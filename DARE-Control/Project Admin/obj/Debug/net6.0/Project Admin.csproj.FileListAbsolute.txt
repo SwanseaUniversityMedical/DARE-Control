@@ -1,0 +1,34 @@
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net6.0\appsettings.Development.json
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net6.0\appsettings.json
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net6.0\Project Admin.exe
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net6.0\Project Admin.deps.json
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net6.0\Project Admin.runtimeconfig.json
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net6.0\Project Admin.dll
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net6.0\Project Admin.pdb
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net6.0\IdentityModel.dll
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net6.0\Microsoft.AspNetCore.Authentication.OpenIdConnect.dll
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net6.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net6.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net6.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net6.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net6.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net6.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net6.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net6.0\System.Security.Permissions.dll
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net6.0\Project Admin.csproj.AssemblyReference.cache
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net6.0\Project Admin.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net6.0\Project Admin.AssemblyInfoInputs.cache
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net6.0\Project Admin.AssemblyInfo.cs
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net6.0\Project Admin.csproj.CoreCompileInputs.cache
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net6.0\Project Admin.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net6.0\staticwebassets.build.json
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net6.0\staticwebassets.development.json
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net6.0\scopedcss\bundle\Project Admin.styles.css
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net6.0\Project Admin.csproj.CopyComplete
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net6.0\Project Admin.dll
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net6.0\refint\Project Admin.dll
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net6.0\Project Admin.pdb
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net6.0\Project Admin.genruntimeconfig.cache
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net6.0\ref\Project Admin.dll
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net6.0\Project Admin.RazorAssemblyInfo.cache
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net6.0\Project Admin.RazorAssemblyInfo.cs

@@ -1,32 +1,36 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\simon\\Documents\\GitHub\\DARE-Control\\DARE-Control\\Project Admin\\Project Admin.csproj": {}
+    "C:\\Users\\luke.young\\Documents\\GitHub\\DARE-Control\\DARE-Control\\Project Admin\\Project Admin.csproj": {}
   },
   "projects": {
-    "C:\\Users\\simon\\Documents\\GitHub\\DARE-Control\\DARE-Control\\Project Admin\\Project Admin.csproj": {
+    "C:\\Users\\luke.young\\Documents\\GitHub\\DARE-Control\\DARE-Control\\Project Admin\\Project Admin.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\simon\\Documents\\GitHub\\DARE-Control\\DARE-Control\\Project Admin\\Project Admin.csproj",
+        "projectUniqueName": "C:\\Users\\luke.young\\Documents\\GitHub\\DARE-Control\\DARE-Control\\Project Admin\\Project Admin.csproj",
         "projectName": "Project Admin",
-        "projectPath": "C:\\Users\\simon\\Documents\\GitHub\\DARE-Control\\DARE-Control\\Project Admin\\Project Admin.csproj",
-        "packagesPath": "C:\\Users\\simon\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\simon\\Documents\\GitHub\\DARE-Control\\DARE-Control\\Project Admin\\obj\\",
+        "projectPath": "C:\\Users\\luke.young\\Documents\\GitHub\\DARE-Control\\DARE-Control\\Project Admin\\Project Admin.csproj",
+        "packagesPath": "C:\\Users\\luke.young\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\luke.young\\Documents\\GitHub\\DARE-Control\\DARE-Control\\Project Admin\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\simon\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\luke.young\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net6.0"
+          "net7.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net6.0": {
-            "targetAlias": "net6.0",
+          "net7.0": {
+            "targetAlias": "net7.0",
             "projectReferences": {}
           }
         },
@@ -37,12 +41,32 @@
         }
       },
       "frameworks": {
-        "net6.0": {
-          "targetAlias": "net6.0",
+        "net7.0": {
+          "targetAlias": "net7.0",
           "dependencies": {
+            "IdentityModel": {
+              "target": "Package",
+              "version": "[6.0.0, )"
+            },
+            "Microsoft.AspNetCore.Authentication.Cookies": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.AspNetCore.Authentication.Core": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.AspNetCore.Authentication.OpenIdConnect": {
+              "target": "Package",
+              "version": "[7.0.5, )"
+            },
             "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": {
               "target": "Package",
-              "version": "[1.17.0, )"
+              "version": "[1.18.1, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[6.29.0, )"
             }
           },
           "imports": [
@@ -56,24 +80,6 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[6.0.16, 6.0.16]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Host.win-x64",
-              "version": "[6.0.16, 6.0.16]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[6.0.16, 6.0.16]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[6.0.16, 6.0.16]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
