@@ -7,7 +7,8 @@ using Project_Admin.Models;
 
 namespace Project_Admin.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = "Admin")]
+    //[Authorize]
 
     public class HomeController : Controller
     {
@@ -20,7 +21,7 @@ namespace Project_Admin.Controllers
 
         //this returns a the view testview on https://localhost:7117/home/testview
         [Authorize]
-
+        
         public IActionResult testview()
         {
             var step1model = new TestModel();
