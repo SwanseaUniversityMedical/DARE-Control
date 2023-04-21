@@ -30,6 +30,8 @@ builder.Services.AddSingleton(keyCloakSettings);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
+
+
 //add services here
 builder.Services.AddScoped<CustomCookieEvent>();
 
@@ -51,6 +53,9 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Admin", policy =>
         policy.RequireClaim("groups", "DARE-Control-Admin")); //MIGHT NEED TO CHANGE LATER
 });
+
+
+
 
 builder.Services.AddAuthentication(options =>
 {

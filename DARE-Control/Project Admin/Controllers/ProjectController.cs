@@ -31,6 +31,7 @@ namespace Project_Admin.Controllers
                 return BadRequest();
             }
         }
+
         public ProjectController(IProjectsHandler projectsHandler)
         {
             _projectsHandler = projectsHandler;

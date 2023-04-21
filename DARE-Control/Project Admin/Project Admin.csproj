@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Views\Project\" />
     <Folder Include="Views\Shared\" />
     <Folder Include="Views\Security\" />
   </ItemGroup>
