@@ -1,0 +1,17 @@
+﻿@using Project_Admin.Models
+@model Project_Admin.Models.ProjectListModel
+
+
+@{
+
+    @foreach (var project in Model.Projects)
+    {
+        <h3>@project.Name</h3>
+        <ul>
+            @foreach (var user in project.Users)
+            {
+                <li>@user.Name</li>
+            }
+        </ul>
+    }
+}

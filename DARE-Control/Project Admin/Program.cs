@@ -50,11 +50,17 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("Admin", policy =>
-        policy.RequireClaim("groups", "DARE-Control-Admin")); //MIGHT NEED TO CHANGE LATER
+    //options.AddPolicy("admin", policy =>
+    //    policy.RequireClaim("groups", "dare-control-admin")); //MIGHT NEED TO CHANGE LATER
+
+    //probably not needed
+options.AddPolicy(
+        "admin",
+        policyBuilder => policyBuilder.RequireAssertion(
+            context => context.User.HasClaim(claim =>
+                claim.Type == "groups"
+                && claim.Value.Contains("dare-control-admin"))));
 });
-
-
 
 
 builder.Services.AddAuthentication(options =>
@@ -175,7 +181,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseRouting();
+app.UseRouting(); 
 
 app.UseAuthorization();
 

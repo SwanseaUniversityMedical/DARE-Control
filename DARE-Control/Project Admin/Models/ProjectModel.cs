@@ -1,14 +1,17 @@
 ﻿namespace Project_Admin.Models
 {
-    public class ProjectModel
+    public class Project
     {
-      //  public int Id { get; set; }
-
+        public int Id { get; set; }
+        public List<Users> Users { get; set; }
         public string Name { get; set; }
 
-        //public List<ProjectModel> Projects { get; set; }
-        // public DateTime CreatedDate { get; set; }
-        // public DateTime ProjectExpirary { get; set; }
-        // public bool ProjectActive { get; set; }
+    }
+
+  
+
+    public class ProjectListModel
+    {
+        public List<Project> Projects { get; set; }
     }
 }
