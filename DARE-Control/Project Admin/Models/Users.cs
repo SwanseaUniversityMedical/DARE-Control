@@ -1,6 +1,6 @@
 ﻿namespace Project_Admin.Models
 {
-    public class Users
+    public class User
     {
         public string Name { get; set; }
     }

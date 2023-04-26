@@ -3,9 +3,10 @@
     public class Project
     {
         public int Id { get; set; }
-        public List<Users> Users { get; set; }
+        public List<User> Users { get; set; }
         public string Name { get; set; }
-
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
     }
 
   
