@@ -3,15 +3,29 @@
 
 
 @{
-
+    <table>
     @foreach (var project in Model.Projects)
     {
-        <h3>@project.Name</h3>
-        <ul>
+        <tr>
+        <td><h3>@project.Name</h3></td>
+        </tr>
+        <tr>
             @foreach (var user in project.Users)
             {
-                <li>@user.Name</li>
+            <tr>
+                <td style="margin: 10px; padding: 10px;">
+                        @user.Name
+                </td>
+            </tr>
+               
             }
-        </ul>
+        </tr>
     }
+    </table>
 }
+
+<div class="clearfix"></div>
+<div class="col-sm-12">
+    <button type="submit" style="margin:5px;" name="submit" value="cancel" class="btn btn-primary btn-lg" onclick="location.href='/'">Home Page</button>
+</div>
+<div draggable="auto" class="clearfix"></div>

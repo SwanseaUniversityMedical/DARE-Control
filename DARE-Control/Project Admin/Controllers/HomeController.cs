@@ -7,6 +7,8 @@ using System.Linq;
 
 using Project_Admin.Models;
 using System.Data;
+using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace Project_Admin.Controllers
 {
@@ -15,6 +17,7 @@ namespace Project_Admin.Controllers
 
     public class HomeController : Controller
     {
+        private string path = @"C:\Users\luke.young\Documents\DareJson\projects.json";
         //[Authorize]
         //added in mapping and different kind of policy
         public async Task<IActionResult> IndexAsync()
@@ -33,117 +36,43 @@ namespace Project_Admin.Controllers
             step1model.TestID = 20;
             return View(step1model);
         }
+        [Route("Home/AllProjects")]
 
         public IActionResult ReturnAllProjects()
         {
-            {
-                var project1Users = new List<User>()
-    {
-        new User() { Name = "User 1" },
-        new User() { Name = "User 2" }
-    };
+            string jsonString = System.IO.File.ReadAllText(path);
 
-                var project2Users = new List<User>()
-    {
-        new User() { Name = "User 3" },
-        new User() { Name = "User 4" }
-    };
 
-                var projects = new List<Project>()
-    {
-        new Project() { Name = "Project 1", Users = project1Users },
-        new Project() { Name = "Project 2", Users = project2Users }
-    };
+            var projectList = System.Text.Json.JsonSerializer.Deserialize<ProjectListModel>(jsonString);
 
-                var model = new ProjectListModel()
-                {
-                    Projects = projects
-                };
-                return View(model);
-            }
-
-        }
-        //[Authorize(Policy = "admin")]
-        [Route("Home/ReturnProject/{projectId:int}")]
-
-        public IActionResult ReturnProject(int projectId)
-        {
-            var project1Users = new List<User>()
-    {
-        
-        new User() { Name = "User 1" },
-        new User() { Name = "User 2" }
-    };
-
-            var project2Users = new List<User>()
-    {
-        new User() { Name = "User 3" },
-        new User() { Name = "User 4" }
-    };
-
-            var projects = new List<Project>()
-    {
-        new Project() { Id = 1,  Name = "Project 1", Users = project1Users },
-        new Project() { Id = 2, Name = "Project 2", Users = project2Users }
-    };
-
+            
             var model = new ProjectListModel()
             {
-                Projects = projects
+                Projects = projectList.Projects
             };
 
-            var project = model.Projects.FirstOrDefault(p => p.Id == projectId);
+            return View(model);
+        }
+
+
+        [Route("Home/ReturnProject/{projectId:int}")]
+        public IActionResult ReturnProject(int projectId)
+        {
+            var projectJson = System.IO.File.ReadAllText(path);
+            var projectListModel = JsonConvert.DeserializeObject<ProjectListModel>(projectJson);
+
+            var project = projectListModel.Projects.FirstOrDefault(p => p.Id == projectId);
+
 
             if (project == null)
             {
                 return NotFound();
             }
 
-
-
             return View(project);
         }
 
-        public IActionResult AddUser(int projectId, string userName)
-        {
-            var project1Users = new List<User>()
-    {
-        new User() { Name = "User 1" },
-        new User() { Name = "User 2" }
-    };
-
-            var project2Users = new List<User>()
-    {
-        new User() { Name = "User 3" },
-        new User() { Name = "User 4" }
-    };
-
-            var projects = new List<Project>()
-    {
-        new Project() { Name = "Project 1", Users = project1Users },
-        new Project() { Name = "Project 2", Users = project2Users }
-    };
-
-            var model = new ProjectListModel()
-            {
-                Projects = projects
-            };
-
-            // Find the project by ID
-            var project = model.Projects.FirstOrDefault(p => p.Id == projectId);
-            if (project == null)
-            {
-                return NotFound(); 
-            }
-
-            project.Users.Add(new User { Name = userName });
-
-            // Redirect back to the project details page
-            return RedirectToAction("ReturnProject", new { id = projectId });
-        }
-
-
-
+       
 
         [Authorize(Policy = "admin")]
         [Route("Home/AdminPanel")]
@@ -154,14 +83,6 @@ namespace Project_Admin.Controllers
             return View();
         }
 
-        public IActionResult AddUserToProject()
-        {
-            AddUser(1, "Luke");
-            AddUser(1, "Luke");
-            AddUser(1, "Luke");
-            AddUser(1, "Luke");
-            return View();
-        }
     }
 }
 

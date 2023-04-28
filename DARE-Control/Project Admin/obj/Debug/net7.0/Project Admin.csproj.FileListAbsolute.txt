@@ -37,3 +37,4 @@ C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj
 C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\Project Admin.pdb
 C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\Project Admin.genruntimeconfig.cache
 C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\ref\Project Admin.dll
+C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Newtonsoft.Json.dll
