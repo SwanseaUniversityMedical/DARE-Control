@@ -1,25 +1,24 @@
-
 using DARE_Control.Models.Services;
 using DARE_Control.Models.Settings;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-
+using Project_Admin.Repositories.DbContexts;
 using System.Net;
-
-
-
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer;
+using Microsoft.Extensions.Options;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(
+    builder.Configuration.GetConnectionString("DefaultConnection")
+));
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
 string AppName = typeof(Program).Module.Name.Replace(".dll", "");
-
-
 
 
 // -- authentication here
@@ -177,6 +176,13 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+    DataInitaliser.SeedData(db).Wait();
+}
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

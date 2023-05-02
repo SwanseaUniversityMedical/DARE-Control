@@ -5,7 +5,8 @@ namespace Project_Admin.Services.Project
 {
     public interface IProjectsHandler
     {
-        
+        Task<User> GetUserSettings(int id);
+
         IEnumerable<Models.Project> Get(Expression<Func<Models.Project, bool>> filter = null, Func<IQueryable<Models.Project>, IOrderedQueryable<Models.Project>> orderBy = null);
         Models.Project? Get(int id);
         IEnumerable<Models.Project>? GetAll();

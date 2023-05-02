@@ -7,8 +7,14 @@ using System.Collections.Generic;
 
 namespace Project_Admin.Repositories.DbContexts
 {
-    public class ApplicationDbContext
+    public class ApplicationDbContext : DbContext
     {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+          : base(options)
+        {
+
+        }
+
         public DbSet<User> Users { get; set; }
     }
 }

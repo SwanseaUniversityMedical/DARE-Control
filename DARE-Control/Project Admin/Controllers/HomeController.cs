@@ -9,6 +9,7 @@ using Project_Admin.Models;
 using System.Data;
 using System.Text.Json;
 using Newtonsoft.Json;
+using Project_Admin.Repositories.DbContexts;
 
 namespace Project_Admin.Controllers
 {
@@ -72,8 +73,27 @@ namespace Project_Admin.Controllers
             return View(project);
         }
 
-       
 
+
+        //[Route("Home/ReturnProject/{projectId:int}")]
+        //public IActionResult AddUser(int projectId)
+        //{
+        //    var projectJson = System.IO.File.ReadAllText(path);
+        //    var projectListModel = JsonConvert.DeserializeObject<ProjectListModel>(projectJson);
+        //    var model = ApplicationDbContext.Users();
+
+        //    var project = projectListModel.Projects.FirstOrDefault(p => p.Id == projectId);
+
+
+        //    if (project == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    return View(project);
+
+
+        //}
         [Authorize(Policy = "admin")]
         [Route("Home/AdminPanel")]
 
