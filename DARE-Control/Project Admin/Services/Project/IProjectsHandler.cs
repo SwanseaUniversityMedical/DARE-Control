@@ -7,13 +7,15 @@ namespace Project_Admin.Services.Project
     {
         Task<User> GetUserSettings(int id);
 
-        IEnumerable<Models.Project> Get(Expression<Func<Models.Project, bool>> filter = null, Func<IQueryable<Models.Project>, IOrderedQueryable<Models.Project>> orderBy = null);
-        Models.Project? Get(int id);
-        IEnumerable<Models.Project>? GetAll();
-        Task<bool> AddAsync(Models.Project ProjectModel);
-        Task<bool> Update(Models.Project ProjectModel);
+        Task<Projects> GetProjectSettings(int id);
+
+        IEnumerable<Models.Projects> Get(Expression<Func<Models.Projects, bool>> filter = null, Func<IQueryable<Models.Projects>, IOrderedQueryable<Models.Projects>> orderBy = null);
+        Models.Projects? Get(int id);
+        IEnumerable<Models.Projects>? GetAll();
+        Task<bool> AddAsync(Models.Projects ProjectModel);
+        Task<bool> Update(Models.Projects ProjectModel);
         Task<bool> Remove(int id);
-        Task<bool> Remove(Models.Project p);
+        Task<bool> Remove(Models.Projects p);
         
 
     }

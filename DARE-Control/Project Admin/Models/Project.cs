@@ -1,6 +1,6 @@
 ﻿namespace Project_Admin.Models
 {
-    public class Project
+    public class Projects
     {
         public int Id { get; set; }
         public List<User> Users { get; set; }
@@ -13,6 +13,6 @@
 
     public class ProjectListModel
     {
-        public List<Project> Projects { get; set; }
+        public List<Projects> Projects { get; set; }
     }
 }

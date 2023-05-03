@@ -10,6 +10,7 @@ using System.Data;
 using System.Text.Json;
 using Newtonsoft.Json;
 using Project_Admin.Repositories.DbContexts;
+using Project_Admin.Services.Project;
 
 namespace Project_Admin.Controllers
 {
@@ -18,6 +19,7 @@ namespace Project_Admin.Controllers
 
     public class HomeController : Controller
     {
+        private readonly IProjectsHandler _dataSetService;
         private string path = @"C:\Users\luke.young\Documents\DareJson\projects.json";
         //[Authorize]
         //added in mapping and different kind of policy
@@ -63,7 +65,8 @@ namespace Project_Admin.Controllers
             var projectListModel = JsonConvert.DeserializeObject<ProjectListModel>(projectJson);
 
             var project = projectListModel.Projects.FirstOrDefault(p => p.Id == projectId);
-
+            //getting from the database will look something like this
+            //var project = await _dataSetService.GetUserSettings(projectId);
 
             if (project == null)
             {

@@ -16,5 +16,6 @@ namespace Project_Admin.Repositories.DbContexts
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Projects> Projects { get; set; }
     }
 }
