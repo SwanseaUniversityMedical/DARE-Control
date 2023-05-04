@@ -57,7 +57,7 @@ namespace Project_Admin.Controllers
             return View(model);
         }
 
-
+        [HttpGet]
         [Route("Home/ReturnProject/{projectId:int}")]
         public IActionResult ReturnProject(int projectId)
         {
@@ -76,27 +76,19 @@ namespace Project_Admin.Controllers
             return View(project);
         }
 
+        [HttpPost]
+        [Route("Home/ReturnProject/{projectId:int}")]
+
+        //create a datasetmirrorestting and it takes in a model
+
+        public async Task<IActionResult> CreateProject(int projectId, Projects model)
+        {
+            var create = await _dataSetService.CreateProjectSettings(model);
+
+            return View(model);
+        }
 
 
-        //[Route("Home/ReturnProject/{projectId:int}")]
-        //public IActionResult AddUser(int projectId)
-        //{
-        //    var projectJson = System.IO.File.ReadAllText(path);
-        //    var projectListModel = JsonConvert.DeserializeObject<ProjectListModel>(projectJson);
-        //    var model = ApplicationDbContext.Users();
-
-        //    var project = projectListModel.Projects.FirstOrDefault(p => p.Id == projectId);
-
-
-        //    if (project == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return View(project);
-
-
-        //}
         [Authorize(Policy = "admin")]
         [Route("Home/AdminPanel")]
 

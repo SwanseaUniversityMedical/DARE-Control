@@ -9,6 +9,9 @@ namespace Project_Admin.Services.Project
 
         Task<Projects> GetProjectSettings(int id);
 
+        Task<Projects> CreateProjectSettings(Projects model);
+
+
         IEnumerable<Models.Projects> Get(Expression<Func<Models.Projects, bool>> filter = null, Func<IQueryable<Models.Projects>, IOrderedQueryable<Models.Projects>> orderBy = null);
         Models.Projects? Get(int id);
         IEnumerable<Models.Projects>? GetAll();
