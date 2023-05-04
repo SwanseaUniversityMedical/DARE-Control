@@ -83,3 +83,53 @@ C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin
 C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\runtimes\win\lib\netcoreapp3.0\System.Windows.Extensions.dll
 C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Npgsql.dll
 C:\Users\luke.young\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\appsettings.Development.json
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\appsettings.json
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Project Admin.exe
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Project Admin.deps.json
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Project Admin.runtimeconfig.json
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Project Admin.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Project Admin.pdb
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Humanizer.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\IdentityModel.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Microsoft.AspNetCore.Authentication.OpenIdConnect.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Microsoft.EntityFrameworkCore.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Microsoft.EntityFrameworkCore.Design.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Microsoft.EntityFrameworkCore.Relational.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Microsoft.Extensions.DependencyModel.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Mono.TextTemplating.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Newtonsoft.Json.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Npgsql.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\System.CodeDom.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\bin\Debug\net7.0\System.Security.Permissions.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\Project Admin.csproj.AssemblyReference.cache
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\Project Admin.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\Project Admin.AssemblyInfoInputs.cache
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\Project Admin.AssemblyInfo.cs
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\Project Admin.csproj.CoreCompileInputs.cache
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\Project Admin.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\Project Admin.RazorAssemblyInfo.cache
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\Project Admin.RazorAssemblyInfo.cs
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\staticwebassets\msbuild.Project Admin.Microsoft.AspNetCore.StaticWebAssets.props
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\staticwebassets\msbuild.build.Project Admin.props
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\staticwebassets\msbuild.buildMultiTargeting.Project Admin.props
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\staticwebassets\msbuild.buildTransitive.Project Admin.props
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\staticwebassets.pack.json
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\staticwebassets.build.json
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\staticwebassets.development.json
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\scopedcss\bundle\Project Admin.styles.css
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\Project Admin.csproj.CopyComplete
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\Project Admin.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\refint\Project Admin.dll
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\Project Admin.pdb
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\Project Admin.genruntimeconfig.cache
+C:\Users\hazel\Documents\GitHub\DARE-Control\DARE-Control\Project Admin\obj\Debug\net7.0\ref\Project Admin.dll
