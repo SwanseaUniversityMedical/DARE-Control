@@ -1,9 +1,11 @@
 ﻿using Project_Admin.Models;
+using Project_Admin.Services.Project;
+
 namespace Project_Admin.Services
 {
     public class ProjectsHandler
     {
-
+        public readonly IProjectsHandler _projectHandler;
         public async Task<Projects> CreateProjectSettings(Projects model)
         {
             //var jsonString = GetStringContent(model);
@@ -13,5 +15,12 @@ namespace Project_Admin.Services
             return model;
 
         }
+        public async Task<Projects> CreateProject(Projects model)
+        {
+            var stringContent = _projectHandler.CreateProject(model);
+
+            return await _projectHandler.GenericGetData<Projects>($"/api/ProjectController/Save_Project", stringContent);
+        }
+
     }
 }

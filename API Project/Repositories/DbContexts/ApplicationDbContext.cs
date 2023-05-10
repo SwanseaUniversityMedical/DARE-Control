@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 
 
-namespace Project_Admin.Repositories.DbContexts
+namespace API_Project.Repositories.DbContexts
 {
     public class ApplicationDbContext : DbContext
     {

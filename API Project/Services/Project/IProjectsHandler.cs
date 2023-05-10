@@ -1,15 +1,15 @@
 ﻿using Project_Admin.Models;
 using System.Linq.Expressions;
 
-namespace API_Project.Services
+namespace API_Project.Services.Project
 {
     public interface IProjectsHandler
     {
         Task<User> GetUserSettings(int id);
 
-        Task<Projects> GetProjectSettings(int id);
+        Task<Projects> GetProject(int id);
         Task<User> AddUser(int id);
-        Task<Projects> CreateProjectSettings(Projects model);
+        Task<Projects> CreateProject(Projects model);
 
         IEnumerable<Project_Admin.Models.Projects> Get(Expression<Func<Project_Admin.Models.Projects, bool>> filter = null, Func<IQueryable<Project_Admin.Models.Projects>, IOrderedQueryable<Project_Admin.Models.Projects>> orderBy = null);
         Project_Admin.Models.Projects? Get(int id);

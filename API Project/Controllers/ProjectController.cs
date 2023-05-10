@@ -1,12 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Project_Admin.Models;
-using Project_Admin.Services.Project;
+using API_Project.Repositories.DbContexts;
+using API_Project.Services.Project;
 
 namespace API_Project.Controllers
 {
+    [Route("api/[controller]")]
+
     public class ProjectController : Controller
     {
-        private IProjectsHandler _projectsHandler;
+        private readonly IProjectsHandler _projectsHandler;
+        private readonly ApplicationDbContext _DbContext;
+        //private readonly IProjectsHandler _ProjectService;
 
         public IActionResult Index()
         {
@@ -16,9 +22,18 @@ namespace API_Project.Controllers
 
         public async Task<Projects> CreateProject(Projects Projects)
         {
-            //add the model to the database using the function AddAsync in IdatasetMirrorSettingsHandler
-            //CreateDatasetMirrorSettings(new DatasetMirrorSetting());
+
+            var existingProject = _DbContext.Projects.Find(Projects.Id);
+
+            if (existingProject == null)
+            {
+                var id = 500;
+                var newProject = await _projectsHandler.CreateProject(Projects);
+            }
+
             await _projectsHandler.AddAsync(Projects);
+            _DbContext.SaveChangesAsync();
+
             return Projects;
         }
     }
