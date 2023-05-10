@@ -8,9 +8,8 @@ namespace Project_Admin.Services.Project
         Task<User> GetUserSettings(int id);
 
         Task<Projects> GetProjectSettings(int id);
-
+        Task<User> AddUser(int id);
         Task<Projects> CreateProjectSettings(Projects model);
-
 
         IEnumerable<Models.Projects> Get(Expression<Func<Models.Projects, bool>> filter = null, Func<IQueryable<Models.Projects>, IOrderedQueryable<Models.Projects>> orderBy = null);
         Models.Projects? Get(int id);
