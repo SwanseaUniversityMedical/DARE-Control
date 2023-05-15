@@ -1,11 +1,17 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Project Admin", "Project Admin\Project Admin.csproj", "{F7A1796A-8AED-400B-A3F2-9321E7E074B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API Project", "API Project\API Project.csproj", "{3DCC81E6-4FD4-47AB-9B2B-E0658D43B390}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API Project", "API Project\API Project.csproj", "{3DCC81E6-4FD4-47AB-9B2B-E0658D43B390}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{464994BB-0291-4311-B504-638099B54967}"
+	ProjectSection(SolutionItems) = preProject
+		DARE-Control-Docker\docker-compose.yml = DARE-Control-Docker\docker-compose.yml
+		DARE-Control-Docker\init.sql = DARE-Control-Docker\init.sql
+		DARE-Control-Docker\run.bat = DARE-Control-Docker\run.bat
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -11,6 +11,7 @@ using System.Text.Json;
 using Newtonsoft.Json;
 using Project_Admin.Repositories.DbContexts;
 using Project_Admin.Services.Project;
+//using API_Project.Repositories.DbContexts;
 
 namespace Project_Admin.Controllers
 {
@@ -19,7 +20,9 @@ namespace Project_Admin.Controllers
 
     public class HomeController : Controller
     {
-        private readonly IProjectsHandler _dataSetService;
+        private readonly IProjectsHandler _projectsHandler;
+
+        //private readonly IProjectsHandler _dataSetService;
         private string path = @"C:\Users\luke.young\Documents\DareJson\projects.json";
         //[Authorize]
         //added in mapping and different kind of policy
@@ -77,17 +80,51 @@ namespace Project_Admin.Controllers
         }
 
         [HttpPost]
-        [Route("Home/ReturnProject/{projectId:int}")]
+        [Route("Home/ReturnProjecttest/{projectId:int}")]
 
-        //create a datasetmirrorestting and it takes in a model
 
         public async Task<IActionResult> CreateProject(int projectId, Projects model)
         {
-            var create = await _dataSetService.CreateProjectSettings(model);
+            //var create = await _dataSetService.CreateProjectSettings(model);
+            model.Id = 5;
+            model.StartDate = DateTime.Now;
+            model.EndDate = DateTime.Now;
+            model.Users = new List<User>();
+            model.Name = "test project";
+
+            var create = await _projectsHandler.CreateProject(model);
 
             return View(model);
         }
 
+        [HttpPost]
+        [Route("Home/Users/AddUser")]
+
+
+        public async Task<IActionResult> AddUser(int userid)
+        {
+            //might need to add more stuff here that will fill out additional user info
+            var create = await _projectsHandler.AddUser(userid);
+
+            return View(userid);
+        }
+
+        [HttpPost]
+        [Route("Home/Users/AddUser")]
+
+
+        public async Task<IActionResult> AddUserToProject(int userid, int projectId)
+        {
+            var project = await _projectsHandler.GetProjectSettings(projectId);
+            var user = await _projectsHandler.GetUserSettings(userid);
+
+            if (project == null)
+            {
+                project.Users.Add(user);
+            }
+
+            return View(project);
+        }
 
         [Authorize(Policy = "admin")]
         [Route("Home/AdminPanel")]
