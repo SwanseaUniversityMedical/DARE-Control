@@ -7,6 +7,10 @@ using Project_Admin.Repositories.DbContexts;
 using System.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Project_Admin.Services.Project;
+using Project_Admin.Models;
+using Project_Admin.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -32,6 +36,11 @@ builder.Services.AddHttpClient();
 
 //add services here
 builder.Services.AddScoped<CustomCookieEvent>();
+builder.Services.AddScoped<IProjectsHandler, ProjectsHandler>();
+builder.Services.AddScoped<IAPICaller>(x =>
+{
+    return new APICaller("https://localhost:7058/");
+});
 
 
 

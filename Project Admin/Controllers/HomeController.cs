@@ -21,6 +21,14 @@ namespace Project_Admin.Controllers
     public class HomeController : Controller
     {
         private readonly IProjectsHandler _projectsHandler;
+        //private readonly IAPICaller _apiCaller;
+
+
+        public HomeController(IProjectsHandler IProjectsHandler/*, IAPICaller IApiCaller*/)
+        {
+            _projectsHandler = IProjectsHandler;
+            //_apiCaller = IApiCaller;
+        }
 
         //private readonly IProjectsHandler _dataSetService;
         private string path = @"C:\Users\luke.young\Documents\DareJson\projects.json";
@@ -79,13 +87,14 @@ namespace Project_Admin.Controllers
             return View(project);
         }
 
-        [HttpPost]
-        [Route("Home/ReturnProjecttest/{projectId:int}")]
+        [HttpGet]
+        [Route("Home/CreateProject/{projectId:int}")]
 
 
-        public async Task<IActionResult> CreateProject(int projectId, Projects model)
+        public async Task<IActionResult> CreateProject(int projectId)
         {
             //var create = await _dataSetService.CreateProjectSettings(model);
+            var model = new Projects();
             model.Id = 5;
             model.StartDate = DateTime.Now;
             model.EndDate = DateTime.Now;
@@ -104,7 +113,7 @@ namespace Project_Admin.Controllers
         public async Task<IActionResult> AddUser(int userid)
         {
             //might need to add more stuff here that will fill out additional user info
-            var create = await _projectsHandler.AddUser(userid);
+            //var create = await _projectsHandler.AddUser(userid);
 
             return View(userid);
         }
@@ -116,11 +125,11 @@ namespace Project_Admin.Controllers
         public async Task<IActionResult> AddUserToProject(int userid, int projectId)
         {
             var project = await _projectsHandler.GetProjectSettings(projectId);
-            var user = await _projectsHandler.GetUserSettings(userid);
+            //var user = await _projectsHandler.GetUserSettings(userid);
 
             if (project == null)
             {
-                project.Users.Add(user);
+           //     project.Users.Add(user);
             }
 
             return View(project);

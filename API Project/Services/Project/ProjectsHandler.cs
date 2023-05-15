@@ -3,7 +3,7 @@ using Project_Admin.Repositories.DbContexts;
 
 namespace API_Project.Services.Project
 {
-    public class ProjectsHandler
+    public class ProjectsHandler 
     {
         private readonly ApplicationDbContext _context;
 
