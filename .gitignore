@@ -374,3 +374,5 @@ obj
 packages
 serp-forms-api/appsettings.Development.json
 serp-forms-api/appsettings.Development.json
+
+.idea
