@@ -2,9 +2,11 @@ name: Build and Release Container
 
 on:
   push:
-    paths:
-      - '.github/workflows/release.yaml'
-      - 'containers/**'
+    paths-ignore:
+      - '.github/workflows/project.yaml'
+      - 'LICENSE'
+      - 'README.md'
+      - 'renovate.json'
     branches:
       - '**'
 
