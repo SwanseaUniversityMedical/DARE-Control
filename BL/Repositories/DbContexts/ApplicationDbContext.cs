@@ -1,11 +1,11 @@
-﻿using Project_Admin.Models;
+﻿using BL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
 
-namespace Project_Admin.Repositories.DbContexts
+namespace BL.Repositories.DbContexts
 {
     public class ApplicationDbContext : DbContext
     {

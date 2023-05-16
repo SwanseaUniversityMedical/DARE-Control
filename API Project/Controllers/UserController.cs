@@ -1,7 +1,7 @@
 ﻿using API_Project.Repositories.DbContexts;
 using API_Project.Services.Project;
 using Microsoft.AspNetCore.Mvc;
-using Project_Admin.Models;
+using BL.Models;
 
 namespace API_Project.Controllers
 {

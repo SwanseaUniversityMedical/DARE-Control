@@ -3,13 +3,15 @@ using DARE_Control.Models.Settings;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Project_Admin.Repositories.DbContexts;
+using BL.Repositories.DbContexts;
 using System.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Project_Admin.Services.Project;
 using Project_Admin.Models;
 using Project_Admin.Services;
+using BL.Models;
+using BL.Services.Project;
 
 var builder = WebApplication.CreateBuilder(args);
 

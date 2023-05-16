@@ -4,13 +4,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
-
-using Project_Admin.Models;
+using BL.Models;
 using System.Data;
 using System.Text.Json;
 using Newtonsoft.Json;
-using Project_Admin.Repositories.DbContexts;
-using Project_Admin.Services.Project;
+using BL.Repositories.DbContexts;
+using BL.Services.Project;
 //using API_Project.Repositories.DbContexts;
 
 namespace Project_Admin.Controllers
@@ -45,10 +44,11 @@ namespace Project_Admin.Controllers
 
         public IActionResult testview()
         {
-            var step1model = new TestModel();
-            step1model.TestID = 10;
-            step1model.TestID = 20;
-            return View(step1model);
+            ////var step1model = new TestModel();
+            //step1model.TestID = 10;
+            //step1model.TestID = 20;
+            //return View(step1model);
+            return View();
         }
         [Route("Home/AllProjects")]
 

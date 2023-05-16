@@ -1,4 +1,4 @@
-﻿namespace Project_Admin.Models
+﻿namespace BL.Models
 {
     public class Projects
     {

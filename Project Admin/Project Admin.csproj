@@ -36,4 +36,8 @@
     <Folder Include="Views\Security\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\BL\BL.csproj" />
+  </ItemGroup>
+
 </Project>

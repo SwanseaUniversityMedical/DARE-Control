@@ -1,4 +1,5 @@
-﻿using Project_Admin.Models;
+﻿using BL.Models;
+using BL.Services.Project;
 using Project_Admin.Services.Project;
 using System.Text.Json;
 using System.Text;
@@ -29,7 +30,7 @@ namespace Project_Admin.Services
         }
         public async Task<Projects> CreateProject(Projects model)
         {
-            var request = new RestRequest("api/ProjectController/Save_Project", Method.Post);
+            var request = new RestRequest("https://localhost:7058/api/Project/Save_Project", Method.Post);
             request.Method = Method.Post;
             request.AddHeader("Accept", "application/json");
             //request.Parameters.Clear();

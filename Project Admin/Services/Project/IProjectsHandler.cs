@@ -1,7 +1,7 @@
-﻿using Project_Admin.Models;
+﻿using BL.Models;
 using System.Linq.Expressions;
 
-namespace Project_Admin.Services.Project
+namespace BL.Services.Project
 {
     public interface IProjectsHandler
     {

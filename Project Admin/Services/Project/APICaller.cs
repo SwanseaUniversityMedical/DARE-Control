@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Project_Admin.Services.Project;
+using BL.Services.Project;
 using RestSharp;
 
 namespace Project_Admin.Services.Project

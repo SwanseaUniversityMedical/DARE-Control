@@ -1,4 +1,4 @@
-﻿using Project_Admin.Models;
+﻿using BL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Project_Admin.Models;
 using API_Project.Repositories.DbContexts;
 using API_Project.Services.Project;
+using BL.Models;
 
 namespace API_Project.Controllers
 {
@@ -13,11 +13,18 @@ namespace API_Project.Controllers
         private readonly IProjectsHandler _projectsHandler;
         private readonly ApplicationDbContext _DbContext;
         //private readonly IProjectsHandler _ProjectService;
+        //[HttpGet]
 
+        //public IActionResult Index()
+        //{
+        //    return View();
+        //}
 
-        public IActionResult Index()
+        [HttpGet("HelloWorld")]
+
+        public IActionResult HelloWorld()
         {
-            return View();
+            return Ok();
         }
         [HttpPost("Save_Project")]
 

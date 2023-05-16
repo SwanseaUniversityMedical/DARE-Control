@@ -1,4 +1,4 @@
-﻿namespace Project_Admin.Repositories.DbContexts
+﻿namespace BL.Repositories.DbContexts
 {
     public class DataInitaliser
     {

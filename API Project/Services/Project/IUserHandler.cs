@@ -1,4 +1,4 @@
-﻿using Project_Admin.Models;
+﻿using BL.Models;
 
 namespace API_Project.Services.Project
 {

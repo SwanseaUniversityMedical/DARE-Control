@@ -1,4 +1,4 @@
-﻿using Project_Admin.Models;
+﻿using BL.Models;
 using System.Linq.Expressions;
 
 namespace API_Project.Services.Project
@@ -11,13 +11,13 @@ namespace API_Project.Services.Project
         Task<User> AddUser(int id);
         Task<Projects> CreateProject(Projects model);
 
-        IEnumerable<Project_Admin.Models.Projects> Get(Expression<Func<Project_Admin.Models.Projects, bool>> filter = null, Func<IQueryable<Project_Admin.Models.Projects>, IOrderedQueryable<Project_Admin.Models.Projects>> orderBy = null);
-        Project_Admin.Models.Projects? Get(int id);
-        IEnumerable<Project_Admin.Models.Projects>? GetAll();
-        Task<bool> AddAsync(Project_Admin.Models.Projects ProjectModel);
-        Task<bool> Update(Project_Admin.Models.Projects ProjectModel);
+        IEnumerable<BL.Models.Projects> Get(Expression<Func<BL.Models.Projects, bool>> filter = null, Func<IQueryable<BL.Models.Projects>, IOrderedQueryable<BL.Models.Projects>> orderBy = null);
+        BL.Models.Projects? Get(int id);
+        IEnumerable<BL.Models.Projects>? GetAll();
+        Task<bool> AddAsync(BL.Models.Projects ProjectModel);
+        Task<bool> Update(BL.Models.Projects ProjectModel);
         Task<bool> Remove(int id);
-        Task<bool> Remove(Project_Admin.Models.Projects p);
+        Task<bool> Remove(BL.Models.Projects p);
         
 
     }
