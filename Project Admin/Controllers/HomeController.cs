@@ -95,7 +95,7 @@ namespace Project_Admin.Controllers
         {
             //var create = await _dataSetService.CreateProjectSettings(model);
             var model = new Projects();
-            model.Id = 5;
+            //model.Id = 5;
             model.StartDate = DateTime.Now;
             model.EndDate = DateTime.Now;
             model.Users = new List<User>();

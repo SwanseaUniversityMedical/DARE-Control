@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text;
 using RestSharp;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Project_Admin.Services
 {
@@ -33,6 +34,11 @@ namespace Project_Admin.Services
             var request = new RestRequest("https://localhost:7058/api/Project/Save_Project", Method.Post);
             request.Method = Method.Post;
             request.AddHeader("Accept", "application/json");
+            //var li = request.Parameters.ToList();
+            //foreach (var l in li)
+            //{
+            //    request.Parameters.RemoveParameter(l);
+            //}
             //request.Parameters.Clear();
             request.AddParameter("application/json", JsonConvert.SerializeObject(model), ParameterType.RequestBody);
             var test = _apiCaller.Client.Execute<Projects>(request);

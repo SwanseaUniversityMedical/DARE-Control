@@ -24,6 +24,8 @@ services:
 #    restart: always
 #    ports:
 #      - 8088:80
+#    environment:
+#      CONNECTIONSTRINGS__DEFAULTCONNECTION: "Server=postgres;Port=32769;Database=DARE-Control;UserId=postgres;Password=password123;"
 ######################################################
 # VOLUME
 ######################################################

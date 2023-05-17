@@ -1,3 +1,6 @@
+using BL.Repositories.DbContexts;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -9,6 +12,10 @@ builder.Services.AddSwaggerGen(
     c.CustomSchemaIds(type => type.ToString());
 }
 );
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(
+    builder.Configuration.GetConnectionString("DefaultConnection")
+));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
