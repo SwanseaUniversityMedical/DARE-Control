@@ -68,29 +68,18 @@ namespace Project_Admin.Controllers
             return View(model);
         }
 
+
         [HttpGet]
-        [Route("Home/ReturnProject/{projectId:int}")]
-        public IActionResult ReturnProject(int projectId)
+        [Route("Home/ReturnProject/{projectId:int}")]      
+        public async Task<IActionResult> GetProject(int projectId)
         {
-            var projectJson = System.IO.File.ReadAllText(path);
-            var projectListModel = JsonConvert.DeserializeObject<ProjectListModel>(projectJson);
-
-            var project = projectListModel.Projects.FirstOrDefault(p => p.Id == projectId);
-            //getting from the database will look something like this
-            //var project = await _dataSetService.GetUserSettings(projectId);
-
-            if (project == null)
-            {
-                return NotFound();
-            }
-
-            return View(project);
+            var project = await _projectsHandler.GetProjectSettings(projectId);
+               project.Id = projectId;
+               return View(project);
         }
 
         [HttpGet]
         [Route("Home/CreateProject/{projectId:int}")]
-
-
         public async Task<IActionResult> CreateProject(int projectId)
         {
             //var create = await _dataSetService.CreateProjectSettings(model);
@@ -106,22 +95,37 @@ namespace Project_Admin.Controllers
             return View(model);
         }
 
-        [HttpPost]
-        [Route("Home/Users/AddUser")]
+
+        [HttpGet]
+        [Route("Home/ReturnUser/{userId:int}")]
+        public async Task<IActionResult> GetAUser(int userId)
+        {
+            var project = await _projectsHandler.GetAUser(userId);
+            project.Id = userId;
+            return View(project);
 
 
+        }
+        [HttpGet]
+        [Route("Home/AddUser/{userid:int}")]
         public async Task<IActionResult> AddUser(int userid)
         {
-            //might need to add more stuff here that will fill out additional user info
-            //var create = await _projectsHandler.AddUser(userid);
+
+            var model = new User();
+            //model.Id = 5;
+            model.Name = "Luke";
+            model.Email = "email@email.com";
+            model.Id = userid;
+            var create = await _projectsHandler.AddAUser(model);
+
+
+            //var create = await _projectsHandler.AddAUser(userid);
 
             return View(userid);
         }
 
         [HttpPost]
         [Route("Home/Users/AddUser")]
-
-
         public async Task<IActionResult> AddUserToProject(int userid, int projectId)
         {
             var project = await _projectsHandler.GetProjectSettings(projectId);
@@ -129,9 +133,8 @@ namespace Project_Admin.Controllers
 
             if (project == null)
             {
-           //     project.Users.Add(user);
+                //     project.Users.Add(user);
             }
-
             return View(project);
         }
 
@@ -140,7 +143,6 @@ namespace Project_Admin.Controllers
 
         public IActionResult AdminPanel()
         {
-
             return View();
         }
 

@@ -5,12 +5,16 @@ namespace BL.Services.Project
 {
     public interface IProjectsHandler
     {
-        
+
         //Task<User> GetUserSettings(int id);
+        Task<Projects> CreateProject(Projects model);
 
         Task<Projects> GetProjectSettings(int id);
-        //Task<User> AddUser(int id);
-        Task<Projects> CreateProject(Projects model);
+        Task<User> AddAUser(User model);
+        Task<User> GetAUser(int id);
+
+        //Task<User> AddUserToProject(int userId, int projectId);
+
 
         //IEnumerable<Models.Projects> Get(Expression<Func<Models.Projects, bool>> filter = null, Func<IQueryable<Models.Projects>, IOrderedQueryable<Models.Projects>> orderBy = null);
         //Models.Projects? Get(int id);

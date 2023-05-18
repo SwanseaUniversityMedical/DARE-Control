@@ -51,5 +51,41 @@ namespace API_Project.Controllers
 
             return Projects;
         }
+        [HttpGet("Get_Project/{projectId}")]
+
+        public Projects GetProject(int projectId)
+        {
+            var returned = _DbContext.Projects.Find(projectId);
+            if (returned == null)
+            {
+                return null;
+            }
+            //return returned.FirstOrDefault();
+            return returned;
+        }
+
+        
+
+
+        //[HttpPost("Get_Project")]
+
+        //public async Task<Projects> GetProject(int projectsId)
+        //{
+
+        //    //var existingProject = _DbContext.Projects.Find(Projects.Id);
+
+        //    //if (existingProject == null)
+        //    //{
+        //    //    var id = 500;
+        //    //    var newProject = await _projectsHandler.CreateProject(Projects);
+        //    //}
+        //    ////var newProject = await _projectsHandler.CreateProject(Projects);
+        //    ////await _projectsHandler.AddAsync(newProject);
+        //    _DbContext.Projects.Add(Projects);
+        //    await _DbContext.SaveChangesAsync();
+
+        //    return Projects;
+        //}
+
     }
 }

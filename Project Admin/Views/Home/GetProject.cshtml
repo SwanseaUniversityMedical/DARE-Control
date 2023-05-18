@@ -1,0 +1,36 @@
+﻿@model BL.Models.Projects
+
+@{
+
+    ViewData["Title"] = "TESTGET";
+}
+
+<div class="container">
+    <div class="d-flex align-items-center justify-content-between">
+        <h1 class="g-font-size-28 my-2">Project</h1>
+    </div>
+    <h1>@Model.Name</h1>
+
+    <div class="user-attribute col-sm-8">
+        <table>
+
+            <tr><td>Start Date @Model.StartDate</td></tr>
+            <tr><td>End Date @Model.EndDate</td></tr>
+            <tr>
+                <th style="text-align:center">Users   &nbsp;</th>
+            </tr>
+            
+
+
+        </table>
+
+
+        <div class="clearfix"></div>
+        <div class="col-sm-12">
+            <button type="submit" style="margin:5px;" name="submit" value="cancel" class="btn btn-primary btn-lg" onclick="location.href='/'">Home Page</button>
+        </div>
+        <div draggable="auto" class="clearfix"></div>
+
+    </div>
+
+
