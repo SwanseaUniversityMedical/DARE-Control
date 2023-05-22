@@ -9,7 +9,7 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["Project Admin/Project Admin.csproj", "Project Admin/"]
 RUN dotnet restore "Project Admin/Project Admin.csproj"
-COPY . .
+COPY ["Project Admin/", "Project Admin/"]
 WORKDIR "/src/Project Admin"
 RUN dotnet build "Project Admin.csproj" -c Release -o /app/build
 
