@@ -10,6 +10,8 @@ WORKDIR /src
 COPY ["API Project/API Project.csproj", "API Project/"]
 RUN dotnet restore "API Project/API Project.csproj"
 COPY ["API Project/", "API Project/"]
+COPY ["Project Admin/", "Project Admin/"]
+RUN rm "Project Admin/appsettings.json"
 WORKDIR "/src/API Project"
 RUN dotnet build "API Project.csproj" -c Release -o /app/build
 
