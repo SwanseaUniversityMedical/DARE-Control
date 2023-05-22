@@ -9,7 +9,7 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["API Project/API Project.csproj", "API Project/"]
 RUN dotnet restore "API Project/API Project.csproj"
-COPY . .
+COPY ["API Project/", "API Project/"]
 WORKDIR "/src/API Project"
 RUN dotnet build "API Project.csproj" -c Release -o /app/build
 
