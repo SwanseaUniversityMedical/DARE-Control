@@ -13,7 +13,7 @@ namespace BL.Services.Project
         Task<User> AddAUser(User model);
         Task<User> GetAUser(int id);
 
-        Task<ProjectMembership> AddMembership(ProjectMembership membership);
+        Task<ProjectMembership> AddMembership(int userId, int projectId);
 
 
         //IEnumerable<Models.Projects> Get(Expression<Func<Models.Projects, bool>> filter = null, Func<IQueryable<Models.Projects>, IOrderedQueryable<Models.Projects>> orderBy = null);

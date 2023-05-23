@@ -148,31 +148,30 @@ namespace Project_Admin.Controllers
         //}
 
         [Route("Home/Projects/AddUser/{userid:int}/{projectId:int}")]
-        public async Task<IActionResult> AddUserToProject(int userid, int projectId)
+        public async Task<IActionResult> AddUserToProject(int userId, int projectId)
         {
             //var user = GetAUser(userid);
             //var project = GetProject(projectId);
 
-            var project = new Projects();
-            //model.Id = 5;
-            project.StartDate = DateTime.Now;
-            project.EndDate = DateTime.Now;
-            project.Users = new List<User>();
-            project.Name = "test project";
+            //var project = new Projects();
+            //project.StartDate = DateTime.Now;
+            //project.EndDate = DateTime.Now;
+            //project.Users = new List<User>();
+            //project.Name = "test project";
 
-            var create = await _projectsHandler.CreateProject(project);
-            var user = new User();
-            //model.Id = 5;
-            user.Name = "Luke";
-            user.Email = "email@email.com";
-            user.Id = userid;
+            //var create = await _projectsHandler.CreateProject(project);
+
+            //var user = new User();
+            //user.Name = "Luke";
+            //user.Email = "email@email.com";
+            //user.Id = userid;
 
 
-            var create1 = await _projectsHandler.AddAUser(user);
-            var membership = new ProjectMembership();
-            membership.Projects = project;
-            membership.Users = user;
-            var userToProject = await _projectsHandler.AddMembership(membership);
+            //var create1 = await _projectsHandler.AddAUser(user);
+            //var membership = new ProjectMembership();
+            //membership.Projects.Id = project;
+            //membership.Users = user;
+            var userToProject = await _projectsHandler.AddMembership(userId,projectId);
             return View(userToProject);
 
         }
