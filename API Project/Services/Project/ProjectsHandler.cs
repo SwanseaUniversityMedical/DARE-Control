@@ -1,9 +1,9 @@
-﻿using Project_Admin.Models;
-using Project_Admin.Repositories.DbContexts;
+﻿using BL.Models;
+using BL.Repositories.DbContexts;
 
 namespace API_Project.Services.Project
 {
-    public class ProjectsHandler
+    public class ProjectsHandler 
     {
         private readonly ApplicationDbContext _context;
 
