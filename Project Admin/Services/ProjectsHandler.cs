@@ -73,6 +73,17 @@ namespace Project_Admin.Services
             var test = _apiCaller.Client.Execute<User>(request);
             return test.Data;
         }
+
+        public async Task<ProjectMembership> AddMembership(ProjectMembership membership)
+        {
+            var request = new RestRequest("https://localhost:7058/api/Project/Add_Membership", Method.Post);
+            request.Method = Method.Post;
+            request.AddHeader("Accept", "application/json");
+            request.AddParameter("application/json", JsonConvert.SerializeObject(membership), ParameterType.RequestBody);
+            var test = _apiCaller.Client.Execute<ProjectMembership>(request);
+            return test.Data;
+
+        }
         public Task<bool> AddAsync(Projects ProjectModel)
         {
             throw new NotImplementedException();

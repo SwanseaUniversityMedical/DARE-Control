@@ -51,6 +51,22 @@ namespace API_Project.Controllers
 
             return Projects;
         }
+
+
+        [HttpPost("Add_Membership")]
+
+        public async Task<ProjectMembership> AddMembership([FromBody] ProjectMembership membership)
+        {
+            membership.Projects.StartDate = membership.Projects.StartDate.ToUniversalTime();
+            membership.Projects.EndDate = membership.Projects.EndDate.ToUniversalTime();
+            _DbContext.ProjectMemberships.Add(membership);
+            await _DbContext.SaveChangesAsync();
+
+            return membership;
+        }
+
+
+
         [HttpGet("Get_Project/{projectId}")]
 
         public Projects GetProject(int projectId)
@@ -65,6 +81,7 @@ namespace API_Project.Controllers
         }
 
         
+
 
 
         //[HttpPost("Get_Project")]

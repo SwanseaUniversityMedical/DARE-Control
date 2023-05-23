@@ -10,6 +10,7 @@ using System.Text.Json;
 using Newtonsoft.Json;
 using BL.Repositories.DbContexts;
 using BL.Services.Project;
+using Newtonsoft.Json.Linq;
 //using API_Project.Repositories.DbContexts;
 
 namespace Project_Admin.Controllers
@@ -100,9 +101,9 @@ namespace Project_Admin.Controllers
         [Route("Home/ReturnUser/{userId:int}")]
         public async Task<IActionResult> GetAUser(int userId)
         {
-            var project = await _projectsHandler.GetAUser(userId);
-            project.Id = userId;
-            return View(project);
+            var user = await _projectsHandler.GetAUser(userId);
+            user.Id = userId;
+            return View(user);
 
 
         }
@@ -124,20 +125,57 @@ namespace Project_Admin.Controllers
             return View(userid);
         }
 
-        [HttpPost]
-        [Route("Home/Users/AddUser")]
+        //[HttpPost]
+        //[Route("Home/Users/AddUser")]
+        //public async Task<IActionResult> AddUserToProject(int userid, int projectId)
+        //{
+        //    var project = await _projectsHandler.GetProjectSettings(projectId);
+        //    //var user = await _projectsHandler.GetUserSettings(userid);
+
+        //    if (project == null)
+        //    {
+        //        //     project.Users.Add(user);
+        //    }
+        //    else
+        //    {
+        //        var model = await _projectsHandler.GetAUser(userid);
+
+
+        //        var create = await _projectsHandler.AddAUser(model);
+
+        //    }
+        //    return View(project);
+        //}
+
+        [Route("Home/Projects/AddUser/{userid:int}/{projectId:int}")]
         public async Task<IActionResult> AddUserToProject(int userid, int projectId)
         {
-            var project = await _projectsHandler.GetProjectSettings(projectId);
-            //var user = await _projectsHandler.GetUserSettings(userid);
+            //var user = GetAUser(userid);
+            //var project = GetProject(projectId);
 
-            if (project == null)
-            {
-                //     project.Users.Add(user);
-            }
-            return View(project);
+            var project = new Projects();
+            //model.Id = 5;
+            project.StartDate = DateTime.Now;
+            project.EndDate = DateTime.Now;
+            project.Users = new List<User>();
+            project.Name = "test project";
+
+            var create = await _projectsHandler.CreateProject(project);
+            var user = new User();
+            //model.Id = 5;
+            user.Name = "Luke";
+            user.Email = "email@email.com";
+            user.Id = userid;
+
+
+            var create1 = await _projectsHandler.AddAUser(user);
+            var membership = new ProjectMembership();
+            membership.Projects = project;
+            membership.Users = user;
+            var userToProject = await _projectsHandler.AddMembership(membership);
+            return View(userToProject);
+
         }
-
         [Authorize(Policy = "admin")]
         [Route("Home/AdminPanel")]
 
