@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Project_Admin.Controllers
+namespace DARE_FrontEnd.Controllers
 {
     [AllowAnonymous]
     public class AccountController : Controller

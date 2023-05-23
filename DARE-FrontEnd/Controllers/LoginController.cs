@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Project_Admin.Controllers
+namespace DARE_FrontEnd.Controllers
 {
     [Authorize]
     public class LoginController : Controller

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Project_Admin.Controllers
+namespace DARE_FrontEnd.Controllers
 {
     public class SecurityController : Controller
     {

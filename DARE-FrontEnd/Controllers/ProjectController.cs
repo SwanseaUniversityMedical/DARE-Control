@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Project_Admin.Models;
-using Project_Admin.Services.Project;
-using BL.Services.Project;
+using DARE_FrontEnd.Models;
+using DARE_FrontEnd.Services.Project;
+
 namespace Project_Admin.Controllers
 {
 

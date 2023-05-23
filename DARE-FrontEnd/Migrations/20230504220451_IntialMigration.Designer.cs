@@ -9,7 +9,7 @@ using BL.Repositories.DbContexts;
 
 #nullable disable
 
-namespace Project_Admin.Migrations
+namespace DARE_FrontEnd.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20230504220451_IntialMigration")]
