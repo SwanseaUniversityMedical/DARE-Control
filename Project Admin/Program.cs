@@ -26,6 +26,7 @@ IWebHostEnvironment environment = builder.Environment;
 string AppName = typeof(Program).Module.Name.Replace(".dll", "");
 
 
+
 // -- authentication here
 var keyCloakSettings = new KeyCloakSettings();
 configuration.Bind(nameof(keyCloakSettings), keyCloakSettings);
