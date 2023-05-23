@@ -1,0 +1,21 @@
+api:
+  enabled: true
+
+  image:
+    repository: harbor.ukserp.ac.uk/dare/control-api
+    tag: 1.1.0
+    pullPolicy: IfNotPresent
+    pullSecret: ""
+    uid: 1001
+    gid: 1001
+
+ui:
+  enabled: true
+
+  image:
+    repository: harbor.ukserp.ac.uk/dare/control-ui
+    tag: 1.1.0
+    pullPolicy: IfNotPresent
+    pullSecret: ""
+    uid: 1001
+    gid: 1001
