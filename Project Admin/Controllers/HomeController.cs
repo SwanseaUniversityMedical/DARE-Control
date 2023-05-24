@@ -107,6 +107,18 @@ namespace Project_Admin.Controllers
 
 
         }
+
+        [HttpGet]
+        [Route("Home/testio")]
+        public async Task<IActionResult> test()
+        {
+
+            return View();
+
+
+
+
+        }
         [HttpGet]
         [Route("Home/AddUser/{userid:int}")]
         public async Task<IActionResult> AddUser(int userid)
