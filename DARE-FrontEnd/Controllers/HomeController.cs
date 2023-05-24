@@ -36,8 +36,10 @@ namespace DARE_FrontEnd.Controllers
 
         private readonly ILogger<HomeController> _logger;
         private readonly IConfiguration configuration;
-        public HomeController(IProjectsHandler IProjectsHandler/*, IAPICaller IApiCaller*/)
+        public HomeController(ILogger<HomeController> logger, IConfiguration configuration,IProjectsHandler IProjectsHandler/*, IAPICaller IApiCaller*/)
         {
+            _logger = logger;
+            this.configuration = configuration;
             _projectsHandler = IProjectsHandler;
             //_apiCaller = IApiCaller;
         }
@@ -261,10 +263,10 @@ namespace DARE_FrontEnd.Controllers
                 ViewBag.NewAccessToken = newJwtTokenForCompany;
 
                 //To print the new expiration time
-                var tokenNew = handler.ReadToken(newJwtTokenForCompany) as JwtSecurityToken;
-                var newTokenExpiry = tokenNew.ValidTo;
-                ViewBag.TokenExpiryDate = newTokenExpiry;
-                ViewBag.Claims = HttpContext.User.Claims.Where(c => c.Type == "groups").ToList();
+                //var tokenNew = handler.ReadToken(newJwtTokenForCompany) as JwtSecurityToken;
+                //var newTokenExpiry = tokenNew.ValidTo;
+                //ViewBag.TokenExpiryDate = newTokenExpiry;
+                //ViewBag.Claims = HttpContext.User.Claims.Where(c => c.Type == "groups").ToList();
             }
             return View();
         }
