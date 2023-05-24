@@ -4,13 +4,24 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using Newtonsoft.Json.Linq;
+using System.Security.Claims;
+using System.Net.Http.Headers;
+using Newtonsoft.Json.Linq;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
+using IdentityModel.Client;
+using Serilog;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Cryptography.X509Certificates;
 using BL.Models;
 using System.Data;
 using System.Text.Json;
 using Newtonsoft.Json;
 using BL.Repositories.DbContexts;
 using DARE_FrontEnd.Services.Project;
-using Newtonsoft.Json.Linq;
+
 //using API_Project.Repositories.DbContexts;
 
 namespace DARE_FrontEnd.Controllers
@@ -23,7 +34,8 @@ namespace DARE_FrontEnd.Controllers
         private readonly IProjectsHandler _projectsHandler;
         //private readonly IAPICaller _apiCaller;
 
-
+        private readonly ILogger<HomeController> _logger;
+        private readonly IConfiguration configuration;
         public HomeController(IProjectsHandler IProjectsHandler/*, IAPICaller IApiCaller*/)
         {
             _projectsHandler = IProjectsHandler;
@@ -175,6 +187,86 @@ namespace DARE_FrontEnd.Controllers
             var userToProject = await _projectsHandler.AddMembership(membership);
             return View(userToProject);
 
+        }
+
+        [HttpGet]
+        [Route("Home/NewTokenIssue")]
+        [Authorize]
+        public async Task<IActionResult> NewTokenIssue()
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var context = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            //Access tokens are used to access third party resources
+            //string currentAccessToken = await HttpContext.GetTokenAsync("access_token");
+
+            //ID tokens are used for user authentication
+            string idToken = await HttpContext.GetTokenAsync("id_token");
+
+            //Refresh tokens are used once the access or ID tokens expire
+            var currentAccessToken = context.Properties.GetTokenValue("access_token");
+            var currentRefreshToken = context.Properties.GetTokenValue("refresh_token");
+
+            //Convert current refresh token to JWT format to check for expiration
+            var tokenRefresh = handler.ReadToken(currentRefreshToken) as JwtSecurityToken;
+            var refreshTokenExpiry = tokenRefresh.ValidTo;
+
+            //Check if the refresh token has expired
+            if (refreshTokenExpiry < DateTime.UtcNow)
+            {
+                Log.Warning("Users refresh Token has expired");
+                //probably need to log user out
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Logout", "Account");
+            }
+            
+            //Send request with valid parameters to get a new access token and an associated new refresh token
+            var tokenResponse = await new HttpClient().RequestRefreshTokenAsync(new RefreshTokenRequest
+            {
+                Address = configuration["KeyCloakSettings:Authority"] + "/protocol/openid-connect/token",
+                ClientId = configuration["KeyCloakSettings:ClientId"],
+                ClientSecret = configuration["KeyCloakSettings:ClientSecret"],
+                RefreshToken = currentRefreshToken,
+            });
+
+            if (tokenResponse.HttpStatusCode == System.Net.HttpStatusCode.OK)
+            {
+                var newAccessToken = tokenResponse.AccessToken;
+                var newRefreshToken = tokenResponse.RefreshToken;
+                //context.Properties.UpdateTokenValue("access_token", newAccessToken);
+                context.Properties.UpdateTokenValue("refresh_token", newRefreshToken);
+
+                //Read the token in JWT format to check for current expiration time(ValidTo parameter)
+                var jwtHandler = new JwtSecurityTokenHandler();
+                var token = jwtHandler.ReadJwtToken(newAccessToken);
+
+                // Token belongs to the specified group
+                // Update the token's expiration time
+                DateTime expirationTime = DateTime.UtcNow;
+                var groupClaims = token.Claims.Where(c => c.Type == "groups").Select(c => c.Value);
+                if (groupClaims.Any(gc => gc.Equals("dare-control-company")))
+                {
+                    expirationTime = DateTime.UtcNow.AddDays(365);
+                }
+
+                else if (groupClaims.Any(gc => gc.Equals("dare-control-users")))
+                {
+                    expirationTime = DateTime.UtcNow.AddDays(30);
+                }
+                //Update the token's expiration claim
+                token.Payload["exp"] = (int)(expirationTime - new DateTime(1970, 1, 1)).TotalSeconds;
+
+                // Generate a new JWT token with the updated expiration claim
+                var newJwtTokenForCompany = jwtHandler.WriteToken(token);
+                context.Properties.UpdateTokenValue("access_token", newJwtTokenForCompany);
+                ViewBag.NewAccessToken = newJwtTokenForCompany;
+
+                //To print the new expiration time
+                var tokenNew = handler.ReadToken(newJwtTokenForCompany) as JwtSecurityToken;
+                var newTokenExpiry = tokenNew.ValidTo;
+                ViewBag.TokenExpiryDate = newTokenExpiry;
+                ViewBag.Claims = HttpContext.User.Claims.Where(c => c.Type == "groups").ToList();
+            }
+            return View();
         }
         [Authorize(Policy = "admin")]
         [Route("Home/AdminPanel")]

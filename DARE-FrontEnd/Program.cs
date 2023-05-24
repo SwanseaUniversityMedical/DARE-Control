@@ -93,6 +93,18 @@ builder.Services.AddAuthorization(options =>
                 context => context.User.HasClaim(claim =>
                     claim.Type == "groups"
                     && claim.Value.Contains("dare-control-admin"))));
+    options.AddPolicy(
+                "company",
+                policyBuilder => policyBuilder.RequireAssertion(
+                    context => context.User.HasClaim(claim =>
+                        claim.Type == "groups"
+                        && claim.Value.Contains("dare-control-company"))));
+    options.AddPolicy(
+            "user",
+            policyBuilder => policyBuilder.RequireAssertion(
+                context => context.User.HasClaim(claim =>
+                    claim.Type == "groups"
+                    && claim.Value.Contains("dare-control-user"))));
 });
 
 
