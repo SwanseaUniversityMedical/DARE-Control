@@ -54,6 +54,11 @@ namespace DARE_FrontEnd.Controllers
             return View();
         }
 
+        public async Task<IActionResult> AddProjectForm()
+        {
+            return View();
+
+        }
         //this returns a the view testview on https://localhost:7117/home/testview
         //[Authorize]
 
