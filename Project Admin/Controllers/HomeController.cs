@@ -83,7 +83,7 @@ namespace Project_Admin.Controllers
         [Route("Home/CreateProject/{projectId:int}")]
         public async Task<IActionResult> CreateProject(int projectId)
         {
-            //var create = await _dataSetService.CreateProjectSettings(model);
+            //this will need to read in a JSON string from form.io then populate the variables
             var model = new Projects();
             //model.Id = 5;
             model.StartDate = DateTime.Now;
