@@ -74,12 +74,13 @@ namespace Project_Admin.Services
             return test.Data;
         }
 
-        public async Task<ProjectMembership> AddMembership(ProjectMembership membership)
+        public async Task<ProjectMembership> AddMembership(int userId, int projectId)
         {
             var request = new RestRequest("https://localhost:7058/api/Project/Add_Membership", Method.Post);
             request.Method = Method.Post;
             request.AddHeader("Accept", "application/json");
-            request.AddParameter("application/json", JsonConvert.SerializeObject(membership), ParameterType.RequestBody);
+            request.AddParameter("userId", userId);
+            request.AddParameter("projectId", projectId);
             var test = _apiCaller.Client.Execute<ProjectMembership>(request);
             return test.Data;
 

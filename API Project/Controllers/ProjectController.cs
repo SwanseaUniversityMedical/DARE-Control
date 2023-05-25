@@ -4,6 +4,7 @@ using BL.Repositories.DbContexts;
 using API_Project.Services.Project;
 using BL.Models;
 using BL.Repositories.DbContexts;
+using Microsoft.AspNetCore.SignalR;
 
 namespace API_Project.Controllers
 {
@@ -55,12 +56,41 @@ namespace API_Project.Controllers
 
         [HttpPost("Add_Membership")]
 
-        public async Task<ProjectMembership> AddMembership([FromBody] ProjectMembership membership)
+        public async Task<ProjectMembership> AddMembership(int userid, int projectid)
         {
-            membership.Projects.StartDate = membership.Projects.StartDate.ToUniversalTime();
-            membership.Projects.EndDate = membership.Projects.EndDate.ToUniversalTime();
+
+            var membership = new ProjectMembership();
+           //var theuser =
+            
+            membership.Users = await _DbContext.Users.SingleAsync(x => x.Id == userid);
+            membership.Projects = await _DbContext.Projects.SingleAsync(x => x.Id == projectid);
+
+            //membership.Id = 1;
             _DbContext.ProjectMemberships.Add(membership);
             await _DbContext.SaveChangesAsync();
+            //try
+            //{
+            //    _DbContext.ProjectMemberships.Add(membership);
+            //    await _DbContext.SaveChangesAsync();
+            //}
+            //catch (Exception ex)
+            //{
+            //    // Display the details of the outer exception
+            //    Console.WriteLine("Outer Exception Type: " + ex.GetType().Name);
+            //    Console.WriteLine("Outer Exception Message: " + ex.Message);
+
+            //    // Check if there is an inner exception
+            //    if (ex.InnerException != null)
+            //    {
+            //        // Display the details of the inner exception
+            //        Console.WriteLine("Inner Exception Type: " + ex.InnerException.GetType().Name);
+            //        Console.WriteLine("Inner Exception Message: " + ex.InnerException.Message);
+            //        // You can continue to access inner exceptions if there are multiple levels
+            //    }
+            //    }
+
+
+
 
             return membership;
         }

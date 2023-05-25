@@ -107,11 +107,23 @@ namespace Project_Admin.Controllers
 
 
         }
+
+        [HttpGet]
+        [Route("Home/testio")]
+        public async Task<IActionResult> test()
+        {
+
+            return View();
+
+
+
+
+        }
         [HttpGet]
         [Route("Home/AddUser/{userid:int}")]
         public async Task<IActionResult> AddUser(int userid)
         {
-
+            
             var model = new User();
             //model.Id = 5;
             model.Name = "Luke";
@@ -125,54 +137,11 @@ namespace Project_Admin.Controllers
             return View(userid);
         }
 
-        //[HttpPost]
-        //[Route("Home/Users/AddUser")]
-        //public async Task<IActionResult> AddUserToProject(int userid, int projectId)
-        //{
-        //    var project = await _projectsHandler.GetProjectSettings(projectId);
-        //    //var user = await _projectsHandler.GetUserSettings(userid);
-
-        //    if (project == null)
-        //    {
-        //        //     project.Users.Add(user);
-        //    }
-        //    else
-        //    {
-        //        var model = await _projectsHandler.GetAUser(userid);
-
-
-        //        var create = await _projectsHandler.AddAUser(model);
-
-        //    }
-        //    return View(project);
-        //}
 
         [Route("Home/Projects/AddUser/{userid:int}/{projectId:int}")]
-        public async Task<IActionResult> AddUserToProject(int userid, int projectId)
+        public async Task<IActionResult> AddUserToProject(int userId, int projectId)
         {
-            //var user = GetAUser(userid);
-            //var project = GetProject(projectId);
-
-            var project = new Projects();
-            //model.Id = 5;
-            project.StartDate = DateTime.Now;
-            project.EndDate = DateTime.Now;
-            project.Users = new List<User>();
-            project.Name = "test project";
-
-            var create = await _projectsHandler.CreateProject(project);
-            var user = new User();
-            //model.Id = 5;
-            user.Name = "Luke";
-            user.Email = "email@email.com";
-            user.Id = userid;
-
-
-            var create1 = await _projectsHandler.AddAUser(user);
-            var membership = new ProjectMembership();
-            membership.Projects = project;
-            membership.Users = user;
-            var userToProject = await _projectsHandler.AddMembership(membership);
+            var userToProject = await _projectsHandler.AddMembership(userId,projectId);
             return View(userToProject);
 
         }
