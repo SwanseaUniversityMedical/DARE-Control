@@ -21,6 +21,7 @@ using System.Text.Json;
 using Newtonsoft.Json;
 using BL.Repositories.DbContexts;
 using DARE_FrontEnd.Services.Project;
+using DARE_FrontEnd.Services.FormIO;
 
 //using API_Project.Repositories.DbContexts;
 
@@ -36,11 +37,13 @@ namespace DARE_FrontEnd.Controllers
 
         private readonly ILogger<HomeController> _logger;
         private readonly IConfiguration configuration;
-        public HomeController(ILogger<HomeController> logger, IConfiguration configuration,IProjectsHandler IProjectsHandler/*, IAPICaller IApiCaller*/)
+        private readonly IFormHandler _formsHandler;
+        public HomeController(ILogger<HomeController> logger, IConfiguration configuration,IProjectsHandler IProjectsHandler, IFormHandler IFormHandler/*, IAPICaller IApiCaller*/)
         {
             _logger = logger;
             this.configuration = configuration;
             _projectsHandler = IProjectsHandler;
+            _formsHandler = IFormHandler;
             //_apiCaller = IApiCaller;
         }
 
@@ -53,7 +56,13 @@ namespace DARE_FrontEnd.Controllers
             var test = await HttpContext.GetTokenAsync("access_token");
             return View();
         }
+        [Route("ThisTestForm/{Id}")]
+        public async Task<IActionResult> ThisTestForm(int Id)
+        {
+            var create = await _formsHandler.GetFormDataById(Id);
 
+            return View();
+        }
         public async Task<IActionResult> AddProjectForm()
         {
             return View();

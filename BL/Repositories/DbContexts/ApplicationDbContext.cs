@@ -25,6 +25,9 @@ namespace BL.Repositories.DbContexts
         public DbSet<Projects> Projects { get; set; }
 
         public DbSet<ProjectMembership> ProjectMemberships { get; set; }
+        public DbSet<FormData> FormData { get; set; }
+
+
 
     }
 }
