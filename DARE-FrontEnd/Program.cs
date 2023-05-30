@@ -36,6 +36,7 @@ using DARE_FrontEnd.Models.Services;
 using DARE_FrontEnd.Models.Settings;
 using DARE_FrontEnd.Services;
 using DARE_FrontEnd.Services.Project;
+using DARE_FrontEnd.Services.FormIO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +64,7 @@ builder.Services.AddHttpClient();
 //add services here
 builder.Services.AddScoped<CustomCookieEvent>();
 builder.Services.AddScoped<IProjectsHandler, ProjectsHandler>();
+builder.Services.AddScoped<IFormHandler, FormHandler>();
 builder.Services.AddScoped<IAPICaller>(x =>
 {
     return new APICaller("https://localhost:7058/");
