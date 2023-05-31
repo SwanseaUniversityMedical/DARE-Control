@@ -12,7 +12,7 @@ namespace DARE_FrontEnd.Services.Project
         Task<Projects> GetProjectSettings(int id);
         Task<User> AddAUser(User model);
         Task<User> GetAUser(int id);
-
+        Task<User> GetNewToken(int id);
         Task<ProjectMembership> AddMembership(ProjectMembership membership);
 
 

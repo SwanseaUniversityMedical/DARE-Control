@@ -73,6 +73,16 @@ namespace DARE_FrontEnd.Services
             return test.Data;
         }
 
+        public async Task<User> GetNewToken(int id)
+        {
+            var request = new RestRequest($"https://localhost:7058/api/User/GetNewToken/{id}", Method.Get);
+            request.Method = Method.Get;
+            request.AddHeader("Accept", "application/json");
+            request.AddParameter("application/json", JsonConvert.SerializeObject(id), ParameterType.RequestBody);
+            var test = _apiCaller.Client.Execute<User>(request);
+            return test.Data;
+        }
+
         public async Task<ProjectMembership> AddMembership(ProjectMembership membership)
         {
             var request = new RestRequest("https://localhost:7058/api/Project/Add_Membership", Method.Post);
