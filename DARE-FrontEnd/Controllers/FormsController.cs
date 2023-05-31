@@ -10,12 +10,24 @@ using DARE_FrontEnd.Models;
 using System.Data;
 using System.Text.Json;
 using Newtonsoft.Json;
-
+using DARE_FrontEnd.Controllers;
 using DARE_FrontEnd.Services.Project;
+using Npgsql.Internal.TypeHandlers.DateTimeHandlers;
+using DARE_FrontEnd.Services.FormIO;
+
 namespace DARE_FrontEnd.Controllers
 {
     public class FormsController : Controller
     {
+        private readonly IProjectsHandler _projectsHandler;
+        public FormsController(IProjectsHandler IProjectsHandler)
+        {
+
+            _projectsHandler = IProjectsHandler;
+
+        }
+
+
         [Authorize]
         [Route("Forms/Index")]
         public IActionResult Index()
@@ -24,11 +36,12 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpPost]
-        public IActionResult FormSubmission([FromBody] JsonObject submissionData)
+        public async Task<IActionResult> FormSubmission([FromBody] JsonObject submissionData)
         {
-            //save session id against it
+            var result =  _projectsHandler.CreateProject1(submissionData);
+            //IActionResult result = await HomeController.CreateProject(submissionData);
 
-            return View();
+            return (IActionResult)result;
         }
 
         [HttpPost]

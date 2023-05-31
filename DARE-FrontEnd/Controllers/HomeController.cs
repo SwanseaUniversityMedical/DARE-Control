@@ -22,6 +22,9 @@ using Newtonsoft.Json;
 using BL.Repositories.DbContexts;
 using DARE_FrontEnd.Services.Project;
 using DARE_FrontEnd.Services.FormIO;
+using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Xml.Linq;
 
 //using API_Project.Repositories.DbContexts;
 
@@ -46,7 +49,6 @@ namespace DARE_FrontEnd.Controllers
             _formsHandler = IFormHandler;
             //_apiCaller = IApiCaller;
         }
-
         //private readonly IProjectsHandler _dataSetService;
         private string path = @"C:\Users\luke.young\Documents\DareJson\projects.json";
         //[Authorize]
@@ -107,23 +109,49 @@ namespace DARE_FrontEnd.Controllers
                return View(project);
         }
 
+        //[HttpGet]
+        //[Route("Home/CreateProject/{projectId:int}")]
+        //public async Task<IActionResult> CreateProject(int projectId)
+        //{
+        //    //var create = await _dataSetService.CreateProjectSettings(model);
+        //    var model = new Projects();
+        //    //model.Id = 5;
+        //    model.StartDate = DateTime.Now;
+        //    model.EndDate = DateTime.Now;
+        //    model.Users = new List<User>();
+        //    model.Name = "test project";
+
+        //    var create = await _projectsHandler.CreateProject(model);
+
+        //    return View(model);
+        //}
+
         [HttpGet]
         [Route("Home/CreateProject/{projectId:int}")]
-        public async Task<IActionResult> CreateProject(int projectId)
+        public async Task<IActionResult> CreateProject(JsonObject project)
         {
+            string jsonString = project.ToString();
+            JObject jsonObject = JObject.Parse(jsonString);
+
+            var projectName = (string)jsonObject["ProjectName"];
+            var startDate = (int)jsonObject["StartDate"];
+            var endDate = (string)jsonObject["EndDate"];
+            //var users = new List<User>();
+            //IEnumerable<string> keys = jsonObject.Properties().Select(p => p.Name);
+            //IEnumerable<string> keys = jsonObject.Properties().Select(p => p.);
+
             //var create = await _dataSetService.CreateProjectSettings(model);
             var model = new Projects();
             //model.Id = 5;
-            model.StartDate = DateTime.Now;
+            //model.StartDate = project;
             model.EndDate = DateTime.Now;
             model.Users = new List<User>();
-            model.Name = "test project";
+           // model.Name = keys.Name;
 
             var create = await _projectsHandler.CreateProject(model);
 
             return View(model);
         }
-
 
         [HttpGet]
         [Route("Home/ReturnUser/{userId:int}")]

@@ -5,6 +5,9 @@ using API_Project.Services.Project;
 using BL.Models;
 using BL.Repositories.DbContexts;
 using Microsoft.AspNetCore.SignalR;
+using System.Text.Json.Nodes;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace API_Project.Controllers
 {
@@ -52,7 +55,39 @@ namespace API_Project.Controllers
 
             return Projects;
         }
+        [HttpPost("Save_Project1")]
 
+        public async Task<Projects> CreateProject1([FromBody] JsonObject Projects)
+        {
+           
+            Projects projects = JsonConvert.DeserializeObject<Projects>(Projects.ToString());
+            //Console.WriteLine($"Name: {users.Name}");
+            var Name = projects.Name;
+            var startDate = projects.StartDate.ToUniversalTime();
+            var endDate = projects.EndDate.ToUniversalTime();
+            var users = projects.Users;
+
+
+            string jsonString = Projects.ToString();
+            JObject jsonObject = JObject.Parse(jsonString);
+            var projectName = (string)jsonObject["ProjectName"];
+           // var startDate = (int)jsonObject["StartDate"];
+           // var endDate = (string)jsonObject["EndDate"];
+
+            var model = new Projects();
+            //model.Id = 5;
+            //model.StartDate = startDate;
+            //model.EndDate = DateTime.Now;
+            model.Name = projectName;
+            model.Users = new List<User>();
+
+            //_DbContext.Projects.Add(model);
+            _DbContext.Projects.Add(projects);
+
+            await _DbContext.SaveChangesAsync();
+
+            return model;
+        }
 
         [HttpPost("Add_Membership")]
 

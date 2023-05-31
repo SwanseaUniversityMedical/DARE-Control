@@ -5,6 +5,7 @@ using System.Text;
 using RestSharp;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Nodes;
 
 namespace DARE_FrontEnd.Services
 {
@@ -44,6 +45,24 @@ namespace DARE_FrontEnd.Services
             return test.Data;
             //return JsonConvert.DeserializeObject<MoveProject>(test.Content);
         }
+
+        public async Task<Projects> CreateProject1(JsonObject model)
+        {
+            var request = new RestRequest("https://localhost:7058/api/Project/Save_Project1", Method.Post);
+            request.Method = Method.Post;
+            request.AddHeader("Accept", "application/json");
+            //var li = request.Parameters.ToList();
+            //foreach (var l in li)
+            //{
+            //    request.Parameters.RemoveParameter(l);
+            //}
+            //request.Parameters.Clear();
+            request.AddParameter("application/json", JsonConvert.SerializeObject(model), ParameterType.RequestBody);
+            var test = _apiCaller.Client.Execute<Projects>(request);
+            return test.Data;
+            //return JsonConvert.DeserializeObject<MoveProject>(test.Content);
+        }
+
 
         public async Task<Projects> GetProjectSettings(int id)
         {
