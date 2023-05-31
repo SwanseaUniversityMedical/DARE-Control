@@ -27,7 +27,7 @@
 //app.Run();
 
 using BL.Repositories.DbContexts;
-using Microsoft.AspNetCore.Authentication.Cookies;
+//using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -37,6 +37,7 @@ using DARE_FrontEnd.Models.Settings;
 using DARE_FrontEnd.Services;
 using DARE_FrontEnd.Services.Project;
 using DARE_FrontEnd.Services.FormIO;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
