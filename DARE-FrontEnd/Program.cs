@@ -67,7 +67,7 @@ builder.Services.AddScoped<IProjectsHandler, ProjectsHandler>();
 builder.Services.AddScoped<IFormHandler, FormHandler>();
 builder.Services.AddScoped<IAPICaller>(x =>
 {
-    return new APICaller("https://localhost:7058/");
+    return new APICaller("https://localhost:5034/");
 });
 
 
