@@ -25,16 +25,15 @@ namespace BL.Controllers
 
         }
         
+        //[HttpPost("Add_User")]
 
-        [HttpPost("Add_User")]
+        //public async Task<User> AddUser([FromBody] User Users)
+        //{
+        //    _DbContext.Users.Add(Users);
+        //    await _DbContext.SaveChangesAsync();
 
-        public async Task<User> AddUser([FromBody] User Users)
-        {
-            _DbContext.Users.Add(Users);
-            await _DbContext.SaveChangesAsync();
-
-            return Users;
-        }
+        //    return Users;
+        //}
 
 
         [HttpPost("AddUser")]
