@@ -2,7 +2,8 @@
 
 using Microsoft.AspNetCore.Mvc;
 using BL.Models;
-
+using System.Text.Json.Nodes;
+using Newtonsoft.Json;
 
 namespace BL.Controllers
 {
@@ -34,6 +35,22 @@ namespace BL.Controllers
 
             return Users;
         }
+
+
+        [HttpPost("AddUser")]
+        public IActionResult AddUser([FromBody] JsonObject submissionData)
+        {
+            //save session id against it
+            User users = JsonConvert.DeserializeObject<User>(submissionData.ToString());
+
+            var Name = users.Name;
+            var Email = users.Email;
+            _DbContext.Users.Add(users);
+            _DbContext.SaveChangesAsync();
+
+            return Ok();
+        }
+
 
         [HttpGet("Get_User/{userId}")]
 
