@@ -1,5 +1,4 @@
 ﻿using BL.Repositories.DbContexts;
-
 using Microsoft.AspNetCore.Mvc;
 using BL.Models;
 using System.Text.Json.Nodes;
@@ -37,17 +36,18 @@ namespace BL.Controllers
 
 
         [HttpPost("AddUser")]
-        public IActionResult AddUser([FromBody] JsonObject submissionData)
+        public async Task<User> AddUser([FromBody] JsonObject submissionData, [FromBody] User User)
         {
             //save session id against it
-            User users = JsonConvert.DeserializeObject<User>(submissionData.ToString());
+            //User users = JsonConvert.DeserializeObject<User>(submissionData.ToString());
+            User = JsonConvert.DeserializeObject<User>(submissionData.ToString());
 
-            var Name = users.Name;
-            var Email = users.Email;
-            _DbContext.Users.Add(users);
+            var Name = User.Name;
+            var Email = User.Email;
+            _DbContext.Users.Add(User);
             _DbContext.SaveChangesAsync();
 
-            return Ok();
+            return User;
         }
 
 
