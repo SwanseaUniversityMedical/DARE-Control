@@ -8,8 +8,8 @@ namespace DARE_FrontEnd.Services.Project
     {
 
         //Task<User> GetUserSettings(int id);
-        Task<Projects> CreateProject(Projects model);
-        Task<Projects> CreateProject1(JsonObject model);
+        Task<Projects> CreateProject(JsonObject model);
+       //Task<Projects> CreateProject1(JsonObject model);
 
         Task<Projects> GetProjectSettings(int id);
         Task<User> AddAUser(User model);

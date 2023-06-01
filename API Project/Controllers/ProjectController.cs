@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 using System.Text.Json.Nodes;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Runtime.InteropServices.JavaScript;
 
 namespace API_Project.Controllers
 {
@@ -35,58 +36,72 @@ namespace API_Project.Controllers
         {
             return Ok();
         }
+        //[HttpPost("Save_Project")]
+
+        //public async Task<Projects> CreateProject([FromBody] Projects Projects)
+        //{
+        //    Projects.StartDate = Projects.StartDate.ToUniversalTime();
+        //    Projects.EndDate = Projects.EndDate.ToUniversalTime();
+        //    //var existingProject = _DbContext.Projects.Find(Projects.Id);
+
+        //    //if (existingProject == null)
+        //    //{
+        //    //    var id = 500;
+        //    //    var newProject = await _projectsHandler.CreateProject(Projects);
+        //    //}
+        //    ////var newProject = await _projectsHandler.CreateProject(Projects);
+        //    ////await _projectsHandler.AddAsync(newProject);
+        //    _DbContext.Projects.Add(Projects);
+        //    await _DbContext.SaveChangesAsync();
+
+        //    return Projects;
+        //}
         [HttpPost("Save_Project")]
 
-        public async Task<Projects> CreateProject([FromBody] Projects Projects)
+        public async Task<Projects> CreateProject([FromBody] JsonObject project)
         {
-            Projects.StartDate = Projects.StartDate.ToUniversalTime();
-            Projects.EndDate = Projects.EndDate.ToUniversalTime();
-            //var existingProject = _DbContext.Projects.Find(Projects.Id);
+            try {
+                string jsonString = project.ToString();
+                Projects projects = JsonConvert.DeserializeObject<Projects>(jsonString);
 
-            //if (existingProject == null)
-            //{
-            //    var id = 500;
-            //    var newProject = await _projectsHandler.CreateProject(Projects);
-            //}
-            ////var newProject = await _projectsHandler.CreateProject(Projects);
-            ////await _projectsHandler.AddAsync(newProject);
-            _DbContext.Projects.Add(Projects);
-            await _DbContext.SaveChangesAsync();
+                //Projects projects = JsonConvert.DeserializeObject<Projects>(project);
+                var model = new Projects();
+                //2023-06-01 14:30:00 use this as the datetime
+                model.Name = projects.Name;
+                model.StartDate = projects.StartDate.ToUniversalTime();
+                //model.Users = projects.Users.ToList();
+                model.EndDate = projects.EndDate.ToUniversalTime();
 
-            return Projects;
-        }
-        [HttpPost("Save_Project1")]
+                _DbContext.Projects.Add(model);
 
-        public async Task<Projects> CreateProject1([FromBody] JsonObject Projects)
-        {
-           
-            Projects projects = JsonConvert.DeserializeObject<Projects>(Projects.ToString());
+                await _DbContext.SaveChangesAsync();
+
+
+                return model;
+            }
+            catch (Exception ex) { }
+
+            return null;
             //Console.WriteLine($"Name: {users.Name}");
-            var Name = projects.Name;
-            var startDate = projects.StartDate.ToUniversalTime();
-            var endDate = projects.EndDate.ToUniversalTime();
-            var users = projects.Users;
+
+            //model.Users = projects.Users;
 
 
-            string jsonString = Projects.ToString();
-            JObject jsonObject = JObject.Parse(jsonString);
-            var projectName = (string)jsonObject["ProjectName"];
+            //string jsonString = Projects.ToString();
+            //JObject jsonObject = JObject.Parse(jsonString);
+            //var projectName = (string)jsonObject["ProjectName"];
            // var startDate = (int)jsonObject["StartDate"];
            // var endDate = (string)jsonObject["EndDate"];
 
-            var model = new Projects();
+            //var model = new Projects();
             //model.Id = 5;
             //model.StartDate = startDate;
             //model.EndDate = DateTime.Now;
-            model.Name = projectName;
-            model.Users = new List<User>();
+            //model.Name = projectName;
+            //model.Users = new List<User>();
 
             //_DbContext.Projects.Add(model);
-            _DbContext.Projects.Add(projects);
 
-            await _DbContext.SaveChangesAsync();
-
-            return model;
         }
 
         [HttpPost("Add_Membership")]

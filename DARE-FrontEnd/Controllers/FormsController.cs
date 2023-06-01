@@ -38,7 +38,7 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<IActionResult> FormSubmission([FromBody] JsonObject submissionData)
         {
-            var result =  _projectsHandler.CreateProject1(submissionData);
+            var result =  _projectsHandler.CreateProject(submissionData);
             //IActionResult result = await HomeController.CreateProject(submissionData);
 
             return (IActionResult)result;

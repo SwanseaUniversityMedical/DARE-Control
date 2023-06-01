@@ -126,32 +126,32 @@ namespace DARE_FrontEnd.Controllers
         //    return View(model);
         //}
 
-        [HttpGet]
-        [Route("Home/CreateProject/{projectId:int}")]
-        public async Task<IActionResult> CreateProject(JsonObject project)
-        {
-            string jsonString = project.ToString();
-            JObject jsonObject = JObject.Parse(jsonString);
+        //[HttpGet]
+        //[Route("Home/CreateProject/{projectId:int}")]
+        //public async Task<IActionResult> CreateProject(JsonObject project)
+        //{
+        //    string jsonString = project.ToString();
+        //    JObject jsonObject = JObject.Parse(jsonString);
 
-            var projectName = (string)jsonObject["ProjectName"];
-            var startDate = (int)jsonObject["StartDate"];
-            var endDate = (string)jsonObject["EndDate"];
-            //var users = new List<User>();
-            //IEnumerable<string> keys = jsonObject.Properties().Select(p => p.Name);
-            //IEnumerable<string> keys = jsonObject.Properties().Select(p => p.);
+        //    var projectName = (string)jsonObject["ProjectName"];
+        //    var startDate = (int)jsonObject["StartDate"];
+        //    var endDate = (string)jsonObject["EndDate"];
+        //    //var users = new List<User>();
+        //    //IEnumerable<string> keys = jsonObject.Properties().Select(p => p.Name);
+        //    //IEnumerable<string> keys = jsonObject.Properties().Select(p => p.);
 
-            //var create = await _dataSetService.CreateProjectSettings(model);
-            var model = new Projects();
-            //model.Id = 5;
-            //model.StartDate = project;
-            model.EndDate = DateTime.Now;
-            model.Users = new List<User>();
-           // model.Name = keys.Name;
+        //    //var create = await _dataSetService.CreateProjectSettings(model);
+        //    var model = new Projects();
+        //    //model.Id = 5;
+        //    //model.StartDate = project;
+        //    model.EndDate = DateTime.Now;
+        //    model.Users = new List<User>();
+        //   // model.Name = keys.Name;
 
-            var create = await _projectsHandler.CreateProject(model);
+        //    var create = await _projectsHandler.CreateProject(model);
 
-            return View(model);
-        }
+        //    return View(model);
+        //}
 
         [HttpGet]
         [Route("Home/ReturnUser/{userId:int}")]
@@ -216,7 +216,7 @@ namespace DARE_FrontEnd.Controllers
             project.Users = new List<User>();
             project.Name = "test project";
 
-            var create = await _projectsHandler.CreateProject(project);
+            //var create = await _projectsHandler.CreateProject(project);
             var user = new User();
             //model.Id = 5;
             user.Name = "Luke";
