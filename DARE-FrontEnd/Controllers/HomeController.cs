@@ -29,7 +29,6 @@ namespace DARE_FrontEnd.Controllers
 {
     //[Authorize(Policy = "admin")]
     [Authorize]
-
     public class HomeController : Controller
     {
         private readonly IProjectsHandler _projectsHandler;
@@ -178,10 +177,8 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         [Route("Home/GetNewToken/{userId:int}")]
         public async Task<IActionResult> GetNewToken(int userId)
-        {
-            var user = await _projectsHandler.GetNewToken(userId);
-            user.Id = userId;
-            return View(user);
+        {         
+            return View();
         }
 
         [Route("Home/Projects/AddUser/{userid:int}/{projectId:int}")]

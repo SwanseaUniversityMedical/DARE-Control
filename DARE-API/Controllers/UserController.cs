@@ -10,10 +10,11 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Serilog;
 using IdentityModel.Client;
-
+using System.Text;
 
 namespace BL.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
@@ -107,7 +108,7 @@ namespace BL.Controllers
                 ClientSecret = configuration["KeyCloakSettings:ClientSecret"],
                 RefreshToken = currentRefreshToken,
             });
-
+            var newJwtToken = "";
             if (tokenResponse.HttpStatusCode == System.Net.HttpStatusCode.OK)
             {
                 var newAccessToken = tokenResponse.AccessToken;
@@ -136,11 +137,12 @@ namespace BL.Controllers
                 token.Payload["exp"] = (int)(expirationTime - new DateTime(1970, 1, 1)).TotalSeconds;
 
                 // Generate a new JWT token with the updated expiration claim
-                var newJwtTokenForCompany = jwtHandler.WriteToken(token);
-                context.Properties.UpdateTokenValue("access_token", newJwtTokenForCompany);
+                newJwtToken = jwtHandler.WriteToken(token);
+                context.Properties.UpdateTokenValue("access_token", newJwtToken);
                 //ViewBag.NewAccessToken = newJwtTokenForCompany;
             }
             return Ok();
+
         }
     }
 }
