@@ -5,6 +5,8 @@ using System.Text;
 using RestSharp;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Mvc;
+using System.Runtime.InteropServices.JavaScript;
+using System.Text.Json.Nodes;
 
 namespace DARE_FrontEnd.Services
 {
@@ -60,6 +62,16 @@ namespace DARE_FrontEnd.Services
             request.Method = Method.Post;
             request.AddHeader("Accept", "application/json");
             request.AddParameter("application/json", JsonConvert.SerializeObject(user), ParameterType.RequestBody);
+            var test = _apiCaller.Client.Execute<User>(request);
+            return test.Data;
+        }
+
+        public async Task<User> AddAUser1(JsonObject jobj)
+        {
+            var request = new RestRequest("http://localhost:7163/api/User/Add_User1", Method.Post);
+            request.Method = Method.Post;
+            request.AddHeader("Accept", "application/json");
+            request.AddParameter("application/json", JsonConvert.SerializeObject(jobj), ParameterType.RequestBody);
             var test = _apiCaller.Client.Execute<User>(request);
             return test.Data;
         }

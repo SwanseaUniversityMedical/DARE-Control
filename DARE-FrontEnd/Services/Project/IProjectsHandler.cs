@@ -1,5 +1,7 @@
 ﻿using BL.Models;
 using System.Linq.Expressions;
+using System.Runtime.InteropServices.JavaScript;
+using System.Text.Json.Nodes;
 
 namespace DARE_FrontEnd.Services.Project
 {
@@ -11,6 +13,7 @@ namespace DARE_FrontEnd.Services.Project
 
         Task<Projects> GetProjectSettings(int id);
         Task<User> AddAUser(User model);
+        Task<User> AddAUser1(JsonObject jobj);
         Task<User> GetAUser(int id);
         Task<User> GetNewToken(int id);
         Task<ProjectMembership> AddMembership(ProjectMembership membership);

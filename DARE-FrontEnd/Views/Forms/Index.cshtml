@@ -19,7 +19,7 @@
             form.nosubmit = true; //Stops submission from going to form.io server
             form.on('submit',
                 function (submission) {
-                    return Formio.fetch('/Forms/FormSubmission',
+                    return Formio.fetch('/Forms/UserFormSubmission',
                         {
                             body: JSON.stringify(submission.data),
                             headers: { 'content-type': 'application/json' },

@@ -16,6 +16,13 @@ namespace DARE_FrontEnd.Controllers
 {
     public class FormsController : Controller
     {
+        private readonly IProjectsHandler _projectsHandler;
+
+        public FormsController(IProjectsHandler projectsHandler)
+        {
+            _projectsHandler = projectsHandler;
+        }
+
         [Authorize]
         [Route("Forms/Index")]
         public IActionResult Index()
@@ -26,8 +33,15 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public IActionResult FormSubmission([FromBody] JsonObject submissionData)
         {
-            //save session id against it
+                      
+            return View();
+        }
 
+        [HttpPost]
+        public IActionResult UserFormSubmission([FromBody] JsonObject submissionData)
+        {
+            //save session id against it
+            _projectsHandler.AddAUser1(submissionData);
             return View();
         }
 

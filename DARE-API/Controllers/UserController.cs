@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Serilog;
 using IdentityModel.Client;
 
+
 namespace BL.Controllers
 {
     [ApiController]
@@ -21,7 +22,6 @@ namespace BL.Controllers
         private readonly ILogger<UserController> _logger;
         private readonly IConfiguration configuration;
         private readonly ApplicationDbContext _DbContext;
-        
 
         public UserController(ApplicationDbContext applicationDbContext, ILogger<UserController> logger, IConfiguration configuration)
         {
@@ -42,19 +42,20 @@ namespace BL.Controllers
         //}
 
 
-        [HttpPost("AddUser")]
-        public async Task<User> AddUser([FromBody] JsonObject submissionData)
+        [HttpPost("Add_User1")]
+        public async Task<User> AddUser(JsonObject submissionData)
         {
             //save session id against it
-            //User users = JsonConvert.DeserializeObject<User>(submissionData.ToString());
-            var user = JsonConvert.DeserializeObject<User>(submissionData.ToString());
+            User users = JsonConvert.DeserializeObject<User>(submissionData.ToString());
+            //user = JsonConvert.DeserializeObject<User>(submissionData.ToString());
 
-            var Name = user.Name;
-            var Email = user.Email;
-            _DbContext.Users.Add(user);
-            _DbContext.SaveChangesAsync();
+            var Name = users.Name;
+            var Email = users.Email;
+            _DbContext.Users.Add(users);
+            await _DbContext.SaveChangesAsync();
+            //_DbContext.SaveChangesAsync();
 
-            return user;
+            return users;
         }
 
 
