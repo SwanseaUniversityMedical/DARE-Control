@@ -5,15 +5,15 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using System.Linq;
-
 using DARE_FrontEnd.Models;
 using System.Data;
 using System.Text.Json;
 using Newtonsoft.Json;
-
 using DARE_FrontEnd.Services.Project;
+
 namespace DARE_FrontEnd.Controllers
 {
+    [Authorize]
     public class FormsController : Controller
     {
         private readonly IProjectsHandler _projectsHandler;

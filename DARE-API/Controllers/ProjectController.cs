@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using BL.Repositories.DbContexts;
 using BL.Models;
@@ -6,6 +7,7 @@ using BL.Models;
 
 namespace DARE_API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
 
