@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using BL.Repositories.DbContexts;
 using BL.Models;
-
+using System.Text.Json.Nodes;
+using Newtonsoft.Json;
 
 namespace DARE_API.Controllers
 {
@@ -13,16 +14,16 @@ namespace DARE_API.Controllers
 
     public class ProjectController : ControllerBase
     {
-       
+
         private readonly ApplicationDbContext _DbContext;
-       
-       
+
+
         public ProjectController(ApplicationDbContext applicationDbContext)
         {
-            
+
             _DbContext = applicationDbContext;
         }
-       
+
 
         [HttpGet("HelloWorld")]
 
@@ -30,18 +31,46 @@ namespace DARE_API.Controllers
         {
             return Ok();
         }
+        //[HttpPost("Save_Project")]
+
+        //public async Task<Projects> CreateProject([FromBody] Projects Projects)
+        //{
+        //    Projects.StartDate = Projects.StartDate.ToUniversalTime();
+        //    Projects.EndDate = Projects.EndDate.ToUniversalTime();
+        //    _DbContext.Projects.Add(Projects);
+        //    await _DbContext.SaveChangesAsync();
+
+        //    return Projects;
+        //}
+
         [HttpPost("Save_Project")]
 
-        public async Task<Projects> CreateProject([FromBody] Projects Projects)
+        public async Task<Projects> CreateProject([FromBody] JsonObject project)
         {
-            Projects.StartDate = Projects.StartDate.ToUniversalTime();
-            Projects.EndDate = Projects.EndDate.ToUniversalTime();
-            _DbContext.Projects.Add(Projects);
-            await _DbContext.SaveChangesAsync();
+            try
+            {
+                string jsonString = project.ToString();
+                Projects projects = JsonConvert.DeserializeObject<Projects>(jsonString);
 
-            return Projects;
+                //Projects projects = JsonConvert.DeserializeObject<Projects>(project);
+                var model = new Projects();
+                //2023-06-01 14:30:00 use this as the datetime
+                model.Name = projects.Name;
+                model.StartDate = projects.StartDate.ToUniversalTime();
+                //model.Users = projects.Users.ToList();
+                model.EndDate = projects.EndDate.ToUniversalTime();
+
+                _DbContext.Projects.Add(model);
+
+                await _DbContext.SaveChangesAsync();
+
+
+                return model;
+            }
+            catch (Exception ex) { }
+
+            return null;
         }
-
 
         [HttpPost("Add_Membership")]
 
@@ -49,15 +78,15 @@ namespace DARE_API.Controllers
         {
 
             var membership = new ProjectMembership();
-           //var theuser =
-            
+            //var theuser =
+
             membership.Users = await _DbContext.Users.SingleAsync(x => x.Id == userid);
             membership.Projects = await _DbContext.Projects.SingleAsync(x => x.Id == projectid);
 
             //membership.Id = 1;
             _DbContext.ProjectMemberships.Add(membership);
             await _DbContext.SaveChangesAsync();
-            
+
 
 
 
@@ -80,7 +109,7 @@ namespace DARE_API.Controllers
             return returned;
         }
 
-       
+
 
     }
 }

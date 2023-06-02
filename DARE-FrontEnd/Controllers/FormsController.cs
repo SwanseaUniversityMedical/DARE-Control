@@ -31,10 +31,12 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpPost]
-        public IActionResult FormSubmission([FromBody] JsonObject submissionData)
+        public async Task<IActionResult> FormSubmission([FromBody] JsonObject submissionData)
         {
-                      
-            return View();
+            var result = _projectsHandler.CreateProject(submissionData);
+            //IActionResult result = await HomeController.CreateProject(submissionData);
+
+            return (IActionResult)result;
         }
 
         [HttpPost]
