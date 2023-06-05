@@ -172,7 +172,7 @@ namespace DARE_FrontEnd.Controllers
             model.Name = "Luke";
             model.Email = "email@email.com";
             model.Id = userid;
-            var create = await _projectsHandler.AddAUser(model);
+           // var create = await _projectsHandler.AddAUser(model);
 
 
             //var create = await _projectsHandler.AddAUser(userid);
@@ -230,7 +230,7 @@ namespace DARE_FrontEnd.Controllers
             user.Id = userid;
 
 
-            var create1 = await _projectsHandler.AddAUser(user);
+            //var create1 = await _projectsHandler.AddAUser(user);
             var membership = new ProjectMembership();
             membership.Projects = project;
             membership.Users = user;

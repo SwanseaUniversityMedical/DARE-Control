@@ -12,8 +12,9 @@ namespace DARE_FrontEnd.Services.Project
         Task<Projects> CreateProject(JsonObject model);
 
         Task<Projects> GetProjectSettings(int id);
-        Task<User> AddAUser(User model);
-        Task<User> AddAUser1(JsonObject jobj);
+        //Task<User> AddAUser(User model);
+        Task<User> AddAUser(JsonObject model);
+        //Task<User> AddAUser1(JsonObject model);
         Task<User> GetAUser(int id);
         void GetNewToken(int id);
         Task<ProjectMembership> AddMembership(ProjectMembership membership);

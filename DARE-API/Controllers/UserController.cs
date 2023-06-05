@@ -43,20 +43,32 @@ namespace BL.Controllers
         //}
 
 
-        [HttpPost("Add_User1")]
+        [HttpPost("Add_User")]
         public async Task<User> AddUser(JsonObject submissionData)
         {
-            //save session id against it
-            User users = JsonConvert.DeserializeObject<User>(submissionData.ToString());
-            //user = JsonConvert.DeserializeObject<User>(submissionData.ToString());
+            try
+            {
+                string jsonString = submissionData.ToString();
+                User users = JsonConvert.DeserializeObject<User>(jsonString);
 
-            var Name = users.Name;
-            var Email = users.Email;
-            _DbContext.Users.Add(users);
-            await _DbContext.SaveChangesAsync();
-            //_DbContext.SaveChangesAsync();
+                //Projects projects = JsonConvert.DeserializeObject<Projects>(project);
+                var model = new User();
+                //2023-06-01 14:30:00 use this as the datetime
+                model.Name = users.Name;
+                model.Email = users.Email;
+                //model.Users = projects.Users.ToList();
+                //model.ProjectMemberships = users.ProjectMemberships;
 
-            return users;
+                _DbContext.Users.Add(model);
+
+                await _DbContext.SaveChangesAsync();
+
+
+                return model;
+            }
+            catch (Exception ex) { }
+
+            return null;
         }
 
 

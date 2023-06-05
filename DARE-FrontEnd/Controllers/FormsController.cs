@@ -43,8 +43,8 @@ namespace DARE_FrontEnd.Controllers
         public IActionResult UserFormSubmission([FromBody] JsonObject submissionData)
         {
             //save session id against it
-            _projectsHandler.AddAUser1(submissionData);
-            return View();
+            var result = _projectsHandler.AddAUser(submissionData);
+            return (IActionResult)result;
         }
 
         [HttpPost]
