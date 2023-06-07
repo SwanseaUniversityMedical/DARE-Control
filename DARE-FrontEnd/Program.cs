@@ -32,12 +32,13 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.Net;
-using DARE_FrontEnd.Models.Services;
-using DARE_FrontEnd.Models.Settings;
+using BL.Models.Services;
+using BL.Models.Settings;
 using DARE_FrontEnd.Services;
 using DARE_FrontEnd.Services.Project;
 using DARE_FrontEnd.Services.FormIO;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using DARE_FrontEnd.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +58,10 @@ var keyCloakSettings = new KeyCloakSettings();
 configuration.Bind(nameof(keyCloakSettings), keyCloakSettings);
 builder.Services.AddSingleton(keyCloakSettings);
 
+var webAPISettings = new WebAPISettings();
+configuration.Bind(nameof(webAPISettings), webAPISettings);
+builder.Services.AddSingleton(webAPISettings);
+
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
@@ -65,6 +70,7 @@ builder.Services.AddHttpClient();
 //add services here
 builder.Services.AddScoped<CustomCookieEvent>();
 builder.Services.AddScoped<IProjectsHandler, ProjectsHandler>();
+builder.Services.AddScoped<IClientHelper, ClientHelper>();
 builder.Services.AddScoped<IFormHandler, FormHandler>();
 builder.Services.AddScoped<IAPICaller>(x =>
 {

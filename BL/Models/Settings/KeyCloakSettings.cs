@@ -1,4 +1,4 @@
-﻿namespace DARE_FrontEnd.Models.Settings
+﻿namespace BL.Models.Settings
 {
     public class KeyCloakSettings
     {

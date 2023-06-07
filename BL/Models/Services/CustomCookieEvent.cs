@@ -1,10 +1,11 @@
 ﻿using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 
 
-namespace DARE_FrontEnd.Models.Services
+namespace BL.Models.Services
 {
     public class CustomCookieEvent : CookieAuthenticationEvents
     {
