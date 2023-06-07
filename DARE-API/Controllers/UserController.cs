@@ -117,6 +117,22 @@ namespace BL.Controllers
             return returned;
         }
 
+        [HttpGet("Get_AllUsers")]
+
+        public List<User> GetAllUsers()
+        {
+            var allUsers = _DbContext.Users.ToList();
+
+            foreach (var user in allUsers)
+            {
+                var id = user.Id;
+                var name = user.Name;
+            }
+            //return returned.FirstOrDefault();
+            return allUsers;
+        }
+
+
         [HttpGet("GetNewToken/{userId}")]
         public async Task<IActionResult> GetNewToken(int userId)
         {

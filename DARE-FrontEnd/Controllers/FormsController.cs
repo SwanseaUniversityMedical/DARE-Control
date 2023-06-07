@@ -53,5 +53,25 @@ namespace DARE_FrontEnd.Controllers
             //save session id against it
             return View();
         }
+
+        [HttpPost]
+        public IActionResult GetAllProjects()
+        {
+           var result = _projectsHandler.GetAllProjects();
+
+            JsonConvert.SerializeObject(result);
+            return View(result);
+        }
+
+        [HttpPost]
+        public IActionResult Membership()
+        {
+            var result = _projectsHandler.GetAllProjects();
+            var result1 = _projectsHandler.GetAllUsers();
+            JsonConvert.SerializeObject(result);
+            JsonConvert.SerializeObject(result1);
+            return View(result);
+
+        }
     }
 }

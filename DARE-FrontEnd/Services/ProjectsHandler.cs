@@ -129,6 +129,26 @@ namespace DARE_FrontEnd.Services
             var test = _apiCaller.Client.Execute<Projects>(request);
             return test.Data;
         }
+
+        public async Task<Projects> GetAllProjects()
+        {
+            var request = new RestRequest($"https://localhost:7163/api/Project/Get_AllProjects", Method.Get);
+            request.Method = Method.Get;
+            request.AddHeader("Accept", "application/json");
+            request.AddParameter("application/json", ParameterType.RequestBody);
+            var test = _apiCaller.Client.Execute<Projects>(request);
+            return test.Data;
+        }
+
+        public async Task<User> GetAllUsers()
+        {
+            var request = new RestRequest($"https://localhost:7058/api/Project/Get_AllUsers", Method.Get);
+            request.Method = Method.Get;
+            request.AddHeader("Accept", "application/json");
+            request.AddParameter("application/json", ParameterType.RequestBody);
+            var test = _apiCaller.Client.Execute<User>(request);
+            return test.Data;
+        }
         //public async Task<User> AddAUser(User user)
         //{
         //    var request = new RestRequest("https://localhost:7058/api/User/Add_User", Method.Post);
