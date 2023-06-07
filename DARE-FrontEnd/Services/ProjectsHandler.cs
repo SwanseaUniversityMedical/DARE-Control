@@ -14,10 +14,12 @@ namespace DARE_FrontEnd.Services
     public class ProjectsHandler : IProjectsHandler
     {
         // public readonly IProjectsHandler _projectHandler;
+        private readonly IClientHelper _clientHelper;
         private readonly IAPICaller _apiCaller;
 
-        public ProjectsHandler( IAPICaller IApiCaller)
+        public ProjectsHandler( IAPICaller IApiCaller, IClientHelper clientHelper)
         {
+            _clientHelper = clientHelper;
             
             _apiCaller = IApiCaller;
         }
@@ -66,15 +68,38 @@ namespace DARE_FrontEnd.Services
             }
         }
 
+        //public async Task<User> AddAUser1(JsonObject model)
+        //{
+        //    try
+        //    {
+        //        var request = new RestRequest("https://localhost:7163/api/User/Add_User1", Method.Post);
+        //        request.Method = Method.Post;
+        //        request.AddHeader("Accept", "application/json");
+        //        request.AddParameter("application/json", model.ToString(), ParameterType.RequestBody);
+        //        var test = _apiCaller.Client.Execute<User>(request);
+        //        return test.Data;
+        //    }
+        //    catch (Exception ex)
+        //    {
+
+        //        Console.WriteLine("An error occurred: " + ex.Message);
+        //        throw;
+        //    }
+        //}
+
 
         public async Task<User> AddAUser(JsonObject model)
         {
             try
             {
-                var request = new RestRequest("https://localhost:7163/api/User/Add_User", Method.Post);
+                //var stringContent = _clientHelper.GetStringContent(new ContainString() { Data = model.ToString()});
+                var stringContent = _clientHelper.GetStringContent(model.ToString());
+                await _clientHelper.GenericHTTPRequest("/api/User/Add_User1", stringContent);
+                var request = new RestRequest("https://localhost:7163/api/User/Add_User1", Method.Post);
                 request.Method = Method.Post;
                 request.AddHeader("Accept", "application/json");
                 request.AddParameter("application/json", model.ToString(), ParameterType.RequestBody);
+
                 var test = _apiCaller.Client.Execute<User>(request);
                 return test.Data;
             }
@@ -88,6 +113,11 @@ namespace DARE_FrontEnd.Services
 
 
 
+        }
+
+        public class ContainString
+        {
+            public string Data { get; set; }
         }
 
         public async Task<Projects> GetProjectSettings(int id)
