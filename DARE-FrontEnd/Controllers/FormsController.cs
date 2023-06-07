@@ -40,10 +40,10 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpPost]
-        public IActionResult UserFormSubmission([FromBody] JsonObject submissionData)
+        public async Task<IActionResult> UserFormSubmission([FromBody] JsonObject submissionData)
         {
             //save session id against it
-            var result = _projectsHandler.AddAUser(submissionData);
+            var result = await _projectsHandler.AddAUser(submissionData);
             return (IActionResult)result;
         }
 
