@@ -19,7 +19,6 @@ namespace BL.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-
         private readonly ILogger<UserController> _logger;
         private readonly IConfiguration configuration;
         private readonly ApplicationDbContext _DbContext;
@@ -31,7 +30,7 @@ namespace BL.Controllers
             _logger = logger;
             this.configuration = configuration;
         }
-        
+
         //[HttpPost("Add_User")]
 
         //public async Task<User> AddUser([FromBody] User Users)
@@ -43,13 +42,13 @@ namespace BL.Controllers
         //}
 
 
-        [HttpPost("Add_User")]
-        public async Task<User> AddUser(JsonObject submissionData)
+        [HttpPost("Add_User1")]
+        public async Task<User> AddUser([FromBody] String submissionData)
         {
             try
             {
-                string jsonString = submissionData.ToString();
-                User users = JsonConvert.DeserializeObject<User>(jsonString);
+                string dataString = submissionData.ToString();
+                User users = JsonConvert.DeserializeObject<User>(dataString);
 
                 //Projects projects = JsonConvert.DeserializeObject<Projects>(project);
                 var model = new User();
@@ -63,14 +62,47 @@ namespace BL.Controllers
 
                 await _DbContext.SaveChangesAsync();
 
-
                 return model;
             }
-            catch (Exception ex) { }
+            catch (Exception ex)
+            {
+            }
 
             return null;
         }
 
+        //[HttpPost("Add_User1")]
+        //public async Task<User> AddUser(JsonObject submissionData)
+        //{
+        //    try
+        //    {
+        //        string jsonString = submissionData.ToString();
+        //        User users = JsonConvert.DeserializeObject<User>(jsonString);
+
+        //        //Projects projects = JsonConvert.DeserializeObject<Projects>(project);
+        //        var model = new User();
+        //        //2023-06-01 14:30:00 use this as the datetime
+        //        model.Name = users.Name;
+        //        model.Email = users.Email;
+        //        //model.Users = projects.Users.ToList();
+        //        //model.ProjectMemberships = users.ProjectMemberships;
+
+        //        _DbContext.Users.Add(model);
+
+        //        await _DbContext.SaveChangesAsync();
+
+
+        //        return model;
+        //    }
+        //    catch (Exception ex) { }
+
+        //    return null;
+        //}
+
+        public class ContainString
+        {
+            public string Data { get; set; }
+        }
 
         [HttpGet("Get_User/{userId}")]
 
