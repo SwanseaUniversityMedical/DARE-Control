@@ -1,0 +1,33 @@
+﻿@model string
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@{
+    ViewData["Title"] = "Project Membership Registration Form";
+}
+
+<script src="~/Scripts/js/formIo.js"></script>
+<a href="##" onClick="history.go(-1); return false;" class="btn btn-link btn-sm p-0 d-flex align-items-center g-text-underline--none--hover"><em class="hs-admin-angle-left mr-3"></em> Back to Application Home</a>
+<div id="errorMsg" style="color: #D63301; background-color: #FFCCBA; background-image: url('https://i.imgur.com/GnyDvKN.png'); border: 1px solid;margin: 10px 0px;padding: 15px 10px 15px 50px;background-repeat: no-repeat;background-position: 10px center;display: none;"></div>
+<div id="FormId"><div class="my-4"><img src="~/images/loader.gif" width="30" height="30" alt="Loading..." /> <span class="ml-2 g-font-weight-600">Loading...</span></div></div>
+
+
+<script>
+    window.onload = function () {
+        Formio.createForm(document.getElementById('FormId'), 'https://eeetfzakffdtqnj.form.io/membership', Model).then(function (form) {
+            form.nosubmit = true; //Stops submission from going to form.io server
+            form.on('submit',
+                function (submission) {
+                    return Formio.fetch('/Forms/FormSubmission',
+                        {
+                            body: JSON.stringify(submission.data),
+                            headers: { 'content-type': 'application/json' },
+                            method: 'POST',
+                            mode: 'cors'
+                        });
+                });
+        });
+    }
+</script>

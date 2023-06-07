@@ -109,7 +109,20 @@ namespace DARE_API.Controllers
             return returned;
         }
 
+        [HttpGet("Get_AllProjects")]
 
+        public List<Projects> GetAllProjects()
+        {
+            var allProjects = _DbContext.Projects.ToList();
+            
+            foreach (var project in allProjects)
+            {
+                var id = project.Id;
+                var name = project.Name;
+            }
+            //return returned.FirstOrDefault();
+            return allProjects;
+        }
 
     }
 }
