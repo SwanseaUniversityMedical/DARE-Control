@@ -54,7 +54,8 @@ namespace BL.Controllers
         {
             try
             {
-                User users = JsonConvert.DeserializeObject<User>("A");
+                //User users = JsonConvert.DeserializeObject<User>("A");
+                User users = JsonConvert.DeserializeObject<User>(data.FormIoString);
 
                 //Projects projects = JsonConvert.DeserializeObject<Projects>(project);
                 var model = new User();
