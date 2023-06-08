@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Runtime.InteropServices.JavaScript;
 using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.Http.HttpResults;
+using static DARE_FrontEnd.Controllers.FormsController;
 
 namespace DARE_FrontEnd.Services
 {
@@ -54,13 +55,16 @@ namespace DARE_FrontEnd.Services
         }
 
 
-        public async Task<User> AddAUser(JsonObject model)
+        public async Task<User> AddAUser(data model)
         {
             try
             {
                 //var stringContent = _clientHelper.GetStringContent(new ContainString() { Data = model.ToString()});
-                var stringContent = _clientHelper.GetStringContent(model.ToString());
+                var stringContent = _clientHelper.GetStringContent(model);
                 await _clientHelper.GenericHTTPRequest("/api/User/Add_User1", stringContent);
+
+
+
                 var request = new RestRequest("https://localhost:7163/api/User/Add_User1", Method.Post);
                 request.Method = Method.Post;
                 request.AddHeader("Accept", "application/json");

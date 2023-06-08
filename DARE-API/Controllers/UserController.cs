@@ -41,14 +41,20 @@ namespace BL.Controllers
         //    return Users;
         //}
 
+        public class data
+        {
+            public string? FormIoString { get; set; }
+
+
+        }
+
 
         [HttpPost("Add_User1")]
-        public async Task<User> AddUser([FromBody] String submissionData)
+        public async Task<User> AddUser(data data)
         {
             try
             {
-                string dataString = submissionData.ToString();
-                User users = JsonConvert.DeserializeObject<User>(dataString);
+                User users = JsonConvert.DeserializeObject<User>("A");
 
                 //Projects projects = JsonConvert.DeserializeObject<Projects>(project);
                 var model = new User();

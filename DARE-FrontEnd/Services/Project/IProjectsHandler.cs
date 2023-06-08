@@ -2,6 +2,7 @@
 using System.Linq.Expressions;
 using System.Runtime.InteropServices.JavaScript;
 using System.Text.Json.Nodes;
+using static DARE_FrontEnd.Controllers.FormsController;
 
 namespace DARE_FrontEnd.Services.Project
 {
@@ -19,7 +20,7 @@ namespace DARE_FrontEnd.Services.Project
         //Task<User> AddAUser(User model);
         //Task<User> AddAUser1(JsonObject model);
 
-        Task<User> AddAUser(JsonObject model);
+        Task<User> AddAUser(data model);
         //Task<User> AddAUser1(JsonObject model);
         Task<User> GetAUser(int id);
         Task<User> GetAllUsers();
