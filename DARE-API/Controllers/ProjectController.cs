@@ -31,17 +31,7 @@ namespace DARE_API.Controllers
         {
             return Ok();
         }
-        //[HttpPost("Save_Project")]
 
-        //public async Task<Projects> CreateProject([FromBody] Projects Projects)
-        //{
-        //    Projects.StartDate = Projects.StartDate.ToUniversalTime();
-        //    Projects.EndDate = Projects.EndDate.ToUniversalTime();
-        //    _DbContext.Projects.Add(Projects);
-        //    await _DbContext.SaveChangesAsync();
-
-        //    return Projects;
-        //}
 
         [HttpPost("Save_Project")]
 

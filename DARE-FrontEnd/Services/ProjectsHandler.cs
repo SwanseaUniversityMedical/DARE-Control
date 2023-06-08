@@ -33,22 +33,7 @@ namespace DARE_FrontEnd.Services
             return model;
 
         }
-        //public async Task<Projects> CreateProject(Projects model)
-        //{
-        //    var request = new RestRequest("https://localhost:7058/api/Project/Save_Project", Method.Post);
-        //    request.Method = Method.Post;
-        //    request.AddHeader("Accept", "application/json");
-        //    //var li = request.Parameters.ToList();
-        //    //foreach (var l in li)
-        //    //{
-        //    //    request.Parameters.RemoveParameter(l);
-        //    //}
-        //    //request.Parameters.Clear();
-        //    request.AddParameter("application/json", JsonConvert.SerializeObject(model), ParameterType.RequestBody);
-        //    var test = _apiCaller.Client.Execute<Projects>(request);
-        //    return test.Data;
-        //    //return JsonConvert.DeserializeObject<MoveProject>(test.Content);
-        //}
+
         public async Task<Projects> CreateProject(JsonObject model)
         {
             try
@@ -67,25 +52,6 @@ namespace DARE_FrontEnd.Services
                 throw;
             }
         }
-
-        //public async Task<User> AddAUser1(JsonObject model)
-        //{
-        //    try
-        //    {
-        //        var request = new RestRequest("https://localhost:7163/api/User/Add_User1", Method.Post);
-        //        request.Method = Method.Post;
-        //        request.AddHeader("Accept", "application/json");
-        //        request.AddParameter("application/json", model.ToString(), ParameterType.RequestBody);
-        //        var test = _apiCaller.Client.Execute<User>(request);
-        //        return test.Data;
-        //    }
-        //    catch (Exception ex)
-        //    {
-
-        //        Console.WriteLine("An error occurred: " + ex.Message);
-        //        throw;
-        //    }
-        //}
 
 
         public async Task<User> AddAUser(JsonObject model)
@@ -149,16 +115,6 @@ namespace DARE_FrontEnd.Services
             var test = _apiCaller.Client.Execute<User>(request);
             return test.Data;
         }
-        //public async Task<User> AddAUser(User user)
-        //{
-        //    var request = new RestRequest("https://localhost:7058/api/User/Add_User", Method.Post);
-        //    request.Method = Method.Post;
-        //    request.AddHeader("Accept", "application/json");
-        //    request.AddParameter("application/json", JsonConvert.SerializeObject(user), ParameterType.RequestBody);
-        //    var test = _apiCaller.Client.Execute<User>(request);
-        //    return test.Data;
-        //}
-
 
 
 
