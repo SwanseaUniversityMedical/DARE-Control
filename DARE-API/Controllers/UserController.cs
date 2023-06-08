@@ -19,35 +19,22 @@ namespace BL.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly ILogger<UserController> _logger;
+        //private readonly ILogger<UserController> _logger;
         private readonly IConfiguration configuration;
         private readonly ApplicationDbContext _DbContext;
 
-        public UserController(ApplicationDbContext applicationDbContext, ILogger<UserController> logger, IConfiguration configuration)
+        public UserController(ApplicationDbContext applicationDbContext, IConfiguration configuration)
         {
 
             _DbContext = applicationDbContext;
-            _logger = logger;
             this.configuration = configuration;
         }
-
-        //[HttpPost("Add_User")]
-
-        //public async Task<User> AddUser([FromBody] User Users)
-        //{
-        //    _DbContext.Users.Add(Users);
-        //    await _DbContext.SaveChangesAsync();
-
-        //    return Users;
-        //}
 
         public class data
         {
             public string? FormIoString { get; set; }
 
-
         }
-
 
         [HttpPost("Add_User1")]
         public async Task<User> AddUser(data data)
@@ -77,34 +64,6 @@ namespace BL.Controllers
 
             return null;
         }
-
-        //[HttpPost("Add_User1")]
-        //public async Task<User> AddUser(JsonObject submissionData)
-        //{
-        //    try
-        //    {
-        //        string jsonString = submissionData.ToString();
-        //        User users = JsonConvert.DeserializeObject<User>(jsonString);
-
-        //        //Projects projects = JsonConvert.DeserializeObject<Projects>(project);
-        //        var model = new User();
-        //        //2023-06-01 14:30:00 use this as the datetime
-        //        model.Name = users.Name;
-        //        model.Email = users.Email;
-        //        //model.Users = projects.Users.ToList();
-        //        //model.ProjectMemberships = users.ProjectMemberships;
-
-        //        _DbContext.Users.Add(model);
-
-        //        await _DbContext.SaveChangesAsync();
-
-
-        //        return model;
-        //    }
-        //    catch (Exception ex) { }
-
-        //    return null;
-        //}
 
         public class ContainString
         {

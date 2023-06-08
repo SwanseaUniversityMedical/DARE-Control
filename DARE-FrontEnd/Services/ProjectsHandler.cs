@@ -53,8 +53,6 @@ namespace DARE_FrontEnd.Services
                 throw;
             }
         }
-
-
         public async Task<User> AddAUser(data model)
         {
             try
@@ -62,9 +60,6 @@ namespace DARE_FrontEnd.Services
                 //var stringContent = _clientHelper.GetStringContent(new ContainString() { Data = model.ToString()});
                 var stringContent = _clientHelper.GetStringContent(model);
                 await _clientHelper.GenericHTTPRequest("/api/User/Add_User1", stringContent);
-
-
-
                 var request = new RestRequest("https://localhost:7163/api/User/Add_User1", Method.Post);
                 request.Method = Method.Post;
                 request.AddHeader("Accept", "application/json");
@@ -75,19 +70,9 @@ namespace DARE_FrontEnd.Services
             }
             catch (Exception ex)
             {
-
                 Console.WriteLine("An error occurred: " + ex.Message);
                 throw;
-
             }
-
-
-
-        }
-
-        public class ContainString
-        {
-            public string Data { get; set; }
         }
 
         public async Task<Projects> GetProjectSettings(int id)
