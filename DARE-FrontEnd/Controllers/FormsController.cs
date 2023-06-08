@@ -23,26 +23,38 @@ namespace DARE_FrontEnd.Controllers
             _projectsHandler = projectsHandler;
         }
 
-        [Authorize]
         [Route("Forms/Index")]
         public IActionResult Index()
         {
-            return View();
+            return View(new data()
+            {
+                FormIoUrl = "https://bthbspqizezypsb.form.io/dareuser/dareuserregistration"
+            });
         }
 
-        [HttpPost]
-        public async Task<IActionResult> FormSubmission([FromBody] JsonObject submissionData)
+        public class data
         {
-            var result = _projectsHandler.CreateProject(submissionData);
+            public string? FormIoString { get; set; }
+            public string? FormIoUrl { get; set; }
+            
+
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> FormSubmission([FromBody] data submissionData)
+        {
+            //var result = _projectsHandler.CreateProject();
             //IActionResult result = await HomeController.CreateProject(submissionData);
 
-            return (IActionResult)result;
+            return Ok();
         }
 
         [HttpPost]
-        public async Task<IActionResult> UserFormSubmission([FromBody] JsonObject submissionData)
+        public async Task<IActionResult> UserFormSubmission([FromBody] data submissionData)
         {
             //save session id against it
+
             var result = await _projectsHandler.AddAUser(submissionData);
             return (IActionResult)result;
         }

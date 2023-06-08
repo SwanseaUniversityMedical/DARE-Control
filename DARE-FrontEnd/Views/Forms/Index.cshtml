@@ -1,4 +1,6 @@
-﻿@*
+﻿@using static DARE_FrontEnd.Controllers.FormsController;
+@model data
+@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
@@ -13,20 +15,18 @@
 <div id="FormId"><div class="my-4"><img src="~/images/loader.gif" width="30" height="30" alt="Loading..." /> <span class="ml-2 g-font-weight-600">Loading...</span></div></div>
 
 
+
+<button id="ExternalSubmit" data-modal-target="#SubmitForReview" data-modal-effect="blur" type="button" class="btn btn-md u-btn-secondary mt-3">
+    <em class="hs-admin-export align-middle g-font-weight-600 mr-2"></em>
+    Submit Form
+</button>
+
 <script>
-    window.onload = function () {
-        Formio.createForm(document.getElementById('FormId'), 'https://bthbspqizezypsb.form.io/dareuser/dareuserregistration').then(function (form) {
-            form.nosubmit = true; //Stops submission from going to form.io server
-            form.on('submit',
-                function (submission) {
-                    return Formio.fetch('/Forms/UserFormSubmission',
-                        {
-                            body: JSON.stringify(submission.data),
-                            headers: { 'content-type': 'application/json' },
-                            method: 'POST',
-                            mode: 'cors'
-                        });
-                });
-        });
-    }
+ 
+
+        window.onload = function () {
+            renderForm(@Html.Raw(Json.Serialize(Model)), "@Html.Raw(Model?.FormIoUrl)", @Html.Raw(Json.Serialize(Model?.FormIoString)) , '/Forms/FormSubmission');
+        }
+
+
 </script>

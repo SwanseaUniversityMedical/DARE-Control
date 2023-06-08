@@ -39,9 +39,10 @@ using DARE_FrontEnd.Services.Project;
 using DARE_FrontEnd.Services.FormIO;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using DARE_FrontEnd.Models;
+using Microsoft.IdentityModel.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
-
+IdentityModelEventSource.ShowPII = true;
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(
