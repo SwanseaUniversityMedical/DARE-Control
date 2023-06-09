@@ -37,7 +37,7 @@ namespace BL.Controllers
         }
 
         [HttpPost("Add_User1")]
-        public async Task<User> AddUser(data data)
+        public async Task<User> AddUser(data data) 
         {
             try
             {

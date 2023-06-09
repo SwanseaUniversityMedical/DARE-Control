@@ -22,11 +22,7 @@
 </button>
 
 <script>
- 
-
         window.onload = function () {
         renderForm(@Html.Raw(Json.Serialize(Model)), "@Html.Raw(Model?.FormIoUrl)", @Html.Raw(Json.Serialize(Model?.FormIoString)) , '/Forms/UserFormSubmission');
         }
-
-
 </script>
