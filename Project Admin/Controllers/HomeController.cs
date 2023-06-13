@@ -4,13 +4,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
-
-using Project_Admin.Models;
+using BL.Models;
 using System.Data;
 using System.Text.Json;
 using Newtonsoft.Json;
-using Project_Admin.Repositories.DbContexts;
-using Project_Admin.Services.Project;
+using BL.Repositories.DbContexts;
+using BL.Services.Project;
+using Newtonsoft.Json.Linq;
 //using API_Project.Repositories.DbContexts;
 
 namespace Project_Admin.Controllers
@@ -21,6 +21,14 @@ namespace Project_Admin.Controllers
     public class HomeController : Controller
     {
         private readonly IProjectsHandler _projectsHandler;
+        //private readonly IAPICaller _apiCaller;
+
+
+        public HomeController(IProjectsHandler IProjectsHandler/*, IAPICaller IApiCaller*/)
+        {
+            _projectsHandler = IProjectsHandler;
+            //_apiCaller = IApiCaller;
+        }
 
         //private readonly IProjectsHandler _dataSetService;
         private string path = @"C:\Users\luke.young\Documents\DareJson\projects.json";
@@ -37,10 +45,11 @@ namespace Project_Admin.Controllers
 
         public IActionResult testview()
         {
-            var step1model = new TestModel();
-            step1model.TestID = 10;
-            step1model.TestID = 20;
-            return View(step1model);
+            ////var step1model = new TestModel();
+            //step1model.TestID = 10;
+            //step1model.TestID = 20;
+            //return View(step1model);
+            return View();
         }
         [Route("Home/AllProjects")]
 
@@ -60,33 +69,23 @@ namespace Project_Admin.Controllers
             return View(model);
         }
 
+
         [HttpGet]
-        [Route("Home/ReturnProject/{projectId:int}")]
-        public IActionResult ReturnProject(int projectId)
+        [Route("Home/ReturnProject/{projectId:int}")]      
+        public async Task<IActionResult> GetProject(int projectId)
         {
-            var projectJson = System.IO.File.ReadAllText(path);
-            var projectListModel = JsonConvert.DeserializeObject<ProjectListModel>(projectJson);
-
-            var project = projectListModel.Projects.FirstOrDefault(p => p.Id == projectId);
-            //getting from the database will look something like this
-            //var project = await _dataSetService.GetUserSettings(projectId);
-
-            if (project == null)
-            {
-                return NotFound();
-            }
-
-            return View(project);
+            var project = await _projectsHandler.GetProjectSettings(projectId);
+               project.Id = projectId;
+               return View(project);
         }
 
-        [HttpPost]
-        [Route("Home/ReturnProjecttest/{projectId:int}")]
-
-
-        public async Task<IActionResult> CreateProject(int projectId, Projects model)
+        [HttpGet]
+        [Route("Home/CreateProject/{projectId:int}")]
+        public async Task<IActionResult> CreateProject(int projectId)
         {
-            //var create = await _dataSetService.CreateProjectSettings(model);
-            model.Id = 5;
+            //this will need to read in a JSON string from form.io then populate the variables
+            var model = new Projects();
+            //model.Id = 5;
             model.StartDate = DateTime.Now;
             model.EndDate = DateTime.Now;
             model.Users = new List<User>();
@@ -97,41 +96,60 @@ namespace Project_Admin.Controllers
             return View(model);
         }
 
-        [HttpPost]
-        [Route("Home/Users/AddUser")]
+
+        [HttpGet]
+        [Route("Home/ReturnUser/{userId:int}")]
+        public async Task<IActionResult> GetAUser(int userId)
+        {
+            var user = await _projectsHandler.GetAUser(userId);
+            user.Id = userId;
+            return View(user);
 
 
+        }
+
+        [HttpGet]
+        [Route("Home/testio")]
+        public async Task<IActionResult> test()
+        {
+
+            return View();
+
+
+
+
+        }
+        [HttpGet]
+        [Route("Home/AddUser/{userid:int}")]
         public async Task<IActionResult> AddUser(int userid)
         {
-            //might need to add more stuff here that will fill out additional user info
-            var create = await _projectsHandler.AddUser(userid);
+            
+            var model = new User();
+            //model.Id = 5;
+            model.Name = "Luke";
+            model.Email = "email@email.com";
+            model.Id = userid;
+            var create = await _projectsHandler.AddAUser(model);
+
+
+            //var create = await _projectsHandler.AddAUser(userid);
 
             return View(userid);
         }
 
-        [HttpPost]
-        [Route("Home/Users/AddUser")]
 
-
-        public async Task<IActionResult> AddUserToProject(int userid, int projectId)
+        [Route("Home/Projects/AddUser/{userid:int}/{projectId:int}")]
+        public async Task<IActionResult> AddUserToProject(int userId, int projectId)
         {
-            var project = await _projectsHandler.GetProjectSettings(projectId);
-            var user = await _projectsHandler.GetUserSettings(userid);
+            var userToProject = await _projectsHandler.AddMembership(userId,projectId);
+            return View(userToProject);
 
-            if (project == null)
-            {
-                project.Users.Add(user);
-            }
-
-            return View(project);
         }
-
         [Authorize(Policy = "admin")]
         [Route("Home/AdminPanel")]
 
         public IActionResult AdminPanel()
         {
-
             return View();
         }
 

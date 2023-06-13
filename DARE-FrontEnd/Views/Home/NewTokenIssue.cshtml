@@ -1,0 +1,48 @@
+﻿@using System.Security.Claims
+@using Microsoft.AspNetCore.Http
+
+<h4 class="mt-5">API Token</h4>
+<div class="row">
+    <div class="col-md-3">
+        <p class="mb-0">When you call an endpoint, you need to provide this API token in your request</p>
+    </div>
+    <div class="offset-md-1 col-md-8">
+        <code id="api-token">@ViewBag.NewAccessToken</code>
+        <p class="mb-0">
+            <a tabindex="0" class="copy-btn w-auto btn btn-link btn-sm d-inline-flex align-items-center mt-4 bg-light g-rounded-50 g-py-4 g-px-15 g-text-underline--none--hover" role="button" data-toggle="tooltip" data-trigger="focus" data-placement="top" title="Copied" data-clipboard-target="#api-token">
+                <i class="hs-admin-clipboard mr-2"></i><span>Copy to clipboard</span>
+            </a>
+        </p>
+    </div>
+</div>
+<hr class="d-flex g-brd-gray-light-v7 mt-5 mb-5">
+<h4>Token Expiry Date</h4>
+<div class="row">
+    <div class="col-md-3">
+        <p class="mb-0">Please use token before the below expiry date.</p>
+    </div>
+    <div class="offset-md-1 col-md-8">
+        <p class="g-font-weight-700 mb-0">@ViewBag.TokenExpiryDate</p>
+        @*<p class="mb-0">
+        <a asp-controller="Home" asp-action="RenewToken" tabindex="0" class="copy-btn w-auto btn btn-link btn-sm d-inline-flex align-items-center mt-4 bg-light g-rounded-50 g-py-4 g-px-15 g-text-underline--none--hover" role="button" data-clipboard-target="#api-token">
+        Renew My Token
+        </a>
+        </p>*@
+    </div>
+</div>
+<hr class="d-flex g-brd-gray-light-v7 mt-5 mb-5">
+<h4>Your Projects</h4>
+<div class="row">
+    <div class="col-md-3">
+        <p>This is the list of projects you have access to.</p>
+        @*<p class="mb-0">You need to choose a project from the list and add a key-value pair like <code>FDS-Project:project_name</code> to the header of your api request.</p>*@
+    </div>
+    <div class="offset-md-1 col-md-8">
+        @foreach (var claim in (IEnumerable<Claim>)ViewBag.Claims)
+        {
+            <p class="g-font-weight-700">@claim.Value</p>
+        }
+    </div>
+</div>
+
+
