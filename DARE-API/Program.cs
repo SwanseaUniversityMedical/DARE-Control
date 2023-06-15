@@ -69,16 +69,16 @@ builder.Services.AddAuthentication(options =>
 
         options.TokenValidationParameters = TVP;
 
-        var proxy = new WebProxy { Address = new Uri("http://192.168.10.15:8080") };
+        //var proxy = new WebProxy { Address = new Uri("http://192.168.10.15:8080") };
 
-        HttpClient.DefaultProxy = proxy;
+        //HttpClient.DefaultProxy = proxy;
 
-        options.BackchannelHttpHandler = new HttpClientHandler
-        {
-            UseProxy = true,
-            UseDefaultCredentials = true,
-            Proxy = proxy
-        };
+        //options.BackchannelHttpHandler = new HttpClientHandler
+        //{
+        //    UseProxy = true,
+        //    UseDefaultCredentials = true,
+        //    Proxy = proxy
+        //};
 
         //options.Events = new JwtBearerEvents
         //{

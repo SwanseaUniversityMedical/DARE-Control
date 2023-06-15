@@ -128,16 +128,16 @@ builder.Services.AddAuthentication(options =>
             .AddOpenIdConnect(options =>
             {
                 
-                var proxy = new WebProxy { Address = new Uri("http://192.168.10.15:8080") };
+                //var proxy = new WebProxy { Address = new Uri("http://192.168.10.15:8080") };
 
-                HttpClient.DefaultProxy = proxy;
+                //HttpClient.DefaultProxy = proxy;
 
-                options.BackchannelHttpHandler = new HttpClientHandler
-                {
-                    UseProxy = true,
-                    UseDefaultCredentials = true,
-                    Proxy = proxy
-                };
+                //options.BackchannelHttpHandler = new HttpClientHandler
+                //{
+                //    UseProxy = true,
+                //    UseDefaultCredentials = true,
+                //    Proxy = proxy
+                //};
                 // URL of the Keycloak server
                 options.Authority = keyCloakSettings.Authority;
                 //// Client configured in the Keycloak
