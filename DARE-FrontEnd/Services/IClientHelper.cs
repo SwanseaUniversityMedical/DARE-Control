@@ -9,7 +9,7 @@ namespace DARE_FrontEnd.Services
 {
     public interface IClientHelper
     {
-        Task<T> GenericGetData<T>(string endPoint, StringContent jsonString = null, bool usePut = false) where T : class, new();
+        Task<T> GenericHttpRequestWithReturnType<T>(string endPoint, StringContent jsonString = null, bool usePut = false) where T : class, new();
         Task GenericHTTPRequest(string endPoint, StringContent jsonString = null, bool usePut = false);
 
         Task<HttpResponseMessage> ClientHelperRequestAsync(string endPoint, HttpMethod method, StringContent? jsonString = null);
@@ -36,7 +36,7 @@ namespace DARE_FrontEnd.Services
             };
         }
 
-        public async Task<T> GenericGetData<T>(string endPoint, StringContent jsonString = null, bool usePut = false) where T : class, new()
+        public async Task<T> GenericHttpRequestWithReturnType<T>(string endPoint, StringContent jsonString = null, bool usePut = false) where T : class, new()
         {
 
             HttpResponseMessage response = null;
