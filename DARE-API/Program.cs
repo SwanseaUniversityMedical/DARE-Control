@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using System.Net;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -55,18 +56,30 @@ builder.Services.AddAuthentication(options =>
         options.Authority = keyCloakSettings.Authority;
         options.Audience = keyCloakSettings.ClientId;
 
+        // URL of the Keycloak server
+        options.Authority = keyCloakSettings.Authority;
+        //// Client configured in the Keycloak
+        
+        //// Client secret shared with Keycloak
+        
+        options.MetadataAddress = keyCloakSettings.MetadataAddress;
+
         options.RequireHttpsMetadata = false; // dev only
         options.IncludeErrorDetails = true;
 
         options.TokenValidationParameters = TVP;
-        
-            options.BackchannelHttpHandler =
-                new HttpClientHandler // to work on steve's pc - not needed by others?!
-                {
-                    UseProxy = false,
-                    UseDefaultCredentials = true
-                };
-        
+
+        //var proxy = new WebProxy { Address = new Uri("http://192.168.10.15:8080") };
+
+        //HttpClient.DefaultProxy = proxy;
+
+        //options.BackchannelHttpHandler = new HttpClientHandler
+        //{
+        //    UseProxy = true,
+        //    UseDefaultCredentials = true,
+        //    Proxy = proxy
+        //};
+
         //options.Events = new JwtBearerEvents
         //{
 
