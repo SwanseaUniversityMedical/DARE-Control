@@ -10,7 +10,8 @@ namespace DARE_FrontEnd.Services.Project
     {
 
         //Task<User> GetUserSettings(int id);
-        Task<Projects> CreateProject(JsonObject model);
+        Task<Projects> CreateProject(data model);
+        //Task<Projects> CreateProject(JsonObject model);
 
         Task<Projects> GetProjectSettings(int id);
 

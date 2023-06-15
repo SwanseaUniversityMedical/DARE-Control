@@ -5,6 +5,8 @@ using BL.Repositories.DbContexts;
 using BL.Models;
 using System.Text.Json.Nodes;
 using Newtonsoft.Json;
+using DARE_API.Controllers;
+using static BL.Controllers.UserController;
 
 namespace DARE_API.Controllers
 {
@@ -33,14 +35,42 @@ namespace DARE_API.Controllers
         }
 
 
+        //[HttpPost("Save_Project")]
+
+        //public async Task<Projects> CreateProject([FromBody] JsonObject project)
+        //{
+        //    try
+        //    {
+        //        string jsonString = project.ToString();
+        //        Projects projects = JsonConvert.DeserializeObject<Projects>(jsonString);
+
+        //        //Projects projects = JsonConvert.DeserializeObject<Projects>(project);
+        //        var model = new Projects();
+        //        //2023-06-01 14:30:00 use this as the datetime
+        //        model.Name = projects.Name;
+        //        model.StartDate = projects.StartDate.ToUniversalTime();
+        //        //model.Users = projects.Users.ToList();
+        //        model.EndDate = projects.EndDate.ToUniversalTime();
+
+        //        _DbContext.Projects.Add(model);
+
+        //        await _DbContext.SaveChangesAsync();
+
+
+        //        return model;
+        //    }
+        //    catch (Exception ex) { }
+
+        //    return null;
+        //}
+
         [HttpPost("Save_Project")]
 
-        public async Task<Projects> CreateProject([FromBody] JsonObject project)
+        public async Task<Projects> CreateProject(data data)
         {
             try
             {
-                string jsonString = project.ToString();
-                Projects projects = JsonConvert.DeserializeObject<Projects>(jsonString);
+                Projects projects = JsonConvert.DeserializeObject<Projects>(data.FormIoString);
 
                 //Projects projects = JsonConvert.DeserializeObject<Projects>(project);
                 var model = new Projects();
