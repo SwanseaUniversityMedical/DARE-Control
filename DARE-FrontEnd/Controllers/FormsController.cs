@@ -44,10 +44,10 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<IActionResult> FormSubmission([FromBody] data submissionData)
         {
-            //var result = _projectsHandler.CreateProject();
-            //IActionResult result = await HomeController.CreateProject(submissionData);
+            var result = await _projectsHandler.CreateProject(submissionData);
+            // IActionResult result = await HomeController.CreateProject(submissionData);
 
-            return Ok();
+            return (IActionResult)result;
         }
 
         [HttpPost]

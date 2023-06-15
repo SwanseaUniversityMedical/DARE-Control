@@ -9,7 +9,7 @@ namespace DARE_FrontEnd.Services
 {
     public interface IClientHelper
     {
-        Task<T> GenericGetData<T>(string endPoint, StringContent jsonString = null, bool usePut = false) where T : class, new();
+        Task<T> GenericHttpRequestWithReturnType<T>(string endPoint, StringContent jsonString = null, bool usePut = false) where T : class, new();
         Task GenericHTTPRequest(string endPoint, StringContent jsonString = null, bool usePut = false);
 
         Task<HttpResponseMessage> ClientHelperRequestAsync(string endPoint, HttpMethod method, StringContent? jsonString = null);
@@ -36,7 +36,7 @@ namespace DARE_FrontEnd.Services
             };
         }
 
-        public async Task<T> GenericGetData<T>(string endPoint, StringContent jsonString = null, bool usePut = false) where T : class, new()
+        public async Task<T> GenericHttpRequestWithReturnType<T>(string endPoint, StringContent jsonString = null, bool usePut = false) where T : class, new()
         {
 
             HttpResponseMessage response = null;
@@ -86,24 +86,30 @@ namespace DARE_FrontEnd.Services
 
         public async Task<HttpResponseMessage> ClientHelperRequestAsync(string endPoint, HttpMethod method, StringContent? jsonString = null)
         {
-            if (string.IsNullOrEmpty(endPoint)) return new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.BadRequest };
-            if (_httpContextAccessor.HttpContext == null) { return new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.BadRequest }; }
-
-            var apiClient = await CreateClientWithToken();
-
-
-            HttpResponseMessage res = new HttpResponseMessage
+            try
             {
-                StatusCode = System.Net.HttpStatusCode.BadRequest
-            };
+                if (string.IsNullOrEmpty(endPoint)) return new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.BadRequest };
+                if (_httpContextAccessor.HttpContext == null) { return new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.BadRequest }; }
 
-            if (method == HttpMethod.Get) res = await apiClient.GetAsync(endPoint);
-            if (method == HttpMethod.Post) res = await apiClient.PostAsync(endPoint, jsonString);
-            if (method == HttpMethod.Put) res = await apiClient.PutAsync(endPoint, jsonString);
-            if (method == HttpMethod.Delete) res = await apiClient.DeleteAsync(endPoint);
+                var apiClient = await CreateClientWithToken();
 
-         
-            return res;
+
+                HttpResponseMessage res = new HttpResponseMessage
+                {
+                    StatusCode = System.Net.HttpStatusCode.BadRequest
+                };
+
+                if (method == HttpMethod.Get) res = await apiClient.GetAsync(endPoint);
+                if (method == HttpMethod.Post) res = await apiClient.PostAsync(endPoint, jsonString);
+                if (method == HttpMethod.Put) res = await apiClient.PutAsync(endPoint, jsonString);
+                if (method == HttpMethod.Delete) res = await apiClient.DeleteAsync(endPoint);
+
+                Console.Out.Write(res);
+                return res;
+            }
+            catch (Exception ex) {
+                return null;
+            }
         }
 
         private async Task<HttpClient> CreateClientWithToken()
