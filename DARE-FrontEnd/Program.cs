@@ -127,23 +127,25 @@ builder.Services.AddAuthentication(options =>
             .AddCookie(options => options.EventsType = typeof(CustomCookieEvent))
             .AddOpenIdConnect(options =>
             {
+                
+                var proxy = new WebProxy { Address = new Uri("http://192.168.10.15:8080") };
+
+                HttpClient.DefaultProxy = proxy;
+
                 options.BackchannelHttpHandler = new HttpClientHandler
                 {
                     UseProxy = true,
                     UseDefaultCredentials = true,
-                    Proxy = new WebProxy()
-                    {
-                        Address = new Uri("https://proxy:8080"),
-                        BypassList = new[] { "keycloak-dev" }
-                    }
+                    Proxy = proxy
                 };
-
                 // URL of the Keycloak server
                 options.Authority = keyCloakSettings.Authority;
-                // Client configured in the Keycloak
+                //// Client configured in the Keycloak
                 options.ClientId = keyCloakSettings.ClientId;
-                // Client secret shared with Keycloak
+                //// Client secret shared with Keycloak
                 options.ClientSecret = keyCloakSettings.ClientSecret;
+                options.MetadataAddress = keyCloakSettings.MetadataAddress;
+                    
                 options.SaveTokens = true;
 
                 options.ResponseType = OpenIdConnectResponseType.Code; //Configuration["Oidc:ResponseType"];

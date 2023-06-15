@@ -8,6 +8,7 @@
         public string RemoteSignOutPath { get; set; }
         public string SignedOutRedirectUri { get; set; }
         public string TokenExpiredAddress { get; set; }
+        public string MetadataAddress { get; set; }
         public string? ValidAudiences { get; set; }
     }
 }
