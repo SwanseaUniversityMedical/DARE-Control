@@ -119,36 +119,36 @@ namespace DARE_FrontEnd.Services
         private async Task<HttpClient> CreateClientWithToken()
         {
             var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
-            //var handler = new JwtSecurityTokenHandler();
-            //var refreshToken = await _httpContextAccessor.HttpContext.GetTokenAsync("refresh_token");
-            //var newJwtToken = "";
-            //var jwtHandler = new JwtSecurityTokenHandler();
-            //var token = jwtHandler.ReadJwtToken(accessToken);
+            var handler = new JwtSecurityTokenHandler();
+            var refreshToken = await _httpContextAccessor.HttpContext.GetTokenAsync("refresh_token");
+            var newJwtToken = "";
+            var jwtHandler = new JwtSecurityTokenHandler();
+            var token = jwtHandler.ReadJwtToken(accessToken);
 
-            //// Token belongs to the specified group
-            //// Update the token's expiration time
-            //DateTime expirationTime = DateTime.UtcNow;
-            //var groupClaims = token.Claims.Where(c => c.Type == "groups").Select(c => c.Value);
-            //if (groupClaims.Any(gc => gc.Equals("dare-control-company")))
-            //{
-            //    expirationTime = DateTime.UtcNow.AddDays(365);
-            //}
+            // Token belongs to the specified group
+            // Update the token's expiration time
+            DateTime expirationTime = DateTime.UtcNow;
+            var groupClaims = token.Claims.Where(c => c.Type == "groups").Select(c => c.Value);
+            if (groupClaims.Any(gc => gc.Equals("dare-control-company")))
+            {
+                expirationTime = DateTime.UtcNow.AddDays(365);
+            }
 
-            //else if (groupClaims.Any(gc => gc.Equals("dare-control-users")))
-            //{
-            //    expirationTime = DateTime.UtcNow.AddDays(30);
-            //}
-            ////Update the token's expiration claim
-            //token.Payload["exp"] = (int)(expirationTime - new DateTime(1970, 1, 1)).TotalSeconds;
+            else if (groupClaims.Any(gc => gc.Equals("dare-control-users")))
+            {
+                expirationTime = DateTime.UtcNow.AddDays(30);
+            }
+            //Update the token's expiration claim
+            token.Payload["exp"] = (int)(expirationTime - new DateTime(1970, 1, 1)).TotalSeconds;
 
-            //// Generate a new JWT token with the updated expiration claim
-            //newJwtToken = jwtHandler.WriteToken(token);
-            //var token1 = jwtHandler.ReadJwtToken(newJwtToken);
-            ////context.Properties.UpdateTokenValue("access_token", newJwtToken);
-            ////ViewBag.NewAccessToken = newJwtTokenForCompany;
+            // Generate a new JWT token with the updated expiration claim
+            newJwtToken = jwtHandler.WriteToken(token);
+            var token1 = jwtHandler.ReadJwtToken(newJwtToken);
+            //context.Properties.UpdateTokenValue("access_token", newJwtToken);
+            //ViewBag.NewAccessToken = newJwtTokenForCompany;
             var apiClient = _httpClientFactory.CreateClient();
-            apiClient.SetBearerToken(accessToken);
-            //apiClient.SetBearerToken(newJwtToken);
+           // apiClient.SetBearerToken(accessToken);
+            apiClient.SetBearerToken(newJwtToken);
             apiClient.DefaultRequestHeaders.Add("Accept", "application/json");
             return apiClient;
         }
