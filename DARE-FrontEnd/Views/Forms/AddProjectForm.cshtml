@@ -4,7 +4,7 @@
 @{
 }
 @{
-    ViewData["Title"] = "User Registration Form";
+    ViewData["Title"] = "Project Form";
 }
 
 <script src="~/Scripts/js/formIo.js"></script>
@@ -16,7 +16,7 @@
     <em class="hs-admin-export align-middle g-font-weight-600 mr-2"></em>
     Submit Form
 </button>
-<script>
+@*<script>
     window.onload = function () {
         Formio.createForm(document.getElementById('FormId'), 'https://flmykuxtnvsgjjt.form.io/addproject').then(function (form) {
             form.nosubmit = true; //Stops submission from going to form.io server
@@ -31,5 +31,16 @@
                         });
                 });
         });
+    }
+</script>*@
+
+@*<button id="ExternalSubmit" data-modal-target="#SubmitForReview" data-modal-effect="blur" type="button" class="btn btn-md u-btn-secondary mt-3">
+    <em class="hs-admin-export align-middle g-font-weight-600 mr-2"></em>
+    Submit Form
+</button>*@
+
+<script>
+    window.onload = function () {
+        renderForm(@Html.Raw(Json.Serialize(Model)), "@Html.Raw(Model?.FormIoUrl)", @Html.Raw(Json.Serialize(Model?.FormIoString)) , '/Forms/FormSubmission');
     }
 </script>
