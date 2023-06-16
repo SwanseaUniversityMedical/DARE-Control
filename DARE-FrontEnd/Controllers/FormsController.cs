@@ -34,7 +34,17 @@ namespace DARE_FrontEnd.Controllers
                 FormIoUrl = "https://bthbspqizezypsb.form.io/dareuser/dareuserregistration"
             });
         }
+        [Route("Forms/AddProjectForm")]
 
+        public async Task<IActionResult> AddProjectForm()
+        {
+            return View(new data()
+            {
+                FormIoUrl = "https://flmykuxtnvsgjjt.form.io/addproject"
+            });
+
+
+        }
         [Route("Forms/AddEndpoint")]
         public IActionResult AddEndpoint()
         {

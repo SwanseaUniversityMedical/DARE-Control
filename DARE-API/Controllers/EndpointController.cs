@@ -35,12 +35,9 @@ namespace DARE_API.Controllers
             {
                 Endpoints endpoints = JsonConvert.DeserializeObject<Endpoints>(data.FormIoString);
 
-                //Projects projects = JsonConvert.DeserializeObject<Projects>(project);
                 var model = new Endpoints();
-                //2023-06-01 14:30:00 use this as the datetime
                 model.Name = endpoints.Name;
                 model.Projects = endpoints.Projects.ToList();
-                //model.Users = projects.Users.ToList();
                 
                 _DbContext.Endpoints.Add(model);
 
