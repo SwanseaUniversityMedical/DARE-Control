@@ -29,7 +29,7 @@ namespace DARE_API.Controllers
 
         [HttpPost("Add_Endpoint")]
 
-        public async Task<Endpoints> CreateProject(data data)
+        public async Task<Endpoints> AddEndpoint(data data)
         {
             try
             {

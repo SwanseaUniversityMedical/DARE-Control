@@ -18,21 +18,21 @@ namespace DARE_FrontEnd.Services
 
         }
 
-        //public async Task<Endpoints> CreateEndpoint(data model)
-        //{
-        //    try
-        //    {
-        //        //var stringContent = _clientHelper.GetStringContent(new ContainString() { Data = model.ToString()});
-        //        var stringContent = _clientHelper.GetStringContent(model);
-        //        var result = await _clientHelper.GenericHttpRequestWithReturnType<Endpoints>("/api/Endpoint/Add_Endpoint", stringContent);
+        public async Task<Endpoints> CreateEndpoint(data model)
+        {
+            try
+            {
+                //var stringContent = _clientHelper.GetStringContent(new ContainString() { Data = model.ToString()});
+                var stringContent = _clientHelper.GetStringContent(model);
+                var result = await _clientHelper.GenericHttpRequestWithReturnType<Endpoints>("/api/Endpoint/Add_Endpoint", stringContent);
 
-        //        return result;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine("An error occurred: " + ex.Message);
-        //        throw;
-        //    }
-        //}
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred: " + ex.Message);
+                throw;
+            }
+        }
     }
 }
