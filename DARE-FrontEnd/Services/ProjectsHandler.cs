@@ -40,14 +40,9 @@ namespace DARE_FrontEnd.Services
             try
             {
                 var stringContent = _clientHelper.GetStringContent(model);
-                await _clientHelper.GenericHTTPRequest("/api/Project/Save_Project", stringContent);
+                var result = await _clientHelper.GenericHttpRequestWithReturnType<Projects>("/api/Project/Save_Project", stringContent);
 
-                var request = new RestRequest("https://localhost:7163/api/Project/Save_Project", Method.Post);
-                request.Method = Method.Post;
-                request.AddHeader("Accept", "application/json");
-                request.AddParameter("application/json", model.ToString(), ParameterType.RequestBody);
-                var test = _apiCaller.Client.Execute<Projects>(request);
-                return test.Data;
+                return result;
             }
             catch (Exception ex)
             {
@@ -55,26 +50,8 @@ namespace DARE_FrontEnd.Services
                 Console.WriteLine("An error occurred: " + ex.Message);
                 throw;
             }
+
         }
-
-        //public async Task<Projects> CreateProject(JsonObject model)
-        //{
-        //    try
-        //    {
-        //        var request = new RestRequest("https://localhost:7163/api/Project/Save_Project", Method.Post);
-        //        request.Method = Method.Post;
-        //        request.AddHeader("Accept", "application/json");
-        //        request.AddParameter("application/json", model.ToString(), ParameterType.RequestBody);
-        //        var test = _apiCaller.Client.Execute<Projects>(request);
-        //        return test.Data;
-        //    }
-        //    catch (Exception ex)
-        //    {
-
-        //        Console.WriteLine("An error occurred: " + ex.Message);
-        //        throw;
-        //    }
-        //}
         public async Task<User> AddAUser(data model)
         {
             try
@@ -182,21 +159,6 @@ namespace DARE_FrontEnd.Services
         {
             throw new NotImplementedException();
         }
-
-        //var stringContent = _projectHandler.CreateProject(model);
-        //    //var jsonString = GetStringContent(model);
-        //    return await GenericGetData<Projects>($"/api/ProjectController/Save_Project", stringContent);
-        //}
-
-        //private StringContent GetStringContent<T>(T datasetObj) where T : class
-        //{
-        //    var test = JsonSerializer.Serialize(datasetObj, _jsonSerializerOptions);
-        //    var jsonString = new StringContent(
-        //        JsonSerializer.Serialize(datasetObj, _jsonSerializerOptions),
-        //        Encoding.UTF8,
-        //        "application/json");
-        //    return jsonString;
-        //}
 
     }
 }
