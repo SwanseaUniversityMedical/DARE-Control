@@ -107,13 +107,22 @@ namespace DARE_API.Controllers
             _DbContext.ProjectMemberships.Add(membership);
             await _DbContext.SaveChangesAsync();
 
-
-
-
-
             return membership;
         }
 
+        [HttpGet("Get_AllMemberships")]
+
+        public List<ProjectMembership> GetAllMemberships()
+        {
+            var allProjectMemberships = _DbContext.ProjectMemberships.ToList();
+
+            //foreach (var projectMembership  in allProjectMemberships)
+            //{
+            //    var id = projectMembership.Id;
+            //}
+            //return returned.FirstOrDefault();
+            return allProjectMemberships;
+        }
 
 
         [HttpGet("Get_Project/{projectId}")]
