@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace DARE_API.Controllers
 {
-    //[Authorize]
-    //[ApiController]
-    //[Route("api/[controller]")]
+    [Authorize]
+    [ApiController]
+    [Route("api/[controller]")]
     public class EndpointController : Controller
     {
         private readonly ApplicationDbContext _DbContext;
@@ -37,7 +37,7 @@ namespace DARE_API.Controllers
 
                 var model = new Endpoints();
                 model.Name = endpoints.Name;
-                model.Projects = endpoints.Projects.ToList();
+                //model.Projects = endpoints.Projects.ToList();
                 
                 _DbContext.Endpoints.Add(model);
 
