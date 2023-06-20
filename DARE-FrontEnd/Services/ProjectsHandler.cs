@@ -121,8 +121,7 @@ namespace DARE_FrontEnd.Services
             var test = _apiCaller.Client.Execute<User>(request);
             return test.Data;
         }
-
-
+     
 
         public async Task<User> GetAUser(int id)
         {
@@ -153,6 +152,16 @@ namespace DARE_FrontEnd.Services
             return test.Data;
 
         }
+        public async Task<ProjectMembership> GetAllMemberships()
+        {
+            var request = new RestRequest($"https://localhost:7058/api/Project/Get_AllMemberships", Method.Get);
+            request.Method = Method.Get;
+            request.AddHeader("Accept", "application/json");
+            request.AddParameter("application/json", ParameterType.RequestBody);
+            var test = _apiCaller.Client.Execute<ProjectMembership>(request);
+            return test.Data;
+        }
+
         public Task<bool> AddAsync(Projects ProjectModel)
         {
             throw new NotImplementedException();
