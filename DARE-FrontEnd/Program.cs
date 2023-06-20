@@ -73,6 +73,7 @@ builder.Services.AddScoped<CustomCookieEvent>();
 builder.Services.AddScoped<IProjectsHandler, ProjectsHandler>();
 builder.Services.AddScoped<IClientHelper, ClientHelper>();
 builder.Services.AddScoped<IFormHandler, FormHandler>();
+builder.Services.AddScoped<IEndpointHandler, EndpointHandler>();
 builder.Services.AddScoped<IAPICaller>(x =>
 {
     return new APICaller("https://localhost:7163/");
