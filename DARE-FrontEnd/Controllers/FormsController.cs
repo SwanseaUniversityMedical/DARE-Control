@@ -111,9 +111,10 @@ namespace DARE_FrontEnd.Controllers
         {
             var result = _projectsHandler.GetAllProjects();
             var result1 = _projectsHandler.GetAllUsers();
+    
             JsonConvert.SerializeObject(result);
             JsonConvert.SerializeObject(result1);
-            return View(result);
+            return View(result1);
 
         }
     }
