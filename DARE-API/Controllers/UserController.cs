@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Serilog;
 using IdentityModel.Client;
 using System.Text;
+using DARE_API.Controllers;
 
 namespace BL.Controllers
 {
@@ -23,13 +24,15 @@ namespace BL.Controllers
         private readonly IConfiguration configuration;
         private readonly ApplicationDbContext _DbContext;
 
+       
+
         public UserController(ApplicationDbContext applicationDbContext, IConfiguration configuration)
         {
 
             _DbContext = applicationDbContext;
             this.configuration = configuration;
         }
-
+        private readonly ILogger<UserController> _logger;
         public class data
         {
             public string? FormIoString { get; set; }
@@ -74,19 +77,28 @@ namespace BL.Controllers
 
         public User GetUser(int userId)
         {
+            try {
             var returned = _DbContext.Users.Find(userId);
             if (returned == null)
             {
                 return null;
             }
-            
-            return returned;
+                _logger.LogInformation("User retrieved successfully");
+                return returned;
+        }
+            catch (Exception ex) {
+                _logger.LogError(ex.Message.ToString());
+            }
+           
+            return null;
         }
 
-        [HttpGet("Get_AllUsers")]
+
+[HttpGet("Get_AllUsers")]
 
         public List<User> GetAllUsers()
         {
+            try { 
             var allUsers = _DbContext.Users.ToList();
 
             foreach (var user in allUsers)
@@ -94,12 +106,19 @@ namespace BL.Controllers
                 var id = user.Id;
                 var name = user.Name;
             }
-            //return returned.FirstOrDefault();
-            return allUsers;
+                //return returned.FirstOrDefault();
+                _logger.LogInformation("Users retrieved successfully");
+                return allUsers;
+        }
+            catch (Exception ex) {
+                _logger.LogError(ex.Message.ToString());
+            }
+           
+            return null;
         }
 
 
-        [HttpGet("GetNewToken/{userId}")]
+[HttpGet("GetNewToken/{userId}")]
         public async Task<IActionResult> GetNewToken(int userId)
         {
             var handler = new JwtSecurityTokenHandler();
