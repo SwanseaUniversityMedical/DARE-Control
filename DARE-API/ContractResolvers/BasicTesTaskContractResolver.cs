@@ -7,7 +7,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using BL.Models;
-using BL.Repository;
+
 
 namespace DARE_API.ContractResolvers
 {
@@ -28,13 +28,7 @@ namespace DARE_API.ContractResolvers
                 Tuple.Create(typeof(TesExecutorLog), nameof(TesExecutorLog.Stderr)),
                 Tuple.Create(typeof(TesInput), nameof(TesInput.Content)),
                 Tuple.Create(typeof(TesTaskLog), nameof(TesTaskLog.SystemLogs)),
-                Tuple.Create(typeof(TesTask), nameof(TesTask.IsCancelRequested)),
-                Tuple.Create(typeof(TesTask), nameof(TesTask.ErrorCount)),
-                Tuple.Create(typeof(TesTask), nameof(TesTask.EndTime)),
-                Tuple.Create(typeof(TesTask), nameof(TesTask.PoolId)),
-                Tuple.Create(typeof(TesTask), nameof(TesTask.WorkflowId)),
-                Tuple.Create(typeof(RepositoryItem<TesTask>), nameof(RepositoryItem<TesTask>.ETag)),
-                Tuple.Create(typeof(RepositoryItem<TesTask>), nameof(RepositoryItem<TesTask>.PartitionKey))
+                
             };
 
         /// <summary>
