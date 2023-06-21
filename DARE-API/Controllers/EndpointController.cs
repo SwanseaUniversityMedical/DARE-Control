@@ -22,6 +22,8 @@ namespace DARE_API.Controllers
             _DbContext = applicationDbContext;
 
         }
+
+        [HttpGet("Index")]
         public IActionResult Index()
         {
             return View();

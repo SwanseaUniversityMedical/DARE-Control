@@ -75,7 +75,7 @@ namespace DARE_API.Controllers
 
 
 
-            return StatusCode(200, new object());
+            return StatusCode(200, new TesCancelTaskResponse());
         }
 
         /// <summary>
@@ -174,9 +174,9 @@ namespace DARE_API.Controllers
         {
             var serviceInfo = new TesServiceInfo
             {
-                Name = "GA4GH Task Execution Service",
+                Name = "DARE FX",
                 Doc = string.Empty,
-                Storage = new List<string>(),
+                Storage = new List<string>(){ "s3://ohsu-compbio-funnel/storage" },
                 TesResourcesSupportedBackendParameters =
                     Enum.GetNames(typeof(TesResources.SupportedBackendParameters)).ToList()
             };
