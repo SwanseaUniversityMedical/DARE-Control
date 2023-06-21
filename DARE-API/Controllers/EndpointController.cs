@@ -22,13 +22,11 @@ namespace DARE_API.Controllers
             _DbContext = applicationDbContext;
 
         }
-
-        [HttpGet("Index")]
-        public IActionResult Index()
-        {
-            return View();
-        }
-
+        //public IActionResult Index()
+        //{
+        //    return View();
+        //}
+       
         [HttpPost("Add_Endpoint")]
 
         public async Task<Endpoints> AddEndpoint(data data)
