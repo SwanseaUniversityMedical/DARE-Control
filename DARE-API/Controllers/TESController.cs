@@ -106,7 +106,7 @@ namespace DARE_API.Controllers
             /// Create a new task                               
             /// </summary>
             /// <param name="tesTask">The <see cref="TesTask"/> to add to the repository</param>
-            /// <param name="cancellationToken">A<see cref="CancellationToken"/> for controlling the lifetime of the asynchronous operation.</param>
+            /// <param name="cancellationToken">A <see cref="CancellationToken"/> for controlling the lifetime of the asynchronous operation.</param>
             /// <response code="200"></response>
             [HttpPost]
             [Route("/v1/tasks")]
@@ -231,7 +231,7 @@ namespace DARE_API.Controllers
             {
                 var serviceInfo = new TesServiceInfo
                 {
-                    Name = "GA4GH Task Execution Service",
+                    .   Name = "GA4GH Task Execution Service",
                     Doc = string.Empty,
                     Storage = new List<string>(),
                     TesResourcesSupportedBackendParameters = Enum.GetNames(typeof(TesResources.SupportedBackendParameters)).ToList()
