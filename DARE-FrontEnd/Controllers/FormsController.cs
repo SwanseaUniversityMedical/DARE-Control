@@ -76,7 +76,6 @@ namespace DARE_FrontEnd.Controllers
         public async Task<IActionResult> UserFormSubmission([FromBody] data submissionData)
         {
             //save session id against it
-
             var result = await _projectsHandler.AddAUser(submissionData);
             return (IActionResult)result;
         }

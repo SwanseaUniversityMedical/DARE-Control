@@ -56,10 +56,8 @@ namespace DARE_FrontEnd.Services
         {
             try
             {
-                //var stringContent = _clientHelper.GetStringContent(new ContainString() { Data = model.ToString()});
                 var stringContent = _clientHelper.GetStringContent(model);
-                var  result = await _clientHelper.GenericHttpRequestWithReturnType<User>("/api/User/Add_User1", stringContent);
-                
+                var  result = await _clientHelper.GenericHttpRequestWithReturnType<User>("/api/User/AddUser", stringContent);
                 return result;
             }
             catch (Exception ex)
