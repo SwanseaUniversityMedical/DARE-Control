@@ -13,18 +13,13 @@ namespace BL.Models
     /// <summary>
     /// FormData is a repository for the JSON data submitted from a FormIo Form
     /// </summary>
-    public class FormData // : IHaveId
+    public class FormData
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        public int UserId { get; set; }
         public string FormIoUrl { get; set; }
-
-        [JsonIgnore] public JsonDocument? Json { get; set; }
-
         public string? FormIoString { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-
     }
 }

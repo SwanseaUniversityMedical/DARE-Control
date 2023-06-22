@@ -11,6 +11,7 @@ using System.Text.Json;
 using Newtonsoft.Json;
 using DARE_FrontEnd.Services.Project;
 using DARE_FrontEnd.Services;
+using BL.DTO;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -73,7 +74,7 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UserFormSubmission([FromBody] data submissionData)
+        public async Task<IActionResult> UserFormSubmission([FromBody] FormIoData submissionData)
         {
             //save session id against it
             var result = await _projectsHandler.AddAUser(submissionData);

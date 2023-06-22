@@ -1,4 +1,5 @@
 ﻿using BL.Models;
+using BL.DTO;
 using DARE_FrontEnd.Services.Project;
 using System.Text.Json;
 using System.Text;
@@ -52,7 +53,7 @@ namespace DARE_FrontEnd.Services
             }
 
         }
-        public async Task<User> AddAUser(data model)
+        public async Task<User> AddAUser(FormIoData model)
         {
             try
             {
