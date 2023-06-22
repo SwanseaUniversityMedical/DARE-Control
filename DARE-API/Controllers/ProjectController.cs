@@ -154,7 +154,7 @@ namespace DARE_API.Controllers
         }
 
         //this is going to be used but commented out until I can fix it
-        //[HttpPost("Add_ProjectToEndpoint")]
+        //[HttpPost("Add_EndpointsToProject")]
 
         //public async Task<Endpoints> AddEndpointsToProject(data data)
         //{

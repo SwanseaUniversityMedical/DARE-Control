@@ -10,6 +10,7 @@ namespace BL.Models
         public string Name { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public virtual List<ProjectEndpoints> ProjectEndpoints { get; set; }
 
         public virtual List<ProjectMembership> ProjectMemberships { get; set; }
 

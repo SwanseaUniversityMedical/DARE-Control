@@ -13,6 +13,7 @@ namespace BL.Models
 
         [JsonIgnore]
         public List<Projects> Projects { get; set; }
+        public virtual List<ProjectEndpoints> ProjectEndpoints { get; set; }
 
         public string Name { get; set; }
 

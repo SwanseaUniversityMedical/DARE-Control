@@ -159,12 +159,12 @@ namespace DARE_FrontEnd.Services
         {
             throw new NotImplementedException();
         }
-        public async Task<Endpoints> AddEndpointsToProject(data model)
+        public async Task<Projects> AddEndpointsToProject(data model)
         {
             try
             {
                 var stringContent = _clientHelper.GetStringContent(model);
-                var result = await _clientHelper.GenericHttpRequestWithReturnType<Endpoints>("/api/Endpoint/Add_ProjectToEndpoint", stringContent);
+                var result = await _clientHelper.GenericHttpRequestWithReturnType<Projects>("/api/Project/Add_EndpointsToProject", stringContent);
 
                 return result;
             }
