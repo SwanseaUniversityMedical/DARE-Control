@@ -46,7 +46,8 @@ namespace DARE_FrontEnd.Controllers
         {
             return View(new data()
             {
-                FormIoUrl = "https://flmykuxtnvsgjjt.form.io/addproject"
+                //FormIoUrl = "https://flmykuxtnvsgjjt.form.io/addproject"
+                FormIoUrl = "https://feidldzemrnfcva.form.io/createnewproject"
             });
 
 
