@@ -129,6 +129,16 @@ namespace DARE_FrontEnd.Services
             return test.Data;
         }
 
+        public async Task<Endpoints> GetAllEndPoints(int projectId)
+        {
+            var request = new RestRequest($"https://localhost:7058/api/Project/Get_AllEndPoints/{projectId}", Method.Get);
+            request.Method = Method.Get;
+            request.AddHeader("Accept", "application/json");
+            request.AddParameter("application/json", ParameterType.RequestBody);
+            var test = _apiCaller.Client.Execute<Endpoints>(request);
+            return test.Data;
+        }
+
         public Task<bool> AddAsync(Projects ProjectModel)
         {
             throw new NotImplementedException();
