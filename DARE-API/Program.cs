@@ -12,8 +12,26 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Net;
 using System.Text.Json;
+using Serilog.Exceptions;
+using Serilog.Exceptions.Core;
+using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Verbose()
+    .Enrich.WithDemystifiedStackTraces()
+    .Enrich.WithExceptionDetails(new DestructuringOptionsBuilder()
+        .WithDefaultDestructurers()
+        .WithDestructurers(new[] { new DbUpdateExceptionDestructurer() }))
+    .Enrich.WithProperty("MainSystem", "DareFX")
+    .Enrich.WithProperty("Component", "SubmissionAPI")
+    .Enrich.FromLogContext()
+    .Enrich.WithProperty("ServerName", Environment.MachineName)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.Seq(builder.Configuration["SeqURL"])
+    .CreateLogger();
 
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
