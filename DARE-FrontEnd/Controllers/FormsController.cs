@@ -91,6 +91,7 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpPost]
+            var result = await _endpointsHandler.CreateEndpoint(submissionData);
         public IActionResult FormSubmissionIndex([FromBody] JsonObject submissionData)
         {
             //save session id against it
