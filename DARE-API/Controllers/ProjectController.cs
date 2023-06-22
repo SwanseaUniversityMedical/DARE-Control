@@ -162,7 +162,8 @@ namespace DARE_API.Controllers
         }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message.ToString());
+                _logger.LogError(ex.Message.ToString()
+                    );
             }
 
             return null;
@@ -239,6 +240,20 @@ namespace DARE_API.Controllers
             }
 
             return null;
+        }
+
+        [HttpGet("Get_AllEndPoints/{projectId}")]
+
+        public List<Endpoints> GetEndPointsInProject(int projectId)
+        {
+            List<Endpoints> endpoints = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Endpoints).ToList();
+
+            //var returned = _DbContext.Projects.Find(projectId);
+            //if (returned == null)
+            //{
+            //    return null;
+            //}           
+            return endpoints;
         }
 
     }

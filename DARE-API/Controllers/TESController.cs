@@ -10,7 +10,7 @@ using DARE_API.Attributes;
 using Microsoft.AspNetCore.WebUtilities;
 using Swashbuckle.AspNetCore.Annotations;
 using BL.Models;
-
+using BL.Repositories.DbContexts;
 using DARE_API.ContractResolvers;
 using Serilog;
 
@@ -32,7 +32,7 @@ namespace DARE_API.Controllers
     public class TaskServiceApiController : ControllerBase
     {
 
-
+        private readonly ApplicationDbContext _DbContext;
 
 
 
@@ -49,10 +49,10 @@ namespace DARE_API.Controllers
         /// <summary>
         /// Contruct a <see cref="TaskServiceApiController"/>
         /// </summary>
-
-        public TaskServiceApiController()
+        /// <param name="repository">The main <see cref="TesTask"/> database repository</param>
+        public TaskServiceApiController(ApplicationDbContext repository)
         {
-            ;
+            _DbContext = repository;
 
         }
 
@@ -71,6 +71,7 @@ namespace DARE_API.Controllers
             CancellationToken cancellationToken)
         {
             TesTask tesTask = null;
+            
 
 
 
@@ -157,6 +158,8 @@ namespace DARE_API.Controllers
 
             Log.Debug("{Function} Creating task with id {Id} state {State}", "CreateTaskAsync", tesTask.Id,
                 tesTask.State);
+
+
 
             return StatusCode(200, new TesCreateTaskResponse { Id = tesTask.Id });
         }

@@ -13,6 +13,7 @@ namespace BL.Models
         public int? ParentId { get; set; }
         public int TesId { get; set; }
         public string TesJson { get; set; }
+        public string DockerInputLocation { get; set; }
         public virtual Projects Project { get; set; }
 
         [ForeignKey("ParentID")]

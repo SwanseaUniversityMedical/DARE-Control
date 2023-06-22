@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -8,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DARE_API.Migrations
 {
     /// <inheritdoc />
-    public partial class initialMigration : Migration
+    public partial class newInitial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -32,9 +31,7 @@ namespace DARE_API.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<int>(type: "integer", nullable: false),
                     FormIoUrl = table.Column<string>(type: "text", nullable: false),
-                    Json = table.Column<JsonDocument>(type: "jsonb", nullable: true),
                     FormIoString = table.Column<string>(type: "text", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -72,11 +69,18 @@ namespace DARE_API.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
+                    FormDataId = table.Column<int>(type: "integer", nullable: false),
                     ProjectsId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_FormData_FormDataId",
+                        column: x => x.FormDataId,
+                        principalTable: "FormData",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Users_Projects_ProjectsId",
                         column: x => x.ProjectsId,
@@ -110,6 +114,51 @@ namespace DARE_API.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Submissions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ParentId = table.Column<int>(type: "integer", nullable: true),
+                    TesId = table.Column<int>(type: "integer", nullable: false),
+                    TesJson = table.Column<string>(type: "text", nullable: false),
+                    ProjectId = table.Column<int>(type: "integer", nullable: false),
+                    ParentID = table.Column<int>(type: "integer", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    EndPointId = table.Column<int>(type: "integer", nullable: false),
+                    SubmittedById = table.Column<int>(type: "integer", nullable: false),
+                    StatusDescription = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Submissions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Submissions_Endpoints_EndPointId",
+                        column: x => x.EndPointId,
+                        principalTable: "Endpoints",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Submissions_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Submissions_Submissions_ParentID",
+                        column: x => x.ParentID,
+                        principalTable: "Submissions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Submissions_Users_SubmittedById",
+                        column: x => x.SubmittedById,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_ProjectMemberships_ProjectsId",
                 table: "ProjectMemberships",
@@ -126,6 +175,31 @@ namespace DARE_API.Migrations
                 column: "EndpointsId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Submissions_EndPointId",
+                table: "Submissions",
+                column: "EndPointId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Submissions_ParentID",
+                table: "Submissions",
+                column: "ParentID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Submissions_ProjectId",
+                table: "Submissions",
+                column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Submissions_SubmittedById",
+                table: "Submissions",
+                column: "SubmittedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_FormDataId",
+                table: "Users",
+                column: "FormDataId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_ProjectsId",
                 table: "Users",
                 column: "ProjectsId");
@@ -135,13 +209,16 @@ namespace DARE_API.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "FormData");
-
-            migrationBuilder.DropTable(
                 name: "ProjectMemberships");
 
             migrationBuilder.DropTable(
+                name: "Submissions");
+
+            migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "FormData");
 
             migrationBuilder.DropTable(
                 name: "Projects");

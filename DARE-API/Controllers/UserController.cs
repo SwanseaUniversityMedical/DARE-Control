@@ -1,6 +1,7 @@
 ﻿using BL.Repositories.DbContexts;
 using Microsoft.AspNetCore.Mvc;
 using BL.Models;
+using BL.DTO;
 using System.Text.Json.Nodes;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
@@ -37,30 +38,30 @@ namespace BL.Controllers
 
         }
 
-        [HttpPost("Add_User1")]
-        public async Task<User> AddUser(data data)
+        [HttpPost("AddUser")]
+        public async Task<User> AddUser(FormIoData data) 
         {
             try
             {
-                //User users = JsonConvert.DeserializeObject<User>("A");
+                FormData formData = new FormData()
+                {
+                    FormIoString = data.FormIoString,
+                    FormIoUrl = data.FormIoUrl
+                };
+
                 User users = JsonConvert.DeserializeObject<User>(data.FormIoString);
 
-                //Projects projects = JsonConvert.DeserializeObject<Projects>(project);
-                var model = new User();
-                //2023-06-01 14:30:00 use this as the datetime
-                model.Name = users.Name;
-                model.Email = users.Email;
-                //model.Users = projects.Users.ToList();
-                //model.ProjectMemberships = users.ProjectMemberships;
+                users.FormData = formData;
 
-                _DbContext.Users.Add(model);
+                _DbContext.Users.Add(users);
 
                 await _DbContext.SaveChangesAsync();
 
-                return model;
+                return users;
             }
             catch (Exception ex)
             {
+
             }
 
             return null;
