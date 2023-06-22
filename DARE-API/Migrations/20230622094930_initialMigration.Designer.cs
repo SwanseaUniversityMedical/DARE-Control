@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DARE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230620101851_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20230622094930_initialMigration")]
+    partial class initialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,6 +25,23 @@ namespace DARE_API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("BL.Models.Endpoints", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Endpoints");
+                });
 
             modelBuilder.Entity("BL.Models.FormData", b =>
                 {
@@ -89,6 +106,9 @@ namespace DARE_API.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int?>("EndpointsId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -97,6 +117,8 @@ namespace DARE_API.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EndpointsId");
 
                     b.ToTable("Projects");
                 });
@@ -146,11 +168,23 @@ namespace DARE_API.Migrations
                     b.Navigation("Users");
                 });
 
+            modelBuilder.Entity("BL.Models.Projects", b =>
+                {
+                    b.HasOne("BL.Models.Endpoints", null)
+                        .WithMany("Projects")
+                        .HasForeignKey("EndpointsId");
+                });
+
             modelBuilder.Entity("BL.Models.User", b =>
                 {
                     b.HasOne("BL.Models.Projects", null)
                         .WithMany("Users")
                         .HasForeignKey("ProjectsId");
+                });
+
+            modelBuilder.Entity("BL.Models.Endpoints", b =>
+                {
+                    b.Navigation("Projects");
                 });
 
             modelBuilder.Entity("BL.Models.Projects", b =>

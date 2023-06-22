@@ -1,5 +1,8 @@
 using BL.Models.Settings;
 using BL.Repositories.DbContexts;
+using DARE_API.Models;
+using DARE_API.Services.Contract;
+using DARE_API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -51,7 +54,13 @@ var keyCloakSettings = new KeyCloakSettings();
 configuration.Bind(nameof(keyCloakSettings), keyCloakSettings);
 builder.Services.AddSingleton(keyCloakSettings);
 
+//var internalMinioSettings = new MinioInternalSettings();
+//configuration.Bind(nameof(internalMinioSettings), internalMinioSettings);
+//builder.Services.AddSingleton(internalMinioSettings);
 
+var minioSettings = new MinioSettings();
+configuration.Bind(nameof(MinioSettings), minioSettings);
+builder.Services.AddSingleton(minioSettings);
 
 
 var TVP = new TokenValidationParameters
@@ -181,6 +190,12 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
+
 void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configuration)
 {
 
@@ -190,7 +205,7 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
     {
         PropertyNameCaseInsensitive = true,
     });
-
+    builder.Services.AddScoped<IMinioService, MinioService>();
     builder.Services.AddMvc().AddControllersAsServices();
 
     //builder.Services.AddScoped<ICodeService, CodeService>();

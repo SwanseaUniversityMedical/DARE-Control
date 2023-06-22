@@ -23,13 +23,14 @@ services:
     image: quay.io/minio/minio
     command: server /data --console-address ":9001"
     environment:
-      - MINIO_ROOT_USER=minioadmin
-      - MINIO_ROOT_PASSWORD=minioadmin
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
       - MINIO_IDENTITY_OPENID_CONFIG_URL=https://auth2.ukserp.ac.uk/realms/Dare-Control/.well-known/openid-configuration
-      - MINIO_IDENTITY_OPENID_CLIENT_ID=Dare-Control-MinIO
-      - MINIO_IDENTITY_OPENID_CLIENT_SECRET=2UEwErlmIvQtwyvRT1pGyiokm5IOh4JP
-      - MINIO_IDENTITY_OPENID_CLAIM_NAME=Dare-Control-roles
-      - MINIO_IDENTITY_OPENID_REDIRECT_URI=http://localhost:9001/oauth_callback
+      - MINIO_IDENTITY_OPENID_CLIENT_ID=Dare-Control-Minio
+      - MINIO_IDENTITY_OPENID_CLIENT_SECRET=MfjRrZJn6vL48MgCyoRn6H8Rr7sv02i0
+      - MINIO_IDENTITY_OPENID_DISPLAY_NAME=SSO_IDENTIFIER
+      - MINIO_IDENTITY_OPENID_SCOPES=openid
+      - MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC=on
     volumes:
       - minio_data:/data
     ports:
