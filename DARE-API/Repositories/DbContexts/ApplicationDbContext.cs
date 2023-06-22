@@ -29,6 +29,8 @@ namespace BL.Repositories.DbContexts
 
         public DbSet<FormData> FormData { get; set; }
 
+        public DbSet<Submission> Submissions { get; set; }
+
 
 
     }

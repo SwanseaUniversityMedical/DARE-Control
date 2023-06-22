@@ -190,6 +190,11 @@ namespace DARE_API.Migrations
                     b.Navigation("Projects");
                 });
 
+            modelBuilder.Entity("BL.Models.Endpoints", b =>
+                {
+                    b.Navigation("Projects");
+                });
+
             modelBuilder.Entity("BL.Models.Projects", b =>
                 {
                     b.Navigation("ProjectMemberships");

@@ -27,7 +27,6 @@ namespace DARE_FrontEnd.Services.Project
         Task<User> GetAUser(int id);
         Task<User> GetAllUsers();
 
-        void GetNewToken(int id);
         Task<ProjectMembership> AddMembership(ProjectMembership membership);
 
 

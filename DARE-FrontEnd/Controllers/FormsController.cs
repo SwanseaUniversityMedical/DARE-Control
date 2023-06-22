@@ -30,6 +30,12 @@ namespace DARE_FrontEnd.Controllers
         [Route("Forms/Index")]
         public IActionResult Index()
         {
+            return View();
+        }
+
+        [Route("Forms/AddUserForm")]
+        public IActionResult AddUserForm()
+        {
             return View(new data()
             {
                 FormIoUrl = "https://bthbspqizezypsb.form.io/dareuser/dareuserregistration"
