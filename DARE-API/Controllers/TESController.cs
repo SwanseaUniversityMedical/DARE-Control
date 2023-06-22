@@ -93,6 +93,14 @@ namespace DARE_API.Controllers
         public virtual async Task<IActionResult> CreateTaskAsync([FromBody] TesTask tesTask,
             CancellationToken cancellationToken)
         {
+
+            var user = _DbContext.Users.FirstOrDefault(x => x.Name.ToLower() == "jaybee");
+
+            if (user == null)
+            {
+                return BadRequest(
+                    "User " + User.Identity.Name + " doesn't exist");
+            }
             if (!string.IsNullOrWhiteSpace(tesTask.Id))
             {
                 return BadRequest(
@@ -120,6 +128,7 @@ namespace DARE_API.Controllers
                 }
             }
 
+            
 
 
             if (tesTask?.Resources?.BackendParameters is not null)
@@ -130,6 +139,7 @@ namespace DARE_API.Controllers
                 {
                     return BadRequest("Duplicate backend_parameters were specified");
                 }
+
 
 
 
@@ -156,12 +166,137 @@ namespace DARE_API.Controllers
 
             }
 
+            if (tesTask.Executors.Count != 1)
+            {
+                return BadRequest("TES Task must contain one and only one Executer.");
+
+                
+            }
+            var exec = tesTask.Executors.First();
+            //TODO: Implement IsDockerThere
+            if (!IsDockerThere(exec.Image))
+            {
+                return BadRequest("Docker Location " + exec.Image + " doesn't exist");
+            }
+
+            var project = tesTask.Tags.Where(x => x.Key.ToLower() == "project").Select(x => x.Key).FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(project))
+            {
+                return BadRequest("Tags must contain key project.");
+            }
+
+            var endpointstr = tesTask.Tags.Where(x => x.Key.ToLower() == "endpoints").Select(x => x.Value).FirstOrDefault();
+            List<string> endpoints = new List<string>();
+            if (!string.IsNullOrWhiteSpace(endpointstr))
+            {
+                endpoints = endpointstr.Split('|').Select(x => x.ToLower()).ToList();
+            }
+
+            var dbproj = _DbContext.Projects.FirstOrDefault(x => x.Name.ToLower() == project.ToLower());
+
+            if (dbproj == null)
+            {
+                return BadRequest("Project " + project + " doesn't exist.");
+            }
+
+            //TODO: Implement this function
+            if (IsUserOnProject(dbproj))
+            {
+                return BadRequest("User " + User.Identity.Name + "isn't on project " + project + ".");
+            }
+
+            if (endpoints.Count > 0 && !AreEndpointsOnProject(dbproj, endpoints))
+            {
+                return BadRequest("One or more of the endpoints are not authorised for this project " + project + ".");
+            }
+
+            var dbendpoints = new List<BL.Models.Endpoints>();
+
+            if (endpoints.Count == 0)
+            {
+                dbendpoints = dbproj.Endpoints;
+            }
+            else
+            {
+                foreach (var endpoint in endpoints)
+                {
+                    dbendpoints.Add(dbproj.Endpoints.First(x => x.Name.ToLower() == endpoint.ToLower()));
+                }
+            }
+
+            if (dbendpoints.Count == 0)
+            {
+                return BadRequest("No valid endpoints for this project " + project + ".");
+            }
+
+           
+            var sub = new Submission()
+            {
+                DockerInputLocation = tesTask.Executors.First().Image,
+                Project = dbproj,
+                Status = SubmissionStatus.WaitingForChildSubsToComplete,
+                SubmittedBy = user
+
+            };
+
+
+
+            _DbContext.Submissions.Add(sub);
+            _DbContext.SaveChanges();
+            tesTask.Id = sub.Id.ToString();
+            sub.TesId = tesTask.Id;
+            var tesstring = JsonConvert.SerializeObject(tesTask);
+            sub.TesJson = tesstring;
+            
+            foreach (var endp in dbendpoints)
+            {
+                _DbContext.Add(new Submission()
+                {
+                    DockerInputLocation = tesTask.Executors.First().Image,
+                    Project = dbproj,
+                    Status = SubmissionStatus.WaitingForAgentToTransfer,
+                    SubmittedBy = user,
+                    Parent = sub,
+                    TesId = tesTask.Id,
+                    TesJson = tesstring,
+                    EndPoint = endp,
+                });
+
+            }
+
+            _DbContext.SaveChanges();
             Log.Debug("{Function} Creating task with id {Id} state {State}", "CreateTaskAsync", tesTask.Id,
                 tesTask.State);
 
 
 
             return StatusCode(200, new TesCreateTaskResponse { Id = tesTask.Id });
+        }
+
+        private bool AreEndpointsOnProject(Projects project, List<string> endpoints)
+        {
+            
+            var projends = project.Endpoints.Select(x => x.Name.ToLower()).ToList();
+            foreach (var endpoint in endpoints)
+            {
+                if (! projends.Contains(endpoint))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private bool IsDockerThere(string dockerloc)
+        {
+            //TODO: Implement this
+            return true;
+        }
+
+        private bool IsUserOnProject(Projects project)
+        {
+            //TODO: Implement this
+            return true;
         }
 
         /// <summary>
