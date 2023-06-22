@@ -228,6 +228,14 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpGet]
+        [Route("Home/GetEndpointsList/{projectId:int}")]
+        public async Task<IActionResult> GetEndpoints(int projectId)
+        {
+            var endpoints = await _projectsHandler.GetAllEndPoints(projectId);
+            return View(endpoints);
+        }
+
+        [HttpGet]
         [Route("Home/NewTokenIssue")]
         [Authorize]
         public async Task<IActionResult> NewTokenIssue()

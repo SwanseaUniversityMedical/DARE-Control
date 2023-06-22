@@ -18,6 +18,8 @@ namespace DARE_FrontEnd.Services.Project
 
         Task<Projects> GetAllProjects();
 
+        Task<Endpoints> GetAllEndPoints(int projectId);
+
 
         //Task<User> AddAUser(User model);
         //Task<User> AddAUser1(JsonObject model);
