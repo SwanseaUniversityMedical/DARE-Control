@@ -7,6 +7,10 @@ using System.Text.Json.Nodes;
 using Newtonsoft.Json;
 using DARE_API.Controllers;
 using static BL.Controllers.UserController;
+using Minio.DataModel;
+using Serilog;
+using DARE_API.Services.Contract;
+using DARE_API.Models;
 
 namespace DARE_API.Controllers
 {
@@ -18,12 +22,16 @@ namespace DARE_API.Controllers
     {
 
         private readonly ApplicationDbContext _DbContext;
+        private readonly MinioSettings _minioSettings;
+        private readonly IMinioService _minioService;
 
 
-        public ProjectController(ApplicationDbContext applicationDbContext)
+        public ProjectController(ApplicationDbContext applicationDbContext, MinioSettings minioSettings, IMinioService minioService)
         {
 
             _DbContext = applicationDbContext;
+            _minioSettings = minioSettings;
+            _minioService = minioService;
         }
 
 
@@ -68,6 +76,13 @@ namespace DARE_API.Controllers
 
         public async Task<Projects> CreateProject(data data)
         {
+            //var backet = "testbucket2";
+            //var bucketExists2 = await _minioService.CreateBucket(_minioSettings, backet);
+            //if (!bucketExists2)
+            //{
+            //    Log.Error("S3GetListObjects: Failed to create bucket {name}.", backet);
+            //}
+
             try
             {
                 Projects projects = JsonConvert.DeserializeObject<Projects>(data.FormIoString);
@@ -79,6 +94,12 @@ namespace DARE_API.Controllers
                 model.StartDate = projects.StartDate.ToUniversalTime();
                 //model.Users = projects.Users.ToList();
                 model.EndDate = projects.EndDate.ToUniversalTime();
+
+                var bucketExists = await _minioService.CreateBucket(_minioSettings, model.Name);
+                if (!bucketExists)
+                {
+                    Log.Error("S3GetListObjects: Failed to create bucket {name}.", model.Name);
+                }
 
                 _DbContext.Projects.Add(model);
 
