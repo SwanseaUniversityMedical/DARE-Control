@@ -142,7 +142,8 @@ namespace DARE_API.Controllers
         }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message.ToString());
+                _logger.LogError(ex.Message.ToString()
+                    );
             }
 
             return null;
