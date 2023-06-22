@@ -144,5 +144,32 @@ namespace DARE_API.Controllers
             return allProjects;
         }
 
+        //this is going to be used but commented out until I can fix it
+        //[HttpPost("Add_ProjectToEndpoint")]
+
+        //public async Task<Endpoints> AddEndpointsToProject(data data)
+        //{
+        //    try
+        //    {
+        //        Endpoints endpoints = JsonConvert.DeserializeObject<Endpoints>(data.FormIoString);
+
+        //        var model = new Endpoints();
+        //        model.Name = endpoints.Name;
+        //        //model.Projects = endpoints.Projects.ToList();
+
+        //        _DbContext.Endpoints.Add(model);
+
+        //        await _DbContext.SaveChangesAsync();
+
+
+        //        return model;
+        //    }
+        //    catch (Exception ex) { }
+
+        //    return null;
+
+
+        //}
+
     }
 }

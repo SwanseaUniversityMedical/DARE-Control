@@ -91,7 +91,15 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpPost]
-            var result = await _endpointsHandler.CreateEndpoint(submissionData);
+        public async Task<IActionResult> AddEndpointsToProjectFormSubmission([FromBody] data submissionData)
+        {
+            //save session id against it
+
+            var result = await _projectsHandler.AddEndpointsToProject(submissionData);
+            return (IActionResult)result;
+        }
+
+        [HttpPost]
         public IActionResult FormSubmissionIndex([FromBody] JsonObject submissionData)
         {
             //save session id against it
