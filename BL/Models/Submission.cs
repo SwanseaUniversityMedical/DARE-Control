@@ -22,6 +22,10 @@ namespace BL.Models
 
         public SubmissionStatus Status { get; set; }
 
+        public virtual Endpoints EndPoint { get; set; }
+
+        public virtual User SubmittedBy { get; set; }
+
         public string StatusDescription { get; set; }
         
         
