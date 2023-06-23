@@ -447,7 +447,7 @@ namespace DARE_API.Controllers
 
 
             var nextPageToken = finalList.continuation;
-            var encodedNextPageToken = nextPageToken is not null ? Base64UrlTextEncoder.Encode(Encoding.UTF8.GetBytes(nextPageToken)) : "";
+            var encodedNextPageToken = nextPageToken is not null ? Base64UrlTextEncoder.Encode(Encoding.UTF8.GetBytes(nextPageToken)) : null;
             var response = new TesListTasksResponse { Tasks = tesTasks.ToList(), NextPageToken = encodedNextPageToken };
 
             return TesJsonResult(response, view);
