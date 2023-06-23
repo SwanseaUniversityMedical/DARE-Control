@@ -13,6 +13,9 @@ using BL.Models;
 using BL.Repositories.DbContexts;
 using DARE_API.ContractResolvers;
 using Serilog;
+using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json.Linq;
+using System.Drawing;
 
 
 namespace DARE_API.Controllers
@@ -70,13 +73,54 @@ namespace DARE_API.Controllers
         public virtual async Task<IActionResult> CancelTask([FromRoute] [Required] string id,
             CancellationToken cancellationToken)
         {
-            TesTask tesTask = null;
+            
+
+            var sub = _DbContext.Submissions.FirstOrDefault(x => x.Parent == null && x.TesId == id);
+            if (sub== null)
+            {
+                return BadRequest("Invalid TesID");
+            }
+
+            var allsubs = sub.Children;
+            allsubs.Add(sub);
+           
+            foreach (var asub in allsubs)
+            {
+                asub.TesJson = SetTesTaskStateToCancelled(asub.TesJson, asub.Id);
+                if (asub.Parent == null)
+                {
+                    asub.Status = SubmissionStatus.CancellingChildren;
+                }
+                else
+                {
+                    asub.Status = SubmissionStatus.RequestCancellation;
+                }
+            }
+
+            await _DbContext.SaveChangesAsync(cancellationToken);
             
 
 
-
-
             return StatusCode(200, new TesCancelTaskResponse());
+        }
+
+        private string SetTesTaskStateToCancelled(string testaskstr, int subid)
+        {
+            var tesTask = JsonConvert.DeserializeObject<TesTask>(testaskstr);
+            if (tesTask.State == TesState.COMPLETEEnum ||
+                tesTask.State == TesState.EXECUTORERROREnum ||
+                tesTask.State == TesState.SYSTEMERROREnum)
+            {
+                Log.Information("{Function} Task {id} for subId {SubID} cannot be canceled because it is in {State} state.", "SetTesTaskStateToCancelled", tesTask.Id, subid, tesTask.State.ToString());
+            }
+            else if (tesTask.State != TesState.CANCELEDEnum)
+            {
+                Log.Information("{Function} Canceling task {id} for subID {SubID}", "SetTesTaskStateToCancelled", tesTask.Id, subid);
+                tesTask.State = TesState.CANCELEDEnum;
+
+            }
+
+            return JsonConvert.SerializeObject(tesTask);
         }
 
         /// <summary>
@@ -176,8 +220,10 @@ namespace DARE_API.Controllers
             //TODO: Implement IsDockerThere
             if (!IsDockerThere(exec.Image))
             {
-                return BadRequest("Docker Location " + exec.Image + " doesn't exist");
+                return BadRequest("Crate Location " + exec.Image + " doesn't exist");
             }
+
+            //TODO: External containers need copying over and change image loc
 
             var project = tesTask.Tags.Where(x => x.Key.ToLower() == "project").Select(x => x.Key).FirstOrDefault();
             if (string.IsNullOrWhiteSpace(project))
@@ -235,18 +281,20 @@ namespace DARE_API.Controllers
                 DockerInputLocation = tesTask.Executors.First().Image,
                 Project = dbproj,
                 Status = SubmissionStatus.WaitingForChildSubsToComplete,
-                SubmittedBy = user
-
+                SubmittedBy = user,
+                TesName = tesTask.Name,
+                SourceCrate = tesTask.Executors.First().Image,
             };
 
 
 
             _DbContext.Submissions.Add(sub);
-            _DbContext.SaveChanges();
+            await _DbContext.SaveChangesAsync(cancellationToken);
             tesTask.Id = sub.Id.ToString();
             sub.TesId = tesTask.Id;
             var tesstring = JsonConvert.SerializeObject(tesTask);
             sub.TesJson = tesstring;
+            
             
             foreach (var endp in dbendpoints)
             {
@@ -260,11 +308,13 @@ namespace DARE_API.Controllers
                     TesId = tesTask.Id,
                     TesJson = tesstring,
                     EndPoint = endp,
+                    TesName = tesTask.Name,
+                    SourceCrate = tesTask.Executors.First().Image,
                 });
 
             }
 
-            _DbContext.SaveChanges();
+            await _DbContext.SaveChangesAsync(cancellationToken);
             Log.Debug("{Function} Creating task with id {Id} state {State}", "CreateTaskAsync", tesTask.Id,
                 tesTask.State);
 
@@ -341,10 +391,16 @@ namespace DARE_API.Controllers
         public virtual async Task<IActionResult> GetTaskAsync([FromRoute] [Required] string id, [FromQuery] string view,
             CancellationToken cancellationToken)
         {
-            TesTask tesTask = null;
 
 
-            return TesJsonResult(tesTask, view);
+            var sub = _DbContext.Submissions.FirstOrDefault(x => x.ParentId == null && x.TesId == id);
+            if (sub == null)
+            {
+                return BadRequest("Invalid ID.");
+            }
+
+            var tesobj = JsonConvert.DeserializeObject<TesTask>(sub.TesJson);
+            return TesJsonResult(tesobj, view);
         }
 
         /// <summary>
@@ -373,15 +429,36 @@ namespace DARE_API.Controllers
                 return BadRequest("If provided, pageSize must be greater than 0 and less than 2048. Defaults to 256.");
             }
 
-            List<TesTask> tasks = null;
+            var pageSizeInt = pageSize.HasValue ? (int)pageSize : 256;
 
-            var encodedNextPageToken = "";
-            var response = new TesListTasksResponse { Tasks = tasks.ToList(), NextPageToken = encodedNextPageToken };
+            var initsubs = _DbContext.Submissions.Where(x =>
+                x.Parent == null && (string.IsNullOrWhiteSpace(namePrefix) ||
+                                     x.TesName.ToLower().StartsWith(namePrefix.ToLower())));
+            var count = initsubs.Count();
+
+            var start = string.IsNullOrWhiteSpace(decodedPageToken) ? 0 : int.Parse(decodedPageToken, System.Globalization.CultureInfo.InvariantCulture);
+            var continuation = (pageSizeInt > start + count) ? (start + count).ToString("G", System.Globalization.CultureInfo.InvariantCulture) : null;
+            var finalList = await Task.FromResult((continuation, _DbContext.Submissions.Skip(start).Take(pageSizeInt).Where(x =>
+                x.Parent == null && (string.IsNullOrWhiteSpace(namePrefix) ||
+                                     x.TesName.ToLower().StartsWith(namePrefix.ToLower())))));
+
+            var tesTasks = finalList.Item2.Where(x => !string.IsNullOrWhiteSpace(x.TesJson))
+                .Select(x => JsonConvert.DeserializeObject<TesTask>(x.TesJson)).OfType<TesTask>();
+
+
+            var nextPageToken = finalList.continuation;
+            var encodedNextPageToken = nextPageToken is not null ? Base64UrlTextEncoder.Encode(Encoding.UTF8.GetBytes(nextPageToken)) : "";
+            var response = new TesListTasksResponse { Tasks = tesTasks.ToList(), NextPageToken = encodedNextPageToken };
 
             return TesJsonResult(response, view);
         }
 
+        private static Submission Clone(Submission obj)
+        {
+            if (ReferenceEquals(obj, null)) return default;
 
+            return JsonConvert.DeserializeObject<Submission>(JsonConvert.SerializeObject(obj), new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace });
+        }
 
         private IActionResult TesJsonResult(object value, string view)
         {
