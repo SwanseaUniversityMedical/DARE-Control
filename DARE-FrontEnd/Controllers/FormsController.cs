@@ -45,6 +45,7 @@ namespace DARE_FrontEnd.Controllers
 
 
         }
+
         [Route("Forms/AddEndpoint")]
         public IActionResult AddEndpoint()
         {
@@ -54,6 +55,19 @@ namespace DARE_FrontEnd.Controllers
             });
 
         }
+
+        [Route("Forms/EndpointsAndProjects")]
+        public async Task<IActionResult> EndpointsAndProjects()
+        {
+            ProjectsAndEndpoints test = new ProjectsAndEndpoints()
+            {
+                test.Projects = await _projectsHandler.GetAllProjects();
+                //test.Endpoints = await _endpointsHandler.GetAllEndpoints();
+            }
+            return View(test);
+
+        }
+
         public class data
         {
             public string? FormIoString { get; set; }
