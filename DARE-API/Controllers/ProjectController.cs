@@ -79,13 +79,6 @@ namespace DARE_API.Controllers
 
         public async Task<Projects> CreateProject(data data)
         {
-            //var backet = "testbucket2";
-            //var bucketExists2 = await _minioService.CreateBucket(_minioSettings, backet);
-            //if (!bucketExists2)
-            //{
-            //    Log.Error("S3GetListObjects: Failed to create bucket {name}.", backet);
-            //}
-
             try
             {
                 Projects projects = JsonConvert.DeserializeObject<Projects>(data.FormIoString);
@@ -98,10 +91,18 @@ namespace DARE_API.Controllers
                 //model.Users = projects.Users.ToList();
                 model.EndDate = projects.EndDate.ToUniversalTime();
 
-                var bucketExists = await _minioService.CreateBucket(_minioSettings, model.Name);
-                if (!bucketExists)
+                model.SubmissionBucket = GenerateRandomName(model.Name);
+                model.OutputBucket = GenerateRandomName(model.Name);
+
+                var submissionBucket = await _minioService.CreateBucket(_minioSettings, model.SubmissionBucket);
+                if (!submissionBucket)
                 {
-                    Log.Error("S3GetListObjects: Failed to create bucket {name}.", model.Name);
+                    Log.Error("S3GetListObjects: Failed to create bucket {name}.", model.SubmissionBucket);
+                }
+                var outputBucket = await _minioService.CreateBucket(_minioSettings, model.OutputBucket);
+                if (!outputBucket)
+                {
+                    Log.Error("S3GetListObjects: Failed to create bucket {name}.", model.OutputBucket);
                 }
 
                 _DbContext.Projects.Add(model);
@@ -254,6 +255,13 @@ namespace DARE_API.Controllers
             //    return null;
             //}           
             return endpoints;
+        }
+
+        public static string GenerateRandomName(string prefix)
+        {
+            Random random = new Random();
+            string randomName = prefix + random.Next(1000, 9999);
+            return randomName;
         }
 
     }
