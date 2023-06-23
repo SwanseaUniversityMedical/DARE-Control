@@ -11,13 +11,16 @@ namespace BL.Models
     {
         public int Id { get; set; }
         public int? ParentId { get; set; }
-        public int TesId { get; set; }
+        public string TesId { get; set; }
+        public string SourceCrate { get; set; }
+
+        public string TesName { get; set; }
         public string TesJson { get; set; }
         public string DockerInputLocation { get; set; }
         public virtual Projects Project { get; set; }
 
         [ForeignKey("ParentID")]
-        public virtual Submission Parent { get; set; }
+        public virtual Submission? Parent { get; set; }
 
         public virtual List<Submission> Children { get; set; }
 
@@ -47,6 +50,10 @@ namespace BL.Models
         InvalidUser=9,
         TRENotAuthorisedForProject=10,
         Completed=11,
-        InvalidSubmission=12
+        InvalidSubmission=12,
+        CancellingChildren = 13,
+        RequestCancellation = 14,
+        CancellationRequestSent = 15,
+        Cancelled = 16
     }
 }
