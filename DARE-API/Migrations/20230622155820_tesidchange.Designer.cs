@@ -3,6 +3,7 @@ using System;
 using BL.Repositories.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DARE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230622155820_tesidchange")]
+    partial class tesidchange
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -100,14 +103,8 @@ namespace DARE_API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("OutputBucket")
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("SubmissionBucket")
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -129,7 +126,7 @@ namespace DARE_API.Migrations
                     b.Property<int>("EndPointId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("ParentID")
+                    b.Property<int>("ParentID")
                         .HasColumnType("integer");
 
                     b.Property<int?>("ParentId")
@@ -137,10 +134,6 @@ namespace DARE_API.Migrations
 
                     b.Property<int>("ProjectId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("SourceCrate")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -157,10 +150,6 @@ namespace DARE_API.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("TesJson")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TesName")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -252,7 +241,9 @@ namespace DARE_API.Migrations
 
                     b.HasOne("BL.Models.Submission", "Parent")
                         .WithMany("Children")
-                        .HasForeignKey("ParentID");
+                        .HasForeignKey("ParentID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("BL.Models.Projects", "Project")
                         .WithMany("Submissions")
