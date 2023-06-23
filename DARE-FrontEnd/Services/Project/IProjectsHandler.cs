@@ -1,4 +1,5 @@
-﻿using BL.Models;
+﻿using BL.DTO;
+using BL.Models;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices.JavaScript;
 using System.Text.Json.Nodes;
@@ -17,17 +18,17 @@ namespace DARE_FrontEnd.Services.Project
 
         Task<Projects> GetAllProjects();
 
-        Task<Projects> AddEndpointsToProject(data model);
+        Task<Endpoints> GetAllEndPoints(int projectId);
+
 
         //Task<User> AddAUser(User model);
         //Task<User> AddAUser1(JsonObject model);
 
-        Task<User> AddAUser(data model);
+        Task<User> AddAUser(FormIoData model);
         //Task<User> AddAUser1(JsonObject model);
         Task<User> GetAUser(int id);
         Task<User> GetAllUsers();
 
-        void GetNewToken(int id);
         Task<ProjectMembership> AddMembership(ProjectMembership membership);
 
 

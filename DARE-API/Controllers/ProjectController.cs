@@ -7,6 +7,10 @@ using System.Text.Json.Nodes;
 using Newtonsoft.Json;
 using DARE_API.Controllers;
 using static BL.Controllers.UserController;
+using Minio.DataModel;
+using DARE_API.Services.Contract;
+using DARE_API.Models;
+using Serilog;
 
 namespace DARE_API.Controllers
 {
@@ -18,12 +22,19 @@ namespace DARE_API.Controllers
     {
 
         private readonly ApplicationDbContext _DbContext;
+        private readonly MinioSettings _minioSettings;
+        private readonly IMinioService _minioService;
 
+        private readonly ILogger<ProjectController> _logger;
 
-        public ProjectController(ApplicationDbContext applicationDbContext)
+    
+
+        public ProjectController(ApplicationDbContext applicationDbContext, MinioSettings minioSettings, IMinioService minioService)
         {
 
             _DbContext = applicationDbContext;
+            _minioSettings = minioSettings;
+            _minioService = minioService;
         }
 
 
@@ -80,15 +91,31 @@ namespace DARE_API.Controllers
                 //model.Users = projects.Users.ToList();
                 model.EndDate = projects.EndDate.ToUniversalTime();
 
+                model.SubmissionBucket = GenerateRandomName(model.Name);
+                model.OutputBucket = GenerateRandomName(model.Name);
+
+                var submissionBucket = await _minioService.CreateBucket(_minioSettings, model.SubmissionBucket);
+                if (!submissionBucket)
+                {
+                    Log.Error("S3GetListObjects: Failed to create bucket {name}.", model.SubmissionBucket);
+                }
+                var outputBucket = await _minioService.CreateBucket(_minioSettings, model.OutputBucket);
+                if (!outputBucket)
+                {
+                    Log.Error("S3GetListObjects: Failed to create bucket {name}.", model.OutputBucket);
+                }
+
                 _DbContext.Projects.Add(model);
 
                 await _DbContext.SaveChangesAsync();
 
-
+                _logger.LogInformation("Projects added successfully");
                 return model;
             }
-            catch (Exception ex) { }
-
+            catch (Exception ex) {
+                _logger.LogError(ex.Message.ToString());
+            }
+           
             return null;
         }
 
@@ -96,7 +123,8 @@ namespace DARE_API.Controllers
 
         public async Task<ProjectMembership> AddMembership(int userid, int projectid)
         {
-
+            try
+            { 
             var membership = new ProjectMembership();
             //var theuser =
 
@@ -106,51 +134,134 @@ namespace DARE_API.Controllers
             //membership.Id = 1;
             _DbContext.ProjectMemberships.Add(membership);
             await _DbContext.SaveChangesAsync();
+                _logger.LogInformation("Memberships added successfully");
+                return membership;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message.ToString());
+            }
 
-            return membership;
+            return null;
         }
 
         [HttpGet("Get_AllMemberships")]
 
-        public List<ProjectMembership> GetAllMemberships()
+        public List<ProjectMembership> GetAllProjectMemberships()
         {
-            var allProjectMemberships = _DbContext.ProjectMemberships.ToList();
+            try { 
+            var allMemberships = _DbContext.ProjectMemberships.ToList();
 
-            //foreach (var projectMembership  in allProjectMemberships)
-            //{
-            //    var id = projectMembership.Id;
-            //}
-            //return returned.FirstOrDefault();
-            return allProjectMemberships;
+            foreach (var memberships in allMemberships)
+            {
+                var Users = memberships.Users;
+                var Projects = memberships.Projects;
+            }
+                //return returned.FirstOrDefault();
+                _logger.LogInformation("Memberships retrieved successfully");
+                return allMemberships;
+        }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message.ToString()
+                    );
+            }
+
+            return null;
         }
 
+[HttpGet("Get_Membership/{userid}")]
 
-        [HttpGet("Get_Project/{projectId}")]
-
-        public Projects GetProject(int projectId)
+        public ProjectMembership GetMembership(int userid)
         {
-            var returned = _DbContext.Projects.Find(projectId);
-            if (returned == null)
+            try {
+            var membership = _DbContext.ProjectMemberships.Find(userid);
+            if (membership == null)
             {
                 return null;
             }
-            //return returned.FirstOrDefault();
-            return returned;
+                //return returned.FirstOrDefault();
+                _logger.LogInformation("Membership retrieved successfully");
+                return membership;
         }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message.ToString());
+            }
+
+            return null;
+        }
+
+
+[HttpGet("Get_Project/{projectId}")]
+
+        public Projects GetProject(int projectId)
+        {
+            try
+            {
+                var returned = _DbContext.Projects.Find(projectId);
+                if (returned == null)
+                {
+                    return null;
+                }
+                //return returned.FirstOrDefault();
+                _logger.LogInformation("Project retrieved successfully");
+                return returned;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message.ToString());
+            }
+
+            return null;
+        }
+
 
         [HttpGet("Get_AllProjects")]
 
         public List<Projects> GetAllProjects()
         {
-            var allProjects = _DbContext.Projects.ToList();
-            
-            foreach (var project in allProjects)
+            try
             {
-                var id = project.Id;
-                var name = project.Name;
+
+                var allProjects = _DbContext.Projects.ToList();
+
+                foreach (var project in allProjects)
+                {
+                    var id = project.Id;
+                    var name = project.Name;
+                }
+                //return returned.FirstOrDefault();
+                _logger.LogInformation("Projects retrieved successfully");
+                return allProjects;
             }
-            //return returned.FirstOrDefault();
-            return allProjects;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message.ToString());
+            }
+
+            return null;
+        }
+
+        [HttpGet("Get_AllEndPoints/{projectId}")]
+
+        public List<Endpoints> GetEndPointsInProject(int projectId)
+        {
+            List<Endpoints> endpoints = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Endpoints).ToList();
+
+            //var returned = _DbContext.Projects.Find(projectId);
+            //if (returned == null)
+            //{
+            //    return null;
+            //}           
+            return endpoints;
+        }
+
+        public static string GenerateRandomName(string prefix)
+        {
+            Random random = new Random();
+            string randomName = prefix + random.Next(1000, 9999);
+            return randomName;
         }
 
         //this is going to be used but commented out until I can fix it

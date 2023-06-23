@@ -38,8 +38,28 @@ using DARE_FrontEnd.Services.FormIO;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using DARE_FrontEnd.Models;
 using Microsoft.IdentityModel.Logging;
+using Serilog.Exceptions.Core;
+using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
+using Serilog;
+using Serilog.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Verbose()
+    .Enrich.WithDemystifiedStackTraces()
+    .Enrich.WithExceptionDetails(new DestructuringOptionsBuilder()
+        .WithDefaultDestructurers()
+        .WithDestructurers(new[] { new DbUpdateExceptionDestructurer() }))
+    .Enrich.WithProperty("MainSystem", "DareFX")
+    .Enrich.WithProperty("Component", "SubmissionUI")
+    .Enrich.FromLogContext()
+    .Enrich.WithProperty("ServerName", Environment.MachineName)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.Seq(builder.Configuration["SeqURL"])
+    .CreateLogger();
+
 IdentityModelEventSource.ShowPII = true;
 // Add services to the container.
 builder.Services.AddControllersWithViews();

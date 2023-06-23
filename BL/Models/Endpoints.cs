@@ -17,6 +17,8 @@ namespace BL.Models
 
         public string Name { get; set; }
 
+        public virtual List<Submission> Submissions { get; set; }
+
 
     }
 }

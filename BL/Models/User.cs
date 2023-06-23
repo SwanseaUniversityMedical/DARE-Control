@@ -9,6 +9,7 @@ namespace BL.Models
         public string Email { get; set; }
         [JsonIgnore]
         public virtual List<ProjectMembership> ProjectMemberships { get; set; }
-
+        public virtual List<Submission> Submissions { get; set; }
+        public FormData FormData { get; set; }
     }
 }

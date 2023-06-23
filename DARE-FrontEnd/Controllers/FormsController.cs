@@ -11,6 +11,7 @@ using System.Text.Json;
 using Newtonsoft.Json;
 using DARE_FrontEnd.Services.Project;
 using DARE_FrontEnd.Services;
+using BL.DTO;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -29,6 +30,12 @@ namespace DARE_FrontEnd.Controllers
         [Route("Forms/Index")]
         public IActionResult Index()
         {
+            return View();
+        }
+
+        [Route("Forms/AddUserForm")]
+        public IActionResult AddUserForm()
+        {
             return View(new data()
             {
                 FormIoUrl = "https://bthbspqizezypsb.form.io/dareuser/dareuserregistration"
@@ -40,7 +47,8 @@ namespace DARE_FrontEnd.Controllers
         {
             return View(new data()
             {
-                FormIoUrl = "https://flmykuxtnvsgjjt.form.io/addproject"
+                //FormIoUrl = "https://flmykuxtnvsgjjt.form.io/addproject"
+                FormIoUrl = "https://feidldzemrnfcva.form.io/createnewproject"
             });
 
 
@@ -87,10 +95,9 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UserFormSubmission([FromBody] data submissionData)
+        public async Task<IActionResult> UserFormSubmission([FromBody] FormIoData submissionData)
         {
             //save session id against it
-
             var result = await _projectsHandler.AddAUser(submissionData);
             return (IActionResult)result;
         }
