@@ -57,6 +57,9 @@ namespace DARE_API.Controllers
         {
             _DbContext = repository;
 
+            
+            
+
         }
 
         /// <summary>
@@ -225,7 +228,7 @@ namespace DARE_API.Controllers
 
             //TODO: External containers need copying over and change image loc
 
-            var project = tesTask.Tags.Where(x => x.Key.ToLower() == "project").Select(x => x.Key).FirstOrDefault();
+            var project = tesTask.Tags.Where(x => x.Key.ToLower() == "project").Select(x => x.Value).FirstOrDefault();
             if (string.IsNullOrWhiteSpace(project))
             {
                 return BadRequest("Tags must contain key project.");
@@ -246,7 +249,7 @@ namespace DARE_API.Controllers
             }
 
             //TODO: Implement this function
-            if (IsUserOnProject(dbproj))
+            if (!IsUserOnProject(dbproj))
             {
                 return BadRequest("User " + User.Identity.Name + "isn't on project " + project + ".");
             }
@@ -375,6 +378,65 @@ namespace DARE_API.Controllers
                 string.Join(",", serviceInfo.TesResourcesSupportedBackendParameters));
             return StatusCode(200, serviceInfo);
         }
+
+        /// <summary>
+        /// GetServiceInfo provides information about the service, such as storage details, resource availability, and  other documentation.
+        /// </summary>
+        /// <response code="200"></response>
+        [HttpGet]
+        [Route("/v1/get_test_tes")]
+        [ValidateModelState]
+        [SwaggerOperation("GetTestTes")]
+        [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
+        public virtual IActionResult GetTestTes()
+        {
+            var test = new TesTask()
+            {
+                Id = "",
+                Logs = new List<TesTaskLog>(),
+                Inputs = new List<TesInput>(),
+                Outputs = new List<TesOutput>(),
+                Volumes = new List<string>(),
+                Resources = new TesResources()
+                {
+                    Zones = new List<string>(),
+                    BackendParameters = new Dictionary<string, string>()
+                    {
+                        {"additionalProp1", "string"},
+                            {"additionalProp2", "string"},
+                            {"additionalProp3", "string"}
+                    },
+                    BackendParametersStrict = false
+
+                },
+                Description = "Testing",
+                Name = "Atest",
+                Executors = new List<TesExecutor>()
+                {
+                    new TesExecutor()
+                    {
+                        Image = @"\\minio\justin1.crate",
+                        Env = new Dictionary<string, string>(),
+                        Stdin = "",
+                        Stdout = "",
+                        Stderr = "",
+                        Command = new List<string>(),
+                        Workdir = "",
+                    }
+                },
+                Tags = new Dictionary<string, string>()
+                {
+                    { "project", "wombles" },
+                    { "endpoints", "SAIL|DPUK" }
+                }
+
+            };
+
+            var teststring = JsonConvert.SerializeObject(test);
+            return StatusCode(200, teststring);
+        }
+
+       
 
         /// <summary>
         /// Get a task. TaskView is requested as such: \&quot;v1/tasks/{id}?view&#x3D;FULL\&quot;
