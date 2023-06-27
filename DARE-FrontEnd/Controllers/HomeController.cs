@@ -197,35 +197,35 @@ namespace DARE_FrontEnd.Controllers
         //    return View(project);
         //}
 
-        [Route("Home/Projects/AddUser/{userid:int}/{projectId:int}")]
-        public async Task<IActionResult> AddUserToProject(int userid, int projectId)
-        {
-            //var user = GetAUser(userid);
-            //var project = GetProject(projectId);
+        //[Route("Home/Projects/AddUser/{userid:int}/{projectId:int}")]
+        //public async Task<IActionResult> AddUserToProject(int userid, int projectId)
+        //{
+        //    //var user = GetAUser(userid);
+        //    //var project = GetProject(projectId);
 
-            var project = new Projects();
-            //model.Id = 5;
-            project.StartDate = DateTime.Now;
-            project.EndDate = DateTime.Now;
-            project.Users = new List<User>();
-            project.Name = "test project";
+        //    var project = new Projects();
+        //    //model.Id = 5;
+        //    project.StartDate = DateTime.Now;
+        //    project.EndDate = DateTime.Now;
+        //    project.Users = new List<User>();
+        //    project.Name = "test project";
 
-            //var create = await _projectsHandler.CreateProject(project);
-            var user = new User();
-            //model.Id = 5;
-            user.Name = "Luke";
-            user.Email = "email@email.com";
-            user.Id = userid;
+        //    //var create = await _projectsHandler.CreateProject(project);
+        //    var user = new User();
+        //    //model.Id = 5;
+        //    user.Name = "Luke";
+        //    user.Email = "email@email.com";
+        //    user.Id = userid;
 
 
-            //var create1 = await _projectsHandler.AddAUser(user);
-            var membership = new ProjectMembership();
-            membership.Projects = project;
-            membership.Users = user;
-            var userToProject = await _projectsHandler.AddMembership(membership);
-            return View(userToProject);
+        //    //var create1 = await _projectsHandler.AddAUser(user);
+        //    var membership = new ProjectMembership();
+        //    membership.Projects = project;
+        //    membership.Users = user;
+        //    var userToProject = await _projectsHandler.AddMembership(membership);
+        //    return View(userToProject);
 
-        }
+        //}
 
         [HttpGet]
         [Route("Home/GetEndpointsList/{projectId:int}")]

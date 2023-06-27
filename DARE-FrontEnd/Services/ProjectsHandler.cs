@@ -109,25 +109,25 @@ namespace DARE_FrontEnd.Services
             return test.Data;
         }
 
-        public async Task<ProjectMembership> AddMembership(ProjectMembership membership)
-        {
-            var request = new RestRequest("https://localhost:7058/api/Project/Add_Membership", Method.Post);
-            request.Method = Method.Post;
-            request.AddHeader("Accept", "application/json");
-            request.AddParameter("application/json", JsonConvert.SerializeObject(membership), ParameterType.RequestBody);
-            var test = _apiCaller.Client.Execute<ProjectMembership>(request);
-            return test.Data;
+        //public async Task<ProjectMembership> AddMembership(ProjectMembership membership)
+        //{
+        //    var request = new RestRequest("https://localhost:7058/api/Project/Add_Membership", Method.Post);
+        //    request.Method = Method.Post;
+        //    request.AddHeader("Accept", "application/json");
+        //    request.AddParameter("application/json", JsonConvert.SerializeObject(membership), ParameterType.RequestBody);
+        //    var test = _apiCaller.Client.Execute<ProjectMembership>(request);
+        //    return test.Data;
 
-        }
-        public async Task<ProjectMembership> GetAllMemberships()
-        {
-            var request = new RestRequest($"https://localhost:7058/api/Project/Get_AllMemberships", Method.Get);
-            request.Method = Method.Get;
-            request.AddHeader("Accept", "application/json");
-            request.AddParameter("application/json", ParameterType.RequestBody);
-            var test = _apiCaller.Client.Execute<ProjectMembership>(request);
-            return test.Data;
-        }
+        //}
+        //public async Task<ProjectMembership> GetAllMemberships()
+        //{
+        //    var request = new RestRequest($"https://localhost:7058/api/Project/Get_AllMemberships", Method.Get);
+        //    request.Method = Method.Get;
+        //    request.AddHeader("Accept", "application/json");
+        //    request.AddParameter("application/json", ParameterType.RequestBody);
+        //    var test = _apiCaller.Client.Execute<ProjectMembership>(request);
+        //    return test.Data;
+        //}
 
         public async Task<Endpoints> GetAllEndPoints(int projectId)
         {

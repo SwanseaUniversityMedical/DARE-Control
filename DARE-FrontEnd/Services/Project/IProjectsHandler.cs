@@ -29,7 +29,7 @@ namespace DARE_FrontEnd.Services.Project
         Task<User> GetAUser(int id);
         Task<User> GetAllUsers();
 
-        Task<ProjectMembership> AddMembership(ProjectMembership membership);
+        //Task<ProjectMembership> AddMembership(ProjectMembership membership);
 
 
         //IEnumerable<Models.Projects> Get(Expression<Func<Models.Projects, bool>> filter = null, Func<IQueryable<Models.Projects>, IOrderedQueryable<Models.Projects>> orderBy = null);
