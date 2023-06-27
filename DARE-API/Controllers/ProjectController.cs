@@ -12,6 +12,7 @@ using Minio.DataModel;
 using DARE_API.Services.Contract;
 using DARE_API.Models;
 using Serilog;
+using Endpoint = BL.Models.Endpoint;
 
 namespace DARE_API.Controllers
 {
@@ -136,6 +137,46 @@ namespace DARE_API.Controllers
             
         }
 
+        [HttpPost]
+        public async Task<ProjectEndpoint?> AddEndpointMembership(ProjectEndpoint model)
+        {
+            try
+            {
+                var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.Id == model.EndpointId);
+                if (endpoint == null)
+                {
+                    Log.Error("{Function} Invalid endpoint id {UserId}", "AddEndpointMembership", model.EndpointId);
+                    return null;
+                }
+
+                var project = _DbContext.Projects.FirstOrDefault(x => x.Id == model.ProjectId);
+                if (project == null)
+                {
+                    Log.Error("{Function} Invalid project id {UserId}", "AddEndpointMembership", model.ProjectId);
+                    return null;
+                }
+
+                if (project.Endpoints.Any(x => x == endpoint))
+                {
+                    Log.Error("{Function} Endpoint {Endpoint} is already on {ProjectName}", "AddEndpointMembership", endpoint.Name, project.Name);
+                    return null;
+                }
+
+                project.Endpoints.Add(endpoint);
+
+                await _DbContext.SaveChangesAsync();
+                Log.Information("{Function} Added endpoint {Enpoint} to {ProjectName}", "AddEndpointMembership", endpoint.Name, project.Name);
+                return model;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "AddEndpointMembership");
+                throw;
+            }
+
+
+        }
+
 
 
 
@@ -188,7 +229,7 @@ namespace DARE_API.Controllers
 
         public List<BL.Models.Endpoint> GetEndPointsInProject(int projectId)
         {
-            List<BL.Models.Endpoint> endpoints = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Endpoints).ToList();
+            List<Endpoint> endpoints = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Endpoints).ToList();
 
             return endpoints;
         }

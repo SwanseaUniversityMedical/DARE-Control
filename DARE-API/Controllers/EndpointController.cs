@@ -32,7 +32,7 @@ namespace DARE_API.Controllers
         {
             try
             {
-                BL.Models.Endpoint endpoints = JsonConvert.DeserializeObject<BL.Models.Endpoint>(data.FormIoString);
+                Endpoint endpoints = JsonConvert.DeserializeObject<BL.Models.Endpoint>(data.FormIoString);
 
                 var model = new BL.Models.Endpoint();
                 model.Name = endpoints.Name;
@@ -52,7 +52,7 @@ namespace DARE_API.Controllers
 
         }
 
-        [HttpPost]
+        [HttpGet]
         public List<Endpoint> GetAllEndpoints()
         {
             try
