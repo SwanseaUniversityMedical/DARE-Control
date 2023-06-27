@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace BL.Models
 {
-    public class Endpoints
+    public class Endpoint
     {
         public int Id { get; set; }
 
         [JsonIgnore]
-        public virtual List<Projects> Projects { get; set; }
+        public virtual List<Project> Projects { get; set; }
 
         public string Name { get; set; }
 

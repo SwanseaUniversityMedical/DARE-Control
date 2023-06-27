@@ -17,7 +17,7 @@ namespace BL.Models
         public string TesName { get; set; }
         public string TesJson { get; set; }
         public string DockerInputLocation { get; set; }
-        public virtual Projects Project { get; set; }
+        public virtual Project Project { get; set; }
 
         [ForeignKey("ParentID")]
         public virtual Submission? Parent { get; set; }
@@ -26,7 +26,7 @@ namespace BL.Models
 
         public SubmissionStatus Status { get; set; }
 
-        public virtual Endpoints EndPoint { get; set; }
+        public virtual Endpoint EndPoint { get; set; }
 
         public virtual User SubmittedBy { get; set; }
 

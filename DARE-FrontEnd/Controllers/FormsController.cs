@@ -43,13 +43,13 @@ namespace DARE_FrontEnd.Controllers
         }
         [Route("Forms/AddProjectForm")]
 
-        public async Task<IActionResult> AddProjectForm()
+        public Task<IActionResult> AddProjectForm()
         {
-            return View(new data()
+            return Task.FromResult<IActionResult>(View(new data()
             {
                 //FormIoUrl = "https://flmykuxtnvsgjjt.form.io/addproject"
                 FormIoUrl = "https://feidldzemrnfcva.form.io/createnewproject"
-            });
+            }));
 
 
         }
@@ -75,9 +75,7 @@ namespace DARE_FrontEnd.Controllers
         public async Task<IActionResult> FormSubmission([FromBody] data submissionData)
         {
             var result = await _projectsHandler.CreateProject(submissionData);
-            // IActionResult result = await HomeController.CreateProject(submissionData);
-
-            return (IActionResult)result;
+            return Ok(result);
         }
 
         [HttpPost]
@@ -85,7 +83,7 @@ namespace DARE_FrontEnd.Controllers
         {
             //save session id against it
             var result = await _projectsHandler.AddAUser(submissionData);
-            return (IActionResult)result;
+            return Ok(result);
         }
 
         [HttpPost]
@@ -94,7 +92,7 @@ namespace DARE_FrontEnd.Controllers
             //save session id against it
 
             var result = await _endpointsHandler.CreateEndpoint(submissionData);
-            return (IActionResult)result;
+            return Ok(result);
         }
 
         [HttpPost]

@@ -29,13 +29,13 @@ namespace DARE_API.Controllers
        
         [HttpPost("Add_Endpoint")]
 
-        public async Task<Endpoints> AddEndpoint(data data)
+        public async Task<BL.Models.Endpoint> AddEndpoint(data data)
         {
             try
             {
-                Endpoints endpoints = JsonConvert.DeserializeObject<Endpoints>(data.FormIoString);
+                BL.Models.Endpoint endpoints = JsonConvert.DeserializeObject<BL.Models.Endpoint>(data.FormIoString);
 
-                var model = new Endpoints();
+                var model = new BL.Models.Endpoint();
                 model.Name = endpoints.Name;
                 //model.Projects = endpoints.Projects.ToList();
                 
