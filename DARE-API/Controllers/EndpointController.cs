@@ -1,6 +1,4 @@
-﻿using BL.Models;
-
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using BL.Repositories.DbContexts;
 
 
@@ -8,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using Endpoint = BL.Models.Endpoint;
+using BL.Models.DTO;
 
 namespace DARE_API.Controllers
 {
@@ -26,16 +25,23 @@ namespace DARE_API.Controllers
 
         }
         
-        [HttpPost]
+        [HttpPost("AddEndpoint")]
 
         public async Task<Endpoint?> AddEndpoint(FormData data)
         {
             try
             {
-                Endpoint endpoints = JsonConvert.DeserializeObject<BL.Models.Endpoint>(data.FormIoString);
+                Endpoint endpoints = JsonConvert.DeserializeObject<Endpoint>(data.FormIoString);
 
-                var model = new BL.Models.Endpoint();
-                model.Name = endpoints.Name;
+                
+                var model = new Endpoint();
+                model.Name = endpoints.Name.Trim();
+                model.FormData = data.FormIoString;
+
+                if (_DbContext.Endpoints.Any(x => x.Name.ToLower() == endpoints.Name.ToLower().Trim()))
+                {
+                    return null;
+                }
 
                 _DbContext.Endpoints.Add(model);
 
@@ -52,7 +58,38 @@ namespace DARE_API.Controllers
 
         }
 
-        [HttpGet]
+        [HttpPost("AddEndpointMVC")]
+
+        public async Task<Endpoint?> AddEndpointMVC(Endpoint model)
+        {
+            try
+            {
+               
+                model.Name = model.Name.Trim();
+                
+
+                if (_DbContext.Endpoints.Any(x => x.Name.ToLower() == model.Name.ToLower().Trim()))
+                {
+                    return null;
+                }
+
+                model.FormData = "";
+                _DbContext.Endpoints.Add(model);
+
+                await _DbContext.SaveChangesAsync();
+
+                Log.Information("{Function} Endpoint created successfully", "AddEndpointMVC");
+                return model;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "AddEndpointMVC");
+                throw;
+            }
+
+        }
+
+        [HttpGet("GetAllEndpoints")]
         public List<Endpoint> GetAllEndpoints()
         {
             try

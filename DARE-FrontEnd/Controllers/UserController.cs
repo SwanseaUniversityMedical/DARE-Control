@@ -22,6 +22,15 @@ namespace DARE_FrontEnd.Controllers
             });
         }
 
+        [HttpGet]
+        public IActionResult GetAllUsers()
+        {
+
+            var test = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
+
+            return View(test);
+        }
+
         [HttpPost]
         public async Task<IActionResult> UserFormSubmission([FromBody] FormData submissionData)
         {

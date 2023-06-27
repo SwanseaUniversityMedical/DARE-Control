@@ -1,0 +1,35 @@
+﻿@model List<BL.Models.User>
+@{
+    ViewData["Title"] = "User List";
+}
+
+
+<div>
+    <table>
+        <thead>
+        <td>User Name</td>
+
+        <td>Users on Project</td>
+        </thead>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Name</td>
+                <td>
+                    <table>
+                        
+                        @foreach (var project in user.Projects)
+                        {
+                            <tr>
+                                <td>
+                                    @project.Name
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                </td>
+            </tr>
+        }
+    </table>
+
+</div>

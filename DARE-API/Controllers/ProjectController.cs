@@ -47,7 +47,7 @@ namespace DARE_API.Controllers
 
 
 
-        [HttpPost]
+        [HttpPost("AddProject")]
         public async Task<Project?> AddProject(FormData data)
         {
             try
@@ -64,18 +64,19 @@ namespace DARE_API.Controllers
 
                 model.SubmissionBucket = GenerateRandomName(model.Name);
                 model.OutputBucket = GenerateRandomName(model.Name);
+                model.FormData = data.FormIoString;
 
-                var submissionBucket = await _minioService.CreateBucket(_minioSettings, model.SubmissionBucket);
-                if (!submissionBucket)
-                {
-                    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", model.SubmissionBucket);
-                }
-                var outputBucket = await _minioService.CreateBucket(_minioSettings, model.OutputBucket);
-                if (!outputBucket)
-                {
-                    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", model.OutputBucket);
+                //var submissionBucket = await _minioService.CreateBucket(_minioSettings, model.SubmissionBucket);
+                //if (!submissionBucket)
+                //{
+                //    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", model.SubmissionBucket);
+                //}
+                //var outputBucket = await _minioService.CreateBucket(_minioSettings, model.OutputBucket);
+                //if (!outputBucket)
+                //{
+                //    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", model.OutputBucket);
                     
-                }
+                //}
 
                 if (_DbContext.Projects.Any(x => x.Name.ToLower() == model.Name.ToLower().Trim()))
                 {
@@ -97,7 +98,7 @@ namespace DARE_API.Controllers
         }
 
 
-        [HttpPost]
+        [HttpPost("AddUserMembership")]
         public async Task<ProjectUser?> AddUserMembership(ProjectUser model)
         {
             try
@@ -137,7 +138,7 @@ namespace DARE_API.Controllers
             
         }
 
-        [HttpPost]
+        [HttpPost("AddEndpointMembership")]
         public async Task<ProjectEndpoint?> AddEndpointMembership(ProjectEndpoint model)
         {
             try
@@ -181,7 +182,7 @@ namespace DARE_API.Controllers
 
 
 
-        [HttpPost]
+        [HttpGet("GetProject")]
         public Project? GetProject(int projectId)
         {
             try
@@ -204,13 +205,17 @@ namespace DARE_API.Controllers
             
         }
 
-        [HttpPost]
+        [HttpGet("GetAllProjects")]
         public List<Project> GetAllProjects()
         {
             try
             {
 
-                var allProjects = _DbContext.Projects.ToList();
+                var allProjects = _DbContext.Projects
+                    //.Include(x => x.Endpoints)
+                    //.Include(x => x.Submissions)
+                    //.Include(x => x.Users)
+                    .ToList();
 
                 
                 Log.Information("{Function} Projects retrieved successfully", "GetAllProjects");
@@ -225,16 +230,16 @@ namespace DARE_API.Controllers
             
         }
 
-        [HttpGet]
+        [HttpGet("GetEndPointsInProject")]
 
-        public List<BL.Models.Endpoint> GetEndPointsInProject(int projectId)
+        public List<Endpoint> GetEndPointsInProject(int projectId)
         {
             List<Endpoint> endpoints = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Endpoints).ToList();
 
             return endpoints;
         }
 
-        public static string GenerateRandomName(string prefix)
+        private static string GenerateRandomName(string prefix)
         {
             Random random = new Random();
             string randomName = prefix + random.Next(1000, 9999);

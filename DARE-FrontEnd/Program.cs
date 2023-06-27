@@ -14,6 +14,9 @@ using Serilog.Exceptions.Core;
 using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
 using Serilog;
 using Serilog.Exceptions;
+using System.Text.Json.Serialization;
+using System.Text.Json;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,7 +37,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 IdentityModelEventSource.ShowPII = true;
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
+    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+); ; ;
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
@@ -63,6 +68,12 @@ builder.Services.AddScoped<CustomCookieEvent>();
 
 builder.Services.AddScoped<IClientHelper, ClientHelper>();
 
+
+//builder.Services.AddSingleton(new JsonSerializerOptions()
+//{
+//    PropertyNameCaseInsensitive = true,
+//    ReferenceHandler = ReferenceHandler.Preserve
+//});
 
 
 

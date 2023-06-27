@@ -7,10 +7,32 @@
 }
 
 <div>
-    @Html.ActionLink("Add a Project", "AddProjectForm","Project")
-    @Html.ActionLink("Add a Project Membership", "AddUserMembership","Project")
-    @Html.ActionLink("Add a Project Membership", "AddEndpointMembership","Project")
-    @Html.ActionLink("List All Projects", "GetAllProjects","Project")
-    @Html.ActionLink("Add a User", "AddUserForm","User")
-    @Html.ActionLink("Add a Project", "AddEndpointForm","Endpoint")
+    <div>
+        @Html.ActionLink("Add a Project", "AddProjectForm", "Project")
+    </div>
+    <div>
+        @Html.ActionLink("Add a Project Membership", "AddUserMembership", "Project")
+    </div>
+    <div>
+        @Html.ActionLink("Add a Endpoint Membership", "AddEndpointMembership", "Project")
+    </div>
+    <div>
+        @Html.ActionLink("List All Projects", "GetAllProjects", "Project")
+    </div>
+    <div>
+        @Html.ActionLink("Add a User", "AddUserForm", "User")
+    </div>
+    <div>
+        @Html.ActionLink("List all Users", "GetAllUsers", "User")
+    </div>
+    <div>
+        @Html.ActionLink("Add an Endpoint MVC", "AddEndpoint", "Endpoint")
+    </div>
+    <div>
+        @Html.ActionLink("Add an Endpoint", "AddEndpointForm", "Endpoint")
+    </div>
+    <div>
+        @Html.ActionLink("List all Endpoints", "GetAllEndpoints", "Endpoint")
+    </div>
 </div>
+

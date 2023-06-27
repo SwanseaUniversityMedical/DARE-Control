@@ -12,10 +12,12 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Net;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Serilog.Exceptions;
 using Serilog.Exceptions.Core;
 using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
 using Microsoft.AspNetCore.Builder;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,8 +43,12 @@ Log.Logger = CreateSerilogLogger(configuration, environment);
 Log.Information("API logging Start.");
 
 // Add services to the container.
-builder.Services.AddControllersWithViews(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(
+builder.Services.AddControllersWithViews(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true).AddNewtonsoftJson(options =>
+    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+); ;
+builder.Services.AddDbContext<ApplicationDbContext>(options => options
+    .UseLazyLoadingProxies(true)
+    .UseNpgsql(
     builder.Configuration.GetConnectionString("DefaultConnection")
 ));
 
@@ -57,7 +63,11 @@ AddDependencies(builder, configuration);
 var keyCloakSettings = new KeyCloakSettings();
 configuration.Bind(nameof(keyCloakSettings), keyCloakSettings);
 builder.Services.AddSingleton(keyCloakSettings);
-
+//builder.Services.AddSingleton(new JsonSerializerOptions()
+//{
+//    PropertyNameCaseInsensitive = true,
+//    ReferenceHandler = ReferenceHandler.Preserve
+//});
 //var internalMinioSettings = new MinioInternalSettings();
 //configuration.Bind(nameof(internalMinioSettings), internalMinioSettings);
 //builder.Services.AddSingleton(internalMinioSettings);
@@ -222,16 +232,19 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
 
     builder.Services.AddHttpContextAccessor();
 
-    builder.Services.AddSingleton(new JsonSerializerOptions()
-    {
-        PropertyNameCaseInsensitive = true,
-    });
+   
     builder.Services.AddScoped<IMinioService, MinioService>();
-    builder.Services.AddMvc().AddControllersAsServices();
+    builder.Services.AddMvc().AddControllersAsServices()
+    //    .AddNewtonsoftJson(options =>
+    //    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+    //); 
+    ;
 
     //builder.Services.AddScoped<ICodeService, CodeService>();
 
 }
+
+
 
 /// <summary>
 /// Add Services

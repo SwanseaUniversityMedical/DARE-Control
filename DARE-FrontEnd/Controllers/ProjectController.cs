@@ -35,6 +35,7 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public IActionResult GetAllProjects()
         {
+
             var test = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
 
             return View(test);
@@ -44,6 +45,12 @@ namespace DARE_FrontEnd.Controllers
         public IActionResult AddUserMembership()
         {
 
+            var projmem = GetProjectUserModel();
+            return View(projmem);
+        }
+
+        private ProjectUser GetProjectUserModel()
+        {
             var projs = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
             var users = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
 
@@ -60,13 +67,19 @@ namespace DARE_FrontEnd.Controllers
                 ProjectItemList = projectItems,
                 UserItemList = userItems
             };
-            return View(projmem);
+            return projmem;
         }
 
         [HttpGet]
         public IActionResult AddEndpointMembership()
         {
 
+            var projmem = GetProjectEndpointModel();
+            return View(projmem);
+        }
+
+        private ProjectEndpoint GetProjectEndpointModel()
+        {
             var projs = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
             var users = _clientHelper.CallAPIWithoutModel<List<Endpoint>>("/api/Endpoint/GetAllEndpoints/").Result;
 
@@ -83,28 +96,28 @@ namespace DARE_FrontEnd.Controllers
                 ProjectItemList = projectItems,
                 EndpointItemList = endpointItems
             };
-            return View(projmem);
+            return projmem;
         }
 
         [HttpPost]
-        public async Task<ProjectUser> AddUserMembership(ProjectUser model)
+        public async Task<IActionResult> AddUserMembership(ProjectUser model)
         {
             var result =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
-
-            return result;
+            result = GetProjectUserModel();
+            return View(result);
 
 
         }
 
         [HttpPost]
-        public async Task<ProjectEndpoint?> AddEndpointMembership(ProjectEndpoint model)
+        public async Task<IActionResult> AddEndpointMembership(ProjectEndpoint model)
         {
             var result =
                 await _clientHelper.CallAPI<ProjectEndpoint, ProjectEndpoint?>("/api/Project/AddEndpointMembership",
                     model);
-
-            return result;
+            result = GetProjectEndpointModel();
+            return View(result);
 
 
         }

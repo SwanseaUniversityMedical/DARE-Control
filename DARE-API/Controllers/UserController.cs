@@ -33,20 +33,19 @@ namespace BL.Controllers
         }
 
 
-        [HttpPost]
+        [HttpPost("AddUser")]
         public async Task<User> AddUser(FormData data) 
         {
             try
             {
-                FormData formData = new FormData()
-                {
-                    FormIoString = data.FormIoString,
-                    FormIoUrl = data.FormIoUrl
-                };
-
+               
                 User users = JsonConvert.DeserializeObject<User>(data.FormIoString);
-
-                users.FormData = formData;
+                users.Name = users.Name.Trim();
+                if (_DbContext.Users.Any(x => x.Name.ToLower() == users.Name.ToLower().Trim()))
+                {
+                    return null;
+                }
+                users.FormData = data.FormIoString;
 
                 _DbContext.Users.Add(users);
 
@@ -65,7 +64,7 @@ namespace BL.Controllers
 
 
 
-        [HttpGet]
+        [HttpGet("GetUser")]
         public User? GetUser(int userId)
         {
             try
@@ -89,7 +88,7 @@ namespace BL.Controllers
 
 
 
-        [HttpGet]
+        [HttpGet("GetAllUsers")]
         public List<User> GetAllUsers()
         {
             try

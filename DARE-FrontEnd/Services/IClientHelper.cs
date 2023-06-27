@@ -135,6 +135,7 @@ namespace DARE_FrontEnd.Services
                     StatusCode = System.Net.HttpStatusCode.BadRequest
                 };
                 
+
                 if (method == HttpMethod.Get) res = await apiClient.GetAsync(endPoint);
                 if (method == HttpMethod.Post) res = await apiClient.PostAsync(endPoint, jsonString);
                 if (method == HttpMethod.Put) res = await apiClient.PutAsync(endPoint, jsonString);
@@ -177,7 +178,7 @@ namespace DARE_FrontEnd.Services
                 modelString = GetStringContent<TInput>(model);
             }
 
-            return await CallAPIWithReturnType<TOutput>(_webAPISettings.Address + endPoint, modelString, paramList);
+            return await CallAPIWithReturnType<TOutput>(endPoint, modelString, paramList);
            
         }
 
@@ -185,7 +186,7 @@ namespace DARE_FrontEnd.Services
         {
             
 
-            return await CallAPIWithReturnType<TOutput>(_webAPISettings.Address + endPoint, null, paramList);
+            return await CallAPIWithReturnType<TOutput>(endPoint, null, paramList);
 
         }
 
