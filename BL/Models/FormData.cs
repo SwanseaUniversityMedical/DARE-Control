@@ -22,7 +22,9 @@ namespace BL.Models
         public string? FormIoString { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
+        [ForeignKey("Id")]
         public virtual Projects Project { get; set; }
+        [ForeignKey("Id")]
         public virtual User User { get; set; }
     }
 }
