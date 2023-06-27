@@ -15,6 +15,7 @@ using System.Text.Json;
 using Serilog.Exceptions;
 using Serilog.Exceptions.Core;
 using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
+using Microsoft.AspNetCore.Builder;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,7 +41,7 @@ Log.Logger = CreateSerilogLogger(configuration, environment);
 Log.Information("API logging Start.");
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(
     builder.Configuration.GetConnectionString("DefaultConnection")
 ));
@@ -158,6 +159,7 @@ if (app.Environment.IsDevelopment())
 
     app.UseSwaggerUI(c =>
     {
+        c.EnableValidator(null);
         c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{environment.ApplicationName} v1");
         c.OAuthClientId(keyCloakSettings.ClientId);
         c.OAuthClientSecret(keyCloakSettings.ClientSecret);

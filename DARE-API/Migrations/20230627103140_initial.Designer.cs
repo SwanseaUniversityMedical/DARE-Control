@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DARE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230627101925_initial")]
+    [Migration("20230627103140_initial")]
     partial class initial
     {
         /// <inheritdoc />
