@@ -7,6 +7,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using BL.Models;
+using BL.Models.Tes;
 
 
 namespace DARE_API.ContractResolvers

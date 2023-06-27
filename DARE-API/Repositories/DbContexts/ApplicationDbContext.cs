@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
-
+using BL.Models.DTO;
 
 namespace BL.Repositories.DbContexts
 {
@@ -18,7 +18,7 @@ namespace BL.Repositories.DbContexts
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
           : base(options)
         {
-
+           
         }
 
         public DbSet<User> Users { get; set; }
@@ -27,7 +27,7 @@ namespace BL.Repositories.DbContexts
         
         public DbSet<Models.Endpoint> Endpoints { get; set; }
 
-        public DbSet<FormData> FormData { get; set; }
+        
 
         public DbSet<Submission> Submissions { get; set; }
 

@@ -1,15 +1,16 @@
-﻿using Newtonsoft.Json;
+﻿using BL.Models.DTO;
+using Newtonsoft.Json;
 
 namespace BL.Models
 {
     public class Project
     {
         public int Id { get; set; }
-        [JsonIgnore]
+        
         public virtual List<User> Users { get; set; }
 
         public virtual List<Endpoint> Endpoints { get; set; }
-        public virtual FormData FormData { get; set; }
+        public string FormData { get; set; }
         public string Name { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }

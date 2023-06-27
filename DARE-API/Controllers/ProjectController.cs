@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using BL.Repositories.DbContexts;
 using BL.Models;
 using System.Text.Json.Nodes;
+using BL.Models.DTO;
 using Newtonsoft.Json;
 using DARE_API.Controllers;
 using static BL.Controllers.UserController;
@@ -11,6 +12,7 @@ using Minio.DataModel;
 using DARE_API.Services.Contract;
 using DARE_API.Models;
 using Serilog;
+using Endpoint = BL.Models.Endpoint;
 
 namespace DARE_API.Controllers
 {
@@ -25,7 +27,7 @@ namespace DARE_API.Controllers
         private readonly MinioSettings _minioSettings;
         private readonly IMinioService _minioService;
 
-        private readonly ILogger<ProjectController> _logger;
+        
 
     
 
@@ -38,168 +40,150 @@ namespace DARE_API.Controllers
         }
 
 
-        [HttpGet("HelloWorld")]
-
-        public IActionResult HelloWorld()
-        {
-            return Ok();
-        }
+        
+        
 
 
-        //[HttpPost("Save_Project")]
-
-        //public async Task<Projects> CreateProject([FromBody] JsonObject project)
-        //{
-        //    try
-        //    {
-        //        string jsonString = project.ToString();
-        //        Projects projects = JsonConvert.DeserializeObject<Projects>(jsonString);
-
-        //        //Projects projects = JsonConvert.DeserializeObject<Projects>(project);
-        //        var model = new Projects();
-        //        //2023-06-01 14:30:00 use this as the datetime
-        //        model.Name = projects.Name;
-        //        model.StartDate = projects.StartDate.ToUniversalTime();
-        //        //model.Users = projects.Users.ToList();
-        //        model.EndDate = projects.EndDate.ToUniversalTime();
-
-        //        _DbContext.Projects.Add(model);
-
-        //        await _DbContext.SaveChangesAsync();
 
 
-        //        return model;
-        //    }
-        //    catch (Exception ex) { }
 
-        //    return null;
-        //}
-
-        [HttpPost("Save_Project")]
-
-        public async Task<Project> CreateProject(data data)
+        [HttpPost("AddProject")]
+        public async Task<Project?> AddProject(FormData data)
         {
             try
             {
                 Project projects = JsonConvert.DeserializeObject<Project>(data.FormIoString);
 
-                //Projects projects = JsonConvert.DeserializeObject<Projects>(project);
+                
                 var model = new Project();
                 //2023-06-01 14:30:00 use this as the datetime
-                model.Name = projects.Name;
+                model.Name = projects.Name.Trim();
                 model.StartDate = projects.StartDate.ToUniversalTime();
-                //model.Users = projects.Users.ToList();
+                
                 model.EndDate = projects.EndDate.ToUniversalTime();
 
                 model.SubmissionBucket = GenerateRandomName(model.Name);
                 model.OutputBucket = GenerateRandomName(model.Name);
+                model.FormData = data.FormIoString;
 
-                var submissionBucket = await _minioService.CreateBucket(_minioSettings, model.SubmissionBucket);
-                if (!submissionBucket)
-                {
-                    Log.Error("S3GetListObjects: Failed to create bucket {name}.", model.SubmissionBucket);
-                }
-                var outputBucket = await _minioService.CreateBucket(_minioSettings, model.OutputBucket);
-                if (!outputBucket)
-                {
-                    Log.Error("S3GetListObjects: Failed to create bucket {name}.", model.OutputBucket);
-                }
+                //var submissionBucket = await _minioService.CreateBucket(_minioSettings, model.SubmissionBucket);
+                //if (!submissionBucket)
+                //{
+                //    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", model.SubmissionBucket);
+                //}
+                //var outputBucket = await _minioService.CreateBucket(_minioSettings, model.OutputBucket);
+                //if (!outputBucket)
+                //{
+                //    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", model.OutputBucket);
+                    
+                //}
 
+                if (_DbContext.Projects.Any(x => x.Name.ToLower() == model.Name.ToLower().Trim()))
+                {
+                    return null;
+                }
                 _DbContext.Projects.Add(model);
 
                 await _DbContext.SaveChangesAsync();
 
-                _logger.LogInformation("Projects added successfully");
+                Log.Information("{Function} Projects added successfully", "CreateProject");
                 return model;
             }
             catch (Exception ex) {
-                _logger.LogError(ex.Message.ToString());
+                Log.Error(ex, "{Function} Crash", "AddProject");
+                throw;
             }
            
-            return null;
+            
         }
 
-        [HttpPost("Add_Membership")]
 
-        //public async Task<ProjectMembership> AddMembership(int userid, int projectid)
-        //{
-        //    try
-        //    { 
-        //    var membership = new ProjectMembership();
-        //    //var theuser =
+        [HttpPost("AddUserMembership")]
+        public async Task<ProjectUser?> AddUserMembership(ProjectUser model)
+        {
+            try
+            {
+                var user = _DbContext.Users.FirstOrDefault(x => x.Id == model.UserId);
+                if (user == null)
+                {
+                    Log.Error("{Function} Invalid user id {UserId}", "AddUserMembership", model.UserId);
+                    return null;
+                }
 
-        //    membership.Users = await _DbContext.Users.SingleAsync(x => x.Id == userid);
-        //    membership.Projects = await _DbContext.Projects.SingleAsync(x => x.Id == projectid);
+                var project = _DbContext.Projects.FirstOrDefault(x => x.Id == model.ProjectId);
+                if (project == null)
+                {
+                    Log.Error("{Function} Invalid project id {UserId}", "AddUserMembership", model.ProjectId);
+                    return null;
+                }
 
-        //    //membership.Id = 1;
-        //    //_DbContext.ProjectMemberships.Add(membership);
-        //    await _DbContext.SaveChangesAsync();
-        //        _logger.LogInformation("Memberships added successfully");
-        //        return membership;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex.Message.ToString());
-        //    }
+                if (project.Users.Any(x => x == user))
+                {
+                    Log.Error("{Function} User {UserName} is already on {ProjectName}", "AddUserMembership", user.Name, project.Name);
+                    return null;
+                }
 
-        //    return null;
-        //}
+                project.Users.Add(user);
+                
+                await _DbContext.SaveChangesAsync();
+                Log.Information("{Function} Added User {UserName} to {ProjectName}", "AddUserMembership", user.Name, project.Name);
+                return model;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "AddUserMembership");
+                throw;
+            }
 
-        //[HttpGet("Get_AllMemberships")]
+            
+        }
 
-        //public List<ProjectMembership> GetAllProjectMemberships()
-        //{
-        //    try
-        //    {
-        //        var allMemberships = new List<ProjectMembership>();
-        //    //var allMemberships = _DbContext.ProjectMemberships.ToList();
+        [HttpPost("AddEndpointMembership")]
+        public async Task<ProjectEndpoint?> AddEndpointMembership(ProjectEndpoint model)
+        {
+            try
+            {
+                var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.Id == model.EndpointId);
+                if (endpoint == null)
+                {
+                    Log.Error("{Function} Invalid endpoint id {UserId}", "AddEndpointMembership", model.EndpointId);
+                    return null;
+                }
 
-        //    foreach (var memberships in allMemberships)
-        //    {
-        //        var Users = memberships.Users;
-        //        var Projects = memberships.Projects;
-        //    }
-        //        //return returned.FirstOrDefault();
-        //        _logger.LogInformation("Memberships retrieved successfully");
-        //        return allMemberships;
-        //}
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex.Message.ToString()
-        //            );
-        //    }
+                var project = _DbContext.Projects.FirstOrDefault(x => x.Id == model.ProjectId);
+                if (project == null)
+                {
+                    Log.Error("{Function} Invalid project id {UserId}", "AddEndpointMembership", model.ProjectId);
+                    return null;
+                }
 
-        //    return null;
-        //}
+                if (project.Endpoints.Any(x => x == endpoint))
+                {
+                    Log.Error("{Function} Endpoint {Endpoint} is already on {ProjectName}", "AddEndpointMembership", endpoint.Name, project.Name);
+                    return null;
+                }
 
-//[HttpGet("Get_Membership/{userid}")]
+                project.Endpoints.Add(endpoint);
 
-//        public ProjectMembership GetMembership(int userid)
-//        {
-//            try
-//            {
-//                var membership = new ProjectMembership();
-//            //var membership = _DbContext.ProjectMemberships.Find(userid);
-//            if (membership == null)
-//            {
-//                return null;
-//            }
-//                //return returned.FirstOrDefault();
-//                _logger.LogInformation("Membership retrieved successfully");
-//                return membership;
-//        }
-//            catch (Exception ex)
-//            {
-//                _logger.LogError(ex.Message.ToString());
-//            }
-
-//            return null;
-//        }
+                await _DbContext.SaveChangesAsync();
+                Log.Information("{Function} Added endpoint {Enpoint} to {ProjectName}", "AddEndpointMembership", endpoint.Name, project.Name);
+                return model;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "AddEndpointMembership");
+                throw;
+            }
 
 
-[HttpGet("Get_Project/{projectId}")]
+        }
 
-        public Project GetProject(int projectId)
+
+
+
+
+        [HttpGet("GetProject")]
+        public Project? GetProject(int projectId)
         {
             try
             {
@@ -208,60 +192,54 @@ namespace DARE_API.Controllers
                 {
                     return null;
                 }
-                //return returned.FirstOrDefault();
-                _logger.LogInformation("Project retrieved successfully");
+                
+                Log.Information("{Function} Project retrieved successfully", "GetProject");
                 return returned;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message.ToString());
+                Log.Error(ex, "{Function} Crashed", "GetProject");
+                throw;
             }
 
-            return null;
+            
         }
 
-
-        [HttpGet("Get_AllProjects")]
-
+        [HttpGet("GetAllProjects")]
         public List<Project> GetAllProjects()
         {
             try
             {
 
-                var allProjects = _DbContext.Projects.ToList();
+                var allProjects = _DbContext.Projects
+                    //.Include(x => x.Endpoints)
+                    //.Include(x => x.Submissions)
+                    //.Include(x => x.Users)
+                    .ToList();
 
-                foreach (var project in allProjects)
-                {
-                    var id = project.Id;
-                    var name = project.Name;
-                }
-                //return returned.FirstOrDefault();
-                _logger.LogInformation("Projects retrieved successfully");
+                
+                Log.Information("{Function} Projects retrieved successfully", "GetAllProjects");
                 return allProjects;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message.ToString());
+                Log.Error(ex, "{Function} Crashed", "GetAllProjects");
+                throw;
             }
 
-            return null;
+            
         }
 
-        [HttpGet("Get_AllEndPoints/{projectId}")]
+        [HttpGet("GetEndPointsInProject")]
 
-        public List<BL.Models.Endpoint> GetEndPointsInProject(int projectId)
+        public List<Endpoint> GetEndPointsInProject(int projectId)
         {
-            List<BL.Models.Endpoint> endpoints = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Endpoints).ToList();
+            List<Endpoint> endpoints = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Endpoints).ToList();
 
-            //var returned = _DbContext.Projects.Find(projectId);
-            //if (returned == null)
-            //{
-            //    return null;
-            //}           
             return endpoints;
         }
 
-        public static string GenerateRandomName(string prefix)
+        private static string GenerateRandomName(string prefix)
         {
             Random random = new Random();
             string randomName = prefix + random.Next(1000, 9999);

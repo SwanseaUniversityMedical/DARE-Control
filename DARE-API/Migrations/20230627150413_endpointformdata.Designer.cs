@@ -3,6 +3,7 @@ using System;
 using BL.Repositories.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DARE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230627150413_endpointformdata")]
+    partial class endpointformdata
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,10 +33,6 @@ namespace DARE_API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("FormData")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -41,6 +40,27 @@ namespace DARE_API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Endpoints");
+                });
+
+            modelBuilder.Entity("BL.Models.FormData", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FormIoString")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FormIoUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FormData");
                 });
 
             modelBuilder.Entity("BL.Models.Project", b =>
@@ -53,10 +73,6 @@ namespace DARE_API.Migrations
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("FormData")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -151,10 +167,6 @@ namespace DARE_API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("FormData")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -192,6 +204,33 @@ namespace DARE_API.Migrations
                     b.HasIndex("UsersId");
 
                     b.ToTable("ProjectUser");
+                });
+
+            modelBuilder.Entity("BL.Models.FormData", b =>
+                {
+                    b.HasOne("BL.Models.Endpoint", "Endpoint")
+                        .WithOne("FormData")
+                        .HasForeignKey("BL.Models.FormData", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BL.Models.Project", "Project")
+                        .WithOne("FormData")
+                        .HasForeignKey("BL.Models.FormData", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BL.Models.User", "User")
+                        .WithOne("FormData")
+                        .HasForeignKey("BL.Models.FormData", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Endpoint");
+
+                    b.Navigation("Project");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BL.Models.Submission", b =>
@@ -259,11 +298,17 @@ namespace DARE_API.Migrations
 
             modelBuilder.Entity("BL.Models.Endpoint", b =>
                 {
+                    b.Navigation("FormData")
+                        .IsRequired();
+
                     b.Navigation("Submissions");
                 });
 
             modelBuilder.Entity("BL.Models.Project", b =>
                 {
+                    b.Navigation("FormData")
+                        .IsRequired();
+
                     b.Navigation("Submissions");
                 });
 
@@ -274,6 +319,9 @@ namespace DARE_API.Migrations
 
             modelBuilder.Entity("BL.Models.User", b =>
                 {
+                    b.Navigation("FormData")
+                        .IsRequired();
+
                     b.Navigation("Submissions");
                 });
 #pragma warning restore 612, 618

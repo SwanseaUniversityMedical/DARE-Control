@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using BL.Models.DTO;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,10 +12,12 @@ namespace BL.Models
     {
         public int Id { get; set; }
 
-        [JsonIgnore]
+        
         public virtual List<Project> Projects { get; set; }
 
         public string Name { get; set; }
+
+        public string FormData { get; set; }
 
         public virtual List<Submission> Submissions { get; set; }
 
