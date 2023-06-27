@@ -131,7 +131,7 @@ namespace DARE_API.Controllers
             membership.Projects = await _DbContext.Projects.SingleAsync(x => x.Id == projectid);
 
             //membership.Id = 1;
-            _DbContext.ProjectMemberships.Add(membership);
+            //_DbContext.ProjectMemberships.Add(membership);
             await _DbContext.SaveChangesAsync();
                 _logger.LogInformation("Memberships added successfully");
                 return membership;
@@ -149,8 +149,8 @@ namespace DARE_API.Controllers
         public List<ProjectMembership> GetAllProjectMemberships()
         {
             try { 
-            var allMemberships = _DbContext.ProjectMemberships.ToList();
-
+           // var allMemberships = _DbContext.ProjectMemberships.ToList();
+           var allMemberships = new List<ProjectMembership>();
             foreach (var memberships in allMemberships)
             {
                 var Users = memberships.Users;
@@ -173,8 +173,10 @@ namespace DARE_API.Controllers
 
         public ProjectMembership GetMembership(int userid)
         {
-            try {
-            var membership = _DbContext.ProjectMemberships.Find(userid);
+            try
+            {
+                var membership = new ProjectMembership();
+                    //var membership = _DbContext.ProjectMemberships.Find(userid);
             if (membership == null)
             {
                 return null;
