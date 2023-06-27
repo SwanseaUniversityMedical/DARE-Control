@@ -121,80 +121,80 @@ namespace DARE_API.Controllers
 
         [HttpPost("Add_Membership")]
 
-        public async Task<ProjectMembership> AddMembership(int userid, int projectid)
-        {
-            try
-            { 
-            var membership = new ProjectMembership();
-            //var theuser =
+        //public async Task<ProjectMembership> AddMembership(int userid, int projectid)
+        //{
+        //    try
+        //    { 
+        //    var membership = new ProjectMembership();
+        //    //var theuser =
 
-            membership.Users = await _DbContext.Users.SingleAsync(x => x.Id == userid);
-            membership.Projects = await _DbContext.Projects.SingleAsync(x => x.Id == projectid);
+        //    membership.Users = await _DbContext.Users.SingleAsync(x => x.Id == userid);
+        //    membership.Projects = await _DbContext.Projects.SingleAsync(x => x.Id == projectid);
 
-            //membership.Id = 1;
-            //_DbContext.ProjectMemberships.Add(membership);
-            await _DbContext.SaveChangesAsync();
-                _logger.LogInformation("Memberships added successfully");
-                return membership;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message.ToString());
-            }
+        //    //membership.Id = 1;
+        //    //_DbContext.ProjectMemberships.Add(membership);
+        //    await _DbContext.SaveChangesAsync();
+        //        _logger.LogInformation("Memberships added successfully");
+        //        return membership;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex.Message.ToString());
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
 
-        [HttpGet("Get_AllMemberships")]
+        //[HttpGet("Get_AllMemberships")]
 
-        public List<ProjectMembership> GetAllProjectMemberships()
-        {
-            try
-            {
-                var allMemberships = new List<ProjectMembership>();
-            //var allMemberships = _DbContext.ProjectMemberships.ToList();
+        //public List<ProjectMembership> GetAllProjectMemberships()
+        //{
+        //    try
+        //    {
+        //        var allMemberships = new List<ProjectMembership>();
+        //    //var allMemberships = _DbContext.ProjectMemberships.ToList();
 
-            foreach (var memberships in allMemberships)
-            {
-                var Users = memberships.Users;
-                var Projects = memberships.Projects;
-            }
-                //return returned.FirstOrDefault();
-                _logger.LogInformation("Memberships retrieved successfully");
-                return allMemberships;
-        }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message.ToString()
-                    );
-            }
+        //    foreach (var memberships in allMemberships)
+        //    {
+        //        var Users = memberships.Users;
+        //        var Projects = memberships.Projects;
+        //    }
+        //        //return returned.FirstOrDefault();
+        //        _logger.LogInformation("Memberships retrieved successfully");
+        //        return allMemberships;
+        //}
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex.Message.ToString()
+        //            );
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
 
-[HttpGet("Get_Membership/{userid}")]
+//[HttpGet("Get_Membership/{userid}")]
 
-        public ProjectMembership GetMembership(int userid)
-        {
-            try
-            {
-                var membership = new ProjectMembership();
-            //var membership = _DbContext.ProjectMemberships.Find(userid);
-            if (membership == null)
-            {
-                return null;
-            }
-                //return returned.FirstOrDefault();
-                _logger.LogInformation("Membership retrieved successfully");
-                return membership;
-        }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message.ToString());
-            }
+//        public ProjectMembership GetMembership(int userid)
+//        {
+//            try
+//            {
+//                var membership = new ProjectMembership();
+//            //var membership = _DbContext.ProjectMemberships.Find(userid);
+//            if (membership == null)
+//            {
+//                return null;
+//            }
+//                //return returned.FirstOrDefault();
+//                _logger.LogInformation("Membership retrieved successfully");
+//                return membership;
+//        }
+//            catch (Exception ex)
+//            {
+//                _logger.LogError(ex.Message.ToString());
+//            }
 
-            return null;
-        }
+//            return null;
+//        }
 
 
 [HttpGet("Get_Project/{projectId}")]
