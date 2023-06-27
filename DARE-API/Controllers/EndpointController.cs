@@ -1,10 +1,13 @@
 ﻿using BL.Models;
-using Microsoft.AspNetCore.Mvc;
+
 using Newtonsoft.Json;
 using BL.Repositories.DbContexts;
 
-using static BL.Controllers.UserController;
+
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Serilog;
+using Endpoint = BL.Models.Endpoint;
 
 namespace DARE_API.Controllers
 {
@@ -22,14 +25,10 @@ namespace DARE_API.Controllers
             _DbContext = applicationDbContext;
 
         }
-        //public IActionResult Index()
-        //{
-        //    return View();
-        //}
-       
-        [HttpPost("Add_Endpoint")]
+        
+        [HttpPost]
 
-        public async Task<BL.Models.Endpoint> AddEndpoint(data data)
+        public async Task<Endpoint?> AddEndpoint(FormData data)
         {
             try
             {
@@ -37,18 +36,40 @@ namespace DARE_API.Controllers
 
                 var model = new BL.Models.Endpoint();
                 model.Name = endpoints.Name;
-                //model.Projects = endpoints.Projects.ToList();
-                
+
                 _DbContext.Endpoints.Add(model);
 
                 await _DbContext.SaveChangesAsync();
 
-
+                Log.Information("{Function} Endpoint created successfully", "AddEndpoint");
                 return model;
             }
-            catch (Exception ex) { }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "AddEndpoint");
+                throw;
+            }
 
-            return null;
+        }
+
+        [HttpPost]
+        public List<Endpoint> GetAllEndpoints()
+        {
+            try
+            {
+
+                var allEndpoints = _DbContext.Endpoints.ToList();
+
+                
+
+                Log.Information("{Function} Endpoints retrieved successfully", "GetAllEndpoints");
+                return allEndpoints;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetAllEndpoints");
+                throw;
+            }
 
 
         }

@@ -1,7 +1,6 @@
 ﻿using BL.Repositories.DbContexts;
 using Microsoft.AspNetCore.Mvc;
 using BL.Models;
-using BL.DTO;
 using System.Text.Json.Nodes;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
@@ -12,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Serilog;
 using IdentityModel.Client;
 using System.Text;
+using BL.Models.DTO;
 using DARE_API.Controllers;
 
 namespace BL.Controllers
@@ -21,25 +21,20 @@ namespace BL.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        //private readonly ILogger<UserController> _logger;
-        private readonly IConfiguration configuration;
+        
+        
         private readonly ApplicationDbContext _DbContext;
 
-        public UserController(ApplicationDbContext applicationDbContext, IConfiguration configuration)
+        public UserController(ApplicationDbContext applicationDbContext)
         {
 
             _DbContext = applicationDbContext;
-            this.configuration = configuration;
-        }
-        private readonly ILogger<UserController> _logger;
-        public class data
-        {
-            public string? FormIoString { get; set; }
-
+        
         }
 
-        [HttpPost("AddUser")]
-        public async Task<User> AddUser(FormIoData data) 
+
+        [HttpPost]
+        public async Task<User> AddUser(FormData data) 
         {
             try
             {
@@ -61,20 +56,17 @@ namespace BL.Controllers
             }
             catch (Exception ex)
             {
-
+                Log.Error(ex, "{Function} Crashed", "AddUser");
+                throw;
             }
 
-            return null;
+            
         }
 
-        public class ContainString
-        {
-            public string Data { get; set; }
-        }
 
-        [HttpGet("Get_User/{userId}")]
 
-        public User GetUser(int userId)
+        [HttpGet]
+        public User? GetUser(int userId)
         {
             try
             {
@@ -83,41 +75,39 @@ namespace BL.Controllers
                 {
                     return null;
                 }
-                _logger.LogInformation("User retrieved successfully");
+                Log.Information("{Function} User retrieved successfully", "GetUser");
                 return returned;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message.ToString());
+                Log.Error(ex, "{Function} Crashed", "GetUser");
+                throw;
             }
 
-            return null;
+            
         }
 
 
-        [HttpGet("Get_AllUsers")]
 
+        [HttpGet]
         public List<User> GetAllUsers()
         {
             try
             {
                 var allUsers = _DbContext.Users.ToList();
 
-                foreach (var user in allUsers)
-                {
-                    var id = user.Id;
-                    var name = user.Name;
-                }
-                //return returned.FirstOrDefault();
-                _logger.LogInformation("Users retrieved successfully");
+                
+            
+               Log.Information("{Function} Users retrieved successfully", "GetAllUsers");
                 return allUsers;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message.ToString());
+                Log.Error(ex, "{Function} Crash", "GetAllUsers");
+                throw;
             }
 
-            return null;
+            
         }
     }
 }

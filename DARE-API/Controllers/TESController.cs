@@ -16,6 +16,7 @@ using Serilog;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json.Linq;
 using System.Drawing;
+using BL.Models.Tes;
 
 
 namespace DARE_API.Controllers

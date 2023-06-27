@@ -1,30 +1,3 @@
-//var builder = WebApplication.CreateBuilder(args);
-
-//// Add services to the container.
-//builder.Services.AddControllersWithViews();
-
-//var app = builder.Build();
-
-//// Configure the HTTP request pipeline.
-//if (!app.Environment.IsDevelopment())
-//{
-//    app.UseExceptionHandler("/Home/Error");
-//    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-//    app.UseHsts();
-//}
-
-//app.UseHttpsRedirection();
-//app.UseStaticFiles();
-
-//app.UseRouting();
-
-//app.UseAuthorization();
-
-//app.MapControllerRoute(
-//    name: "default",
-//    pattern: "{controller=Home}/{action=Index}/{id?}");
-
-//app.Run();
 
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
@@ -33,8 +6,7 @@ using System.Net;
 using BL.Models.Services;
 using BL.Models.Settings;
 using DARE_FrontEnd.Services;
-using DARE_FrontEnd.Services.Project;
-using DARE_FrontEnd.Services.FormIO;
+
 using Microsoft.AspNetCore.Authentication.Cookies;
 using DARE_FrontEnd.Models;
 using Microsoft.IdentityModel.Logging;
@@ -88,14 +60,10 @@ builder.Services.AddHttpClient();
 
 //add services here
 builder.Services.AddScoped<CustomCookieEvent>();
-builder.Services.AddScoped<IProjectsHandler, ProjectsHandler>();
+
 builder.Services.AddScoped<IClientHelper, ClientHelper>();
-builder.Services.AddScoped<IFormHandler, FormHandler>();
-builder.Services.AddScoped<IEndpointHandler, EndpointHandler>();
-builder.Services.AddScoped<IAPICaller>(x =>
-{
-    return new APICaller("https://localhost:7163/");
-});
+
+
 
 
 
