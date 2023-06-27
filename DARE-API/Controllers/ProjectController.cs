@@ -149,9 +149,11 @@ namespace DARE_API.Controllers
 
         public List<ProjectMembership> GetAllProjectMemberships()
         {
-            try { 
-           // var allMemberships = _DbContext.ProjectMemberships.ToList();
-           var allMemberships = new List<ProjectMembership>();
+            try
+            {
+                var allMemberships = new List<ProjectMembership>();
+            //var allMemberships = _DbContext.ProjectMemberships.ToList();
+
             foreach (var memberships in allMemberships)
             {
                 var Users = memberships.Users;
@@ -177,7 +179,7 @@ namespace DARE_API.Controllers
             try
             {
                 var membership = new ProjectMembership();
-                    //var membership = _DbContext.ProjectMemberships.Find(userid);
+            //var membership = _DbContext.ProjectMemberships.Find(userid);
             if (membership == null)
             {
                 return null;
