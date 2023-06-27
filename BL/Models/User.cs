@@ -10,6 +10,6 @@ namespace BL.Models
         [JsonIgnore]
         public virtual List<ProjectMembership> ProjectMemberships { get; set; }
         public virtual List<Submission> Submissions { get; set; }
-        public FormData FormData { get; set; }
+        public virtual FormData FormData { get; set; }
     }
 }

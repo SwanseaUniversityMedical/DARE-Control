@@ -21,5 +21,8 @@ namespace BL.Models
         public string FormIoUrl { get; set; }
         public string? FormIoString { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+
+        public virtual Projects Project { get; set; }
+        public virtual User User { get; set; }
     }
 }

@@ -12,7 +12,7 @@ namespace BL.Models
         public int Id { get; set; }
 
         [JsonIgnore]
-        public List<Projects> Projects { get; set; }
+        public virtual List<Projects> Projects { get; set; }
 
         public string Name { get; set; }
 
