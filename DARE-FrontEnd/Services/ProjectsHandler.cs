@@ -26,7 +26,7 @@ namespace DARE_FrontEnd.Services
             _apiCaller = IApiCaller;
         }
 
-        public async Task<Projects> CreateProjectSettings(Projects model)
+        public async Task<BL.Models.Project> CreateProjectSettings(BL.Models.Project model)
         {
             //var jsonString = GetStringContent(model);
             ////serialising the model to be passed to the API
@@ -36,12 +36,12 @@ namespace DARE_FrontEnd.Services
 
         }
 
-        public async Task<Projects> CreateProject(data model)
+        public async Task<BL.Models.Project> CreateProject(data model)
         {
             try
             {
                 var stringContent = _clientHelper.GetStringContent(model);
-                var result = await _clientHelper.GenericHttpRequestWithReturnType<Projects>("/api/Project/Save_Project", stringContent);
+                var result = await _clientHelper.GenericHttpRequestWithReturnType<BL.Models.Project>("/api/Project/Save_Project", stringContent);
 
                 return result;
             }
@@ -68,23 +68,23 @@ namespace DARE_FrontEnd.Services
             }
         }
 
-        public async Task<Projects> GetProjectSettings(int id)
+        public async Task<BL.Models.Project> GetProjectSettings(int id)
         {
             var request = new RestRequest($"https://localhost:7058/api/Project/Get_Project/{id}", Method.Get);
             request.Method = Method.Get;
             request.AddHeader("Accept", "application/json");
             request.AddParameter("application/json", JsonConvert.SerializeObject(id), ParameterType.RequestBody);
-            var test = _apiCaller.Client.Execute<Projects>(request);
+            var test = _apiCaller.Client.Execute<BL.Models.Project>(request);
             return test.Data;
         }
 
-        public async Task<Projects> GetAllProjects()
+        public async Task<BL.Models.Project> GetAllProjects()
         {
             var request = new RestRequest($"https://localhost:7163/api/Project/Get_AllProjects", Method.Get);
             request.Method = Method.Get;
             request.AddHeader("Accept", "application/json");
             request.AddParameter("application/json", ParameterType.RequestBody);
-            var test = _apiCaller.Client.Execute<Projects>(request);
+            var test = _apiCaller.Client.Execute<BL.Models.Project>(request);
             return test.Data;
         }
 
@@ -129,22 +129,22 @@ namespace DARE_FrontEnd.Services
         //    return test.Data;
         //}
 
-        public async Task<Endpoints> GetAllEndPoints(int projectId)
+        public async Task<BL.Models.Endpoint> GetAllEndPoints(int projectId)
         {
             var request = new RestRequest($"https://localhost:7058/api/Project/Get_AllEndPoints/{projectId}", Method.Get);
             request.Method = Method.Get;
             request.AddHeader("Accept", "application/json");
             request.AddParameter("application/json", ParameterType.RequestBody);
-            var test = _apiCaller.Client.Execute<Endpoints>(request);
+            var test = _apiCaller.Client.Execute<BL.Models.Endpoint>(request);
             return test.Data;
         }
 
-        public Task<bool> AddAsync(Projects ProjectModel)
+        public Task<bool> AddAsync(BL.Models.Project ProjectModel)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Update(Projects ProjectModel)
+        public Task<bool> Update(BL.Models.Project ProjectModel)
         {
             throw new NotImplementedException();
         }

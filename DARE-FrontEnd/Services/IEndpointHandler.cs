@@ -5,6 +5,6 @@ namespace DARE_FrontEnd.Services
 {
     public interface IEndpointHandler
     {
-        Task<Endpoints> CreateEndpoint(data model);
+        Task<BL.Models.Endpoint> CreateEndpoint(data model);
     }
 }

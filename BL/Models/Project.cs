@@ -2,13 +2,13 @@
 
 namespace BL.Models
 {
-    public class Projects
+    public class Project
     {
         public int Id { get; set; }
         [JsonIgnore]
         public virtual List<User> Users { get; set; }
 
-        public virtual List<Endpoints> Endpoints { get; set; }
+        public virtual List<Endpoint> Endpoints { get; set; }
         public virtual FormData FormData { get; set; }
         public string Name { get; set; }
         public DateTime StartDate { get; set; }
@@ -26,6 +26,6 @@ namespace BL.Models
 
     public class ProjectListModel
     {
-        public List<Projects> Projects { get; set; }
+        public List<Project> Projects { get; set; }
     }
 }

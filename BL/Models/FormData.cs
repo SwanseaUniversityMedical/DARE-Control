@@ -23,7 +23,7 @@ namespace BL.Models
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
         [ForeignKey("Id")]
-        public virtual Projects Project { get; set; }
+        public virtual Project Project { get; set; }
         [ForeignKey("Id")]
         public virtual User User { get; set; }
     }

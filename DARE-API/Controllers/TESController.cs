@@ -259,7 +259,7 @@ namespace DARE_API.Controllers
                 return BadRequest("One or more of the endpoints are not authorised for this project " + project + ".");
             }
 
-            var dbendpoints = new List<BL.Models.Endpoints>();
+            var dbendpoints = new List<BL.Models.Endpoint>();
 
             if (endpoints.Count == 0)
             {
@@ -326,7 +326,7 @@ namespace DARE_API.Controllers
             return StatusCode(200, new TesCreateTaskResponse { Id = tesTask.Id });
         }
 
-        private bool AreEndpointsOnProject(Projects project, List<string> endpoints)
+        private bool AreEndpointsOnProject(Project project, List<string> endpoints)
         {
             
             var projends = project.Endpoints.Select(x => x.Name.ToLower()).ToList();
@@ -346,7 +346,7 @@ namespace DARE_API.Controllers
             return true;
         }
 
-        private bool IsUserOnProject(Projects project)
+        private bool IsUserOnProject(Project project)
         {
             //TODO: Implement this
             return true;

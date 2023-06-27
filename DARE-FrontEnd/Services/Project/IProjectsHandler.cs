@@ -11,14 +11,14 @@ namespace DARE_FrontEnd.Services.Project
     {
 
         //Task<User> GetUserSettings(int id);
-        Task<Projects> CreateProject(data model);
+        Task<BL.Models.Project> CreateProject(data model);
         //Task<Projects> CreateProject(JsonObject model);
 
-        Task<Projects> GetProjectSettings(int id);
+        Task<BL.Models.Project> GetProjectSettings(int id);
 
-        Task<Projects> GetAllProjects();
+        Task<BL.Models.Project> GetAllProjects();
 
-        Task<Endpoints> GetAllEndPoints(int projectId);
+        Task<BL.Models.Endpoint> GetAllEndPoints(int projectId);
 
 
         //Task<User> AddAUser(User model);
@@ -35,8 +35,8 @@ namespace DARE_FrontEnd.Services.Project
         //IEnumerable<Models.Projects> Get(Expression<Func<Models.Projects, bool>> filter = null, Func<IQueryable<Models.Projects>, IOrderedQueryable<Models.Projects>> orderBy = null);
         //Models.Projects? Get(int id);
         //IEnumerable<Models.Projects>? GetAll();
-        Task<bool> AddAsync(BL.Models.Projects ProjectModel);
-        Task<bool> Update(BL.Models.Projects ProjectModel);
+        Task<bool> AddAsync(BL.Models.Project ProjectModel);
+        Task<bool> Update(BL.Models.Project ProjectModel);
         //Task<bool> Remove(int id);
         //Task<bool> Remove(Models.Projects p);
         Task<T> GenericGetData<T>(string endPoint, StringContent jsonString = null, bool usePut = false) where T : class, new();

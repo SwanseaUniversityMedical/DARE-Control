@@ -18,13 +18,13 @@ namespace DARE_FrontEnd.Services
 
         }
 
-        public async Task<Endpoints> CreateEndpoint(data model)
+        public async Task<BL.Models.Endpoint> CreateEndpoint(data model)
         {
             try
             {
                 //var stringContent = _clientHelper.GetStringContent(new ContainString() { Data = model.ToString()});
                 var stringContent = _clientHelper.GetStringContent(model);
-                var result = await _clientHelper.GenericHttpRequestWithReturnType<Endpoints>("/api/Endpoint/Add_Endpoint", stringContent);
+                var result = await _clientHelper.GenericHttpRequestWithReturnType<BL.Models.Endpoint>("/api/Endpoint/Add_Endpoint", stringContent);
 
                 return result;
             }

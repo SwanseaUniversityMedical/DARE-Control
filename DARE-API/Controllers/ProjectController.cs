@@ -77,14 +77,14 @@ namespace DARE_API.Controllers
 
         [HttpPost("Save_Project")]
 
-        public async Task<Projects> CreateProject(data data)
+        public async Task<Project> CreateProject(data data)
         {
             try
             {
-                Projects projects = JsonConvert.DeserializeObject<Projects>(data.FormIoString);
+                Project projects = JsonConvert.DeserializeObject<Project>(data.FormIoString);
 
                 //Projects projects = JsonConvert.DeserializeObject<Projects>(project);
-                var model = new Projects();
+                var model = new Project();
                 //2023-06-01 14:30:00 use this as the datetime
                 model.Name = projects.Name;
                 model.StartDate = projects.StartDate.ToUniversalTime();
@@ -199,7 +199,7 @@ namespace DARE_API.Controllers
 
 [HttpGet("Get_Project/{projectId}")]
 
-        public Projects GetProject(int projectId)
+        public Project GetProject(int projectId)
         {
             try
             {
@@ -223,7 +223,7 @@ namespace DARE_API.Controllers
 
         [HttpGet("Get_AllProjects")]
 
-        public List<Projects> GetAllProjects()
+        public List<Project> GetAllProjects()
         {
             try
             {
@@ -249,9 +249,9 @@ namespace DARE_API.Controllers
 
         [HttpGet("Get_AllEndPoints/{projectId}")]
 
-        public List<Endpoints> GetEndPointsInProject(int projectId)
+        public List<BL.Models.Endpoint> GetEndPointsInProject(int projectId)
         {
-            List<Endpoints> endpoints = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Endpoints).ToList();
+            List<BL.Models.Endpoint> endpoints = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Endpoints).ToList();
 
             //var returned = _DbContext.Projects.Find(projectId);
             //if (returned == null)
