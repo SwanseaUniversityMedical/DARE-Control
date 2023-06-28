@@ -11,11 +11,11 @@ namespace BL.Models
     {
         public int Id { get; set; }
         public int? ParentId { get; set; }
-        public string TesId { get; set; }
+        public string? TesId { get; set; }
         public string SourceCrate { get; set; }
 
         public string TesName { get; set; }
-        public string TesJson { get; set; }
+        public string? TesJson { get; set; }
         public string DockerInputLocation { get; set; }
         public virtual Project Project { get; set; }
 
@@ -26,11 +26,11 @@ namespace BL.Models
 
         public SubmissionStatus Status { get; set; }
 
-        public virtual Endpoint EndPoint { get; set; }
+        public virtual Endpoint? EndPoint { get; set; }
 
         public virtual User SubmittedBy { get; set; }
 
-        public string StatusDescription { get; set; }
+        public string? StatusDescription { get; set; }
         
         
 

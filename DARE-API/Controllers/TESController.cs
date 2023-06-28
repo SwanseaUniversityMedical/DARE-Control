@@ -390,41 +390,41 @@ namespace DARE_API.Controllers
         {
             var test = new TesTask()
             {
-                Id = "",
-                Logs = new List<TesTaskLog>(),
-                Inputs = new List<TesInput>(),
-                Outputs = new List<TesOutput>(),
-                Volumes = new List<string>(),
-                Resources = new TesResources()
-                {
-                    Zones = new List<string>(),
-                    BackendParameters = new Dictionary<string, string>()
-                    {
-                        {"additionalProp1", "string"},
-                            {"additionalProp2", "string"},
-                            {"additionalProp3", "string"}
-                    },
-                    BackendParametersStrict = false
+                //Id = "",
+                //Logs = new List<TesTaskLog>(),
+                //Inputs = new List<TesInput>(),
+                //Outputs = new List<TesOutput>(),
+                //Volumes = new List<string>(),
+                //Resources = new TesResources()
+                //{
+                //    Zones = new List<string>(),
+                //    BackendParameters = new Dictionary<string, string>()
+                //    {
+                //        {"additionalProp1", "string"},
+                //            {"additionalProp2", "string"},
+                //            {"additionalProp3", "string"}
+                //    },
+                //    BackendParametersStrict = false
 
-                },
-                Description = "Testing",
+                //},
+                //Description = "Testing",
                 Name = "Atest",
                 Executors = new List<TesExecutor>()
                 {
                     new TesExecutor()
                     {
                         Image = @"\\minio\justin1.crate",
-                        Env = new Dictionary<string, string>(),
-                        Stdin = "",
-                        Stdout = "",
-                        Stderr = "",
-                        Command = new List<string>(),
-                        Workdir = "",
+                        //Env = new Dictionary<string, string>(),
+                        //Stdin = "",
+                        //Stdout = "",
+                        //Stderr = "",
+                        //Command = new List<string>(),
+                        //Workdir = "",
                     }
                 },
                 Tags = new Dictionary<string, string>()
                 {
-                    { "project", "wombles" },
+                    { "project", "Head" },
                     { "endpoints", "SAIL|DPUK" }
                 }
 

@@ -18,10 +18,10 @@ namespace DARE_API.Services
         private readonly ApplicationDbContext _dbContext;
 
 
-        public ConsumeInternalMessageService(IBus bus, ApplicationDbContext applicationDbContext)
+        public ConsumeInternalMessageService(IBus bus , IServiceProvider serviceProvider)
         {
             _bus = bus;
-            _dbContext = applicationDbContext;
+            _dbContext = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<ApplicationDbContext>(); ;
         
         }
 
