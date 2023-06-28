@@ -18,6 +18,8 @@ using Serilog.Exceptions.Core;
 using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
 using Microsoft.AspNetCore.Builder;
 using Newtonsoft.Json;
+using BL.Rabbit;
+using EasyNetQ;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,7 +60,10 @@ AddServices(builder);
 //Add Dependancies
 AddDependencies(builder, configuration);
 
-
+builder.Services.Configure<RabbitMQSetting>(configuration.GetSection("RabbitMQ"));
+builder.Services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);
+builder.Services.AddSingleton(RabbitHutch.CreateBus($"host={configuration["RabbitMQ:HostAddress"]}:{int.Parse(configuration["RabbitMQ:PortNumber"])};virtualHost={configuration["RabbitMQ:VirtualHost"]};username={configuration["RabbitMQ:Username"]};password={configuration["RabbitMQ:Password"]}"));
+Task task = SetUpRabbitMQ.DoItAsync(configuration["RabbitMQ:HostAddress"], configuration["RabbitMQ:PortNumber"], configuration["RabbitMQ:VirtualHost"], configuration["RabbitMQ:Username"], configuration["RabbitMQ:Password"]);
 
 var keyCloakSettings = new KeyCloakSettings();
 configuration.Bind(nameof(keyCloakSettings), keyCloakSettings);
@@ -76,7 +81,7 @@ var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
 
-
+builder.Services.AddHostedService<ConsumeInternalMessageService>();
 var TVP = new TokenValidationParameters
 {
     ValidateAudience = true,

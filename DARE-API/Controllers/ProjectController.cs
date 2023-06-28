@@ -5,18 +5,20 @@ using BL.Repositories.DbContexts;
 using BL.Models;
 using System.Text.Json.Nodes;
 using BL.Models.DTO;
+using BL.Rabbit;
 using Newtonsoft.Json;
 using DARE_API.Controllers;
 using static BL.Controllers.UserController;
 using Minio.DataModel;
 using DARE_API.Services.Contract;
 using DARE_API.Models;
+using EasyNetQ;
 using Serilog;
 using Endpoint = BL.Models.Endpoint;
 
 namespace DARE_API.Controllers
 {
-   // [Authorize]
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
 
@@ -37,6 +39,7 @@ namespace DARE_API.Controllers
             _DbContext = applicationDbContext;
             _minioSettings = minioSettings;
             _minioService = minioService;
+            
         }
 
 
@@ -52,6 +55,7 @@ namespace DARE_API.Controllers
         {
             try
             {
+                
                 Project projects = JsonConvert.DeserializeObject<Project>(data.FormIoString);
 
                 

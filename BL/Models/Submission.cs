@@ -54,6 +54,7 @@ namespace BL.Models
         CancellingChildren = 13,
         RequestCancellation = 14,
         CancellationRequestSent = 15,
-        Cancelled = 16
+        Cancelled = 16,
+        WaitingForCrateFormatCheck=17
     }
 }
