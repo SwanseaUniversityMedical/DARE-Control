@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DARE_API.Migrations
 {
     /// <inheritdoc />
-    public partial class newInitial : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -49,16 +49,62 @@ namespace DARE_API.Migrations
                     Name = table.Column<string>(type: "text", nullable: false),
                     StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    EndpointsId = table.Column<int>(type: "integer", nullable: true)
+                    SubmissionBucket = table.Column<string>(type: "text", nullable: true),
+                    OutputBucket = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Projects", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EndpointsProjects",
+                columns: table => new
+                {
+                    EndpointsId = table.Column<int>(type: "integer", nullable: false),
+                    ProjectsId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EndpointsProjects", x => new { x.EndpointsId, x.ProjectsId });
                     table.ForeignKey(
-                        name: "FK_Projects_Endpoints_EndpointsId",
+                        name: "FK_EndpointsProjects_Endpoints_EndpointsId",
                         column: x => x.EndpointsId,
                         principalTable: "Endpoints",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_EndpointsProjects_Projects_ProjectsId",
+                        column: x => x.ProjectsId,
+                        principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProjectEndpoints",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ProjectsId = table.Column<int>(type: "integer", nullable: false),
+                    EndpointsId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectEndpoints", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProjectEndpoints_Endpoints_EndpointsId",
+                        column: x => x.EndpointsId,
+                        principalTable: "Endpoints",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProjectEndpoints_Projects_ProjectsId",
+                        column: x => x.ProjectsId,
+                        principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -123,6 +169,7 @@ namespace DARE_API.Migrations
                     ParentId = table.Column<int>(type: "integer", nullable: true),
                     TesId = table.Column<int>(type: "integer", nullable: false),
                     TesJson = table.Column<string>(type: "text", nullable: false),
+                    DockerInputLocation = table.Column<string>(type: "text", nullable: false),
                     ProjectId = table.Column<int>(type: "integer", nullable: false),
                     ParentID = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
@@ -160,6 +207,21 @@ namespace DARE_API.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_EndpointsProjects_ProjectsId",
+                table: "EndpointsProjects",
+                column: "ProjectsId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectEndpoints_EndpointsId",
+                table: "ProjectEndpoints",
+                column: "EndpointsId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectEndpoints_ProjectsId",
+                table: "ProjectEndpoints",
+                column: "ProjectsId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProjectMemberships_ProjectsId",
                 table: "ProjectMemberships",
                 column: "ProjectsId");
@@ -168,11 +230,6 @@ namespace DARE_API.Migrations
                 name: "IX_ProjectMemberships_UsersId",
                 table: "ProjectMemberships",
                 column: "UsersId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Projects_EndpointsId",
-                table: "Projects",
-                column: "EndpointsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Submissions_EndPointId",
@@ -209,10 +266,19 @@ namespace DARE_API.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "EndpointsProjects");
+
+            migrationBuilder.DropTable(
+                name: "ProjectEndpoints");
+
+            migrationBuilder.DropTable(
                 name: "ProjectMemberships");
 
             migrationBuilder.DropTable(
                 name: "Submissions");
+
+            migrationBuilder.DropTable(
+                name: "Endpoints");
 
             migrationBuilder.DropTable(
                 name: "Users");
@@ -222,9 +288,6 @@ namespace DARE_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "Projects");
-
-            migrationBuilder.DropTable(
-                name: "Endpoints");
         }
     }
 }

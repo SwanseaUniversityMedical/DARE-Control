@@ -1,5 +1,6 @@
 ﻿using BL.Models;
 using DARE_FrontEnd.Services.Project;
+using RestSharp;
 using static DARE_FrontEnd.Controllers.FormsController;
 
 namespace DARE_FrontEnd.Services
@@ -33,6 +34,17 @@ namespace DARE_FrontEnd.Services
                 Console.WriteLine("An error occurred: " + ex.Message);
                 throw;
             }
+        }
+
+        public async Task<Endpoints> ListOfAllEndpoints(List<Endpoints> endpoints)
+        {
+            var request = new RestRequest($"https://localhost:7058/api/Endpoint/ListOfAllEndpoints", Method.Get);
+            request.Method = Method.Get;
+            request.AddHeader("Accept", "application/json");
+            request.AddParameter("application/json", ParameterType.RequestBody);
+            var test = _apiCaller.Client.Execute<Endpoints>(request);
+            return test.Data;
+
         }
     }
 }

@@ -14,7 +14,7 @@ namespace BL.Models
         public DateTime EndDate { get; set; }
         public string? SubmissionBucket { get; set; }
         public string? OutputBucket { get; set; }
-
+        //public virtual List<ProjectEndpoints> ProjectEndpoints { get; set; }
         public virtual List<ProjectMembership> ProjectMemberships { get; set; }
 
         public virtual List<Submission> Submissions { get; set; }

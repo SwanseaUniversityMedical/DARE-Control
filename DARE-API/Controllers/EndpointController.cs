@@ -52,5 +52,16 @@ namespace DARE_API.Controllers
 
 
         }
+
+        [HttpGet("ListOfAllEndpoints")]
+
+        public List<Endpoints> GetListOfAllEndpoints()
+        {
+            List<Endpoints> endpoints = _DbContext.Endpoints.ToList();
+
+    
+            return endpoints;
+        }
+
     }
 }

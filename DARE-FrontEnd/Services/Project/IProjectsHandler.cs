@@ -15,7 +15,7 @@ namespace DARE_FrontEnd.Services.Project
         //Task<Projects> CreateProject(JsonObject model);
 
         Task<Projects> GetProjectSettings(int id);
-
+        Task<Projects> AddEndpointsToProject(data model);
         Task<Projects> GetAllProjects();
 
         Task<Endpoints> GetAllEndPoints(int projectId);

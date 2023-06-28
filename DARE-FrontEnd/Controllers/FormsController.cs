@@ -67,9 +67,9 @@ namespace DARE_FrontEnd.Controllers
         [Route("Forms/EndpointsAndProjects")]
         public async Task<IActionResult> EndpointsAndProjects()
         {
-            ProjectsAndEndpoints test = new ProjectsAndEndpoints()
+            ProjectsAndEndpoints test = new ProjectsAndEndpoints();
             {
-                test.Projects = await _projectsHandler.GetAllProjects();
+                //test.Projects = await _projectsHandler.GetAllProjects();
                 //test.Endpoints = await _endpointsHandler.GetAllEndpoints();
             }
             return View(test);

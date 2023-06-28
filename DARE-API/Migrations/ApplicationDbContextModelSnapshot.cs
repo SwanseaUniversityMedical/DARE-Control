@@ -62,6 +62,29 @@ namespace DARE_API.Migrations
                     b.ToTable("FormData");
                 });
 
+            modelBuilder.Entity("BL.Models.ProjectEndpoints", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EndpointsId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProjectsId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EndpointsId");
+
+                    b.HasIndex("ProjectsId");
+
+                    b.ToTable("ProjectEndpoints");
+                });
+
             modelBuilder.Entity("BL.Models.ProjectMembership", b =>
                 {
                     b.Property<int>("Id")
@@ -214,6 +237,25 @@ namespace DARE_API.Migrations
                     b.ToTable("EndpointsProjects");
                 });
 
+            modelBuilder.Entity("BL.Models.ProjectEndpoints", b =>
+                {
+                    b.HasOne("BL.Models.Endpoints", "Endpoints")
+                        .WithMany("ProjectEndpoints")
+                        .HasForeignKey("EndpointsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BL.Models.Projects", "Projects")
+                        .WithMany()
+                        .HasForeignKey("ProjectsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Endpoints");
+
+                    b.Navigation("Projects");
+                });
+
             modelBuilder.Entity("BL.Models.ProjectMembership", b =>
                 {
                     b.HasOne("BL.Models.Projects", "Projects")
@@ -300,6 +342,8 @@ namespace DARE_API.Migrations
 
             modelBuilder.Entity("BL.Models.Endpoints", b =>
                 {
+                    b.Navigation("ProjectEndpoints");
+
                     b.Navigation("Submissions");
                 });
 
