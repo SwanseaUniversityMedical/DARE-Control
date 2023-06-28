@@ -66,17 +66,17 @@ namespace DARE_API.Controllers
                 model.OutputBucket = GenerateRandomName(model.Name);
                 model.FormData = data.FormIoString;
 
-                //var submissionBucket = await _minioService.CreateBucket(_minioSettings, model.SubmissionBucket);
-                //if (!submissionBucket)
-                //{
-                //    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", model.SubmissionBucket);
-                //}
-                //var outputBucket = await _minioService.CreateBucket(_minioSettings, model.OutputBucket);
-                //if (!outputBucket)
-                //{
-                //    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", model.OutputBucket);
-                    
-                //}
+                var submissionBucket = await _minioService.CreateBucket(_minioSettings, model.SubmissionBucket);
+                if (!submissionBucket)
+                {
+                    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", model.SubmissionBucket);
+                }
+                var outputBucket = await _minioService.CreateBucket(_minioSettings, model.OutputBucket);
+                if (!outputBucket)
+                {
+                    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", model.OutputBucket);
+
+                }
 
                 if (_DbContext.Projects.Any(x => x.Name.ToLower() == model.Name.ToLower().Trim()))
                 {
