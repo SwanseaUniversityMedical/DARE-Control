@@ -1,30 +1,3 @@
-//var builder = WebApplication.CreateBuilder(args);
-
-//// Add services to the container.
-//builder.Services.AddControllersWithViews();
-
-//var app = builder.Build();
-
-//// Configure the HTTP request pipeline.
-//if (!app.Environment.IsDevelopment())
-//{
-//    app.UseExceptionHandler("/Home/Error");
-//    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-//    app.UseHsts();
-//}
-
-//app.UseHttpsRedirection();
-//app.UseStaticFiles();
-
-//app.UseRouting();
-
-//app.UseAuthorization();
-
-//app.MapControllerRoute(
-//    name: "default",
-//    pattern: "{controller=Home}/{action=Index}/{id?}");
-
-//app.Run();
 
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
@@ -33,8 +6,7 @@ using System.Net;
 using BL.Models.Services;
 using BL.Models.Settings;
 using DARE_FrontEnd.Services;
-using DARE_FrontEnd.Services.Project;
-using DARE_FrontEnd.Services.FormIO;
+
 using Microsoft.AspNetCore.Authentication.Cookies;
 using DARE_FrontEnd.Models;
 using Microsoft.IdentityModel.Logging;
@@ -42,29 +14,37 @@ using Serilog.Exceptions.Core;
 using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
 using Serilog;
 using Serilog.Exceptions;
+using System.Text.Json.Serialization;
+using System.Text.Json;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Verbose()
-    .Enrich.WithDemystifiedStackTraces()
-    .Enrich.WithExceptionDetails(new DestructuringOptionsBuilder()
-        .WithDefaultDestructurers()
-        .WithDestructurers(new[] { new DbUpdateExceptionDestructurer() }))
-    .Enrich.WithProperty("MainSystem", "DareFX")
-    .Enrich.WithProperty("Component", "SubmissionUI")
-    .Enrich.FromLogContext()
-    .Enrich.WithProperty("ServerName", Environment.MachineName)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.Seq(builder.Configuration["SeqURL"])
-    .CreateLogger();
+//Log.Logger = new LoggerConfiguration()
+//    .MinimumLevel.Verbose()
+//    .Enrich.WithDemystifiedStackTraces()
+//    .Enrich.WithExceptionDetails(new DestructuringOptionsBuilder()
+//        .WithDefaultDestructurers()
+//        .WithDestructurers(new[] { new DbUpdateExceptionDestructurer() }))
+//    .Enrich.WithProperty("MainSystem", "DareFX")
+//    .Enrich.WithProperty("Component", "SubmissionUI")
+//    .Enrich.FromLogContext()
+//    .Enrich.WithProperty("ServerName", Environment.MachineName)
+//    .Enrich.FromLogContext()
+//    .WriteTo.Console()
+//    .WriteTo.Seq(builder.Configuration["SeqURL"])
+//    .CreateLogger();
 
 IdentityModelEventSource.ShowPII = true;
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
+    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+); ; ;
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
+
+Log.Logger = CreateSerilogLogger(configuration, environment);
+Log.Information("Dare-FrontEnd logging Start.");
 
 string AppName = typeof(Program).Module.Name.Replace(".dll", "");
 
@@ -85,14 +65,16 @@ builder.Services.AddHttpClient();
 
 //add services here
 builder.Services.AddScoped<CustomCookieEvent>();
-builder.Services.AddScoped<IProjectsHandler, ProjectsHandler>();
+
 builder.Services.AddScoped<IClientHelper, ClientHelper>();
-builder.Services.AddScoped<IFormHandler, FormHandler>();
-builder.Services.AddScoped<IEndpointHandler, EndpointHandler>();
-builder.Services.AddScoped<IAPICaller>(x =>
-{
-    return new APICaller("https://localhost:7163/");
-});
+
+
+//builder.Services.AddSingleton(new JsonSerializerOptions()
+//{
+//    PropertyNameCaseInsensitive = true,
+//    ReferenceHandler = ReferenceHandler.Preserve
+//});
+
 
 
 
@@ -250,7 +232,23 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHostEnvironment environment)
+{
+    var seqServerUrl = configuration["Serilog:SeqServerUrl"];
+    var seqApiKey = configuration["Serilog:SeqApiKey"];
 
+
+
+    return new LoggerConfiguration()
+    .MinimumLevel.Verbose()
+    .Enrich.WithProperty("ApplicationContext", environment.ApplicationName)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.Seq(seqServerUrl, apiKey: seqApiKey)
+    .ReadFrom.Configuration(configuration)
+    .CreateLogger();
+
+}
 
 
 app.UseHttpsRedirection();

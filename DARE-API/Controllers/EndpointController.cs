@@ -1,10 +1,12 @@
-﻿using BL.Models;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using BL.Repositories.DbContexts;
 
-using static BL.Controllers.UserController;
+
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Serilog;
+using Endpoint = BL.Models.Endpoint;
+using BL.Models.DTO;
 
 namespace DARE_API.Controllers
 {
@@ -22,33 +24,89 @@ namespace DARE_API.Controllers
             _DbContext = applicationDbContext;
 
         }
-        //public IActionResult Index()
-        //{
-        //    return View();
-        //}
-       
-        [HttpPost("Add_Endpoint")]
+        
+        [HttpPost("AddEndpoint")]
 
-        public async Task<Endpoints> AddEndpoint(data data)
+        public async Task<Endpoint?> AddEndpoint(FormData data)
         {
             try
             {
-                Endpoints endpoints = JsonConvert.DeserializeObject<Endpoints>(data.FormIoString);
+                Endpoint endpoints = JsonConvert.DeserializeObject<Endpoint>(data.FormIoString);
 
-                var model = new Endpoints();
-                model.Name = endpoints.Name;
-                //model.Projects = endpoints.Projects.ToList();
                 
+                var model = new Endpoint();
+                model.Name = endpoints.Name.Trim();
+                model.FormData = data.FormIoString;
+
+                if (_DbContext.Endpoints.Any(x => x.Name.ToLower() == endpoints.Name.ToLower().Trim()))
+                {
+                    return null;
+                }
+
                 _DbContext.Endpoints.Add(model);
 
                 await _DbContext.SaveChangesAsync();
 
-
+                Log.Information("{Function} Endpoint created successfully", "AddEndpoint");
                 return model;
             }
-            catch (Exception ex) { }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "AddEndpoint");
+                throw;
+            }
 
-            return null;
+        }
+
+        [HttpPost("AddEndpointMVC")]
+
+        public async Task<Endpoint?> AddEndpointMVC(Endpoint model)
+        {
+            try
+            {
+               
+                model.Name = model.Name.Trim();
+                
+
+                if (_DbContext.Endpoints.Any(x => x.Name.ToLower() == model.Name.ToLower().Trim()))
+                {
+                    return null;
+                }
+
+                model.FormData = "";
+                _DbContext.Endpoints.Add(model);
+
+                await _DbContext.SaveChangesAsync();
+
+                Log.Information("{Function} Endpoint created successfully", "AddEndpointMVC");
+                return model;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "AddEndpointMVC");
+                throw;
+            }
+
+        }
+
+        [HttpGet("GetAllEndpoints")]
+        public List<Endpoint> GetAllEndpoints()
+        {
+            try
+            {
+
+                var allEndpoints = _DbContext.Endpoints.ToList();
+
+                
+
+                Log.Information("{Function} Endpoints retrieved successfully", "GetAllEndpoints");
+                return allEndpoints;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetAllEndpoints");
+                throw;
+            }
 
 
         }

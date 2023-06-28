@@ -53,7 +53,7 @@ namespace DARE_API.Attributes
                     var isValid = validationAttribute.IsValid(args);
                     if (!isValid)
                     {
-                        modelState.AddModelError(parameter.Name, validationAttribute.FormatErrorMessage(parameter.Name));
+                        modelState.AddModelError(parameter.Name, validationAttribute.FormatErrorMessage(parameter.Name) + " Justin");
                     }
                 }
             }

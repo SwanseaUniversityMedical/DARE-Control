@@ -22,13 +22,17 @@ namespace DARE_API.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("BL.Models.Endpoints", b =>
+            modelBuilder.Entity("BL.Models.Endpoint", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FormData")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -39,53 +43,7 @@ namespace DARE_API.Migrations
                     b.ToTable("Endpoints");
                 });
 
-            modelBuilder.Entity("BL.Models.FormData", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("FormIoString")
-                        .HasColumnType("text");
-
-                    b.Property<string>("FormIoUrl")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("FormData");
-                });
-
-            modelBuilder.Entity("BL.Models.ProjectMembership", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ProjectsId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UsersId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectsId");
-
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("ProjectMemberships");
-                });
-
-            modelBuilder.Entity("BL.Models.Projects", b =>
+            modelBuilder.Entity("BL.Models.Project", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -95,6 +53,10 @@ namespace DARE_API.Migrations
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FormData")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -129,7 +91,7 @@ namespace DARE_API.Migrations
                     b.Property<int>("EndPointId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ParentID")
+                    b.Property<int?>("ParentID")
                         .HasColumnType("integer");
 
                     b.Property<int?>("ParentId")
@@ -137,6 +99,10 @@ namespace DARE_API.Migrations
 
                     b.Property<int>("ProjectId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("SourceCrate")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -148,10 +114,15 @@ namespace DARE_API.Migrations
                     b.Property<int>("SubmittedById")
                         .HasColumnType("integer");
 
-                    b.Property<int>("TesId")
-                        .HasColumnType("integer");
+                    b.Property<string>("TesId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("TesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TesName")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -180,26 +151,20 @@ namespace DARE_API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("FormDataId")
-                        .HasColumnType("integer");
+                    b.Property<string>("FormData")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("ProjectsId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("FormDataId");
-
-                    b.HasIndex("ProjectsId");
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("EndpointsProjects", b =>
+            modelBuilder.Entity("EndpointProject", b =>
                 {
                     b.Property<int>("EndpointsId")
                         .HasColumnType("integer");
@@ -211,31 +176,27 @@ namespace DARE_API.Migrations
 
                     b.HasIndex("ProjectsId");
 
-                    b.ToTable("EndpointsProjects");
+                    b.ToTable("EndpointProject");
                 });
 
-            modelBuilder.Entity("BL.Models.ProjectMembership", b =>
+            modelBuilder.Entity("ProjectUser", b =>
                 {
-                    b.HasOne("BL.Models.Projects", "Projects")
-                        .WithMany("ProjectMemberships")
-                        .HasForeignKey("ProjectsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<int>("ProjectsId")
+                        .HasColumnType("integer");
 
-                    b.HasOne("BL.Models.User", "Users")
-                        .WithMany("ProjectMemberships")
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<int>("UsersId")
+                        .HasColumnType("integer");
 
-                    b.Navigation("Projects");
+                    b.HasKey("ProjectsId", "UsersId");
 
-                    b.Navigation("Users");
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("ProjectUser");
                 });
 
             modelBuilder.Entity("BL.Models.Submission", b =>
                 {
-                    b.HasOne("BL.Models.Endpoints", "EndPoint")
+                    b.HasOne("BL.Models.Endpoint", "EndPoint")
                         .WithMany("Submissions")
                         .HasForeignKey("EndPointId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -243,11 +204,9 @@ namespace DARE_API.Migrations
 
                     b.HasOne("BL.Models.Submission", "Parent")
                         .WithMany("Children")
-                        .HasForeignKey("ParentID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ParentID");
 
-                    b.HasOne("BL.Models.Projects", "Project")
+                    b.HasOne("BL.Models.Project", "Project")
                         .WithMany("Submissions")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -268,48 +227,44 @@ namespace DARE_API.Migrations
                     b.Navigation("SubmittedBy");
                 });
 
-            modelBuilder.Entity("BL.Models.User", b =>
+            modelBuilder.Entity("EndpointProject", b =>
                 {
-                    b.HasOne("BL.Models.FormData", "FormData")
-                        .WithMany()
-                        .HasForeignKey("FormDataId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BL.Models.Projects", null)
-                        .WithMany("Users")
-                        .HasForeignKey("ProjectsId");
-
-                    b.Navigation("FormData");
-                });
-
-            modelBuilder.Entity("EndpointsProjects", b =>
-                {
-                    b.HasOne("BL.Models.Endpoints", null)
+                    b.HasOne("BL.Models.Endpoint", null)
                         .WithMany()
                         .HasForeignKey("EndpointsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BL.Models.Projects", null)
+                    b.HasOne("BL.Models.Project", null)
                         .WithMany()
                         .HasForeignKey("ProjectsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("BL.Models.Endpoints", b =>
+            modelBuilder.Entity("ProjectUser", b =>
+                {
+                    b.HasOne("BL.Models.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BL.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("BL.Models.Endpoint", b =>
                 {
                     b.Navigation("Submissions");
                 });
 
-            modelBuilder.Entity("BL.Models.Projects", b =>
+            modelBuilder.Entity("BL.Models.Project", b =>
                 {
-                    b.Navigation("ProjectMemberships");
-
                     b.Navigation("Submissions");
-
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("BL.Models.Submission", b =>
@@ -319,8 +274,6 @@ namespace DARE_API.Migrations
 
             modelBuilder.Entity("BL.Models.User", b =>
                 {
-                    b.Navigation("ProjectMemberships");
-
                     b.Navigation("Submissions");
                 });
 #pragma warning restore 612, 618

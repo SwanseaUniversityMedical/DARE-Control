@@ -12,33 +12,43 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Net;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Serilog.Exceptions;
 using Serilog.Exceptions.Core;
 using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
+using Microsoft.AspNetCore.Builder;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Verbose()
-    .Enrich.WithDemystifiedStackTraces()
-    .Enrich.WithExceptionDetails(new DestructuringOptionsBuilder()
-        .WithDefaultDestructurers()
-        .WithDestructurers(new[] { new DbUpdateExceptionDestructurer() }))
-    .Enrich.WithProperty("MainSystem", "DareFX")
-    .Enrich.WithProperty("Component", "SubmissionAPI")
-    .Enrich.FromLogContext()
-    .Enrich.WithProperty("ServerName", Environment.MachineName)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.Seq(builder.Configuration["SeqURL"])
-    .CreateLogger();
+//Log.Logger = new LoggerConfiguration()
+//    .MinimumLevel.Verbose()
+//    .Enrich.WithDemystifiedStackTraces()
+//    .Enrich.WithExceptionDetails(new DestructuringOptionsBuilder()
+//        .WithDefaultDestructurers()
+//        .WithDestructurers(new[] { new DbUpdateExceptionDestructurer() }))
+//    .Enrich.WithProperty("MainSystem", "DareFX")
+//    .Enrich.WithProperty("Component", "SubmissionAPI")
+//    .Enrich.FromLogContext()
+//    .Enrich.WithProperty("ServerName", Environment.MachineName)
+//    .Enrich.FromLogContext()
+//    .WriteTo.Console()
+//    .WriteTo.Seq(builder.Configuration["SeqURL"])
+//    .CreateLogger();
 
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
+Log.Logger = CreateSerilogLogger(configuration, environment);
+Log.Information("API logging Start.");
+
 // Add services to the container.
-builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(
+builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
+    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+); ;
+builder.Services.AddDbContext<ApplicationDbContext>(options => options
+    .UseLazyLoadingProxies(true)
+    .UseNpgsql(
     builder.Configuration.GetConnectionString("DefaultConnection")
 ));
 
@@ -53,7 +63,11 @@ AddDependencies(builder, configuration);
 var keyCloakSettings = new KeyCloakSettings();
 configuration.Bind(nameof(keyCloakSettings), keyCloakSettings);
 builder.Services.AddSingleton(keyCloakSettings);
-
+//builder.Services.AddSingleton(new JsonSerializerOptions()
+//{
+//    PropertyNameCaseInsensitive = true,
+//    ReferenceHandler = ReferenceHandler.Preserve
+//});
 //var internalMinioSettings = new MinioInternalSettings();
 //configuration.Bind(nameof(internalMinioSettings), internalMinioSettings);
 //builder.Services.AddSingleton(internalMinioSettings);
@@ -155,6 +169,7 @@ if (app.Environment.IsDevelopment())
 
     app.UseSwaggerUI(c =>
     {
+        c.EnableValidator(null);
         c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{environment.ApplicationName} v1");
         c.OAuthClientId(keyCloakSettings.ClientId);
         c.OAuthClientSecret(keyCloakSettings.ClientSecret);
@@ -195,22 +210,41 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
 }
+Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHostEnvironment environment)
+{
+    var seqServerUrl = configuration["Serilog:SeqServerUrl"];
+    var seqApiKey = configuration["Serilog:SeqApiKey"];
 
+
+
+    return new LoggerConfiguration()
+    .MinimumLevel.Verbose()
+    .Enrich.WithProperty("ApplicationContext", environment.ApplicationName)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.Seq(seqServerUrl, apiKey: seqApiKey)
+    .ReadFrom.Configuration(configuration)
+    .CreateLogger();
+
+}
 void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configuration)
 {
 
     builder.Services.AddHttpContextAccessor();
 
-    builder.Services.AddSingleton(new JsonSerializerOptions()
-    {
-        PropertyNameCaseInsensitive = true,
-    });
+   
     builder.Services.AddScoped<IMinioService, MinioService>();
-    builder.Services.AddMvc().AddControllersAsServices();
+    builder.Services.AddMvc().AddControllersAsServices()
+    //    .AddNewtonsoftJson(options =>
+    //    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+    //); 
+    ;
 
     //builder.Services.AddScoped<ICodeService, CodeService>();
 
 }
+
+
 
 /// <summary>
 /// Add Services

@@ -14,6 +14,17 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password123
       - POSTGRES_DB=listmonk
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    restart: unless-stopped
+    container_name: 'rabbitmq'
+    ports:
+        - 5672:5672
+        - 15672:15672
+    volumes:
+#        - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+#        - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+        - rabbitmq:/var/lib/rabbitmq/
   adminer:
     image: adminer
     restart: always
@@ -21,6 +32,7 @@ services:
       - 8087:8080
   minio:
     image: quay.io/minio/minio
+    restart: always
     command: server /data --console-address ":9001"
     environment:
       - MINIO_ROOT_USER=minio
@@ -36,6 +48,16 @@ services:
     ports:
       - 9000:9000
       - 9001:9001
+  seq:
+    image: datalust/seq:latest
+    container_name: seq
+    restart: always
+    ports:
+      - 5341:80
+    volumes:
+      - seq_data:/data
+    environment:
+      - ACCEPT_EULA=Y
 #  control:
 #    image: harbor.ukserp.ac.uk/dare/control:1.0.0
 #    restart: always
@@ -50,6 +72,10 @@ volumes:
     postgres:
       driver: local
     minio_data:
+      driver: local
+    seq_data:
+      driver: local
+    rabbitmq:
       driver: local
 
 ######################################################

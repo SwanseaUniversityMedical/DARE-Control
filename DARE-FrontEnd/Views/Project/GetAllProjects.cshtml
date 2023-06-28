@@ -1,0 +1,51 @@
+﻿@model List<BL.Models.Project>
+@{
+    ViewData["Title"] = "Project List";
+}
+
+
+<div>
+    <table>
+        <thead>
+        <td>Project Name</td>
+        <td>Users on Project</td>
+        <td>Endpoints attached to Project</td>
+        </thead>
+        @foreach (var project in Model)
+        {
+            <tr>
+                <td>@project.Name</td>
+                <td>
+                    
+                    <table>
+                        @foreach (var user in project.Users)
+                        {
+                            <tr>
+                                <td>
+                                    @user.Name
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                </td>
+                <td>
+                    <table>
+                        @foreach (var endpoint in project.Endpoints)
+                        {
+                            <tr>
+                                <td>
+                                    @endpoint.Name
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                    
+                </td>
+            </tr>
+        }
+    </table>
+        
+</div>
+
+
+                
