@@ -177,6 +177,7 @@ namespace DARE_FrontEnd.Services
             {
                 modelString = GetStringContent<TInput>(model);
             }
+            
 
             return await CallAPIWithReturnType<TOutput>(endPoint, modelString, paramList);
            

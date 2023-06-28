@@ -13,6 +13,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -60,20 +61,20 @@ namespace BL.Models.Tes
         /// </summary>
         /// <value>Input files. Inputs will be downloaded and mounted into the executor container.</value>
         [DataMember(Name = "inputs")]
-        public List<TesInput> Inputs { get; set; }
+        public List<TesInput>? Inputs { get; set; }
 
         /// <summary>
         /// Output files. Outputs will be uploaded from the executor container to long-term storage.
         /// </summary>
         /// <value>Output files. Outputs will be uploaded from the executor container to long-term storage.</value>
         [DataMember(Name = "outputs")]
-        public List<TesOutput> Outputs { get; set; }
+        public List<TesOutput>? Outputs { get; set; }
 
         /// <summary>
         /// Gets or Sets Resources
         /// </summary>
         [DataMember(Name = "resources")]
-        public TesResources Resources { get; set; }
+        public TesResources? Resources { get; set; }
 
         /// <summary>
         /// A list of executors to be run, sequentially. Execution stops on the first error.

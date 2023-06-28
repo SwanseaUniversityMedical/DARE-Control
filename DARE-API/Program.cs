@@ -43,7 +43,7 @@ Log.Logger = CreateSerilogLogger(configuration, environment);
 Log.Information("API logging Start.");
 
 // Add services to the container.
-builder.Services.AddControllersWithViews(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true).AddNewtonsoftJson(options =>
+builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
 ); ;
 builder.Services.AddDbContext<ApplicationDbContext>(options => options

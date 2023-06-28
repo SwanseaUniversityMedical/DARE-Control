@@ -16,7 +16,7 @@ using Endpoint = BL.Models.Endpoint;
 
 namespace DARE_API.Controllers
 {
-    [Authorize]
+   // [Authorize]
     [ApiController]
     [Route("api/[controller]")]
 
@@ -56,8 +56,13 @@ namespace DARE_API.Controllers
 
                 
                 var model = new Project();
+
                 //2023-06-01 14:30:00 use this as the datetime
                 model.Name = projects.Name.Trim();
+                if (_DbContext.Projects.Any(x => x.Name.ToLower() == model.Name.ToLower().Trim()))
+                {
+                    return null;
+                }
                 model.StartDate = projects.StartDate.ToUniversalTime();
                 
                 model.EndDate = projects.EndDate.ToUniversalTime();
@@ -78,10 +83,7 @@ namespace DARE_API.Controllers
 
                 }
 
-                if (_DbContext.Projects.Any(x => x.Name.ToLower() == model.Name.ToLower().Trim()))
-                {
-                    return null;
-                }
+                
                 _DbContext.Projects.Add(model);
 
                 await _DbContext.SaveChangesAsync();

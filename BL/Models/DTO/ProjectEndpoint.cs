@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace BL.Models.DTO
 {
@@ -12,8 +13,10 @@ namespace BL.Models.DTO
         public int ProjectId { get; set; }
         public int EndpointId { get; set; }
 
-        public IEnumerable<SelectListItem> ProjectItemList { get; set; }
+        [JsonIgnore]
+        public IEnumerable<SelectListItem>? ProjectItemList { get; set; }
 
-        public IEnumerable<SelectListItem> EndpointItemList { get; set; }
+        [JsonIgnore]
+        public IEnumerable<SelectListItem>? EndpointItemList { get; set; }
     }
 }
