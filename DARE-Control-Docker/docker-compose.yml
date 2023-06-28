@@ -14,6 +14,17 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password123
       - POSTGRES_DB=listmonk
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    restart: unless-stopped
+    container_name: 'rabbitmq'
+    ports:
+        - 5672:5672
+        - 15672:15672
+    volumes:
+#        - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+#        - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+        - rabbitmq:/var/lib/rabbitmq/
   adminer:
     image: adminer
     restart: always
@@ -63,6 +74,8 @@ volumes:
     minio_data:
       driver: local
     seq_data:
+      driver: local
+    rabbitmq:
       driver: local
 
 ######################################################
