@@ -17,6 +17,8 @@ namespace BL.Models
         public string TesName { get; set; }
         public string? TesJson { get; set; }
         public string DockerInputLocation { get; set; }
+
+        //zxczxc
         
         public virtual Project Project { get; set; }
 
