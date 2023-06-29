@@ -90,7 +90,7 @@ public class Startup
 
         // Enable Hangfire Dashboard
         app.UseHangfireDashboard();
-        RecurringJob.AddOrUpdate(() => Test(), Cron.MinuteInterval(10));
+        RecurringJob.AddOrUpdate<IDoWork>(a => a.Execute(), Cron.MinuteInterval(10));
         var serverAddressesFeature = app.ServerFeatures.Get<IServerAddressesFeature>();
         var port = serverAddressesFeature?.Addresses.FirstOrDefault()?.Split(':').Last();
 
@@ -99,10 +99,7 @@ public class Startup
         // Other app configurations
     }
 
-    public void Test()
-    {
-        var asas = 1;
-    }
+    
 
     
 }
