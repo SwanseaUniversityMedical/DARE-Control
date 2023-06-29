@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
 using BL.Models;
+using EasyNetQ;
 
 namespace DARE_API.Controllers
 {
@@ -19,9 +20,12 @@ namespace DARE_API.Controllers
     {
         private readonly ApplicationDbContext _DbContext;
 
-        public SubmissionController(ApplicationDbContext repository)
+        
+
+        public SubmissionController(ApplicationDbContext repository, IBus rabbit)
         {
             _DbContext = repository;
+            
 
         }
 

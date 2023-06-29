@@ -42,42 +42,42 @@ namespace BL.Models.Tes
         /// </summary>
         /// <value>A sequence of program arguments to execute, where the first argument is the program to execute (i.e. argv).</value>
         [DataMember(Name = "command")]
-        public List<string> Command { get; set; }
+        public List<string>? Command { get; set; }
 
         /// <summary>
         /// The working directory that the command will be executed in. Defaults to the directory set by the container image.
         /// </summary>
         /// <value>The working directory that the command will be executed in. Defaults to the directory set by the container image.</value>
         [DataMember(Name = "workdir")]
-        public string Workdir { get; set; }
+        public string? Workdir { get; set; }
 
         /// <summary>
         /// Path inside the container to a file which will be piped to the executor&#39;s stdin. Must be an absolute path.
         /// </summary>
         /// <value>Path inside the container to a file which will be piped to the executor&#39;s stdin. Must be an absolute path.</value>
         [DataMember(Name = "stdin")]
-        public string Stdin { get; set; }
+        public string? Stdin { get; set; }
 
         /// <summary>
         /// Path inside the container to a file where the executor&#39;s stdout will be written to. Must be an absolute path.
         /// </summary>
         /// <value>Path inside the container to a file where the executor&#39;s stdout will be written to. Must be an absolute path.</value>
         [DataMember(Name = "stdout")]
-        public string Stdout { get; set; }
+        public string? Stdout { get; set; }
 
         /// <summary>
         /// Path inside the container to a file where the executor&#39;s stderr will be written to. Must be an absolute path.
         /// </summary>
         /// <value>Path inside the container to a file where the executor&#39;s stderr will be written to. Must be an absolute path.</value>
         [DataMember(Name = "stderr")]
-        public string Stderr { get; set; }
+        public string? Stderr { get; set; }
 
         /// <summary>
         /// Enviromental variables to set within the container.
         /// </summary>
         /// <value>Enviromental variables to set within the container.</value>
         [DataMember(Name = "env")]
-        public Dictionary<string, string> Env { get; set; }
+        public Dictionary<string, string>? Env { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

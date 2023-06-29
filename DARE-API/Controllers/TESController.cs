@@ -17,6 +17,8 @@ using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json.Linq;
 using System.Drawing;
 using BL.Models.Tes;
+using BL.Rabbit;
+using EasyNetQ;
 
 
 namespace DARE_API.Controllers
@@ -37,7 +39,7 @@ namespace DARE_API.Controllers
     {
 
         private readonly ApplicationDbContext _DbContext;
-
+        private readonly IBus _rabbit;
 
 
         private static readonly Dictionary<TesView, JsonSerializerSettings> TesJsonSerializerSettings = new()
@@ -53,13 +55,15 @@ namespace DARE_API.Controllers
         /// <summary>
         /// Contruct a <see cref="TaskServiceApiController"/>
         /// </summary>
-        /// <param name="repository">The main <see cref="TesTask"/> database repository</param>
-        public TaskServiceApiController(ApplicationDbContext repository)
+        /// <param name="repository">The main <see cref="ApplicationDbContext"/> database repository</param>
+        /// <param name="rabbit">The main <see cref="IBus"/> easynet q sender</param>
+        public TaskServiceApiController(ApplicationDbContext repository, IBus rabbit)
         {
             _DbContext = repository;
+            _rabbit = rabbit;
 
-            
-            
+
+
 
         }
 
@@ -141,6 +145,10 @@ namespace DARE_API.Controllers
         public virtual async Task<IActionResult> CreateTaskAsync([FromBody] TesTask tesTask,
             CancellationToken cancellationToken)
         {
+
+
+            
+
 
             var user = _DbContext.Users.FirstOrDefault(x => x.Name.ToLower() == "jaybee");
 
@@ -298,27 +306,16 @@ namespace DARE_API.Controllers
             sub.TesId = tesTask.Id;
             var tesstring = JsonConvert.SerializeObject(tesTask);
             sub.TesJson = tesstring;
-            
-            
-            foreach (var endp in dbendpoints)
-            {
-                _DbContext.Add(new Submission()
-                {
-                    DockerInputLocation = tesTask.Executors.First().Image,
-                    Project = dbproj,
-                    Status = SubmissionStatus.WaitingForAgentToTransfer,
-                    SubmittedBy = user,
-                    Parent = sub,
-                    TesId = tesTask.Id,
-                    TesJson = tesstring,
-                    EndPoint = endp,
-                    TesName = tesTask.Name,
-                    SourceCrate = tesTask.Executors.First().Image,
-                });
-
-            }
-
             await _DbContext.SaveChangesAsync(cancellationToken);
+            
+            //Send to rabbit q to processed async
+            var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
+
+            _rabbit.Advanced.Publish(exch, RoutingConstants.Subs, false, new Message<int>(sub.Id));
+
+           
+
+            
             Log.Debug("{Function} Creating task with id {Id} state {State}", "CreateTaskAsync", tesTask.Id,
                 tesTask.State);
 
@@ -393,41 +390,41 @@ namespace DARE_API.Controllers
         {
             var test = new TesTask()
             {
-                Id = "",
-                Logs = new List<TesTaskLog>(),
-                Inputs = new List<TesInput>(),
-                Outputs = new List<TesOutput>(),
-                Volumes = new List<string>(),
-                Resources = new TesResources()
-                {
-                    Zones = new List<string>(),
-                    BackendParameters = new Dictionary<string, string>()
-                    {
-                        {"additionalProp1", "string"},
-                            {"additionalProp2", "string"},
-                            {"additionalProp3", "string"}
-                    },
-                    BackendParametersStrict = false
+                //Id = "",
+                //Logs = new List<TesTaskLog>(),
+                //Inputs = new List<TesInput>(),
+                //Outputs = new List<TesOutput>(),
+                //Volumes = new List<string>(),
+                //Resources = new TesResources()
+                //{
+                //    Zones = new List<string>(),
+                //    BackendParameters = new Dictionary<string, string>()
+                //    {
+                //        {"additionalProp1", "string"},
+                //            {"additionalProp2", "string"},
+                //            {"additionalProp3", "string"}
+                //    },
+                //    BackendParametersStrict = false
 
-                },
-                Description = "Testing",
+                //},
+                //Description = "Testing",
                 Name = "Atest",
                 Executors = new List<TesExecutor>()
                 {
                     new TesExecutor()
                     {
                         Image = @"\\minio\justin1.crate",
-                        Env = new Dictionary<string, string>(),
-                        Stdin = "",
-                        Stdout = "",
-                        Stderr = "",
-                        Command = new List<string>(),
-                        Workdir = "",
+                        //Env = new Dictionary<string, string>(),
+                        //Stdin = "",
+                        //Stdout = "",
+                        //Stderr = "",
+                        //Command = new List<string>(),
+                        //Workdir = "",
                     }
                 },
                 Tags = new Dictionary<string, string>()
                 {
-                    { "project", "wombles" },
+                    { "project", "Head" },
                     { "endpoints", "SAIL|DPUK" }
                 }
 
