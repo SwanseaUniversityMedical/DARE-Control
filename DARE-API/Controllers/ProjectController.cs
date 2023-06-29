@@ -97,10 +97,12 @@ namespace DARE_API.Controllers
             }
             catch (Exception ex) {
                 Log.Error(ex, "{Function} Crash", "AddProject");
+                var errorModel = new Project();
+                return errorModel;
                 throw;
             }
-           
-            
+
+
         }
 
 
