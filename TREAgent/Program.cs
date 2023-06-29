@@ -36,7 +36,7 @@ var hostBuilder = new HostBuilder()
         services.AddSingleton(treAPISettings);
 
 
-        services.AddTransient<IDoWork, DoWork>();
+        services.AddScoped<IDoWork, DoWork>();
         services.AddScoped<IDareClientHelper, DareClientHelper>();
         services.AddScoped<ITREClientHelper, TREClientHelper>();
 
@@ -90,13 +90,18 @@ public class Startup
 
         // Enable Hangfire Dashboard
         app.UseHangfireDashboard();
-        RecurringJob.AddOrUpdate<IDoWork>(a => a.Execute(), Cron.MinuteInterval(10));
+        RecurringJob.AddOrUpdate(() => Test(), Cron.MinuteInterval(10));
         var serverAddressesFeature = app.ServerFeatures.Get<IServerAddressesFeature>();
         var port = serverAddressesFeature?.Addresses.FirstOrDefault()?.Split(':').Last();
 
         // Print the port number
         Console.WriteLine("Application is running on port: " + port);
         // Other app configurations
+    }
+
+    public void Test()
+    {
+        var asas = 1;
     }
 
     
