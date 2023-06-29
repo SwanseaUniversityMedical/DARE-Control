@@ -149,7 +149,7 @@ namespace DARE_API.Controllers
 
             
 
-
+            //TODO: switch to token auth user. Need to setup a jaybee user for them if not there on deploy
             var user = _DbContext.Users.FirstOrDefault(x => x.Name.ToLower() == "jaybee");
 
             if (user == null)
