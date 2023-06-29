@@ -1,6 +1,6 @@
 ﻿using BL.Models;
 using BL.Models.DTO;
-using DARE_FrontEnd.Services;
+using BL.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -9,8 +9,8 @@ namespace DARE_FrontEnd.Controllers
 {
     public class UserController : Controller
     {
-        private readonly IClientHelper _clientHelper;
-        public UserController(IClientHelper client)
+        private readonly IDareClientHelper _clientHelper;
+        public UserController(IDareClientHelper client)
         {
             _clientHelper = client;
         }

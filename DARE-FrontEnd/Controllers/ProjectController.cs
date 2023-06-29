@@ -1,11 +1,12 @@
 ﻿using BL.Models;
 using BL.Models.DTO;
-using DARE_FrontEnd.Services;
+
 
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using RestSharp;
 using System.Text.Json.Nodes;
+using BL.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using static System.Net.Mime.MediaTypeNames;
 using Endpoint = BL.Models.Endpoint;
@@ -15,9 +16,9 @@ namespace DARE_FrontEnd.Controllers
 {
     public class ProjectController : Controller
     {
-        private readonly IClientHelper _clientHelper;
+        private readonly IDareClientHelper _clientHelper;
 
-        public ProjectController(IClientHelper client)
+        public ProjectController(IDareClientHelper client)
         {
             _clientHelper = client;
         }

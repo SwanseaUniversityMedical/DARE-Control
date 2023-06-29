@@ -9,7 +9,7 @@ using System.Text;
 using System.Text.Json;
 using BL.Models.DTO;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Diagnostics;
+
 using Serilog;
 
 namespace BL.Services
