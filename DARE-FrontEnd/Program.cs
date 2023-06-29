@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.Net;
 using BL.Models.Services;
 using BL.Models.Settings;
-using DARE_FrontEnd.Services;
+
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using DARE_FrontEnd.Models;
@@ -16,6 +16,8 @@ using Serilog;
 using Serilog.Exceptions;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using BL.Models.DTO;
+using BL.Services;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Options;
 
@@ -55,9 +57,9 @@ var keyCloakSettings = new KeyCloakSettings();
 configuration.Bind(nameof(keyCloakSettings), keyCloakSettings);
 builder.Services.AddSingleton(keyCloakSettings);
 
-var webAPISettings = new WebAPISettings();
-configuration.Bind(nameof(webAPISettings), webAPISettings);
-builder.Services.AddSingleton(webAPISettings);
+var dareAPISettings = new DareAPISettings();
+configuration.Bind(nameof(dareAPISettings), dareAPISettings);
+builder.Services.AddSingleton(dareAPISettings);
 
 
 builder.Services.AddHttpContextAccessor();
@@ -67,7 +69,7 @@ builder.Services.AddHttpClient();
 //add services here
 builder.Services.AddScoped<CustomCookieEvent>();
 
-builder.Services.AddScoped<IClientHelper, ClientHelper>();
+builder.Services.AddScoped<IDareClientHelper, DareClientHelper>();
 
 
 //builder.Services.AddSingleton(new JsonSerializerOptions()

@@ -1,4 +1,4 @@
-﻿namespace DARE_FrontEnd.Models
+﻿namespace BL.Models.DTO
 {
     public class WebAPISettings
     {

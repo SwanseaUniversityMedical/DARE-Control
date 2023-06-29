@@ -80,4 +80,8 @@
     <UpToDateCheckInput Remove="Views\Home\GetProject.cshtml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\" />
+  </ItemGroup>
+
 </Project>

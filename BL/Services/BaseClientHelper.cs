@@ -1,5 +1,4 @@
-using DARE_FrontEnd.Controllers;
-using DARE_FrontEnd.Models;
+
 using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -8,32 +7,24 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using BL.Models.DTO;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Serilog;
 
-namespace DARE_FrontEnd.Services
+namespace BL.Services
 {
-    public interface IClientHelper
-    {
+    
 
-
-
-        Task<TOutput?> CallAPI<TInput, TOutput>(string endPoint, TInput model,
-            Dictionary<string, string>? paramList = null) where TInput : class? where TOutput : class?, new();
-
-        Task<TOutput?> CallAPIWithoutModel<TOutput>(string endPoint, Dictionary<string, string>? paramList = null)
-            where TOutput : class?, new();
-    }
-
-    public class ClientHelper : IClientHelper
+    public class BaseClientHelper : IBaseClientHelper
     {
         
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly WebAPISettings _webAPISettings;
-        private readonly JsonSerializerOptions _jsonSerializerOptions;
+        protected readonly IHttpClientFactory _httpClientFactory;
+        protected readonly IHttpContextAccessor _httpContextAccessor;
+        protected readonly WebAPISettings _webAPISettings;
+        protected readonly JsonSerializerOptions _jsonSerializerOptions;
 
-        public ClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, WebAPISettings webAPISettings)
+        public BaseClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, WebAPISettings webAPISettings)
         {
             _httpClientFactory = httpClientFactory;
             _httpContextAccessor = httpContextAccessor;
@@ -93,7 +84,7 @@ namespace DARE_FrontEnd.Services
        
 
 
-        private async Task<HttpResponseMessage> ClientHelperRequestAsync(string endPoint, HttpMethod method, StringContent? jsonString = null, Dictionary<string, string>? paramlist = null)
+        protected async Task<HttpResponseMessage> ClientHelperRequestAsync(string endPoint, HttpMethod method, StringContent? jsonString = null, Dictionary<string, string>? paramlist = null)
         {
             try
             {
@@ -150,7 +141,7 @@ namespace DARE_FrontEnd.Services
             }
         }
 
-        private async Task<HttpClient> CreateClientWithToken()
+        protected async Task<HttpClient> CreateClientWithToken()
         {
             var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
             var apiClient = _httpClientFactory.CreateClient();
@@ -161,7 +152,7 @@ namespace DARE_FrontEnd.Services
 
         #region Helpers
 
-        private StringContent GetStringContent<T>(T datasetObj) where T : class?
+        protected StringContent GetStringContent<T>(T datasetObj) where T : class?
         {
             var jsonString = new StringContent(
                 System.Text.Json.JsonSerializer.Serialize(datasetObj, _jsonSerializerOptions),
