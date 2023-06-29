@@ -25,7 +25,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bl", "bl", "{6634C1BF-5ACA-
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TRE-API", "TRE-API\TRE-API.csproj", "{74A67920-5A7D-4C10-B1DB-8DE5AD25FF35}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TRE-FrontEnd", "TRE-FrontEnd\TRE-FrontEnd.csproj", "{5F458753-2C70-47A8-9C9A-1E3C522F81EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TRE-FrontEnd", "TRE-FrontEnd\TRE-FrontEnd.csproj", "{5F458753-2C70-47A8-9C9A-1E3C522F81EA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{061D315F-99DE-4D1F-8D29-6C4C0484BDB3} = {061D315F-99DE-4D1F-8D29-6C4C0484BDB3}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
