@@ -5,6 +5,8 @@
 }
 @{
     ViewData["Title"] = "Project Form";
+    var result = ViewBag.SubmissionResult;
+
 }
 
 <script src="~/Scripts/js/formIo.js"></script>
@@ -14,7 +16,9 @@
 
 <button id="ExternalSubmit" data-modal-target="#SubmitForReview" data-modal-effect="blur" type="button" class="btn btn-md u-btn-secondary mt-3">
     <em class="hs-admin-export align-middle g-font-weight-600 mr-2"></em>
+        <a asp-controller="home" asp-action="Index" class="btn btn-link">
     Submit Form
+    </a>
 </button>
 
 
