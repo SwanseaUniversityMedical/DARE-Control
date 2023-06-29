@@ -42,7 +42,7 @@ namespace TREAgent
 
                 //TODO: Validate against treapi
                 //TODO: Check crate format
-                //TODO: Call API or rabbit for testing
+                //TODO: Call API or rabbit for testing (Only dump tesString
                 //TODO: Update status of subs
 
             }
