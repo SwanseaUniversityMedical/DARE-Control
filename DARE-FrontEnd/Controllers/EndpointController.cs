@@ -1,6 +1,7 @@
 ﻿using BL.Models;
 using BL.Models.DTO;
-using DARE_FrontEnd.Services;
+using BL.Services;
+
 using Microsoft.AspNetCore.Mvc;
 using Endpoint = BL.Models.Endpoint;
 
@@ -9,8 +10,8 @@ namespace DARE_FrontEnd.Controllers
     public class EndpointController : Controller
     {
 
-        private readonly IClientHelper _clientHelper;
-        public EndpointController(IClientHelper client)
+        private readonly IDareClientHelper _clientHelper;
+        public EndpointController(IDareClientHelper client)
         {
             _clientHelper = client;
         }

@@ -25,6 +25,9 @@
     <Reference Include="Microsoft.AspNetCore.Mvc.ViewFeatures">
       <HintPath>..\..\..\..\..\..\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\7.0.7\ref\net7.0\Microsoft.AspNetCore.Mvc.ViewFeatures.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Extensions.Http">
+      <HintPath>..\..\..\..\..\..\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\7.0.7\ref\net7.0\Microsoft.Extensions.Http.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
