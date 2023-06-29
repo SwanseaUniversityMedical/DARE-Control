@@ -1,5 +1,6 @@
 ﻿using BL.Models.DTO;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace BL.Services
     public class DareClientHelper: BaseClientHelper, IDareClientHelper
     {
 
-        public DareClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, DareAPISettings webAPISettings): base(httpClientFactory, httpContextAccessor, webAPISettings)
+        public DareClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, IConfiguration config): base(httpClientFactory, httpContextAccessor, config["DareAPISettings:Address"])
         {
         
         }

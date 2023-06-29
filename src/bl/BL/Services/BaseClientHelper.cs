@@ -21,14 +21,14 @@ namespace BL.Services
         
         protected readonly IHttpClientFactory _httpClientFactory;
         protected readonly IHttpContextAccessor _httpContextAccessor;
-        protected readonly WebAPISettings _webAPISettings;
+        protected readonly string _address;
         protected readonly JsonSerializerOptions _jsonSerializerOptions;
 
-        public BaseClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, WebAPISettings webAPISettings)
+        public BaseClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, string address)
         {
             _httpClientFactory = httpClientFactory;
             _httpContextAccessor = httpContextAccessor;
-            this._webAPISettings = webAPISettings;
+            _address = address;
             _jsonSerializerOptions = new JsonSerializerOptions()
             {
                 
@@ -45,15 +45,15 @@ namespace BL.Services
 
             if (jsonString == null)
             {
-                response = await ClientHelperRequestAsync(_webAPISettings.Address + endPoint, HttpMethod.Get, jsonString, paramlist);
+                response = await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Get, jsonString, paramlist);
             }
             else if (usePut)
             {
-                response = await ClientHelperRequestAsync(_webAPISettings.Address + endPoint, HttpMethod.Put, jsonString, paramlist);
+                response = await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Put, jsonString, paramlist);
             }
             else
             {
-                response = await ClientHelperRequestAsync(_webAPISettings.Address + endPoint, HttpMethod.Post, jsonString, paramlist);
+                response = await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Post, jsonString, paramlist);
             }
 
 
@@ -88,10 +88,23 @@ namespace BL.Services
         {
             try
             {
+                var usetoken = true;
                 if (string.IsNullOrEmpty(endPoint)) return new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.BadRequest };
-                if (_httpContextAccessor.HttpContext == null) { return new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.BadRequest }; }
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    usetoken = false;
+                };
 
-                var apiClient = await CreateClientWithToken();
+                HttpClient? apiClient;
+                if (usetoken)
+                {
+                    apiClient = await CreateClientWithToken();
+                }
+                else
+                {
+                    apiClient = await CreateClientWithOutToken();
+                }
+                    
                 if (paramlist != null)
                 {
                     if (endPoint.EndsWith("/"))
@@ -146,6 +159,14 @@ namespace BL.Services
             var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
             var apiClient = _httpClientFactory.CreateClient();
             apiClient.SetBearerToken(accessToken);
+            apiClient.DefaultRequestHeaders.Add("Accept", "application/json");
+            return apiClient;
+        }
+
+        protected async Task<HttpClient> CreateClientWithOutToken()
+        {
+            
+            var apiClient = _httpClientFactory.CreateClient();
             apiClient.DefaultRequestHeaders.Add("Accept", "application/json");
             return apiClient;
         }

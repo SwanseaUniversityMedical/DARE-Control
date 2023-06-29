@@ -32,14 +32,14 @@ namespace DARE_API.Controllers
 
         
         [HttpGet]
-        [Route("/GetWaitingSubmissionsForEndpoint")]
+        [Route("GetWaitingSubmissionsForEndpoint")]
         [ValidateModelState]
         [SwaggerOperation("GetWaitingSubmissionsForEndpoint")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<Submission>), description: "")]
         public virtual IActionResult GetWaitingSubmissionsForEndpoint(string endpointname)
         {
             //ToDo alter to get endpoint from validated token
-            var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.Name.ToLower() == endpointname);
+            var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.Name.ToLower() == endpointname.ToLower());
             if (endpoint == null)
             {
                 return BadRequest("No access to endpoint " + endpointname + " or does not exist.");

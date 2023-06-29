@@ -28,12 +28,7 @@ var hostBuilder = new HostBuilder()
 
 
 
-        var dareAPISettings = new DareAPISettings();
-        hostContext.Configuration.Bind(nameof(dareAPISettings), dareAPISettings);
-        services.AddSingleton(dareAPISettings);
-        var treAPISettings = new TREAPISettings();
-        hostContext.Configuration.Bind(nameof(treAPISettings), treAPISettings);
-        services.AddSingleton(treAPISettings);
+       
         services.AddHttpContextAccessor();
         services.AddHttpClient();
 
@@ -42,15 +37,7 @@ var hostBuilder = new HostBuilder()
         services.AddScoped<IDareClientHelper, DareClientHelper>();
         services.AddScoped<ITREClientHelper, TREClientHelper>();
 
-        // Configure Hangfire
-        //services.AddHangfire(configuration => configuration
-        //    .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
-        //    .UseSimpleAssemblyNameTypeSerializer()
-        //    .UseRecommendedSerializerSettings()
-        //    .UsePostgreSqlStorage(hostContext.Configuration.GetConnectionString("DefaultConnection")));
-        
-        // Register Hangfire's JobActivator
-        //services.AddSingleton<JobActivator>(new HangfireJobActivator(services.BuildServiceProvider()));
+      
     }).ConfigureWebHostDefaults(webBuilder =>
     {
         webBuilder.UseStartup<Startup>();
@@ -82,18 +69,11 @@ public class Startup
 
         services.AddHangfireServer();
 
-        // Register the Hangfire job
-        //services.AddTransient<IHangfireJob, HangfireJob>();
-
-        // Add other services or dependencies as needed
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        // Other middleware configurations
         
-        // Enable Hangfire Dashboard
-
         app.UseHangfireDashboard();
         RecurringJob.AddOrUpdate<IDoWork>(a => a.Execute(), Cron.MinuteInterval(10));
         var serverAddressesFeature = app.ServerFeatures.Get<IServerAddressesFeature>();
@@ -101,7 +81,7 @@ public class Startup
 
         // Print the port number
         Console.WriteLine("Application is running on port: " + port);
-        // Other app configurations
+        
     }
 
     

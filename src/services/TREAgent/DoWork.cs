@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BL.Models;
 using BL.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -35,6 +36,14 @@ namespace TREAgent
                 var treApi = scope.ServiceProvider.GetRequiredService<ITREClientHelper>();
                 var dareApi = scope.ServiceProvider.GetRequiredService<IDareClientHelper>();
 
+                var subs = dareApi.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForEndpoint",
+                    new Dictionary<string, string>() { { "endpointname", TreName } }).Result;
+
+
+                //TODO: Validate against treapi
+                //TODO: Check crate format
+                //TODO: Call API or rabbit for testing
+                //TODO: Update status of subs
 
             }
             // Use the app settings value here

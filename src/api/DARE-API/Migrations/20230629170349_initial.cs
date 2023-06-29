@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DARE_API.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -114,17 +114,17 @@ namespace DARE_API.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ParentId = table.Column<int>(type: "integer", nullable: true),
-                    TesId = table.Column<string>(type: "text", nullable: false),
+                    TesId = table.Column<string>(type: "text", nullable: true),
                     SourceCrate = table.Column<string>(type: "text", nullable: false),
                     TesName = table.Column<string>(type: "text", nullable: false),
-                    TesJson = table.Column<string>(type: "text", nullable: false),
+                    TesJson = table.Column<string>(type: "text", nullable: true),
                     DockerInputLocation = table.Column<string>(type: "text", nullable: false),
                     ProjectId = table.Column<int>(type: "integer", nullable: false),
                     ParentID = table.Column<int>(type: "integer", nullable: true),
                     Status = table.Column<int>(type: "integer", nullable: false),
-                    EndPointId = table.Column<int>(type: "integer", nullable: false),
+                    EndPointId = table.Column<int>(type: "integer", nullable: true),
                     SubmittedById = table.Column<int>(type: "integer", nullable: false),
-                    StatusDescription = table.Column<string>(type: "text", nullable: false)
+                    StatusDescription = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -133,8 +133,7 @@ namespace DARE_API.Migrations
                         name: "FK_Submissions_Endpoints_EndPointId",
                         column: x => x.EndPointId,
                         principalTable: "Endpoints",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Submissions_Projects_ProjectId",
                         column: x => x.ProjectId,

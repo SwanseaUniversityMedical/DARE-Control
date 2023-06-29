@@ -57,9 +57,6 @@ var keyCloakSettings = new KeyCloakSettings();
 configuration.Bind(nameof(keyCloakSettings), keyCloakSettings);
 builder.Services.AddSingleton(keyCloakSettings);
 
-var dareAPISettings = new DareAPISettings();
-configuration.Bind(nameof(dareAPISettings), dareAPISettings);
-builder.Services.AddSingleton(dareAPISettings);
 
 
 builder.Services.AddHttpContextAccessor();

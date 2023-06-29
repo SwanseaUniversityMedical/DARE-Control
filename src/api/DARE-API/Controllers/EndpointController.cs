@@ -60,11 +60,12 @@ namespace DARE_API.Controllers
 
         [HttpPost("AddEndpointMVC")]
 
-        public async Task<Endpoint?> AddEndpointMVC(Endpoint model)
+        public async Task<Endpoint?> AddEndpointMVC(FormData data)
         {
             try
             {
-               
+                Endpoint model = JsonConvert.DeserializeObject<Endpoint>(data.FormIoString);
+
                 model.Name = model.Name.Trim();
                 
 
@@ -73,7 +74,7 @@ namespace DARE_API.Controllers
                     return null;
                 }
 
-                model.FormData = "";
+                model.FormData = data.FormIoString;
                 _DbContext.Endpoints.Add(model);
 
                 await _DbContext.SaveChangesAsync();

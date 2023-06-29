@@ -3,6 +3,7 @@ using BL.Models.DTO;
 using BL.Services;
 
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Endpoint = BL.Models.Endpoint;
 
 namespace DARE_FrontEnd.Controllers
@@ -36,7 +37,12 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public IActionResult AddEndpoint(Endpoint model)
         {
-            var result =  _clientHelper.CallAPI<Endpoint, Endpoint?>("/api/Endpoint/AddEndpointMVC", model).Result;
+            var data = new FormData()
+            {
+                FormIoUrl = "https://psttpefwlitcuek.form.io/endpoint",
+                FormIoString = JsonConvert.SerializeObject(model)
+            };
+            var result =  _clientHelper.CallAPI<FormData, Endpoint?>("/api/Endpoint/AddEndpointMVC", data).Result;
 
             return View(result);
 
