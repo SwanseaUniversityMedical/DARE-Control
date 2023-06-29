@@ -21,7 +21,7 @@ env:
 
 jobs:
   release-api-container:
-    runs-on: [self-hosted, linux, x64]
+    runs-on: ubuntu-latest
 
     env:
       TAG_PREFIX: 'DARE-Control-API-Container'
@@ -180,7 +180,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
 
   release-ui-container:
-    runs-on: [self-hosted, linux, x64]
+    runs-on: ubuntu-latest
 
     env:
       TAG_PREFIX: 'DARE-Control-UI-Container'

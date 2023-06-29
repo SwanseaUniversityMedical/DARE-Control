@@ -9,6 +9,7 @@ using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using static System.Net.Mime.MediaTypeNames;
 using Endpoint = BL.Models.Endpoint;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -126,6 +127,8 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public Task<IActionResult> AddProjectForm()
         {
+
+            
             return Task.FromResult<IActionResult>(View(new FormData()
             {
                 FormIoUrl = "https://feidldzemrnfcva.form.io/createnewproject"
@@ -137,12 +140,16 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<IActionResult> ProjectFormSubmission([FromBody] FormData model)
         {
+
             var result =
                 await _clientHelper.CallAPI<FormData, Project?>("/api/Project/AddProject", model);
 
+            if (result.Id == 0)
+            {
+                return BadRequest();
+            }
+
             return Ok(result);
-
-
 
         }
     }
