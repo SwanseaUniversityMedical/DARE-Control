@@ -1,7 +1,7 @@
 using BL.Models.Settings;
 using BL.Repositories.DbContexts;
 using TRE_API.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+//using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
