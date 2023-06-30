@@ -4,13 +4,13 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.Net;
 using BL.Models.Services;
 using BL.Models.Settings;
+using BL.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.IdentityModel.Logging;
 using Serilog;
 using Serilog.Exceptions.Core;
 using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
 using Serilog.Exceptions;
-using TRE_FrontEnd.Services;
 using TRE_FrontEnd.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -45,7 +45,7 @@ builder.Services.AddHttpClient();
 //add services here
 builder.Services.AddScoped<CustomCookieEvent>();
 
-builder.Services.AddScoped<IClientHelper, ClientHelper>();
+builder.Services.AddScoped<ITREClientHelper, TREClientHelper>();
 
 builder.Services.AddMvc().AddViewComponentsAsServices();
 
