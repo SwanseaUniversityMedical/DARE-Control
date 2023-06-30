@@ -144,7 +144,10 @@ namespace BL.Services
                 if (method == HttpMethod.Post) res = await apiClient.PostAsync(endPoint, jsonString);
                 if (method == HttpMethod.Put) res = await apiClient.PutAsync(endPoint, jsonString);
                 if (method == HttpMethod.Delete) res = await apiClient.DeleteAsync(endPoint);
-
+                if (!res.IsSuccessStatusCode)
+                {
+                    var i = 1;
+                }
                 Console.Out.Write(res);
                 return res;
             }

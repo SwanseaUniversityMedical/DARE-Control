@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
 using BL.Models;
+using BL.Models.DTO;
+using BL.Models.Tes;
 using EasyNetQ;
 
 namespace DARE_API.Controllers
@@ -48,6 +50,34 @@ namespace DARE_API.Controllers
             var results = endpoint.Submissions.Where(x => x.Status == SubmissionStatus.WaitingForAgentToTransfer).ToList();
 
             return StatusCode(200, results);
+        }
+
+
+        [HttpGet]
+        [Route("UpdateStatusForEndpoint")]
+        [ValidateModelState]
+        [SwaggerOperation("UpdateStatusForEndpoint")]
+        [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
+        public  IActionResult UpdateStatusForEndpoint(string endpointname, string tesId, SubmissionStatus status)
+        {
+            //ToDo alter to get endpoint from validated token
+            var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.Name.ToLower() == endpointname.ToLower());
+            if (endpoint == null)
+            {
+                return BadRequest("No access to endpoint " + endpointname + " or does not exist.");
+            }
+
+            var sub = _DbContext.Submissions.FirstOrDefault(x => x.TesId == tesId && x.EndPoint == endpoint);
+            if (sub == null)
+            {
+                return BadRequest("Invalid tesid or endpoint not valid for tes");
+            }
+            sub.Status = status;
+            
+            _DbContext.SaveChanges();
+            
+
+            return StatusCode(200, new APIReturn(){ReturnType = ReturnType.voidReturn});
         }
     }
 }
