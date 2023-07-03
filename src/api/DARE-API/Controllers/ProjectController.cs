@@ -11,10 +11,10 @@ using DARE_API.Controllers;
 using static BL.Controllers.UserController;
 using Minio.DataModel;
 using DARE_API.Services.Contract;
-using DARE_API.Models;
 using EasyNetQ;
 using Serilog;
 using Endpoint = BL.Models.Endpoint;
+using BL.Services;
 
 namespace DARE_API.Controllers
 {
@@ -27,18 +27,14 @@ namespace DARE_API.Controllers
 
         private readonly ApplicationDbContext _DbContext;
         private readonly MinioSettings _minioSettings;
-        private readonly IMinioService _minioService;
+        private readonly IMinioHelper _minioHelper;
 
-        
-
-    
-
-        public ProjectController(ApplicationDbContext applicationDbContext, MinioSettings minioSettings, IMinioService minioService)
+        public ProjectController(ApplicationDbContext applicationDbContext, MinioSettings minioSettings, IMinioHelper minioHelper)
         {
 
             _DbContext = applicationDbContext;
             _minioSettings = minioSettings;
-            _minioService = minioService;
+            _minioHelper = minioHelper;
             
         }
 
@@ -70,12 +66,12 @@ namespace DARE_API.Controllers
                 model.OutputBucket = GenerateRandomName(model.Name);
                 model.FormData = data.FormIoString;
 
-                var submissionBucket = await _minioService.CreateBucket(_minioSettings, model.SubmissionBucket);
+                var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, model.SubmissionBucket);
                 if (!submissionBucket)
                 {
                     Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", model.SubmissionBucket);
                 }
-                var outputBucket = await _minioService.CreateBucket(_minioSettings, model.OutputBucket);
+                var outputBucket = await _minioHelper.CreateBucket(_minioSettings, model.OutputBucket);
                 if (!outputBucket)
                 {
                     Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", model.OutputBucket);
