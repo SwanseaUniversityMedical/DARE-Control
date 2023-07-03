@@ -1,6 +1,6 @@
 using BL.Models.Settings;
 using BL.Repositories.DbContexts;
-using DARE_API.Models;
+//using DARE_API.Models;
 using DARE_API.Services.Contract;
 using DARE_API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Builder;
 using Newtonsoft.Json;
 using BL.Rabbit;
 using EasyNetQ;
+using BL.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
