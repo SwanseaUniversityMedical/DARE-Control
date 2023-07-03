@@ -7,8 +7,6 @@ on:
       - 'src/**'
       - 'containers/**'
       - 'charts/**'
-      - 'API Project/**'
-      - 'Project Admin/**'
     branches:
       - '**'
 
@@ -39,7 +37,7 @@ jobs:
             src:
               - '.github/workflows/release.yaml'
               - 'containers/api/**'
-              - 'API Project/**'
+              - 'src/api/**'
 
       - name: build container
         if: steps.container-changes.outputs.src == 'true'
@@ -198,7 +196,7 @@ jobs:
             src:
               - '.github/workflows/release.yaml'
               - 'containers/ui/**'
-              - 'Project Admin/**'
+              - 'src/ui/**'
 
       - name: build container
         if: steps.container-changes.outputs.src == 'true'
