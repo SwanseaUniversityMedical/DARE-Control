@@ -84,7 +84,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\bl\BL\BL.csproj" />
+    <ProjectReference Include="..\BL\BL.csproj" />
   </ItemGroup>
 
 </Project>

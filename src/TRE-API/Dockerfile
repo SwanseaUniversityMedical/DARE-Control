@@ -11,6 +11,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["TRE-API/TRE-API.csproj", "TRE-API/"]
+COPY ["../bl/BL/BL.csproj", "BL/"]
 RUN dotnet restore "TRE-API/TRE-API.csproj"
 COPY . .
 WORKDIR "/src/TRE-API"
