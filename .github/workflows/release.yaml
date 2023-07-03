@@ -18,7 +18,7 @@ env:
   HARBOR_TOKEN: ${{ secrets.HARBOR_TOKEN }}
 
 jobs:
-  release-main-api-container:
+  release-api-container:
     runs-on: ubuntu-latest
 
     env:
