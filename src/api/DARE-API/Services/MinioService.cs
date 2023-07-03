@@ -1,7 +1,7 @@
 ﻿using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
-using DARE_API.Models;
+using BL.Models;
 using DARE_API.Services.Contract;
 using Minio.Exceptions;
 using Serilog;

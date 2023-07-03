@@ -1,5 +1,5 @@
 ﻿using Amazon.S3.Model;
-using DARE_API.Models;
+using BL.Models;
 
 namespace DARE_API.Services.Contract
 {
