@@ -11,6 +11,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["TRE-UI/TRE-UI.csproj", "TRE-UI/"]
+COPY ["BL/BL.csproj", "BL/"]
 RUN dotnet restore "TRE-UI/TRE-UI.csproj"
 COPY . .
 WORKDIR "/src/TRE-UI"

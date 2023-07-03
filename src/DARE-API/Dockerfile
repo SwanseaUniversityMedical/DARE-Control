@@ -8,6 +8,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["DARE-API/DARE-API.csproj", "DARE-API/"]
+COPY ["BL/BL.csproj", "BL/"]
 RUN dotnet restore "DARE-API/DARE-API.csproj"
 COPY . .
 WORKDIR "/src/DARE-API"
