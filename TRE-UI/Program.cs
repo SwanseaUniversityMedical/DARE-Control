@@ -3,6 +3,9 @@ using BL.Services;
 using BL.Models.Services;
 using BL.Models.Settings;
 using Serilog;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,6 +47,96 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
     options.OnDeleteCookie = cookieContext =>
         CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
 });
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+})
+            .AddCookie(options => options.EventsType = typeof(CustomCookieEvent))
+            .AddOpenIdConnect(options =>
+            {                
+                // URL of the Keycloak server
+                options.Authority = keyCloakSettings.Authority;
+                //// Client configured in the Keycloak
+                options.ClientId = keyCloakSettings.ClientId;
+                //// Client secret shared with Keycloak
+                options.ClientSecret = keyCloakSettings.ClientSecret;
+                options.MetadataAddress = keyCloakSettings.MetadataAddress;
+
+                options.SaveTokens = true;
+
+                options.ResponseType = OpenIdConnectResponseType.Code; //Configuration["Oidc:ResponseType"];
+                                                                       // For testing we disable https (should be true for production)
+                options.RemoteSignOutPath = keyCloakSettings.RemoteSignOutPath;
+                options.SignedOutRedirectUri = keyCloakSettings.SignedOutRedirectUri;
+                options.RequireHttpsMetadata = false;
+                options.GetClaimsFromUserInfoEndpoint = true;
+                //options.Scope.Add("openid");
+                //options.Scope.Add("profile");
+                //options.Scope.Add("email");
+                //options.Scope.Add("claims");
+                //options.SaveTokens = true;
+                options.ResponseType = OpenIdConnectResponseType.Code;
+                options.Events = new OpenIdConnectEvents
+                {
+                    OnRemoteFailure = context =>
+                    {
+                        //Log.Error("OnRemoteFailure: {ex}", context.Failure);
+                        if (context.Failure.Message.Contains("Correlation failed"))
+                        {
+                            //Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", keyCloakSettings.TokenExpiredAddress);
+                            context.Response.Redirect(keyCloakSettings.TokenExpiredAddress);
+                        }
+                        else
+                        {
+                            //Log.Warning("call /Error/500");
+                            context.Response.Redirect("/Error/500");
+                        }
+
+                        context.HandleResponse();
+
+                        return context.Response.CompleteAsync();
+                    },
+                    OnMessageReceived = context =>
+                    {
+                        string accessToken = context.Request.Query["access_token"];
+                        PathString path = context.HttpContext.Request.Path;
+
+                        if (
+                            !string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/api/SignalRHub")
+                        )
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    },
+                    OnRedirectToIdentityProvider = async context =>
+                    {               
+                        foreach (var header in context.HttpContext.Request.Headers)
+                        {
+                            // Log.Information("Request Header {key} - {value}", header.Key, header.Value);
+                        }
+
+                        foreach (var header in context.HttpContext.Response.Headers)
+                        {
+                            // Log.Information("Response Header {key} - {value}", header.Key, header.Value);
+                        }
+
+
+                        //context.ProtocolMessage.RedirectUri = Configuration["Oidc:RedirectUri"];
+                        //Log.Information( context.ProtocolMessage.RedirectUri);
+                        //Log.Information( context.ProtocolMessage.RedirectUri);
+                        await Task.FromResult(0);
+                    }
+                };
+
+                options.NonceCookie.SameSite = SameSiteMode.None;
+                options.CorrelationCookie.SameSite = SameSiteMode.None;
+            });
 
 var app = builder.Build();
 
