@@ -91,6 +91,8 @@ namespace DARE_FrontEnd.Controllers
             ViewBag.TokenExpiryDate = tokenExpiryDate;
             return View();
         }
+
+        [Route("Home/TokenRequest")]
         public async Task<IActionResult> TokenRequest()
         {
             var handler = new JwtSecurityTokenHandler();
