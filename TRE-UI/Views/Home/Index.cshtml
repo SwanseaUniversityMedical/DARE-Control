@@ -2,7 +2,30 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
+@*<div class="text-center">
     <h1 class="display-4">Welcome DARE TREFX</h1>
 
+</div>*@
+
+
+<div>
+    <div>
+        @Html.ActionLink("Add a Project", "AddProject", "Project")
+    </div>
+    <div>
+        @Html.ActionLink("Awaiting Approvals", "ApproveProject", "Project")
+   @*     list of submissions awaiting approval in a table*@
+    </div>
+ @*   <div>
+        @Html.ActionLink("List All Memberships", "GetAllMemberships", "Project")
+    </div>*@
+    <div>
+        @Html.ActionLink("List All Projects", "GetAllProjects", "Project")
+    </div>
+   
+    <div>
+        @Html.ActionLink("List all Users", "GetAllUsers", "User")
+    </div>
+
+   
 </div>

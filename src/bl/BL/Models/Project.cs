@@ -28,5 +28,6 @@ namespace BL.Models
     public class ProjectListModel
     {
         public List<Project> Projects { get; set; }
+
     }
 }
