@@ -661,7 +661,7 @@ jobs:
 
 
   release-chart:
-    needs: [release-api-container, release-ui-container]
+    needs: [release-api-container, release-ui-container, release-tre-api-container, release-tre-ui-container]
     runs-on: [ self-hosted, linux, x64 ]
 
     env:
