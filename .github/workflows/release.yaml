@@ -18,13 +18,13 @@ env:
   HARBOR_TOKEN: ${{ secrets.HARBOR_TOKEN }}
 
 jobs:
-  release-api-container:
+  release-main-api-container:
     runs-on: ubuntu-latest
 
     env:
       TAG_PREFIX: 'DARE-Control-API-Container'
       TAG_FORMAT: 'DARE-Control-API-Container-${version}'
-      HARBOR_API_REPO: ${{ vars.HARBOR_REPO }}-api
+      HARBOR_API_REPO: ${{ vars.HARBOR_REPO }}-main-api
 
     steps:
       - name: clone repo
@@ -184,7 +184,7 @@ jobs:
     env:
       TAG_PREFIX: 'DARE-Control-UI-Container'
       TAG_FORMAT: 'DARE-Control-UI-Container-${version}'
-      HARBOR_UI_REPO: ${{ vars.HARBOR_REPO }}-ui
+      HARBOR_UI_REPO: ${{ vars.HARBOR_REPO }}-main-ui
 
     steps:
       - name: clone repo
@@ -201,8 +201,9 @@ jobs:
 
       - name: build container
         if: steps.container-changes.outputs.src == 'true'
+        working-directory: src/
         run: |
-          docker build -t image -f "containers/ui/Dockerfile" .
+          docker build -t image -f "DARE-FrontEnd/Dockerfile" .
 
       - name: registry login
         if: steps.container-changes.outputs.src == 'true'
