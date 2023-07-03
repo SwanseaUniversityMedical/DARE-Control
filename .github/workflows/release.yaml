@@ -37,12 +37,12 @@ jobs:
             src:
               - '.github/workflows/release.yaml'
               - 'containers/api/**'
-              - 'src/api/**'
+              - 'src/DARE-API/**'
 
       - name: build container
         if: steps.container-changes.outputs.src == 'true'
         run: |
-          docker build -t image -f "containers/api/Dockerfile" .
+          docker build -t image -f "DARE-API/Dockerfile" .
 
       - name: registry login
         if: steps.container-changes.outputs.src == 'true'
