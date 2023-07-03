@@ -40,7 +40,8 @@ jobs:
               - 'src/DARE-API/**'
 
       - name: build container
-        if: steps.container-changes.outputs.src == 'true'
+        if: steps.container-changes.outputs.src == 'true'      
+        working-directory: src/
         run: |
           docker build -t image -f "DARE-API/Dockerfile" .
 
