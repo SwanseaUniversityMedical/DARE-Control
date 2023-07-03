@@ -48,6 +48,32 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
         CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
 });
 
+builder.Services.AddAuthorization(options =>
+{
+    //options.AddPolicy("admin", policy =>
+    //    policy.RequireClaim("groups", "dare-control-admin")); //MIGHT NEED TO CHANGE LATER
+
+    //probably not needed
+    options.AddPolicy(
+            "admin",
+            policyBuilder => policyBuilder.RequireAssertion(
+                context => context.User.HasClaim(claim =>
+                    claim.Type == "groups"
+                    && claim.Value.Contains("dare-control-admin"))));
+    //options.AddPolicy(
+    //            "company",
+    //            policyBuilder => policyBuilder.RequireAssertion(
+    //                context => context.User.HasClaim(claim =>
+    //                    claim.Type == "groups"
+    //                    && claim.Value.Contains("dare-control-company"))));
+    //options.AddPolicy(
+    //        "user",
+    //        policyBuilder => policyBuilder.RequireAssertion(
+    //            context => context.User.HasClaim(claim =>
+    //                claim.Type == "groups"
+    //                && claim.Value.Contains("dare-control-user"))));
+});
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
