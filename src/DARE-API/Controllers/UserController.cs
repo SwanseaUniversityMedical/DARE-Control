@@ -22,7 +22,6 @@ namespace BL.Controllers
     public class UserController : ControllerBase
     {
         
-        
         private readonly ApplicationDbContext _DbContext;
 
         public UserController(ApplicationDbContext applicationDbContext)
