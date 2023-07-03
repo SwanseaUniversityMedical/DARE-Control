@@ -38,6 +38,7 @@ jobs:
               - '.github/workflows/release.yaml'
               - 'containers/api/**'
               - 'src/DARE-API/**'
+              - 'src/BL/**'
 
       - name: build container
         if: steps.container-changes.outputs.src == 'true'      
@@ -197,7 +198,8 @@ jobs:
             src:
               - '.github/workflows/release.yaml'
               - 'containers/ui/**'
-              - 'src/ui/**'
+              - 'src/DARE-FrontEnd/**'
+              - 'src/BL/**'
 
       - name: build container
         if: steps.container-changes.outputs.src == 'true'
@@ -358,7 +360,8 @@ jobs:
             src:
               - '.github/workflows/release.yaml'
               - 'containers/api/**'
-              - 'src/DARE-API/**'
+              - 'src/TRE-API/**'
+              - 'src/BL/**'
 
       - name: build container
         if: steps.container-changes.outputs.src == 'true'      
@@ -518,7 +521,8 @@ jobs:
             src:
               - '.github/workflows/release.yaml'
               - 'containers/ui/**'
-              - 'src/ui/**'
+              - 'src/TRE-FrontEnd/**'
+              - 'src/BL/**'
 
       - name: build container
         if: steps.container-changes.outputs.src == 'true'
