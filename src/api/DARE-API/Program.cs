@@ -23,20 +23,7 @@ using EasyNetQ;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//Log.Logger = new LoggerConfiguration()
-//    .MinimumLevel.Verbose()
-//    .Enrich.WithDemystifiedStackTraces()
-//    .Enrich.WithExceptionDetails(new DestructuringOptionsBuilder()
-//        .WithDefaultDestructurers()
-//        .WithDestructurers(new[] { new DbUpdateExceptionDestructurer() }))
-//    .Enrich.WithProperty("MainSystem", "DareFX")
-//    .Enrich.WithProperty("Component", "SubmissionAPI")
-//    .Enrich.FromLogContext()
-//    .Enrich.WithProperty("ServerName", Environment.MachineName)
-//    .Enrich.FromLogContext()
-//    .WriteTo.Console()
-//    .WriteTo.Seq(builder.Configuration["SeqURL"])
-//    .CreateLogger();
+
 
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
@@ -69,14 +56,7 @@ Task task = SetUpRabbitMQ.DoItAsync(configuration["RabbitMQ:HostAddress"], confi
 var keyCloakSettings = new KeyCloakSettings();
 configuration.Bind(nameof(keyCloakSettings), keyCloakSettings);
 builder.Services.AddSingleton(keyCloakSettings);
-//builder.Services.AddSingleton(new JsonSerializerOptions()
-//{
-//    PropertyNameCaseInsensitive = true,
-//    ReferenceHandler = ReferenceHandler.Preserve
-//});
-//var internalMinioSettings = new MinioInternalSettings();
-//configuration.Bind(nameof(internalMinioSettings), internalMinioSettings);
-//builder.Services.AddSingleton(internalMinioSettings);
+
 
 var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
