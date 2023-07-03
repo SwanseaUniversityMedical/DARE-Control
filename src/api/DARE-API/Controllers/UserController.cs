@@ -56,6 +56,8 @@ namespace BL.Controllers
             catch (Exception ex)
             {
                 Log.Error(ex, "{Function} Crashed", "AddUser");
+                var errorUser = new User();
+                return errorUser;
                 throw;
             }
 

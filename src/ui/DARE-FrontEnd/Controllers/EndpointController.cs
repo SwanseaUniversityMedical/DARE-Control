@@ -65,7 +65,11 @@ namespace DARE_FrontEnd.Controllers
         public async Task<IActionResult> EndpointFormSubmission([FromBody] FormData submissionData)
         {
             var result = await _clientHelper.CallAPI<FormData, Endpoint?>("/api/Endpoint/AddEndpoint", submissionData);
+            if (result.Id == 0)
+            {
+                return BadRequest();
 
+            }
             return Ok(result);
         }
     }

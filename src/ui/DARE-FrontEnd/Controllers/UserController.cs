@@ -36,7 +36,12 @@ namespace DARE_FrontEnd.Controllers
         {
 
             var result = await _clientHelper.CallAPI<FormData, User>("/api/User/AddUser", submissionData);
-            
+
+            if (result.Id == 0)
+            {
+                return BadRequest();
+
+            }
             return Ok(result);
         }
 

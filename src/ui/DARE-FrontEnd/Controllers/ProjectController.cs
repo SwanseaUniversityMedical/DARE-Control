@@ -107,6 +107,8 @@ namespace DARE_FrontEnd.Controllers
             var result =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
             result = GetProjectUserModel();
+
+
             return View(result);
 
 
@@ -119,6 +121,7 @@ namespace DARE_FrontEnd.Controllers
                 await _clientHelper.CallAPI<ProjectEndpoint, ProjectEndpoint?>("/api/Project/AddEndpointMembership",
                     model);
             result = GetProjectEndpointModel();
+
             return View(result);
 
 
@@ -150,8 +153,7 @@ namespace DARE_FrontEnd.Controllers
                 return BadRequest();
             }
 
-            return Ok(result);
-
+            return Redirect("/home");
         }
     }
 }
