@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "TREAgent": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}
