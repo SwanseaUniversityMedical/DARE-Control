@@ -22,7 +22,7 @@ namespace DARE_FrontEnd.Controllers
         {
             return View(new FormData()
             {
-                FormIoUrl = "https://psttpefwlitcuek.form.io/endpoint"
+                FormIoUrl = "https://formio.ukserp.ac.uk/dev-sumcldchbogedhw/addendpoint"
             });
 
         }
@@ -30,8 +30,10 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public IActionResult AddEndpoint()
         {
-            return View();
-
+            return View(new FormData()
+            {
+                FormIoUrl = "https://formio.ukserp.ac.uk/dev-sumcldchbogedhw/addendpoint"
+            });
         }
 
         [HttpPost]
