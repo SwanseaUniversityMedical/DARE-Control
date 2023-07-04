@@ -1,0 +1,42 @@
+name: Scan
+
+on:
+  push:
+    branches:
+      - 'main'
+
+env:
+  DAREUI: dare-control-ui
+  DAREAPI: dare-control-api
+  TREUI: dare-control-treui
+  TREAPI: dare-control-treapi
+  AGENT: dare-control-agent
+  
+
+jobs:
+  scan-code:
+    name: Scan
+    runs-on: [self-hosted, linux, x64]
+    # runs-on: windows-latest
+    steps:
+      - name: clone repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: scan ${{ env.DAREUI }} project
+        run: |
+          docker run --rm \
+          -v $(pwd):/src/DARE-FrontEnd \
+              && dotnet /sonar-scanner/SonarScanner.MSBuild.dll begin \
+              /k:${{ env.DAREUI }} /name:${{ env.DAREUI }} \
+              /d:sonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+              /d:sonar.login=${{ secrets.SONAR_TOKEN }} \
+              && dotnet restore "DARE-FrontEnd.csproj" \
+              && dotnet build "DARE-FrontEnd.csproj" -c Release \
+              && dotnet /sonar-scanner/SonarScanner.MSBuild.dll end \
+              /d:sonar.login=${{ secrets.SONAR_TOKEN }}"
+
+      - name: Sleep for 30 seconds to give the SQ server a chance to catch up
+        run: sleep 30s
+        shell: bash
