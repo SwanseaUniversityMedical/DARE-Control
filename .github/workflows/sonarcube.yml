@@ -43,3 +43,63 @@ jobs:
       - name: Sleep for 30 seconds to give the SQ server a chance to catch up
         run: sleep 30s
         shell: bash
+
+      - name: scan ${{ env.DAREAPI }} project
+        run: |
+          docker run --rm \
+          -v $(pwd):/source \
+          alleeex/dotnet-sonar:23.06.4-r2 \
+          bash -c \
+              "cd /source/src/DARE-API \
+              && dotnet /sonar-scanner/SonarScanner.MSBuild.dll begin \
+              /k:${{ env.DAREAPI }} /name:${{ env.DAREAPI }} \
+              /d:sonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+              /d:sonar.login=${{ secrets.SONAR_TOKEN }} \
+              && dotnet restore "DARE-API.csproj" \
+              && dotnet build "DARE-API.csproj" -c Release \
+              && dotnet /sonar-scanner/SonarScanner.MSBuild.dll end \
+              /d:sonar.login=${{ secrets.SONAR_TOKEN }}"
+
+      - name: Sleep for 30 seconds to give the SQ server a chance to catch up
+        run: sleep 30s
+        shell: bash
+
+      - name: scan ${{ env.TREUI }} project
+        run: |
+          docker run --rm \
+          -v $(pwd):/source \
+          alleeex/dotnet-sonar:23.06.4-r2 \
+          bash -c \
+              "cd /source/src/TRE-UI \
+              && dotnet /sonar-scanner/SonarScanner.MSBuild.dll begin \
+              /k:${{ env.TREUI }} /name:${{ env.TREUI }} \
+              /d:sonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+              /d:sonar.login=${{ secrets.SONAR_TOKEN }} \
+              && dotnet restore "TRE-UI.csproj" \
+              && dotnet build "TRE-UI.csproj" -c Release \
+              && dotnet /sonar-scanner/SonarScanner.MSBuild.dll end \
+              /d:sonar.login=${{ secrets.SONAR_TOKEN }}"
+
+      - name: Sleep for 30 seconds to give the SQ server a chance to catch up
+        run: sleep 30s
+        shell: bash
+      
+      - name: scan ${{ env.TREAPI }} project
+        run: |
+          docker run --rm \
+          -v $(pwd):/source \
+          alleeex/dotnet-sonar:23.06.4-r2 \
+          bash -c \
+              "cd /source/src/TRE-UI \
+              && dotnet /sonar-scanner/SonarScanner.MSBuild.dll begin \
+              /k:${{ env.TREAPI }} /name:${{ env.TREAPI }} \
+              /d:sonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+              /d:sonar.login=${{ secrets.SONAR_TOKEN }} \
+              && dotnet restore "TRE-UI.csproj" \
+              && dotnet build "TRE-UI.csproj" -c Release \
+              && dotnet /sonar-scanner/SonarScanner.MSBuild.dll end \
+              /d:sonar.login=${{ secrets.SONAR_TOKEN }}"
+
+      - name: Sleep for 30 seconds to give the SQ server a chance to catch up
+        run: sleep 30s
+        shell: bash
