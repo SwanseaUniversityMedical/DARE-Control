@@ -21,6 +21,7 @@ using Newtonsoft.Json;
 using BL.Rabbit;
 using EasyNetQ;
 using BL.Models;
+using BL.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -221,6 +222,7 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
 
    
     builder.Services.AddScoped<IMinioService, MinioService>();
+    builder.Services.AddScoped<IMinioHelper, MinioHelper>();
     builder.Services.AddMvc().AddControllersAsServices()
     //    .AddNewtonsoftJson(options =>
     //    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
