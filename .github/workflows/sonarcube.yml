@@ -110,7 +110,7 @@ jobs:
           -v $(pwd):/source \
           alleeex/dotnet-sonar:23.06.4-r2 \
           bash -c \
-              "cd /source/src/TREAGENT \
+              "cd /source/src/TREAgent \
               && dotnet /sonar-scanner/SonarScanner.MSBuild.dll begin \
               /k:${{ env.TREAGENT }} /name:${{ env.TREAGENT }} \
               /d:sonar.host.url=${{ secrets.SONAR_HOST_URL }} \
