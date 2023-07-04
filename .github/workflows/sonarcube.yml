@@ -27,10 +27,10 @@ jobs:
       - name: scan ${{ env.DAREUI }} project
         run: |
           docker run --rm \
-          -v $(pwd):/source/src \
+          -v $(pwd):/src \
           alleeex/dotnet-sonar:23.06.4-r2 \
           bash -c \
-              "cd source/src/DARE-FrontEnd \
+              "cd src/DARE-FrontEnd \
               && dotnet /sonar-scanner/SonarScanner.MSBuild.dll begin \
               /k:${{ env.DAREUI }} /name:${{ env.DAREUI }} \
               /d:sonar.host.url=${{ secrets.SONAR_HOST_URL }} \
