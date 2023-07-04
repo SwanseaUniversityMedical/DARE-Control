@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@{
+    <a href="/Account/Logout">Sign Out</a>
+
+}
+
+<div>
+    <div>
+        @Html.ActionLink("Add a Project", "AddProject", "Project")
+    </div>
+    <div>
+        @Html.ActionLink("Awaiting Approvals", "ApproveProject", "Project")
+   @*     list of submissions awaiting approval in a table*@
+    </div>
+ @*   <div>
+        @Html.ActionLink("List All Memberships", "GetAllMemberships", "Project")
+    </div>*@
+    <div>
+        @Html.ActionLink("List All Projects", "GetAllProjects", "Project")
+    </div>
+   
+    <div>
+        @Html.ActionLink("List all Users", "GetAllUsers", "User")
+    </div>
+
+   
+</div>
