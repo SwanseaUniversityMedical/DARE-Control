@@ -10,7 +10,7 @@ env:
   DAREAPI: dare-control-api
   TREUI: dare-control-treui
   TREAPI: dare-control-treapi
-  AGENT: dare-control-agent
+  TREAGENT: dare-control-agent
   
 
 jobs:
@@ -90,13 +90,33 @@ jobs:
           -v $(pwd):/source \
           alleeex/dotnet-sonar:23.06.4-r2 \
           bash -c \
-              "cd /source/src/TRE-UI \
+              "cd /source/src/TRE-API \
               && dotnet /sonar-scanner/SonarScanner.MSBuild.dll begin \
               /k:${{ env.TREAPI }} /name:${{ env.TREAPI }} \
               /d:sonar.host.url=${{ secrets.SONAR_HOST_URL }} \
               /d:sonar.login=${{ secrets.SONAR_TOKEN }} \
-              && dotnet restore "TRE-UI.csproj" \
-              && dotnet build "TRE-UI.csproj" -c Release \
+              && dotnet restore "TRE-API.csproj" \
+              && dotnet build "TRE-API.csproj" -c Release \
+              && dotnet /sonar-scanner/SonarScanner.MSBuild.dll end \
+              /d:sonar.login=${{ secrets.SONAR_TOKEN }}"
+
+      - name: Sleep for 30 seconds to give the SQ server a chance to catch up
+        run: sleep 30s
+        shell: bash
+
+      - name: scan ${{ env.TREAGENT }} project
+        run: |
+          docker run --rm \
+          -v $(pwd):/source \
+          alleeex/dotnet-sonar:23.06.4-r2 \
+          bash -c \
+              "cd /source/src/TREAGENT \
+              && dotnet /sonar-scanner/SonarScanner.MSBuild.dll begin \
+              /k:${{ env.TREAGENT }} /name:${{ env.TREAGENT }} \
+              /d:sonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+              /d:sonar.login=${{ secrets.SONAR_TOKEN }} \
+              && dotnet restore "TREAGENT.csproj" \
+              && dotnet build "TREAGENT.csproj" -c Release \
               && dotnet /sonar-scanner/SonarScanner.MSBuild.dll end \
               /d:sonar.login=${{ secrets.SONAR_TOKEN }}"
 
