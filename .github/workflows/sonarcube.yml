@@ -115,8 +115,8 @@ jobs:
               /k:${{ env.TREAGENT }} /name:${{ env.TREAGENT }} \
               /d:sonar.host.url=${{ secrets.SONAR_HOST_URL }} \
               /d:sonar.login=${{ secrets.SONAR_TOKEN }} \
-              && dotnet restore "TREAGENT.csproj" \
-              && dotnet build "TREAGENT.csproj" -c Release \
+              && dotnet restore "TREagent.csproj" \
+              && dotnet build "TREagent.csproj" -c Release \
               && dotnet /sonar-scanner/SonarScanner.MSBuild.dll end \
               /d:sonar.login=${{ secrets.SONAR_TOKEN }}"
 
