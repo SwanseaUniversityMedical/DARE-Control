@@ -44,7 +44,7 @@ namespace DARE_FrontEnd.Controllers
             };
             var result =  _clientHelper.CallAPI<FormData, Endpoint?>("/api/Endpoint/AddEndpointMVC", data).Result;
 
-            return View(result);
+            return RedirectToAction("GetAllEndpoints");
 
         }
 

@@ -2,14 +2,23 @@
 @{
     ViewData["Title"] = "User List";
 }
+<div class="">
+    <div class="d-flex align-items-center justify-content-between">
+        <h1 class="g-font-size-28 my-2">Users</h1>
+        <a asp-controller="User" asp-action="AddUserForm" class="btn btn-xl u-btn-secondary g-font-size-default">
+            <i class="hs-admin-plus align-middle mr-2 g-font-weight-600"></i>
+            <span>Create New Usert</span>
+        </a>
+    </div>
+    <hr class="d-flex g-brd-gray-light-v7 mt-4 g-mb-30">
+</div>
 
-
-<div>
-    <table>
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
         <thead>
-        <td>User Name</td>
+        <th>User Name</th>
 
-        <td>Users on Project</td>
+        <th>Users on Project</th>
         </thead>
         @foreach (var user in Model)
         {
@@ -17,7 +26,7 @@
                 <td>@user.Name</td>
                 <td>
                     <table>
-                        
+
                         @foreach (var project in user.Projects)
                         {
                             <tr>

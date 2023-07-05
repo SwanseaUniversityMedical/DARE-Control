@@ -2,10 +2,19 @@
 @{
     ViewData["Title"] = "Endpoint List";
 }
+<div class="">
+    <div class="d-flex align-items-center justify-content-between">
+        <h1 class="g-font-size-28 my-2">Endpoints</h1>
+        <a asp-controller="Endpoint" asp-action="AddEndpoint" class="btn btn-xl u-btn-secondary g-font-size-default">
+            <i class="hs-admin-plus align-middle mr-2 g-font-weight-600"></i>
+            <span>Create New Endpoint</span>
+        </a>
+    </div>
+    <hr class="d-flex g-brd-gray-light-v7 mt-4 g-mb-30">
+</div>
 
-
-<div>
-    <table>
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
         <thead>
         <td>Endpoint Name</td>
         
