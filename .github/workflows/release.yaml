@@ -10,6 +10,7 @@ on:
     branches:
       - '**'
 
+
 env:
   HARBOR_REGISTRY: ${{ vars.HARBOR_REGISTRY }}
   HARBOR_PROJECT: ${{ vars.HARBOR_PROJECT }}
