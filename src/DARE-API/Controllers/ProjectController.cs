@@ -35,21 +35,21 @@ namespace DARE_API.Controllers
             _DbContext = applicationDbContext;
             _minioSettings = minioSettings;
             _minioHelper = minioHelper;
-            
+
         }
 
 
- 
+
 
         [HttpPost("AddProject")]
         public async Task<Project?> AddProject(FormData data)
         {
             try
             {
-                
+
                 Project projects = JsonConvert.DeserializeObject<Project>(data.FormIoString);
 
-                
+
                 var model = new Project();
 
                 //2023-06-01 14:30:00 use this as the datetime
@@ -59,11 +59,11 @@ namespace DARE_API.Controllers
                     return null;
                 }
                 model.StartDate = projects.StartDate.ToUniversalTime();
-                
+
                 model.EndDate = projects.EndDate.ToUniversalTime();
 
-                model.SubmissionBucket = GenerateRandomName(model.Name);
-                model.OutputBucket = GenerateRandomName(model.Name);
+                model.SubmissionBucket = GenerateRandomName(model.Name) + "submission";
+                model.OutputBucket = GenerateRandomName(model.Name) + "output";
                 model.FormData = data.FormIoString;
 
                 var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, model.SubmissionBucket);
@@ -78,7 +78,7 @@ namespace DARE_API.Controllers
 
                 }
 
-                
+
                 _DbContext.Projects.Add(model);
 
                 await _DbContext.SaveChangesAsync();
@@ -86,7 +86,8 @@ namespace DARE_API.Controllers
                 Log.Information("{Function} Projects added successfully", "CreateProject");
                 return model;
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Log.Error(ex, "{Function} Crash", "AddProject");
                 var errorModel = new Project();
                 return errorModel;
@@ -123,7 +124,7 @@ namespace DARE_API.Controllers
                 }
 
                 project.Users.Add(user);
-                
+
                 await _DbContext.SaveChangesAsync();
                 Log.Information("{Function} Added User {UserName} to {ProjectName}", "AddUserMembership", user.Name, project.Name);
                 return model;
@@ -134,7 +135,7 @@ namespace DARE_API.Controllers
                 throw;
             }
 
-            
+
         }
 
         [HttpPost("AddEndpointMembership")]
@@ -191,7 +192,7 @@ namespace DARE_API.Controllers
                 {
                     return null;
                 }
-                
+
                 Log.Information("{Function} Project retrieved successfully", "GetProject");
                 return returned;
             }
@@ -201,7 +202,7 @@ namespace DARE_API.Controllers
                 throw;
             }
 
-            
+
         }
 
         [HttpGet("GetAllProjects")]
@@ -216,7 +217,7 @@ namespace DARE_API.Controllers
                     //.Include(x => x.Users)
                     .ToList();
 
-                
+
                 Log.Information("{Function} Projects retrieved successfully", "GetAllProjects");
                 return allProjects;
             }
@@ -226,7 +227,7 @@ namespace DARE_API.Controllers
                 throw;
             }
 
-            
+
         }
 
         [HttpGet("GetEndPointsInProject")]
