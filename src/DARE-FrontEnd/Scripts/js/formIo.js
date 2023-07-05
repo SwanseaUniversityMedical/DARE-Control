@@ -50,7 +50,7 @@
                 }).then(function (response) {
                     if (response.ok) {
                         console.log("Ok");
-                        //setTimeout(function () { window.location.href = "/AvailableForms/GetAvailableFormsForGroup/" + groupName; }, 1); //LocalRedirect don't work so we Have to use this to get it working also brakes stuff when it's not delayed by at least a tiny amount
+                        setTimeout(function () { window.location.href = "/home"; }, 1); //LocalRedirect don't work so we Have to use this to get it working also brakes stuff when it's not delayed by at least a tiny amount
 
                         return "GOOD"
                     }

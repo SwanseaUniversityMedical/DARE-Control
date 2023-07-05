@@ -53,6 +53,8 @@ namespace DARE_API.Controllers
             catch (Exception ex)
             {
                 Log.Error(ex, "{Function} Crashed", "AddEndpoint");
+                var errorEndpoint = new Endpoint();
+                return errorEndpoint;
                 throw;
             }
 
