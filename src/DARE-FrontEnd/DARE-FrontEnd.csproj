@@ -7,6 +7,8 @@
     <RootNamespace>DARE_FrontEnd</RootNamespace>
     <UserSecretsId>26cc2351-a8a9-4037-ae8c-6821a4c93bac</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..</DockerfileContext>
+    <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <ItemGroup>

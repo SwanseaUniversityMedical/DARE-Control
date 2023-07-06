@@ -522,7 +522,7 @@ jobs:
             src:
               - '.github/workflows/release.yaml'
               - 'containers/ui/**'
-              - 'src/TRE-FrontEnd/**'
+              - 'src/TRE-UI/**'
               - 'src/BL/**'
 
       - name: build container
