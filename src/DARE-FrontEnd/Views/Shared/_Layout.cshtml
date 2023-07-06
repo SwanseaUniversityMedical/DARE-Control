@@ -1,22 +1,21 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-100">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" shrink-to-fit="no" />
-    <title>@ViewData["Title"] - DARE_FrontEnd</title>
+    <title>@ViewData["Title"] - TRE FX</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <script src="https://cdn.form.io/formiojs/formio.form.min.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.form.io/formiojs/formio.form.min.css" crossorigin="anonymous" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/DARE_FrontEnd.styles.css" asp-append-version="true" />
     <script src="~/js/formIo.js"></script>
     <link rel="stylesheet" href="https://use.typekit.net/tyz0nfb.css">
 </head>
-<body>
+<body class="d-flex flex-column h-100">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="autohide navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">DARE_FrontEnd</a>
+                <a class="navbar-brand me-5" asp-area="" asp-controller="Home" asp-action="Index">TRE FX</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -27,16 +26,32 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="forms" asp-action="AddUserForm">Add User</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Project" asp-action="GetAllProjects">Projects</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="forms" asp-action="AddProjectForm">Add Project</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="GetAllUsers">People</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-dark" href="">Queries</a>
                         </li>
-
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Endpoint" asp-action="GetAllEndpoints">TREs</a>
+                        </li>
                     </ul>
+                </div>
+                <div class="d-flex">
+                    <div class="nav-item dropdown">
+                        <a class="nav-link text-dark dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            @User?.FindFirst("name")?.Value
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="#">Account</a></li>
+                            <li><a class="dropdown-item" href="#">Helpdesk</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/Account/Logout">Logout</a></li>
+                        </ul>
+                    </div>
+                    @*<a href="#" class="btn btn-outline-primary">Sign In</a>*@
                 </div>
             </div>
         </nav>
@@ -47,9 +62,20 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="mt-auto footer text-muted">
         <div class="container">
-            &copy; 2023 - DARE_FrontEnd - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <ul class="nav mb-2">
+                <li class="nav-item">
+                    <a class="nav-link text-light" href="#">Terms and Conditions</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-light" href="#">Cookie Notice</a>
+                </li>
+            </ul>
+            <p class="text-light mb-0">&copy;TRE FX 2023. All rights reserved.</p> 
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
