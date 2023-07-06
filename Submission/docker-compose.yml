@@ -14,10 +14,15 @@ services:
   submission-api:
     image: harbor.ukserp.ac.uk:443/dare-trefx/control-main-api:1.4.0
     container_name: submission-api
+    environment:
+      ConnectionStrings__DefaultConnection: Server=postgres;Port=5432;Database=DARE-Control;Include Error Detail=true;User Id=${PGLOGIN};Password=${PGPASSWORD};
     networks:
       - sub-net
     ports:
       - "8002:80"
+    depends_on:
+      postgresql_submission:
+        condition: service_healthy
 
   postgresql_submission:
     image: docker.io/bitnami/postgresql:latest
@@ -71,7 +76,7 @@ services:
       - ADMINER_DEFAULT_DB_HOST=postgres
       - ADMINER_DEFAULT_DB_NAME=postgres
     depends_on:
-      postgresql_assets:
+      postgresql_submission:
         condition: service_healthy
     healthcheck:
       test: [ "CMD", "nc", "-z", "adminer", "9000" ]
