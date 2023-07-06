@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+  dare-frontend:
+    image: ${DOCKER_REGISTRY-}darefrontend
+    build:
+      context: .
+      dockerfile: src/DARE-FrontEnd/Dockerfile
+
+  tre-ui:
+    image: ${DOCKER_REGISTRY-}treui
+    build:
+      context: .
+      dockerfile: src/TRE-UI/Dockerfile
+

@@ -30,6 +30,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TREAgent", "src\TREAgent\TR
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TRE-UI", "src\TRE-UI\TRE-UI.csproj", "{0F576ABA-E84A-4176-8AB9-D15C76952305}"
 EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{BC0287B0-FFB6-490D-8F6C-44E02A012528}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,6 +62,10 @@ Global
 		{0F576ABA-E84A-4176-8AB9-D15C76952305}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F576ABA-E84A-4176-8AB9-D15C76952305}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F576ABA-E84A-4176-8AB9-D15C76952305}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC0287B0-FFB6-490D-8F6C-44E02A012528}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC0287B0-FFB6-490D-8F6C-44E02A012528}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC0287B0-FFB6-490D-8F6C-44E02A012528}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC0287B0-FFB6-490D-8F6C-44E02A012528}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
