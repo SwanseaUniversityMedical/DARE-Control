@@ -1,3 +1,11 @@
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlfCRc4EsA.woff2) format('woff2');
+    unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
 body {
     font-family: 'Museo Sans Rounded 500', -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif;
     background-color: #f6f7f8;
@@ -88,8 +96,21 @@ a {
 .dropdown-toggle::after {
     color: rgb(71, 93, 167);
 }
-
-footer {
+.footer-top {
+    padding: 15px 0;
+    background-color: rgb(238, 238, 238);
+}
+.dare-logo {
+    font-size: 39px;
+    color: #2e2d5f;
+    letter-spacing: -3px;
+    font-weight: 700;
+    font-family:Roboto, sans-serif;
+}
+footer img:hover {
+    opacity:0.7;
+}
+.footer-bottom {
     background-color: #29235c !important;
     padding: 50px 0;
 }
@@ -106,10 +127,26 @@ footer {
             text-decoration:underline;
         }
 
-@media (min-width: 576px) {
-    .navbar-expand-sm .navbar-nav .nav-link {
-        padding-right: 0rem;
-        padding-left: 0rem;
-        padding: 0;
-    }
+
+.home-banner {
+    margin-top: -3rem !important;
+    margin-bottom: -100px !important;
+    padding: 100px 80px 200px;
+    background-size: cover;
+    background-position: center;
+    background-image: linear-gradient(110deg,rgba(41, 35, 92, 0.7),rgba(41, 35, 92, 0.7) 100%),url('../img/ezgif-6-c351adb73f22.webp');
 }
+.card-img, .card-img-top {
+    border-top-left-radius: calc(0.25rem - 1px);
+    border-top-right-radius: calc(0.25rem - 1px);
+    height: 15vw;
+    object-fit: cover;
+}
+
+    @media (min-width: 576px) {
+        .navbar-expand-sm .navbar-nav .nav-link {
+            padding-right: 0rem;
+            padding-left: 0rem;
+            padding: 0;
+        }
+    }
