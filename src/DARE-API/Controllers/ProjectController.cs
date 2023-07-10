@@ -18,7 +18,7 @@ using BL.Services;
 
 namespace DARE_API.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [ApiController]
     [Route("api/[controller]")]
 
@@ -245,6 +245,24 @@ namespace DARE_API.Controllers
             string randomName = prefix + random.Next(1000, 9999);
             return randomName;
         }
+
+        //For testing FetchAndStoreS3Object
+        public class testFetch
+        {
+            public string url { get; set; }
+            public string bucketName { get; set; }
+            public string key { get; set; }
+        }
+
+        [HttpPost("TestFetchAndStoreObject")]
+        public async Task<IActionResult> TestFetchAndStoreObject(testFetch testf)
+        {
+            await _minioHelper.FetchAndStoreObject(testf.url, _minioSettings, testf.bucketName, testf.key);
+
+            return Ok();
+        }
+
+        //End
 
     }
 }

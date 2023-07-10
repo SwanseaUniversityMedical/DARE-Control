@@ -15,6 +15,7 @@ namespace BL.Services
         Task<bool> UploadFileAsync(MinioSettings minioSettings, string bucketName = "", string objectName="", string filePath = "");
         Task<bool> DownloadFileAsync(MinioSettings minioSettings, string bucketName = "", string objectName = "");
         Task<bool> CheckObjectExists(MinioSettings minioSettings, string bucketName, string objectKey);
+        Task<bool> FetchAndStoreObject(string url, MinioSettings minioSettings, string bucketName, string key);
 
     }
 }
