@@ -29,3 +29,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // if
 
 }); 
+$(document).ready(function () {
+    $('#nav-icon3').click(function () {
+        $(this).toggleClass('open');
+    });
+});
