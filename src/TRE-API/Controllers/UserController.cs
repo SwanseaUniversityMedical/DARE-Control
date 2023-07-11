@@ -37,32 +37,9 @@ namespace BL.Controllers
 
 
 
-        [HttpGet("GetUser")]
-        public User? GetUser(int userId)
-        {
-            try
-            {
-                var returned = _DbContext.Users.Find(userId);
-                if (returned == null)
-                {
-                    return null;
-                }
-                Log.Information("{Function} User retrieved successfully", "GetUser");
-                return returned;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crashed", "GetUser");
-                throw;
-            }
-
-
-        }
-
-
-
-        [HttpGet("GetAllUsers")]
-        public List<User> GetAllUsers()
+       
+        [HttpGet("ListAllUsers")]
+        public List<User> ListAllUsers()
         {
             try
             {
@@ -70,12 +47,12 @@ namespace BL.Controllers
 
 
 
-                Log.Information("{Function} Users retrieved successfully", "GetAllUsers");
+                Log.Information("{Function} Users retrieved successfully", "ListAllUsers");
                 return allUsers;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} Crash", "GetAllUsers");
+                Log.Error(ex, "{Function} Crash", "ListAllUsers");
                 throw;
             }
 

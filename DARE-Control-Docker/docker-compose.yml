@@ -7,6 +7,7 @@ services:
     restart: always
     ports:
       - 32769:5432
+       #- 8087:8080
     volumes:
       - postgres:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -64,7 +65,7 @@ services:
 #    ports:
 #      - 8088:80
 #    environment:
-#      CONNECTIONSTRINGS__DEFAULTCONNECTION: "Server=postgres;Port=32769;Database=DARE-Control;UserId=postgres;Password=password123;"
+#     CONNECTIONSTRINGS__DEFAULTCONNECTION: "Server=postgres;Port=32769;Database=DARE-Control;UserId=postgres;Password=password123;"
 ######################################################
 # VOLUME
 ######################################################
