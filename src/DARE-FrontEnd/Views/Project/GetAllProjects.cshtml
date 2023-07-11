@@ -37,7 +37,12 @@
         {
             <tr>
                 <td>
-                    <b>@project.Name</b>
+                    <div class="d-flex justify-content-between">
+                        <b>@project.Name</b>
+                        @*TODO: CHANGE TO THE URL OF THE EDITPAGE WHEN IT IS MADE*@
+                        <a href="/" class="btn btn-link"> Edit</a>
+                    </div>
+                    
 
                     <br>
                     <br>Start Date:<span class="space"></span>@project.StartDate
@@ -57,8 +62,7 @@
                         Queries
                     </div>
                     <div class="edit-button">
-                        @*TODO: CHANGE TO THE URL OF THE EDITPAGE WHEN IT IS MADE*@
-                        <a href="/"> Edit</a>
+                        
                     </div>
 
 
