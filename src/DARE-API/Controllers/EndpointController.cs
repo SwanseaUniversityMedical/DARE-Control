@@ -92,6 +92,24 @@ namespace DARE_API.Controllers
 
         }
 
+        [HttpGet("GetEndPointsInProject/{projectId}")]
+
+        public List<Endpoint> GetEndPointsInProject(int projectId)
+        {
+            try
+            {
+                List<Endpoint> endpointsList = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Endpoints).ToList();
+                return endpointsList;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function Crashed", "GetEndPointsInProject");
+                throw;
+            }
+        }
+
+
+
         [HttpGet("GetAllEndpoints")]
         public List<Endpoint> GetAllEndpoints()
         {

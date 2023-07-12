@@ -2,6 +2,7 @@
 using Amazon.Runtime.Internal;
 using Amazon.S3;
 using Amazon.S3.Model;
+using Amazon.S3.Transfer;
 using BL.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Minio.Exceptions;
@@ -165,6 +166,25 @@ namespace BL.Services
                     throw;
                 }
             }
+        }
+        public async Task<bool> FetchAndStoreObject(string url, MinioSettings minioSettings, string bucketName, string key)
+        {
+            using (var httpClient = new HttpClient())
+            {
+                var response = await httpClient.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                var contentBytes = await response.Content.ReadAsByteArrayAsync();
+
+                var amazonS3Client = GenerateAmazonS3Client(minioSettings);
+
+                using (var transferUtility = new TransferUtility(amazonS3Client))
+                {
+                    await transferUtility.UploadAsync(new MemoryStream(contentBytes), bucketName, key);
+                }
+            }
+
+            return true;
         }
 
         #region PrivateHelpers

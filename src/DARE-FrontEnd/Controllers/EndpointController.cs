@@ -61,7 +61,12 @@ namespace DARE_FrontEnd.Controllers
         }
 
 
-
+        [HttpGet]
+        public async Task<IActionResult> GetEndpoints(int projectId)
+        {
+            var endpointsList = _clientHelper.CallAPIWithoutModel<List<Endpoint>>("/api/Endpoint/GetEndPointsInProject/{projectId}").Result;
+            return View(endpointsList);
+        }
 
         [HttpPost]
         public async Task<IActionResult> EndpointFormSubmission([FromBody] FormData submissionData)
