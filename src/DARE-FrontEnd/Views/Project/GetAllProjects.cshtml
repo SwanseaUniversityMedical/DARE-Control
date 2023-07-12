@@ -40,7 +40,7 @@
                         <div class="d-flex justify-content-between">
                             <b>@project.Name</b>
                             @*TODO: CHANGE TO THE URL OF THE EDITPAGE WHEN IT IS MADE*@
-                            <a href="/" class="btn btn-link"> Edit</a>
+                            <a href="@Url.Action("EditProject", "Project",new{Projectid=@project.Id})" class="btn btn-link"> Edit</a>
                         </div>
 
 

@@ -4,116 +4,128 @@
     ViewData["Title"] = "Project";
 }
 
+<style>
+    .box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: gray;
+        border: 1px solid #ccc;
+        border-radius: 50%;
+        padding: 10px;
+    }
 
+    .space {
+        margin-right: 2em;
+    }
+</style>
 
-
-<div class="container my-5">
-    <div class="col-lg-8 mx-auto">
-        <ul class="nav nav-tabs" id="myTab" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#project" type="button" role="tab" aria-controls="Project" aria-selected="true">Project</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#userMembership" type="button" role="tab" aria-controls="User Membership" aria-selected="false">User Membership</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#endpoint" type="button" role="tab" aria-controls="Endpoint" aria-selected="false">Endpoint</button>
-            </li>
-        </ul>
-        <div class="tab-content" id="myTabContent">
-            <div class="tab-pane fade show active" id="project" role="tabpanel" aria-labelledby="home-tab">
-                <div class="row">
-                    <div class="col-md-4">
-                        <form method="post" asp-action="Edit">
-                            <div asp-validation-summary="All"></div>
-                            <input asp-for="Id" hidden />
-                            <div class="form-group">
-                                <label asp-for="Name"></label>
-                                <input asp-for="Name" class="form-control form-control-md" />
-                                <span asp-validation-for="Name" class="text-danger"></span>
-                            </div>
-                            <div class="form-group">
-                                <label asp-for="StartDate"></label>
-                                <input asp-for="StartDate" class="form-control form-control-md" />
-                                <span asp-validation-for="StartDate" class="text-danger"></span>
-                            </div>
-                            <div class="form-group">
-                                <label asp-for="EndDate"></label>
-                                <input asp-for="EndDate" class="form-control form-control-md" />
-                                <span asp-validation-for="EndDate" class="text-danger"></span>
-                            </div>
-                            <div class="mt-5 d-flex align-items-center">
-                                <button type="submit" class="btn btn-md btn-primary mr-2">Save</button>
-                                <a asp-controller="Project" asp-action="Index" class="btn btn-link">
-                                    Cancel
-                                </a>
-                            </div>
-                        </form>
+<div class="container bg-white p-5">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#project" type="button" role="tab" aria-controls="Project" aria-selected="true">Project</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#userMembership" type="button" role="tab" aria-controls="User Membership" aria-selected="false">User Membership</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#endpoint" type="button" role="tab" aria-controls="Endpoint" aria-selected="false">Endpoint</button>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="project" role="tabpanel" aria-labelledby="home-tab">
+            <div class="row">
+                <div class="col-md-4">
+                    <form method="post" asp-action="Edit">
+                        <div asp-validation-summary="All"></div>
+                        <input asp-for="Id" hidden />
+                        <div class="form-group">
+                            <label asp-for="Name"></label>
+                            <input asp-for="Name" class="form-control form-control-md" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="StartDate"></label>
+                            <input asp-for="StartDate" class="form-control form-control-md" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="EndDate"></label>
+                            <input asp-for="EndDate" class="form-control form-control-md" />
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                        </div>
+                        <div class="mt-5 d-flex align-items-center">
+                            <button type="submit" class="btn btn-md btn-primary mr-2">Save</button>
+                            <a asp-controller="Project" asp-action="GetAllProjects" class="btn btn-link">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="userMembership" role="tabpanel" aria-labelledby="profile-tab">
+            <div class="row mt-2 mb-2">
+                <div class="col-2">
+                    <button type="button" class="btn btn-primary" id="addUser">Add User</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            @foreach (var user in Model.Users)
+                            {
+                                <tr>
+                                    <td>
+                                        @user.Name
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("RemoveUserFromProject", "Project",new{ProjectId=Model.Id,UserId=@user.Id})"
+                                           class="g-text-underline--none--hover">
+                                            <h5 class="g-font-size-18 g-font-size-22--md g-color-black"><span class="g-color-black" style="word-break: break-word;">Remove</span></h5>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </table>
                     </div>
                 </div>
             </div>
-            <div class="tab-pane fade" id="userMembership" role="tabpanel" aria-labelledby="profile-tab">
-                <div class="row mt-2 mb-2">
-                    <div class="col-2">
-                        <button type="button" class="btn btn-primary" id="addUser">Add User</button>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-12">
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                @foreach (var user in Model.Users)
-                                {
-                                    <tr>
-                                        <td>
-                                            @user.Name
-                                        </td>
-                                        <td>
-                                            <a href="@Url.Action("RemoveUserFromProject", "Project",new{ProjectId=Model.Id,UserId=@user.Id})"
-                                               class="g-text-underline--none--hover">
-                                                <h5 class="g-font-size-18 g-font-size-22--md g-color-black"><span class="g-color-black" style="word-break: break-word;">Remove</span></h5>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                }
-                            </table>
-                        </div>
-                    </div>
-                </div>
 
-            </div>
-            <div class="tab-pane fade" id="endpoint" role="tabpanel" aria-labelledby="contact-tab">
-                <div class="row mt-2 mb-2">
-                    <div class="col-2">
-                        <button type="button" class="btn btn-primary" id="addEndpint">Add Endpoint</button>
-                    </div>
+        </div>
+        <div class="tab-pane fade" id="endpoint" role="tabpanel" aria-labelledby="contact-tab">
+            <div class="row mt-2 mb-2">
+                <div class="col-2">
+                    <button type="button" class="btn btn-primary" id="addEndpint">Add Endpoint</button>
                 </div>
-                <div class="row">
-                    <div class="col-12">
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                @foreach (var endpoint in Model.Endpoints)
-                                {
-                                    <tr>
-                                        <td>
-                                            @endpoint.Name
-                                        </td>
-                                        <td>
-                                            <a href="@Url.Action("RemoveEndFromProject", "Project",new{ProjectId=Model.Id,EndpointId=@endpoint.Id})"
-                                               class="g-text-underline--none--hover">
-                                                <h5 class="g-font-size-18 g-font-size-22--md g-color-black"><span class="g-color-black" style="word-break: break-word;">Remove</span></h5>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                }
-                            </table>
-                        </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            @foreach (var endpoint in Model.Endpoints)
+                            {
+                                <tr>
+                                    <td>
+                                        @endpoint.Name
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("RemoveEndFromProject", "Project",new{ProjectId=Model.Id,EndpointId=@endpoint.Id})"
+                                           class="g-text-underline--none--hover">
+                                            <h5 class="g-font-size-18 g-font-size-22--md g-color-black"><span class="g-color-black" style="word-break: break-word;">Remove</span></h5>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 
 <div class="modal fade bd-user-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="userModal">
     <div class="modal-dialog modal-lg">
