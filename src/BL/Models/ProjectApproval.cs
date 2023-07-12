@@ -13,6 +13,6 @@ namespace BL.Models
         public string? ProjectName { get; set; }
         public string? Approved { get; set; }
         public string? SubmittedBy { get; set; }
-
+        public string IsValid { get; set; }
     }
 }
