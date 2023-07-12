@@ -72,3 +72,36 @@
         }
     }
 };
+
+function RenderProjectForm(formUrl, formData, submitUrl, returnUrl = "", model) {
+    if (formData != "" && formData != null) {
+        formData = JSON.parse(formData);
+    }
+
+    Formio.createForm(document.getElementById('FormId'), formUrl).then(function (form) {
+        form.nosubmit = true;
+        form.submission = {
+            data: formData
+        };
+        form.on('submit', function (submission) {
+            return Formio.fetch(submitUrl, {
+                body: JSON.stringify(submission),
+                headers: { 'content-type': 'application/json' },
+                method: 'POST',
+                mode: 'cors',
+            })
+                .then(function (response) {
+                    if (response.ok) {
+                        console.log("Ok");
+                        //redirect here
+                        return "GOOD"
+                    }
+                    else {
+                        console.log("Bad " + response.message);
+                        alert("error submitting project");
+                        return "BAD"
+                    }
+                })
+        });
+    });
+}
