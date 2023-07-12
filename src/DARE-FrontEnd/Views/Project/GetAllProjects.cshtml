@@ -1,6 +1,6 @@
 ﻿@model List<BL.Models.Project>
 @{
-    ViewData["Title"] = "Project List";
+    ViewData["Title"] = "Projects";
     var projectsCount = Model.Count;
 }    <style>
          .box {
@@ -15,63 +15,62 @@
 
          .space {
              margin-right: 2em;
-             
          }
 </style>
-<div class="">
+
+<div class="container bg-white p-5">
     <div class="d-flex align-items-center justify-content-between">
-        <h1 class="g-font-size-28 my-2">Projects</h1>
-        <h3>Showing @projectsCount results</h3>
-        <a asp-controller="Project" asp-action="AddProjectForm" class="btn btn-xl u-btn-secondary g-font-size-default">
-            <i class="hs-admin-plus align-middle mr-2 g-font-weight-600"></i>
+        <h1 class="fs-2 mb-0">Projects</h1>
+
+        <a asp-controller="Project" asp-action="AddProjectForm" class="btn btn-primary btn-sm">
+            <i class="fa fa-plus align-middle mr-2"></i>
             <span>Create Project</span>
         </a>
     </div>
-    <hr class="d-flex g-brd-gray-light-v7 mt-4 g-mb-30">
+    <hr class="d-flex mt-4 g-mb-30">
+
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+
+            @foreach (var project in Model)
+            {
+                <tr>
+                    <td>
+                        <div class="d-flex justify-content-between">
+                            <b>@project.Name</b>
+                            @*TODO: CHANGE TO THE URL OF THE EDITPAGE WHEN IT IS MADE*@
+                            <a href="/" class="btn btn-link"> Edit</a>
+                        </div>
+
+
+                        <br>
+                        <br>Start Date:<span class="space"></span>@project.StartDate
+                        <br>End Date:<span class="space"></span>@project.EndDate
+                        <br>
+                        <br>Project Description: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in...
+                        <br>
+                        <br>
+                        <div class="box">
+                            @project.Users.Count People
+                        </div>
+                        <div class="box">
+                            @project.Endpoints.Count Endpoints
+                        </div>
+                        <div class="box">
+                            Queries
+                        </div>
+                        <div class="edit-button">
+                        </div>
+
+
+                    </td>
+                </tr>
+            }
+        </table>
+
+    </div>
+    <p>Showing @projectsCount results</p>
 </div>
-
-<div class="table-responsive">
-    <table class="table table-bordered table-striped">
-
-        @foreach (var project in Model)
-        {
-            <tr>
-                <td>
-                    <div class="d-flex justify-content-between">
-                        <b>@project.Name</b>
-                        @*TODO: CHANGE TO THE URL OF THE EDITPAGE WHEN IT IS MADE*@
-                        <a href="/" class="btn btn-link"> Edit</a>
-                    </div>
-                    
-
-                    <br>
-                    <br>Start Date:<span class="space"></span>@project.StartDate
-                    <br>End Date:<span class="space"></span>@project.EndDate
-                    <br>
-                    <br>Project Description: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in...
-                    <br>
-                    <br>
-                    <div class="box">
-                        @project.Users.Count People
-                    </div>
-                    <div class="box">
-                        @project.Endpoints.Count Endpoints
-                    </div>
-                    <div class="box">
-                        Queries
-                    </div>
-                    <div class="edit-button">
-                        
-                    </div>
-
-
-                </td>
-            </tr>
-        }
-    </table>
-
-</div>
-
-
 
