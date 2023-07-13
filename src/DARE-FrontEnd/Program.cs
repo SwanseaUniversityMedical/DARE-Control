@@ -20,6 +20,7 @@ using BL.Models.DTO;
 using BL.Services;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Options;
+using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -115,6 +116,7 @@ builder.Services.AddAuthorization(options =>
                     && claim.Value.Contains("dare-control-user"))));
 });
 
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -122,9 +124,27 @@ builder.Services.AddAuthentication(options =>
     options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
 })
-            .AddCookie(options => options.EventsType = typeof(CustomCookieEvent))
+             //.AddCookie(options => options.EventsType = typeof(CustomCookieEvent))
+             .AddCookie(o =>
+             {
+                 o.SessionStore = new MemoryCacheTicketStore();
+                 o.EventsType = typeof(CustomCookieEvent);
+             })
             .AddOpenIdConnect(options =>
             {
+                if (keyCloakSettings.Proxy)
+                {
+                    options.BackchannelHttpHandler = new HttpClientHandler
+                    {
+                        UseProxy = true,
+                        UseDefaultCredentials = true,
+                        Proxy = new WebProxy()
+                        {
+                            Address = new Uri(keyCloakSettings.ProxyAddresURL),
+                            BypassList = new[] { keyCloakSettings.BypassProxy }
+                        }
+                    };
+                }
                 
                 //var proxy = new WebProxy { Address = new Uri("http://192.168.10.15:8080") };
 
@@ -210,7 +230,11 @@ builder.Services.AddAuthentication(options =>
                             // Log.Information("Response Header {key} - {value}", header.Key, header.Value);
                         }
 
-
+                        if (keyCloakSettings.UseRedirectURL)
+                        {
+                            context.ProtocolMessage.RedirectUri = keyCloakSettings.RedirectURL;
+                        }
+                        Log.Information(context.ProtocolMessage.RedirectUri);
                         //context.ProtocolMessage.RedirectUri = Configuration["Oidc:RedirectUri"];
                         //Log.Information( context.ProtocolMessage.RedirectUri);
                         //Log.Information( context.ProtocolMessage.RedirectUri);
@@ -236,9 +260,6 @@ Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHost
 {
     var seqServerUrl = configuration["Serilog:SeqServerUrl"];
     var seqApiKey = configuration["Serilog:SeqApiKey"];
-
-
-
     return new LoggerConfiguration()
     .MinimumLevel.Verbose()
     .Enrich.WithProperty("ApplicationContext", environment.ApplicationName)
