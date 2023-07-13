@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <script src="https://cdn.form.io/formiojs/formio.form.min.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.form.io/formiojs/formio.form.min.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="~/css/datatables.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <script src="~/js/formIo.js"></script>
     <link rel="stylesheet" href="https://use.typekit.net/tyz0nfb.css">
@@ -37,10 +38,10 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="GetAllUsers">People</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" href="">Queries</a>
+                            <a class="nav-link text-dark" href="">Submissions</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Endpoint" asp-action="GetAllEndpoints">TREs</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Endpoint" asp-action="GetAllEndpoints">Trusted Research Environments</a>
                         </li>
                         <li class="mobile-account-nav">
                             <hr class="mobile-account-nav dropdown-divider" />
@@ -121,7 +122,29 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/datatables.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        new DataTable('#projectList');
+        $('#launch-button').on('click', function () {
+
+            $('#welcomeModal').modal('show');
+
+        })
+
+        $('#addUser').on('click', function () {
+
+            $('#userModal').modal('show');
+
+        })
+
+        $('#addEndpint').on('click', function () {
+
+            $('#endpointModal').modal('show');
+
+        })
+
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
