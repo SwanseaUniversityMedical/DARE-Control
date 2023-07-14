@@ -55,6 +55,15 @@ a {
 .bg-grey {
     background-color: rgb(238, 238, 238);
 }
+.bg-dark-blue {
+    background-color: rgb(71, 93, 167);
+}
+hr {
+    background-color: rgb(208, 211, 212);
+}
+    hr:not([size]) {
+        height: 2px;
+    }
 .btn {
     font-weight:bold;
     padding:8px 12px;
@@ -94,6 +103,12 @@ a.bg-grey:hover {
     background-color: rgb(208, 208, 208);
     box-shadow: 1px 1px 3px 0 rgba(0,0,0,.09);
 }
+
+input, .form-control, .form-select {
+    border-color: rgb(208, 211, 212);
+    border-width:2px;
+}
+
 .navbar {
     box-shadow: 1px 1px 3px 0 rgba(0,0,0,.09);
     min-height: 80px;
@@ -278,8 +293,11 @@ table {
 table.no-head thead  {
    display:none;
 }
-    @media (min-width: 576px) {
-        .navbar-expand-sm .navbar-nav .nav-link {
+.dataTables_filter, .dataTables_length {
+    padding: 0.25rem !important;
+}
+@media (min-width: 576px) {
+    .navbar-expand-sm .navbar-nav .nav-link {
             padding-right: 0rem;
             padding-left: 0rem;
             padding: 0;
