@@ -79,5 +79,17 @@ namespace DARE_FrontEnd.Controllers
             }
             return Ok(result);
         }
+
+        [HttpGet]
+        public IActionResult GetAnEndpoint(int id)
+        {
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("endpointId", id.ToString());
+            var test = _clientHelper.CallAPIWithoutModel<Endpoint?>(
+                "/api/Endpoint/GetAnEndpoint/", paramlist).Result;
+
+            return View(test);
+        }
+
     }
 }
