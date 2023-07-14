@@ -31,25 +31,44 @@ body {
     transform: translateY(0);
     transition: all 0.3s ease-in-out;
 }
-
+.fs-6 {
+    font-size:13px !important;
+}
+.text-success {
+    color: rgb(50, 146, 118) !important;
+}
 a {
     -webkit-text-decoration-skip: objects;
     background-color: transparent;
-    color: #2c8166;
+    color: #475da7;
     text-decoration: none;
 }
-
+    a:hover {
+        color: #2e2d5f;
+    }
+.hover-underline:hover {
+    text-decoration:underline;
+}
 .text-dark {
     color: #2d2d2d;
 }
-
+.bg-grey {
+    background-color: rgb(238, 238, 238);
+}
+.btn {
+    font-weight:bold;
+    padding:8px 12px;
+}
 .btn:focus, .btn:active:focus {
     outline: 5px auto -webkit-focus-ring-color;
     box-shadow: none;
     background: rgb(61, 178, 140);
 }
-
-/*.btn-outline-primary {
+.btn-primary {
+    background-color: rgb(71, 93, 167);
+    border-color: rgb(71, 93, 167);
+}
+.btn-outline-primary {
     border-width: 2px;
     border-style: solid;
     display: inline-flex;
@@ -58,24 +77,23 @@ a {
     -webkit-box-pack: center;
     justify-content: center;
     line-height: 1em;
-    cursor: pointer;
     border-radius: 4px;
     background: rgb(255, 255, 255);
     border-color: rgb(61, 178, 140);
     color: rgb(60, 60, 59);
     fill: rgb(60, 60, 59);
-    font-size: 14px;
     padding: 8px 12px;
-    height: 40px;
-    gap: 6px;
-}*/
+}
 
-/*    .btn-outline-primary:hover {
+    .btn-outline-primary:hover {
         background: rgb(61, 178, 140);
         border-color: rgb(61, 178, 140);
         color: rgb(255, 255, 255);
-    }*/
-
+    }
+a.bg-grey:hover {
+    background-color: rgb(208, 208, 208);
+    box-shadow: 1px 1px 3px 0 rgba(0,0,0,.09);
+}
 .navbar {
     box-shadow: 1px 1px 3px 0 rgba(0,0,0,.09);
     min-height: 80px;
@@ -227,7 +245,6 @@ footer img:hover {
 
 
 .home-banner {
-    margin-top: -3rem !important;
     padding: 80px 40px;
     background-size: cover;
     background-position: center;
@@ -256,7 +273,7 @@ table {
     width:100% !important;
 }
     table.dataTable {
-        margin: 3rem 0 !important;
+        margin: 2rem 0 !important;
     }
 table.no-head thead  {
    display:none;
