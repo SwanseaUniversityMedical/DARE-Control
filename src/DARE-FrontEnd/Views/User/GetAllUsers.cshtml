@@ -1,13 +1,31 @@
 ﻿@model List<BL.Models.User>
 @{
     ViewData["Title"] = "User List";
+    var usersCount = Model.Count;
+
 }
+<style>
+    .box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: gray;
+        border: 1px solid #ccc;
+        border-radius: 50%;
+        padding: 10px;
+    }
+
+    .space {
+        margin-right: 2em;
+    }
+</style>
+
 <div class="">
     <div class="d-flex align-items-center justify-content-between">
-        <h1 class="g-font-size-28 my-2">Users</h1>
+        <h1 class="g-font-size-28 my-2">People</h1>
         <a asp-controller="User" asp-action="AddUserForm" class="btn btn-xl u-btn-secondary g-font-size-default">
             <i class="hs-admin-plus align-middle mr-2 g-font-weight-600"></i>
-            <span>Create New Usert</span>
+            <span>Create New User</span>
         </a>
     </div>
     <hr class="d-flex g-brd-gray-light-v7 mt-4 g-mb-30">
@@ -16,26 +34,39 @@
 <div class="table-responsive">
     <table class="table table-bordered table-striped">
         <thead>
-        <th>User Name</th>
+        <td>
+            Showing @usersCount results
 
-        <th>Users on Project</th>
+        </td>
         </thead>
         @foreach (var user in Model)
         {
             <tr>
-                <td>@user.Name</td>
                 <td>
-                    <table>
 
-                        @foreach (var project in user.Projects)
-                        {
-                            <tr>
-                                <td>
-                                    @project.Name
-                                </td>
-                            </tr>
-                        }
-                    </table>
+
+                    <b>
+                        @user.Name
+                    </b>
+                    <br>
+                    @*//TODO: Change these to non-hard coded values when they exist @user.Organisation*@
+                    Organisation
+                    @*<br>@endpoint.location*@
+
+                    <br>
+                    <div class="box">
+                        @user.Projects.Count Projects
+                    </div>
+                    <div class="box">
+                        @*@user.Queries.Count*@
+                        TREs
+                    </div>
+                    <div class="box">
+                        @*@user.Queries.Count*@ Queries
+                    </div>
+
+
+
                 </td>
             </tr>
         }

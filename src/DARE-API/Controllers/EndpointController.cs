@@ -7,10 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using Endpoint = BL.Models.Endpoint;
 using BL.Models.DTO;
+using BL.Models;
 
 namespace DARE_API.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class EndpointController : Controller
@@ -126,6 +127,29 @@ namespace DARE_API.Controllers
             catch (Exception ex)
             {
                 Log.Error(ex, "{Function} Crashed", "GetAllEndpoints");
+                throw;
+            }
+
+
+        }
+
+        [HttpGet("GetAnEndpoint")]
+        public Endpoint? GetAnEndpoint(int endpointId)
+        {
+            try
+            {
+                var returned = _DbContext.Endpoints.Find(endpointId);
+                if (returned == null)
+                {
+                    return null;
+                }
+
+                Log.Information("{Function} Project retrieved successfully", "GetAnEndpoint");
+                return returned;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetAnEndpoint");
                 throw;
             }
 
