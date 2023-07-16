@@ -2,75 +2,64 @@
 @{
     ViewData["Title"] = "Projects";
     var projectsCount = Model.Count;
-}    <style>
-         .box {
-             display: inline-flex;
-             align-items: center;
-             justify-content: center;
-             background-color: gray;
-             border: 1px solid #ccc;
-             border-radius: 50%;
-             padding: 10px;
-         }
+}
 
-         .space {
-             margin-right: 2em;
-         }
-</style>
-
-<div class="container bg-white p-5">
+<div class="container-lg p-4">
     <div class="d-flex align-items-center justify-content-between">
-        <h1 class="fs-2 mb-0">Projects</h1>
+        <h1 class="fs-3 mb-0">Projects</h1>
 
         <a asp-controller="Project" asp-action="AddProjectForm" class="btn btn-primary btn-sm">
             <i class="fa fa-plus align-middle mr-2"></i>
             <span>Create Project</span>
         </a>
     </div>
-    <hr class="d-flex mt-4 g-mb-30">
-
-
+    <hr class="d-flex mt-4 mb-5">
     <div class="table-responsive">
-        <table class="table table-bordered table-striped">
+        <table id="projectList" class="table table-bordered table-striped no-head" caption="List of Projects">
+            <thead><tr><td>Project</td></tr></thead>
+            <tbody>
+                @foreach (var project in Model)
+                {
+                    <tr>
+                        <td class="card mb-2 p-3 bg-white shadow-sm border-1">
 
-            @foreach (var project in Model)
-            {
-                <tr>
-                    <td>
-                        <div class="d-flex justify-content-between">
-                            <b>@project.Name</b>
-                            @*TODO: CHANGE TO THE URL OF THE EDITPAGE WHEN IT IS MADE*@
-                            <a href="@Url.Action("EditProject", "Project",new{Projectid=@project.Id})" class="btn btn-link"> Edit</a>
-                        </div>
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div>
+                                    <a href="#"><h2 class="mb-0 fw-bold hover-underline fs-5">@project.Name</h2></a>
+                                    <p class="text-muted small mb-0">#[Project ID]</p>
+                                </div>
+                                <a href="@Url.Action("EditProject", "Project",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+                            </div>
+                            <div class="">
+                                <a href="#" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                    @project.Users.Count People
+                                </a>
+                                <a href="#" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                    @project.Endpoints.Count Endpoints
+                                </a>
+                                <a href="#" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                    X Submissions
+                                </a>
+                            </div>
+                            <p class="my-4">
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in...
+                            </p>
+                            <p class="text-muted fs-6 mb-0">
+                                Start Date: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate
+                            </p>
+
+                            
 
 
-                        <br>
-                        <br>Start Date:<span class="space"></span>@project.StartDate
-                        <br>End Date:<span class="space"></span>@project.EndDate
-                        <br>
-                        <br>Project Description: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in...
-                        <br>
-                        <br>
-                        <div class="box">
-                            @project.Users.Count People
-                        </div>
-                        <div class="box">
-                            @project.Endpoints.Count Endpoints
-                        </div>
-                        <div class="box">
-                            Queries
-                        </div>
-                        <div class="edit-button">
-                        </div>
 
 
-                    </td>
-                </tr>
-            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
         </table>
 
     </div>
-    <p>Showing @projectsCount results</p>
+    @*<p>Showing @projectsCount results</p>*@
 </div>
-
