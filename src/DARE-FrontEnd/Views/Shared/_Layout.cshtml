@@ -46,6 +46,7 @@
                         <li class="mobile-account-nav">
                             <hr class="mobile-account-nav dropdown-divider" />
                                 </li>
+                        <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="NewTokenIssue">Access Token</a></li>
                         <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="#">Account</a></li>
                         <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="#">Helpdesk</a></li>
                         <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="/Account/Logout">Logout</a></li>
@@ -60,6 +61,7 @@
                             @User?.FindFirst("name")?.Value
                         </a>
                         <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="NewTokenIssue">Access Token</a></li>
                             <li><a class="dropdown-item" href="#">Account</a></li>
                             <li><a class="dropdown-item" href="#">Helpdesk</a></li>
                             <li><hr class="dropdown-divider"></li>
