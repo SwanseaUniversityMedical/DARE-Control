@@ -43,7 +43,7 @@ namespace TRE_UI.Controllers
         {
 
             var projects = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
-            var users = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
+
             return View(projects);
         }
         [HttpGet]
