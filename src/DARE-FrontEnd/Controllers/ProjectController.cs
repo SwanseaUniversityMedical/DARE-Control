@@ -215,5 +215,40 @@ namespace DARE_FrontEnd.Controllers
                 await _clientHelper.CallAPI<ProjectEndpoint, ProjectEndpoint?>("/api/Project/RemoveEndpointMembership", model);
             return RedirectToAction("EditProject", new { projectId = projectId });
         }
+
+        [HttpPost]
+        public async Task<IActionResult> AddUserList(string ProjectId, string ItemList)
+        {
+            string[] arr= ItemList.Split(',');
+            foreach (string s in arr)
+            {
+                var model = new ProjectUser()
+                {
+                    ProjectId = Int32.Parse(ProjectId),
+                    UserId = Int32.Parse(s)
+                };
+                var result =
+                await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
+            }
+            return RedirectToAction("EditProject", new { projectId = ProjectId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddEndpintList(string ProjectId, string ItemList)
+        {
+            string[] arr = ItemList.Split(',');
+            foreach (string s in arr)
+            {
+                var model = new ProjectEndpoint()
+                {
+                    ProjectId = Int32.Parse(ProjectId),
+                    EndpointId = Int32.Parse(s)
+                };
+                var result =
+                await _clientHelper.CallAPI<ProjectEndpoint, ProjectEndpoint?>("/api/Project/AddEndpointMembership",
+                    model);
+            }
+            return RedirectToAction("EditProject", new { projectId = ProjectId });
+        }
     }
 }

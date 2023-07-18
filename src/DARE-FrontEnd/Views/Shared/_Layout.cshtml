@@ -45,7 +45,7 @@
                         </li>
                         <li class="mobile-account-nav">
                             <hr class="mobile-account-nav dropdown-divider" />
-                                </li>
+                        </li>
                         <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="NewTokenIssue">Access Token</a></li>
                         <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="#">Account</a></li>
                         <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="#">Helpdesk</a></li>
@@ -146,6 +146,73 @@
 
         })
 
+    </script>
+
+    <script>
+        var SaveUserList = function (el) {
+            debugger;
+            var projectId = $(el).attr('id');
+            var arrItem = [];
+            var commaSeparatedIds = "";
+
+            $("#UserList tr td input[type=checkbox]").each(function (index, val) {
+                debugger;
+                var checkId = $(val).attr("Id");
+
+                var Ischecked = $("#" + checkId).is(":checked", true);
+
+                if (Ischecked) {
+                    arrItem.push(checkId);
+                }
+            })
+
+            if (arrItem.length != 0) {
+                commaSeparatedIds = arrItem.toString();
+
+                $.ajax({
+                    url: "/Project/AddUserList",
+                    type: "POST",
+                    data: { ProjectId: el, ItemList: commaSeparatedIds },
+                    success: function (reponse) {
+                        window.location.href = "/Project/EditProject?projectId="+el;
+                    }
+                })
+            }
+        }
+    </script>
+    <script>
+        var SaveEndpointList = function (el) {
+            debugger;
+            var arrItem = [];
+            var commaSeparatedIds = "";
+
+            $("#EndpointList tr td input[type=checkbox]").each(function (index, val) {
+                debugger;
+                var checkId = $(val).attr("Id");
+                var arr = checkId.split('_');
+                var currentCheckboxId = arr[1];
+
+                var Ischecked = $("#" + checkId).is(":checked", true);
+
+                if (Ischecked) {
+                    arrItem.push(currentCheckboxId);
+                }
+            })
+
+            if (arrItem.length != 0) {
+                commaSeparatedIds = arrItem.toString();
+
+                $.ajax({
+                    url: "/Project/AddEndpintList",
+                    type: "POST",
+                    data: { ProjectId: el, ItemList: commaSeparatedIds },
+                    success: function (reponse) {
+                        window.location.href = "/Project/EditProject?projectId=" + el;
+                    }
+                })
+            }
+
+        }
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
