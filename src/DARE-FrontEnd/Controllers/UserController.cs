@@ -45,6 +45,14 @@ namespace DARE_FrontEnd.Controllers
             return Ok(result);
         }
 
-        
+        public IActionResult GetUser(int id)
+        {
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("userId", id.ToString());
+            var test = _clientHelper.CallAPIWithoutModel<User?>(
+                "/api/User/GetUser/", paramlist).Result;
+
+            return View(test);
+        }
     }
 }
