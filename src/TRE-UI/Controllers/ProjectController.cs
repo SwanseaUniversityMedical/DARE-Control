@@ -14,12 +14,16 @@ namespace TRE_UI.Controllers
 {
     public class ProjectController : Controller
     {
-        private readonly IDareClientHelper _clientHelper;
-
-        public ProjectController(IDareClientHelper client)
+        private readonly IDareClientHelper _dareclientHelper;
+        private readonly ITREClientHelper _treclientHelper;
+        public ProjectController(IDareClientHelper dareclient)
         {
-            _clientHelper = client;
+            _dareclientHelper = dareclient;
         }
+        //public ProjectController(ITREClientHelper treclient)
+        //{
+        //    _treclientHelper = treclient;
+        //}
         [HttpGet]
         public IActionResult AddProject()
         {
