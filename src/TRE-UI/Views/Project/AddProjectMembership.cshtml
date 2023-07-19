@@ -1,17 +1,13 @@
-﻿@{
-    ViewData["Title"] = "Project";
-}
-
-@model BL.Models.ProjectApproval
+﻿@model BL.Models.DTO.ProjectUser
 <div class="row">
     <div class="col-sm-12">
-        <h1>Add Project</h1>
+        <h1>Add User to Project</h1>
 
 
 
 
 
-        @using (Html.BeginForm("AddProject", "Project", FormMethod.Post, new { id = "frmMain" }))
+        @using (Html.BeginForm("AddUserMembership", "Project", FormMethod.Post, new { id = "frmMain" }))
         {
             @Html.AntiForgeryToken()
 
@@ -19,86 +15,35 @@
 
             <div class="form-group">
                 @{
-                    @Html.LabelFor(m => m.ProjectName, "Enter project name")
-                    @Html.TextBoxFor(m => m.ProjectName, new {@class = "form-control show-tick noBottomMargin"})
+                    @Html.LabelFor(m => m.ProjectId, "Select the project name")
+                    @Html.DropDownListFor(m => m.ProjectId, Model.ProjectItemList, new {@class = "form-control show-tick noBottomMargin"})
 
                 }
 
-                @*  @Html.ValidationMessageFor(m => m.ProjectId, "Select Project")*@
+                @Html.ValidationMessageFor(m => m.ProjectId, "Select Project")
 
             </div>
 
             <div class="form-group">
                 @{
-                    @Html.LabelFor(m => m.UserId, "Enter user name")
-                    @Html.TextBoxFor(m => m.UserId, new {@class = "form-control show-tick noBottomMargin"})
+                    @Html.LabelFor(m => m.UserId, "Select the user name")
+                    @Html.DropDownListFor(m => m.UserId, Model.UserItemList, new {@class = "form-control show-tick noBottomMargin"})
 
                 }
 
-
-            </div>
-            <div class="form-group">
-                @{
-                    @Html.LabelFor(m => m.StartDate, "Enter date format dd-mm-yyyy")
-                    @Html.TextBoxFor(m => m.StartDate, new {@class = "form-control show-tick noBottomMargin"})
-
-                }
-
+                @Html.ValidationMessageFor(m => m.ProjectId, "Select User")
 
             </div>
 
 
-            @*      <div class="form-group">
-        @{
-        @Html.LabelFor(m => m.EndDate, "Enter end date")
 
-        @Html.EditorFor(model => model.EndDate, new { @type = "date" })
-        }
-
-        </div>*@
-            <div class="form-group">
-                @{
-                    @Html.LabelFor(m => m.EndDate, "Enter date format dd-mm-yyyy")
-                    @Html.TextBoxFor(m => m.EndDate, new {@class = "form-control show-tick noBottomMargin"})
-
-                }
-
-
+            <div class="hero-block-1">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i>Add User Membership</button>
             </div>
-            @*
-        <div class="hero-block-1">
-        <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i>Add Project</button>
-        </div>*@
         }
 
     </div>
 </div>
-<!doctype html>
-<html>
-<head>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
-</head>
-<body style="font-family: sans-serif; ">
-    <div style="height: 500px;">
-        @* <button onclick="fireSweetAlert()">Show sweet alert example</button>*@
-
-        <div class="hero-block-1">
-            <button type="submit" onclick="fireSweetAlert()" class="btn btn-primary"><i class="fas fa-paper-plane"></i>Add Project</button>
-        </div>
-    </div>
-    <script>
-
-        function fireSweetAlert() {
-            Swal.fire(
-                'Success!',
-                'Project Sent for Approval!',
-                'success'
-            )
-        }
-
-    </script>
-</body>
-</html>
 
         @*  public int Id { get; set; }
         public string? UserId { get; set; }

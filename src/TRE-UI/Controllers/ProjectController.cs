@@ -16,14 +16,12 @@ namespace TRE_UI.Controllers
     {
         private readonly IDareClientHelper _dareclientHelper;
         private readonly ITREClientHelper _treclientHelper;
-        public ProjectController(IDareClientHelper dareclient)
+        public ProjectController(IDareClientHelper dareclient, ITREClientHelper treclient)
         {
             _dareclientHelper = dareclient;
+            _treclientHelper = treclient;
         }
-        //public ProjectController(ITREClientHelper treclient)
-        //{
-        //    _treclientHelper = treclient;
-        //}
+    
         [HttpGet]
         public IActionResult AddProject()
         {
@@ -36,7 +34,7 @@ namespace TRE_UI.Controllers
         {
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());
-            var projects = _clientHelper.CallAPIWithoutModel<Project?>(
+            var projects = _dareclientHelper.CallAPIWithoutModel<Project?>(
                 "/api/Project/GetProject/", paramlist).Result;
 
             return View(projects);
@@ -46,7 +44,7 @@ namespace TRE_UI.Controllers
         public IActionResult GetAllProjects()
         {
 
-            var projects = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
+            var projects = _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
 
             return View(projects);
         }
@@ -68,8 +66,8 @@ namespace TRE_UI.Controllers
 
         private ProjectUser GetProjectUserModel()
         {
-            var projs = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
-            var users = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
+            var projs = _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
+            var users = _dareclientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
 
             var projectItems = projs
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
@@ -93,7 +91,8 @@ namespace TRE_UI.Controllers
         public async Task<IActionResult> AddUserMembership(ProjectUser model)
         {
             var result =
-                await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
+                await _dareclientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
+            await _treclientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
             result = GetProjectUserModel();
             return View(result);
 
