@@ -13,7 +13,7 @@
             <span>Create Project</span>
         </a>
     </div>
-    <hr class="d-flex mt-4 mb-5">
+    <hr class="d-flex my-4">
     <div class="table-responsive">
         <table id="projectList" class="table table-bordered table-striped no-head" caption="List of Projects">
             <thead><tr><td>Project</td></tr></thead>
@@ -25,8 +25,12 @@
 
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <div>
-                                    <a href="#"><h2 class="mb-0 fw-bold hover-underline fs-5">@project.Name</h2></a>
-                                    <p class="text-muted small mb-0">#[Project ID]</p>
+                                    <a href="#">
+                                        <h2 class="mb-0 fw-bold hover-underline fs-5">
+                                            <a href="@Url.Action("GetProject", "Project", new { id = project.Id })">@project.Name</a>
+                                        </h2>
+                                    </a>
+                                    <p class="text-muted small mb-0">#[Project ID = @project.Id]</p>
                                 </div>
                                 <a href="@Url.Action("EditProject", "Project",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
                             </div>

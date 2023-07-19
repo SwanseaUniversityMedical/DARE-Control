@@ -1,0 +1,38 @@
+﻿@model BL.Models.Project
+@{
+    ViewData["Title"] = "Project";
+
+
+}
+<style>
+    .box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: gray;
+        border: 1px solid #ccc;
+        border-radius: 50%;
+        padding: 10px;
+    }
+
+    .space {
+        margin-right: 2em;
+    }
+</style>
+@*<div class="">
+    <div class="d-flex align-items-center justify-content-between">
+        <h1 class="g-font-size-28 my-2">TREs</h1>
+    </div>
+    <hr class="d-flex g-brd-gray-light-v7 mt-4 g-mb-30">
+</div>*@
+
+<div class="table-responsive">
+    Project Name: @Model.Name
+    <br />
+    <br />
+    <div class="box">
+        Has @Model.Users.Count Users
+    </div>
+
+
+</div>
