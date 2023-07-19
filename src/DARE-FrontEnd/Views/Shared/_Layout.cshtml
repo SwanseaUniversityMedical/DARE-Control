@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <script src="https://cdn.form.io/formiojs/formio.form.min.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.form.io/formiojs/formio.form.min.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="~/css/datatables.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <script src="~/js/formIo.js"></script>
     <link rel="stylesheet" href="https://use.typekit.net/tyz0nfb.css">
@@ -37,14 +38,15 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="GetAllUsers">People</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" href="">Queries</a>
+                            <a class="nav-link text-dark" href="">Submissions</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Endpoint" asp-action="GetAllEndpoints">TREs</a>
                         </li>
                         <li class="mobile-account-nav">
                             <hr class="mobile-account-nav dropdown-divider" />
-                                </li>
+                        </li>
+                        <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="NewTokenIssue">Access Token</a></li>
                         <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="#">Account</a></li>
                         <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="#">Helpdesk</a></li>
                         <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="/Account/Logout">Logout</a></li>
@@ -59,6 +61,7 @@
                             @User?.FindFirst("name")?.Value
                         </a>
                         <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="NewTokenIssue">Access Token</a></li>
                             <li><a class="dropdown-item" href="#">Account</a></li>
                             <li><a class="dropdown-item" href="#">Helpdesk</a></li>
                             <li><hr class="dropdown-divider"></li>
@@ -71,7 +74,7 @@
             </div>
         </nav>
     </header>
-    <main role="main" class="mt-5 pb-3">
+    <main role="main" class="pb-3">
         @RenderBody()
     </main>
 
@@ -121,7 +124,96 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/datatables.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        new DataTable('#projectList');
+        $('#launch-button').on('click', function () {
+
+            $('#welcomeModal').modal('show');
+
+        })
+
+        $('#addUser').on('click', function () {
+
+            $('#userModal').modal('show');
+
+        })
+
+        $('#addEndpint').on('click', function () {
+
+            $('#endpointModal').modal('show');
+
+        })
+
+    </script>
+
+    <script>
+        var SaveUserList = function (el) {
+            debugger;
+            var projectId = $(el).attr('id');
+            var arrItem = [];
+            var commaSeparatedIds = "";
+
+            $("#UserList tr td input[type=checkbox]").each(function (index, val) {
+                debugger;
+                var checkId = $(val).attr("Id");
+
+                var Ischecked = $("#" + checkId).is(":checked", true);
+
+                if (Ischecked) {
+                    arrItem.push(checkId);
+                }
+            })
+
+            if (arrItem.length != 0) {
+                commaSeparatedIds = arrItem.toString();
+
+                $.ajax({
+                    url: "/Project/AddUserList",
+                    type: "POST",
+                    data: { ProjectId: el, ItemList: commaSeparatedIds },
+                    success: function (reponse) {
+                        window.location.href = "/Project/EditProject?projectId="+el;
+                    }
+                })
+            }
+        }
+    </script>
+    <script>
+        var SaveEndpointList = function (el) {
+            debugger;
+            var arrItem = [];
+            var commaSeparatedIds = "";
+
+            $("#EndpointList tr td input[type=checkbox]").each(function (index, val) {
+                debugger;
+                var checkId = $(val).attr("Id");
+                var arr = checkId.split('_');
+                var currentCheckboxId = arr[1];
+
+                var Ischecked = $("#" + checkId).is(":checked", true);
+
+                if (Ischecked) {
+                    arrItem.push(currentCheckboxId);
+                }
+            })
+
+            if (arrItem.length != 0) {
+                commaSeparatedIds = arrItem.toString();
+
+                $.ajax({
+                    url: "/Project/AddEndpintList",
+                    type: "POST",
+                    data: { ProjectId: el, ItemList: commaSeparatedIds },
+                    success: function (reponse) {
+                        window.location.href = "/Project/EditProject?projectId=" + el;
+                    }
+                })
+            }
+
+        }
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

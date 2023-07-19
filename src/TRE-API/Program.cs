@@ -1,6 +1,6 @@
 using BL.Models.Settings;
 using BL.Repositories.DbContexts;
-using TRE_API.Models;
+using BL.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -25,8 +25,8 @@ var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
-//Log.Logger = CreateSerilogLogger(configuration, environment);
-//Log.Information("API logging Start.");
+Log.Logger = CreateSerilogLogger(configuration, environment);
+Log.Information("API logging Start.");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
@@ -135,9 +135,9 @@ if (!app.Environment.IsDevelopment())
 
 using (var scope = app.Services.CreateScope())
 {
-    // var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    //db.Database.Migrate();
-    //DataInitaliser.SeedData(db, SeedSettings).Wait();
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+   
 }
 
 
@@ -149,28 +149,24 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-using (var scope = app.Services.CreateScope())
+
+Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHostEnvironment environment)
 {
-    //var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    //db.Database.Migrate();
+    var seqServerUrl = configuration["Serilog:SeqServerUrl"];
+    var seqApiKey = configuration["Serilog:SeqApiKey"];
+
+
+
+    return new LoggerConfiguration()
+    .MinimumLevel.Verbose()
+    .Enrich.WithProperty("ApplicationContext", environment.ApplicationName)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.Seq(seqServerUrl, apiKey: seqApiKey)
+    .ReadFrom.Configuration(configuration)
+    .CreateLogger();
+
 }
-//Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHostEnvironment environment)
-//{
-//    var seqServerUrl = configuration["Serilog:SeqServerUrl"];
-//    var seqApiKey = configuration["Serilog:SeqApiKey"];
-
-
-
-//    return new LoggerConfiguration()
-//    .MinimumLevel.Verbose()
-//    .Enrich.WithProperty("ApplicationContext", environment.ApplicationName)
-//    .Enrich.FromLogContext()
-//    .WriteTo.Console()
-//    .WriteTo.Seq(seqServerUrl, apiKey: seqApiKey)
-//    .ReadFrom.Configuration(configuration)
-//    .CreateLogger();
-
-//}
 void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configuration)
 {
 

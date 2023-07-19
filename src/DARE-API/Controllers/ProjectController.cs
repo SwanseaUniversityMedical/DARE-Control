@@ -138,6 +138,46 @@ namespace DARE_API.Controllers
 
         }
 
+        [HttpPost("RemoveUserMembership")]
+        public async Task<ProjectUser?> RemoveUserMembership(ProjectUser model)
+        {
+            try
+            {
+                var user = _DbContext.Users.FirstOrDefault(x => x.Id == model.UserId);
+                if (user == null)
+                {
+                    Log.Error("{Function} Invalid user id {UserId}", "RemoveUserMembership", model.UserId);
+                    return null;
+                }
+
+                var project = _DbContext.Projects.FirstOrDefault(x => x.Id == model.ProjectId);
+                if (project == null)
+                {
+                    Log.Error("{Function} Invalid project id {UserId}", "RemoveUserMembership", model.ProjectId);
+                    return null;
+                }
+
+                if (!project.Users.Any(x => x == user))
+                {
+                    Log.Error("{Function} User {UserName} is not in the {ProjectName}", "RemoveUserMembership", user.Name, project.Name);
+                    return null;
+                }
+
+                project.Users.Remove(user);
+
+                await _DbContext.SaveChangesAsync();
+                Log.Information("{Function} Added User {UserName} to {ProjectName}", "RemoveUserMembership", user.Name, project.Name);
+                return model;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "RemoveUserMembership");
+                throw;
+            }
+
+
+        }
+
         [HttpPost("AddEndpointMembership")]
         public async Task<ProjectEndpoint?> AddEndpointMembership(ProjectEndpoint model)
         {
@@ -178,8 +218,45 @@ namespace DARE_API.Controllers
 
         }
 
+        [HttpPost("RemoveEndpointMembership")]
+        public async Task<ProjectEndpoint?> RemoveEndpointMembership(ProjectEndpoint model)
+        {
+            try
+            {
+                var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.Id == model.EndpointId);
+                if (endpoint == null)
+                {
+                    Log.Error("{Function} Invalid endpoint id {UserId}", "AddEndpointMembership", model.EndpointId);
+                    return null;
+                }
+
+                var project = _DbContext.Projects.FirstOrDefault(x => x.Id == model.ProjectId);
+                if (project == null)
+                {
+                    Log.Error("{Function} Invalid project id {UserId}", "AddEndpointMembership", model.ProjectId);
+                    return null;
+                }
+
+                if (!project.Endpoints.Any(x => x == endpoint))
+                {
+                    Log.Error("{Function} Endpoint {Endpoint} is already on {ProjectName}", "AddEndpointMembership", endpoint.Name, project.Name);
+                    return null;
+                }
+
+                project.Endpoints.Remove(endpoint);
+
+                await _DbContext.SaveChangesAsync();
+                Log.Information("{Function} Added endpoint {Enpoint} to {ProjectName}", "AddEndpointMembership", endpoint.Name, project.Name);
+                return model;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "AddEndpointMembership");
+                throw;
+            }
 
 
+        }
 
 
         [HttpGet("GetProject")]

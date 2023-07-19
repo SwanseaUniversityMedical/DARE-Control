@@ -6,6 +6,20 @@ using Serilog;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using System.Net;
+using TRE_UI.Models;
+using Serilog.Exceptions.Core;
+using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
+using Serilog.Exceptions;
+using System.Text.Json.Serialization;
+using System.Text.Json;
+using BL.Models.DTO;
+using Newtonsoft.Json;
+using Microsoft.Extensions.Options;
+using System.IdentityModel.Tokens.Jwt;
+
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +32,7 @@ ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
 Log.Logger = CreateSerilogLogger(configuration, environment);
-Log.Information("Dare-FrontEnd logging Start.");
+Log.Information("TRE-UI logging Start.");
 
 string AppName = typeof(Program).Module.Name.Replace(".dll", "");
 
@@ -36,6 +50,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<CustomCookieEvent>();
 
 builder.Services.AddScoped<ITREClientHelper, TREClientHelper>();
+builder.Services.AddScoped<IDareClientHelper, DareClientHelper>();
 
 builder.Services.AddMvc().AddViewComponentsAsServices();
 
