@@ -17,7 +17,8 @@ using Microsoft.AspNetCore.Builder;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
 using System;
-
+using Microsoft.AspNetCore.Http.Connections;
+using TRE_API.Services.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,34 +81,6 @@ builder.Services.AddAuthentication(options =>
 
         options.TokenValidationParameters = TVP;
 
-        //var proxy = new WebProxy { Address = new Uri("http://192.168.10.15:8080") };
-
-        //HttpClient.DefaultProxy = proxy;
-
-        //options.BackchannelHttpHandler = new HttpClientHandler
-        //{
-        //    UseProxy = true,
-        //    UseDefaultCredentials = true,
-        //    Proxy = proxy
-        //};
-
-        //options.Events = new JwtBearerEvents
-        //{
-
-        //    OnAuthenticationFailed = f =>
-        //    {
-        //        f.NoResult();
-        //        f.Response.StatusCode = 401;
-        //        f.Response.ContentType = "text/plain";
-
-
-        //        f.Response.Redirect($"https://localhost:5001/Account/LoginAfterTokenExpired", true);
-
-        //        //return f.Response.WriteAsync(f.Exception.ToString());
-        //        return f.Response.CompleteAsync();
-        //    },
-        //    OnChallenge = f => Task.CompletedTask
-        //};
     });
 
 // - authorize here
@@ -117,16 +90,17 @@ builder.Services.AddAuthorization(options =>
 });
 
 // Enable CORS
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(builder =>
-    {
-        builder
-            .WithOrigins("https://localhost:7290")
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
-    });
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.WithOrigins(configuration["DARE-API:Address"])
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+                      });
 });
 
 var app = builder.Build();
@@ -203,14 +177,12 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
     builder.Services.AddHttpContextAccessor();
 
 
-    //builder.Services.AddScoped<IMinioService, MinioService>();
+    builder.Services.AddScoped<ISignalRService, SignalRService>();
     builder.Services.AddMvc().AddControllersAsServices()
     //    .AddNewtonsoftJson(options =>
     //    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
     //); 
     ;
-
-    //builder.Services.AddScoped<ICodeService, CodeService>();
 
 }
 
@@ -229,7 +201,7 @@ void AddServices(WebApplicationBuilder builder)
     //TODO
     builder.Services.AddSwaggerGen(c =>
     {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = environment.ApplicationName, Version = "v1" });
+        c.SwaggerDoc("v2", new OpenApiInfo { Title = environment.ApplicationName, Version = "v2" });
     }
     );
 
@@ -243,6 +215,10 @@ void AddServices(WebApplicationBuilder builder)
 
 //for SignalR
 app.UseCors();
+app.MapHub<SignalRService>("/signalRHub", options =>
+{
+    options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
+}).RequireCors(MyAllowSpecificOrigins);
 
 app.Run();
 
