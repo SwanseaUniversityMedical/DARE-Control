@@ -82,15 +82,21 @@ builder.Services.AddAuthentication(options =>
 })
     .AddJwtBearer(options =>
     {
+        if (keyCloakSettings.Proxy)
+        {
+            options.BackchannelHttpHandler = new HttpClientHandler
+            {
+                UseProxy = true,
+                UseDefaultCredentials = true,
+                Proxy = new WebProxy()
+                {
+                    Address = new Uri(keyCloakSettings.ProxyAddresURL),
+                    BypassList = new[] { keyCloakSettings.BypassProxy }
+                }
+            };
+        }
         options.Authority = keyCloakSettings.Authority;
-        options.Audience = keyCloakSettings.ClientId;
-
-        // URL of the Keycloak server
-        options.Authority = keyCloakSettings.Authority;
-        //// Client configured in the Keycloak
-        
-        //// Client secret shared with Keycloak
-        
+        options.Audience = keyCloakSettings.ClientId;          
         options.MetadataAddress = keyCloakSettings.MetadataAddress;
 
         options.RequireHttpsMetadata = false; // dev only
