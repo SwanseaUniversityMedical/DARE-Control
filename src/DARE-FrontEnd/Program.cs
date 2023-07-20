@@ -172,15 +172,15 @@ builder.Services.AddAuthentication(options =>
                 {
                     OnRemoteFailure = context =>
                     {
-                        //Log.Error("OnRemoteFailure: {ex}", context.Failure);
+                        Log.Error("OnRemoteFailure: {ex}", context.Failure);
                         if (context.Failure.Message.Contains("Correlation failed"))
                         {
-                            //Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", keyCloakSettings.TokenExpiredAddress);
+                            Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", keyCloakSettings.TokenExpiredAddress);
                             context.Response.Redirect(keyCloakSettings.TokenExpiredAddress);
                         }
                         else
                         {
-                            //Log.Warning("call /Error/500");
+                            Log.Warning("call /Error/500");
                             context.Response.Redirect("/Error/500");
                         }
 
