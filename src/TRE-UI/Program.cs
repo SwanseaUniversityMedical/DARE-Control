@@ -75,29 +75,58 @@ builder.Services.AddAuthorization(options =>
                 context => context.User.HasClaim(claim =>
                     claim.Type == "groups"
                     && claim.Value.Contains("dare-control-admin"))));
-    //options.AddPolicy(
-    //            "company",
-    //            policyBuilder => policyBuilder.RequireAssertion(
-    //                context => context.User.HasClaim(claim =>
-    //                    claim.Type == "groups"
-    //                    && claim.Value.Contains("dare-control-company"))));
-    //options.AddPolicy(
-    //        "user",
-    //        policyBuilder => policyBuilder.RequireAssertion(
-    //            context => context.User.HasClaim(claim =>
-    //                claim.Type == "groups"
-    //                && claim.Value.Contains("dare-control-user"))));
+    options.AddPolicy(
+                "company",
+                policyBuilder => policyBuilder.RequireAssertion(
+                    context => context.User.HasClaim(claim =>
+                        claim.Type == "groups"
+                        && claim.Value.Contains("dare-control-company"))));
+    options.AddPolicy(
+            "user",
+            policyBuilder => policyBuilder.RequireAssertion(
+                context => context.User.HasClaim(claim =>
+                    claim.Type == "groups"
+                    && claim.Value.Contains("dare-control-user"))));
 });
-
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
 })
-            .AddCookie(options => options.EventsType = typeof(CustomCookieEvent))
+             //.AddCookie(options => options.EventsType = typeof(CustomCookieEvent))
+             .AddCookie(o =>
+             {
+                 o.SessionStore = new MemoryCacheTicketStore();
+                 o.EventsType = typeof(CustomCookieEvent);
+             })
             .AddOpenIdConnect(options =>
-            {                
+            {
+                if (keyCloakSettings.Proxy)
+                {
+                    options.BackchannelHttpHandler = new HttpClientHandler
+                    {
+                        UseProxy = true,
+                        UseDefaultCredentials = true,
+                        Proxy = new WebProxy()
+                        {
+                            Address = new Uri(keyCloakSettings.ProxyAddresURL),
+                            BypassList = new[] { keyCloakSettings.BypassProxy }
+                        }
+                    };
+                }
+
+                //var proxy = new WebProxy { Address = new Uri("http://192.168.10.15:8080") };
+
+                //HttpClient.DefaultProxy = proxy;
+
+                //options.BackchannelHttpHandler = new HttpClientHandler
+                //{
+                //    UseProxy = true,
+                //    UseDefaultCredentials = true,
+                //    Proxy = proxy
+                //};
                 // URL of the Keycloak server
                 options.Authority = keyCloakSettings.Authority;
                 //// Client configured in the Keycloak
@@ -156,7 +185,12 @@ builder.Services.AddAuthentication(options =>
                         return Task.CompletedTask;
                     },
                     OnRedirectToIdentityProvider = async context =>
-                    {               
+                    {
+                        // Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}", context.HttpContext.Connection.RemoteIpAddress);
+                        //Log.Information("HttpContext.Connection.RemotePort : {RemotePort}", context.HttpContext.Connection.RemotePort);
+                        // Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
+                        // Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
+
                         foreach (var header in context.HttpContext.Request.Headers)
                         {
                             // Log.Information("Request Header {key} - {value}", header.Key, header.Value);
@@ -167,7 +201,11 @@ builder.Services.AddAuthentication(options =>
                             // Log.Information("Response Header {key} - {value}", header.Key, header.Value);
                         }
 
-
+                        if (keyCloakSettings.UseRedirectURL)
+                        {
+                            context.ProtocolMessage.RedirectUri = keyCloakSettings.RedirectURL;
+                        }
+                        Log.Information(context.ProtocolMessage.RedirectUri);
                         //context.ProtocolMessage.RedirectUri = Configuration["Oidc:RedirectUri"];
                         //Log.Information( context.ProtocolMessage.RedirectUri);
                         //Log.Information( context.ProtocolMessage.RedirectUri);
@@ -178,6 +216,95 @@ builder.Services.AddAuthentication(options =>
                 options.NonceCookie.SameSite = SameSiteMode.None;
                 options.CorrelationCookie.SameSite = SameSiteMode.None;
             });
+//builder.Services.AddAuthentication(options =>
+//{
+//    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+//    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+//    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+//})
+//            .AddCookie(options => options.EventsType = typeof(CustomCookieEvent))
+//            .AddOpenIdConnect(options =>
+//            {                
+//                // URL of the Keycloak server
+//                options.Authority = keyCloakSettings.Authority;
+//                //// Client configured in the Keycloak
+//                options.ClientId = keyCloakSettings.ClientId;
+//                //// Client secret shared with Keycloak
+//                options.ClientSecret = keyCloakSettings.ClientSecret;
+//                options.MetadataAddress = keyCloakSettings.MetadataAddress;
+
+//                options.SaveTokens = true;
+
+//                options.ResponseType = OpenIdConnectResponseType.Code; //Configuration["Oidc:ResponseType"];
+//                                                                       // For testing we disable https (should be true for production)
+//                options.RemoteSignOutPath = keyCloakSettings.RemoteSignOutPath;
+//                options.SignedOutRedirectUri = keyCloakSettings.SignedOutRedirectUri;
+//                options.RequireHttpsMetadata = false;
+//                options.GetClaimsFromUserInfoEndpoint = true;
+//                //options.Scope.Add("openid");
+//                //options.Scope.Add("profile");
+//                //options.Scope.Add("email");
+//                //options.Scope.Add("claims");
+//                //options.SaveTokens = true;
+//                options.ResponseType = OpenIdConnectResponseType.Code;
+//                options.Events = new OpenIdConnectEvents
+//                {
+//                    OnRemoteFailure = context =>
+//                    {
+//                        //Log.Error("OnRemoteFailure: {ex}", context.Failure);
+//                        if (context.Failure.Message.Contains("Correlation failed"))
+//                        {
+//                            //Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", keyCloakSettings.TokenExpiredAddress);
+//                            context.Response.Redirect(keyCloakSettings.TokenExpiredAddress);
+//                        }
+//                        else
+//                        {
+//                            //Log.Warning("call /Error/500");
+//                            context.Response.Redirect("/Error/500");
+//                        }
+
+//                        context.HandleResponse();
+
+//                        return context.Response.CompleteAsync();
+//                    },
+//                    OnMessageReceived = context =>
+//                    {
+//                        string accessToken = context.Request.Query["access_token"];
+//                        PathString path = context.HttpContext.Request.Path;
+
+//                        if (
+//                            !string.IsNullOrEmpty(accessToken) &&
+//                            path.StartsWithSegments("/api/SignalRHub")
+//                        )
+//                        {
+//                            context.Token = accessToken;
+//                        }
+
+//                        return Task.CompletedTask;
+//                    },
+//                    OnRedirectToIdentityProvider = async context =>
+//                    {               
+//                        foreach (var header in context.HttpContext.Request.Headers)
+//                        {
+//                            // Log.Information("Request Header {key} - {value}", header.Key, header.Value);
+//                        }
+
+//                        foreach (var header in context.HttpContext.Response.Headers)
+//                        {
+//                            // Log.Information("Response Header {key} - {value}", header.Key, header.Value);
+//                        }
+
+
+//                        //context.ProtocolMessage.RedirectUri = Configuration["Oidc:RedirectUri"];
+//                        //Log.Information( context.ProtocolMessage.RedirectUri);
+//                        //Log.Information( context.ProtocolMessage.RedirectUri);
+//                        await Task.FromResult(0);
+//                    }
+//                };
+
+//                options.NonceCookie.SameSite = SameSiteMode.None;
+//                options.CorrelationCookie.SameSite = SameSiteMode.None;
+//            });
 
 var app = builder.Build();
 
