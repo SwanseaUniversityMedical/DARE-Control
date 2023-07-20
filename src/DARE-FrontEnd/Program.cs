@@ -240,8 +240,8 @@ builder.Services.AddAuthentication(options =>
                 options.Scope.Add("profile");
                 options.ResponseType = OpenIdConnectResponseType.CodeToken; //Configuration["Oidc:ResponseType"];
                                                                        // For testing we disable https (should be true for production)
-                options.RemoteSignOutPath = keyCloakSettings.RemoteSignOutPath;
-                options.SignedOutRedirectUri = keyCloakSettings.SignedOutRedirectUri;
+                //options.RemoteSignOutPath = keyCloakSettings.RemoteSignOutPath;
+                //options.SignedOutRedirectUri = keyCloakSettings.SignedOutRedirectUri;
                 options.RequireHttpsMetadata = false;
                 options.GetClaimsFromUserInfoEndpoint = true;
                 //options.Scope.Add("openid");
