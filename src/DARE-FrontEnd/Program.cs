@@ -173,6 +173,7 @@ builder.Services.AddAuthentication(options =>
                 //    Proxy = proxy
                 //};
                 // URL of the Keycloak server
+
                 options.Authority = keyCloakSettings.Authority;
                 //// Client configured in the Keycloak
                 options.ClientId = keyCloakSettings.ClientId;
