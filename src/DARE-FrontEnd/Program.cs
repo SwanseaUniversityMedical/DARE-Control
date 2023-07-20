@@ -223,7 +223,7 @@ builder.Services.AddAuthentication(options =>
                 //        return context.Response.CompleteAsync();
                 //    },
 
-                    
+
 
                 //    OnTicketReceived = context =>
                 //    {
@@ -296,28 +296,21 @@ builder.Services.AddAuthentication(options =>
                 //    }
                 //};
                 //options.MetadataAddress = keyCloakSettings.MetadataAddress;
-                    
+
+                options.RequireHttpsMetadata = false;
                 options.SaveTokens = true;
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
-                options.ResponseType = OpenIdConnectResponseType.CodeToken; //Configuration["Oidc:ResponseType"];
-                                                                       // For testing we disable https (should be true for production)
-                //options.RemoteSignOutPath = keyCloakSettings.RemoteSignOutPath;
-                //options.SignedOutRedirectUri = keyCloakSettings.SignedOutRedirectUri;
-                options.RequireHttpsMetadata = false;
                 options.GetClaimsFromUserInfoEndpoint = true;
-                //options.Scope.Add("openid");
-                //options.Scope.Add("profile");
-                //options.Scope.Add("email");
-                //options.Scope.Add("claims");
-                //options.SaveTokens = true;
-                options.ResponseType = OpenIdConnectResponseType.Code;
-               
 
                 if (string.IsNullOrEmpty(keyCloakSettings.MetadataAddress) == false)
                 {
                     options.MetadataAddress = keyCloakSettings.MetadataAddress;
                 }
+                
+
+                options.ResponseType = OpenIdConnectResponseType.Code;
+
 
                 options.NonceCookie.SameSite = SameSiteMode.None;
                 options.CorrelationCookie.SameSite = SameSiteMode.None;
