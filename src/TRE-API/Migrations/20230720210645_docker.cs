@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace TRE_API.Migrations
 {
     /// <inheritdoc />
-    public partial class initialMigration : Migration
+    public partial class docker : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -23,23 +23,11 @@ namespace TRE_API.Migrations
                     LocalProjectName = table.Column<string>(type: "text", nullable: true),
                     Approved = table.Column<string>(type: "text", nullable: true),
                     ApprovedBy = table.Column<string>(type: "text", nullable: true),
-                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ProjectApproval", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ProjectUser_Projects",
-                        column: x => x.ProjectId,
-                        principalTable: "Projects",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ProjectUser_Users",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
         }
 

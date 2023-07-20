@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace TRE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230720075936_initialMigration")]
-    partial class initialMigration
+    [Migration("20230720210645_docker")]
+    partial class docker
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
