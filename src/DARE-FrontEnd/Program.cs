@@ -170,6 +170,56 @@ builder.Services.AddAuthentication(options =>
 
                 options.Events = new OpenIdConnectEvents
                 {
+
+                    OnAccessDenied = context =>
+                    {
+                        Log.Error("{Function}: {ex}", "OnAccessDenied", context.AccessDeniedPath);
+                        context.HandleResponse();
+                        return context.Response.CompleteAsync();
+
+                    },
+                    OnAuthenticationFailed = context =>
+                    {
+                        Log.Error("{Function}: {ex}", "OnAuthFailed", context.Exception.Message);
+                        context.HandleResponse();
+                        return context.Response.CompleteAsync();
+                    },
+                    OnAuthorizationCodeReceived = context =>
+                    {
+                        Log.Information("{Function}", "OnAuthorizationCodeReceived");
+                        context.HandleResponse();
+                        return context.Response.CompleteAsync();
+
+                    },
+                    OnTokenResponseReceived = context =>
+                    {
+                        Log.Information("{Function}", "OnTokenResponseReceived");
+                        context.HandleResponse();
+                        return context.Response.CompleteAsync();
+                    },
+
+                    OnTokenValidated = context =>
+                    {
+                        Log.Information("{Function}", "OnTokenResponseReceived");
+                        context.HandleResponse();
+                        return context.Response.CompleteAsync();
+                    },
+
+                    OnUserInformationReceived = context =>
+                    {
+                        Log.Information("{Function}", "OnTokenResponseReceived");
+                        context.HandleResponse();
+                        return context.Response.CompleteAsync();
+                    },
+
+                    
+                    OnTicketReceived = context =>
+                    {
+                        Log.Information("{Function}: {ex}", "OnTicketReceived", context.ToString());
+                        context.HandleResponse();
+                        return context.Response.CompleteAsync();
+
+                    },
                     OnRemoteFailure = context =>
                     {
                         Log.Error("OnRemoteFailure: {ex}", context.Failure);
