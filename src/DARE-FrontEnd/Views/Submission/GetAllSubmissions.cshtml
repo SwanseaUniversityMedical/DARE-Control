@@ -1,0 +1,65 @@
+﻿@model List<BL.Models.Submission>
+@{
+    ViewData["Title"] = "Submissions";
+    var submissionCount = Model.Count;
+
+}
+
+<div class="container-lg p-4">
+    <div class="d-flex align-items-center justify-content-between">
+        <h1 class="fs-3 mb-0">Submissions</h1>
+
+    </div>
+    <hr class="d-flex my-4">
+    <div class="table-responsive">
+        <table id="submissionList" class="table table-bordered table-striped no-head" caption="List of Submissions">
+            <thead><tr><td>Project</td></tr></thead>
+            <tbody>
+                @foreach (var submission in Model)
+                {
+                    
+
+                    <tr>
+                        <td class="card mb-2 p-3 bg-white shadow-sm border-1">
+
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div>
+                                    <a href="#">
+                                    </a>
+                                    <p class="text-muted small mb-0">#[Submission ID = @submission.Id]</p>
+                                    <p class="text-muted small mb-0">#[Submission Projects' Name = @submission.Project.Name]</p>
+                                    @*TODO Display a nice version of status instead of just an enum*@
+                                    @{
+                                        string value;
+                                        string defaultValue = "N/A";
+                                        if (submission.EndPoint == null)
+                                        {
+                                            value = defaultValue;
+                                        }
+                                        else
+                                        {
+                                            value = submission.EndPoint.Name;
+                                        }
+
+                                    }
+                                    <p class="text-muted small mb-0">#[Submission Endpoints' Name = @value]</p>
+
+                                    <p class="text-muted small mb-0">#[Submission Status = @submission.Status]</p>
+                                    <p class="text-muted small mb-0">#[Who Submitted= @submission.SubmittedBy.Name</p>
+                                    <p class="text-muted small mb-0">#[Submission Status = @submission.StatusDescription]</p>
+                                </div>
+                            </div>
+
+
+
+
+
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+    @*<p>Showing @projectsCount results</p>*@
+</div>

@@ -79,5 +79,28 @@ namespace DARE_API.Controllers
 
             return StatusCode(200, new APIReturn(){ReturnType = ReturnType.voidReturn});
         }
+
+        [HttpGet("GetAllSubmissions")]
+        public List<Submission> GetAllSubmissions()
+        {
+            try
+            {
+
+                var allSubmissions = _DbContext.Submissions.ToList();
+
+
+
+                Log.Information("{Function} Endpoints retrieved successfully", "GetAllSubmissions");
+                return allSubmissions;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetAllSubmissions");
+                throw;
+            }
+
+
+        }
+
     }
 }
