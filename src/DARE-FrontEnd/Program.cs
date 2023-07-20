@@ -179,121 +179,121 @@ builder.Services.AddAuthentication(options =>
                 //// Client secret shared with Keycloak
                 options.ClientSecret = keyCloakSettings.ClientSecret;
 
-                options.Events = new OpenIdConnectEvents
-                {
-                    OnAccessDenied = context =>
-                    {
-                        Log.Error("{Function}: {ex}", "OnAccessDenied", context.AccessDeniedPath);
-                        context.HandleResponse();
-                        return context.Response.CompleteAsync();
+                //options.Events = new OpenIdConnectEvents
+                //{
+                //    OnAccessDenied = context =>
+                //    {
+                //        Log.Error("{Function}: {ex}", "OnAccessDenied", context.AccessDeniedPath);
+                //        context.HandleResponse();
+                //        return context.Response.CompleteAsync();
 
-                    },
-                    OnAuthenticationFailed = context =>
-                    {
-                        Log.Error("{Function}: {ex}", "OnAuthFailed", context.Exception.Message);
-                        context.HandleResponse();
-                        return context.Response.CompleteAsync();
-                    },
-                    OnAuthorizationCodeReceived = context =>
-                    {
-                        Log.Information("{Function}", "OnAuthorizationCodeReceived");
-                        context.HandleResponse();
-                        return context.Response.CompleteAsync();
+                //    },
+                //    OnAuthenticationFailed = context =>
+                //    {
+                //        Log.Error("{Function}: {ex}", "OnAuthFailed", context.Exception.Message);
+                //        context.HandleResponse();
+                //        return context.Response.CompleteAsync();
+                //    },
+                //    OnAuthorizationCodeReceived = context =>
+                //    {
+                //        Log.Information("{Function}", "OnAuthorizationCodeReceived");
+                //        context.HandleResponse();
+                //        return context.Response.CompleteAsync();
 
-                    },
-                    OnTokenResponseReceived = context =>
-                    {
-                        Log.Information("{Function}", "OnTokenResponseReceived");
-                        context.HandleResponse();
-                        return context.Response.CompleteAsync();
-                    },
+                //    },
+                //    OnTokenResponseReceived = context =>
+                //    {
+                //        Log.Information("{Function}", "OnTokenResponseReceived");
+                //        context.HandleResponse();
+                //        return context.Response.CompleteAsync();
+                //    },
 
-                    OnTokenValidated = context =>
-                    {
-                        Log.Information("{Function}", "OnTokenResponseReceived");
-                        context.HandleResponse();
-                        return context.Response.CompleteAsync();
-                    },
+                //    OnTokenValidated = context =>
+                //    {
+                //        Log.Information("{Function}", "OnTokenResponseReceived");
+                //        context.HandleResponse();
+                //        return context.Response.CompleteAsync();
+                //    },
 
-                    OnUserInformationReceived = context =>
-                    {
-                        Log.Information("{Function}", "OnTokenResponseReceived");
-                        context.HandleResponse();
-                        return context.Response.CompleteAsync();
-                    },
+                //    OnUserInformationReceived = context =>
+                //    {
+                //        Log.Information("{Function}", "OnTokenResponseReceived");
+                //        context.HandleResponse();
+                //        return context.Response.CompleteAsync();
+                //    },
 
                     
 
-                    OnTicketReceived = context =>
-                    {
-                        Log.Information("{Function}: {ex}", "OnTicketReceived", context.ToString());
-                        context.HandleResponse();
-                        return context.Response.CompleteAsync();
+                //    OnTicketReceived = context =>
+                //    {
+                //        Log.Information("{Function}: {ex}", "OnTicketReceived", context.ToString());
+                //        context.HandleResponse();
+                //        return context.Response.CompleteAsync();
 
-                    },
-                    OnRemoteFailure = context =>
-                    {
-                        Log.Error("OnRemoteFailure: {ex}", context.Failure);
-                        if (context.Failure.Message.Contains("Correlation failed"))
-                        {
-                            Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", keyCloakSettings.TokenExpiredAddress);
-                            context.Response.Redirect(keyCloakSettings.TokenExpiredAddress);
-                        }
-                        else
-                        {
-                            Log.Warning("call /Error/500");
-                            context.Response.Redirect("/Error/500");
-                        }
+                //    },
+                //    OnRemoteFailure = context =>
+                //    {
+                //        Log.Error("OnRemoteFailure: {ex}", context.Failure);
+                //        if (context.Failure.Message.Contains("Correlation failed"))
+                //        {
+                //            Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", keyCloakSettings.TokenExpiredAddress);
+                //            context.Response.Redirect(keyCloakSettings.TokenExpiredAddress);
+                //        }
+                //        else
+                //        {
+                //            Log.Warning("call /Error/500");
+                //            context.Response.Redirect("/Error/500");
+                //        }
 
-                        context.HandleResponse();
+                //        context.HandleResponse();
 
-                        return context.Response.CompleteAsync();
-                    },
-                    OnMessageReceived = context =>
-                    {
-                        string accessToken = context.Request.Query["access_token"];
-                        PathString path = context.HttpContext.Request.Path;
+                //        return context.Response.CompleteAsync();
+                //    },
+                //    OnMessageReceived = context =>
+                //    {
+                //        string accessToken = context.Request.Query["access_token"];
+                //        PathString path = context.HttpContext.Request.Path;
 
-                        if (
-                            !string.IsNullOrEmpty(accessToken) &&
-                            path.StartsWithSegments("/api/SignalRHub")
-                        )
-                        {
-                            context.Token = accessToken;
-                        }
+                //        if (
+                //            !string.IsNullOrEmpty(accessToken) &&
+                //            path.StartsWithSegments("/api/SignalRHub")
+                //        )
+                //        {
+                //            context.Token = accessToken;
+                //        }
 
-                        return Task.CompletedTask;
-                    },
-                    OnRedirectToIdentityProvider = async context =>
-                    {
-                        Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}", context.HttpContext.Connection.RemoteIpAddress);
-                        Log.Information("HttpContext.Connection.RemotePort : {RemotePort}", context.HttpContext.Connection.RemotePort);
-                        Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
-                        Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
+                //        return Task.CompletedTask;
+                //    },
+                //    OnRedirectToIdentityProvider = async context =>
+                //    {
+                //        Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}", context.HttpContext.Connection.RemoteIpAddress);
+                //        Log.Information("HttpContext.Connection.RemotePort : {RemotePort}", context.HttpContext.Connection.RemotePort);
+                //        Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
+                //        Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
 
-                        foreach (var header in context.HttpContext.Request.Headers)
-                        {
-                            Log.Information("Request Header {key} - {value}", header.Key, header.Value);
-                        }
+                //        foreach (var header in context.HttpContext.Request.Headers)
+                //        {
+                //            Log.Information("Request Header {key} - {value}", header.Key, header.Value);
+                //        }
 
-                        foreach (var header in context.HttpContext.Response.Headers)
-                        {
-                            Log.Information("Response Header {key} - {value}", header.Key, header.Value);
-                        }
-
-
-
-                        if (keyCloakSettings.UseRedirectURL)
-                        {
-                            context.ProtocolMessage.RedirectUri = keyCloakSettings.RedirectURL;
-                        }
+                //        foreach (var header in context.HttpContext.Response.Headers)
+                //        {
+                //            Log.Information("Response Header {key} - {value}", header.Key, header.Value);
+                //        }
 
 
-                        Log.Information(context.ProtocolMessage.RedirectUri);
-                        Log.Information(context.ProtocolMessage.RedirectUri);
-                        await Task.FromResult(0);
-                    }
-                };
+
+                //        if (keyCloakSettings.UseRedirectURL)
+                //        {
+                //            context.ProtocolMessage.RedirectUri = keyCloakSettings.RedirectURL;
+                //        }
+
+
+                //        Log.Information(context.ProtocolMessage.RedirectUri);
+                //        Log.Information(context.ProtocolMessage.RedirectUri);
+                //        await Task.FromResult(0);
+                //    }
+                //};
                 //options.MetadataAddress = keyCloakSettings.MetadataAddress;
                     
                 options.SaveTokens = true;
