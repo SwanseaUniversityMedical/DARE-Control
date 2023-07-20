@@ -339,6 +339,22 @@ namespace DARE_API.Controllers
             return Ok();
         }
 
+        [HttpGet("IsUserOnProject")]
+        public bool IsUserOnProject(int projectId, int userId)
+        {
+            try
+            {
+                bool isUserOnProject = _DbContext.Projects.Any(p => p.Id == projectId && p.Users.Any(u => u.Id == userId));
+                return isUserOnProject;
+            }
+
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} crash", "IsUserOnProject");
+                throw;
+            }
+        }
+
         //End
 
     }

@@ -250,5 +250,17 @@ namespace DARE_FrontEnd.Controllers
             }
             return RedirectToAction("EditProject", new { projectId = ProjectId });
         }
+
+        [HttpGet]
+        public void IsUSerOnProject(int projectId, int userId)
+        {
+            var model = new ProjectUser()
+            {
+                ProjectId = projectId,
+                UserId = userId
+            };
+            var result = _clientHelper.CallAPI<ProjectUser, ProjectUser?>("api/Project/IsUserOnProject", model);
+        }
+
     }
 }
