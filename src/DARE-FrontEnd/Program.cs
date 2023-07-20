@@ -213,6 +213,7 @@ builder.Services.AddAuthentication(options =>
                     },
 
                     
+
                     OnTicketReceived = context =>
                     {
                         Log.Information("{Function}: {ex}", "OnTicketReceived", context.ToString());
