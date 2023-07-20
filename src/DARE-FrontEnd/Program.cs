@@ -86,7 +86,7 @@ builder.Services.AddMvc().AddViewComponentsAsServices();
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
-    options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
+    options.MinimumSameSitePolicy = SameSiteMode.None;
     options.OnAppendCookie = cookieContext =>
         CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
     options.OnDeleteCookie = cookieContext =>
@@ -351,10 +351,10 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseCookiePolicy(new CookiePolicyOptions
-{
-    Secure = CookieSecurePolicy.Always
-});
+//app.UseCookiePolicy(new CookiePolicyOptions
+//{
+//    Secure = CookieSecurePolicy.Always
+//});
 app.UseAuthorization();
 
 app.MapControllerRoute(
@@ -374,7 +374,7 @@ void CheckSameSite(HttpContext httpContext, CookieOptions options)
         //configure cookie policy to omit samesite=none when request is not https
         if (!httpContext.Request.IsHttps || DisallowsSameSiteNone(userAgent))
         {
-            options.SameSite = SameSiteMode.Unspecified;
+            options.SameSite = SameSiteMode.None;
         }
     }
 }
