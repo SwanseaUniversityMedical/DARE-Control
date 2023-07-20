@@ -96,8 +96,7 @@ namespace DARE_API.Controllers
 
 
         }
-
-
+    
         [HttpPost("AddUserMembership")]
         public async Task<ProjectUser?> AddUserMembership(ProjectUser model)
         {

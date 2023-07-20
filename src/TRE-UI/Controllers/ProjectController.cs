@@ -57,14 +57,14 @@ namespace TRE_UI.Controllers
      
 
         [HttpGet]
-        public IActionResult AddUserMembership()
+        public IActionResult RequestProjectMembership()
         {
 
             var projmem = GetProjectUserModel();
             return View(projmem);
         }
 
-        private ProjectUser GetProjectUserModel()
+        private ProjectUserTre GetProjectUserModel()
         {
             var projs = _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
             var users = _dareclientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
@@ -77,7 +77,7 @@ namespace TRE_UI.Controllers
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
 
-            var projmem = new ProjectUser()
+            var projmem = new ProjectUserTre()
             {
                 ProjectItemList = projectItems,
                 UserItemList = userItems
@@ -88,17 +88,14 @@ namespace TRE_UI.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> AddUserMembership(ProjectUser model)
+        public async Task<IActionResult> RequestProjectMembership(ProjectUserTre model)
         {
-            var result =
-                await _dareclientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
-            await _treclientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
-            result = GetProjectUserModel();
+            var result =  await _treclientHelper.CallAPI<ProjectUserTre, ProjectUserTre?>("/api/Project/RequestMembership", model);
+
             return View(result);
 
 
         }
-
 
 
     }
