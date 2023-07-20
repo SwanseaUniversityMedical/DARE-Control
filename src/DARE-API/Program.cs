@@ -22,6 +22,7 @@ using BL.Rabbit;
 using EasyNetQ;
 using BL.Models;
 using BL.Services;
+using static IdentityModel.ClaimComparer;
 using EasyNetQ.Management.Client.Model;
 using Microsoft.AspNetCore.SignalR.Client;
 using System.Runtime.CompilerServices;
@@ -244,6 +245,29 @@ async void AddServices(WebApplicationBuilder builder)
     builder.Services.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v1", new OpenApiInfo { Title = environment.ApplicationName, Version = "v1" });
+
+        var securityScheme = new OpenApiSecurityScheme
+        {
+            Name = "JWT Authentication",
+            Description = "Enter JWT token.",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            Reference = new OpenApiReference
+            {
+                Id = JwtBearerDefaults.AuthenticationScheme,
+                Type = ReferenceType.SecurityScheme
+            }
+        };
+
+        c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            { securityScheme, new string[] { } }
+        });
+
+
     }
     );
 
