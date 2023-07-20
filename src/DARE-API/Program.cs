@@ -22,6 +22,11 @@ using BL.Rabbit;
 using EasyNetQ;
 using BL.Models;
 using BL.Services;
+using EasyNetQ.Management.Client.Model;
+using Microsoft.AspNetCore.SignalR.Client;
+using System.Runtime.CompilerServices;
+using Microsoft.AspNetCore.Components;
+using DARE_API.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,15 +87,21 @@ builder.Services.AddAuthentication(options =>
 })
     .AddJwtBearer(options =>
     {
+        if (keyCloakSettings.Proxy)
+        {
+            options.BackchannelHttpHandler = new HttpClientHandler
+            {
+                UseProxy = true,
+                UseDefaultCredentials = true,
+                Proxy = new WebProxy()
+                {
+                    Address = new Uri(keyCloakSettings.ProxyAddresURL),
+                    BypassList = new[] { keyCloakSettings.BypassProxy }
+                }
+            };
+        }
         options.Authority = keyCloakSettings.Authority;
-        options.Audience = keyCloakSettings.ClientId;
-
-        // URL of the Keycloak server
-        options.Authority = keyCloakSettings.Authority;
-        //// Client configured in the Keycloak
-        
-        //// Client secret shared with Keycloak
-        
+        options.Audience = keyCloakSettings.ClientId;          
         options.MetadataAddress = keyCloakSettings.MetadataAddress;
 
         options.RequireHttpsMetadata = false; // dev only
@@ -132,19 +143,6 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization(options =>
 {
 
-});
-
-// Enable CORS
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(builder =>
-    {
-        builder
-            .WithOrigins("https://localhost:7290")
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
-    });
 });
 
 var app = builder.Build();
@@ -223,14 +221,10 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
    
     builder.Services.AddScoped<IMinioService, MinioService>();
     builder.Services.AddScoped<IMinioHelper, MinioHelper>();
-    builder.Services.AddMvc().AddControllersAsServices()
+    
     //    .AddNewtonsoftJson(options =>
     //    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
     //); 
-    ;
-
-    //builder.Services.AddScoped<ICodeService, CodeService>();
-
 }
 
 
@@ -238,12 +232,13 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
 /// <summary>
 /// Add Services
 /// </summary>
-void AddServices(WebApplicationBuilder builder)
+async void AddServices(WebApplicationBuilder builder)
 {
     builder.Services.AddHttpClient();
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSignalR();
+    builder.Services.Configure<TREAPISettings>(configuration.GetSection("TREAPI"));
 
     //TODO
     builder.Services.AddSwaggerGen(c =>

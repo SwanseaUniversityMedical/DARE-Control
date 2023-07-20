@@ -27,7 +27,7 @@ namespace BL.Models.Services
                     var tokenS = handler.ReadToken(accessToken) as JwtSecurityToken;
                     var tokenExpiryDate = tokenS.ValidTo;
                     //// If there is no valid `exp` claim then `ValidTo` returns DateTime.MinValue
-                    if (tokenExpiryDate == DateTime.MinValue) throw new Exception("Could not get exp claim from token");
+                    //if (tokenExpiryDate == DateTime.MinValue) throw new Exception("Could not get exp claim from token");
                     if (tokenExpiryDate < DateTime.UtcNow)
                     {
        

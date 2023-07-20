@@ -21,6 +21,11 @@ using BL.Services;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using Microsoft.AspNetCore.HttpOverrides;
+using Duende.AccessTokenManagement;
+using Duende.AccessTokenManagement.OpenIdConnect;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -162,22 +167,7 @@ builder.Services.AddAuthentication(options =>
                 options.ClientId = keyCloakSettings.ClientId;
                 //// Client secret shared with Keycloak
                 options.ClientSecret = keyCloakSettings.ClientSecret;
-                options.MetadataAddress = keyCloakSettings.MetadataAddress;
-                    
-                options.SaveTokens = true;
 
-                options.ResponseType = OpenIdConnectResponseType.Code; //Configuration["Oidc:ResponseType"];
-                                                                       // For testing we disable https (should be true for production)
-                options.RemoteSignOutPath = keyCloakSettings.RemoteSignOutPath;
-                options.SignedOutRedirectUri = keyCloakSettings.SignedOutRedirectUri;
-                options.RequireHttpsMetadata = false;
-                options.GetClaimsFromUserInfoEndpoint = true;
-                //options.Scope.Add("openid");
-                //options.Scope.Add("profile");
-                //options.Scope.Add("email");
-                //options.Scope.Add("claims");
-                //options.SaveTokens = true;
-                options.ResponseType = OpenIdConnectResponseType.Code;
                 options.Events = new OpenIdConnectEvents
                 {
                     OnRemoteFailure = context =>
@@ -215,38 +205,75 @@ builder.Services.AddAuthentication(options =>
                     },
                     OnRedirectToIdentityProvider = async context =>
                     {
-                        // Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}", context.HttpContext.Connection.RemoteIpAddress);
-                        //Log.Information("HttpContext.Connection.RemotePort : {RemotePort}", context.HttpContext.Connection.RemotePort);
-                        // Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
-                        // Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
+                        Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}", context.HttpContext.Connection.RemoteIpAddress);
+                        Log.Information("HttpContext.Connection.RemotePort : {RemotePort}", context.HttpContext.Connection.RemotePort);
+                        Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
+                        Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
 
                         foreach (var header in context.HttpContext.Request.Headers)
                         {
-                            // Log.Information("Request Header {key} - {value}", header.Key, header.Value);
+                            Log.Information("Request Header {key} - {value}", header.Key, header.Value);
                         }
 
                         foreach (var header in context.HttpContext.Response.Headers)
                         {
-                            // Log.Information("Response Header {key} - {value}", header.Key, header.Value);
+                            Log.Information("Response Header {key} - {value}", header.Key, header.Value);
                         }
+
+
 
                         if (keyCloakSettings.UseRedirectURL)
                         {
                             context.ProtocolMessage.RedirectUri = keyCloakSettings.RedirectURL;
                         }
+
+
                         Log.Information(context.ProtocolMessage.RedirectUri);
-                        //context.ProtocolMessage.RedirectUri = Configuration["Oidc:RedirectUri"];
-                        //Log.Information( context.ProtocolMessage.RedirectUri);
-                        //Log.Information( context.ProtocolMessage.RedirectUri);
+                        Log.Information(context.ProtocolMessage.RedirectUri);
                         await Task.FromResult(0);
                     }
                 };
+                //options.MetadataAddress = keyCloakSettings.MetadataAddress;
+                    
+                options.SaveTokens = true;
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
+                options.ResponseType = OpenIdConnectResponseType.CodeToken; //Configuration["Oidc:ResponseType"];
+                                                                       // For testing we disable https (should be true for production)
+                options.RemoteSignOutPath = keyCloakSettings.RemoteSignOutPath;
+                options.SignedOutRedirectUri = keyCloakSettings.SignedOutRedirectUri;
+                options.RequireHttpsMetadata = false;
+                options.GetClaimsFromUserInfoEndpoint = true;
+                //options.Scope.Add("openid");
+                //options.Scope.Add("profile");
+                //options.Scope.Add("email");
+                //options.Scope.Add("claims");
+                //options.SaveTokens = true;
+                options.ResponseType = OpenIdConnectResponseType.Code;
+               
+
+                if (string.IsNullOrEmpty(keyCloakSettings.MetadataAddress) == false)
+                {
+                    options.MetadataAddress = keyCloakSettings.MetadataAddress;
+                }
 
                 options.NonceCookie.SameSite = SameSiteMode.None;
                 options.CorrelationCookie.SameSite = SameSiteMode.None;
+
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    NameClaimType = "name",
+                    RoleClaimType = ClaimTypes.Role,
+                    ValidateIssuer = true
+                };
             });
 
 var app = builder.Build();
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto
+});
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
