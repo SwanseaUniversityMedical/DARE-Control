@@ -41,6 +41,7 @@ namespace DARE_API.Controllers
             return View();
         }
 
+        [HttpGet("StartConnection")]
         public IActionResult StartConnection()
         {
 
