@@ -63,8 +63,6 @@ var keyCloakSettings = new KeyCloakSettings();
 configuration.Bind(nameof(keyCloakSettings), keyCloakSettings);
 builder.Services.AddSingleton(keyCloakSettings);
 
-
-
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
 
