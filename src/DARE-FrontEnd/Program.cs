@@ -168,7 +168,6 @@ builder.Services.AddAuthentication(options =>
 
                 options.Events = new OpenIdConnectEvents
                 {
-
                     OnAccessDenied = context =>
                     {
                         Log.Error("{Function}: {ex}", "OnAccessDenied", context.AccessDeniedPath);
