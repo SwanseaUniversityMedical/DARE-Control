@@ -63,8 +63,6 @@ var keyCloakSettings = new KeyCloakSettings();
 configuration.Bind(nameof(keyCloakSettings), keyCloakSettings);
 builder.Services.AddSingleton(keyCloakSettings);
 
-
-
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
 
@@ -88,7 +86,7 @@ builder.Services.AddMvc().AddViewComponentsAsServices();
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
-    options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
+    options.MinimumSameSitePolicy = SameSiteMode.None;
     options.OnAppendCookie = cookieContext =>
         CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
     options.OnDeleteCookie = cookieContext =>
@@ -121,12 +119,25 @@ builder.Services.AddAuthorization(options =>
                     && claim.Value.Contains("dare-control-user"))));
 });
 
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
+
+
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    //options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    //options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
 })
              //.AddCookie(options => options.EventsType = typeof(CustomCookieEvent))
@@ -170,17 +181,31 @@ builder.Services.AddAuthentication(options =>
 
                 options.Events = new OpenIdConnectEvents
                 {
+                    OnAccessDenied = context =>
+                    {
+                        Log.Error("{Function}: {ex}", "OnAccessDenied", context.AccessDeniedPath);
+                        context.HandleResponse();
+                        return context.Response.CompleteAsync();
+
+                    },
+                    OnAuthenticationFailed = context =>
+                    {
+                        Log.Error("{Function}: {ex}", "OnAuthFailed", context.Exception.Message);
+                        context.HandleResponse();
+                        return context.Response.CompleteAsync();
+                    },
+
                     OnRemoteFailure = context =>
                     {
-                        //Log.Error("OnRemoteFailure: {ex}", context.Failure);
+                        Log.Error("OnRemoteFailure: {ex}", context.Failure);
                         if (context.Failure.Message.Contains("Correlation failed"))
                         {
-                            //Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", keyCloakSettings.TokenExpiredAddress);
+                            Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", keyCloakSettings.TokenExpiredAddress);
                             context.Response.Redirect(keyCloakSettings.TokenExpiredAddress);
                         }
                         else
                         {
-                            //Log.Warning("call /Error/500");
+                            Log.Warning("call /Error/500");
                             context.Response.Redirect("/Error/500");
                         }
 
@@ -234,28 +259,21 @@ builder.Services.AddAuthentication(options =>
                     }
                 };
                 //options.MetadataAddress = keyCloakSettings.MetadataAddress;
-                    
+
+                options.RequireHttpsMetadata = false;
                 options.SaveTokens = true;
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
-                options.ResponseType = OpenIdConnectResponseType.CodeToken; //Configuration["Oidc:ResponseType"];
-                                                                       // For testing we disable https (should be true for production)
-                options.RemoteSignOutPath = keyCloakSettings.RemoteSignOutPath;
-                options.SignedOutRedirectUri = keyCloakSettings.SignedOutRedirectUri;
-                options.RequireHttpsMetadata = false;
                 options.GetClaimsFromUserInfoEndpoint = true;
-                //options.Scope.Add("openid");
-                //options.Scope.Add("profile");
-                //options.Scope.Add("email");
-                //options.Scope.Add("claims");
-                //options.SaveTokens = true;
-                options.ResponseType = OpenIdConnectResponseType.Code;
-               
 
                 if (string.IsNullOrEmpty(keyCloakSettings.MetadataAddress) == false)
                 {
                     options.MetadataAddress = keyCloakSettings.MetadataAddress;
                 }
+                
+
+                options.ResponseType = OpenIdConnectResponseType.Code;
+
 
                 options.NonceCookie.SameSite = SameSiteMode.None;
                 options.CorrelationCookie.SameSite = SameSiteMode.None;
@@ -267,6 +285,20 @@ builder.Services.AddAuthentication(options =>
                     ValidateIssuer = true
                 };
             });
+
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins(configuration["DareAPISettings:Address"])
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        });
+});
 
 var app = builder.Build();
 
@@ -299,13 +331,19 @@ Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHost
 }
 
 
-app.UseHttpsRedirection();
+//removed by simon for testing
+//app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    Secure = CookieSecurePolicy.Always
+});
 app.UseAuthorization();
 
+app.UseCors();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
@@ -323,7 +361,7 @@ void CheckSameSite(HttpContext httpContext, CookieOptions options)
         //configure cookie policy to omit samesite=none when request is not https
         if (!httpContext.Request.IsHttps || DisallowsSameSiteNone(userAgent))
         {
-            options.SameSite = SameSiteMode.Unspecified;
+            options.SameSite = SameSiteMode.None;
         }
     }
 }
