@@ -335,7 +335,9 @@ Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHost
 
 }
 
+//removed
 //app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 
 app.UseRouting();
