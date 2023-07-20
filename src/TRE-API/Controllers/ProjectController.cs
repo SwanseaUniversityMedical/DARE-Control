@@ -22,16 +22,12 @@ namespace TRE_API.Controllers
     {
 
         private readonly ApplicationDbContext _DbContext;
-     
+
         public ProjectController(ApplicationDbContext applicationDbContext)
         {
 
             _DbContext = applicationDbContext;
-     
-
         }
-
-
 
         [HttpPost("MapUserToProject")]
         public async Task<ProjectUser?> MapUserToProject(ProjectUser model)
@@ -70,10 +66,6 @@ namespace TRE_API.Controllers
 
         }
 
-
-
-
-
         [HttpGet("GetAllProjectsForApproval")]
         public List<ProjectApproval> GetAllProjectsForApproval()
         {
@@ -96,7 +88,6 @@ namespace TRE_API.Controllers
 
         }
 
-
         [HttpGet("ListAllProjects")]
         public List<Project> ListAllProjects()
         {
@@ -118,7 +109,5 @@ namespace TRE_API.Controllers
 
 
         }
-
-
     }
 }
