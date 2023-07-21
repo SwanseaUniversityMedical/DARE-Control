@@ -18,6 +18,7 @@ namespace BL.Controllers
 {
     //[Authorize]
     [ApiController]
+    [Authorize(Roles = "dare-control-admin")]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
@@ -64,7 +65,7 @@ namespace BL.Controllers
         }
 
 
-
+        [AllowAnonymous]
         [HttpGet("GetUser")]
         public User? GetUser(int userId)
         {
@@ -88,7 +89,7 @@ namespace BL.Controllers
         }
 
 
-
+        [AllowAnonymous]
         [HttpGet("GetAllUsers")]
         public List<User> GetAllUsers()
         {

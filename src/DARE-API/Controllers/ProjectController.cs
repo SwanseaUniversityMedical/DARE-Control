@@ -19,6 +19,7 @@ using BL.Services;
 namespace DARE_API.Controllers
 {
     [Authorize]
+    [Authorize(Roles = "dare-control-admin")]
     [ApiController]
     [Route("api/[controller]")]
 
@@ -257,7 +258,7 @@ namespace DARE_API.Controllers
 
         }
 
-
+        [AllowAnonymous]
         [HttpGet("GetProject")]
         public Project? GetProject(int projectId)
         {
@@ -282,7 +283,7 @@ namespace DARE_API.Controllers
         }
 
         [HttpGet("GetAllProjects")]
-        [Authorize(Roles = "dare-control-admin")]
+        [AllowAnonymous]
         public List<Project> GetAllProjects()
         {
             try
@@ -308,7 +309,7 @@ namespace DARE_API.Controllers
         }
 
         [HttpGet("GetEndPointsInProject")]
-
+        [AllowAnonymous]
         public List<Endpoint> GetEndPointsInProject(int projectId)
         {
             List<Endpoint> endpoints = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Endpoints).ToList();
@@ -339,6 +340,7 @@ namespace DARE_API.Controllers
             return Ok();
         }
 
+        [AllowAnonymous]
         [HttpGet("IsUserOnProject")]
         public bool IsUserOnProject(int projectId, int userId)
         {

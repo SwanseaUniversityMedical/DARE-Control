@@ -4,10 +4,13 @@ using BL.Services;
 
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Data;
+using Microsoft.AspNetCore.Authorization;
 using Endpoint = BL.Models.Endpoint;
 
 namespace DARE_FrontEnd.Controllers
 {
+    [Authorize(Roles = "dare-control-admin")]
     public class EndpointController : Controller
     {
 
@@ -50,7 +53,7 @@ namespace DARE_FrontEnd.Controllers
 
         }
 
-
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult GetAllEndpoints()
         {
@@ -59,7 +62,7 @@ namespace DARE_FrontEnd.Controllers
 
             return View(test);
         }
-
+        [AllowAnonymous]
 
         [HttpGet]
         public async Task<IActionResult> GetEndpoints(int projectId)
@@ -67,7 +70,7 @@ namespace DARE_FrontEnd.Controllers
             var endpointsList = _clientHelper.CallAPIWithoutModel<List<Endpoint>>("/api/Endpoint/GetEndPointsInProject/{projectId}").Result;
             return View(endpointsList);
         }
-
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> EndpointFormSubmission([FromBody] FormData submissionData)
         {
@@ -80,6 +83,7 @@ namespace DARE_FrontEnd.Controllers
             return Ok(result);
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult GetAnEndpoint(int id)
         {

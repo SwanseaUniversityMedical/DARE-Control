@@ -11,6 +11,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DARE_FrontEnd.Controllers
 {
+    [Authorize(Roles = "dare-control-admin")]
     public class TestingController : Controller
     {
 

@@ -16,6 +16,7 @@ namespace DARE_API.Controllers
 {
 
     [Route("api/[controller]")]
+    [Authorize(Roles = "dare-control-admin,dare-tre")]
     [ApiController]
     
     
@@ -84,6 +85,7 @@ namespace DARE_API.Controllers
             return StatusCode(200, new APIReturn(){ReturnType = ReturnType.voidReturn});
         }
 
+        [AllowAnonymous]
         [HttpGet("GetAllSubmissions")]
         public List<Submission> GetAllSubmissions()
         {

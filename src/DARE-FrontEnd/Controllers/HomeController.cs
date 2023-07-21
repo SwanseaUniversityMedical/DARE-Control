@@ -30,7 +30,7 @@ using System.Xml.Linq;
 namespace DARE_FrontEnd.Controllers
 {
     
-    [Authorize]
+    [AllowAnonymous]
     public class HomeController : Controller
     {
         

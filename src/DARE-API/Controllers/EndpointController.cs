@@ -94,7 +94,7 @@ namespace DARE_API.Controllers
         }
 
         [HttpGet("GetEndPointsInProject/{projectId}")]
-
+        [AllowAnonymous]
         public List<Endpoint> GetEndPointsInProject(int projectId)
         {
             try

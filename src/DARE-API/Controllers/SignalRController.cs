@@ -1,12 +1,15 @@
 ﻿using BL.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Data;
 
 namespace DARE_API.Controllers
 {
     [ApiController]
+    [Authorize(Roles = "dare-tre,dare-control-admin")]
     [Route("api/[controller]")]
     public class SignalRController : Controller
     {
