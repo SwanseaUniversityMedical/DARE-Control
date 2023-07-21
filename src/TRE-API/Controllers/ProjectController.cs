@@ -14,7 +14,7 @@ using Serilog;
 
 namespace TRE_API.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [ApiController]
     [Route("api/[controller]")]
 
@@ -28,43 +28,42 @@ namespace TRE_API.Controllers
 
             _DbContext = applicationDbContext;
         }
-
-        [HttpPost("MapUserToProject")]
-        public async Task<ProjectUser?> MapUserToProject(ProjectUser model)
+        [HttpPost("RequestMembership")]
+        public async Task<ProjectApproval?> RequestMembership(ProjectUserTre model)
         {
             try
             {
-                var user = _DbContext.Users.FirstOrDefault(x => x.Id == model.UserId);
-                if (user == null)
 
-                {
-                    Log.Error("{Function} Invalid user id {UserId}", "MapUserToProject", model.UserId);
-                    return null;
-                }
-
-                var project = _DbContext.Projects.FirstOrDefault(x => x.Id == model.ProjectId);
               
+                var proj = new ProjectApproval();
 
-                if (project.Users.Any(x => x == user))
-                {
-                    Log.Error("{Function} User {UserName} is already on {ProjectName}", "MapUserToProject", user.Name, project.Name);
-                    return null;
-                }
+                //2023-06-01 14:30:00 use this as the datetime
+                proj.ProjectId = model.ProjectId;
+                proj.UserId = model.UserId;
+                    proj.LocalProjectName =model.LocalProjectName;
 
-                project.Users.Add(user);
+              
+               
+
+
+                _DbContext.ProjectApproval.Add(proj);
 
                 await _DbContext.SaveChangesAsync();
-                Log.Information("{Function} Added User {UserName} to {ProjectName}", "MapUserToProject", user.Name, project.Name);
-                return model;
+
+                Log.Information("{Function} Membership Request added successfully", "MembershipRequest");
+                return proj;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} Crash", "AddUserToProject");
+                Log.Error(ex, "{Function} Crash", "RequestMembership");
+                var errorModel = new ProjectApproval();
+                return errorModel;
                 throw;
             }
 
 
         }
+       
 
         [HttpGet("GetAllProjectsForApproval")]
         public List<ProjectApproval> GetAllProjectsForApproval()
@@ -88,26 +87,6 @@ namespace TRE_API.Controllers
 
         }
 
-        [HttpGet("ListAllProjects")]
-        public List<Project> ListAllProjects()
-        {
-            try
-            {
-
-                var allProjects = _DbContext.Projects
-                    .ToList();
-
-
-                Log.Information("{Function} Projects retrieved successfully", "ListAllProjects");
-                return allProjects;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crashed", "ListAllProjects");
-                throw;
-            }
-
-
-        }
+       
     }
 }

@@ -1,0 +1,87 @@
+﻿@model BL.Models.DTO.ProjectUserTre
+<style>
+    .box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: gray;
+        border: 1px solid #ccc;
+        border-radius: 50%;
+        padding: 10px;
+    }
+
+    .space {
+        margin-right: 2em;
+    }
+</style>
+<div class="row">
+    <div class="col-sm-12">
+
+        <div class="container bg-white p-5">
+
+            <div class="tab-content" id="myTabContent">
+                <h1>Request Membership</h1>
+
+                <form method="post" asp-action="RequestProjectMembership">
+                    <div asp-validation-summary="All"></div>
+                    <label> User Name : </label> <div class="form-group">
+
+
+
+                        <span asp-validation-for="UserId" class="text-danger"></span>
+
+                        <select asp-for="UserId" asp-items="@Model.UserItemList" class="form-control form-control-md">
+                            <option>--Please select your user name--</option>
+                        </select>
+
+
+                    </div>
+                    <div>
+                    </div>
+
+
+                    <div>
+                    </div> <label> Project Name : </label>
+                    <div class="form-group">
+
+
+
+                        <span asp-validation-for="ProjectId" class="text-danger"></span>
+
+                        <select asp-for="ProjectId" asp-items="@Model.ProjectItemList" class="form-control form-control-md">
+                            <option>--Please select project name--</option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+                        <label> Local Project Name : </label>
+                        <input asp-for="LocalProjectName" class="form-control form-control-md" />
+                        <span asp-validation-for="LocalProjectName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mt-5 d-flex align-items-center">
+                        <button type="submit" onclick="fireSweetAlert()" class="btn btn-md btn-primary mr-2">Save</button>
+                        <a asp-controller="Project" asp-action="RequestProjectMembership" class="btn btn-link">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<script>
+
+    function fireSweetAlert() {
+        Swal.fire(
+            'Success!',
+            'Project Sent for Approval!',
+            'success'
+        )
+    }
+
+</script>

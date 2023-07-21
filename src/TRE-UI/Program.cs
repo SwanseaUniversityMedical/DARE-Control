@@ -21,6 +21,7 @@ using System.IdentityModel.Tokens.Jwt;
 
 
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 IdentityModelEventSource.ShowPII = true;
@@ -334,7 +335,9 @@ Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHost
 
 }
 
-app.UseHttpsRedirection();
+//removed
+//app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 
 app.UseRouting();
