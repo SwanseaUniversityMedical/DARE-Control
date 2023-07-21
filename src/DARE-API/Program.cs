@@ -28,6 +28,8 @@ using Microsoft.AspNetCore.SignalR.Client;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Components;
 using DARE_API.Controllers;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +56,14 @@ AddServices(builder);
 
 //Add Dependancies
 AddDependencies(builder, configuration);
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 builder.Services.Configure<RabbitMQSetting>(configuration.GetSection("RabbitMQ"));
 builder.Services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);
@@ -80,7 +90,7 @@ var TVP = new TokenValidationParameters
     ValidateIssuer = true,
     ValidateLifetime = true
 };
-
+builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformer>();
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -110,34 +120,7 @@ builder.Services.AddAuthentication(options =>
 
         options.TokenValidationParameters = TVP;
 
-        //var proxy = new WebProxy { Address = new Uri("http://192.168.10.15:8080") };
-
-        //HttpClient.DefaultProxy = proxy;
-
-        //options.BackchannelHttpHandler = new HttpClientHandler
-        //{
-        //    UseProxy = true,
-        //    UseDefaultCredentials = true,
-        //    Proxy = proxy
-        //};
-
-        //options.Events = new JwtBearerEvents
-        //{
-
-        //    OnAuthenticationFailed = f =>
-        //    {
-        //        f.NoResult();
-        //        f.Response.StatusCode = 401;
-        //        f.Response.ContentType = "text/plain";
-
-
-        //        f.Response.Redirect($"https://localhost:5001/Account/LoginAfterTokenExpired", true);
-
-        //        //return f.Response.WriteAsync(f.Exception.ToString());
-        //        return f.Response.CompleteAsync();
-        //    },
-        //    OnChallenge = f => Task.CompletedTask
-        //};
+       
     });
 
 // - authorize here
@@ -147,6 +130,10 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto
+});
 // --- Session Token
 
 // Configure the HTTP request pipeline.
@@ -187,7 +174,9 @@ using (var scope = app.Services.CreateScope())
 //app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
+//app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

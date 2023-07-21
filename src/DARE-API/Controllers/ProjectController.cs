@@ -282,6 +282,7 @@ namespace DARE_API.Controllers
         }
 
         [HttpGet("GetAllProjects")]
+        [Authorize(Roles = "dare-control-admin")]
         public List<Project> GetAllProjects()
         {
             try

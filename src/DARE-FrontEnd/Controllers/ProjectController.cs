@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using static System.Net.Mime.MediaTypeNames;
 using Endpoint = BL.Models.Endpoint;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -35,6 +37,7 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "dare-control-admin")]
         public IActionResult GetAllProjects()
         {
 

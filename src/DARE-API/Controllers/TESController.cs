@@ -19,22 +19,18 @@ using System.Drawing;
 using BL.Models.Tes;
 using BL.Rabbit;
 using EasyNetQ;
+using System.Data;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace DARE_API.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize(Roles = "dare-control-admin,dare-control-submitter,dare-tre-api")]
     [ApiController]
     /// <summary>
     /// API endpoints for <see cref="TesTask"/>s.
     /// </summary>
-
-
-
-
-
-
-
     public class TaskServiceApiController : ControllerBase
     {
 
@@ -354,6 +350,7 @@ namespace DARE_API.Controllers
         /// GetServiceInfo provides information about the service, such as storage details, resource availability, and  other documentation.
         /// </summary>
         /// <response code="200"></response>
+        [AllowAnonymous]
         [HttpGet]
         [Route("/v1/service-info")]
         [ValidateModelState]
@@ -382,6 +379,7 @@ namespace DARE_API.Controllers
         /// </summary>
         /// <response code="200"></response>
         [HttpGet]
+        [AllowAnonymous]
         [Route("/v1/get_test_tes")]
         [ValidateModelState]
         [SwaggerOperation("GetTestTes")]
@@ -444,6 +442,7 @@ namespace DARE_API.Controllers
         /// <param name="cancellationToken">A<see cref="CancellationToken"/> for controlling the lifetime of the asynchronous operation.</param>
         /// <response code="200"></response>
         [HttpGet]
+        [AllowAnonymous]
         [Route("/v1/tasks/{id}")]
         [ValidateModelState]
         [SwaggerOperation("GetTask")]
@@ -473,6 +472,7 @@ namespace DARE_API.Controllers
         /// <param name="cancellationToken">A<see cref="CancellationToken"/> for controlling the lifetime of the asynchronous operation.</param>
         /// <response code="200"></response>
         [HttpGet]
+        [AllowAnonymous]
         [Route("/v1/tasks")]
         [ValidateModelState]
         [SwaggerOperation("ListTasks")]

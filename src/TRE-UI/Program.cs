@@ -17,10 +17,10 @@ using BL.Models.DTO;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
-
-
-
-
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,7 +57,7 @@ builder.Services.AddMvc().AddViewComponentsAsServices();
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
-    options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
+    options.MinimumSameSitePolicy = SameSiteMode.None;
     options.OnAppendCookie = cookieContext =>
         CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
     options.OnDeleteCookie = cookieContext =>
@@ -90,13 +90,38 @@ builder.Services.AddAuthorization(options =>
                     && claim.Value.Contains("dare-control-user"))));
 });
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+builder.Services.AddCors(options =>
+{
+   
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins(configuration["TREAPI:Address"])
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        });
+});
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
+
+builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformer>();
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+
     options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
 })
-             //.AddCookie(options => options.EventsType = typeof(CustomCookieEvent))
+             
              .AddCookie(o =>
              {
                  o.SessionStore = new MemoryCacheTicketStore();
@@ -118,16 +143,7 @@ builder.Services.AddAuthentication(options =>
                     };
                 }
 
-                //var proxy = new WebProxy { Address = new Uri("http://192.168.10.15:8080") };
-
-                //HttpClient.DefaultProxy = proxy;
-
-                //options.BackchannelHttpHandler = new HttpClientHandler
-                //{
-                //    UseProxy = true,
-                //    UseDefaultCredentials = true,
-                //    Proxy = proxy
-                //};
+                
                 // URL of the Keycloak server
                 options.Authority = keyCloakSettings.Authority;
                 //// Client configured in the Keycloak
@@ -144,25 +160,38 @@ builder.Services.AddAuthentication(options =>
                 options.SignedOutRedirectUri = keyCloakSettings.SignedOutRedirectUri;
                 options.RequireHttpsMetadata = false;
                 options.GetClaimsFromUserInfoEndpoint = true;
-                //options.Scope.Add("openid");
-                //options.Scope.Add("profile");
-                //options.Scope.Add("email");
-                //options.Scope.Add("claims");
-                //options.SaveTokens = true;
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
+                options.Scope.Add("email");
+                
+                options.SaveTokens = true;
                 options.ResponseType = OpenIdConnectResponseType.Code;
                 options.Events = new OpenIdConnectEvents
                 {
+                    OnAccessDenied = context =>
+                    {
+                        Log.Error("{Function}: {ex}", "OnAccessDenied", context.AccessDeniedPath);
+                        context.HandleResponse();
+                        return context.Response.CompleteAsync();
+
+                    },
+                    OnAuthenticationFailed = context =>
+                    {
+                        Log.Error("{Function}: {ex}", "OnAuthFailed", context.Exception.Message);
+                        context.HandleResponse();
+                        return context.Response.CompleteAsync();
+                    },
                     OnRemoteFailure = context =>
                     {
-                        //Log.Error("OnRemoteFailure: {ex}", context.Failure);
+                        Log.Error("OnRemoteFailure: {ex}", context.Failure);
                         if (context.Failure.Message.Contains("Correlation failed"))
                         {
-                            //Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", keyCloakSettings.TokenExpiredAddress);
+                            Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", keyCloakSettings.TokenExpiredAddress);
                             context.Response.Redirect(keyCloakSettings.TokenExpiredAddress);
                         }
                         else
                         {
-                            //Log.Warning("call /Error/500");
+                            Log.Warning("call /Error/500");
                             context.Response.Redirect("/Error/500");
                         }
 
@@ -187,19 +216,19 @@ builder.Services.AddAuthentication(options =>
                     },
                     OnRedirectToIdentityProvider = async context =>
                     {
-                        // Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}", context.HttpContext.Connection.RemoteIpAddress);
-                        //Log.Information("HttpContext.Connection.RemotePort : {RemotePort}", context.HttpContext.Connection.RemotePort);
-                        // Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
-                        // Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
+                        Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}", context.HttpContext.Connection.RemoteIpAddress);
+                        Log.Information("HttpContext.Connection.RemotePort : {RemotePort}", context.HttpContext.Connection.RemotePort);
+                        Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
+                        Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
 
                         foreach (var header in context.HttpContext.Request.Headers)
                         {
-                            // Log.Information("Request Header {key} - {value}", header.Key, header.Value);
+                             Log.Information("Request Header {key} - {value}", header.Key, header.Value);
                         }
 
                         foreach (var header in context.HttpContext.Response.Headers)
                         {
-                            // Log.Information("Response Header {key} - {value}", header.Key, header.Value);
+                             Log.Information("Response Header {key} - {value}", header.Key, header.Value);
                         }
 
                         if (keyCloakSettings.UseRedirectURL)
@@ -207,107 +236,27 @@ builder.Services.AddAuthentication(options =>
                             context.ProtocolMessage.RedirectUri = keyCloakSettings.RedirectURL;
                         }
                         Log.Information(context.ProtocolMessage.RedirectUri);
-                        //context.ProtocolMessage.RedirectUri = Configuration["Oidc:RedirectUri"];
-                        //Log.Information( context.ProtocolMessage.RedirectUri);
-                        //Log.Information( context.ProtocolMessage.RedirectUri);
+                        
                         await Task.FromResult(0);
                     }
                 };
 
                 options.NonceCookie.SameSite = SameSiteMode.None;
                 options.CorrelationCookie.SameSite = SameSiteMode.None;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    NameClaimType = "name",
+                    RoleClaimType = ClaimTypes.Role,
+                    ValidateIssuer = true
+                };
             });
-//builder.Services.AddAuthentication(options =>
-//{
-//    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-//    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-//    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-//})
-//            .AddCookie(options => options.EventsType = typeof(CustomCookieEvent))
-//            .AddOpenIdConnect(options =>
-//            {                
-//                // URL of the Keycloak server
-//                options.Authority = keyCloakSettings.Authority;
-//                //// Client configured in the Keycloak
-//                options.ClientId = keyCloakSettings.ClientId;
-//                //// Client secret shared with Keycloak
-//                options.ClientSecret = keyCloakSettings.ClientSecret;
-//                options.MetadataAddress = keyCloakSettings.MetadataAddress;
 
-//                options.SaveTokens = true;
-
-//                options.ResponseType = OpenIdConnectResponseType.Code; //Configuration["Oidc:ResponseType"];
-//                                                                       // For testing we disable https (should be true for production)
-//                options.RemoteSignOutPath = keyCloakSettings.RemoteSignOutPath;
-//                options.SignedOutRedirectUri = keyCloakSettings.SignedOutRedirectUri;
-//                options.RequireHttpsMetadata = false;
-//                options.GetClaimsFromUserInfoEndpoint = true;
-//                //options.Scope.Add("openid");
-//                //options.Scope.Add("profile");
-//                //options.Scope.Add("email");
-//                //options.Scope.Add("claims");
-//                //options.SaveTokens = true;
-//                options.ResponseType = OpenIdConnectResponseType.Code;
-//                options.Events = new OpenIdConnectEvents
-//                {
-//                    OnRemoteFailure = context =>
-//                    {
-//                        //Log.Error("OnRemoteFailure: {ex}", context.Failure);
-//                        if (context.Failure.Message.Contains("Correlation failed"))
-//                        {
-//                            //Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", keyCloakSettings.TokenExpiredAddress);
-//                            context.Response.Redirect(keyCloakSettings.TokenExpiredAddress);
-//                        }
-//                        else
-//                        {
-//                            //Log.Warning("call /Error/500");
-//                            context.Response.Redirect("/Error/500");
-//                        }
-
-//                        context.HandleResponse();
-
-//                        return context.Response.CompleteAsync();
-//                    },
-//                    OnMessageReceived = context =>
-//                    {
-//                        string accessToken = context.Request.Query["access_token"];
-//                        PathString path = context.HttpContext.Request.Path;
-
-//                        if (
-//                            !string.IsNullOrEmpty(accessToken) &&
-//                            path.StartsWithSegments("/api/SignalRHub")
-//                        )
-//                        {
-//                            context.Token = accessToken;
-//                        }
-
-//                        return Task.CompletedTask;
-//                    },
-//                    OnRedirectToIdentityProvider = async context =>
-//                    {               
-//                        foreach (var header in context.HttpContext.Request.Headers)
-//                        {
-//                            // Log.Information("Request Header {key} - {value}", header.Key, header.Value);
-//                        }
-
-//                        foreach (var header in context.HttpContext.Response.Headers)
-//                        {
-//                            // Log.Information("Response Header {key} - {value}", header.Key, header.Value);
-//                        }
-
-
-//                        //context.ProtocolMessage.RedirectUri = Configuration["Oidc:RedirectUri"];
-//                        //Log.Information( context.ProtocolMessage.RedirectUri);
-//                        //Log.Information( context.ProtocolMessage.RedirectUri);
-//                        await Task.FromResult(0);
-//                    }
-//                };
-
-//                options.NonceCookie.SameSite = SameSiteMode.None;
-//                options.CorrelationCookie.SameSite = SameSiteMode.None;
-//            });
 
 var app = builder.Build();
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto
+});
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -339,15 +288,19 @@ Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHost
 //app.UseHttpsRedirection();
 
 app.UseStaticFiles();
-
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    Secure = CookieSecurePolicy.Always
+});
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
+app.UseCors();
 app.Run();
 
 #region SameSite Cookie Issue - https://community.auth0.com/t/correlation-failed-unknown-location-error-on-chrome-but-not-in-safari/40013/7
@@ -360,7 +313,7 @@ void CheckSameSite(HttpContext httpContext, CookieOptions options)
         //configure cookie policy to omit samesite=none when request is not https
         if (!httpContext.Request.IsHttps || DisallowsSameSiteNone(userAgent))
         {
-            options.SameSite = SameSiteMode.Unspecified;
+            options.SameSite = SameSiteMode.None;
         }
     }
 }

@@ -19,6 +19,9 @@ using Microsoft.Extensions.Configuration;
 using System;
 using Microsoft.AspNetCore.Http.Connections;
 using TRE_API.Services.SignalR;
+using BL.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +61,16 @@ var TVP = new TokenValidationParameters
     ValidateIssuer = true,
     ValidateLifetime = true
 };
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
+builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformer>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -68,7 +81,19 @@ builder.Services.AddAuthentication(options =>
     {
         options.Authority = keyCloakSettings.Authority;
         options.Audience = keyCloakSettings.ClientId;
-
+        if (keyCloakSettings.Proxy)
+        {
+            options.BackchannelHttpHandler = new HttpClientHandler
+            {
+                UseProxy = true,
+                UseDefaultCredentials = true,
+                Proxy = new WebProxy()
+                {
+                    Address = new Uri(keyCloakSettings.ProxyAddresURL),
+                    BypassList = new[] { keyCloakSettings.BypassProxy }
+                }
+            };
+        }
         // URL of the Keycloak server
         options.Authority = keyCloakSettings.Authority;
         //// Client configured in the Keycloak
@@ -102,9 +127,14 @@ builder.Services.AddCors(options =>
                           .AllowAnyHeader()
                           .AllowCredentials();
                       });
+    
 });
 
 var app = builder.Build();
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto
+});
 // --- Session Token
 
 // Configure the HTTP request pipeline.
@@ -145,6 +175,12 @@ using (var scope = app.Services.CreateScope())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    Secure = CookieSecurePolicy.Always
+});
+
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",

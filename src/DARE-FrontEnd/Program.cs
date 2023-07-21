@@ -26,6 +26,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.HttpOverrides;
 using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
+using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -93,6 +94,8 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
         CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
 });
 
+
+
 builder.Services.AddAuthorization(options =>
 {
     //options.AddPolicy("admin", policy =>
@@ -132,15 +135,14 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-
+builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformer>();
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    //options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    //options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    
     options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
 })
-             //.AddCookie(options => options.EventsType = typeof(CustomCookieEvent))
+             
              .AddCookie(o =>
              {
                  o.SessionStore = new MemoryCacheTicketStore();
@@ -162,16 +164,7 @@ builder.Services.AddAuthentication(options =>
                     };
                 }
                 
-                //var proxy = new WebProxy { Address = new Uri("http://192.168.10.15:8080") };
-
-                //HttpClient.DefaultProxy = proxy;
-
-                //options.BackchannelHttpHandler = new HttpClientHandler
-                //{
-                //    UseProxy = true,
-                //    UseDefaultCredentials = true,
-                //    Proxy = proxy
-                //};
+               
                 // URL of the Keycloak server
                 options.Authority = keyCloakSettings.Authority;
                 //// Client configured in the Keycloak
@@ -254,7 +247,7 @@ builder.Services.AddAuthentication(options =>
 
 
                         Log.Information(context.ProtocolMessage.RedirectUri);
-                        Log.Information(context.ProtocolMessage.RedirectUri);
+                        
                         await Task.FromResult(0);
                     }
                 };
@@ -264,6 +257,8 @@ builder.Services.AddAuthentication(options =>
                 options.SaveTokens = true;
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
+                options.Scope.Add("roles");
+                
                 options.GetClaimsFromUserInfoEndpoint = true;
 
                 if (string.IsNullOrEmpty(keyCloakSettings.MetadataAddress) == false)
@@ -274,7 +269,7 @@ builder.Services.AddAuthentication(options =>
 
                 options.ResponseType = OpenIdConnectResponseType.Code;
 
-
+              
                 options.NonceCookie.SameSite = SameSiteMode.None;
                 options.CorrelationCookie.SameSite = SameSiteMode.None;
 
@@ -341,6 +336,7 @@ app.UseCookiePolicy(new CookiePolicyOptions
 {
     Secure = CookieSecurePolicy.Always
 });
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseCors();
