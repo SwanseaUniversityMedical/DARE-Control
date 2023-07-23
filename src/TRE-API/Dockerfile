@@ -16,6 +16,7 @@ WORKDIR /src
 COPY ["TRE-API/TRE-API.csproj", "TRE-API/"]
 COPY ["BL/BL.csproj", "BL/"]
 RUN dotnet restore "TRE-API/TRE-API.csproj"
+RUN dotnet restore "BL/BL.csproj"
 COPY . .
 WORKDIR "/src/TRE-API"
 RUN dotnet build "TRE-API.csproj" -c Release -o /app/build

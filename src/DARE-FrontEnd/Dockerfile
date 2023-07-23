@@ -10,6 +10,7 @@ WORKDIR /src
 COPY ["DARE-FrontEnd/DARE-FrontEnd.csproj", "DARE-FrontEnd/"]
 COPY ["BL/BL.csproj", "BL/"]
 RUN dotnet restore "DARE-FrontEnd/DARE-FrontEnd.csproj"
+RUN dotnet restore "BL/BL.csproj"
 
 COPY . .
 WORKDIR "/src/DARE-FrontEnd"

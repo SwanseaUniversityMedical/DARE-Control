@@ -8,6 +8,8 @@ WORKDIR /src
 COPY ["src/services/TREAgent/TREAgent.csproj", "src/services/TREAgent/"]
 COPY ["src/BL/BL.csproj", "src/BL/"]
 RUN dotnet restore "src/services/TREAgent/TREAgent.csproj"
+RUN dotnet restore "BL/BL.csproj"
+
 COPY . .
 WORKDIR "/src/src/services/TREAgent"
 RUN dotnet build "TREAgent.csproj" -c Release -o /app/build

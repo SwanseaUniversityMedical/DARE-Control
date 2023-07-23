@@ -16,6 +16,8 @@ WORKDIR /src
 COPY ["TRE-UI/TRE-UI.csproj", "TRE-UI/"]
 COPY ["BL/BL.csproj", "BL/"]
 RUN dotnet restore "TRE-UI/TRE-UI.csproj"
+RUN dotnet restore "BL/BL.csproj"
+
 COPY . .
 WORKDIR "/src/TRE-UI"
 RUN dotnet build "TRE-UI.csproj" -c Release -o /app/build
