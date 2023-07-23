@@ -135,7 +135,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
+//builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
