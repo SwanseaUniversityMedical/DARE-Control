@@ -2,7 +2,7 @@
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 
-ENV ASPNETCORE_ENVIRONMENT=Development
+#ENV ASPNETCORE_ENVIRONMENT=Development
 
 WORKDIR /app
 EXPOSE 80
