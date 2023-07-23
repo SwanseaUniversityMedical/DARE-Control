@@ -66,6 +66,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 });
 
 
+
 builder.Services.Configure<RabbitMQSetting>(configuration.GetSection("RabbitMQ"));
 builder.Services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);
 var bus = 
@@ -91,7 +92,7 @@ var TVP = new TokenValidationParameters
     ValidateIssuer = true,
     ValidateLifetime = true
 };
-builder.Services.AddSingleton<IClaimsTransformation, ClaimsTransformerBL>();
+builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
