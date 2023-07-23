@@ -45,7 +45,7 @@ jobs:
         if: steps.container-changes.outputs.src == 'true'      
         working-directory: src/
         run: |
-          docker build -t image -f "DARE-API/Dockerfile" .
+          docker rebuild -t image -f "DARE-API/Dockerfile" .
 
       - name: registry login
         if: steps.container-changes.outputs.src == 'true'
