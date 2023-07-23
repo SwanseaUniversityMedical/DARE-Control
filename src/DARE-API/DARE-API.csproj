@@ -7,6 +7,7 @@
     <RootNamespace>DARE_API</RootNamespace>
     <UserSecretsId>bb637ba3-a5e0-4648-8423-7b86ac6b8cf2</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>

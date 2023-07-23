@@ -1,25 +1,17 @@
 #See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
-
-ENV ASPNETCORE_ENVIRONMENT=Development
-
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["DARE-API/DARE-API.csproj", "DARE-API/"]
-COPY ["BL/BL.csproj", "BL/"]
-RUN dotnet restore "DARE-API/DARE-API.csproj"
-RUN dotnet restore "BL/BL.csproj"
-
+COPY ["src/DARE-API/DARE-API.csproj", "src/DARE-API/"]
+COPY ["src/BL/BL.csproj", "src/BL/"]
+RUN dotnet restore "src/DARE-API/DARE-API.csproj"
 COPY . .
-WORKDIR "/src/BL"
-RUN dotnet build "BL.csproj" -c Release -o /app/build
-
-WORKDIR "/src/DARE-API"
+WORKDIR "/src/src/DARE-API"
 RUN dotnet build "DARE-API.csproj" -c Release -o /app/build
 
 FROM build AS publish
