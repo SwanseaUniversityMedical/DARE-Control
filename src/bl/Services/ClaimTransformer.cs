@@ -9,6 +9,14 @@ using System.Threading.Tasks;
 
 namespace BL.Services
 {
+    public class dummytraformThing : IClaimsTransformation
+    {
+        public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class ClaimsTransformerBL : IClaimsTransformation
     {
         public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
