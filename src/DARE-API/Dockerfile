@@ -14,7 +14,11 @@ COPY ["DARE-API/DARE-API.csproj", "DARE-API/"]
 COPY ["BL/BL.csproj", "BL/"]
 RUN dotnet restore "DARE-API/DARE-API.csproj"
 RUN dotnet restore "BL/BL.csproj"
+
 COPY . .
+WORKDIR "/src/BL"
+RUN dotnet build "BL.csproj" -c Release -o /app/build
+
 WORKDIR "/src/DARE-API"
 RUN dotnet build "DARE-API.csproj" -c Release -o /app/build
 
