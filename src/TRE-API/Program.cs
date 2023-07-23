@@ -70,7 +70,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Clear();
 });
 
-builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformer>();
+builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
 
 builder.Services.AddAuthentication(options =>
 {

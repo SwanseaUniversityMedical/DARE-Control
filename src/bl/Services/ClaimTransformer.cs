@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BL.Services
 {
-    public class ClaimsTransformer : IClaimsTransformation
+    public class ClaimsTransformerBL : IClaimsTransformation
     {
         public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {

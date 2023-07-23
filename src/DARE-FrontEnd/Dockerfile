@@ -13,7 +13,7 @@ RUN dotnet restore "DARE-FrontEnd/DARE-FrontEnd.csproj"
 
 COPY . .
 WORKDIR "/src/DARE-FrontEnd"
-RUN dotnet build "DARE-FrontEnd.csproj" --no-incremental -c Release -o /app/build
+RUN dotnet build "DARE-FrontEnd.csproj"   -c Release -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "DARE-FrontEnd.csproj" -c Release -o /app/publish /p:UseAppHost=false
