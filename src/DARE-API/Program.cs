@@ -94,6 +94,7 @@ var TVP = new TokenValidationParameters
 };
 
 //builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
+
 builder.Services.AddTransient<IClaimsTransformation, BL.Services.dummytraformThing>();
 
 
