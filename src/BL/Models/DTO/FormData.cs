@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 namespace BL.Models.DTO
 {
     /// <summary>
-    /// FormData is a repository for the JSON data submitted from a FormIo Form
+    /// FormData is a repository for the JSON data submitted from a FormIo Form.
     /// </summary>
     public class FormData
     {
@@ -19,7 +19,6 @@ namespace BL.Models.DTO
         public string FormIoUrl { get; set; }
         public string? FormIoString { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-
-       
+               
     }
 }
