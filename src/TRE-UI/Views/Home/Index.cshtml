@@ -1,43 +1,4 @@
-﻿@*@{
-    ViewData["Title"] = "Home Page";
-}
-@{
-    <a href="/Account/Logout">Sign Out</a>
-
-}
-
-
-
-<div>
-    <div>
-        @Html.ActionLink("Add a Project", "AddProject", "Project")
-    </div>
-    <div>
-        @Html.ActionLink("Awaiting Approvals", "ApproveProjects", "Project")
-   @*     list of submissions awaiting approval in a table*@
- @*   </div>
-
-    <div>
-        @Html.ActionLink("List All Projects", "GetAllProject", "Project")
-    </div>
-   
-    <div>
-        @Html.ActionLink("List all Users", "GetAllUsers", "User")
-    </div>
-
-   
-</div>
-*@
-
-@*<div class="home-banner text-center">
-    <h1 class="display-5 text-light">Safe &amp; Transparent Research</h1>
-    <p class="text-light mb-5 fs-6">Search and discover the types of research this trusted platform is enabling for public good.</p>
-    <div class="col-xl-4 col-lg-6 col-md-8 mx-auto">
-        <form class="col-12 col-lg-auto mb-3 mb-lg-0">
-            <input type="search" class="form-control border-0" placeholder="Search..." aria-label="Search">
-        </form>
-    </div>
-</div>*@
+﻿
 <div class="container mt-5">
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-md-5 g-4">
@@ -53,7 +14,7 @@
             </a>
         </div>
         <div class="col">
-            <a asp-area="" asp-controller="User" asp-action="GetAllUsers" class="card shadow-sm">
+            <a asp-area="" asp-controller="Projects" asp-action="GetAllProjectsForApproval" class="card shadow-sm">
                 <img class="card-img-top" src="/img/shutterstock_376975414-740x481.jpg.webp" alt="People image" />
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
