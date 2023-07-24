@@ -14,7 +14,7 @@ using Serilog;
 
 namespace TRE_API.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
 
@@ -40,7 +40,9 @@ namespace TRE_API.Controllers
                 //2023-06-01 14:30:00 use this as the datetime
                 proj.ProjectId = model.ProjectId;
                 proj.UserId = model.UserId;
-                    proj.LocalProjectName =model.LocalProjectName;
+                proj.Projectname = model.Projectname;
+                proj.Username = model.Username;
+                 proj.LocalProjectName =model.LocalProjectName;
 
               
                

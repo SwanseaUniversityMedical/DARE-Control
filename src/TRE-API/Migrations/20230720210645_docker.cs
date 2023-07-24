@@ -10,6 +10,7 @@ namespace TRE_API.Migrations
     public partial class docker : Migration
     {
         /// <inheritdoc />
+        /// 
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(

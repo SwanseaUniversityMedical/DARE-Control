@@ -13,6 +13,7 @@ namespace BL.Models.DTO
 
     }
 
+
     public enum ReturnType
     {
         voidReturn,

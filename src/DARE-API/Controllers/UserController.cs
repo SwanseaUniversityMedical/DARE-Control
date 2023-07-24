@@ -16,7 +16,7 @@ using DARE_API.Controllers;
 
 namespace BL.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Authorize(Roles = "dare-control-admin")]
     [Route("api/[controller]")]
