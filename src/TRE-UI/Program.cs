@@ -94,14 +94,14 @@ var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
 {
    
-    options.AddPolicy(name: MyAllowSpecificOrigins,
-        policy =>
-        {
-            policy.WithOrigins(configuration["TREAPI:Address"])
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials();
-        });
+    //options.AddPolicy(name: MyAllowSpecificOrigins,
+    //    policy =>
+    //    {
+    //        policy.WithOrigins(configuration["TREAPI:Address"])
+    //            .AllowAnyMethod()
+    //            .AllowAnyHeader()
+    //            .AllowCredentials();
+    //    });
 });
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>

@@ -9,6 +9,8 @@ namespace BL.Models
         public int Id { get; set; }
         public int UserId { get; set; }
         public int ProjectId { get; set; }
+        public string? Projectname { get; set; }
+        public string? Username { get; set; }
         //[JsonIgnore]
         //public IEnumerable<SelectListItem>? ProjectItemList { get; set; }
         //[JsonIgnore]
