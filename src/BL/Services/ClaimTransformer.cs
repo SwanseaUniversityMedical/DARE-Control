@@ -13,7 +13,9 @@ namespace BL.Services
     {
         public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {
-            throw new NotImplementedException();
+            ClaimsIdentity claimsIdentity = principal.Identity as ClaimsIdentity;
+
+            return Task.FromResult(principal);
         }
     }
 
@@ -21,7 +23,7 @@ namespace BL.Services
     {
         public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {
-            ClaimsIdentity claimsIdentity = (ClaimsIdentity)principal.Identity;
+            ClaimsIdentity claimsIdentity = principal.Identity as ClaimsIdentity;
 
             // flatten realm_access because Microsoft identity model doesn't support nested claims
             // by map it to Microsoft identity model, because automatic JWT bearer token mapping already processed here
