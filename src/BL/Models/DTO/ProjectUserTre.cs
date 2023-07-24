@@ -12,6 +12,8 @@ namespace BL.Models.DTO
     {
         public int UserId { get; set; }
         public int ProjectId { get; set; }
+        public string? Projectname { get; set; }
+        public string? Username { get; set; }
         [JsonIgnore]
         public virtual IEnumerable<SelectListItem>? ProjectItemList { get; set; }
         [JsonIgnore]
