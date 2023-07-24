@@ -80,7 +80,7 @@ namespace TRE_UI.Controllers
             var projmem = new ProjectUserTre()
             {
                 //Username = userItems.Where(p => p.Value == "2").First().Text,
-                //Projectname = projectItems.Where(p => p.Value == "2").First().Text,
+                //Projectname = projectItems.Where(p => p.Value == "2").First().Text.,
                 ProjectItemList = projectItems,
                 UserItemList = userItems
             };
