@@ -93,9 +93,9 @@ var TVP = new TokenValidationParameters
     ValidateLifetime = true
 };
 
-//builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
+builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
 
-builder.Services.AddTransient<IClaimsTransformation, BL.Services.dummytraformThing>();
+//builder.Services.AddTransient<IClaimsTransformation, BL.Services.dummytraformThing>();
 
 
 builder.Services.AddAuthentication(options =>
