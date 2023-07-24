@@ -14,7 +14,7 @@ using Serilog;
 
 namespace TRE_API.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
 
