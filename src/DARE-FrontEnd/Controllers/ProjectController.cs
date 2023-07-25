@@ -11,9 +11,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using static System.Net.Mime.MediaTypeNames;
 using Endpoint = BL.Models.Endpoint;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace DARE_FrontEnd.Controllers
 {
+    [Authorize(Roles = "dare-control-admin")]
     public class ProjectController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
@@ -23,6 +26,7 @@ namespace DARE_FrontEnd.Controllers
             _clientHelper = client;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult GetProject(int id)
         {
@@ -35,6 +39,7 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult GetAllProjects()
         {
 
@@ -51,6 +56,7 @@ namespace DARE_FrontEnd.Controllers
             return View(projmem);
         }
 
+        
         private ProjectUser GetProjectUserModel()
         {
             var projs = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
@@ -80,6 +86,7 @@ namespace DARE_FrontEnd.Controllers
             return View(projmem);
         }
 
+        
         private ProjectEndpoint GetProjectEndpointModel()
         {
             var projs = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
@@ -250,5 +257,18 @@ namespace DARE_FrontEnd.Controllers
             }
             return RedirectToAction("EditProject", new { projectId = ProjectId });
         }
+
+        [HttpGet]
+        [Authorize(Roles = "dare-control-admin")]
+        public void IsUSerOnProject(int projectId, int userId)
+        {
+            var model = new ProjectUser()
+            {
+                ProjectId = projectId,
+                UserId = userId
+            };
+            var result = _clientHelper.CallAPI<ProjectUser, ProjectUser?>("api/Project/IsUserOnProject", model);
+        }
+
     }
 }

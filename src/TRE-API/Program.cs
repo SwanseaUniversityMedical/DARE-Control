@@ -19,6 +19,9 @@ using Microsoft.Extensions.Configuration;
 using System;
 using Microsoft.AspNetCore.Http.Connections;
 using TRE_API.Services.SignalR;
+using BL.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +30,7 @@ IWebHostEnvironment environment = builder.Environment;
 
 Log.Logger = CreateSerilogLogger(configuration, environment);
 Log.Information("API logging Start.");
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
@@ -57,6 +61,16 @@ var TVP = new TokenValidationParameters
     ValidateIssuer = true,
     ValidateLifetime = true
 };
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
+builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -67,7 +81,19 @@ builder.Services.AddAuthentication(options =>
     {
         options.Authority = keyCloakSettings.Authority;
         options.Audience = keyCloakSettings.ClientId;
-
+        if (keyCloakSettings.Proxy)
+        {
+            options.BackchannelHttpHandler = new HttpClientHandler
+            {
+                UseProxy = true,
+                UseDefaultCredentials = true,
+                Proxy = new WebProxy()
+                {
+                    Address = new Uri(keyCloakSettings.ProxyAddresURL),
+                    BypassList = new[] { keyCloakSettings.BypassProxy }
+                }
+            };
+        }
         // URL of the Keycloak server
         options.Authority = keyCloakSettings.Authority;
         //// Client configured in the Keycloak
@@ -101,9 +127,14 @@ builder.Services.AddCors(options =>
                           .AllowAnyHeader()
                           .AllowCredentials();
                       });
+    
 });
 
 var app = builder.Build();
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto
+});
 // --- Session Token
 
 // Configure the HTTP request pipeline.
@@ -137,13 +168,19 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
-   
+
 }
 
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    Secure = CookieSecurePolicy.Always
+});
+
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
@@ -197,7 +234,28 @@ void AddServices(WebApplicationBuilder builder)
     //TODO
     builder.Services.AddSwaggerGen(c =>
     {
-        c.SwaggerDoc("v2", new OpenApiInfo { Title = environment.ApplicationName, Version = "v2" });
+
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = environment.ApplicationName, Version = "v1" });
+        var securityScheme = new OpenApiSecurityScheme
+        {
+            Name = "JWT Authentication",
+            Description = "Enter JWT token.",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            Reference = new OpenApiReference
+            {
+                Id = JwtBearerDefaults.AuthenticationScheme,
+                Type = ReferenceType.SecurityScheme
+            }
+        };
+
+        c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            { securityScheme, new string[] { } }
+        });
     }
     );
 

@@ -9,7 +9,7 @@ using BL.Models;
 
 namespace DARE_API.Controllers
 {
-    //[Authorize]
+    [Authorize(Roles = "dare-control-admin")]
     [ApiController]
     [Route("api/[controller]")]
     public class EndpointController : Controller
@@ -92,7 +92,7 @@ namespace DARE_API.Controllers
         }
 
         [HttpGet("GetEndPointsInProject/{projectId}")]
-
+        [AllowAnonymous]
         public List<Endpoint> GetEndPointsInProject(int projectId)
         {
             try
@@ -108,7 +108,7 @@ namespace DARE_API.Controllers
         }
 
 
-
+        [AllowAnonymous]
         [HttpGet("GetAllEndpoints")]
         public List<Endpoint> GetAllEndpoints()
         {
@@ -130,7 +130,7 @@ namespace DARE_API.Controllers
 
 
         }
-
+        [AllowAnonymous]
         [HttpGet("GetAnEndpoint")]
         public Endpoint? GetAnEndpoint(int endpointId)
         {

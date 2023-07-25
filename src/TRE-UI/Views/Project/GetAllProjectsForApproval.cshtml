@@ -1,4 +1,4 @@
-﻿@model List<BL.Models.Project>
+﻿@model List<BL.Models.ProjectApproval>
 @{
     ViewData["Title"] = "Projects";
     var projectsCount = Model.Count;
@@ -6,7 +6,7 @@
 
 <div class="container-lg p-4">
     <div class="d-flex align-items-center justify-content-between">
-        <h1 class="fs-3 mb-0">Projects</h1>
+        <h1 class="fs-3 mb-0">Membership Approval</h1>
 
         @*<a asp-controller="Project" asp-action="AddProjectForm" class="btn btn-primary btn-sm">
         <i class="fa fa-plus align-middle mr-2"></i>
@@ -25,22 +25,22 @@
 
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <div>
-                                    <a href="#"><h2 class="mb-0 fw-bold hover-underline fs-5">@project.Name</h2></a>
+                                    <a href="#"><h2 class="mb-0 fw-bold hover-underline fs-5">@project.Id</h2></a>
                                     <p class="text-muted small mb-0">#[Project ID = @project.Id]</p>
                                 </div>
-                                @*                                <a href="@Url.Action("EditProject", "Project",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>*@
+                                <a href="@Url.Action("EditProject", "Project",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
                             </div>
                             <div class="">
-                                <a href="#" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                    @project.Users.Count People
-                                </a>
+                                @*  <a href="#" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                            @project.Users.Count People
+                            </a>*@
 
 
                             </div>
 
-                            <p class="text-muted fs-6 mb-0">
-                                Start Date: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate
-                            </p>
+                            @* <p class="text-muted fs-6 mb-0">
+                        Start Date: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate
+                        </p>*@
 
 
 

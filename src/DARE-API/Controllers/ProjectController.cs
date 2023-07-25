@@ -18,7 +18,8 @@ using BL.Services;
 
 namespace DARE_API.Controllers
 {
-    //[Authorize]
+    
+    [Authorize(Roles = "dare-control-admin")]
     [ApiController]
     [Route("api/[controller]")]
 
@@ -96,8 +97,7 @@ namespace DARE_API.Controllers
 
 
         }
-
-
+    
         [HttpPost("AddUserMembership")]
         public async Task<ProjectUser?> AddUserMembership(ProjectUser model)
         {
@@ -258,7 +258,7 @@ namespace DARE_API.Controllers
 
         }
 
-
+        [AllowAnonymous]
         [HttpGet("GetProject")]
         public Project? GetProject(int projectId)
         {
@@ -283,6 +283,7 @@ namespace DARE_API.Controllers
         }
 
         [HttpGet("GetAllProjects")]
+        [AllowAnonymous]
         public List<Project> GetAllProjects()
         {
             try
@@ -308,7 +309,7 @@ namespace DARE_API.Controllers
         }
 
         [HttpGet("GetEndPointsInProject")]
-
+        [AllowAnonymous]
         public List<Endpoint> GetEndPointsInProject(int projectId)
         {
             List<Endpoint> endpoints = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Endpoints).ToList();
@@ -337,6 +338,23 @@ namespace DARE_API.Controllers
             await _minioHelper.FetchAndStoreObject(testf.url, _minioSettings, testf.bucketName, testf.key);
 
             return Ok();
+        }
+
+        [AllowAnonymous]
+        [HttpGet("IsUserOnProject")]
+        public bool IsUserOnProject(int projectId, int userId)
+        {
+            try
+            {
+                bool isUserOnProject = _DbContext.Projects.Any(p => p.Id == projectId && p.Users.Any(u => u.Id == userId));
+                return isUserOnProject;
+            }
+
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} crash", "IsUserOnProject");
+                throw;
+            }
         }
 
         //End

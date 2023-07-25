@@ -1,12 +1,15 @@
 ﻿using BL.Models;
 using BL.Models.DTO;
 using BL.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Data;
 
 namespace DARE_FrontEnd.Controllers
 {
+    [Authorize(Roles = "dare-control-admin")]
     public class UserController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
@@ -23,6 +26,7 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult GetAllUsers()
         {
 
@@ -45,6 +49,7 @@ namespace DARE_FrontEnd.Controllers
             return Ok(result);
         }
 
+        [AllowAnonymous]
         public IActionResult GetUser(int id)
         {
             var paramlist = new Dictionary<string, string>();

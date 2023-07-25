@@ -30,7 +30,7 @@
                                             <a href="@Url.Action("GetProject", "Project", new { id = project.Id })">@project.Name</a>
                                         </h2>
                                     </a>
-                                    <p class="text-muted small mb-0">#[Project ID = @project.Id]</p>
+                                    <p class="text-muted small mb-0">#@project.Id</p>
                                 </div>
                                 <a href="@Url.Action("EditProject", "Project",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
                             </div>
@@ -42,7 +42,7 @@
                                     @project.Endpoints.Count Endpoints
                                 </a>
                                 <a href="#" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                    X Submissions
+                                    @project.Submissions.Count Submissions
                                 </a>
                             </div>
                             <p class="my-4">

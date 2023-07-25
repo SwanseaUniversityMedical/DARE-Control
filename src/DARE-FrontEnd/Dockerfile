@@ -10,9 +10,11 @@ WORKDIR /src
 COPY ["DARE-FrontEnd/DARE-FrontEnd.csproj", "DARE-FrontEnd/"]
 COPY ["BL/BL.csproj", "BL/"]
 RUN dotnet restore "DARE-FrontEnd/DARE-FrontEnd.csproj"
+RUN dotnet restore "BL/BL.csproj"
+
 COPY . .
 WORKDIR "/src/DARE-FrontEnd"
-RUN dotnet build "DARE-FrontEnd.csproj" -c Release -o /app/build
+RUN dotnet build "DARE-FrontEnd.csproj"   -c Release -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "DARE-FrontEnd.csproj" -c Release -o /app/publish /p:UseAppHost=false

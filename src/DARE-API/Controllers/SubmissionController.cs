@@ -9,12 +9,17 @@ using BL.Models;
 using BL.Models.DTO;
 using BL.Models.Tes;
 using EasyNetQ;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace DARE_API.Controllers
 {
 
     [Route("api/[controller]")]
+    [Authorize(Roles = "dare-control-admin,dare-tre")]
     [ApiController]
+    
+    
     /// <summary>
     /// API endpoints for <see cref="Submission"/>s.
     /// </summary>
@@ -79,5 +84,29 @@ namespace DARE_API.Controllers
 
             return StatusCode(200, new APIReturn(){ReturnType = ReturnType.voidReturn});
         }
+
+        [AllowAnonymous]
+        [HttpGet("GetAllSubmissions")]
+        public List<Submission> GetAllSubmissions()
+        {
+            try
+            {
+
+                var allSubmissions = _DbContext.Submissions.ToList();
+
+
+
+                Log.Information("{Function} Endpoints retrieved successfully", "GetAllSubmissions");
+                return allSubmissions;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetAllSubmissions");
+                throw;
+            }
+
+
+        }
+
     }
 }

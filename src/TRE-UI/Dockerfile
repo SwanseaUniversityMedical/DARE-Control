@@ -4,6 +4,9 @@
 #For more information, please see https://aka.ms/containercompat
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+
+ENV ASPNETCORE_ENVIRONMENT=Development
+
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
@@ -13,6 +16,8 @@ WORKDIR /src
 COPY ["TRE-UI/TRE-UI.csproj", "TRE-UI/"]
 COPY ["BL/BL.csproj", "BL/"]
 RUN dotnet restore "TRE-UI/TRE-UI.csproj"
+RUN dotnet restore "BL/BL.csproj"
+
 COPY . .
 WORKDIR "/src/TRE-UI"
 RUN dotnet build "TRE-UI.csproj" -c Release -o /app/build

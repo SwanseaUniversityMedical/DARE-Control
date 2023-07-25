@@ -9,11 +9,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace TRE_API.Migrations
+namespace DARE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230712121302_initialMigration")]
-    partial class initialMigration
+    [Migration("20230720210420_docker")]
+    partial class docker
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,7 +46,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Endpoint");
+                    b.ToTable("Endpoints");
                 });
 
             modelBuilder.Entity("BL.Models.Project", b =>
@@ -71,9 +71,6 @@ namespace TRE_API.Migrations
                     b.Property<string>("OutputBucket")
                         .HasColumnType("text");
 
-                    b.Property<int?>("ProjectApprovalId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -82,44 +79,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProjectApprovalId");
-
                     b.ToTable("Projects");
-                });
-
-            modelBuilder.Entity("BL.Models.ProjectApproval", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Approved")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("IsValid")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ProjectName")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("SubmittedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ProjectApproval");
                 });
 
             modelBuilder.Entity("BL.Models.Submission", b =>
@@ -179,7 +139,7 @@ namespace TRE_API.Migrations
 
                     b.HasIndex("SubmittedById");
 
-                    b.ToTable("Submission");
+                    b.ToTable("Submissions");
                 });
 
             modelBuilder.Entity("BL.Models.User", b =>
@@ -235,13 +195,6 @@ namespace TRE_API.Migrations
                     b.HasIndex("UsersId");
 
                     b.ToTable("ProjectUser");
-                });
-
-            modelBuilder.Entity("BL.Models.Project", b =>
-                {
-                    b.HasOne("BL.Models.ProjectApproval", null)
-                        .WithMany("Projects")
-                        .HasForeignKey("ProjectApprovalId");
                 });
 
             modelBuilder.Entity("BL.Models.Submission", b =>
@@ -313,11 +266,6 @@ namespace TRE_API.Migrations
             modelBuilder.Entity("BL.Models.Project", b =>
                 {
                     b.Navigation("Submissions");
-                });
-
-            modelBuilder.Entity("BL.Models.ProjectApproval", b =>
-                {
-                    b.Navigation("Projects");
                 });
 
             modelBuilder.Entity("BL.Models.Submission", b =>

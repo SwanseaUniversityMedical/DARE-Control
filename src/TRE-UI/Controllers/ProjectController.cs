@@ -1,6 +1,5 @@
 ﻿using BL.Models;
 using BL.Models.DTO;
-
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using RestSharp;
@@ -57,14 +56,14 @@ namespace TRE_UI.Controllers
      
 
         [HttpGet]
-        public IActionResult AddUserMembership()
+        public IActionResult RequestProjectMembership()
         {
 
             var projmem = GetProjectUserModel();
             return View(projmem);
         }
 
-        private ProjectUser GetProjectUserModel()
+        private ProjectUserTre GetProjectUserModel()
         {
             var projs = _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
             var users = _dareclientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
@@ -77,29 +76,89 @@ namespace TRE_UI.Controllers
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
 
-            var projmem = new ProjectUser()
+            var projmem = new ProjectUserTre()
             {
+                //Username = userItems.Where(p => p.Value == "2").First().Text,
+                //Projectname = projectItems.Where(p => p.Value == "2").First().Text,
                 ProjectItemList = projectItems,
                 UserItemList = userItems
             };
+
             return projmem;
         }
-
-
-
         [HttpPost]
-        public async Task<IActionResult> AddUserMembership(ProjectUser model)
+        public async Task<IActionResult> RequestProjectMembership(ProjectUserTre model)
+        {
+            var projmem = GetProjectUserModel();
+            var result = await _treclientHelper.CallAPI<ProjectUserTre, ProjectUserTre?>("/api/Project/RequestMembership", model);
+
+            return View(result);
+
+
+        }
+        public async Task<IActionResult> AddUserMembership(ProjectUserTre model)
         {
             var result =
-                await _dareclientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
-            await _treclientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
+                await _dareclientHelper.CallAPI<ProjectUserTre, ProjectUserTre?>("/api/Project/AddUserMembership", model);
             result = GetProjectUserModel();
+
+
             return View(result);
 
 
         }
 
+     
+        [HttpGet]
+        public async Task<IActionResult> RemoveUserFromProject(int projectId, int userId)
+        {
+            var model = new ProjectUser()
+            {
+                ProjectId = projectId,
+                UserId = userId
+            };
+            var result =
+                await _dareclientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/RemoveUserMembership", model);
+            return RedirectToAction("EditProject", new { projectId = projectId });
+        }
 
+        [HttpGet]
+        public async Task<IActionResult> EditProject(int? projectId)
+        {
+            var users = _dareclientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
+            
+            var userItems = users
+                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
+                .ToList();
+
+        
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("projectId", projectId.ToString());
+            var project = _dareclientHelper.CallAPIWithoutModel<Project?>(
+                "/api/Project/GetProject/", paramlist).Result;
+
+            var projectView = new ProjectUserEndpoint()
+            {
+                Id = project.Id,
+                Name = project.Name,
+                Users = project.Users,
+                StartDate = project.StartDate,
+                EndDate = project.EndDate,
+                UserItemList = userItems,
+               
+            };
+
+            return View(projectView);
+        }
+        [HttpGet]
+        public IActionResult GetAllProjectsForApproval()
+        {
+            var projmem = GetProjectUserModel();
+     
+            var projects = _treclientHelper.CallAPIWithoutModel<List<ProjectApproval>>("/api/Project/GetAllProjectsForApproval/").Result;
+
+            return View(projects);
+        }
 
     }
 }
