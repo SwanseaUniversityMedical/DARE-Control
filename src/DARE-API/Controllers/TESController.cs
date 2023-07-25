@@ -10,7 +10,7 @@ using DARE_API.Attributes;
 using Microsoft.AspNetCore.WebUtilities;
 using Swashbuckle.AspNetCore.Annotations;
 using BL.Models;
-using BL.Repositories.DbContexts;
+using DARE_API.Repositories.DbContexts;
 using DARE_API.ContractResolvers;
 using Serilog;
 using Microsoft.AspNetCore.SignalR;

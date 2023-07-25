@@ -1,5 +1,5 @@
 using BL.Models.Settings;
-using BL.Repositories.DbContexts;
+using DARE_API.Repositories.DbContexts;
 //using DARE_API.Models;
 using DARE_API.Services.Contract;
 using DARE_API.Services;
@@ -211,8 +211,8 @@ Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHost
     .WriteTo.Seq(seqServerUrl, apiKey: seqApiKey)
     .ReadFrom.Configuration(configuration)
     .CreateLogger();
-
 }
+
 void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configuration)
 {
 
@@ -228,7 +228,6 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
 }
 
 
-
 /// <summary>
 /// Add Services
 /// </summary>
@@ -239,6 +238,7 @@ async void AddServices(WebApplicationBuilder builder)
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSignalR();
     builder.Services.Configure<TREAPISettings>(configuration.GetSection("TREAPI"));
+    builder.Services.AddHostedService<DAREBackgroundService>();
 
     //TODO
     builder.Services.AddSwaggerGen(c =>

@@ -1,5 +1,5 @@
 ﻿using BL.Models;
-using BL.Repositories.DbContexts;
+using DARE_API.Repositories.DbContexts;
 using DARE_API.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

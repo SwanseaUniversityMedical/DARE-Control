@@ -25,7 +25,6 @@ namespace TRE_API.Controllers
 
         public ProjectController(ApplicationDbContext applicationDbContext)
         {
-
             _DbContext = applicationDbContext;
         }
 
