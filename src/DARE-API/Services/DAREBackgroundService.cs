@@ -36,14 +36,14 @@ namespace DARE_API.Services
                 await connection.StartAsync();
             };
 
-            connection.On<string, string, SubmissionStatus>("TREMessage", UpdateStatusForEndpoint);
+            connection.On<string, string, string>("TREUpdateStatus", UpdateStatusForEndpoint);
 
             connection.StartAsync();
 
             return Task.CompletedTask;
         }
 
-        private void UpdateStatusForEndpoint(string endpointname, string tesId, SubmissionStatus status)
+        private void UpdateStatusForEndpoint(string endpointname, string tesId, string status)
         {
             using (var scope = _serviceScopeFactory.CreateScope())
             {
@@ -59,7 +59,9 @@ namespace DARE_API.Services
                 {
                     //return BadRequest("Invalid tesid or endpoint not valid for tes");
                 }
-                sub.Status = status;
+
+                Enum.TryParse(status, out SubmissionStatus myStatus);
+                sub.Status = myStatus;
 
                 _DbContext.SaveChanges();
             }

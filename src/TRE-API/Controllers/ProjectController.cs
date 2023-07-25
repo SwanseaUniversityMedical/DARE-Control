@@ -27,6 +27,7 @@ namespace TRE_API.Controllers
         {
             _DbContext = applicationDbContext;
         }
+
         [HttpPost("RequestMembership")]
         public async Task<ProjectApproval?> RequestMembership(ProjectUserTre model)
         {
