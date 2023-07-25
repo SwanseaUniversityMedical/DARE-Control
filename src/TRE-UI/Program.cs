@@ -66,8 +66,9 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-    //options.AddPolicy("admin", policy =>
-    //    policy.RequireClaim("groups", "dare-control-admin")); //MIGHT NEED TO CHANGE LATER
+    options.AddPolicy("admin", policy =>
+        policy.RequireClaim("groups", "dare-control-admin"));
+    //MIGHT NEED TO CHANGE LATER
 
     //probably not needed
     options.AddPolicy(
@@ -93,15 +94,15 @@ JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
 {
-   
-    //options.AddPolicy(name: MyAllowSpecificOrigins,
-    //    policy =>
-    //    {
-    //        policy.WithOrigins(configuration["TREAPI:Address"])
-    //            .AllowAnyMethod()
-    //            .AllowAnyHeader()
-    //            .AllowCredentials();
-    //    });
+
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins(configuration["TREAPISettings:Address"])
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        });
 });
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>

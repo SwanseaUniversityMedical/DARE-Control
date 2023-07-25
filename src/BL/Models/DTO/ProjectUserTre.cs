@@ -18,6 +18,6 @@ namespace BL.Models.DTO
         public virtual IEnumerable<SelectListItem>? ProjectItemList { get; set; }
         [JsonIgnore]
         public virtual IEnumerable<SelectListItem>? UserItemList { get; set; }
-        public string LocalProjectName { get; set; } = string.Empty;
+        public string? LocalProjectName { get; set; } 
     }
 }

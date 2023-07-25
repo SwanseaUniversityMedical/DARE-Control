@@ -1,145 +1,71 @@
 ﻿@using BL.Models.DTO
-@model ProjectUserEndpoint
-
+@*@model ProjectUserEndpoint*@
+@model BL.Models.ProjectApproval
 @{
-    ViewData["Title"] = "Project";
+    ViewData["Title"] = "Edit @Model.Name";
 }
 
-<style>
-    .box {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background-color: gray;
-        border: 1px solid #ccc;
-        border-radius: 50%;
-        padding: 10px;
-    }
+<div class="container-lg mt-4 p-4 bg-white border-1 shadow-sm">
 
-    .space {
-        margin-right: 2em;
-    }
-</style>
+    <div class="d-flex align-items-center justify-content-between">
+        <div>
+            <h1 class="fs-3 mb-0">Approve Membership</h1>
 
-
-
-<div class="container bg-white p-5">
-    <ul class="nav nav-tabs" id="myTab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#project" type="button" role="tab" aria-controls="Project" aria-selected="true">Project</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#userMembership" type="button" role="tab" aria-controls="User Membership" aria-selected="false">User Membership</button>
-        </li>
+        </div>
       
-    </ul>
-    <div class="tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="project" role="tabpanel" aria-labelledby="home-tab">
-            <div class="row">
-                <div class="col-md-4">
-                   <form method="post" asp-action="Edit">
-                        <div asp-validation-summary="All"></div>
-                        <input asp-for="Id" hidden />
-                        <div class="form-group">
-                            <label asp-for="Name"></label>
-                            <input asp-for="Name" class="form-control form-control-md" />
-                            <span asp-validation-for="Name" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            <label asp-for="StartDate"></label>
-                            <input asp-for="StartDate" class="form-control form-control-md" />
-                            <span asp-validation-for="StartDate" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            <label asp-for="EndDate"></label>
-                            <input asp-for="EndDate" class="form-control form-control-md" />
-                            <span asp-validation-for="EndDate" class="text-danger"></span>
-                        </div>
-                        <div class="mt-5 d-flex align-items-center">
-                            <button type="submit" class="btn btn-md btn-primary mr-2">Save</button>
-                            <a asp-controller="Project" asp-action="GetAllProjects" class="btn btn-link">
-                                Cancel
-                           </a>
-                       </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div class="tab-pane fade" id="userMembership" role="tabpanel" aria-labelledby="profile-tab">
-            <div class="row mt-2 mb-2">
-                <div class="col-2">
-                    <button type="button" class="btn btn-primary" id="addUser">Add User</button>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12">
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            @foreach (var user in Model.Users)
-                            {
-                                <tr>
-                                    <td>
-                                        @user.Name
-                                    </td>
-                                    <td>
-                                        <a href="@Url.Action("RemoveUserFromProject", "Project",new{ProjectId=Model.Id,UserId=@user.Id})"
-                                           class="g-text-underline--none--hover">
-                                            <h5 class="g-font-size-18 g-font-size-22--md g-color-black"><span class="g-color-black" style="word-break: break-word;">Remove</span></h5>
-                                        </a>
-                                    </td>
-                                </tr>
-                            }
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
     </div>
-</div>
+    <div class="mt-4">
+        <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
+      
+        
+        </ul>
 
 
-<div class="modal fade bd-user-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="userModal">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Add User</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
+        <div class="tab-content py-5" id="myTabContent">
+            <div class="tab-pane fade show active" id="project" role="tabpanel" aria-labelledby="home-tab">
                 <div class="row">
-                    <div class="col-12">
-                        <div class="table-responsive">
-                            <table class="table table-bordered" id="UserList">
-                                @foreach (var user in Model.UserItemList)
-                                {
-                                    <tr>
-                                        <td><input type="checkbox" value="@user.Value" id="@user.Value" name="selectedUser" /></td>
-                                        <td>@user.Text</td>
-                                    </tr>
-                                }
-                            </table>
-                        </div>
+                    <div class="col-md-6">
+                        <form method="post" asp-action="EditMembership">
+                            <div asp-validation-summary="All"></div>
+                            <input asp-for="Id" hidden />
+                            <div class="form-group mb-4">
+                                <label asp-for="Projectname">Project Name</label>
+                                <input asp-for="Projectname" class="form-control form-control-md" />
+                                <span asp-validation-for="Projectname" class="text-danger"></span>
+                            </div>
+                            <div class="form-group mb-4">
+                                <label asp-for="Username">User Name</label>
+                                <input asp-for="Username" class="form-control form-control-md" />
+                                <span asp-validation-for="Username" class="text-danger"></span>
+                            </div>
+                            <div class="form-group mb-4">
+                                <label asp-for="LocalProjectName">Local Project Name</label>
+                                <input asp-for="LocalProjectName" class="form-control form-control-md" />
+                                <span asp-validation-for="LocalProjectName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group mb-4">
+                                <label asp-for="Approved">Approved</label>                              
+                                <input asp-for="Approved" class="form-control form-control-md" />
+                                <span asp-validation-for="Approved" class="text-danger"></span>
+                            </div>
+                            <div class="form-group mb-4">
+                                <label asp-for="ApprovedBy">Approved By</label>
+                                <input asp-for="ApprovedBy" class="form-control form-control-md" />
+                                <span asp-validation-for="ApprovedBy" class="text-danger"></span>
+                            </div>
+                            <div class="mt-5 d-flex align-items-center">
+                                <button type="submit" class="btn btn-md btn-primary mr-2">Approve</button>
+                                <a href="@Url.Action("RemoveUserFromProject", "Project", new { id = Model.ProjectId })" class="btn btn-link">
+                                    Remove
+                                </a>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="SaveUserList(@Model.Id)">Add</button>
-            </div>
-        </div>
+
+     
     </div>
+
+ 
 </div>
-
-@*<div class="modal fade bd-endpoint-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="endpointModal">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-           
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-
-            </div>
-        </div>
-    </div>
-</div>*@

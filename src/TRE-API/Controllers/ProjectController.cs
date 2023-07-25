@@ -14,8 +14,8 @@ using Serilog;
 
 namespace TRE_API.Controllers
 {
-    [Authorize]
-    [ApiController]
+    //[Authorize]
+    //[ApiController]
     [Route("api/[controller]")]
 
     public class ProjectController : ControllerBase
@@ -34,18 +34,20 @@ namespace TRE_API.Controllers
             try
             {
 
-              
                 var proj = new ProjectApproval();
 
-                //2023-06-01 14:30:00 use this as the datetime
-                proj.ProjectId = model.ProjectId;
-                proj.UserId = model.UserId;
-                proj.Projectname = model.Projectname;
-                proj.Username = model.Username;
-                 proj.LocalProjectName =model.LocalProjectName;
+                proj.Date = DateTime.Now.ToUniversalTime();
+                proj.ProjectId = 3;
+                proj.UserId = 3;
+                proj.Projectname = "Project3";
+                proj.Username = "User3";
+                proj.LocalProjectName = "testb";
 
-              
-               
+                //proj.ProjectId = model.ProjectId;
+                //proj.UserId = model.UserId;
+                //proj.Projectname = model.Projectname;
+                //proj.Username = model.Username;
+                // proj.LocalProjectName =model.LocalProjectName;
 
 
                 _DbContext.ProjectApproval.Add(proj);
@@ -65,8 +67,69 @@ namespace TRE_API.Controllers
 
 
         }
-       
+        [HttpPost("EditProjectApproval")]
+        public async Task<ProjectApproval?> EditProjectApproval(ProjectApproval model)
+        {
+            try
+            {
 
+                var proj = new ProjectApproval();
+
+                proj.Id = model.Id;
+                proj.ProjectId = model.ProjectId;
+                proj.UserId = model.UserId;
+                proj.Projectname = model.Projectname;
+                proj.Username = model.Username;
+                proj.LocalProjectName = model.LocalProjectName;
+                proj.Approved = model.Approved;
+                proj.Approved = model.ApprovedBy;
+                proj.Date = DateTime.Now.ToUniversalTime(); 
+
+
+                var returned = _DbContext.ProjectApproval.Find(model.Id);
+                if( returned != null)
+                    _DbContext.ProjectApproval.Update(proj); ;
+                await _DbContext.SaveChangesAsync();
+
+                Log.Information("{Function} Membership Request added successfully", "MembershipRequest");
+                return proj;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "EditMembership");
+                var errorModel = new ProjectApproval();
+                return errorModel;
+                throw;
+            }
+
+
+        }
+
+        [AllowAnonymous]
+        [HttpGet("GetProjectApproval")]
+        public ProjectApproval? GetProjectApproval(int projectId)
+        {
+            try
+            {
+
+        
+                var returned = _DbContext.ProjectApproval.Find(projectId);
+                if (returned == null)
+                {
+                    return null;
+                }
+
+                Log.Information("{Function} Project retrieved successfully", "GetProject");
+                return returned;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetProjectApproval");
+                throw;
+            }
+
+
+        }
         [HttpGet("GetAllProjectsForApproval")]
         public List<ProjectApproval> GetAllProjectsForApproval()
         {

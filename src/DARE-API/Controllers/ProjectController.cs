@@ -18,7 +18,7 @@ using BL.Services;
 
 namespace DARE_API.Controllers
 {
-    
+
     [Authorize(Roles = "dare-control-admin")]
     [ApiController]
     [Route("api/[controller]")]
@@ -201,7 +201,7 @@ namespace DARE_API.Controllers
                 {
                     Log.Error("{Function} Endpoint {Endpoint} is already on {ProjectName}", "AddEndpointMembership", endpoint.Name, project.Name);
                     return null;
-                }
+                  }
 
                 project.Endpoints.Add(endpoint);
 

@@ -1,6 +1,6 @@
 ﻿@model List<BL.Models.ProjectApproval>
 @{
-    ViewData["Title"] = "Projects";
+    ViewData["Title"] = "Projects Approval";
     var projectsCount = Model.Count;
 }
 
@@ -8,15 +8,12 @@
     <div class="d-flex align-items-center justify-content-between">
         <h1 class="fs-3 mb-0">Membership Approval</h1>
 
-        @*<a asp-controller="Project" asp-action="AddProjectForm" class="btn btn-primary btn-sm">
-        <i class="fa fa-plus align-middle mr-2"></i>
-        <span>Create Project</span>
-        </a>*@
+     
     </div>
-    <hr class="d-flex mt-4 mb-5">
+    <hr class="d-flex my-4 mb-5">
     <div class="table-responsive">
         <table id="projectList" class="table table-bordered table-striped no-head" caption="List of Projects">
-            <thead><tr><td>Project</td></tr></thead>
+            <thead><tr><td>Membership Approval</td></tr></thead>
             <tbody>
                 @foreach (var project in Model)
                 {
@@ -25,24 +22,23 @@
 
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <div>
-                                    <a href="#"><h2 class="mb-0 fw-bold hover-underline fs-5">@project.Id</h2></a>
-                                    <p class="text-muted small mb-0">#[Project ID = @project.Id]</p>
+                                    <a href="#">
+                                        <h2 class="mb-0 fw-bold hover-underline fs-5">
+                                            <a href="@Url.Action("GetProject", "Project", new { id = project.ProjectId })">@project.Projectname</a>
+                                        </h2>
+                                    </a>
+                                    <p class="text-muted small mb-0">Project Id : @project.ProjectId</p>
                                 </div>
                                 <a href="@Url.Action("EditProject", "Project",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
                             </div>
-                            <div class="">
-                                @*  <a href="#" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                            @project.Users.Count People
-                            </a>*@
+                        
+                            <p class="text-muted fs-6 mb-0">
+                                User Name: @project.Username <span class="mx-2"></span>Local Projectname: @project.LocalProjectName
+                            </p>
 
-
-                            </div>
-
-                            @* <p class="text-muted fs-6 mb-0">
-                        Start Date: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate
-                        </p>*@
-
-
+                            <p class="text-muted fs-6 mb-0">
+                                Approved : @project.Approved <span class="mx-2"></span>Approved By: @project.ApprovedBy
+                            </p>
 
 
 

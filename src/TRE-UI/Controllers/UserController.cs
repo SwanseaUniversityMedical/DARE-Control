@@ -8,6 +8,7 @@ using Serilog;
 
 namespace TRE_UI.Controllers
 {
+    //[Authorize(Roles = "dare-control-admin")]
     public class UserController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
