@@ -225,6 +225,9 @@ header .navbar-collapse .nav-link {
     width: 0%;
     left: 50%;
 }
+.nav-underline .nav-link.active, .nav-underline .show > .nav-link {
+    border-bottom: 3px solid #3db28c;
+}
 .footer-top {
     background-color: rgb(238, 238, 238);
 }
