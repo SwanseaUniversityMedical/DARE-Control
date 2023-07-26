@@ -25,7 +25,8 @@ namespace TRE_API.Controllers
         [HttpPost("DAREUpdateSubmission")]
         public async void DAREUpdateSubmission(string endpointname, string tesId, string submissionStatus) 
         {
-            await _signalRService.SendUpdateMessage("TREUpdateStatus", endpointname, tesId, submissionStatus);
+            List<string> StringList = new List<string> { endpointname, tesId, submissionStatus };
+            await _signalRService.SendUpdateMessage("TREUpdateStatus", StringList);
         }
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Serilog;
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -36,28 +37,34 @@ namespace DARE_API.Services
                 await connection.StartAsync();
             };
 
-            connection.On<string, string, string>("TREUpdateStatus", UpdateStatusForEndpoint);
+            connection.On<List<string>>("TREUpdateStatus", UpdateStatusForEndpoint);
 
             connection.StartAsync();
 
             return Task.CompletedTask;
         }
 
-        private void UpdateStatusForEndpoint(string endpointname, string tesId, string status)
+        private void UpdateStatusForEndpoint(List<string> varList)
         {
+            string endpointname = varList[0];
+            string tesId = varList[1];
+            string status = varList[2];
+
             using (var scope = _serviceScopeFactory.CreateScope())
             {
                 var _DbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.Name.ToLower() == endpointname.ToLower());
                 if (endpoint == null)
                 {
-                    //return BadRequest("No access to endpoint " + endpointname + " or does not exist.");
+                    Log.Error("DAREBackgroundService: Unable to find endpoint");
+                    return;
                 }
 
                 var sub = _DbContext.Submissions.FirstOrDefault(x => x.TesId == tesId && x.EndPoint == endpoint);
                 if (sub == null)
                 {
-                    //return BadRequest("Invalid tesid or endpoint not valid for tes");
+                    Log.Error("DAREBackgroundService: Unable to find submission");
+                    return;
                 }
 
                 Enum.TryParse(status, out SubmissionStatus myStatus);
