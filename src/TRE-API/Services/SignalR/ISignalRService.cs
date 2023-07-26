@@ -4,7 +4,7 @@ namespace TRE_API.Services.SignalR
 {
     public interface ISignalRService
     {
-        Task SendUpdateMessage(string updateName);
+        Task SendUpdateMessage(string updateName, List<string> varList);
     }
 
     public class SignalRService : Hub, ISignalRService
@@ -16,9 +16,9 @@ namespace TRE_API.Services.SignalR
             _hubContext = hubContext;
         }
 
-        public async Task SendUpdateMessage(string updateName)
+        public async Task SendUpdateMessage(string updateName, List<string> varList)
         {
-            await _hubContext.Clients.All.SendAsync(updateName, "Var1", "Var2");
+            await _hubContext.Clients.All.SendAsync(updateName, varList);
         }
     }
 }
