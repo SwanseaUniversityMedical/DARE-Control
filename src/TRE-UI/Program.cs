@@ -286,7 +286,7 @@ Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHost
 
 }
 
-//removed
+//removed to stop redirection
 //app.UseHttpsRedirection();
 
 app.UseStaticFiles();
