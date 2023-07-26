@@ -11,13 +11,10 @@ namespace BL.Models
         public int ProjectId { get; set; }
         public string? Projectname { get; set; }
         public string? Username { get; set; }
-        //[JsonIgnore]
-        //public IEnumerable<SelectListItem>? ProjectItemList { get; set; }
-        //[JsonIgnore]
-        //public IEnumerable<SelectListItem>? UserItemList { get; set; }
+     
         public string? LocalProjectName { get; set; }
-        public string? Approved { get; set; }
-        public string? ApprovedBy { get; set; }
+        public string? Approved { get; set; } 
+        public string? ApprovedBy { get; set; } 
         public DateTime Date { get; set; }
     }
 }

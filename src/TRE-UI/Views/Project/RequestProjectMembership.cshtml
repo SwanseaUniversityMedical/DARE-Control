@@ -1,4 +1,11 @@
 ﻿@model BL.Models.DTO.ProjectUserTre
+@{
+    ViewData["Title"] = "Project Approval";
+    var result = ViewBag.ApprovalResult;
+
+}
+
+
 <style>
     .box {
         display: inline-flex;
@@ -21,7 +28,7 @@
 
             <div class="tab-content" id="myTabContent">
                 <h1>Request Membership</h1>
-
+              
                 <form method="post" asp-action="RequestProjectMembership">
                     <div asp-validation-summary="All"></div>
                     <label> User Name : </label> <div class="form-group">
@@ -65,7 +72,7 @@
                         <a asp-controller="Project" asp-action="RequestProjectMembership" class="btn btn-link">
                             Cancel
                         </a>
-                    </div>
+                  </div>
                 </form>
             </div>
         </div>
