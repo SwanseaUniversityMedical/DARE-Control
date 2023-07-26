@@ -26,9 +26,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 IdentityModelEventSource.ShowPII = true;
 
-builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
-    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-); ; ;
+builder.Services.AddControllersWithViews().AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore); 
+
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
@@ -90,11 +89,13 @@ builder.Services.AddAuthorization(options =>
                     claim.Type == "groups"
                     && claim.Value.Contains("dare-control-user"))));
 });
+
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 builder.Services.AddCors(options =>
 {
-
     options.AddPolicy(name: MyAllowSpecificOrigins,
         policy =>
         {
@@ -107,8 +108,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
-    options.ForwardedHeaders =
-        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
 
     options.KnownNetworks.Clear();
     options.KnownProxies.Clear();
@@ -254,6 +254,7 @@ builder.Services.AddAuthentication(options =>
 
 
 var app = builder.Build();
+
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedProto
@@ -289,10 +290,13 @@ Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHost
 //app.UseHttpsRedirection();
 
 app.UseStaticFiles();
-app.UseCookiePolicy(new CookiePolicyOptions
-{
-    Secure = CookieSecurePolicy.Always
-});
+
+// ST: try removing to stop https redirect
+//app.UseCookiePolicy(new CookiePolicyOptions
+//{
+//    Secure = CookieSecurePolicy.Always
+//});
+
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -301,7 +305,9 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
 app.UseCors();
+
 app.Run();
 
 #region SameSite Cookie Issue - https://community.auth0.com/t/correlation-failed-unknown-location-error-on-chrome-but-not-in-safari/40013/7
