@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 using BL.Models.DTO;
 
-namespace BL.Repositories.DbContexts
+namespace DARE_API.Repositories.DbContexts
 {
     public class ApplicationDbContext : DbContext
     {
@@ -25,7 +25,7 @@ namespace BL.Repositories.DbContexts
         public DbSet<Project> Projects { get; set; }
         
         
-        public DbSet<Models.Endpoint> Endpoints { get; set; }
+        public DbSet<BL.Models.Endpoint> Endpoints { get; set; }
 
         
 

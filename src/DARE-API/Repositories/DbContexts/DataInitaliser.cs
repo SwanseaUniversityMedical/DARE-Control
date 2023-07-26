@@ -1,4 +1,4 @@
-﻿namespace BL.Repositories.DbContexts
+﻿namespace DARE_API.Repositories.DbContexts
 {
     public class DataInitaliser
     {

@@ -13,7 +13,8 @@ using System.Collections.Generic;
 using Amazon.S3;
 
 namespace TRE_UI.Controllers
-{ 
+{
+    //[Authorize]
     //[Authorize(Roles = "dare-control-admin")]
     public class ProjectController : Controller
     {
@@ -107,10 +108,12 @@ namespace TRE_UI.Controllers
         public async Task<IActionResult> RequestProjectMembership(ProjectUserTre model)
         {
 
-            model = GetProjectUserModelSubmit(model.ProjectId,model.UserId,model.LocalProjectName);
+            //model = GetProjectUserModelSubmit(model.ProjectId,model.UserId,model.LocalProjectName);
           
             var result = await _treclientHelper.CallAPI<ProjectUserTre, ProjectUserTre?>("/api/Project/RequestMembership", model);
-            ViewBag.ApprovalResult= "Project Sent for Approval!";
+            //ViewBag.ApprovalResult= "Project Sent for Approval!";
+            TempData["name"] = "Project Sent for Approval!";
+          
             return View(result);
 
 

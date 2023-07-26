@@ -25,9 +25,9 @@ namespace TRE_API.Controllers
 
         public ProjectController(ApplicationDbContext applicationDbContext)
         {
-
             _DbContext = applicationDbContext;
         }
+
         [HttpPost("RequestMembership")]
         public async Task<ProjectApproval?> RequestMembership(ProjectUserTre model)
         {
@@ -37,17 +37,17 @@ namespace TRE_API.Controllers
                 var proj = new ProjectApproval();
 
                 proj.Date = DateTime.Now.ToUniversalTime();
-                proj.ProjectId = 3;
-                proj.UserId = 3;
-                proj.Projectname = "Project3";
-                proj.Username = "User3";
-                proj.LocalProjectName = "testb";
+                //proj.ProjectId = 2;
+                //proj.UserId = 2;
+                //proj.Projectname = "Project2";
+                //proj.Username = "User2";
+                //proj.LocalProjectName = "testa";
 
-                //proj.ProjectId = model.ProjectId;
-                //proj.UserId = model.UserId;
-                //proj.Projectname = model.Projectname;
-                //proj.Username = model.Username;
-                // proj.LocalProjectName =model.LocalProjectName;
+                proj.ProjectId = model.ProjectId;
+                proj.UserId = model.UserId;
+                proj.Projectname = model.Projectname;
+                proj.Username = model.Username;
+                proj.LocalProjectName = model.LocalProjectName;
 
 
                 _DbContext.ProjectApproval.Add(proj);
@@ -67,6 +67,7 @@ namespace TRE_API.Controllers
 
 
         }
+
         [HttpPost("EditProjectApproval")]
         public async Task<ProjectApproval?> EditProjectApproval(ProjectApproval model)
         {
