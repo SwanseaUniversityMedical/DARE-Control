@@ -5,13 +5,13 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["src/services/TREAgent/TREAgent.csproj", "src/services/TREAgent/"]
-COPY ["src/BL/BL.csproj", "src/BL/"]
-RUN dotnet restore "src/services/TREAgent/TREAgent.csproj"
+COPY ["TREAgent/TREAgent.csproj", "TREAgent/"]
+COPY ["BL/BL.csproj", "BL/"]
+RUN dotnet restore "TREAgent/TREAgent.csproj"
 RUN dotnet restore "BL/BL.csproj"
 
 COPY . .
-WORKDIR "/src/src/services/TREAgent"
+WORKDIR "/src/TREAgent"
 RUN dotnet build "TREAgent.csproj" -c Release -o /app/build
 
 FROM build AS publish
