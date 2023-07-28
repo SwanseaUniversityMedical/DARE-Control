@@ -13,6 +13,7 @@ namespace TRE_UI.Controllers
             _logger = logger;
         }
 
+
         public IActionResult Index()
         {
             return View();
