@@ -30,20 +30,6 @@ using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//Log.Logger = new LoggerConfiguration()
-//    .MinimumLevel.Verbose()
-//    .Enrich.WithDemystifiedStackTraces()
-//    .Enrich.WithExceptionDetails(new DestructuringOptionsBuilder()
-//        .WithDefaultDestructurers()
-//        .WithDestructurers(new[] { new DbUpdateExceptionDestructurer() }))
-//    .Enrich.WithProperty("MainSystem", "DareFX")
-//    .Enrich.WithProperty("Component", "SubmissionUI")
-//    .Enrich.FromLogContext()
-//    .Enrich.WithProperty("ServerName", Environment.MachineName)
-//    .Enrich.FromLogContext()
-//    .WriteTo.Console()
-//    .WriteTo.Seq(builder.Configuration["SeqURL"])
-//    .CreateLogger();
 
 IdentityModelEventSource.ShowPII = true;
 // Add services to the container.
@@ -56,7 +42,7 @@ IWebHostEnvironment environment = builder.Environment;
 Log.Logger = CreateSerilogLogger(configuration, environment);
 Log.Information("Dare-FrontEnd logging Start.");
 
-string AppName = typeof(Program).Module.Name.Replace(".dll", "");
+
 
 
 // -- authentication here
@@ -74,11 +60,6 @@ builder.Services.AddScoped<CustomCookieEvent>();
 builder.Services.AddScoped<IDareClientHelper, DareClientHelper>();
 
 
-//builder.Services.AddSingleton(new JsonSerializerOptions()
-//{
-//    PropertyNameCaseInsensitive = true,
-//    ReferenceHandler = ReferenceHandler.Preserve
-//});
 
 
 
@@ -307,7 +288,7 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+   // app.UseHsts();
 }
 
 Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHostEnvironment environment)
