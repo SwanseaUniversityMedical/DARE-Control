@@ -529,7 +529,7 @@ jobs:
         if: steps.container-changes.outputs.src == 'true'
         working-directory: src/
         run: |
-          docker build -t image -f "TRE-FrontEnd/Dockerfile" .
+          docker build -t image -f "TRE-UI/Dockerfile" .
 
       - name: registry login
         if: steps.container-changes.outputs.src == 'true'
