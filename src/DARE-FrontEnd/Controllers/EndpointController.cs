@@ -25,7 +25,7 @@ namespace DARE_FrontEnd.Controllers
         {
             return View(new FormData()
             {
-                FormIoUrl = "https://formio.ukserp.ac.uk/dev-sumcldchbogedhw/addendpoint"
+                FormIoUrl = "https://formio.ukserp.ac.uk/dev-sumcldchbogedhw/addendpoints"
             });
 
         }
@@ -35,7 +35,7 @@ namespace DARE_FrontEnd.Controllers
         {
             return View(new FormData()
             {
-                FormIoUrl = "https://formio.ukserp.ac.uk/dev-sumcldchbogedhw/addendpoint"
+                FormIoUrl = "https://formio.ukserp.ac.uk/dev-sumcldchbogedhw/addendpoints"
             });
         }
 
