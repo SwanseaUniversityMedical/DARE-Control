@@ -40,8 +40,14 @@ namespace DARE_FrontEnd.Controllers
         {
             return View();
         }
-
-
+        public IActionResult TermsAndConditions()
+        {
+            return View();
+        }
+        public IActionResult PrivacyPolicy()
+        {
+            return View();
+        }
 
     }
 }
