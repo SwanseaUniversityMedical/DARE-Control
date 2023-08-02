@@ -35,14 +35,14 @@
                                 <a href="@Url.Action("EditProject", "Project",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
                             </div>
                             <div class="">
-                                <a href="#" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#submissions" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                    @project.Submissions.Count Submissions
+                                </a>
+                                <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#people" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
                                     @project.Users.Count People
                                 </a>
-                                <a href="#" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                    @project.Endpoints.Count Endpoints
-                                </a>
-                                <a href="#" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                    @project.Submissions.Count Submissions
+                                <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#tre" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                    @project.Endpoints.Count TREs
                                 </a>
                             </div>
                             <p class="my-4">

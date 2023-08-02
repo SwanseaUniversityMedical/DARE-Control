@@ -124,9 +124,21 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/bootstrap-history-tabs.js"></script>
     <script src="~/js/datatables.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
+        $(document).ready(function () {
+            if (location.hash !== '') $('a[href="' + location.hash + '"]').tab('show');
+            return $('a[data-toggle="tab"]').on('shown', function (e) {
+                return location.hash = $(e.target).attr('href').substr(1);
+            });
+        });
+        $('.nav-underline a').click(function () {
+            var addressValue = $(this).attr("href");
+            window.location.hash = addressValue;
+        });
+
         new DataTable('#projectList');
         $('#launch-button').on('click', function () {
 
@@ -174,7 +186,7 @@
                     type: "POST",
                     data: { ProjectId: el, ItemList: commaSeparatedIds },
                     success: function (reponse) {
-                        window.location.href = "/Project/EditProject?projectId="+el;
+                        window.location.href = "/Project/EditProject?projectId=" + el;
                     }
                 })
             }
