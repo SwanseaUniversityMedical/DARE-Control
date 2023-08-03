@@ -37,7 +37,7 @@ namespace BL.Models.Settings
         }
         public string ProjectForm
         {
-            get => useInternal==trues ? in_projectForm : projectForm;
+            get => useInternal==true ? in_projectForm : projectForm;
             set => projectForm = value;
         }
     }
