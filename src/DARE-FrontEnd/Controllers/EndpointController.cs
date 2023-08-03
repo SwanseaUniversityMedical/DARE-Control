@@ -31,7 +31,10 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public IActionResult AddEndpoint()
         {
-            return View(new FormData() { FormIoUrl = _formIOSettings.EndpointForm });
+            return View(new FormData()
+            {
+                FormIoUrl =  _formIOSettings.EndpointForm
+            });
         }
 
         [HttpPost]
