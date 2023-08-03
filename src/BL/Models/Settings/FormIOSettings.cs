@@ -16,10 +16,29 @@ namespace BL.Models.Settings
 
     public class FormIOSettings : IFormIOSettings
     {
+        private string projectForm;
+        private string userForm;
+        private string endpointForm;
+        const string in_projectForm="/formio/project.json";
+        const string in_userForm="/formio/user.json";
+        const string in_endpointForm="/form/endpoint.json";
+
         public bool UseInternal { get; set; } = false;
-        public string EndpointForm { get; set; }
-        public string UserForm { get; set; }
-        public string ProjectForm { get; set; }
+        public string EndpointForm
+        {
+            get => UseInternal ? in_endpointForm :  endpointForm;
+            set => endpointForm = value;
+        }
+        public string UserForm
+        {
+            get => UseInternal ? in_userForm : userForm;
+            set => userForm = value;
+        }
+        public string ProjectForm
+        {
+            get => UseInternal ? in_projectForm : projectForm;
+            set => projectForm = value;
+        }
     }
 
 
