@@ -19,25 +19,25 @@ namespace BL.Models.Settings
         private string projectForm;
         private string userForm;
         private string endpointForm;
-        
+        private bool useInternal = false;
         const string in_projectForm="/formio/project.json";
         const string in_userForm="/formio/user.json";
         const string in_endpointForm="/form/endpoint.json";
 
-        public bool UseInternal { get; set; } = false;
+        public bool UseInternal { get => useInternal; set => useInternal = value; }
         public string EndpointForm
         {
-            get => UseInternal ? in_endpointForm :  endpointForm;
+            get => useInternal==true ? in_endpointForm :  endpointForm;
             set => endpointForm = value;
         }
         public string UserForm
         {
-            get => UseInternal ? in_userForm : userForm;
+            get => useInternal==true ? in_userForm : userForm;
             set => userForm = value;
         }
         public string ProjectForm
         {
-            get => UseInternal ? in_projectForm : projectForm;
+            get => useInternal==trues ? in_projectForm : projectForm;
             set => projectForm = value;
         }
     }
