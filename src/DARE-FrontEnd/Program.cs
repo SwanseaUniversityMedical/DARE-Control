@@ -59,9 +59,6 @@ builder.Services.AddScoped<CustomCookieEvent>();
 
 builder.Services.AddScoped<IDareClientHelper, DareClientHelper>();
 
-var FormIOSettings = new FormIOSettings();
-configuration.Bind(nameof(FormIOSettings), FormIOSettings);
-builder.Services.AddScoped<IFormIOSettings, FormIOSettings>();
 
 builder.Services.AddMvc().AddViewComponentsAsServices();
 

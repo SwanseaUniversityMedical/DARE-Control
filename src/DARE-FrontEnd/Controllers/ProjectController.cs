@@ -21,12 +21,16 @@ namespace DARE_FrontEnd.Controllers
     public class ProjectController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
-        private readonly IFormIOSettings _formSettings;
+        private readonly IConfiguration _configuration;
+        private readonly IFormIOSettings _formIOSettings;
 
-        public ProjectController(IDareClientHelper client, IFormIOSettings formSettings)
+        public ProjectController(IDareClientHelper client, IConfiguration configuration)
         {
             _clientHelper = client;
-            _formSettings = formSettings;
+            _configuration = configuration;
+            _formIOSettings = new FormIOSettings();
+            configuration.Bind(nameof(FormIOSettings), _formIOSettings);
+
         }
 
         [AllowAnonymous]
@@ -143,7 +147,7 @@ namespace DARE_FrontEnd.Controllers
         {
 
 
-            return Task.FromResult<IActionResult>(View(new FormData() { FormIoUrl = _formSettings.ProjectForm }));
+            return Task.FromResult<IActionResult>(View(new FormData() { FormIoUrl = _formIOSettings.ProjectForm }));
         }
 
         [HttpPost]

@@ -14,16 +14,21 @@ namespace DARE_FrontEnd.Controllers
     public class UserController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
-        private readonly IFormIOSettings _formSettings;
+        private readonly IConfiguration _configuration;
+        private readonly IFormIOSettings _formIOSettings;
 
-        public UserController(IDareClientHelper client, IFormIOSettings formSettings)
+        public UserController(IDareClientHelper client, IConfiguration configuration)
         {
             _clientHelper = client;
-            _formSettings = formSettings;
+            _configuration = configuration;
+            _formIOSettings = new FormIOSettings();
+            configuration.Bind(nameof(FormIOSettings), _formIOSettings);
+
         }
+
         public IActionResult AddUserForm()
         {
-            return View(new FormData() { FormIoUrl = _formSettings.UserForm });
+            return View(new FormData() { FormIoUrl = _formIOSettings.UserForm });
         }
 
         [HttpGet]

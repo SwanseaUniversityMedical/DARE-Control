@@ -16,19 +16,22 @@ namespace DARE_FrontEnd.Controllers
     {
 
         private readonly IDareClientHelper _clientHelper;
-        private readonly IFormIOSettings _formSettings;
+        private readonly IConfiguration _configuration;
+        private readonly IFormIOSettings _formIOSettings;
 
-        public EndpointController(IDareClientHelper client, IFormIOSettings formSettings)
+        public EndpointController(IDareClientHelper client, IConfiguration configuration)
         {
             _clientHelper = client;
-            _formSettings = formSettings;
+            _configuration = configuration;
+            _formIOSettings = new FormIOSettings();
+            configuration.Bind(nameof(FormIOSettings), _formIOSettings);
+
         }
-      
 
         [HttpGet]
         public IActionResult AddEndpoint()
         {
-            return View(new FormData() { FormIoUrl = _formSettings.EndpointForm });
+            return View(new FormData() { FormIoUrl = _formIOSettings.EndpointForm });
         }
 
         [HttpPost]
@@ -36,7 +39,7 @@ namespace DARE_FrontEnd.Controllers
         {
             var data = new FormData()
             {
-                FormIoUrl = _formSettings.EndpointForm,
+                FormIoUrl = _formIOSettings.EndpointForm,
                 FormIoString = JsonConvert.SerializeObject(model)
             };
             var result =  _clientHelper.CallAPI<FormData, Endpoint?>("/api/Endpoint/AddEndpointMVC", data).Result;
