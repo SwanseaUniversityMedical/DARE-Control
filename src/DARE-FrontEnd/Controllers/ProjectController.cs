@@ -13,6 +13,7 @@ using Endpoint = BL.Models.Endpoint;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
+using BL.Models.Settings;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -20,10 +21,12 @@ namespace DARE_FrontEnd.Controllers
     public class ProjectController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
+        private readonly IFormIOSettings _formSettings;
 
-        public ProjectController(IDareClientHelper client)
+        public ProjectController(IDareClientHelper client, IFormIOSettings formSettings)
         {
             _clientHelper = client;
+            _formSettings = formSettings;
         }
 
         [AllowAnonymous]
@@ -139,14 +142,8 @@ namespace DARE_FrontEnd.Controllers
         public Task<IActionResult> AddProjectForm()
         {
 
-            
-            return Task.FromResult<IActionResult>(View(new FormData()
-            {
-                FormIoUrl = "https://formio.ukserp.ac.uk/dev-sumcldchbogedhw/addprojectform"
-         
-            }));
 
-            ////"https://feidldzemrnfcva.form.io/createnewproject"
+            return Task.FromResult<IActionResult>(View(new FormData() { FormIoUrl = _formSettings.ProjectForm }));
         }
 
         [HttpPost]

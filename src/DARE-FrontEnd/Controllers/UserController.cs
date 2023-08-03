@@ -1,5 +1,6 @@
 ﻿using BL.Models;
 using BL.Models.DTO;
+using BL.Models.Settings;
 using BL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,16 +14,16 @@ namespace DARE_FrontEnd.Controllers
     public class UserController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
-        public UserController(IDareClientHelper client)
+        private readonly IFormIOSettings _formSettings;
+
+        public UserController(IDareClientHelper client, IFormIOSettings formSettings)
         {
             _clientHelper = client;
+            _formSettings = formSettings;
         }
         public IActionResult AddUserForm()
         {
-            return View(new FormData()
-            {
-                FormIoUrl = "https://bthbspqizezypsb.form.io/dareuser/dareuserregistration"
-            });
+            return View(new FormData() { FormIoUrl = _formSettings.UserForm });
         }
 
         [HttpGet]

@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using System.Data;
 using Microsoft.AspNetCore.Authorization;
 using Endpoint = BL.Models.Endpoint;
+using BL.Models.Settings;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -15,19 +16,19 @@ namespace DARE_FrontEnd.Controllers
     {
 
         private readonly IDareClientHelper _clientHelper;
-        public EndpointController(IDareClientHelper client)
+        private readonly IFormIOSettings _formSettings;
+
+        public EndpointController(IDareClientHelper client, IFormIOSettings formSettings)
         {
             _clientHelper = client;
+            _formSettings = formSettings;
         }
       
 
         [HttpGet]
         public IActionResult AddEndpoint()
         {
-            return View(new FormData()
-            {
-                FormIoUrl = "https://formio.ukserp.ac.uk/dev-sumcldchbogedhw/addendpoints"
-            });
+            return View(new FormData() { FormIoUrl = _formSettings.EndpointForm });
         }
 
         [HttpPost]
@@ -35,7 +36,7 @@ namespace DARE_FrontEnd.Controllers
         {
             var data = new FormData()
             {
-                FormIoUrl = "https://psttpefwlitcuek.form.io/endpoint",
+                FormIoUrl = _formSettings.EndpointForm,
                 FormIoString = JsonConvert.SerializeObject(model)
             };
             var result =  _clientHelper.CallAPI<FormData, Endpoint?>("/api/Endpoint/AddEndpointMVC", data).Result;
