@@ -10,7 +10,7 @@ using BL.Models;
 namespace DARE_API.Controllers
 {
     [Authorize(Roles = "dare-control-admin")]
-    [ApiController]
+    //[ApiController]
     [Route("api/[controller]")]
     public class EndpointController : Controller
     {
@@ -23,74 +23,36 @@ namespace DARE_API.Controllers
             _DbContext = applicationDbContext;
 
         }
-        
+
         [HttpPost("AddEndpoint")]
 
-        public async Task<Endpoint?> AddEndpoint(FormData data)
-        {
+        public async Task<Endpoint> AddEndpoint([FromBody] FormData data)
+        {           
             try
             {
                 Endpoint endpoints = JsonConvert.DeserializeObject<Endpoint>(data.FormIoString);
-
-                
-                var model = new Endpoint();
-                model.Name = endpoints.Name.Trim();
-                model.FormData = data.FormIoString;
-
+                endpoints.Name = endpoints.Name.Trim();
                 if (_DbContext.Endpoints.Any(x => x.Name.ToLower() == endpoints.Name.ToLower().Trim()))
                 {
                     return null;
                 }
-
-                _DbContext.Endpoints.Add(model);
+                endpoints.FormData = data.FormIoString;
+                _DbContext.Endpoints.Add(endpoints);
 
                 await _DbContext.SaveChangesAsync();
+                return endpoints;
 
-                Log.Information("{Function} Endpoint created successfully", "AddEndpoint");
-                return model;
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "{Function} Crashed", "AddEndpoint");
+
                 var errorEndpoint = new Endpoint();
                 return errorEndpoint;
                 throw;
             }
-
         }
-
-        [HttpPost("AddEndpointMVC")]
-
-        public async Task<Endpoint?> AddEndpointMVC(FormData data)
-        {
-            try
-            {
-                Endpoint model = JsonConvert.DeserializeObject<Endpoint>(data.FormIoString);
-
-                model.Name = model.Name.Trim();
-                
-
-                if (_DbContext.Endpoints.Any(x => x.Name.ToLower() == model.Name.ToLower().Trim()))
-                {
-                    return null;
-                }
-
-                model.FormData = data.FormIoString;
-                _DbContext.Endpoints.Add(model);
-
-                await _DbContext.SaveChangesAsync();
-
-                Log.Information("{Function} Endpoint created successfully", "AddEndpointMVC");
-                return model;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crashed", "AddEndpointMVC");
-                throw;
-            }
-
-        }
-
+     
         [HttpGet("GetEndPointsInProject/{projectId}")]
         [AllowAnonymous]
         public List<Endpoint> GetEndPointsInProject(int projectId)
@@ -107,8 +69,6 @@ namespace DARE_API.Controllers
             }
         }
 
-
-        [AllowAnonymous]
         [HttpGet("GetAllEndpoints")]
         public List<Endpoint> GetAllEndpoints()
         {
@@ -130,7 +90,7 @@ namespace DARE_API.Controllers
 
 
         }
-        [AllowAnonymous]
+        
         [HttpGet("GetAnEndpoint")]
         public Endpoint? GetAnEndpoint(int endpointId)
         {

@@ -19,16 +19,7 @@ namespace DARE_FrontEnd.Controllers
         {
             _clientHelper = client;
         }
-
-        [HttpGet]
-        public IActionResult AddEndpointForm()
-        {
-            return View(new FormData()
-            {
-                FormIoUrl = "https://formio.ukserp.ac.uk/dev-sumcldchbogedhw/addendpoints"
-            });
-
-        }
+      
 
         [HttpGet]
         public IActionResult AddEndpoint()
@@ -53,7 +44,7 @@ namespace DARE_FrontEnd.Controllers
 
         }
 
-        [AllowAnonymous]
+       
         [HttpGet]
         public IActionResult GetAllEndpoints()
         {
@@ -70,11 +61,11 @@ namespace DARE_FrontEnd.Controllers
             var endpointsList = _clientHelper.CallAPIWithoutModel<List<Endpoint>>("/api/Endpoint/GetEndPointsInProject/{projectId}").Result;
             return View(endpointsList);
         }
-        [AllowAnonymous]
+     
         [HttpPost]
         public async Task<IActionResult> EndpointFormSubmission([FromBody] FormData submissionData)
         {
-            var result = await _clientHelper.CallAPI<FormData, Endpoint?>("/api/Endpoint/AddEndpoint", submissionData);
+            var result = await _clientHelper.CallAPI<FormData, Endpoint>("/api/Endpoint/AddEndpoint", submissionData);
             if (result.Id == 0)
             {
                 return BadRequest();
@@ -83,7 +74,7 @@ namespace DARE_FrontEnd.Controllers
             return Ok(result);
         }
 
-        [AllowAnonymous]
+       
         [HttpGet]
         public IActionResult GetAnEndpoint(int id)
         {
