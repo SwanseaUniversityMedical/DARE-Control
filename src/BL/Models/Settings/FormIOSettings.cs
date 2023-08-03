@@ -19,6 +19,7 @@ namespace BL.Models.Settings
         private string projectForm;
         private string userForm;
         private string endpointForm;
+        
         const string in_projectForm="/formio/project.json";
         const string in_userForm="/formio/user.json";
         const string in_endpointForm="/form/endpoint.json";
