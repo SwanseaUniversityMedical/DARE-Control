@@ -44,7 +44,7 @@ namespace TREAgent
                 var treApi = scope.ServiceProvider.GetRequiredService<ITREClientHelper>();
                 var dareApi = scope.ServiceProvider.GetRequiredService<IDareClientHelper>();
                 
-        var subs = dareApi.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForEndpoint",
+                var subs = dareApi.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForEndpoint",
                     new Dictionary<string, string>() { { "endpointname", TreName } }).Result;
 
 

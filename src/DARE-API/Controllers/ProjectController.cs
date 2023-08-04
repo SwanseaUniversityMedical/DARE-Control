@@ -288,6 +288,7 @@ namespace DARE_API.Controllers
         {
             try
             {
+                //TODO - use User.Identity.IsAuthenticated to alter list returned : embargoed etc
 
                 var allProjects = _DbContext.Projects
                     //.Include(x => x.Endpoints)
