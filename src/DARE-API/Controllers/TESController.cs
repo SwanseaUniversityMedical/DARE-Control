@@ -142,11 +142,11 @@ namespace DARE_API.Controllers
             CancellationToken cancellationToken)
         {
 
-
+            // TODO instead of hardcode - user.identity should work
             
 
             //TODO: switch to token auth user. Need to setup a jaybee user for them if not there on deploy
-            var user = _DbContext.Users.FirstOrDefault(x => x.Name.ToLower() == "jaybee");
+            var user = _DbContext.Users.FirstOrDefault(x => x.Name.ToLower() == "simon");
 
             if (user == null)
             {
