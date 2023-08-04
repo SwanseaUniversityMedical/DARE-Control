@@ -25,7 +25,6 @@ namespace DARE_FrontEnd.Controllers
             _configuration = configuration;
             _formIOSettings = new FormIOSettings();
             configuration.Bind(nameof(FormIOSettings), _formIOSettings);
-            _formIOSettings.BaseURL = $"{Request.Scheme}://{Request.Host}:{Request.Host.Port ?? 80}";
         }
 
         [HttpGet]

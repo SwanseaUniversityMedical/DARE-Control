@@ -6,6 +6,10 @@
 }
 @{
     ViewData["Title"] = "Create TRE";
+    if (Model != null && Model.FormIoUrl.StartsWith('/'))
+    {
+        Model.FormIoUrl = $"{Context.Request.Scheme}://{Context.Request.Host.Value}" + Model.FormIoUrl;
+    }
 }
 <div class="container-lg p-4">
     <div class="d-flex align-items-center justify-content-between">
