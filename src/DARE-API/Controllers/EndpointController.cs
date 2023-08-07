@@ -70,7 +70,7 @@ namespace DARE_API.Controllers
         }
 
         [HttpGet("GetAllEndpoints")]
-        public List<Endpoint> GetAllEndpoints()
+        public async Task<List<Endpoint>> GetAllEndpoints()
         {
             try
             {
