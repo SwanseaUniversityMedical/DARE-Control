@@ -67,7 +67,7 @@ namespace BL.Services
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    Log.Error(e, "{Function} Failed deserialising string ", "CallAPIWithReturnType");
                     throw;
                 }
 
@@ -146,8 +146,9 @@ namespace BL.Services
                 if (method == HttpMethod.Delete) res = await apiClient.DeleteAsync(endPoint);
                 if (!res.IsSuccessStatusCode)
                 {
-                    var i = 1;
+                   throw new Exception("API Call Failure: " + res.StatusCode + ": " + res.ReasonPhrase);
                 }
+                Log.Information("{Function} The response {res}", "ClientHelperRequestAsync", res);
                 Console.Out.Write(res);
                 return res;
             }
