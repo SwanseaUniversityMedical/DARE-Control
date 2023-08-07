@@ -49,18 +49,10 @@ namespace DARE_FrontEnd.Controllers
         [AllowAnonymous]
         public IActionResult GetAllProjects()
         {
-            try
-            {
-
+           
             
             var projects = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/")?.Result;
-            return View(projects);
-            }
-            catch (AggregateException e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+           
             
         }
 
