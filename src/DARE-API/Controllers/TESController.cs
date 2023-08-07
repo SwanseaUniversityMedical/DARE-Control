@@ -143,10 +143,12 @@ namespace DARE_API.Controllers
         {
 
             // TODO instead of hardcode - user.identity should work
-            
+
+            //{ preferred_username: simon}
+            var usersName = (from x in User.Claims where x.Type== "preferred_username" select x.Value).First();
 
             //TODO: switch to token auth user. Need to setup a jaybee user for them if not there on deploy
-            var user = _DbContext.Users.FirstOrDefault(x => x.Name.ToLower() == "simon");
+            var user = _DbContext.Users.FirstOrDefault(x => x.Name.ToLower() == usersName.ToLower());
 
             if (user == null)
             {
