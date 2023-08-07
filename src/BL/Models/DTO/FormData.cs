@@ -16,7 +16,7 @@ namespace BL.Models.DTO
     public class FormData
     {
         public int Id { get; set; }
-        public string FormIoUrl { get; set; }
+        public string? FormIoUrl { get; set; }
         public string? FormIoString { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
                

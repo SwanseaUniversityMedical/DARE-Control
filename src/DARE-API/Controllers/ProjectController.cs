@@ -15,6 +15,7 @@ using EasyNetQ;
 using Serilog;
 using Endpoint = BL.Models.Endpoint;
 using BL.Services;
+using EasyNetQ.Management.Client.Model;
 
 namespace DARE_API.Controllers
 {
@@ -97,7 +98,46 @@ namespace DARE_API.Controllers
 
 
         }
-    
+
+        [HttpPost("EditProject")]
+        public async Task<Project?> EditProject(FormData data)
+        {
+            try
+            {
+                Project projects = JsonConvert.DeserializeObject<Project>(data.FormIoString);
+                var id = data.Id;
+                var project = _DbContext.Projects.Find(id);
+
+                //var model = new Project();
+
+                if (project != null)
+                {
+                    project.Id = id;
+                    project.Name = projects.Name;
+                    project.OutputBucket = projects.OutputBucket;
+                    project.SubmissionBucket = projects.SubmissionBucket;
+                    project.StartDate = projects.StartDate.ToUniversalTime();
+                    project.EndDate = projects.EndDate.ToUniversalTime();
+                    project.FormData=data.FormIoString;
+                }
+
+                _DbContext.Projects.Update(project);
+
+                await _DbContext.SaveChangesAsync();
+
+                Log.Information("{Function} Projects Updated successfully", "UpdateProject");
+                return project;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "UpdateProject");
+                var errorModel = new Project();
+                return errorModel;
+                throw;
+            }
+
+        }
+
         [HttpPost("AddUserMembership")]
         public async Task<ProjectUser?> AddUserMembership(ProjectUser model)
         {
