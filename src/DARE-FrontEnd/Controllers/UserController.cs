@@ -62,7 +62,7 @@ namespace DARE_FrontEnd.Controllers
         public async Task<IActionResult> UserFormSubmission([FromBody] string submissionData)//FormData submissionData)
         {
 
-            var result = await _clientHelper.CallAPI<string, User>("/api/User/AddUser", submissionData, null, true);
+            var result = await _clientHelper.CallAPI<string, BL.Models.User>("/api/User/AddUser", submissionData, null, true);
 
             if (result.Id == 0)
             {
@@ -77,7 +77,7 @@ namespace DARE_FrontEnd.Controllers
         {
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("userId", id.ToString());
-            var result = _clientHelper.CallAPIWithoutModel<User?>(
+            var result = _clientHelper.CallAPIWithoutModel<BL.Models.User?>(
                 "/api/User/GetUser/", paramlist).Result;
 
             return View(result);

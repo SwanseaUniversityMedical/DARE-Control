@@ -38,14 +38,15 @@ namespace BL.Controllers
         {
             try
             {
-                User userData = JsonConvert.DeserializeObject<User>(data.FormIoString);
+                User userData = JsonConvert.DeserializeObject<User>(data);
                 userData.Name = userData.Name.Trim();
                 userData.Email = userData.Email.Trim();
                 if (_DbContext.Users.Any(x => x.Name.ToLower() == userData.Name.ToLower().Trim()))
                 {
                     return new User();
                 }
-                userData.FormData = data.FormIoString;
+
+                userData.FormData = data;
 
                 if (userData.Id > 0)
                 {
