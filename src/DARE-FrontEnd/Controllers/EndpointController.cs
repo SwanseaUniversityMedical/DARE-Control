@@ -38,16 +38,7 @@ namespace DARE_FrontEnd.Controllers
             }); ;
         }
 
-        [HttpGet]
-        public IActionResult AddEndpoint2()
-        {
-            return View(new FormData()
-            {
-                FormIoUrl = _formIOSettings.EndpointForm
-            });
-        }
-
-
+      
 
 
         [HttpGet]
@@ -87,17 +78,7 @@ namespace DARE_FrontEnd.Controllers
             return BadRequest();
         }
 
-        [HttpPost]
-        public IActionResult EndpointFormSubmission2(FormData submissionData)
-        {
-            var result =  _clientHelper.CallAPI<FormData, Endpoint>("/api/Endpoint/AddEndpoint", submissionData);
-            if (result.Id == 0)
-            {
-                return BadRequest();
-
-            }
-            return Ok(result);
-        }
+       
 
 
         [HttpGet]
