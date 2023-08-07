@@ -32,7 +32,7 @@ namespace DARE_FrontEnd.Controllers
         {
             return View(new FormData()
             {
-                FormIoUrl =  _formIOSettings.EndpointForm2
+                FormIoUrl =  _formIOSettings.EndpointForm
             });
         }
 
