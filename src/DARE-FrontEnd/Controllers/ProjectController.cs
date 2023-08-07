@@ -52,6 +52,7 @@ namespace DARE_FrontEnd.Controllers
            
             
             var projects = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/")?.Result;
+            return View(projects);
            
             
         }
