@@ -28,7 +28,10 @@ namespace DARE_FrontEnd.Controllers
 
         public IActionResult AddUserForm()
         {
-            return View(new FormData() { FormIoUrl = _formIOSettings.UserForm });
+            return View(new FormData() { 
+                FormIoUrl = _formIOSettings.UserForm,
+                FormIoString = @"{""id"":0}"
+            });
         }
 
         [HttpGet]
