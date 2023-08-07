@@ -52,6 +52,9 @@
                             <p class="text-muted fs-6 mb-0">
                                 Start Date: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate
                             </p>
+                            <p>
+                                <a href="@Url.Action("GetProjectBuckets", "Project", new { id = project.Id })">@project.Name Buckets</a>
+                            </p>
 
                             
 
