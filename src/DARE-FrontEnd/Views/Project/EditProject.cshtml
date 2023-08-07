@@ -11,8 +11,8 @@
             <h1 class="fs-3 mb-0">@Model.Name</h1>
             <p class="text-muted small mb-0">#@Model.Id</p>
         </div>
-        <a href="@Url.Action("GetProject", "Project", new { id = Model.Id })" class="btn btn-link">
-            <span>Cancel</span>
+        <a href="@Url.Action("GetProject", "Project", new { id = Model.Id })" class="btn btn-sm btn-outline-primary">
+            <span>Exit Edit</span>
         </a>
     </div>
     <div class="mt-4">
@@ -81,63 +81,55 @@
             </div>
             <div class="tab-pane fade" id="submissions" role="tabpanel" aria-labelledby="submissions-tab">
                 <div class="mt-2 mb-2">
-                    <button type="button" class="btn btn-primary" id="addSubmission">Add Submission</button>
+                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addSubmission">Add Submission</button>
                 </div>
                 <p>Details of where bucket repository is...</p>
 
             </div>
             <div class="tab-pane fade" id="userMembership" role="tabpanel" aria-labelledby="profile-tab">
                 <div class="mt-2 mb-2">
-                    <button type="button" class="btn btn-primary" id="addUser">Add Person</button>
+                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addUser">Add User</button>
                 </div>
                 <div class="row">
                     <div class="col-12">
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                @foreach (var user in Model.Users)
-                                {
-                                    <tr>
-                                        <td>
-                                            @user.Name
-                                        </td>
-                                        <td>
-                                            <a href="@Url.Action("RemoveUserFromProject", "Project",new{ProjectId=Model.Id,UserId=@user.Id})"
-                                               class="g-text-underline--none--hover">
-                                                <h5 class="g-font-size-18 g-font-size-22--md g-color-black"><span class="g-color-black" style="word-break: break-word;">Remove</span></h5>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                }
-                            </table>
-                        </div>
+                        <ul class="list-group">
+                            @foreach (var user in Model.Users)
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <a href="@Url.Action("GetUser", "User", new { id = user.Id })" class="fs-6 fw-bold">@user.Name</a>
+                                        <a href="@Url.Action("RemoveUserFromProject", "Project",new{ProjectId=Model.Id,UserId=@user.Id})">
+                                            <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove user from project"></span>
+                                        </a>
+                                    </div>
+
+                                </li>
+                            }
+                        </ul>
                     </div>
                 </div>
 
             </div>
             <div class="tab-pane fade" id="endpoint" role="tabpanel" aria-labelledby="contact-tab">
                 <div class="mt-2 mb-2">
-                    <button type="button" class="btn btn-primary" id="addEndpint">Add TRE</button>
+                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addEndpint">Add TRE</button>
                 </div>
                 <div class="row">
                     <div class="col-12">
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                @foreach (var endpoint in Model.Endpoints)
-                                {
-                                    <tr>
-                                        <td>
-                                            @endpoint.Name
-                                        </td>
-                                        <td>
-                                            <a href="@Url.Action("RemoveEndFromProject", "Project",new{ProjectId=Model.Id,EndpointId=@endpoint.Id})"
-                                               class="g-text-underline--none--hover">
-                                                <h5 class="g-font-size-18 g-font-size-22--md g-color-black"><span class="g-color-black" style="word-break: break-word;">Remove</span></h5>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                }
-                            </table>
-                        </div>
+                        <ul class="list-group">
+                            @foreach (var endpoint in Model.Endpoints)
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <a href="@Url.Action("GetAnEndpoint", "Endpoint", new { id = endpoint.Id })" class="fs-6 fw-bold">@endpoint.Name</a>
+                                        <a href="@Url.Action("RemoveEndFromProject", "Project",new{ProjectId=Model.Id,EndpointId=@endpoint.Id})">
+                                            <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
+                                        </a>
+                                    </div>
+
+                                </li>
+                            }
+                        </ul>
                     </div>
                 </div>
             </div>
