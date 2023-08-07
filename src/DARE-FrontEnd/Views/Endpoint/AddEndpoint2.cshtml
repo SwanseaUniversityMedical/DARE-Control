@@ -1,0 +1,93 @@
+﻿@using Newtonsoft.Json
+@model BL.Models.DTO.FormData
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@{
+    ViewData["Title"] = "Create TRE";
+    if (Model != null && Model.FormIoUrl.StartsWith('/'))
+    {
+        Model.FormIoUrl = $"{Context.Request.Scheme}://{Context.Request.Host.Value}" + Model.FormIoUrl;
+    }
+}
+<div class="container-lg p-4">
+    <div class="d-flex align-items-center justify-content-between">
+        <h1 class="fs-3 mb-0">Create TRE</h1>
+    </div>
+    <hr class="d-flex my-4">
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div id="errorMsg" style="color: #D63301; background-color: #FFCCBA; background-image: url('https://i.imgur.com/GnyDvKN.png'); border: 1px solid;margin: 10px 0px;padding: 15px 10px 15px 50px;background-repeat: no-repeat;background-position: 10px center;display: none;"></div>
+            <div id="FormId"></div>
+            <input type="hidden" name="FormIoString" id="formIoStringField" /> <!-- Hidden field for FormIoString -->
+        </div>
+    </div>
+    
+</div>
+<script>
+
+    var formioJSON = '@Html.Raw(Model.FormIoUrl)';
+    
+    // Render the Formio form
+    Formio.createForm(document.getElementById("FormId"), {
+
+
+        "components": [
+            {
+                "label": "Name",
+                "placeholder": "Enter name of TREs",
+                "key": "name",
+                "type": "textfield",
+                "input": true,
+                "validate": {
+                    "required": false
+                }
+
+            },
+            {
+                "type": "button",
+                "action": "submit",
+                "label": "Create TRE"
+            }
+
+        ]
+    }).then(function (form) {
+        // Handle form submission
+        form.on("submit", function (submission) {
+            // Send the form data to the server
+            var formIoString = JSON.stringify(submission.data);
+            document.getElementById("formIoStringField").value = formIoString;
+            $.ajax({
+                type: "POST",
+                url: "/Endpoint/EndpointFormSubmission2",
+                data: $("#formio").serialize(),
+                success: function () {
+                    // After the form submission is successful, fetch the updated list of endpoints
+                    window.location.href = "/Endpoint/GetAllEndpoints";
+                },
+                error: function () {
+                    // Handle error if needed
+                },
+            });
+        });
+    });
+
+    // Function to fetch and display the list of endpoints
+    function fetchEndpointsList() {
+        $.ajax({
+            type: "GET",
+            url: "/Endpoint/GetAllEndpoints",
+            success: function (data) {
+                // Update the UI with the list of endpoints
+                // e.g., populate a table or list with the received data
+            },
+            error: function () {
+                // Handle error if needed
+            },
+        });
+    }
+
+</script>

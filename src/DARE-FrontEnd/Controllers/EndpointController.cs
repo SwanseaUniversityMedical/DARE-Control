@@ -32,25 +32,22 @@ namespace DARE_FrontEnd.Controllers
         {
             return View(new FormData()
             {
-                FormIoUrl =  _formIOSettings.EndpointForm
+                FormIoUrl =  _formIOSettings.EndpointForm2
             });
         }
 
-        [HttpPost]
-        public IActionResult AddEndpoint(Endpoint model)
+        [HttpGet]
+        public IActionResult AddEndpoint2()
         {
-            var data = new FormData()
+            return View(new FormData()
             {
-                FormIoUrl = _formIOSettings.EndpointForm,
-                FormIoString = JsonConvert.SerializeObject(model)
-            };
-            var result =  _clientHelper.CallAPI<FormData, Endpoint?>("/api/Endpoint/AddEndpointMVC", data).Result;
-
-            return RedirectToAction("GetAllEndpoints");
-
+                FormIoUrl = _formIOSettings.EndpointForm2
+            });
         }
 
-       
+
+
+
         [HttpGet]
         public IActionResult GetAllEndpoints()
         {
@@ -59,8 +56,8 @@ namespace DARE_FrontEnd.Controllers
 
             return View(test);
         }
-        [AllowAnonymous]
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetEndpoints(int projectId)
         {
@@ -69,9 +66,9 @@ namespace DARE_FrontEnd.Controllers
         }
      
         [HttpPost]
-        public async Task<IActionResult> EndpointFormSubmission([FromBody] FormData submissionData)
+        public async Task<IActionResult> EndpointFormSubmission([FromBody] Endpoint submissionData)
         {
-            var result = await _clientHelper.CallAPI<FormData, Endpoint>("/api/Endpoint/AddEndpoint", submissionData);
+            var result = await _clientHelper.CallAPI<Endpoint, Endpoint>("/api/Endpoint/AddEndpoint", submissionData);
             if (result.Id == 0)
             {
                 return BadRequest();
@@ -80,7 +77,19 @@ namespace DARE_FrontEnd.Controllers
             return Ok(result);
         }
 
-       
+        [HttpPost]
+        public IActionResult EndpointFormSubmission2(FormData submissionData)
+        {
+            var result =  _clientHelper.CallAPI<FormData, Endpoint>("/api/Endpoint/AddEndpoint", submissionData);
+            if (result.Id == 0)
+            {
+                return BadRequest();
+
+            }
+            return Ok(result);
+        }
+
+
         [HttpGet]
         public IActionResult GetAnEndpoint(int id)
         {
