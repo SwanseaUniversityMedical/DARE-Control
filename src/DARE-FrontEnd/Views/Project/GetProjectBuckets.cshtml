@@ -1,0 +1,10 @@
+﻿@using BL.Models.DTO
+@model ProjectUserEndpoint
+@{
+    ViewData["Title"] = "Edit @Model.Name";
+}
+
+Minio URL: http://@Html.Raw(Model.MinioEndpoint) 
+
+Submission Bucket: @Html.Raw(Model.SubmissionBucket) 
+Output Bucket: @Html.Raw(Model.OutputBucket)
