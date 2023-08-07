@@ -32,8 +32,10 @@ namespace DARE_FrontEnd.Controllers
         {
             return View(new FormData()
             {
-                FormIoUrl =  _formIOSettings.EndpointForm
-            });
+                FormIoUrl = _formIOSettings.EndpointForm,
+                FormIoString = @"{""id"":0}"
+
+            }); ;
         }
 
         [HttpGet]
@@ -41,7 +43,7 @@ namespace DARE_FrontEnd.Controllers
         {
             return View(new FormData()
             {
-                FormIoUrl = _formIOSettings.EndpointForm2
+                FormIoUrl = _formIOSettings.EndpointForm
             });
         }
 
@@ -66,15 +68,23 @@ namespace DARE_FrontEnd.Controllers
         }
      
         [HttpPost]
-        public async Task<IActionResult> EndpointFormSubmission([FromBody] Endpoint submissionData)
+        public async Task<IActionResult> EndpointFormSubmission([FromBody] object arg, int id)
         {
-            var result = await _clientHelper.CallAPI<Endpoint, Endpoint>("/api/Endpoint/AddEndpoint", submissionData);
-            if (result.Id == 0)
-            {
-                return BadRequest();
+            var str = arg?.ToString();
 
+            if (!string.IsNullOrEmpty(str))
+            {
+                var theEndpoint = System.Text.Json.JsonSerializer.Deserialize<FormData>(str);
+                theEndpoint.FormIoString = str;
+
+                var result = await _clientHelper.CallAPI<FormData, Endpoint>("/api/Endpoint/AddEndpoint", theEndpoint);
+                if (result.Id == 0)
+                {
+                    return BadRequest();
+                } 
+                return Ok(result);
             }
-            return Ok(result);
+            return BadRequest();
         }
 
         [HttpPost]
