@@ -33,19 +33,18 @@ namespace BL.Controllers
         }
 
 
-        [HttpPost("AddUser")]
-        public async Task<User> AddUser([FromBody] FormData data) 
+        [HttpPut("AddUser")]
+        public async Task<User> AddUser([FromBody] string data) 
         {
             try
-            {
-               
-                User users = JsonConvert.DeserializeObject<User>(data.FormIoString);
+            {            
+                User users = JsonConvert.DeserializeObject<User>(data);
                 users.Name = users.Name.Trim();
                 if (_DbContext.Users.Any(x => x.Name.ToLower() == users.Name.ToLower().Trim()))
                 {
-                    return null;
+                    return new User();
                 }
-                users.FormData = data.FormIoString;
+                users.FormData = data;
 
                 _DbContext.Users.Add(users);
 
@@ -56,8 +55,7 @@ namespace BL.Controllers
             catch (Exception ex)
             {
                 Log.Error(ex, "{Function} Crashed", "AddUser");
-                var errorUser = new User();
-                return errorUser;
+                return new User(); ;
                 throw;
             }
 

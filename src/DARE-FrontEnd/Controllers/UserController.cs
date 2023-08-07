@@ -36,23 +36,23 @@ namespace DARE_FrontEnd.Controllers
         public IActionResult GetAllUsers()
         {
 
-            var test = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
+            var result = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
 
-            return View(test);
+            return View(result);
         }
 
         [HttpPost]
-        public async Task<IActionResult> UserFormSubmission([FromBody] FormData submissionData)
+        public async Task<IActionResult> UserFormSubmission([FromBody] string submissionData)//FormData submissionData)
         {
 
-            var result = await _clientHelper.CallAPI<FormData, User>("/api/User/AddUser", submissionData);
+            var result = await _clientHelper.CallAPI<string, User>("/api/User/AddUser", submissionData, null, true);
 
             if (result.Id == 0)
             {
                 return BadRequest();
 
             }
-            return Ok(result);
+            return Json(new { redirectToUrl = "/User/GetAllUsers" });
         }
 
         [AllowAnonymous]
@@ -60,10 +60,10 @@ namespace DARE_FrontEnd.Controllers
         {
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("userId", id.ToString());
-            var test = _clientHelper.CallAPIWithoutModel<User?>(
+            var result = _clientHelper.CallAPIWithoutModel<User?>(
                 "/api/User/GetUser/", paramlist).Result;
 
-            return View(test);
+            return View(result);
         }
 
         [HttpPost]

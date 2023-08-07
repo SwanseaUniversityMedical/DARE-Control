@@ -1,4 +1,4 @@
-function renderForm(layOutURLOrString, formData, submitFuction, ReadOnly = false, divId = "FormId", redirectOverrideUrl) {
+function renderForm(model, layOutURLOrString, formData, submitFuction, ReadOnly = false, divId = "FormId", redirectOverrideUrl) {
     renderForm.draftSubmissionData = "";
     var formReference
 
@@ -57,10 +57,10 @@ function renderForm(layOutURLOrString, formData, submitFuction, ReadOnly = false
                     headers: { 'content-type': 'application/json' },
                     method: 'POST',
                     mode: 'cors'
-                }).then(function (response) {
-                    if (response.ok) {
-                        console.log("Ok");
-                        setTimeout(function () { window.location.href = redirectOverrideUrl; }, 1); //LocalRedirect don't work so we Have to use this to get it working also brakes stuff when it's not delayed by at least a tiny amount
+                }).then(response => response.json())
+                .then(function (response) {
+                    if (response.redirectToUrl) {
+                        window.location.href = response.redirectToUrl;
                         return "GOOD"
                     }
                     else {
