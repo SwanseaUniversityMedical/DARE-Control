@@ -9,6 +9,7 @@ namespace BL.Models.Settings
     public interface IFormIOSettings
     {
         string EndpointForm { get; set; }
+        string EndpointForm2 { get; set; }
         string ProjectForm { get; set; }
         bool UseInternal { get; set; }
         string UserForm { get; set; }
