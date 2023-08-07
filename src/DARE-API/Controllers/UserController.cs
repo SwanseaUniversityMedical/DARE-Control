@@ -33,8 +33,8 @@ namespace BL.Controllers
         }
 
 
-        [HttpPost("AddUser")]
-        public async Task<User> AddUser([FromBody] FormData data) 
+        [HttpPut("AddUser")]
+        public async Task<User> AddUser([FromBody] string data) 
         {
             try
             {
@@ -43,7 +43,7 @@ namespace BL.Controllers
                 userData.Email = userData.Email.Trim();
                 if (_DbContext.Users.Any(x => x.Name.ToLower() == userData.Name.ToLower().Trim()))
                 {
-                    return null;
+                    return new User();
                 }
                 userData.FormData = data.FormIoString;
 
@@ -64,8 +64,7 @@ namespace BL.Controllers
             catch (Exception ex)
             {
                 Log.Error(ex, "{Function} Crashed", "AddUser");
-                var errorUser = new User();
-                return errorUser;
+                return new User(); ;
                 throw;
             }
 
