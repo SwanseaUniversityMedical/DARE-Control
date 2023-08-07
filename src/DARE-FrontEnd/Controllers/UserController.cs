@@ -5,6 +5,7 @@ using BL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Serilog;
 using System.Data;
 
@@ -63,6 +64,40 @@ namespace DARE_FrontEnd.Controllers
                 "/api/User/GetUser/", paramlist).Result;
 
             return View(test);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UserEditFormSubmission([FromBody] FormData submissionData)
+        {
+
+            var result = await _clientHelper.CallAPI<FormData, User>("/api/User/UpdateUser", submissionData);
+
+            if (result.Id == 0)
+            {
+                return BadRequest();
+
+            }
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditUser(int? userId)
+        {
+           
+            var paramList = new Dictionary<string, string>();
+            paramList.Add("userId", userId.ToString());
+            var user = _clientHelper.CallAPIWithoutModel<User?>("/api/User/GetUser/", paramList).Result;
+            var userView = new User()
+            {
+                Id = user.Id,
+                FormData = user.FormData,
+                Name = user.Name,
+                Email = user.Email
+            };
+
+            return View(userView);
+
+           
         }
     }
 }
