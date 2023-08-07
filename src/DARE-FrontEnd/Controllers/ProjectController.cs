@@ -187,7 +187,8 @@ namespace DARE_FrontEnd.Controllers
             var projectView = new ProjectUserEndpoint()
             {
                 Id = project.Id,
-                Name=project.Name,
+                FormData = project.FormData,
+                Name = project.Name,
                 Users = project.Users,
                 StartDate = project.StartDate,
                 EndDate = project.EndDate,
@@ -197,6 +198,21 @@ namespace DARE_FrontEnd.Controllers
             };
 
             return View(projectView);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ProjectEditFormSubmission([FromBody] FormData model)
+        {
+
+            var result =
+                await _clientHelper.CallAPI<FormData, Project?>("/api/Project/EditProject", model);
+
+            if (result.Id == 0)
+            {
+                return BadRequest();
+            }
+
+            return Redirect("/home");
         }
 
         [HttpGet]
