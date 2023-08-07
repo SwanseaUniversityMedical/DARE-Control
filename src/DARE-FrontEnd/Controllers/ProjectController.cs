@@ -17,7 +17,7 @@ using BL.Models.Settings;
 
 namespace DARE_FrontEnd.Controllers
 {
-//    [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
+   [Authorize(Roles = "dare-control-admin")]
     public class ProjectController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
@@ -49,8 +49,12 @@ namespace DARE_FrontEnd.Controllers
         [AllowAnonymous]
         public IActionResult GetAllProjects()
         {
-            var projects = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/")?.Result;
+           
+            
+            var projects = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
             return View(projects);
+           
+            
         }
 
         [HttpGet]

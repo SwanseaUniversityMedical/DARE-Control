@@ -18,7 +18,7 @@ namespace BL.Controllers
 {
     [Authorize]
     //[ApiController]
-    //[Authorize(Roles = "dare-control-admin,dare-tre-admin")]
+    [Authorize(Roles = "dare-control-admin")]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
@@ -109,6 +109,34 @@ namespace BL.Controllers
             }
 
             
+        }
+
+        [AllowAnonymous]
+        [HttpPost("UpdateUser")]
+        public User? UpdateUser([FromBody] FormData data)
+        {
+            User users = JsonConvert.DeserializeObject<User>(data.FormIoString);
+            var id = data.Id;
+            var user = _DbContext.Users.Find(id);
+            try
+            {
+                Log.Information("{Function} User retrieved successfully", "UpdateUser");
+                if (user != null)
+                {
+                    user.Name = users.Name;
+                    user.Email = users.Email;
+                    user.FormData = data.FormIoString;
+                    _DbContext.Users.Update(user);
+                    _DbContext.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "UpdateUser");
+                throw;
+            }
+            return user;
+
         }
     }
 }
