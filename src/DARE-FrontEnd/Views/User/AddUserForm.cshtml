@@ -28,10 +28,7 @@
     </div>
 </div>
 <script>
-    window.onload = function () {
-        renderForm(@Html.Raw(Json.Serialize(Model)), "@Html.Raw(Model?.FormIoUrl)", @Html.Raw(Json.Serialize(Model?.FormIoString)) , '/User/UserFormSubmission');
-        
+    window.onload = function () {         
         renderForm("@Model.FormIoUrl", @Html.Raw(Model.FormIoString), '/User/UserEditFormSubmission/@Url.ActionContext.RouteData.Values["id"]', false, 'formio', "/User/GetAllUsers");
-
     }
 </script>
