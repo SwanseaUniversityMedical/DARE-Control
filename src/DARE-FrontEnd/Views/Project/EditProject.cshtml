@@ -1,5 +1,6 @@
 ﻿@using BL.Models.DTO
 @model ProjectUserEndpoint
+@inject IConfiguration Configuration
 @{
     ViewData["Title"] = "Edit @Model.Name";
 }
@@ -51,31 +52,28 @@
             <div class="tab-pane fade show active" id="project" role="tabpanel" aria-labelledby="home-tab">
                 <div class="row">
                     <div class="col-md-6">
-                        <form method="post" asp-action="Edit">
-                            <div asp-validation-summary="All"></div>
-                            <input asp-for="Id" hidden />
-                            <div class="form-group mb-4">
-                                <label asp-for="Name">Project Name</label>
-                                <input asp-for="Name" class="form-control form-control-md" />
-                                <span asp-validation-for="Name" class="text-danger"></span>
+                        <script src="~/js/formIo.js"></script>
+                        <div id="errorMsg" style="color: #D63301; background-color: #FFCCBA; background-image: url('https://i.imgur.com/GnyDvKN.png'); border: 1px solid;margin: 10px 0px;padding: 15px 10px 15px 50px;background-repeat: no-repeat;background-position: 10px center;display: none;"></div>
+                        <div id="FormId"><div class="my-4"><img src="~/images/loader.gif" width="30" height="30" alt="Loading..." /> <span class="ml-2 g-font-weight-600">Loading...</span></div></div>
+
+
+                        <button id="ExternalSubmit" data-modal-target="#SubmitForReview" data-modal-effect="blur" type="button" class="btn btn-md btn-primary mr-2">
+                            <em class="hs-admin-export align-middle g-font-weight-600 mr-2"></em>
+                            Submit Form
+                        </button>
+
+                        <div id="SubmitForReview" class="text-left g-width-400 g-bg-white g-overflow-y-auto g-pa-20 g-overflow-y-auto" style="display: none;">
+                            <div class="text-right">
+                                <button type="button" class="btn btn-link mr-2 text-decoration-none" onclick="Custombox.modal.close();">
+                                    <em class="hs-admin-close g-font-size-22"></em>
+                                </button>
                             </div>
-                            <div class="form-group mb-4">
-                                <label asp-for="StartDate">Start Date</label>
-                                <input asp-for="StartDate" class="form-control form-control-md" />
-                                <span asp-validation-for="StartDate" class="text-danger"></span>
-                            </div>
-                            <div class="form-group mb-4">
-                                <label asp-for="EndDate">End Date</label>
-                                <input asp-for="EndDate" class="form-control form-control-md" />
-                                <span asp-validation-for="EndDate" class="text-danger"></span>
-                            </div>
-                            <div class="mt-5 d-flex align-items-center">
-                                <button type="submit" class="btn btn-md btn-primary mr-2">Save</button>
-                                <a href="@Url.Action("GetProject", "Project", new { id = Model.Id })" class="btn btn-link">
-                                    Cancel
-                                </a>
-                            </div>
-                        </form>
+                        </div>
+                        <script>
+                            window.onload = function () {
+                                renderForm(@Html.Raw(Json.Serialize(Model)), "@Configuration.GetSection("FormIOSettings")["ProjectForm"]", @Html.Raw(Json.Serialize(Model?.FormData)) , '/Project/ProjectEditFormSubmission');
+                            }
+                        </script>
                     </div>
                 </div>
             </div>
