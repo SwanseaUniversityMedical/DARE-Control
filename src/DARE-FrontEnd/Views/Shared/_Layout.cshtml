@@ -17,7 +17,7 @@
 </head>
 <body class="d-flex flex-column h-100">
     <header>
-        <nav class="autohide navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white box-shadow mb-3">
+        <nav class="autohide navbar navbar-expand-md navbar-toggleable-md navbar-light bg-white box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand me-5 fw-bold" asp-area="" asp-controller="Home" asp-action="Index">TRE FX</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -29,7 +29,7 @@
                         <span></span>
                     </span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <div class="navbar-collapse collapse d-md-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
@@ -47,17 +47,19 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Submission" asp-action="GetAllSubmissions">Submissions</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="NewTokenIssue">API Access Token</a>
+                        </li>
                         <li class="mobile-account-nav">
                             <hr class="mobile-account-nav dropdown-divider" />
                         </li>
-                        <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="NewTokenIssue">Access Token</a></li>
                         <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="#">Account</a></li>
                         <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="#">Helpdesk</a></li>
                         <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="/Account/Logout">Logout</a></li>
                     </ul>
                 </div>
                 <div class="account-nav align-items-center">
-                    <form class="me-3 d-none d-md-block">
+                    <form class="me-3 d-none d-lg-block">
                         <input type="search" class="form-control form-control-sm" placeholder="Search..." aria-label="Search">
                     </form>
                     <div class="nav-item dropdown">
@@ -65,7 +67,6 @@
                             @User?.FindFirst("name")?.Value
                         </a>
                         <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="NewTokenIssue">Access Token</a></li>
                             <li><a class="dropdown-item" href="#">Account</a></li>
                             <li><a class="dropdown-item" href="#">Helpdesk</a></li>
                             <li><hr class="dropdown-divider"></li>
