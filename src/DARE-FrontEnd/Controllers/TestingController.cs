@@ -20,11 +20,7 @@ namespace DARE_FrontEnd.Controllers
 
         public TestingController(IConfiguration configuration)
         {
-
             this.configuration = configuration;
-
-
-
         }
 
         private string path = @"C:\Users\luke.young\Documents\DareJson\projects.json";

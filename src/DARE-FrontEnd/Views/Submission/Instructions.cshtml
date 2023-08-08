@@ -1,6 +1,4 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model string
 @{
 }
 
@@ -66,7 +64,7 @@
     <p>Example command</p>
     <p><pre>
 curl -X 'POST' \
-  'https://localhost:7163/v1/tasks' \
+  '@Html.Raw(Model)/v1/tasks' \
   -H 'accept: text/plain' \
   -H 'Authorization: Bearer **TOKEN-HERE**' \
   -H 'Content-Type: application/json-patch+json' \
