@@ -19,6 +19,7 @@ namespace BL.Models.DTO
         public DateTime EndDate { get; set; }
         public string? SubmissionBucket { get; set; }
         public string? OutputBucket { get; set; }
+        public string? MinioEndpoint { get; set; }
 
         [JsonIgnore]
         public IEnumerable<SelectListItem>? EndpointItemList { get; set; }

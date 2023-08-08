@@ -17,7 +17,7 @@ using BL.Models.Settings;
 
 namespace DARE_FrontEnd.Controllers
 {
-   [Authorize(Roles = "dare-control-admin")]
+    [Authorize(Roles = "dare-control-admin")]
     public class ProjectController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
@@ -30,7 +30,7 @@ namespace DARE_FrontEnd.Controllers
             _configuration = configuration;
             _formIOSettings = new FormIOSettings();
             configuration.Bind(nameof(FormIOSettings), _formIOSettings);
-            
+
         }
 
         [AllowAnonymous]
@@ -49,12 +49,12 @@ namespace DARE_FrontEnd.Controllers
         [AllowAnonymous]
         public IActionResult GetAllProjects()
         {
-           
-            
+
+
             var projects = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
             return View(projects);
-           
-            
+
+
         }
 
         [HttpGet]
@@ -65,7 +65,7 @@ namespace DARE_FrontEnd.Controllers
             return View(projmem);
         }
 
-        
+
         private ProjectUser GetProjectUserModel()
         {
             var projs = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
@@ -95,7 +95,7 @@ namespace DARE_FrontEnd.Controllers
             return View(projmem);
         }
 
-        
+
         private ProjectEndpoint GetProjectEndpointModel()
         {
             var projs = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
@@ -145,24 +145,60 @@ namespace DARE_FrontEnd.Controllers
 
 
         [HttpGet]
-        public Task<IActionResult> AddProjectForm()
+        public IActionResult AddProjectForm()
         {
-            return Task.FromResult<IActionResult>(View(new FormData() { FormIoUrl = _formIOSettings.ProjectForm }));
+            return View(new FormData()
+            {
+                FormIoUrl = _formIOSettings.ProjectForm,
+                FormIoString = @"{""id"":0}"
+            }); ;
+        }
+
+        [HttpGet]
+        public IActionResult GetProjectBuckets(int id)
+        {
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("projectId", id.ToString());
+            var project = _clientHelper.CallAPIWithoutModel<Project?>(
+                "/api/Project/GetProject/", paramlist).Result;
+
+            var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
+
+            var projectView = new ProjectUserEndpoint()
+            {
+                Id = project.Id,
+                FormData = project.FormData,
+                Name = project.Name,
+                Users = project.Users,
+                StartDate = project.StartDate,
+                EndDate = project.EndDate,
+                Endpoints = project.Endpoints,
+                SubmissionBucket = project.SubmissionBucket,
+                OutputBucket = project.OutputBucket,
+                MinioEndpoint = minioEndpoint.Url
+            };
+
+            return View(projectView);
         }
 
         [HttpPost]
-        public async Task<IActionResult> ProjectFormSubmission([FromBody] FormData model)
+        public async Task<IActionResult> ProjectFormSubmission([FromBody] object arg, int id)
         {
-            
-            var result =
-                await _clientHelper.CallAPI<FormData, Project?>("/api/Project/AddProject", model);
+            var str = arg?.ToString();
 
-            if (result.Id == 0)
+            if (!string.IsNullOrEmpty(str))
             {
-                return BadRequest();
-            }
+                var data = System.Text.Json.JsonSerializer.Deserialize<FormData>(str);
+                data.FormIoString = str;
 
-            return Redirect("/home");
+                var result = await _clientHelper.CallAPI<FormData, Project?>("/api/Project/AddProject", data);
+
+                if (result.Id == 0)
+                    return BadRequest();
+
+                return Ok(result);
+            }
+            return BadRequest();
         }
 
         [HttpGet]
@@ -244,7 +280,7 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<IActionResult> AddUserList(string ProjectId, string ItemList)
         {
-            string[] arr= ItemList.Split(',');
+            string[] arr = ItemList.Split(',');
             foreach (string s in arr)
             {
                 var model = new ProjectUser()

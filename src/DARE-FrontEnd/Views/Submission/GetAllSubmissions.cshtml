@@ -13,11 +13,11 @@
     <hr class="d-flex my-4">
     <div class="table-responsive">
         <table id="submissionList" class="table table-bordered table-striped no-head" caption="List of Submissions">
-            <thead><tr><td>Project</td></tr></thead>
+            <thead><tr><td>Submissions</td></tr></thead>
             <tbody>
                 @foreach (var submission in Model)
                 {
-                    
+
 
                     <tr>
                         <td class="card mb-2 p-3 bg-white shadow-sm border-1">
@@ -61,5 +61,27 @@
         </table>
 
     </div>
-    @*<p>Showing @projectsCount results</p>*@
+    @*<div class="card mb-2 p-3 bg-white shadow-sm border-1">
+
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <div>
+                <a href="#">
+                    <h2 class="mb-0 fw-bold hover-underline fs-5">
+                        SubmissionName
+                    </h2>
+                </a>
+                <p class="text-muted small mb-0">#ID</p>
+            </div>
+            <h6><span class="badge bg-dark-blue rounded-pill">Status</span></h6>
+        </div>
+        <p class="">Submitted by #Person's Name
+            <br />
+            Date submitted xx/xx/xxxx
+        </p>
+        <p class="">TREs</p>
+
+        
+        <p class="">Status description</p>
+
+    </div>*@
 </div>

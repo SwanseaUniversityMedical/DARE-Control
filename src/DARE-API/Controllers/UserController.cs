@@ -33,31 +33,39 @@ namespace BL.Controllers
         }
 
 
-        [HttpPost("AddUser")]
-        public async Task<User> AddUser([FromBody] FormData data) 
+        [HttpPut("AddUser")]
+        public async Task<User> AddUser([FromBody] string data) 
         {
             try
             {
-               
-                User users = JsonConvert.DeserializeObject<User>(data.FormIoString);
-                users.Name = users.Name.Trim();
-                if (_DbContext.Users.Any(x => x.Name.ToLower() == users.Name.ToLower().Trim()))
+                User userData = JsonConvert.DeserializeObject<User>(data);
+                userData.Name = userData.Name.Trim();
+                userData.Email = userData.Email.Trim();
+                if (_DbContext.Users.Any(x => x.Name.ToLower() == userData.Name.ToLower().Trim()))
                 {
-                    return null;
+                    return new User();
                 }
-                users.FormData = data.FormIoString;
 
-                _DbContext.Users.Add(users);
+                userData.FormData = data;
+
+                if (userData.Id > 0)
+                {
+                    if (_DbContext.Users.Select(x=>x.Id==userData.Id).Any())
+                        _DbContext.Users.Update(userData);
+                    else
+                        _DbContext.Users.Add(userData);
+                }
+                else
+                    _DbContext.Users.Add(userData);
 
                 await _DbContext.SaveChangesAsync();
 
-                return users;
+                return userData;
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "{Function} Crashed", "AddUser");
-                var errorUser = new User();
-                return errorUser;
+                return new User(); ;
                 throw;
             }
 
@@ -111,32 +119,32 @@ namespace BL.Controllers
             
         }
 
-        [AllowAnonymous]
-        [HttpPost("UpdateUser")]
-        public User? UpdateUser([FromBody] FormData data)
-        {
-            User users = JsonConvert.DeserializeObject<User>(data.FormIoString);
-            var id = data.Id;
-            var user = _DbContext.Users.Find(id);
-            try
-            {
-                Log.Information("{Function} User retrieved successfully", "UpdateUser");
-                if (user != null)
-                {
-                    user.Name = users.Name;
-                    user.Email = users.Email;
-                    user.FormData = data.FormIoString;
-                    _DbContext.Users.Update(user);
-                    _DbContext.SaveChanges();
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crashed", "UpdateUser");
-                throw;
-            }
-            return user;
+        //[AllowAnonymous]
+        //[HttpPost("UpdateUser")]
+        //public User? UpdateUser([FromBody] FormData data)
+        //{
+        //    User users = JsonConvert.DeserializeObject<User>(data.FormIoString);
+        //    var id = data.Id;
+        //    var user = _DbContext.Users.Find(id);
+        //    try
+        //    {
+        //        Log.Information("{Function} User retrieved successfully", "UpdateUser");
+        //        if (user != null)
+        //        {
+        //            user.Name = users.Name;
+        //            user.Email = users.Email;
+        //            user.FormData = data.FormIoString;
+        //            _DbContext.Users.Update(user);
+        //            _DbContext.SaveChanges();
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Log.Error(ex, "{Function} Crashed", "UpdateUser");
+        //        throw;
+        //    }
+        //    return user;
 
-        }
+        //}
     }
 }
