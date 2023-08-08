@@ -1,4 +1,4 @@
-﻿@model BL.Models.Project
+﻿@model BL.Models.DTO.ProjectUserEndpoint
 @{
     ViewData["Title"] = "@Model.Name";
 
@@ -60,7 +60,7 @@
             </div>
             <div class="tab-pane fade" id="submissions-tab" role="tabpanel" aria-labelledby="submissions">
                 <p>
-                    Minio URL: <a href="#">http://Html.Raw(Model.MinioEndpoint)</a><br />
+                    Minio URL: <a href="#">http://@Html.Raw(Model.MinioEndpoint)</a><br />
                     Submission Bucket: @Html.Raw(Model.SubmissionBucket)<br />
                     Output Bucket: @Html.Raw(Model.OutputBucket)
                 </p>

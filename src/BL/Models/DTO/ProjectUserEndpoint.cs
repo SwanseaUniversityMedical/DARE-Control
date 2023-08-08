@@ -23,6 +23,9 @@ namespace BL.Models.DTO
         public string? MinioEndpoint { get; set; }
 
         [JsonIgnore]
+        public virtual List<Submission> Submissions { get; set; }
+
+        [JsonIgnore]
         public IEnumerable<SelectListItem>? EndpointItemList { get; set; }
 
         [JsonIgnore]
