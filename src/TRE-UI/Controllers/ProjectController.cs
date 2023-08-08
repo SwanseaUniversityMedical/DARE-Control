@@ -14,8 +14,7 @@ using Amazon.S3;
 
 namespace TRE_UI.Controllers
 {
-    //[Authorize]
-    //[Authorize(Roles = "dare-control-admin")]
+
     public class ProjectController : Controller
     {
         private readonly IDareClientHelper _dareclientHelper;

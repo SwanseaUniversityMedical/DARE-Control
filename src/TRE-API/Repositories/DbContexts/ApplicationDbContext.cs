@@ -23,7 +23,7 @@ namespace BL.Repositories.DbContexts
         }
      
         public DbSet<ProjectApproval> ProjectApproval { get; set; }
-
+        public DbSet<accessTokenTRE> accessTokenTRE { get; set; }
 
 
     }

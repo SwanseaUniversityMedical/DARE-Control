@@ -26,7 +26,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace DARE_API.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(Roles = "dare-control-admin,dare-control-submitter,dare-tre")]
+    [Authorize(Roles = "dare-control-admin,dare-control-submitter,dare-tre,dare-tre-admin")]
     [ApiController]
     /// <summary>
     /// API endpoints for <see cref="TesTask"/>s.
