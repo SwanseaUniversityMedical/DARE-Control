@@ -29,8 +29,7 @@
 </div>
 <script>
     window.onload = function () {         
-        renderForm("@Model.FormIoUrl", @Html.Raw(Model.FormIoString), '/User/UserEditFormSubmission/@Url.ActionContext.RouteData.Values["id"]', false, 'formio', "/User/GetAllUsers");
-        //renderForm("1", "@Model.FormIoUrl", @Html.Raw(Model.FormIoString), '/User/UserFormSubmission', false, 'formio', "/User/GetAllUsers");
+        renderForm("@Model.FormIoUrl", @Html.Raw(Model.FormIoString), '/User/UserEditFormSubmission/@Url.ActionContext.RouteData.Values["id"]', false, 'formio', "/User/GetAllUsers");       
     }
 
 
