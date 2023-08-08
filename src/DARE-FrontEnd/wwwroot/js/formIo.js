@@ -1,4 +1,4 @@
-function renderForm(layOutURLOrString, formData, submitFuction, ReadOnly = false, divId = "FormId", redirectOverrideUrl) {
+function renderForm(model, layOutURLOrString, formData, submitFuction, ReadOnly = false, divId = "FormId", redirectOverrideUrl) {
     renderForm.draftSubmissionData = "";
     var formReference
 
