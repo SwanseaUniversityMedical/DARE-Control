@@ -1,7 +1,5 @@
 ﻿using BL.Models;
 using BL.Models.DTO;
-
-
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using RestSharp;
@@ -145,7 +143,7 @@ namespace DARE_FrontEnd.Controllers
 
 
         [HttpGet]
-        public IActionResult AddProjectForm()
+        public IActionResult AddProjectForm(int Projectid)
         {
             return View(new FormData()
             {
@@ -224,6 +222,7 @@ namespace DARE_FrontEnd.Controllers
             {
                 Id = project.Id,
                 FormData = project.FormData,
+                FormIoUrl = _formIOSettings.ProjectForm,
                 Name = project.Name,
                 Users = project.Users,
                 StartDate = project.StartDate,
