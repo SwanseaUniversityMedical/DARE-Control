@@ -53,7 +53,7 @@ namespace DARE_FrontEnd.Controllers
         public IActionResult GetAllUsers()
         {
 
-            var result = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
+            var result = _clientHelper.CallAPIWithoutModel<List<BL.Models.User>>("/api/User/GetAllUsers/").Result;
 
             return View(result);
         }
