@@ -2,12 +2,14 @@
 using BL.Models.DTO;
 using BL.Models.Settings;
 using BL.Services;
+using EasyNetQ.Management.Client.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Serilog;
 using System.Data;
+using User = EasyNetQ.Management.Client.Model.User;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -26,9 +28,24 @@ namespace DARE_FrontEnd.Controllers
             configuration.Bind(nameof(FormIOSettings), _formIOSettings);
         }
 
-        public IActionResult AddUserForm()
+        public IActionResult AddUserForm(int userId)
         {
-            return View(new FormData() { FormIoUrl = _formIOSettings.UserForm });
+            var formData = new FormData()
+            {
+                FormIoUrl = _formIOSettings.UserForm,
+                FormIoString = @"{""id"":0}"
+            };
+            
+            if (userId > 0)
+            {
+                var paramList = new Dictionary<string, string>();
+                paramList.Add("userId", userId.ToString());
+                var user = _clientHelper.CallAPIWithoutModel<BL.Models.User?>("/api/User/GetUser/", paramList).Result;
+                formData.FormIoString = user?.FormData;
+                formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""id"":"+userId.ToString());
+            }
+
+            return View(formData);
         }
 
         [HttpGet]
@@ -36,68 +53,73 @@ namespace DARE_FrontEnd.Controllers
         public IActionResult GetAllUsers()
         {
 
-            var test = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
+            var result = _clientHelper.CallAPIWithoutModel<List<BL.Models.User>>("/api/User/GetAllUsers/").Result;
 
-            return View(test);
+            return View(result);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> UserFormSubmission([FromBody] FormData submissionData)
-        {
+        //[HttpPost]
+        //public async Task<IActionResult> UserFormSubmission([FromBody] string submissionData)//FormData submissionData)
+        //{
 
-            var result = await _clientHelper.CallAPI<FormData, User>("/api/User/AddUser", submissionData);
+        //    var result = await _clientHelper.CallAPI<string, BL.Models.User>("/api/User/AddUser", submissionData, null, true);
 
-            if (result.Id == 0)
-            {
-                return BadRequest();
+        //    if (result.Id == 0)
+        //    {
+        //        return BadRequest();
 
-            }
-            return Ok(result);
-        }
+        //    }
+        //    return Json(new { redirectToUrl = "/User/GetAllUsers" });
+        //}
 
         [AllowAnonymous]
         public IActionResult GetUser(int id)
         {
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("userId", id.ToString());
-            var test = _clientHelper.CallAPIWithoutModel<User?>(
+            var result = _clientHelper.CallAPIWithoutModel<BL.Models.User?>(
                 "/api/User/GetUser/", paramlist).Result;
 
-            return View(test);
+            return View(result);
         }
 
         [HttpPost]
-        public async Task<IActionResult> UserEditFormSubmission([FromBody] FormData submissionData)
+        public async Task<IActionResult> UserEditFormSubmission([FromBody] object arg, int id)
         {
+            var str = arg?.ToString();
 
-            var result = await _clientHelper.CallAPI<FormData, User>("/api/User/UpdateUser", submissionData);
-
-            if (result.Id == 0)
+            if (!string.IsNullOrEmpty(str))
             {
-                return BadRequest();
+                var data = System.Text.Json.JsonSerializer.Deserialize<FormData>(str);
+                data.FormIoString = str;
 
+                var result = await _clientHelper.CallAPI<FormData, BL.Models.User>("/api/User/AddUser", data);
+
+                if (result.Id == 0)
+                    return BadRequest();
+
+                return Ok(result);
             }
-            return Ok(result);
+            return BadRequest();
         }
 
-        [HttpGet]
-        public async Task<IActionResult> EditUser(int? userId)
-        {
+        //[HttpGet]
+        //public async Task<IActionResult> EditUser(int? userId)
+        //{
            
-            var paramList = new Dictionary<string, string>();
-            paramList.Add("userId", userId.ToString());
-            var user = _clientHelper.CallAPIWithoutModel<User?>("/api/User/GetUser/", paramList).Result;
-            var userView = new User()
-            {
-                Id = user.Id,
-                FormData = user.FormData,
-                Name = user.Name,
-                Email = user.Email
-            };
+        //    var paramList = new Dictionary<string, string>();
+        //    paramList.Add("userId", userId.ToString());
+        //    var user = _clientHelper.CallAPIWithoutModel<BL.Models.User?>("/api/User/GetUser/", paramList).Result;
+        //    var userView = new User()
+        //    {
+        //        Id = user.Id,
+        //        FormData = user.FormData,
+        //        Name = user.Name,
+        //        Email = user.Email
+        //    };
 
-            return View(userView);
+        //    return View(userView);
 
-           
-        }
+        //}
     }
 }

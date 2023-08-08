@@ -32,25 +32,15 @@ namespace DARE_FrontEnd.Controllers
         {
             return View(new FormData()
             {
-                FormIoUrl =  _formIOSettings.EndpointForm
-            });
-        }
-
-        [HttpPost]
-        public IActionResult AddEndpoint(Endpoint model)
-        {
-            var data = new FormData()
-            {
                 FormIoUrl = _formIOSettings.EndpointForm,
-                FormIoString = JsonConvert.SerializeObject(model)
-            };
-            var result =  _clientHelper.CallAPI<FormData, Endpoint?>("/api/Endpoint/AddEndpointMVC", data).Result;
+                FormIoString = @"{""id"":0}"
 
-            return RedirectToAction("GetAllEndpoints");
-
+            }); ;
         }
 
-       
+      
+
+
         [HttpGet]
         public IActionResult GetAllEndpoints()
         {
@@ -59,8 +49,8 @@ namespace DARE_FrontEnd.Controllers
 
             return View(test);
         }
-        [AllowAnonymous]
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetEndpoints(int projectId)
         {
@@ -69,18 +59,28 @@ namespace DARE_FrontEnd.Controllers
         }
      
         [HttpPost]
-        public async Task<IActionResult> EndpointFormSubmission([FromBody] FormData submissionData)
+        public async Task<IActionResult> EndpointFormSubmission([FromBody] object arg, int id)
         {
-            var result = await _clientHelper.CallAPI<FormData, Endpoint>("/api/Endpoint/AddEndpoint", submissionData);
-            if (result.Id == 0)
-            {
-                return BadRequest();
+            var str = arg?.ToString();
 
+            if (!string.IsNullOrEmpty(str))
+            {
+                var theEndpoint = System.Text.Json.JsonSerializer.Deserialize<FormData>(str);
+                theEndpoint.FormIoString = str;
+
+                var result = await _clientHelper.CallAPI<FormData, Endpoint>("/api/Endpoint/AddEndpoint", theEndpoint);
+                if (result.Id == 0)
+                {
+                    return BadRequest();
+                } 
+                return Ok(result);
             }
-            return Ok(result);
+            return BadRequest();
         }
 
        
+
+
         [HttpGet]
         public IActionResult GetAnEndpoint(int id)
         {

@@ -398,6 +398,19 @@ namespace DARE_API.Controllers
             }
         }
 
+        [HttpGet("GetMinioEndPoint")]
+        public MinioEndpoint? GetMinioEndPoint()
+        {
+
+            var minioEndPoint = new MinioEndpoint()
+            {
+                Url = _minioSettings.Url,
+            };  
+
+            return minioEndPoint;
+        }
+
+
         //End
 
     }
