@@ -46,8 +46,7 @@
                                 </a>
                             </div>
                             <p class="my-4">
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in...
+                                @Html.Raw(project.Display?.Replace("\n","<br/>"))
                             </p>
                             <p class="text-muted fs-7 mb-0">
                                 Start Date: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate

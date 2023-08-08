@@ -12,6 +12,7 @@ namespace BL.Models
         public virtual List<Endpoint> Endpoints { get; set; }
         public string FormData { get; set; }
         public string Name { get; set; }
+        public string Display { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public string? SubmissionBucket { get; set; }
