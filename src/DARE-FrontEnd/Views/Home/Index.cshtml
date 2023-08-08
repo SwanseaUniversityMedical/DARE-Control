@@ -11,6 +11,17 @@
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-md-5 g-4">
         <div class="col">
+            <a asp-area="" asp-controller="Submission" asp-action="GetAllSubmissions" class="card shadow-sm">
+                <img class="card-img-top" src="/img/data-image.jpg" alt="Submissions image" />
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="m-0 text-dark fs-5">Submissions</h4>
+                        <span class="badge bg-dark-blue rounded-pill">X</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col">
             <a asp-area="" asp-controller="Project" asp-action="GetAllProjects" class="card shadow-sm">
                 <img class="card-img-top" src="/img/shutterstock_1081970570-Reduced-740x481.jpg" alt="Projects image" />
                 <div class="card-body">
@@ -32,30 +43,7 @@
                 </div>
             </a>
         </div>
-        <div class="col">
-            <a asp-area="" asp-controller="Submission" asp-action="GetAllSubmissions" class="card shadow-sm">
-                <img class="card-img-top" src="/img/data-image.jpg" alt="Submissions image" />
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="m-0 text-dark fs-5">Submissions</h4>
-                        <span class="badge bg-dark-blue rounded-pill">X</span>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-@*        <div class="col">
-            <a href="#" class="card shadow-sm">
-                <img class="card-img-top" src="/img/data-image.jpg" alt="Submissions image" />
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="m-0 text-dark fs-5">Submissions</h4>
-                        <span class="badge bg-dark-blue rounded-pill">X</span>
-                    </div>
-                </div>
-            </a>
-        </div>*@
-
+        
         <div class="col">
             <a asp-area="" asp-controller="Endpoint" asp-action="GetAllEndpoints" class="card shadow-sm">
                 <img class="card-img-top" src="/img/about-banner.jpg" alt="TREs image" />

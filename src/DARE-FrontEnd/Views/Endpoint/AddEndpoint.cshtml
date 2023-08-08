@@ -1,6 +1,6 @@
 ﻿@model BL.Models.DTO.FormData
 @*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=39786
 *@
 @{
 }
@@ -16,22 +16,20 @@
         <h1 class="fs-3 mb-0">Create TRE</h1>
     </div>
     <hr class="d-flex my-4">
-    @*<script src="~/Scripts/js/formIo.js"></script>*@
+
     <div class="row">
         <div class="col-md-6">
             <div id="errorMsg" style="color: #D63301; background-color: #FFCCBA; background-image: url('https://i.imgur.com/GnyDvKN.png'); border: 1px solid;margin: 10px 0px;padding: 15px 10px 15px 50px;background-repeat: no-repeat;background-position: 10px center;display: none;"></div>
-            <div id="FormId"><div class="my-4"><img src="~/img/loader.gif" width="30" height="30" alt="Loading..." /> <span class="ml-2 g-font-weight-600">Loading...</span></div></div>
+            
+            <div id="formio"> <img src="~/img/loader.gif" width="30" height="30" alt="Loading..." /> </div>
+            <button id="ExternalSubmit" type="submit" class="btn btn-md btn-primary mt-5 mr-2">Submit</button>
+
         </div>
     </div>
-    <div class="mt-5 d-flex align-items-center">
-        
-        <a asp-controller="Endpoint" asp-action="GetAllEndpoints" id="ExternalSubmit" type="button" class="btn btn-sm btn-primary me-3">
-            Create TRE
-        </a>
-    </div>
+ 
 </div>
 <script>
-    window.onload = function () {
-        renderForm(@Html.Raw(Json.Serialize(Model)), "@Html.Raw(Model?.FormIoUrl)", @Html.Raw(Json.Serialize(Model?.FormIoString)) , '/Endpoint/EndpointFormSubmission');
+    window.onload = function () {        
+        renderForm("@Model.FormIoUrl", @Html.Raw(Model.FormIoString), '/Endpoint/EndpointFormSubmission/@Url.ActionContext.RouteData.Values["id"]', false, 'formio', "/Endpoint/GetAllEndpoints");
     }
 </script>

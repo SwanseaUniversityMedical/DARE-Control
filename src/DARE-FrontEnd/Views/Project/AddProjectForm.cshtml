@@ -9,7 +9,7 @@
 
     string baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host.Value}";
 
-    if (Model != null &&  Model?.FormIoUrl.StartsWith('/'))
+    if (Model != null && Model.FormIoUrl.StartsWith('/'))
     {
         Model.FormIoUrl = $"{Context.Request.Scheme}://{Context.Request.Host.Value}" + Model.FormIoUrl;
     }
@@ -22,20 +22,20 @@
     </div>
     <hr class="d-flex my-4">
     <div class="row">
-        <div class="col-xl-5 col-lg-6 col-md-8">
+        
             <div id="errorMsg" style="color: #D63301; background-color: #FFCCBA; background-image: url('https://i.imgur.com/GnyDvKN.png'); border: 1px solid;margin: 10px 0px;padding: 15px 10px 15px 50px;background-repeat: no-repeat;background-position: 10px center;display: none;"></div>
-            <div id="FormId"><div class="my-4"><img src="~/img/loader.gif" width="30" height="30" alt="Loading..." /> <span class="ml-2 g-font-weight-600">Loading...</span></div></div>
+     
+            <div id="formio"> <img src="~/img/loader.gif" width="30" height="30" alt="Loading..." /> </div>
+            <button id="ExternalSubmit" type="submit" class="btn btn-md btn-primary mr-2">Submit</button>
+            
             <div class="d-flex align-items-center mt-4">
-                <a asp-controller="Project" asp-action="GetAllProjects" id="ExternalSubmit" type="button" class="btn btn-sm btn-primary me-3">
-                    Create Project
-                </a>
                 <a href="##" onClick="history.go(-1); return false;" class="btn btn-link btn-sm">Cancel</a>
             </div>
-        </div>
+         
     </div>
 </div>
 <script>
-    window.onload = function () {
-        renderForm(@Html.Raw(Json.Serialize(Model)), "@Html.Raw(Model?.FormIoUrl)", @Html.Raw(Json.Serialize(Model?.FormIoString)) , '/Project/ProjectFormSubmission');
+    window.onload = function () {        
+        renderForm("@Model.FormIoUrl", @Html.Raw(Model.FormIoString), '/Project/ProjectFormSubmission/@Url.ActionContext.RouteData.Values["id"]', false, 'formio', "/Project/GetAllProjects");
     }
 </script>

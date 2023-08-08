@@ -2,6 +2,11 @@
 @model ProjectUserEndpoint
 @{
     ViewData["Title"] = "Edit @Model.Name";
+
+    if (Model != null && Model.FormIoUrl.StartsWith('/'))
+    {
+        Model.FormIoUrl = $"{Context.Request.Scheme}://{Context.Request.Host.Value}" + Model.FormIoUrl;
+    }
 }
 
 <div class="container-lg mt-4 p-4 bg-white border-1 shadow-sm">
@@ -11,8 +16,8 @@
             <h1 class="fs-3 mb-0">@Model.Name</h1>
             <p class="text-muted small mb-0">#@Model.Id</p>
         </div>
-        <a href="@Url.Action("GetProject", "Project", new { id = Model.Id })" class="btn btn-link">
-            <span>Cancel</span>
+        <a href="@Url.Action("GetProject", "Project", new { id = Model.Id })" class="btn btn-sm btn-outline-primary">
+            <span>Exit Edit</span>
         </a>
     </div>
     <div class="mt-4">
@@ -51,93 +56,82 @@
             <div class="tab-pane fade show active" id="project" role="tabpanel" aria-labelledby="home-tab">
                 <div class="row">
                     <div class="col-md-6">
-                        <form method="post" asp-action="Edit">
-                            <div asp-validation-summary="All"></div>
-                            <input asp-for="Id" hidden />
-                            <div class="form-group mb-4">
-                                <label asp-for="Name">Project Name</label>
-                                <input asp-for="Name" class="form-control form-control-md" />
-                                <span asp-validation-for="Name" class="text-danger"></span>
+                        <script src="~/js/formIo.js"></script>
+                        <div id="errorMsg" style="color: #D63301; background-color: #FFCCBA; background-image: url('https://i.imgur.com/GnyDvKN.png'); border: 1px solid;margin: 10px 0px;padding: 15px 10px 15px 50px;background-repeat: no-repeat;background-position: 10px center;display: none;"></div>
+
+                        <div id="formio"> <img src="~/img/loader.gif" width="30" height="30" alt="Loading..." /> </div>
+                        <button id="ExternalSubmit" type="submit" class="btn btn-md btn-primary mr-2">Submit</button>
+
+                        <div id="SubmitForReview" class="text-left g-width-400 g-bg-white g-overflow-y-auto g-pa-20 g-overflow-y-auto" style="display: none;">
+                            <div class="text-right">
+                                <button type="button" class="btn btn-link mr-2 text-decoration-none" onclick="Custombox.modal.close();">
+                                    <em class="hs-admin-close g-font-size-22"></em>
+                                </button>
                             </div>
-                            <div class="form-group mb-4">
-                                <label asp-for="StartDate">Start Date</label>
-                                <input asp-for="StartDate" class="form-control form-control-md" />
-                                <span asp-validation-for="StartDate" class="text-danger"></span>
-                            </div>
-                            <div class="form-group mb-4">
-                                <label asp-for="EndDate">End Date</label>
-                                <input asp-for="EndDate" class="form-control form-control-md" />
-                                <span asp-validation-for="EndDate" class="text-danger"></span>
-                            </div>
-                            <div class="mt-5 d-flex align-items-center">
-                                <button type="submit" class="btn btn-md btn-primary mr-2">Save</button>
-                                <a href="@Url.Action("GetProject", "Project", new { id = Model.Id })" class="btn btn-link">
-                                    Cancel
-                                </a>
-                            </div>
-                        </form>
+                        </div>
+                        <script>
+                            window.onload = function () {
+                                renderForm("@Model.FormIoUrl", @Html.Raw(Model.FormData), '/Project/ProjectFormSubmission/@Url.ActionContext.RouteData.Values["id"]', false, 'formio', "/Project/GetAllProjects");
+                            }
+                        </script>
                     </div>
                 </div>
             </div>
             <div class="tab-pane fade" id="submissions" role="tabpanel" aria-labelledby="submissions-tab">
                 <div class="mt-2 mb-2">
-                    <button type="button" class="btn btn-primary" id="addSubmission">Add Submission</button>
+                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addSubmission">Add Submission</button>
                 </div>
-                <p>Details of where bucket repository is...</p>
-
+                <p>
+                    Minio URL: <a href="#">http://Html.Raw(Model.MinioEndpoint)</a><br />
+                    Submission Bucket: @Html.Raw(Model.SubmissionBucket)<br />
+                    Output Bucket: @Html.Raw(Model.OutputBucket)
+                </p>
+                
             </div>
             <div class="tab-pane fade" id="userMembership" role="tabpanel" aria-labelledby="profile-tab">
                 <div class="mt-2 mb-2">
-                    <button type="button" class="btn btn-primary" id="addUser">Add Person</button>
+                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addUser">Add User</button>
                 </div>
                 <div class="row">
                     <div class="col-12">
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                @foreach (var user in Model.Users)
-                                {
-                                    <tr>
-                                        <td>
-                                            @user.Name
-                                        </td>
-                                        <td>
-                                            <a href="@Url.Action("RemoveUserFromProject", "Project",new{ProjectId=Model.Id,UserId=@user.Id})"
-                                               class="g-text-underline--none--hover">
-                                                <h5 class="g-font-size-18 g-font-size-22--md g-color-black"><span class="g-color-black" style="word-break: break-word;">Remove</span></h5>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                }
-                            </table>
-                        </div>
+                        <ul class="list-group">
+                            @foreach (var user in Model.Users)
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <a href="@Url.Action("GetUser", "User", new { id = user.Id })" class="fs-6 fw-bold">@user.Name</a>
+                                        <a href="@Url.Action("RemoveUserFromProject", "Project",new{ProjectId=Model.Id,UserId=@user.Id})">
+                                            <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove user from project"></span>
+                                        </a>
+                                    </div>
+
+                                </li>
+                            }
+                        </ul>
                     </div>
                 </div>
 
             </div>
             <div class="tab-pane fade" id="endpoint" role="tabpanel" aria-labelledby="contact-tab">
                 <div class="mt-2 mb-2">
-                    <button type="button" class="btn btn-primary" id="addEndpint">Add TRE</button>
+                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addEndpint">Add TRE</button>
                 </div>
                 <div class="row">
                     <div class="col-12">
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                @foreach (var endpoint in Model.Endpoints)
-                                {
-                                    <tr>
-                                        <td>
-                                            @endpoint.Name
-                                        </td>
-                                        <td>
-                                            <a href="@Url.Action("RemoveEndFromProject", "Project",new{ProjectId=Model.Id,EndpointId=@endpoint.Id})"
-                                               class="g-text-underline--none--hover">
-                                                <h5 class="g-font-size-18 g-font-size-22--md g-color-black"><span class="g-color-black" style="word-break: break-word;">Remove</span></h5>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                }
-                            </table>
-                        </div>
+                        <ul class="list-group">
+                            @foreach (var endpoint in Model.Endpoints)
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <a href="@Url.Action("GetAnEndpoint", "Endpoint", new { id = endpoint.Id })" class="fs-6 fw-bold">@endpoint.Name</a>
+                                        <a href="@Url.Action("RemoveEndFromProject", "Project",new{ProjectId=Model.Id,EndpointId=@endpoint.Id})">
+                                            <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
+                                        </a>
+                                    </div>
+
+                                </li>
+                            }
+                        </ul>
                     </div>
                 </div>
             </div>

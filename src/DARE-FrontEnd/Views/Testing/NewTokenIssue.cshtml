@@ -3,6 +3,9 @@
 @{
     ViewData["Title"] = "API Token";
 }
+<script>
+    new ClipboardJS('.copy-btn');
+</script>
 <div class="container-lg p-4">
     <h1 class="fs-3 mb-0">API Token</h1>
     <hr class="d-flex my-4">
@@ -16,6 +19,7 @@
                     <a tabindex="0" class="copy-btn btn btn-link btn-sm me-2" role="button" data-toggle="tooltip" data-trigger="focus" data-placement="top" title="Copied" data-clipboard-target="#api-token">
                         <i class=" mr-2"></i><span>Copy to clipboard</span>
                     </a>
+           
                     <a asp-controller="Home" asp-action="TokenRequest" class="btn btn-primary btn-sm">
                         Renew My Token
                     </a>

@@ -186,7 +186,7 @@ namespace BL.Services
             return jsonString;
         }
 
-        public async Task<TOutput?> CallAPI<TInput, TOutput>(string endPoint,TInput model, Dictionary<string, string>? paramList = null) where TInput : class? where TOutput : class?, new()
+        public async Task<TOutput?> CallAPI<TInput, TOutput>(string endPoint,TInput model, Dictionary<string, string>? paramList = null, bool usePut = false) where TInput : class? where TOutput : class?, new()
         {
             StringContent? modelString = null;
             if (model != null)
@@ -195,7 +195,7 @@ namespace BL.Services
             }
             
 
-            return await CallAPIWithReturnType<TOutput>(endPoint, modelString, paramList);
+            return await CallAPIWithReturnType<TOutput>(endPoint, modelString, paramList, usePut);
            
         }
 

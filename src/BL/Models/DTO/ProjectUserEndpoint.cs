@@ -14,11 +14,16 @@ namespace BL.Models.DTO
         public virtual List<User> Users { get; set; }
         public virtual List<Endpoint> Endpoints { get; set; }
         public string FormData { get; set; }
+        public string FormIoUrl { get; set; }
         public string Name { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public string? SubmissionBucket { get; set; }
         public string? OutputBucket { get; set; }
+        public string? MinioEndpoint { get; set; }
+
+        [JsonIgnore]
+        public virtual List<Submission> Submissions { get; set; }
 
         [JsonIgnore]
         public IEnumerable<SelectListItem>? EndpointItemList { get; set; }

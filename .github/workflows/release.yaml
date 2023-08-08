@@ -20,7 +20,7 @@ env:
 
 jobs:
   release-api-container:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64]
 
     env:
       TAG_PREFIX: 'DARE-Control-API-Container'
@@ -181,7 +181,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
 
   release-ui-container:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64]
 
     env:
       TAG_PREFIX: 'DARE-Control-UI-Container'
@@ -343,7 +343,7 @@ jobs:
 
 
   release-tre-api-container:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64]
 
     env:
       TAG_PREFIX: 'DARE-TRE-API-Container'
@@ -504,7 +504,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
 
   release-tre-ui-container:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64]
 
     env:
       TAG_PREFIX: 'DARE-TRE-UI-Container'
@@ -666,7 +666,7 @@ jobs:
 
 
   release-tre-agent-container:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64]
         
     env:
         TAG_PREFIX: 'DARE-Agent-Container'
