@@ -27,7 +27,7 @@ namespace DARE_API.Controllers
         }
 
 
-        [HttpPost("AddEndpoint")
+        [HttpPost("AddEndpoint")]
         public async Task<Endpoint> AddEndpoint([FromBody] FormData data)
         {           
             try
