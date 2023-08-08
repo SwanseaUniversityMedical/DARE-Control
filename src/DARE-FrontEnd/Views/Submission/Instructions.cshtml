@@ -1,0 +1,86 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<div class="container-lg p-4">
+    <div class="d-flex align-items-center justify-content-between">
+        <h1 class="fs-3 mb-0">Submission Instructions</h1>
+         
+    </div>
+    <hr class="d-flex my-4">
+    
+    
+    <h2>Access Token (JWT)</h2>
+    <p>To submit a Crate you/Job you must be authenticated.  Then you login you are given a JWT Token that can be used to authenticate all the actions you take.  
+        This token will expire overtime.</p>
+    <p>You can access the token under your name from the menu in the top right of this screen or <a href="/Home/NewTokenIssue">Click Here</a>, you token can also be renewed from this same screen</p>
+    
+    <h2>Message Format</h2>
+    <p>The system used the <a href="https://www.ga4gh.org/news_item/ga4gh-tes-api-bringing-compatibility-to-task-execution-across-hpc-systems-the-cloud-and-beyond/" target="_blank">GA4GH TES</a> message format to pass a job to the system in order to tell a TRE to download and execute an RO-CRATE.</p>
+    <p>In order for the system to align with the 5 safes requirement then the message must also contain a set number of parameters</p>
+    <h3>Key parameters</h3>
+    <p>1. Name: display name</p>
+    <p>2. TAGS: project : name of the project as known on this system</p>
+    <p>3. TAGS: endpoint : blank (all) or pipe | separated lists of endpoint the submission is to</p>
+    <p>4. Executor listing the URl for the 5 saves RO-CRATE</p>
+    <p><b>IMPORTANT : </b> you can only submit requests if you are a valid user on the system, you are listed ont he project you state and that the TRE(s) have been added to the project.</p>
+    <p><b>NOTE : </b> when a submission is received by a TRE, the project and user must also have been authorised locally, otherwise the submission will be rejected at the parameter of the TRE.</p>
+    <p><b>Example</b>
+        <pre>
+
+{
+   "id":null,
+   "state":0,
+   "name":"Testing Submission",
+   "description":null,
+   "inputs":null,
+   "outputs":null,
+   "resources":null,
+   "executors":[
+      {
+         "image":"https://abc.com/justin1.crate",
+         "command":null,
+         "workdir":null,
+         "stdin":null,
+         "stdout":null,
+         "stderr":null,
+         "env":null
+      }
+   ],
+   "volumes":null,
+   "tags":{
+      "project":"Project147",
+      "endpoints":"SAIL|DPUK"
+   },
+   "logs":null,
+   "creation_time":null
+}
+</pre>
+    
+        </p>
+
+    <h2>Calling the REST API</h2>
+    <p>You will need a JWT Token (<a href="/Home/NewTokenIssue">Here</a>)</p>
+    <p>Example command</p>
+    <p><pre>
+curl -X 'POST' \
+  'https://localhost:7163/v1/tasks' \
+  -H 'accept: text/plain' \
+  -H 'Authorization: Bearer **TOKEN-HERE**' \
+  -H 'Content-Type: application/json-patch+json' \
+  -d '{"id":null,"state":0,"name":"Testing Submission","description":null,"inputs":null,"outputs":null,"resources":null,"executors":[{"image":"\\\\minio\\justin1.crate","command":null,"workdir":null,"stdin":null,"stdout":null,"stderr":null,"env":null}],"volumes":null,"tags":{"project":"Project147","endpoints":"SAIL|DPUK"},"logs":null,"creation_time":null}'
+</pre></p>
+
+    <h2>Calling the REST API through Swagger</h2>
+    <p>Access Swagger URl at <a href="https://localhost:7163/swagger/index.html" target="_blank">https://localhost:7163/swagger/index.html</a></p>
+    <p>1. Click Authorize, enter Token into Value and press Authorize then Close</p>
+    <p>2. Section TaskServiceApi, POST /v1/tasks</p>
+    <p>3. Press "Try it out"</p>
+    <p>4. Paste JSON message into textbox and then press Execute</p>
+    
+
+    <h2>Calling the REST API through the user interface</h2>
+    <p><b>Out on a GIT branch at this moment, will become available as merged into Main</b></p>
+</div>

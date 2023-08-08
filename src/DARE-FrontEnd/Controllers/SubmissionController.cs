@@ -20,6 +20,11 @@ namespace DARE_FrontEnd.Controllers
             return View();
         }
 
+        public IActionResult Instructions()
+        {
+            return View();
+        }
+
         [HttpGet]
         public IActionResult GetAllSubmissions()
         {
