@@ -52,7 +52,8 @@ namespace DARE_API.Controllers
                 return BadRequest("No access to endpoint " + endpointname + " or does not exist.");
             }
 
-            var results = endpoint.Submissions.Where(x => x.Status == SubmissionStatus.WaitingForAgentToTransfer).ToList();
+            //var results = endpoint.Submissions.Where(x =>x.Status == SubmissionStatus.WaitingForAgentToTransfer).ToList();
+            var results = _DbContext.Submissions.Where(x => x.EndPoint == endpoint && x.Status == SubmissionStatus.WaitingForAgentToTransfer).ToList();
 
             return StatusCode(200, results);
         }

@@ -58,19 +58,6 @@ namespace DARE_FrontEnd.Controllers
             return View(result);
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> UserFormSubmission([FromBody] string submissionData)//FormData submissionData)
-        //{
-
-        //    var result = await _clientHelper.CallAPI<string, BL.Models.User>("/api/User/AddUser", submissionData, null, true);
-
-        //    if (result.Id == 0)
-        //    {
-        //        return BadRequest();
-
-        //    }
-        //    return Json(new { redirectToUrl = "/User/GetAllUsers" });
-        //}
 
         [AllowAnonymous]
         public IActionResult GetUser(int id)
@@ -103,23 +90,6 @@ namespace DARE_FrontEnd.Controllers
             return BadRequest();
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> EditUser(int? userId)
-        //{
-           
-        //    var paramList = new Dictionary<string, string>();
-        //    paramList.Add("userId", userId.ToString());
-        //    var user = _clientHelper.CallAPIWithoutModel<BL.Models.User?>("/api/User/GetUser/", paramList).Result;
-        //    var userView = new User()
-        //    {
-        //        Id = user.Id,
-        //        FormData = user.FormData,
-        //        Name = user.Name,
-        //        Email = user.Email
-        //    };
-
-        //    return View(userView);
-
-        //}
+       
     }
 }
