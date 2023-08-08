@@ -36,11 +36,11 @@ namespace BL.Controllers
 
 
         [HttpPost("AddUser")]
-        public async Task<User> AddUser([FromBody] string data) 
+        public async Task<User> AddUser([FromBody] FormData data) 
         {
             try
             {
-                User userData = JsonConvert.DeserializeObject<User>(data);
+                User userData = JsonConvert.DeserializeObject<User>(data.FormIoString);
                 userData.Name = userData.Name.Trim();
                 userData.Email = userData.Email.Trim();
                 if (_DbContext.Users.Any(x => x.Name.ToLower() == userData.Name.ToLower().Trim()))
