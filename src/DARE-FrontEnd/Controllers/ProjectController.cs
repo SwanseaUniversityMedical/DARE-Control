@@ -31,7 +31,7 @@ namespace DARE_FrontEnd.Controllers
 
         }
 
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [HttpGet]
         public IActionResult GetProject(int id)
         {
@@ -40,7 +40,24 @@ namespace DARE_FrontEnd.Controllers
             var project = _clientHelper.CallAPIWithoutModel<Project?>(
                 "/api/Project/GetProject/", paramlist).Result;
 
-            return View(project);
+            var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
+
+            var projectView = new ProjectUserEndpoint()
+            {
+                Id = project.Id,
+                FormData = project.FormData,
+                Name = project.Name,
+                Users = project.Users,
+                StartDate = project.StartDate,
+                EndDate = project.EndDate,
+                Endpoints = project.Endpoints,
+                SubmissionBucket = project.SubmissionBucket,
+                OutputBucket = project.OutputBucket,
+                MinioEndpoint = minioEndpoint.Url,
+                Submissions=project.Submissions
+            };
+
+            return View(projectView);
         }
 
         [HttpGet]
