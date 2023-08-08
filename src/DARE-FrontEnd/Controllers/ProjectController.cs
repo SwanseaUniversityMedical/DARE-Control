@@ -145,7 +145,7 @@ namespace DARE_FrontEnd.Controllers
 
 
         [HttpGet]
-        public IActionResult AddProjectForm()
+        public IActionResult AddProjectForm(int Projectid)
         {
             return View(new FormData()
             {
