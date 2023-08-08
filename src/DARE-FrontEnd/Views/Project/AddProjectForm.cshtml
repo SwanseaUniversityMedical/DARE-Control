@@ -9,7 +9,7 @@
 
     string baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host.Value}";
 
-    if (Model != null &&  Model?.FormIoUrl.StartsWith('/'))
+    if (Model != null && Model.FormIoUrl.StartsWith('/'))
     {
         Model.FormIoUrl = $"{Context.Request.Scheme}://{Context.Request.Host.Value}" + Model.FormIoUrl;
     }

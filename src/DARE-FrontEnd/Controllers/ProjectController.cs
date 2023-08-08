@@ -145,15 +145,13 @@ namespace DARE_FrontEnd.Controllers
 
 
         [HttpGet]
-        public Task<IActionResult> AddProjectForm()
+        public IActionResult AddProjectForm()
         {
-            var formData = new FormData()
+            return View(new FormData()
             {
                 FormIoUrl = _formIOSettings.ProjectForm,
                 FormIoString = @"{""id"":0}"
-            };
-
-            return Task.FromResult<IActionResult>(View(formData));
+            }); ;
         }
 
         [HttpGet]
