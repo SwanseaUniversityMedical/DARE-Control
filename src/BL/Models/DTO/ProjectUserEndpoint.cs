@@ -14,6 +14,7 @@ namespace BL.Models.DTO
         public virtual List<User> Users { get; set; }
         public virtual List<Endpoint> Endpoints { get; set; }
         public string FormData { get; set; }
+        public string FormIoUrl { get; set; }
         public string Name { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
