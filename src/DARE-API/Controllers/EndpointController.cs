@@ -33,7 +33,7 @@ namespace DARE_API.Controllers
             try
             {
                 Endpoint endpoints = JsonConvert.DeserializeObject<Endpoint>(data.FormIoString);
-                endpoints.Name = endpoints.Name.Trim();
+                endpoints.Name = endpoints.Name?.Trim();
                 if (_DbContext.Endpoints.Any(x => x.Name.ToLower() == endpoints.Name.ToLower().Trim()))
                 {
                     return null;
