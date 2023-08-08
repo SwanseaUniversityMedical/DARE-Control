@@ -40,6 +40,7 @@ namespace BL.Controllers
         {
             try
             {
+
                 User userData = JsonConvert.DeserializeObject<User>(data.FormIoString);
                 userData.Name = userData.Name.Trim();
                 userData.Email = userData.Email.Trim();
@@ -48,7 +49,7 @@ namespace BL.Controllers
                     return new User();
                 }
 
-                userData.FormData = data;
+                userData.FormData = data.FormIoString;
 
                 if (userData.Id > 0)
                 {
