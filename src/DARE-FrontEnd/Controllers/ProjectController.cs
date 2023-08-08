@@ -147,7 +147,13 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public Task<IActionResult> AddProjectForm()
         {
-            return Task.FromResult<IActionResult>(View(new FormData() { FormIoUrl = _formIOSettings.ProjectForm }));
+            var formData = new FormData()
+            {
+                FormIoUrl = _formIOSettings.ProjectForm,
+                FormIoString = @"{""id"":0}"
+            };
+
+            return Task.FromResult<IActionResult>(View(formData));
         }
 
         [HttpGet]
@@ -178,18 +184,23 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ProjectFormSubmission([FromBody] FormData model)
+        public async Task<IActionResult> ProjectFormSubmission([FromBody] object arg, int id)
         {
+            var str = arg?.ToString();
 
-            var result =
-                await _clientHelper.CallAPI<FormData, Project?>("/api/Project/AddProject", model);
-
-            if (result.Id == 0)
+            if (!string.IsNullOrEmpty(str))
             {
-                return BadRequest();
-            }
+                var data = System.Text.Json.JsonSerializer.Deserialize<FormData>(str);
+                data.FormIoString = str;
 
-            return Redirect("/home");
+                var result = await _clientHelper.CallAPI<FormData, Project?>("/api/Project/AddProject", data);
+
+                if (result.Id == 0)
+                    return BadRequest();
+
+                return Ok(result);
+            }
+            return BadRequest();
         }
 
         [HttpGet]

@@ -58,19 +58,19 @@ namespace DARE_FrontEnd.Controllers
             return View(result);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> UserFormSubmission([FromBody] string submissionData)//FormData submissionData)
-        {
+        //[HttpPost]
+        //public async Task<IActionResult> UserFormSubmission([FromBody] string submissionData)//FormData submissionData)
+        //{
 
-            var result = await _clientHelper.CallAPI<string, BL.Models.User>("/api/User/AddUser", submissionData, null, true);
+        //    var result = await _clientHelper.CallAPI<string, BL.Models.User>("/api/User/AddUser", submissionData, null, true);
 
-            if (result.Id == 0)
-            {
-                return BadRequest();
+        //    if (result.Id == 0)
+        //    {
+        //        return BadRequest();
 
-            }
-            return Json(new { redirectToUrl = "/User/GetAllUsers" });
-        }
+        //    }
+        //    return Json(new { redirectToUrl = "/User/GetAllUsers" });
+        //}
 
         [AllowAnonymous]
         public IActionResult GetUser(int id)
