@@ -229,6 +229,17 @@
       "key": "projectDescription",
       "type": "textarea",
       "input": true
+    },
+    {
+      "label": "Display on UI",
+      "applyMaskOn": "change",
+      "autoExpand": true,
+      "tableView": true,
+      "calculateValue": "value = \"Project lead : \" + data.projectOwner + \"<br>\" + data.projectDescription",
+      "key": "display",
+      "type": "textarea",
+      "rows": 1,
+      "input": true
     }
   ],
   "settings": {},
@@ -239,7 +250,7 @@
   "submissionRevisions": "",
   "_vid": 0,
   "created": "2023-08-01T07:47:28.637Z",
-  "modified": "2023-08-01T09:00:00.568Z",
+  "modified": "2023-08-08T15:40:03.876Z",
   "machineName": "rikojtsvfwnqslz:dareControlProject",
   "plan": "commercial"
 }

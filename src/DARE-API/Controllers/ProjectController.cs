@@ -47,21 +47,19 @@ namespace DARE_API.Controllers
         public async Task<Project?> AddProject(FormData data)
         {
             try
-            {
-
+            { 
                 Project projects = JsonConvert.DeserializeObject<Project>(data.FormIoString);
-
-
                 var model = new Project();
 
                 //2023-06-01 14:30:00 use this as the datetime
                 model.Name = projects.Name.Trim();
+                model.Display = projects.Display.Trim();
+
                 if (_DbContext.Projects.Any(x => x.Name.ToLower() == model.Name.ToLower().Trim()))
                 {
                     return null;
                 }
                 model.StartDate = projects.StartDate.ToUniversalTime();
-
                 model.EndDate = projects.EndDate.ToUniversalTime();
 
                 model.SubmissionBucket = GenerateRandomName(model.Name) + "submission";
