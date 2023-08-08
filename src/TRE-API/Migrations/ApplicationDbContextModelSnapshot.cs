@@ -61,6 +61,24 @@ namespace TRE_API.Migrations
 
                     b.ToTable("ProjectApproval");
                 });
+            modelBuilder.Entity("BL.Models.accessTokenTRE", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("integer");
+
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                b.Property<string>("accessToken")
+                    .HasColumnType("text");
+
+                b.Property<DateTime>("expirationDate")
+                    .HasColumnType("timestamp with time zone");             
+
+                b.HasKey("Id");
+
+                b.ToTable("accessTokenTRE");
+            });
 #pragma warning restore 612, 618
         }
     }

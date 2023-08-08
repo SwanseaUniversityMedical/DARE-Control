@@ -20,7 +20,7 @@ using EasyNetQ.Management.Client.Model;
 namespace DARE_API.Controllers
 {
 
-    [Authorize(Roles = "dare-control-admin")]
+    [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
     [ApiController]
     [Route("api/[controller]")]
 

@@ -19,7 +19,7 @@ namespace BL.Controllers
 
     [Authorize]
     //[ApiController]
-    [Authorize(Roles = "dare-control-admin")]
+    [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {

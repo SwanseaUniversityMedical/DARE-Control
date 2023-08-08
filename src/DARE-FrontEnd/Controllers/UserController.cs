@@ -13,7 +13,7 @@ using User = EasyNetQ.Management.Client.Model.User;
 
 namespace DARE_FrontEnd.Controllers
 {
-    [Authorize(Roles = "dare-control-admin")]
+    [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
     public class UserController : Controller
     {
         private readonly IDareClientHelper _clientHelper;

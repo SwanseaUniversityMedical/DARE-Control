@@ -30,6 +30,21 @@ namespace TRE_API.Migrations
                 {
                     table.PrimaryKey("PK_ProjectApproval", x => x.Id);
                 });
+
+
+            migrationBuilder.CreateTable(
+             name: "accessTokenTRE",
+             columns: table => new
+             {
+                 Id = table.Column<int>(type: "integer", nullable: false)
+                     .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                 accessToken= table.Column<string>(type: "text", nullable: true),
+                 expirationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+             },
+             constraints: table =>
+             {
+                 table.PrimaryKey("PK_accessTokenTRE", x => x.Id);
+             });
         }
 
         /// <inheritdoc />
@@ -37,6 +52,11 @@ namespace TRE_API.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ProjectApproval");
+
+            migrationBuilder.DropTable(
+            name: "accessTokenTRE");
         }
+
+
     }
 }
