@@ -50,7 +50,7 @@ namespace DARE_API.Controllers
             }
 
             //var results = endpoint.Submissions.Where(x =>x.Status == SubmissionStatus.WaitingForAgentToTransfer).ToList();
-            var results = _DbContext.Submissions.Where(x => x.EndPoint == endpoint && x.Status == SubmissionStatus.WaitingForAgentToTransfer).ToList();
+            var results = _DbContext.Submissions.Where(x => x.EndPoint != null && x.EndPoint.Name == endpointname.ToLower() && x.Status == SubmissionStatus.WaitingForAgentToTransfer).ToList();
 
             return StatusCode(200, results);
         }
