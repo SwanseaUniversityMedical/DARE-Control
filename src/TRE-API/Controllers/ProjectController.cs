@@ -11,21 +11,46 @@ using TRE_API.Controllers;
 using TRE_API.Models;
 using EasyNetQ;
 using Serilog;
+using Microsoft.Extensions.Options;
+using BL.Services;
 
 namespace TRE_API.Controllers
 {
     //[Authorize]
     //[ApiController]
+    //[Authorize(Roles = "dare-tre-admin")]
     [Route("api/[controller]")]
 
     public class ProjectController : ControllerBase
     {
 
         private readonly ApplicationDbContext _DbContext;
+        private readonly IConfiguration _configuration;
+        private readonly DAREAPISettings _dareAPISettings;
 
-        public ProjectController(ApplicationDbContext applicationDbContext)
+        private readonly IDareClientHelper _dareclientHelper;
+  
+        public ProjectController(IDareClientHelper dareclient)
+        {
+            _dareclientHelper = dareclient;
+        
+        }
+
+        public ProjectController(ApplicationDbContext applicationDbContext) 
         {
             _DbContext = applicationDbContext;
+        }
+       
+
+
+        [HttpGet]
+        [Authorize(Roles = "dare-tre,dare-control-admin")]
+        public List<Project> GetAllProjects()
+        {
+            //var url = _DAREAPISettings["DareAPISettings:HelpAddress"];
+            var allProjects =  _dareclientHelper.CallAPIWithoutModel<List<Project>>(_dareAPISettings.Address + "/api/Project/GetAllProjects/").Result;
+            //var allProjects = (_DAREAPISettings.Address + "/api/Project/GetAllProjects/");
+            return allProjects;
         }
 
         [HttpPost("RequestMembership")]

@@ -41,7 +41,7 @@ namespace TRE_UI.Controllers
         public IActionResult GetAllProjects()
         {
 
-            var projects = _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
+            var projects = _treclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
 
             return View(projects);
         }

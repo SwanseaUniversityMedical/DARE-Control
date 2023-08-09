@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace BL.Models
 {
-    public class TREAPISettings
+    public class DAREAPISettings
     {
-        public string? SignalRAddress { get; set; }
+        public string? Address { get; set; }
     }
 
 }
