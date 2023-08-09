@@ -59,7 +59,7 @@ namespace DARE_API.Controllers
                 model.SubmissionBucket = GenerateRandomName(model.Name) + "submission";
                 model.OutputBucket = GenerateRandomName(model.Name) + "output";
                 model.FormData = data.FormIoString;
-
+                model.Display = projects.Display;
                 var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, model.SubmissionBucket);
                 if (!submissionBucket)
                 {
