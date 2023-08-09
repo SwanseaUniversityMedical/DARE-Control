@@ -1,7 +1,4 @@
 ﻿@model BL.Models.DTO.FormData
-@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=39786
-*@
 @{
 }
 @{
@@ -11,6 +8,7 @@
         Model.FormIoUrl = $"{Context.Request.Scheme}://{Context.Request.Host.Value}" + Model.FormIoUrl;
     }
 }
+
 <div class="container-lg p-4">
     <div class="d-flex align-items-center justify-content-between">
         <h1 class="fs-3 mb-0">Create TRE</h1>
