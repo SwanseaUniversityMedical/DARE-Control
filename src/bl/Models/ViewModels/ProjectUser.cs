@@ -1,22 +1,20 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
 
-namespace BL.Models.DTO
+namespace BL.Models.ViewModels
 {
-    public class ProjectEndpoint
+    public class ProjectUser
     {
+        public int UserId { get; set; }
         public int ProjectId { get; set; }
-        public int EndpointId { get; set; }
-
         [JsonIgnore]
         public IEnumerable<SelectListItem>? ProjectItemList { get; set; }
-
         [JsonIgnore]
-        public IEnumerable<SelectListItem>? EndpointItemList { get; set; }
+        public IEnumerable<SelectListItem>? UserItemList { get; set; }
     }
 }

@@ -1,18 +1,10 @@
 ﻿using DARE_API.Repositories.DbContexts;
 using Microsoft.AspNetCore.Mvc;
 using BL.Models;
-using System.Text.Json.Nodes;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Serilog;
-using IdentityModel.Client;
-using System.Text;
-using BL.Models.DTO;
-using DARE_API.Controllers;
+using BL.Models.ViewModels;
 
 namespace BL.Controllers
 {

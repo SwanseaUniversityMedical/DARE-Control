@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
 
-namespace BL.Models.DTO
+namespace BL.Models.ViewModels
 {
     public class ProjectUserTre
     {

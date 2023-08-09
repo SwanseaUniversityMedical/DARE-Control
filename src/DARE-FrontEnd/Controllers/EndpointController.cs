@@ -1,10 +1,8 @@
-﻿using BL.Models;
-using BL.Models.DTO;
+﻿using BL.Models.ViewModels;
 using BL.Services;
 
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System.Data;
+
 using Microsoft.AspNetCore.Authorization;
 using Endpoint = BL.Models.Endpoint;
 using BL.Models.Settings;
@@ -16,13 +14,13 @@ namespace DARE_FrontEnd.Controllers
     {
 
         private readonly IDareClientHelper _clientHelper;
-        private readonly IConfiguration _configuration;
+        
         private readonly IFormIOSettings _formIOSettings;
 
         public EndpointController(IDareClientHelper client, IConfiguration configuration)
         {
             _clientHelper = client;
-            _configuration = configuration;
+            
             _formIOSettings = new FormIOSettings();
             configuration.Bind(nameof(FormIOSettings), _formIOSettings);
         }

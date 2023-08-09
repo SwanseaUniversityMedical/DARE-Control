@@ -8,24 +8,13 @@ using BL.Models.Settings;
 
 
 using Microsoft.AspNetCore.Authentication.Cookies;
-using DARE_FrontEnd.Models;
 using Microsoft.IdentityModel.Logging;
-using Serilog.Exceptions.Core;
-using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
 using Serilog;
-using Serilog.Exceptions;
-using System.Text.Json.Serialization;
-using System.Text.Json;
-using BL.Models.DTO;
 using BL.Services;
-using Newtonsoft.Json;
-using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using Microsoft.AspNetCore.HttpOverrides;
-using Duende.AccessTokenManagement;
-using Duende.AccessTokenManagement.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);

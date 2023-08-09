@@ -1,21 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
+
 using DARE_API.Repositories.DbContexts;
 using BL.Models;
-using System.Text.Json.Nodes;
-using BL.Models.DTO;
-using BL.Rabbit;
+using BL.Models.ViewModels;
+
 using Newtonsoft.Json;
-using DARE_API.Controllers;
-using static BL.Controllers.UserController;
-using Minio.DataModel;
-using DARE_API.Services.Contract;
-using EasyNetQ;
 using Serilog;
 using Endpoint = BL.Models.Endpoint;
 using BL.Services;
-using EasyNetQ.Management.Client.Model;
+
 
 namespace DARE_API.Controllers
 {
@@ -65,7 +59,7 @@ namespace DARE_API.Controllers
                 model.SubmissionBucket = GenerateRandomName(model.Name) + "submission";
                 model.OutputBucket = GenerateRandomName(model.Name) + "output";
                 model.FormData = data.FormIoString;
-
+                model.Display = projects.Display;
                 var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, model.SubmissionBucket);
                 if (!submissionBucket)
                 {

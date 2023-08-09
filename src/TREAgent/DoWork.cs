@@ -1,18 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BL.Models;
-using BL.Models.DTO;
+using BL.Models.ViewModels;
 using BL.Models.Tes;
 using BL.Rabbit;
 using BL.Services;
 using Microsoft.Extensions.DependencyInjection;
 using EasyNetQ;
-using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 
 namespace TREAgent

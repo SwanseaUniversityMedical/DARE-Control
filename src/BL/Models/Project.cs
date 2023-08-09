@@ -1,6 +1,4 @@
-﻿using BL.Models.DTO;
-using Newtonsoft.Json;
-
+﻿
 namespace BL.Models
 {
     public class Project

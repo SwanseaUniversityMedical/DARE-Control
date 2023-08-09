@@ -1,5 +1,5 @@
 using BL.Models.Settings;
-using BL.Repositories.DbContexts;
+
 using BL.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Cors.Infrastructure;
@@ -22,6 +22,7 @@ using TRE_API.Services.SignalR;
 using BL.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
+using TRE_API.Repositories.DbContexts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +51,10 @@ var keyCloakSettings = new KeyCloakSettings();
 configuration.Bind(nameof(keyCloakSettings), keyCloakSettings);
 builder.Services.AddSingleton(keyCloakSettings);
 
+var encSettings = new EncryptionSettings();
+configuration.Bind(nameof(encSettings), encSettings);
+builder.Services.AddSingleton(encSettings);
+builder.Services.AddScoped<IEncDecHelper, EncDecHelper>();
 
 
 var TVP = new TokenValidationParameters
@@ -99,7 +104,7 @@ builder.Services.AddAuthentication(options =>
         //// Client configured in the Keycloak
 
         //// Client secret shared with Keycloak
-
+        options.Audience = keyCloakSettings.ClientId;
         options.MetadataAddress = keyCloakSettings.MetadataAddress;
 
         options.RequireHttpsMetadata = false; // dev only

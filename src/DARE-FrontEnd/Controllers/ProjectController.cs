@@ -1,16 +1,10 @@
 ﻿using BL.Models;
-using BL.Models.DTO;
+using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using RestSharp;
-using System.Text.Json.Nodes;
 using BL.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using static System.Net.Mime.MediaTypeNames;
 using Endpoint = BL.Models.Endpoint;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
 using BL.Models.Settings;
 
 namespace DARE_FrontEnd.Controllers

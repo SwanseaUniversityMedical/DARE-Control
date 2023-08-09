@@ -1,7 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using BL.Models.DTO;
-using BL.Models.Services;
 using BL.Rabbit;
 using BL.Services;
 using EasyNetQ;

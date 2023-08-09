@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BL.Models
+namespace BL.Models.APISimpleTypeReturns
 {
-    internal class simon
+    public class BoolReturn
     {
-        public int MyProperty { get; set; }
+        public bool Result { get; set; }
     }
 }

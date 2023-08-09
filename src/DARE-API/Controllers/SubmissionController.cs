@@ -2,15 +2,12 @@
 using DARE_API.Repositories.DbContexts;
 using DARE_API.Attributes;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
-using BL.Models;
-using BL.Models.DTO;
-using BL.Models.Tes;
+using BL.Models.ViewModels;
 using EasyNetQ;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
+
 
 namespace DARE_API.Controllers
 {
@@ -52,8 +49,8 @@ namespace DARE_API.Controllers
                 return BadRequest("No access to endpoint " + endpointname + " or does not exist.");
             }
 
-            //var results = endpoint.Submissions.Where(x =>x.Status == SubmissionStatus.WaitingForAgentToTransfer).ToList();
-            var results = _DbContext.Submissions.Where(x => x.EndPoint == endpoint && x.Status == SubmissionStatus.WaitingForAgentToTransfer).ToList();
+            var results = endpoint.Submissions.Where(x =>x.Status == SubmissionStatus.WaitingForAgentToTransfer).ToList();
+            //var results = _DbContext.Submissions.Where(x => x.EndPoint != null && x.EndPoint.Name == endpointname.ToLower() && x.Status == SubmissionStatus.WaitingForAgentToTransfer).ToList();
 
             return StatusCode(200, results);
         }
