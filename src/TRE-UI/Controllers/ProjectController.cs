@@ -20,7 +20,7 @@ namespace TRE_UI.Controllers
         private readonly ITREClientHelper _treclientHelper;
         public ProjectController(ITREClientHelper client)
         {
-          
+    
             _treclientHelper = client;
         }
     
