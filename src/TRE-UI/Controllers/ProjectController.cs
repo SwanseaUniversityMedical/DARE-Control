@@ -17,12 +17,11 @@ namespace TRE_UI.Controllers
 
     public class ProjectController : Controller
     {
-        private readonly IDareClientHelper _dareclientHelper;
         private readonly ITREClientHelper _treclientHelper;
-        public ProjectController(IDareClientHelper dareclient, ITREClientHelper treclient)
+        public ProjectController(ITREClientHelper client)
         {
-            _dareclientHelper = dareclient;
-            _treclientHelper = treclient;
+          
+            _treclientHelper = client;
         }
     
 
@@ -31,7 +30,7 @@ namespace TRE_UI.Controllers
         {
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());
-            var projects = _dareclientHelper.CallAPIWithoutModel<Project?>(
+            var projects = _treclientHelper.CallAPIWithoutModel<Project?>(
                 "/api/Project/GetProject/", paramlist).Result;
 
             return View(projects);
@@ -57,8 +56,8 @@ namespace TRE_UI.Controllers
         }
         private ProjectUserTre GetProjectUserModelSubmit(int projectId,int userId,string Localprojectname)
         {
-            var projs = _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
-            var users = _dareclientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
+            var projs = _treclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
+            var users = _treclientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
 
             var projectItems = projs
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
@@ -83,8 +82,8 @@ namespace TRE_UI.Controllers
 
         private ProjectUserTre GetProjectUserModel()
         {
-            var projs = _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
-            var users = _dareclientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
+            var projs = _treclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
+            var users = _treclientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
 
             var projectItems = projs
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
@@ -129,7 +128,7 @@ namespace TRE_UI.Controllers
                     UserId = Int32.Parse(s)
                 };
                 var result =
-                await _dareclientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
+                await _treclientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
             }
             return RedirectToAction("EditProject", new { projectId = ProjectId });
         }
@@ -165,7 +164,7 @@ namespace TRE_UI.Controllers
                 UserId = userId
             };
             var result =
-                await _dareclientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/RemoveUserMembership", model);
+                await _treclientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/RemoveUserMembership", model);
             return RedirectToAction("GetAllProjectsForApproval");
         }
 
