@@ -13,7 +13,7 @@ namespace DARE_API.Controllers
 {
 
     [Route("api/[controller]")]
-    [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
+    [Authorize(Roles = "dare-control-admin")]
     [ApiController]
     
     

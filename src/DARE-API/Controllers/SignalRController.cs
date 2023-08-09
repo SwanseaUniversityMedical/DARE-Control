@@ -9,7 +9,7 @@ using System.Data;
 namespace DARE_API.Controllers
 {
     [ApiController]
-    [Authorize(Roles = "dare-tre,dare-control-admin,dare-tre-admin")]
+    [Authorize(Roles = "dare-tre,dare-control-admin")]
     [Route("api/[controller]")]
     public class SignalRController : Controller
     {

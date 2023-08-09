@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using System.IdentityModel.Tokens.Jwt;
+using Newtonsoft.Json.Linq;
 
 namespace TRE_UI.Controllers
 {
@@ -36,7 +37,6 @@ namespace TRE_UI.Controllers
             return View(test);
         }
         [HttpGet]
-        //[Route("Home/NewTokenIssue")]
         [Authorize]
         public async Task<IActionResult> RequestTokenForEndpoints()
         {
@@ -105,7 +105,49 @@ namespace TRE_UI.Controllers
             return tokenResponse.AccessToken;
         }
 
-    
-     
+        public async Task<string> NewToken()
+        {
+            var context = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            var result = "";
+            //Refresh tokens are used once the access or ID tokens expire
+            var currentAccessToken = context.Properties.GetTokenValue("access_token");
+            var currentRefreshToken = context.Properties.GetTokenValue("refresh_token");
+
+            string keycloakBaseUrl = "https://auth2.ukserp.ac.uk/realms/Dare-Control";
+            string clientId = "Dare-Control-UI";
+            string clientSecret = "PUykmXOAkyYhIdKzpYz0anPlQ74gUBTz";
+            string refreshToken = currentRefreshToken;
+
+            HttpClient httpClient = new HttpClient();
+
+            var tokenEndpoint = $"{keycloakBaseUrl}/protocol/openid-connect/token";
+            var tokenRequestBody = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                {"grant_type", "refresh_token"},
+                {"client_id", clientId},
+                {"client_secret", clientSecret},
+                {"refresh_token", refreshToken},
+                {"max_age", "2592000"} // Set a longer max_age in seconds
+            });
+
+            var tokenResponse = await httpClient.PostAsync(tokenEndpoint, tokenRequestBody);
+            var tokenResponseContent = await tokenResponse.Content.ReadAsStringAsync();
+
+            if (tokenResponse.IsSuccessStatusCode)
+            {
+                var tokenJson = JObject.Parse(tokenResponseContent);
+                var newAccessToken = tokenJson["access_token"].ToString();
+                result = newAccessToken;
+                Log.Information("{Function} New Access Token with longer expiry: {newAccessToken}", "NewToken", newAccessToken);
+            }
+            else
+            {
+                Log.Error("{Function} Error refreshing token: {tokenResponseContent}", "NewToken", tokenResponseContent);
+            }
+
+            return result;
+        }
+
+
     }
 }
