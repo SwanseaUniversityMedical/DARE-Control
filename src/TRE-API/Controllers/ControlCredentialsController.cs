@@ -4,11 +4,13 @@ using BL.Models.APISimpleTypeReturns;
 using BL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using TRE_API.Models;
 using TRE_API.Repositories.DbContexts;
+using TRE_API.Services;
 
 namespace TRE_API.Controllers
 {
@@ -19,18 +21,30 @@ namespace TRE_API.Controllers
 
         private readonly ApplicationDbContext _DbContext;
         private readonly IEncDecHelper _encDecHelper;
+        private readonly IKeycloakTokenHelper _keycloakTokenHelper;
 
-        public ControlCredentialsController(ApplicationDbContext applicationDbContext, IEncDecHelper encDec)
+        public ControlCredentialsController(ApplicationDbContext applicationDbContext, IEncDecHelper encDec, IKeycloakTokenHelper keycloakTokenHelper)
         {
             _encDecHelper = encDec;
             _DbContext = applicationDbContext;
+            _keycloakTokenHelper = keycloakTokenHelper;
         }
 
         [AllowAnonymous]
-        [HttpGet("AreCredentialsSet")]
-        public BoolReturn AreCredentialsSet()
+        [HttpGet("CheckCredentialsAreValid")]
+        public async Task<BoolReturn> CheckCredentialsAreValidAsync()
         {
-            return new BoolReturn() { Result = _DbContext.ControlCredentials.Any() };
+            var result = new BoolReturn(){Result = false};
+            var creds = _DbContext.ControlCredentials.FirstOrDefault();
+            if (creds != null)
+            {
+                var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
+                    _encDecHelper.Decrypt(creds.PasswordEnc));
+                result.Result = !string.IsNullOrWhiteSpace(token);
+                    
+            }
+
+            return result;
         }
 
         [HttpPost("UpdateCredentials")]
@@ -38,12 +52,21 @@ namespace TRE_API.Controllers
         {
             try
             {
-                var add = false;
+                creds.Valid = true;
+                var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
+                    creds.PasswordEnc);
+                if (string.IsNullOrWhiteSpace(token))
+                {
+                    creds.Valid = false;
+                    return creds;
+                }
+                
+                var add = true;
                 var dbcred = _DbContext.ControlCredentials.FirstOrDefault();
                 if (dbcred != null)
                 {
                     creds.Id = dbcred.Id;
-                    add = true;
+                    add = false;
                 }
 
                 creds.PasswordEnc = _encDecHelper.Encrypt(creds.PasswordEnc);

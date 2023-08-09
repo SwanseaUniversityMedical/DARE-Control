@@ -33,17 +33,17 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Project" asp-action="GetAllProjects">Projects</a>
                         </li>
-                        <li class="nav-item">
+                        @*<li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="GetAllUsers">People</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Project" asp-action="RequestProjectMembership">Request Project Membership</a>
-                        </li> 
+                        </li> *@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Project" asp-action="GetAllProjectsForApproval">Approve Membership</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="RequestTokenForEndpoints">Get API Token</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="ControlCredentials" asp-action="UpdateCredentials">Update Control Credentials</a>
                         </li>
                         <li class="mobile-account-nav">
                             <hr class="mobile-account-nav dropdown-divider" />

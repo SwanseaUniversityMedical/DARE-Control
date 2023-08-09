@@ -14,8 +14,8 @@ namespace TRE_UI.Controllers
     //[Authorize(Roles = "dare-TRE-admin")]
     public class UserController : Controller
     {
-        private readonly IDareClientHelper _clientHelper;
-        public UserController(IDareClientHelper client)
+        private readonly ITREClientHelper _clientHelper;
+        public UserController(ITREClientHelper client)
         {
             _clientHelper = client;
         }

@@ -21,27 +21,24 @@ namespace TRE_API.Controllers
         private readonly IConfiguration _configuration;
         private readonly DAREAPISettings _dareAPISettings;
 
-        private readonly IDareClientHelper _dareclientHelper;
+        private readonly IDareClientWithoutTokenHelper _dareclientHelper;
   
-        public ProjectController(IDareClientHelper dareclient)
+        public ProjectController(IDareClientWithoutTokenHelper dareclient, ApplicationDbContext applicationDbContext)
         {
             _dareclientHelper = dareclient;
-        
+            _DbContext = applicationDbContext;
+
         }
 
-        public ProjectController(ApplicationDbContext applicationDbContext) 
-        {
-            _DbContext = applicationDbContext;
-        }
        
 
 
-        [HttpGet]
-        [Authorize(Roles = "dare-tre,dare-control-admin")]
+        [HttpGet("GetAllProjects")]
+        [Authorize(Roles = "dare-tre-admin")]
         public List<Project> GetAllProjects()
         {
             //var url = _DAREAPISettings["DareAPISettings:HelpAddress"];
-            var allProjects =  _dareclientHelper.CallAPIWithoutModel<List<Project>>(_dareAPISettings.Address + "/api/Project/GetAllProjects/").Result;
+            var allProjects =  _dareclientHelper.CallAPIWithoutModel<List<Project>>( "/api/Project/GetAllProjects/").Result;
             //var allProjects = (_DAREAPISettings.Address + "/api/Project/GetAllProjects/");
             return allProjects;
         }
