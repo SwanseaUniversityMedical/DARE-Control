@@ -11,14 +11,14 @@ namespace TRE_API.Controllers
 {
     //[Authorize]
     //[ApiController]
-    //[Authorize(Roles = "dare-tre-admin")]
-    [Route("api/[controller]")]
+    //[Authorize(Roles = "dare-tre,dare-control-admin")]
+    //[Route("api/[controller]")]
 
     public class ProjectController : ControllerBase
     {
 
         private readonly ApplicationDbContext _DbContext;
-        private readonly IConfiguration _configuration;
+
         private readonly DAREAPISettings _dareAPISettings;
 
         private readonly IDareClientWithoutTokenHelper _dareclientHelper;
@@ -32,6 +32,8 @@ namespace TRE_API.Controllers
 
        
 
+                Log.Information("{Function} Projects retrieved successfully", "GetAllProjects");
+                return projects;
 
         [HttpGet("GetAllProjects")]
         [Authorize(Roles = "dare-tre-admin")]
@@ -42,6 +44,7 @@ namespace TRE_API.Controllers
             //var allProjects = (_DAREAPISettings.Address + "/api/Project/GetAllProjects/");
             return allProjects;
         }
+
 
         [HttpPost("RequestMembership")]
         public async Task<ProjectApproval?> RequestMembership(ProjectUserTre model)
