@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using System.IdentityModel.Tokens.Jwt;
 using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace TRE_UI.Controllers
 {
