@@ -43,7 +43,7 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Project" asp-action="GetAllProjectsForApproval">Approve Membership</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="RequestTokenForEndpoints">Request Token for endpoints</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="RequestTokenForEndpoints">Get API Token</a>
                         </li>
                         <li class="mobile-account-nav">
                             <hr class="mobile-account-nav dropdown-divider" />
@@ -55,8 +55,18 @@
                     <form class="me-3 d-none d-md-block">
                         <input type="search" class="form-control form-control-sm" placeholder="Search..." aria-label="Search">
                     </form>
-                  
 
+                    <div class="nav-item dropdown">
+                        <a class="nav-link text-dark dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            @User?.FindFirst("name")?.Value
+                        </a>
+                        <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="#">Account</a></li>
+                            <li><a class="dropdown-item" href="#">Helpdesk</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/Account/Logout">Logout</a></li>
+                        </ul>
+                    </div>
             </div>
         </nav>
     </header>

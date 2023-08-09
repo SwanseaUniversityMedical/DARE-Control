@@ -13,7 +13,7 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace TRE_UI.Controllers
 {
-    //[Authorize(Roles = "dare-control-admin")]
+    //[Authorize(Roles = "dare-TRE-admin")]
     public class UserController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
@@ -40,61 +40,76 @@ namespace TRE_UI.Controllers
             return View(test);
         }
         [HttpGet]
-        ////[Route("Home/TokenForEndpoints")]
-        //[Authorize]
-
-        [Authorize(Roles = "dare-tre-admin")]
+        //[Route("Home/NewTokenIssue")]
+        [Authorize]
         public async Task<IActionResult> RequestTokenForEndpoints()
-        {  
+        {
 
-            //var handler = new JwtSecurityTokenHandler();
-            var context = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            var oldtoken = HttpContext.User?.Identity?.IsAuthenticated == true
+                ? await this.HttpContext.GetTokenAsync("access_token")
+                : null;
+            var newtoken = await GetTokenForUser();
+            ViewBag.Claims = HttpContext.User.Claims.Where(c => c.Type == "groups").ToList();
+            var accessToken = HttpContext.User?.Identity?.IsAuthenticated == true
+                ? await this.HttpContext.GetTokenAsync("access_token")
+                : null;
+            ViewBag.AccessToken = accessToken;
+            var handler = new JwtSecurityTokenHandler();
+            var tokenS = handler.ReadToken(accessToken) as JwtSecurityToken;
+            var tokenExpiryDate = tokenS.ValidTo;
+            ViewBag.TokenExpiryDate = tokenExpiryDate;
+            return View();
+        }
 
-            //Refresh tokens are used once the access or ID tokens expire
-            var currentRefreshToken = context.Properties.GetTokenValue("refresh_token");
-            var tokenResponse = await new HttpClient().RequestRefreshTokenAsync(new RefreshTokenRequest
+       
+        public async Task<string> GetTokenForUser()
+        {
+
+            //string clientId = "Dare-TRE-UI";
+            //string clientSecret = "5da4W2dwgRfYb3Jfp9if7KSPQLiMZ93I";
+            string clientId = "Dare-Control-UI";
+            string clientSecret = "PUykmXOAkyYhIdKzpYz0anPlQ74gUBTz";
+            var authority = "https://auth2.ukserp.ac.uk/realms/Dare-Control";
+
+            var client = new HttpClient();
+
+            var disco = await client.GetDiscoveryDocumentAsync(new DiscoveryDocumentRequest
             {
-                Address = "https://auth2.ukserp.ac.uk/auth/realms/Dare-Control",
-                ClientId = "Dare-TRE-UI",
-                ClientSecret = "5da4W2dwgRfYb3Jfp9if7KSPQLiMZ93I",
-                RefreshToken = currentRefreshToken,
+                Address = authority,
+                Policy = new DiscoveryPolicy
+                {
+                    ValidateIssuerName = false, // Keycloak may have a different issuer name format
+                }
             });
 
-            // Send request with valid parameters to get a new access token and an associated new refresh token
-
-            if (tokenResponse.HttpStatusCode == System.Net.HttpStatusCode.OK)
+            if (disco.IsError)
             {
-                var newAccessToken = tokenResponse.AccessToken;
-                var jwtHandler = new JwtSecurityTokenHandler();
-                var token = jwtHandler.ReadJwtToken(newAccessToken);
-
-                DateTime expirationTime = DateTime.UtcNow;
-                var groupClaims = token.Claims.Where(c => c.Type == "realm_access").Select(c => c.Value);
-                var roles = new TokenRoles()
-                {
-                    roles = new List<string>()
-                };
-                if (groupClaims.Any())
-                {
-                    roles = JsonConvert.DeserializeObject<TokenRoles>(groupClaims.First());
-                }
-                if (roles.roles.Any(gc => gc.Equals("dare-tre-admin")))
-                {
-                    expirationTime = DateTime.UtcNow.AddDays(10);
-                }
-                token.Payload["exp"] = (int)(expirationTime - new DateTime(1970, 1, 1)).TotalSeconds;
-
-                // Generate a new JWT token with the updated expiration claim
-                var newJwtToken = jwtHandler.WriteToken(token);
-                context.Properties.UpdateTokenValue("access_token", newJwtToken);
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, context.Principal, context.Properties);
+                Log.Error("{Function} {Error}", "GetTokenForUser", disco.Error);
+                return "";
             }
-            return Ok();
-        }
-        public class TokenRoles
-        {
-            public List<string> roles { get; set; }
+
+            var tokenResponse = await client.RequestPasswordTokenAsync(new PasswordTokenRequest
+            {
+                Address = disco.TokenEndpoint,
+                ClientId = clientId,
+                ClientSecret = clientSecret,
+                UserName = "testingtreapi",
+                Password = "statuszero0!"
+            });
+
+
+            if (tokenResponse.IsError)
+            {
+                Log.Error("{Function} {Error}", "GetTokenForUser", tokenResponse.Error);
+                return "";
+            }
+
+            Log.Information("{Function} {AccessToken}", "GetTokenForUser", tokenResponse.AccessToken);
+            Log.Information(tokenResponse.RefreshToken);
+            return tokenResponse.AccessToken;
         }
 
+    
+     
     }
 }

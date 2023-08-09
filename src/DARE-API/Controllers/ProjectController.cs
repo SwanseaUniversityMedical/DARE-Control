@@ -53,7 +53,7 @@ namespace DARE_API.Controllers
 
                 //2023-06-01 14:30:00 use this as the datetime
                 model.Name = projects.Name.Trim();
-                model.Display = projects.Display.Trim();
+                //model.Display = projects.Display.Trim();
 
                 if (_DbContext.Projects.Any(x => x.Name.ToLower() == model.Name.ToLower().Trim()))
                 {
