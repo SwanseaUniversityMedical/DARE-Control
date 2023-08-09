@@ -8,7 +8,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace BL.Models.DTO
+namespace BL.Models.ViewModels
 {
     /// <summary>
     /// FormData is a repository for the JSON data submitted from a FormIo Form.

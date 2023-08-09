@@ -1,16 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using BL.Repositories.DbContexts;
 using BL.Models;
-using System.Text.Json.Nodes;
-using BL.Models.DTO;
-using BL.Rabbit;
-using Newtonsoft.Json;
-using TRE_API.Controllers;
-using TRE_API.Models;
-using EasyNetQ;
+using BL.Models.ViewModels;
 using Serilog;
+using TRE_API.Repositories.DbContexts;
 
 namespace TRE_API.Controllers
 {
@@ -50,7 +43,7 @@ namespace TRE_API.Controllers
                 proj.LocalProjectName = model.LocalProjectName;
 
 
-                _DbContext.ProjectApproval.Add(proj);
+                _DbContext.ProjectApprovals.Add(proj);
 
                 await _DbContext.SaveChangesAsync();
 
@@ -87,9 +80,9 @@ namespace TRE_API.Controllers
                 proj.Date = DateTime.Now.ToUniversalTime(); 
 
 
-                var returned = _DbContext.ProjectApproval.Find(model.Id);
+                var returned = _DbContext.ProjectApprovals.Find(model.Id);
                 if( returned != null)
-                    _DbContext.ProjectApproval.Update(proj); ;
+                    _DbContext.ProjectApprovals.Update(proj); ;
                 await _DbContext.SaveChangesAsync();
 
                 Log.Information("{Function} Membership Request added successfully", "MembershipRequest");
@@ -114,7 +107,7 @@ namespace TRE_API.Controllers
             {
 
         
-                var returned = _DbContext.ProjectApproval.Find(projectId);
+                var returned = _DbContext.ProjectApprovals.Find(projectId);
                 if (returned == null)
                 {
                     return null;
@@ -137,7 +130,7 @@ namespace TRE_API.Controllers
             try
             {
 
-                var allApprovedProjects = _DbContext.ProjectApproval
+                var allApprovedProjects = _DbContext.ProjectApprovals
                     //.Include(x => x.Approved)
                     .ToList();
 

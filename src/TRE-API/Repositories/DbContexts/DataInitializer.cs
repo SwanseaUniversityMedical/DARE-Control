@@ -1,5 +1,7 @@
 ﻿
-namespace BL.Repositories.DbContexts
+
+
+namespace TRE_API.Repositories.DbContexts
 {
     public class DataInitaliser
     {

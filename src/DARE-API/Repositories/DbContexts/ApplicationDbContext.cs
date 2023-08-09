@@ -1,10 +1,5 @@
 ﻿using BL.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using System.Collections.Generic;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
-using BL.Models.DTO;
 
 namespace DARE_API.Repositories.DbContexts
 {

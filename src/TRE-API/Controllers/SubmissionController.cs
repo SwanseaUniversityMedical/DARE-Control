@@ -1,11 +1,6 @@
-﻿using BL.Models.DTO;
-using BL.Models;
-using Microsoft.AspNetCore.Authorization;
+﻿
 using Microsoft.AspNetCore.Mvc;
 using TRE_API.Services.SignalR;
-using BL.Services;
-using System.Text.Json;
-using System.Text;
 
 namespace TRE_API.Controllers
 {

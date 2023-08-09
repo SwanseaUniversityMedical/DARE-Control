@@ -1,60 +1,47 @@
 ﻿using BL.Models;
+
 using BL.Services;
 using IdentityModel.Client;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Serilog;
 using System.IdentityModel.Tokens.Jwt;
+using BL.Models.APISimpleTypeReturns;
 
 namespace TRE_UI.Controllers
 {
-    //[Authorize(Roles = "dare-TRE-admin")]
-    public class UserController : Controller
+    [Authorize(Roles = "dare-tre-admin")]
+    public class ControlCredentialsController : Controller
     {
-        private readonly IDareClientHelper _clientHelper;
-        public UserController(IDareClientHelper client)
+        private readonly ITREClientHelper _clientHelper;
+        public ControlCredentialsController(ITREClientHelper client)
         {
             _clientHelper = client;
         }
-    
-        [HttpGet]
-        public IActionResult GetAllUsers()
+
+
+        [HttpGet("UpdateCredentials")]
+
+        public async Task<IActionResult> UpdateCredentialsAsync()
         {
+            var alreadyset = await _clientHelper.CallAPIWithoutModel<BoolReturn>("/api/ControlCredentials/AreCredentialsSet");
 
-            var users = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
 
-            return View(users);
+            return View(new ControlCredentials()
+                { AlreadySet = alreadyset.Result });
         }
-        public IActionResult GetUser(int id)
-        {
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("userId", id.ToString());
-            var test = _clientHelper.CallAPIWithoutModel<User?>(
-                "/api/User/GetUser/", paramlist).Result;
 
-            return View(test);
-        }
-        [HttpGet]
-        //[Route("Home/NewTokenIssue")]
-        [Authorize]
-        public async Task<IActionResult> RequestTokenForEndpoints()
-        {
+        [HttpPost("UpdateCredentials")]
+        
+        public async Task<IActionResult> UpdateCredentials(ControlCredentials credentials) {
 
-            var oldtoken = HttpContext.User?.Identity?.IsAuthenticated == true
-                ? await this.HttpContext.GetTokenAsync("access_token")
-                : null;
-            var newtoken = await GetTokenForUser();
-            ViewBag.Claims = HttpContext.User.Claims.Where(c => c.Type == "groups").ToList();
-            var accessToken = HttpContext.User?.Identity?.IsAuthenticated == true
-                ? await this.HttpContext.GetTokenAsync("access_token")
-                : null;
-            ViewBag.AccessToken = accessToken;
-            var handler = new JwtSecurityTokenHandler();
-            var tokenS = handler.ReadToken(accessToken) as JwtSecurityToken;
-            var tokenExpiryDate = tokenS.ValidTo;
-            ViewBag.TokenExpiryDate = tokenExpiryDate;
-            return View();
+
+            var result = await _clientHelper.CallAPI<ControlCredentials, ControlCredentials>("/api/ControlCredential/UpdateCredentials", credentials);
+            return RedirectToAction("Index", "Home");
         }
 
        

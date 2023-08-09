@@ -2,15 +2,12 @@
 using DARE_API.Repositories.DbContexts;
 using DARE_API.Attributes;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
-using BL.Models;
-using BL.Models.DTO;
-using BL.Models.Tes;
+using BL.Models.ViewModels;
 using EasyNetQ;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
+
 
 namespace DARE_API.Controllers
 {

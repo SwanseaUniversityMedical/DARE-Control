@@ -1,16 +1,8 @@
 ﻿using BL.Models;
-using BL.Models.DTO;
+using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using RestSharp;
-using System.Text.Json.Nodes;
 using BL.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using static System.Net.Mime.MediaTypeNames;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Collections.Generic;
-using Amazon.S3;
 
 namespace TRE_UI.Controllers
 {

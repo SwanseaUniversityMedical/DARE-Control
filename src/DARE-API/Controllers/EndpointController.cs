@@ -4,8 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using Endpoint = BL.Models.Endpoint;
-using BL.Models.DTO;
-using BL.Models;
+using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 
 namespace DARE_API.Controllers
