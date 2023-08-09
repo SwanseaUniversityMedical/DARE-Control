@@ -11,8 +11,8 @@ namespace TRE_API.Controllers
 {
     //[Authorize]
     //[ApiController]
-    [Authorize(Roles = "dare-tre,dare-control-admin")]
-    [Route("api/[controller]")]
+    //[Authorize(Roles = "dare-tre,dare-control-admin")]
+    //[Route("api/[controller]")]
 
     public class ProjectController : ControllerBase
     {
@@ -24,15 +24,15 @@ namespace TRE_API.Controllers
         private readonly IDareClientHelper _dareclientHelper;
 
 
-        public ProjectController(ApplicationDbContext applicationDbContext, IOptions<DAREAPISettings> APISettings, IDareClientHelper client)
+        public ProjectController(ApplicationDbContext applicationDbContext, IOptions<DAREAPISettings> APISettings)
         {
             _DbContext = applicationDbContext;
             _dareAPISettings = APISettings.Value;
-            _dareclientHelper = client;
+          
         }
 
 
-        [HttpGet("GetAllProjects")]
+        [HttpGet]
         public List<Project> GetAllProjects()
         {
             try
@@ -51,7 +51,7 @@ namespace TRE_API.Controllers
             }
         }
 
-        [HttpGet("GetProject")]
+        [HttpGet]
         public Project? GetProject(int projectId)
         {
             try
@@ -72,7 +72,7 @@ namespace TRE_API.Controllers
         }
 
 
-        [HttpGet("GetAllUsers")]
+        [HttpGet]
         public List<User> GetAllUsers()
         {
             try
@@ -91,7 +91,7 @@ namespace TRE_API.Controllers
             }
         }
 
-        [HttpPost("AddUserMembership")]
+        [HttpPost]
         public async Task<ProjectUser?> AddUserMembership(ProjectUser model)
         {
             try
@@ -109,7 +109,7 @@ namespace TRE_API.Controllers
             }
         }
 
-        [HttpPost("RemoveUserMembership")]
+        [HttpPost]
         public async Task<ProjectUser?> RemoveUserMembership(int projectId, int userId)
         {
             try
