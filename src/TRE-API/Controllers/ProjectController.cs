@@ -12,7 +12,7 @@ namespace TRE_API.Controllers
     //[Authorize]
     //[ApiController]
     //[Authorize(Roles = "dare-tre,dare-control-admin")]
-    //[Route("api/[controller]")]
+    [Route("api/[controller]")]
 
     public class ProjectController : ControllerBase
     {
@@ -31,17 +31,14 @@ namespace TRE_API.Controllers
         }
 
        
-
-                Log.Information("{Function} Projects retrieved successfully", "GetAllProjects");
-                return projects;
+        
 
         [HttpGet("GetAllProjects")]
         [Authorize(Roles = "dare-tre-admin")]
         public List<Project> GetAllProjects()
         {
-            //var url = _DAREAPISettings["DareAPISettings:HelpAddress"];
+            
             var allProjects =  _dareclientHelper.CallAPIWithoutModel<List<Project>>( "/api/Project/GetAllProjects/").Result;
-            //var allProjects = (_DAREAPISettings.Address + "/api/Project/GetAllProjects/");
             return allProjects;
         }
 
