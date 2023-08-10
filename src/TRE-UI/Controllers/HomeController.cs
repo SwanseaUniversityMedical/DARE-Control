@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using BL.Models.APISimpleTypeReturns;
+using BL.Services;
 using TRE_UI.Models;
 
 namespace TRE_UI.Controllers
@@ -7,14 +9,21 @@ namespace TRE_UI.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly ITREClientHelper _treClientHelper;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, ITREClientHelper trehelper)
         {
             _logger = logger;
+            _treClientHelper = trehelper;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> IndexAsync()
         {
+            var alreadyset =await  _treClientHelper.CallAPIWithoutModel<BoolReturn>("/api/ControlCredentials/CheckCredentialsAreValid");
+            if (!alreadyset.Result)
+            {
+                return RedirectToAction("UpdateCredentials", "ControlCredentials");
+            }
             return View();
         }
 
@@ -23,10 +32,9 @@ namespace TRE_UI.Controllers
             return View();
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult TermsAndConditions()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View();
         }
     }
 }

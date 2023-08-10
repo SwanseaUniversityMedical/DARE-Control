@@ -1,13 +1,8 @@
 ﻿
 using BL.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using System.Collections.Generic;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
-using BL.Models.DTO;
 
-namespace BL.Repositories.DbContexts
+namespace TRE_API.Repositories.DbContexts
 {
     public class ApplicationDbContext : DbContext
     {
@@ -22,8 +17,8 @@ namespace BL.Repositories.DbContexts
 
         }
      
-        public DbSet<ProjectApproval> ProjectApproval { get; set; }
-
+        public DbSet<ProjectApproval> ProjectApprovals { get; set; }
+        public DbSet<ControlCredentials> ControlCredentials { get; set; }
 
 
     }

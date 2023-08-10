@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using Endpoint = BL.Models.Endpoint;
-using BL.Models.DTO;
-using BL.Models;
+using BL.Models.ViewModels;
+using Microsoft.AspNetCore.Authentication;
 
 namespace DARE_API.Controllers
 {
@@ -15,23 +15,24 @@ namespace DARE_API.Controllers
     public class EndpointController : Controller
     {
         private readonly ApplicationDbContext _DbContext;
+        protected readonly IHttpContextAccessor _httpContextAccessor;
 
-
-        public EndpointController(ApplicationDbContext applicationDbContext)
+        public EndpointController(ApplicationDbContext applicationDbContext, IHttpContextAccessor httpContextAccessor)
         {
 
             _DbContext = applicationDbContext;
+            _httpContextAccessor= httpContextAccessor;
 
         }
 
-        [HttpPost("AddEndpoint")]
 
+        [HttpPost("AddEndpoint")]
         public async Task<Endpoint> AddEndpoint([FromBody] FormData data)
         {           
             try
             {
                 Endpoint endpoints = JsonConvert.DeserializeObject<Endpoint>(data.FormIoString);
-                endpoints.Name = endpoints.Name.Trim();
+                endpoints.Name = endpoints.Name?.Trim();
                 if (_DbContext.Endpoints.Any(x => x.Name.ToLower() == endpoints.Name.ToLower().Trim()))
                 {
                     return null;
@@ -74,7 +75,7 @@ namespace DARE_API.Controllers
         {
             try
             {
-
+                var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
                 var allEndpoints = _DbContext.Endpoints.ToList();
 
                 

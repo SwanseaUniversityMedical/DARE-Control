@@ -1,5 +1,5 @@
 ﻿using BL.Models;
-using BL.Models.DTO;
+
 using BL.Models.Settings;
 using BL.Services;
 using EasyNetQ.Management.Client.Model;
@@ -9,11 +9,12 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Serilog;
 using System.Data;
+using BL.Models.ViewModels;
 using User = EasyNetQ.Management.Client.Model.User;
 
 namespace DARE_FrontEnd.Controllers
 {
-    [Authorize(Roles = "dare-control-admin")]
+    [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
     public class UserController : Controller
     {
         private readonly IDareClientHelper _clientHelper;

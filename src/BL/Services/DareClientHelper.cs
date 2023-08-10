@@ -1,19 +1,12 @@
-﻿using BL.Models.DTO;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace BL.Services
 {
     public class DareClientHelper: BaseClientHelper, IDareClientHelper
     {
 
-        public DareClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, IConfiguration config): base(httpClientFactory, httpContextAccessor, config["DareAPISettings:Address"])
+        public DareClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, IConfiguration config): base(httpClientFactory, httpContextAccessor, config["DareAPISettings:Address"], null)
         {
         
         }

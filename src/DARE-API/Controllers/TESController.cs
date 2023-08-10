@@ -26,7 +26,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace DARE_API.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(Roles = "dare-control-admin,dare-control-submitter,dare-tre")]
+    [Authorize(Roles = "dare-control-admin,dare-control-submitter,dare-tre,dare-tre-admin")]
     [ApiController]
     /// <summary>
     /// API endpoints for <see cref="TesTask"/>s.
@@ -250,8 +250,8 @@ namespace DARE_API.Controllers
                 return BadRequest("Project " + project + " doesn't exist.");
             }
 
-            //TODO: Implement this function
-            if (!IsUserOnProject(dbproj))
+            
+            if (!IsUserOnProject(dbproj, usersName))
             {
                 return BadRequest("User " + User.Identity.Name + "isn't on project " + project + ".");
             }
@@ -337,10 +337,10 @@ namespace DARE_API.Controllers
             return true;
         }
 
-        private bool IsUserOnProject(Project project)
+        private bool IsUserOnProject(Project project, string username)
         {
-            //TODO: Implement this
-            return true;
+            return project.Users.Any(x => x.Name == username.ToLower());
+            
         }
 
         /// <summary>

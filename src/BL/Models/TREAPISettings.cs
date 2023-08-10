@@ -8,6 +8,7 @@ namespace BL.Models
 {
     public class TREAPISettings
     {
-        public string SignalRAddress { get; set; }
+        public string? SignalRAddress { get; set; }
     }
+
 }

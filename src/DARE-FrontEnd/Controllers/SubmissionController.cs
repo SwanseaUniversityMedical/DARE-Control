@@ -9,10 +9,12 @@ namespace DARE_FrontEnd.Controllers
     public class SubmissionController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
+        private readonly IConfiguration _configuration;
 
-        public SubmissionController(IDareClientHelper client)
+        public SubmissionController(IDareClientHelper client, IConfiguration configuration)
         {
             _clientHelper = client;
+            _configuration = configuration;
         }
 
         public IActionResult Index()
@@ -22,7 +24,8 @@ namespace DARE_FrontEnd.Controllers
 
         public IActionResult Instructions()
         {
-            return View();
+            var url = _configuration["DareAPISettings:HelpAddress"];
+            return View(model:url);
         }
 
         [HttpGet]

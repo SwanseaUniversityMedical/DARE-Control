@@ -1,7 +1,4 @@
-﻿using BL.Models.DTO;
-using Newtonsoft.Json;
-
-namespace BL.Models
+﻿namespace BL.Models
 {
     public class User
     {

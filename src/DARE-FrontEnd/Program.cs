@@ -8,24 +8,13 @@ using BL.Models.Settings;
 
 
 using Microsoft.AspNetCore.Authentication.Cookies;
-using DARE_FrontEnd.Models;
 using Microsoft.IdentityModel.Logging;
-using Serilog.Exceptions.Core;
-using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
 using Serilog;
-using Serilog.Exceptions;
-using System.Text.Json.Serialization;
-using System.Text.Json;
-using BL.Models.DTO;
 using BL.Services;
-using Newtonsoft.Json;
-using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using Microsoft.AspNetCore.HttpOverrides;
-using Duende.AccessTokenManagement;
-using Duende.AccessTokenManagement.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,9 +35,9 @@ Log.Information("Dare-FrontEnd logging Start.");
 
 
 // -- authentication here
-var keyCloakSettings = new KeyCloakSettings();
-configuration.Bind(nameof(keyCloakSettings), keyCloakSettings);
-builder.Services.AddSingleton(keyCloakSettings);
+var controlKeyCloakSettings = new ControlKeyCloakSettings();
+configuration.Bind(nameof(controlKeyCloakSettings), controlKeyCloakSettings);
+builder.Services.AddSingleton(controlKeyCloakSettings);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
@@ -97,6 +86,12 @@ builder.Services.AddAuthorization(options =>
                 context => context.User.HasClaim(claim =>
                     claim.Type == "groups"
                     && claim.Value.Contains("dare-control-user"))));
+    options.AddPolicy(
+          "admin",
+          policyBuilder => policyBuilder.RequireAssertion(
+              context => context.User.HasClaim(claim =>
+                  claim.Type == "groups"
+                  && claim.Value.Contains("dare-tre-admin"))));
 });
 
 
@@ -127,7 +122,7 @@ builder.Services.AddAuthentication(options =>
              })
             .AddOpenIdConnect(options =>
             {
-                if (keyCloakSettings.Proxy)
+                if (controlKeyCloakSettings.Proxy)
                 {
                     options.BackchannelHttpHandler = new HttpClientHandler
                     {
@@ -135,19 +130,19 @@ builder.Services.AddAuthentication(options =>
                         UseDefaultCredentials = true,
                         Proxy = new WebProxy()
                         {
-                            Address = new Uri(keyCloakSettings.ProxyAddresURL),
-                            BypassList = new[] { keyCloakSettings.BypassProxy }
+                            Address = new Uri(controlKeyCloakSettings.ProxyAddresURL),
+                            BypassList = new[] { controlKeyCloakSettings.BypassProxy }
                         }
                     };
                 }
                 
                
                 // URL of the Keycloak server
-                options.Authority = keyCloakSettings.Authority;
+                options.Authority = controlKeyCloakSettings.Authority;
                 //// Client configured in the Keycloak
-                options.ClientId = keyCloakSettings.ClientId;
+                options.ClientId = controlKeyCloakSettings.ClientId;
                 //// Client secret shared with Keycloak
-                options.ClientSecret = keyCloakSettings.ClientSecret;
+                options.ClientSecret = controlKeyCloakSettings.ClientSecret;
 
                 options.Events = new OpenIdConnectEvents
                 {
@@ -170,8 +165,8 @@ builder.Services.AddAuthentication(options =>
                         Log.Error("OnRemoteFailure: {ex}", context.Failure);
                         if (context.Failure.Message.Contains("Correlation failed"))
                         {
-                            Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", keyCloakSettings.TokenExpiredAddress);
-                            context.Response.Redirect(keyCloakSettings.TokenExpiredAddress);
+                            Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", controlKeyCloakSettings.TokenExpiredAddress);
+                            context.Response.Redirect(controlKeyCloakSettings.TokenExpiredAddress);
                         }
                         else
                         {
@@ -217,9 +212,9 @@ builder.Services.AddAuthentication(options =>
 
 
 
-                        if (keyCloakSettings.UseRedirectURL)
+                        if (controlKeyCloakSettings.UseRedirectURL)
                         {
-                            context.ProtocolMessage.RedirectUri = keyCloakSettings.RedirectURL;
+                            context.ProtocolMessage.RedirectUri = controlKeyCloakSettings.RedirectURL;
                         }
 
 
@@ -228,7 +223,7 @@ builder.Services.AddAuthentication(options =>
                         await Task.FromResult(0);
                     }
                 };
-                //options.MetadataAddress = keyCloakSettings.MetadataAddress;
+                //options.MetadataAddress = controlKeyCloakSettings.MetadataAddress;
 
                 options.RequireHttpsMetadata = false;
                 options.SaveTokens = true;
@@ -238,9 +233,9 @@ builder.Services.AddAuthentication(options =>
                 
                 options.GetClaimsFromUserInfoEndpoint = true;
 
-                if (string.IsNullOrEmpty(keyCloakSettings.MetadataAddress) == false)
+                if (string.IsNullOrEmpty(controlKeyCloakSettings.MetadataAddress) == false)
                 {
-                    options.MetadataAddress = keyCloakSettings.MetadataAddress;
+                    options.MetadataAddress = controlKeyCloakSettings.MetadataAddress;
                 }
                 
 

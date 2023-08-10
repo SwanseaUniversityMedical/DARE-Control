@@ -2,7 +2,7 @@
 <div class="container mt-5">
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-md-5 g-4">
-        <div class="col">
+        @*<div class="col">
             <a asp-area="" asp-controller="Project" asp-action="RequestProjectMembership" class="card shadow-sm">
                 <img class="card-img-top" src="/img/shutterstock_1081970570-Reduced-740x481.jpg" alt="Projects image" />
                 <div class="card-body">
@@ -12,13 +12,24 @@
                     </div>
                 </div>
             </a>
-        </div>
+        </div>*@
         <div class="col">
-            <a asp-area="" asp-controller="Projects" asp-action="GetAllProjectsForApproval" class="card shadow-sm">
+            <a asp-area="" asp-controller="Project" asp-action="GetAllProjectsForApproval" class="card shadow-sm">
                 <img class="card-img-top" src="/img/shutterstock_376975414-740x481.jpg.webp" alt="People image" />
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <h4 class="m-0 text-dark fs-5">Approve Membership</h4>
+                        <span class="badge bg-dark-blue rounded-pill">X</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col">
+            <a asp-area="" asp-controller="ControlCredentials" asp-action="UpdateCredentials" class="card shadow-sm">
+                <img class="card-img-top" src="/img/about-banner.jpg" alt="TREs image" />
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="m-0 text-dark fs-5">Get API Token</h4>
                         <span class="badge bg-dark-blue rounded-pill">X</span>
                     </div>
                 </div>

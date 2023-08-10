@@ -1,8 +1,4 @@
-﻿using BL.Models.DTO;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Newtonsoft.Json;
-
-namespace BL.Models
+﻿namespace BL.Models
 {
     public class ProjectApproval
     {
