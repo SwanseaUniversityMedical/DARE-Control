@@ -68,9 +68,6 @@
     <Content Update="wwwroot\formio\endpoint.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Update="wwwroot\formio\endpoint2.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Update="wwwroot\formio\project.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
