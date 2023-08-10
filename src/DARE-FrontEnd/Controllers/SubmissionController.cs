@@ -34,16 +34,17 @@ namespace DARE_FrontEnd.Controllers
             List<Submission> displaySubmissionsList = new List<Submission>();
             var res = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions/").Result;
 
-            var submissionGroups = res.GroupBy(x => new {x.Project.Name});
+            res = res.Where(x => x.Parent == null).ToList();
 
-            foreach (var group in submissionGroups)
-            {
-                displaySubmissionsList.Add(group.First());
-            }
-
-            return View(displaySubmissionsList);
+            return View(res);
         }
 
+        [HttpGet]
+        public IActionResult GetASubmission(int id)
+        {
+            var res = _clientHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetAllSubmissions/").Result;
 
+            return View(res);
+        }
     }
 }

@@ -91,8 +91,6 @@ namespace DARE_API.Controllers
             {
                 var allSubmissions = _DbContext.Submissions.ToList();
 
-
-
                 Log.Information("{Function} Endpoints retrieved successfully", "GetAllSubmissions");
                 return allSubmissions;
             }
@@ -101,9 +99,24 @@ namespace DARE_API.Controllers
                 Log.Error(ex, "{Function} Crashed", "GetAllSubmissions");
                 throw;
             }
-
-
         }
 
+        [AllowAnonymous]
+        [HttpGet("GetASubmission")]
+        public Submission GetASubmission(int id)
+        {
+            try
+            {
+                var Submission = _DbContext.Submissions.Where(x => x.Id == id).FirstOrDefault();
+
+                Log.Information("{Function} Submission retrieved successfully", "GetASubmission");
+                return Submission;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetASubmission");
+                throw;
+            }
+        }
     }
 }
