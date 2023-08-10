@@ -7,15 +7,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.Net;
-using TRE_UI.Models;
-using Serilog.Exceptions.Core;
-using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
-using Serilog.Exceptions;
-using System.Text.Json.Serialization;
-using System.Text.Json;
 
-using Newtonsoft.Json;
-using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
@@ -34,7 +26,7 @@ IWebHostEnvironment environment = builder.Environment;
 Log.Logger = CreateSerilogLogger(configuration, environment);
 Log.Information("TRE-UI logging Start.");
 
-string AppName = typeof(Program).Module.Name.Replace(".dll", "");
+
 
 // -- authentication here
 var treKeyCloakSettings = new TreKeyCloakSettings();

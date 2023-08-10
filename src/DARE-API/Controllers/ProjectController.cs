@@ -341,6 +341,39 @@ namespace DARE_API.Controllers
 
         }
 
+
+        [HttpGet("GetAllProjectsForEndpoint")]
+        [AllowAnonymous]
+        public List<Project> GetAllProjectsForEndpoint()
+        {
+            try
+            {
+                var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+                var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
+                if (endpoint == null)
+                {
+                    throw new Exception("User " + usersName + " doesn't have an endpoint");
+                    
+                }
+                var allProjects = _DbContext.Projects.Where(x => x.Endpoints.Contains(endpoint))
+                    //.Include(x => x.Endpoints)
+                    //.Include(x => x.Submissions)
+                    //.Include(x => x.Users)
+                    .ToList();
+
+
+                Log.Information("{Function} Projects retrieved successfully", "GetAllProjectsForEndpoint");
+                return allProjects;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetAllProjectsForEndpoint");
+                throw;
+            }
+
+
+        }
+
         [HttpGet("GetEndPointsInProject")]
         [AllowAnonymous]
         public List<Endpoint> GetEndPointsInProject(int projectId)

@@ -38,7 +38,7 @@ namespace TRE_API.Controllers
         public List<Project> GetAllProjects()
         {
             
-            var allProjects =  _dareclientHelper.CallAPIWithoutModel<List<Project>>( "/api/Project/GetAllProjects/").Result;
+            var allProjects =  _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForEndpoint/").Result;
             return allProjects;
         }
 
@@ -52,12 +52,6 @@ namespace TRE_API.Controllers
                 var proj = new ProjectApproval();
 
                 proj.Date = DateTime.Now.ToUniversalTime();
-                //proj.ProjectId = 2;
-                //proj.UserId = 2;
-                //proj.Projectname = "Project2";
-                //proj.Username = "User2";
-                //proj.LocalProjectName = "testa";
-
                 proj.ProjectId = model.ProjectId;
                 proj.UserId = model.UserId;
                 proj.Projectname = model.Projectname;

@@ -35,10 +35,9 @@ namespace TREAgent
                 var rabbit = scope.ServiceProvider.GetRequiredService<IBus>(); ;
                 var exch = rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
                 var treApi = scope.ServiceProvider.GetRequiredService<ITREClientHelper>();
-                var dareApi = scope.ServiceProvider.GetRequiredService<IDareClientHelper>();
                 
-                var subs = dareApi.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForEndpoint",
-                    new Dictionary<string, string>() { { "endpointname", TreName } }).Result;
+                
+                var subs = treApi.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForEndpoint").Result;
 
 
                
@@ -51,8 +50,8 @@ namespace TREAgent
 
                     var tes = JsonConvert.DeserializeObject<TesTask>(submission.TesJson);
                     rabbit.Advanced.Publish(exch, RoutingConstants.Subs, false, new Message<TesTask>(tes));
-                    var result = dareApi.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForEndpoint",
-                        new Dictionary<string, string>() { { "endpointname", TreName}, {"tesId", submission.TesId}, {"status",SubmissionStatus.TransferredToPod.ToString() } }).Result;
+                    var result = treApi.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForEndpoint",
+                        new Dictionary<string, string>() {  {"tesId", submission.TesId}, {"status",SubmissionStatus.TransferredToPod.ToString() } }).Result;
                     //TODO: Update status of subs
 
                 }
