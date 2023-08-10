@@ -52,12 +52,6 @@ namespace TRE_API.Controllers
                 var proj = new ProjectApproval();
 
                 proj.Date = DateTime.Now.ToUniversalTime();
-                //proj.ProjectId = 2;
-                //proj.UserId = 2;
-                //proj.Projectname = "Project2";
-                //proj.Username = "User2";
-                //proj.LocalProjectName = "testa";
-
                 proj.ProjectId = model.ProjectId;
                 proj.UserId = model.UserId;
                 proj.Projectname = model.Projectname;
