@@ -90,8 +90,7 @@ namespace TRE_UI.Controllers
                 Address = disco.TokenEndpoint,
                 ClientId = clientId,
                 ClientSecret = clientSecret,
-                UserName = "testingtreapi",
-                Password = "statuszero0!"
+               
             });
 
 
