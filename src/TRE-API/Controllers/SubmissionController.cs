@@ -55,6 +55,7 @@ namespace TRE_API.Controllers
         {
             var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForEndpoint",
                 new Dictionary<string, string>() { { "tesId", tesId }, { "status", status.ToString() } });
+            return StatusCode(200, result);
         }
     }
 }

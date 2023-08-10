@@ -38,7 +38,7 @@ namespace TRE_API.Controllers
         public List<Project> GetAllProjects()
         {
             
-            var allProjects =  _dareclientHelper.CallAPIWithoutModel<List<Project>>( "/api/Project/GetAllProjects/").Result;
+            var allProjects =  _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForEndpoint/").Result;
             return allProjects;
         }
 
