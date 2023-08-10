@@ -35,9 +35,13 @@ namespace BL.Controllers
                 User userData = JsonConvert.DeserializeObject<User>(data.FormIoString);
                 userData.Name = userData.Name.Trim();
                 userData.Email = userData.Email.Trim();
-                if (_DbContext.Users.Any(x => x.Name.ToLower() == userData.Name.ToLower().Trim()))
+
+               
+
+                if (_DbContext.Users.Any(x => x.Name.ToLower() == userData.Name.ToLower().Trim() && x.Id != userData.Id))
                 {
-                    return new User();
+                    
+                    return new User() { Error = true, ErrorMessage = "Another user already exists with the same name" };
                 }
 
                 userData.FormData = data.FormIoString;

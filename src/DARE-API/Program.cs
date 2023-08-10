@@ -20,7 +20,6 @@ using Microsoft.AspNetCore.Builder;
 using Newtonsoft.Json;
 using BL.Rabbit;
 using EasyNetQ;
-using BL.Models;
 using BL.Services;
 using static IdentityModel.ClaimComparer;
 using EasyNetQ.Management.Client.Model;
@@ -30,6 +29,7 @@ using Microsoft.AspNetCore.Components;
 using DARE_API.Controllers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
+using BL.Models.ViewModels;
 
 var builder = WebApplication.CreateBuilder(args);
 

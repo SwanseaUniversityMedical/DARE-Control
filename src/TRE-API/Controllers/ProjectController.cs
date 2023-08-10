@@ -19,8 +19,7 @@ namespace TRE_API.Controllers
 
         private readonly ApplicationDbContext _DbContext;
 
-        private readonly DAREAPISettings _dareAPISettings;
-
+        
         private readonly IDareClientWithoutTokenHelper _dareclientHelper;
   
         public ProjectController(IDareClientWithoutTokenHelper dareclient, ApplicationDbContext applicationDbContext)

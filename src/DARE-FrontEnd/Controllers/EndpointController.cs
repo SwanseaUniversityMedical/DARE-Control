@@ -67,9 +67,9 @@ namespace DARE_FrontEnd.Controllers
                 theEndpoint.FormIoString = str;
 
                 var result = await _clientHelper.CallAPI<FormData, Endpoint>("/api/Endpoint/AddEndpoint", theEndpoint);
-                if (result.Id == 0)
+                if (result.Error)
                 {
-                    return BadRequest();
+                    return BadRequest(result.ErrorMessage);
                 } 
                 return Ok(result);
             }

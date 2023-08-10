@@ -31,17 +31,23 @@ namespace DARE_API.Controllers
         {           
             try
             {
-                Endpoint endpoints = JsonConvert.DeserializeObject<Endpoint>(data.FormIoString);
-                endpoints.Name = endpoints.Name?.Trim();
-                if (_DbContext.Endpoints.Any(x => x.Name.ToLower() == endpoints.Name.ToLower().Trim()))
+                Endpoint endpoint = JsonConvert.DeserializeObject<Endpoint>(data.FormIoString);
+                endpoint.Name = endpoint.Name?.Trim();
+                if (_DbContext.Endpoints.Any(x => x.Name.ToLower() == endpoint.Name.ToLower().Trim() && x.Id != endpoint.Id))
                 {
-                    return null;
+                    
+                    return new Endpoint(){Error = true, ErrorMessage = "Another endpoint already exists with the same name"};
                 }
-                endpoints.FormData = data.FormIoString;
-                _DbContext.Endpoints.Add(endpoints);
+                
+                if  (_DbContext.Endpoints.Any(x => x.AdminUsername.ToLower() == endpoint.AdminUsername.ToLower() && x.Id != endpoint.Id))
+                {
+                    return new Endpoint() { Error = true, ErrorMessage = "Another endpoint already exists with the same TRE Admin Name" };
+                }
+                endpoint.FormData = data.FormIoString;
+                _DbContext.Endpoints.Add(endpoint);
 
                 await _DbContext.SaveChangesAsync();
-                return endpoints;
+                return endpoint;
 
             }
             catch (Exception ex)

@@ -1,7 +1,7 @@
 ﻿
 namespace BL.Models
 {
-    public class Project
+    public class Project : BaseModel
     {
         public int Id { get; set; }
         

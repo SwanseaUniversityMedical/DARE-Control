@@ -48,11 +48,12 @@ namespace DARE_API.Controllers
                 //2023-06-01 14:30:00 use this as the datetime
                 model.Name = projects.Name.Trim();
                 //model.Display = projects.Display.Trim();
-
-                if (_DbContext.Projects.Any(x => x.Name.ToLower() == model.Name.ToLower().Trim()))
+                if (_DbContext.Projects.Any(x => x.Name.ToLower() == model.Name.ToLower().Trim() && x.Id != model.Id))
                 {
-                    return null;
+
+                    return new Project() { Error = true, ErrorMessage = "Another project already exists with the same name" };
                 }
+               
                 model.StartDate = projects.StartDate.ToUniversalTime();
                 model.EndDate = projects.EndDate.ToUniversalTime();
 
@@ -96,29 +97,33 @@ namespace DARE_API.Controllers
         {
             try
             {
-                Project projects = JsonConvert.DeserializeObject<Project>(data.FormIoString);
+                Project project = JsonConvert.DeserializeObject<Project>(data.FormIoString);
                 var id = data.Id;
-                var project = _DbContext.Projects.Find(id);
+                var dbproject = _DbContext.Projects.Find(id);
+                if (_DbContext.Projects.Any(x => x.Name.ToLower() == project.Name.ToLower().Trim() && x.Id != project.Id))
+                {
 
+                    return new Project() { Error = true, ErrorMessage = "Another project already exists with the same name" };
+                }
                 //var model = new Project();
 
-                if (project != null)
+                if (dbproject != null)
                 {
-                    project.Id = id;
-                    project.Name = projects.Name;
-                    project.OutputBucket = projects.OutputBucket;
-                    project.SubmissionBucket = projects.SubmissionBucket;
-                    project.StartDate = projects.StartDate.ToUniversalTime();
-                    project.EndDate = projects.EndDate.ToUniversalTime();
-                    project.FormData=data.FormIoString;
+                    dbproject.Id = id;
+                    dbproject.Name = project.Name;
+                    dbproject.OutputBucket = project.OutputBucket;
+                    dbproject.SubmissionBucket = project.SubmissionBucket;
+                    dbproject.StartDate = project.StartDate.ToUniversalTime();
+                    dbproject.EndDate = project.EndDate.ToUniversalTime();
+                    dbproject.FormData=data.FormIoString;
                 }
 
-                _DbContext.Projects.Update(project);
+                _DbContext.Projects.Update(dbproject);
 
                 await _DbContext.SaveChangesAsync();
 
                 Log.Information("{Function} Projects Updated successfully", "UpdateProject");
-                return project;
+                return dbproject;
             }
             catch (Exception ex)
             {

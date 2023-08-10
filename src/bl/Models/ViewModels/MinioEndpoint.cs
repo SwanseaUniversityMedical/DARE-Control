@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BL.Models
+namespace BL.Models.ViewModels
 {
-    public class TREAPISettings
+    public class MinioEndpoint
     {
-        public string? SignalRAddress { get; set; }
+        public string Url { get; set; }
     }
-
 }

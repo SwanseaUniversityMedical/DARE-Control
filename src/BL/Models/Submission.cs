@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BL.Models
 {
-    public class Submission
+    public class Submission : BaseModel
     {
         public int Id { get; set; }
         public int? ParentId { get; set; }

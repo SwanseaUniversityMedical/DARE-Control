@@ -1,7 +1,7 @@
 ﻿
 namespace BL.Models
 {
-    public class Endpoint
+    public class Endpoint: BaseModel
     {
         public int Id { get; set; }        
         public virtual List<Project> Projects { get; set; }
