@@ -123,7 +123,7 @@ namespace DARE_FrontEnd.Controllers
             var oldtoken = HttpContext.User?.Identity?.IsAuthenticated == true
                 ? await this.HttpContext.GetTokenAsync("access_token")
                 : null;
-            var newtoken = await GetTokenForUser();
+            //var newtoken = await GetTokenForUser();
             ViewBag.Claims = HttpContext.User.Claims.Where(c => c.Type == "groups").ToList();
             var accessToken = HttpContext.User?.Identity?.IsAuthenticated == true
                 ? await this.HttpContext.GetTokenAsync("access_token")
@@ -136,52 +136,7 @@ namespace DARE_FrontEnd.Controllers
             return View();
         }
 
-        public async Task<string> GetTokenForUser()
-        {
-
-            string keycloakBaseUrl = "https://auth2.ukserp.ac.uk/realms/Dare-Control";
-            string clientId = "Dare-Control-UI";
-            string clientSecret = "PUykmXOAkyYhIdKzpYz0anPlQ74gUBTz";
-            
-            var authority = "https://auth2.ukserp.ac.uk/realms/Dare-Control";
-
-            var client = new HttpClient();
-
-            var disco = await client.GetDiscoveryDocumentAsync(new DiscoveryDocumentRequest
-            {
-                Address = authority,
-                Policy = new DiscoveryPolicy
-                {
-                    ValidateIssuerName = false, // Keycloak may have a different issuer name format
-                }
-            });
-
-            if (disco.IsError)
-            {
-               Log.Error("{Function} {Error}","GetTokenForUser",disco.Error);
-                return "";
-            }
-
-            var tokenResponse = await client.RequestPasswordTokenAsync(new PasswordTokenRequest
-            {
-                Address = disco.TokenEndpoint,
-                ClientId = clientId,
-                ClientSecret = clientSecret,
-                UserName = "testingtreapi",
-                Password = "statuszero0!"
-            });
-
-
-            if (tokenResponse.IsError)
-            {
-                Log.Error("{Function} {Error}", "GetTokenForUser", tokenResponse.Error);
-                return "";
-            }
-
-            Log.Information("{Function} {AccessToken}", "GetTokenForUser",tokenResponse.AccessToken);
-            Log.Information(tokenResponse.RefreshToken);
-            return tokenResponse.AccessToken;
-        }
+        
 
         [Route("Home/TokenRequest")]
         public async Task<IActionResult> TokenRequest()

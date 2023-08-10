@@ -23,12 +23,18 @@ namespace BL.Services
         protected readonly IHttpContextAccessor _httpContextAccessor;
         protected readonly string _address;
         protected readonly JsonSerializerOptions _jsonSerializerOptions;
+        protected readonly IKeycloakTokenHelper? __keycloakTokenHelper;
+        public string _password { get; set; }
+        public string _username { get; set; }
+        
 
-        public BaseClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, string address)
+        public BaseClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, string address, IKeycloakTokenHelper? keycloakTokenHelper)
         {
             _httpClientFactory = httpClientFactory;
             _httpContextAccessor = httpContextAccessor;
             _address = address;
+            
+            __keycloakTokenHelper = keycloakTokenHelper;
             _jsonSerializerOptions = new JsonSerializerOptions()
             {
                 
@@ -98,11 +104,11 @@ namespace BL.Services
                 HttpClient? apiClient;
                 if (usetoken)
                 {
-                    apiClient = await CreateClientWithToken();
+                    apiClient = await CreateClientWithKeycloak();
                 }
                 else
                 {
-                    apiClient = await CreateClientWithOutToken();
+                    apiClient = await CreateClientWithOutKeycloak();
                 }
                     
                 if (paramlist != null)
@@ -158,16 +164,25 @@ namespace BL.Services
             }
         }
 
-        protected async Task<HttpClient> CreateClientWithToken()
+        protected async Task<HttpClient> CreateClientWithKeycloak()
         {
-            var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
+            var accessToken = "";
+            if (__keycloakTokenHelper != null)
+            {
+                accessToken = await  __keycloakTokenHelper.GetTokenForUser(_username, _password);
+            }
+            else
+            {
+                accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
+            }
+            
             var apiClient = _httpClientFactory.CreateClient();
             apiClient.SetBearerToken(accessToken);
             apiClient.DefaultRequestHeaders.Add("Accept", "application/json");
             return apiClient;
         }
 
-        protected async Task<HttpClient> CreateClientWithOutToken()
+        protected async Task<HttpClient> CreateClientWithOutKeycloak()
         {
             
             var apiClient = _httpClientFactory.CreateClient();

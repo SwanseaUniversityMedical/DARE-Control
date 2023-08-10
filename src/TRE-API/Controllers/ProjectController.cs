@@ -12,7 +12,7 @@ namespace TRE_API.Controllers
     //[Authorize]
     //[ApiController]
     //[Authorize(Roles = "dare-tre,dare-control-admin")]
-    //[Route("api/[controller]")]
+    [Route("api/[controller]")]
 
     public class ProjectController : ControllerBase
     {
@@ -21,116 +21,25 @@ namespace TRE_API.Controllers
 
         private readonly DAREAPISettings _dareAPISettings;
 
-        private readonly IDareClientHelper _dareclientHelper;
-
-
-        public ProjectController(ApplicationDbContext applicationDbContext, IOptions<DAREAPISettings> APISettings)
+        private readonly IDareClientWithoutTokenHelper _dareclientHelper;
+  
+        public ProjectController(IDareClientWithoutTokenHelper dareclient, ApplicationDbContext applicationDbContext)
         {
+            _dareclientHelper = dareclient;
             _DbContext = applicationDbContext;
-            _dareAPISettings = APISettings.Value;
-          
+
         }
 
+       
+        
 
-        [HttpGet]
+        [HttpGet("GetAllProjects")]
+        [Authorize(Roles = "dare-tre-admin")]
         public List<Project> GetAllProjects()
         {
-            try
-            {
-                var allProjects = _dareclientHelper.CallAPIWithoutModel<List<Project>>(_dareAPISettings.Address + "/api/Project/GetAllProjects/").Result;
-
-                Log.Information("{Function} Projects retrieved successfully", "GetAllProjects");
-
-                return allProjects;
-
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crashed", "GetAllProjects");
-                throw;
-            }
-        }
-
-        [HttpGet]
-        public Project? GetProject(int projectId)
-        {
-            try
-            {
-                var paramlist = new Dictionary<string, string>();
-                paramlist.Add("projectId", projectId.ToString());
-                var projects = _dareclientHelper.CallAPIWithoutModel<Project?>(_dareAPISettings.Address + "/api/Project/GetProject/", paramlist).Result;
-
-                Log.Information("{Function} Projects retrieved successfully", "GetAllProjects");
-                return projects;
-
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crashed", "GetProject");
-                throw;
-            }
-        }
-
-
-        [HttpGet]
-        public List<User> GetAllUsers()
-        {
-            try
-            {
-                var allUsers = _dareclientHelper.CallAPIWithoutModel<List<User>>(_dareAPISettings.Address + "/api/User/GetAllUsers/").Result;
-               
-                Log.Information("{Function} Users retrieved successfully", "GetAllUsers");
-
-                return allUsers;
-
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crashed", "GetAllUsers");
-                throw;
-            }
-        }
-
-        [HttpPost]
-        public async Task<ProjectUser?> AddUserMembership(ProjectUser model)
-        {
-            try
-            {
-                var result = await _dareclientHelper.CallAPI<ProjectUser, ProjectUser?>(_dareAPISettings.Address + "/api/Project/AddUserMembership", model);
-                Log.Information("{Function} Membership successfully", "AddUserMembership");
-
-                return result;
-            }
-
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crashed", "AddUserMembership");
-                throw;
-            }
-        }
-
-        [HttpPost]
-        public async Task<ProjectUser?> RemoveUserMembership(int projectId, int userId)
-        {
-            try
-            {
-                var model = new ProjectUser()
-                {
-                    ProjectId = projectId,
-                    UserId = userId
-                };
-                var result =
-                    await _dareclientHelper.CallAPI<ProjectUser, ProjectUser?>(_dareAPISettings.Address + "/api/Project/RemoveUserMembership", model);
-                Log.Information("{Function} Membership removed successfully", "RemoveUserMembership");
-
-                return result;
-            }
-
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crashed", "RemoveUserMembership");
-                throw;
-            }
+            
+            var allProjects =  _dareclientHelper.CallAPIWithoutModel<List<Project>>( "/api/Project/GetAllProjects/").Result;
+            return allProjects;
         }
 
 

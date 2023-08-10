@@ -2,18 +2,20 @@
 using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using BL.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace TRE_UI.Controllers
 {
-
+    [Authorize]
     public class ProjectController : Controller
     {
+        
         private readonly ITREClientHelper _treclientHelper;
-        public ProjectController(ITREClientHelper client)
+        public ProjectController(ITREClientHelper treClient)
         {
-    
-            _treclientHelper = client;
+            
+            _treclientHelper = treClient;
         }
     
 

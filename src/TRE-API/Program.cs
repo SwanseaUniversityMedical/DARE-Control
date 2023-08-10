@@ -2,27 +2,18 @@ using BL.Models.Settings;
 
 using BL.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Net;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Serilog.Exceptions;
-using Serilog.Exceptions.Core;
-using Microsoft.AspNetCore.Builder;
-using Newtonsoft.Json;
-using Microsoft.Extensions.Configuration;
-using System;
 using Microsoft.AspNetCore.Http.Connections;
 using TRE_API.Services.SignalR;
 using BL.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using TRE_API.Repositories.DbContexts;
+using TRE_API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,21 +38,27 @@ AddServices(builder);
 //Add Dependancies
 AddDependencies(builder, configuration);
 
-var keyCloakSettings = new KeyCloakSettings();
-configuration.Bind(nameof(keyCloakSettings), keyCloakSettings);
-builder.Services.AddSingleton(keyCloakSettings);
+var treKeyCloakSettings = new TreKeyCloakSettings();
+configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
+builder.Services.AddSingleton(treKeyCloakSettings);
 
-var encSettings = new EncryptionSettings();
-configuration.Bind(nameof(encSettings), encSettings);
-builder.Services.AddSingleton(encSettings);
+var controlKeyCloakSettings = new ControlKeyCloakSettings();
+configuration.Bind(nameof(controlKeyCloakSettings), controlKeyCloakSettings);
+builder.Services.AddSingleton(controlKeyCloakSettings);
+builder.Services.AddScoped<IDareClientWithoutTokenHelper, DareClientWithoutTokenHelper>();
+   
+var encryptionSettings = new EncryptionSettings();
+configuration.Bind(nameof(encryptionSettings), encryptionSettings);
+builder.Services.AddSingleton(encryptionSettings);
+builder.Services.AddScoped<IKeycloakTokenHelper, KeycloakTokenHelper>();
 builder.Services.AddScoped<IEncDecHelper, EncDecHelper>();
 
 
 var TVP = new TokenValidationParameters
 {
     ValidateAudience = true,
-    ValidAudiences = keyCloakSettings.ValidAudiences.Trim().Split(',').ToList(),
-    ValidIssuer = keyCloakSettings.Authority,
+    ValidAudiences = treKeyCloakSettings.ValidAudiences.Trim().Split(',').ToList(),
+    ValidIssuer = treKeyCloakSettings.Authority,
     ValidateIssuerSigningKey = true,
     ValidateIssuer = true,
     ValidateLifetime = true
@@ -84,9 +81,7 @@ builder.Services.AddAuthentication(options =>
 })
     .AddJwtBearer(options =>
     {
-        options.Authority = keyCloakSettings.Authority;
-        options.Audience = keyCloakSettings.ClientId;
-        if (keyCloakSettings.Proxy)
+        if (treKeyCloakSettings.Proxy)
         {
             options.BackchannelHttpHandler = new HttpClientHandler
             {
@@ -94,18 +89,17 @@ builder.Services.AddAuthentication(options =>
                 UseDefaultCredentials = true,
                 Proxy = new WebProxy()
                 {
-                    Address = new Uri(keyCloakSettings.ProxyAddresURL),
-                    BypassList = new[] { keyCloakSettings.BypassProxy }
+                    Address = new Uri(treKeyCloakSettings.ProxyAddresURL),
+                    BypassList = new[] { treKeyCloakSettings.BypassProxy }
                 }
             };
         }
-        // URL of the Keycloak server
-        options.Authority = keyCloakSettings.Authority;
-        //// Client configured in the Keycloak
-
-        //// Client secret shared with Keycloak
-        options.Audience = keyCloakSettings.ClientId;
-        options.MetadataAddress = keyCloakSettings.MetadataAddress;
+        options.Authority = treKeyCloakSettings.Authority;
+        options.Audience = treKeyCloakSettings.ClientId;
+        
+        
+        
+        options.MetadataAddress = treKeyCloakSettings.MetadataAddress;
 
         options.RequireHttpsMetadata = false; // dev only
         options.IncludeErrorDetails = true;
@@ -127,10 +121,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy =>
                       {
-                          policy.WithOrigins(configuration["DARE-API:Address"])
-                          .AllowAnyMethod()
-                          .AllowAnyHeader()
-                          .AllowCredentials();
+                          policy.WithOrigins(configuration["TreAPISettings:Address"])
+                              .AllowAnyMethod()
+                              .AllowAnyHeader()
+                              .AllowCredentials();
                       });
     
 });
@@ -151,9 +145,9 @@ if (app.Environment.IsDevelopment())
     {
         c.EnableValidator(null);
         c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{environment.ApplicationName} v1");
-        c.OAuthClientId(keyCloakSettings.ClientId);
-        c.OAuthClientSecret(keyCloakSettings.ClientSecret);
-        c.OAuthAppName(keyCloakSettings.ClientId);
+        c.OAuthClientId(treKeyCloakSettings.ClientId);
+        c.OAuthClientSecret(treKeyCloakSettings.ClientSecret);
+        c.OAuthAppName(treKeyCloakSettings.ClientId);
     });
     app.UseDeveloperExceptionPage();
 }
@@ -180,10 +174,10 @@ using (var scope = app.Services.CreateScope())
 //app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseCookiePolicy(new CookiePolicyOptions
-{
-    Secure = CookieSecurePolicy.Always
-});
+//app.UseCookiePolicy(new CookiePolicyOptions
+//{
+//    Secure = CookieSecurePolicy.Always
+//});
 
 app.UseAuthentication();
 app.UseAuthorization();

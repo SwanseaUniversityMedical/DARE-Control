@@ -48,9 +48,9 @@ namespace BL.Models.Services
                             {
                                 var tokenResponse = await new HttpClient().RequestRefreshTokenAsync(new RefreshTokenRequest
                                 {
-                                    Address = _config["KeyCloakSettings:Authority"] + "/protocol/openid-connect/token",
-                                    ClientId = _config["KeyCloakSettings:ClientId"],
-                                    ClientSecret = _config["KeyCloakSettings:ClientSecret"],
+                                    Address = _config["DareKeyCloakSettings:Authority"] + "/protocol/openid-connect/token",
+                                    ClientId = _config["DareKeyCloakSettings:ClientId"],
+                                    ClientSecret = _config["DareKeyCloakSettings:ClientSecret"],
                                     RefreshToken = refreshToken
                                 });
                                 if (tokenResponse.HttpStatusCode == System.Net.HttpStatusCode.OK)
@@ -174,9 +174,9 @@ namespace BL.Models.Services
     //                        {
     //                            var tokenResponse = await new HttpClient().RequestRefreshTokenAsync(new RefreshTokenRequest
     //                            {
-    //                                Address = _config["KeyCloakSettings:Authority"] + "/protocol/openid-connect/token",
-    //                                ClientId = _config["KeyCloakSettings:ClientId"],
-    //                                ClientSecret = _config["KeyCloakSettings:ClientSecret"],
+    //                                Address = _config["DareKeyCloakSettings:Authority"] + "/protocol/openid-connect/token",
+    //                                ClientId = _config["DareKeyCloakSettings:ClientId"],
+    //                                ClientSecret = _config["DareKeyCloakSettings:ClientSecret"],
     //                                RefreshToken = refreshToken
     //                            });
     //                            if (tokenResponse.HttpStatusCode == System.Net.HttpStatusCode.OK)

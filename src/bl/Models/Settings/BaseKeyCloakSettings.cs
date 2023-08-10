@@ -1,8 +1,10 @@
 ﻿namespace BL.Models.Settings
 {
-    public class KeyCloakSettings
+    public class BaseKeyCloakSettings
     {
         public string Authority { get; set; }
+
+        public string BaseUrl { get; set; }
         public string ClientId { get; set; }
         public string ClientSecret { get; set; }
         public string RemoteSignOutPath { get; set; }

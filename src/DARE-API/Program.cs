@@ -71,9 +71,9 @@ var bus =
 builder.Services.AddSingleton(RabbitHutch.CreateBus($"host={configuration["RabbitMQ:HostAddress"]}:{int.Parse(configuration["RabbitMQ:PortNumber"])};virtualHost={configuration["RabbitMQ:VirtualHost"]};username={configuration["RabbitMQ:Username"]};password={configuration["RabbitMQ:Password"]}"));
 Task task = SetUpRabbitMQ.DoItAsync(configuration["RabbitMQ:HostAddress"], configuration["RabbitMQ:PortNumber"], configuration["RabbitMQ:VirtualHost"], configuration["RabbitMQ:Username"], configuration["RabbitMQ:Password"]);
 
-var keyCloakSettings = new KeyCloakSettings();
-configuration.Bind(nameof(keyCloakSettings), keyCloakSettings);
-builder.Services.AddSingleton(keyCloakSettings);
+var controlKeyCloakSettings = new ControlKeyCloakSettings();
+configuration.Bind(nameof(controlKeyCloakSettings), controlKeyCloakSettings);
+builder.Services.AddSingleton(controlKeyCloakSettings);
 
 
 var minioSettings = new MinioSettings();
@@ -84,8 +84,8 @@ builder.Services.AddHostedService<ConsumeInternalMessageService>();
 var TVP = new TokenValidationParameters
 {
     ValidateAudience = true,
-    ValidAudiences = keyCloakSettings.ValidAudiences.Trim().Split(',').ToList(),
-    ValidIssuer = keyCloakSettings.Authority,
+    ValidAudiences = controlKeyCloakSettings.ValidAudiences.Trim().Split(',').ToList(),
+    ValidIssuer = controlKeyCloakSettings.Authority,
     ValidateIssuerSigningKey = true,
     ValidateIssuer = true,
     ValidateLifetime = true
@@ -102,7 +102,7 @@ builder.Services.AddAuthentication(options =>
 })
     .AddJwtBearer(options =>
     {
-        if (keyCloakSettings.Proxy)
+        if (controlKeyCloakSettings.Proxy)
         {
             options.BackchannelHttpHandler = new HttpClientHandler
             {
@@ -110,14 +110,14 @@ builder.Services.AddAuthentication(options =>
                 UseDefaultCredentials = true,
                 Proxy = new WebProxy()
                 {
-                    Address = new Uri(keyCloakSettings.ProxyAddresURL),
-                    BypassList = new[] { keyCloakSettings.BypassProxy }
+                    Address = new Uri(controlKeyCloakSettings.ProxyAddresURL),
+                    BypassList = new[] { controlKeyCloakSettings.BypassProxy }
                 }
             };
         }
-        options.Authority = keyCloakSettings.Authority;
-        options.Audience = keyCloakSettings.ClientId;          
-        options.MetadataAddress = keyCloakSettings.MetadataAddress;
+        options.Authority = controlKeyCloakSettings.Authority;
+        options.Audience = controlKeyCloakSettings.ClientId;          
+        options.MetadataAddress = controlKeyCloakSettings.MetadataAddress;
 
         options.RequireHttpsMetadata = false; // dev only
         options.IncludeErrorDetails = true;
@@ -149,9 +149,9 @@ if (app.Environment.IsDevelopment())
     {
         c.EnableValidator(null);
         c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{environment.ApplicationName} v1");
-        c.OAuthClientId(keyCloakSettings.ClientId);
-        c.OAuthClientSecret(keyCloakSettings.ClientSecret);
-        c.OAuthAppName(keyCloakSettings.ClientId);
+        c.OAuthClientId(controlKeyCloakSettings.ClientId);
+        c.OAuthClientSecret(controlKeyCloakSettings.ClientSecret);
+        c.OAuthAppName(controlKeyCloakSettings.ClientId);
     });
     app.UseDeveloperExceptionPage();
 }

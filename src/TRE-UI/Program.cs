@@ -37,9 +37,9 @@ Log.Information("TRE-UI logging Start.");
 string AppName = typeof(Program).Module.Name.Replace(".dll", "");
 
 // -- authentication here
-var keyCloakSettings = new KeyCloakSettings();
-configuration.Bind(nameof(keyCloakSettings), keyCloakSettings);
-builder.Services.AddSingleton(keyCloakSettings);
+var treKeyCloakSettings = new TreKeyCloakSettings();
+configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
+builder.Services.AddSingleton(treKeyCloakSettings);
 
 
 builder.Services.AddHttpContextAccessor();
@@ -50,7 +50,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<CustomCookieEvent>();
 
 builder.Services.AddScoped<ITREClientHelper, TREClientHelper>();
-builder.Services.AddScoped<IDareClientHelper, DareClientHelper>();
+
 
 builder.Services.AddMvc().AddViewComponentsAsServices();
 
@@ -63,32 +63,32 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
         CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
 });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("admin", policy =>
-        policy.RequireClaim("groups", "dare-control-admin"));
-    //MIGHT NEED TO CHANGE LATER
+//builder.Services.AddAuthorization(options =>
+//{
+//    options.AddPolicy("admin", policy =>
+//        policy.RequireClaim("groups", "dare-control-admin"));
+//    //MIGHT NEED TO CHANGE LATER
 
-    //probably not needed
-    options.AddPolicy(
-            "admin",
-            policyBuilder => policyBuilder.RequireAssertion(
-                context => context.User.HasClaim(claim =>
-                    claim.Type == "groups"
-                    && claim.Value.Contains("dare-control-admin,dare-tre-admin"))));
-    options.AddPolicy(
-                "company",
-                policyBuilder => policyBuilder.RequireAssertion(
-                    context => context.User.HasClaim(claim =>
-                        claim.Type == "groups"
-                        && claim.Value.Contains("dare-control-company"))));
-    options.AddPolicy(
-            "user",
-            policyBuilder => policyBuilder.RequireAssertion(
-                context => context.User.HasClaim(claim =>
-                    claim.Type == "groups"
-                    && claim.Value.Contains("dare-control-user"))));
-});
+//    //probably not needed
+//    options.AddPolicy(
+//            "admin",
+//            policyBuilder => policyBuilder.RequireAssertion(
+//                context => context.User.HasClaim(claim =>
+//                    claim.Type == "groups"
+//                    && claim.Value.Contains("dare-control-admin,dare-tre-admin"))));
+//    options.AddPolicy(
+//                "company",
+//                policyBuilder => policyBuilder.RequireAssertion(
+//                    context => context.User.HasClaim(claim =>
+//                        claim.Type == "groups"
+//                        && claim.Value.Contains("dare-control-company"))));
+//    options.AddPolicy(
+//            "user",
+//            policyBuilder => policyBuilder.RequireAssertion(
+//                context => context.User.HasClaim(claim =>
+//                    claim.Type == "groups"
+//                    && claim.Value.Contains("dare-control-user"))));
+//});
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
@@ -99,7 +99,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins(configuration["TREAPISettings:Address"])
+            policy.WithOrigins(configuration["TreAPISettings:Address"])
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials();
@@ -130,7 +130,7 @@ builder.Services.AddAuthentication(options =>
              })
             .AddOpenIdConnect(options =>
             {
-                if (keyCloakSettings.Proxy)
+                if (treKeyCloakSettings.Proxy)
                 {
                     options.BackchannelHttpHandler = new HttpClientHandler
                     {
@@ -138,27 +138,27 @@ builder.Services.AddAuthentication(options =>
                         UseDefaultCredentials = true,
                         Proxy = new WebProxy()
                         {
-                            Address = new Uri(keyCloakSettings.ProxyAddresURL),
-                            BypassList = new[] { keyCloakSettings.BypassProxy }
+                            Address = new Uri(treKeyCloakSettings.ProxyAddresURL),
+                            BypassList = new[] { treKeyCloakSettings.BypassProxy }
                         }
                     };
                 }
 
                 
                 // URL of the Keycloak server
-                options.Authority = keyCloakSettings.Authority;
+                options.Authority = treKeyCloakSettings.Authority;
                 //// Client configured in the Keycloak
-                options.ClientId = keyCloakSettings.ClientId;
+                options.ClientId = treKeyCloakSettings.ClientId;
                 //// Client secret shared with Keycloak
-                options.ClientSecret = keyCloakSettings.ClientSecret;
-                options.MetadataAddress = keyCloakSettings.MetadataAddress;
+                options.ClientSecret = treKeyCloakSettings.ClientSecret;
+                options.MetadataAddress = treKeyCloakSettings.MetadataAddress;
 
                 options.SaveTokens = true;
 
                 options.ResponseType = OpenIdConnectResponseType.Code; //Configuration["Oidc:ResponseType"];
                                                                        // For testing we disable https (should be true for production)
-                options.RemoteSignOutPath = keyCloakSettings.RemoteSignOutPath;
-                options.SignedOutRedirectUri = keyCloakSettings.SignedOutRedirectUri;
+                options.RemoteSignOutPath = treKeyCloakSettings.RemoteSignOutPath;
+                options.SignedOutRedirectUri = treKeyCloakSettings.SignedOutRedirectUri;
                 options.RequireHttpsMetadata = false;
                 options.GetClaimsFromUserInfoEndpoint = true;
                 options.Scope.Add("openid");
@@ -187,8 +187,8 @@ builder.Services.AddAuthentication(options =>
                         Log.Error("OnRemoteFailure: {ex}", context.Failure);
                         if (context.Failure.Message.Contains("Correlation failed"))
                         {
-                            Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", keyCloakSettings.TokenExpiredAddress);
-                            context.Response.Redirect(keyCloakSettings.TokenExpiredAddress);
+                            Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", treKeyCloakSettings.TokenExpiredAddress);
+                            context.Response.Redirect(treKeyCloakSettings.TokenExpiredAddress);
                         }
                         else
                         {
@@ -232,9 +232,9 @@ builder.Services.AddAuthentication(options =>
                              Log.Information("Response Header {key} - {value}", header.Key, header.Value);
                         }
 
-                        if (keyCloakSettings.UseRedirectURL)
+                        if (treKeyCloakSettings.UseRedirectURL)
                         {
-                            context.ProtocolMessage.RedirectUri = keyCloakSettings.RedirectURL;
+                            context.ProtocolMessage.RedirectUri = treKeyCloakSettings.RedirectURL;
                         }
                         Log.Information(context.ProtocolMessage.RedirectUri);
                         

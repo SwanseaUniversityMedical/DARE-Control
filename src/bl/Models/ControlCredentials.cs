@@ -22,6 +22,6 @@ namespace BL.Models
 
         [NotMapped]
         
-        public bool AlreadySet { get; set; }
+        public bool Valid { get; set; }
     }
 }
