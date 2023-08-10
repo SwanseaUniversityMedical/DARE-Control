@@ -41,7 +41,7 @@ namespace TRE_API.Controllers
         public virtual IActionResult GetWaitingSubmissionsForEndpoint()
         {
             var result =
-                _dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForEndpoint");
+                _dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForEndpoint").Result;
             return StatusCode(200, result);
         }
 
@@ -54,7 +54,7 @@ namespace TRE_API.Controllers
         public IActionResult UpdateStatusForEndpoint(string tesId, SubmissionStatus status)
         {
             var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForEndpoint",
-                new Dictionary<string, string>() { { "tesId", tesId }, { "status", status.ToString() } });
+                new Dictionary<string, string>() { { "tesId", tesId }, { "status", status.ToString() } }).Result;
             return StatusCode(200, result);
         }
     }
