@@ -92,7 +92,6 @@ namespace DARE_API.Controllers
         {
             try
             {
-
                 var allSubmissions = _DbContext.Submissions.ToList();
 
 
