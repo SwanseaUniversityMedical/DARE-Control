@@ -348,6 +348,7 @@ namespace DARE_API.Controllers
         {
             try
             {
+                
                 var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
                 var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
                 if (endpoint == null)
@@ -355,12 +356,8 @@ namespace DARE_API.Controllers
                     throw new Exception("User " + usersName + " doesn't have an endpoint");
                     
                 }
-                var allProjects = _DbContext.Projects.Where(x => x.Endpoints.Contains(endpoint))
-                    //.Include(x => x.Endpoints)
-                    //.Include(x => x.Submissions)
-                    //.Include(x => x.Users)
-                    .ToList();
 
+                var allProjects = endpoint.Projects;
 
                 Log.Information("{Function} Projects retrieved successfully", "GetAllProjectsForEndpoint");
                 return allProjects;
