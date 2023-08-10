@@ -40,13 +40,14 @@ namespace DARE_API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetWaitingSubmissionsForEndpoint")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<Submission>), description: "")]
-        public virtual IActionResult GetWaitingSubmissionsForEndpoint(string endpointname)
+        public virtual IActionResult GetWaitingSubmissionsForEndpoint()
         {
             //ToDo alter to get endpoint from validated token
-            var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.Name.ToLower() == endpointname.ToLower());
+            var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+            var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName);
             if (endpoint == null)
             {
-                return BadRequest("No access to endpoint " + endpointname + " or does not exist.");
+                return BadRequest("User " + usersName + " doesn't have an endpoint");
             }
 
             var results = endpoint.Submissions.Where(x =>x.Status == SubmissionStatus.WaitingForAgentToTransfer).ToList();
@@ -61,14 +62,16 @@ namespace DARE_API.Controllers
         [ValidateModelState]
         [SwaggerOperation("UpdateStatusForEndpoint")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public  IActionResult UpdateStatusForEndpoint(string endpointname, string tesId, SubmissionStatus status)
+        public  IActionResult UpdateStatusForEndpoint(string tesId, SubmissionStatus status)
         {
             //ToDo alter to get endpoint from validated token
-            var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.Name.ToLower() == endpointname.ToLower());
+            var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+            var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
             if (endpoint == null)
             {
-                return BadRequest("No access to endpoint " + endpointname + " or does not exist.");
+                return BadRequest("User " + usersName + " doesn't have an endpoint");
             }
+        
 
             var sub = _DbContext.Submissions.FirstOrDefault(x => x.TesId == tesId && x.EndPoint == endpoint);
             if (sub == null)
