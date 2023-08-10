@@ -20,17 +20,44 @@
             <tbody>
                 @foreach (var submission in Model)
                 {
-
-
                     <tr>
                         <td class="card mb-2 p-3 bg-white shadow-sm border-1">
 
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <div>
-                                    <a href="#">
+                                    <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })">
+                                        <h2 class="mb-0 fw-bold hover-underline fs-5">
+                                            @submission.TesName
+                                        </h2>
                                     </a>
-                                    <p class="text-muted small mb-0">#[Submission ID = @submission.Id]</p>
-                                    <p class="text-muted small mb-0">#[Submission Projects' Name = @submission.Project.Name]</p>
+                                    <p class="text-muted small mb-0">#@submission.Id</p>
+                                    <h2 class="mb-0 fw-bold fs-5">
+                                        <small>@submission.Project.Name</small>      
+                                    </h2                              
+                                    <p class="mb-0">Submitted by:  @submission.SubmittedBy.Name</p>
+                                    <div> @*Add back when endpont name is added*@
+@*                                        <p class="mb-0">@submission.EndPoint.Name</p>
+                                        @{
+                                            foreach (var child in submission.Children) { 
+                                                <p class="mb-0">@child.EndPoint.Name</p>
+                                            }
+                                        }*@
+                                    </div>
+
+                                    <div>
+                                        <p>Status: </p>
+                                        @{
+                                            switch(submission.Status)
+                                            {
+                                                case BL.Models.SubmissionStatus.DataOutApproved:
+                                                     <h6><span class="badge bg-dark-blue rounded-pill">@submission.Status</span></h6>
+                                                    break;
+                                                default:
+                                                    <h6><span class="badge bg-dark-blue rounded-pill">@submission.Status</span></h6>
+                                                    break;
+                                            }
+                                        }
+                                    </div>
                                     @*TODO Display a nice version of status instead of just an enum*@
                                     @{
                                         string value;
@@ -45,12 +72,7 @@
                                         }
 
                                     }
-                                    <p class="text-muted small mb-0">#[Submission Endpoints' Name = @value]</p>
-
-                                    <p class="text-muted small mb-0">#[Submission Status = @submission.Status]</p>
-                                    <p class="text-muted small mb-0">#[Who Submitted= @submission.SubmittedBy.Name</p>
-                                    <p class="text-muted small mb-0">#[Submission Status = @submission.StatusDescription]</p>
-                                </div>
+                                 </div>
                             </div>
 
 

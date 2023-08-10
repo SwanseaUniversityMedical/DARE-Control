@@ -31,12 +31,20 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public IActionResult GetAllSubmissions()
         {
+            List<Submission> displaySubmissionsList = new List<Submission>();
+            var res = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions/").Result;
 
-            var test = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions/").Result;
+            res = res.Where(x => x.Parent == null).ToList();
 
-            return View(test);
+            return View(res);
         }
 
+        [HttpGet]
+        public IActionResult GetASubmission(int id)
+        {
+            var res = _clientHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetAllSubmissions/").Result;
 
+            return View(res);
+        }
     }
 }
