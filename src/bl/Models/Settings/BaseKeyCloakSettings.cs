@@ -15,6 +15,8 @@
         public string BypassProxy { get; set; }
 
         public string ProxyAddresURL { get; set; }
+        public string TokenRefreshSeconds { get; set; }
+        
 
         public string RedirectURL { get; set; }
 

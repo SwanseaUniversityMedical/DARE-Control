@@ -1,6 +1,6 @@
 ﻿namespace BL.Models
 {
-    public class ProjectApproval
+    public class ProjectApproval : BaseModel
     {
         public int Id { get; set; }
         public int UserId { get; set; }

@@ -89,8 +89,19 @@
       "displayMask": "",
       "spellcheck": true,
       "truncateMultipleSpaces": false
+    },
+    {
+      "label": "TRE Admin User",
+      "placeholder": "Enter username of TRE's admin",
+      "key": "AdminUsername",
+      "type": "textfield",
+      "input": true,
+      "validate": {
+        "required": true
+      }
+
     }
-    
+
   ],
   "settings": {},
   "properties": {},

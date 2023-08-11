@@ -46,8 +46,8 @@ namespace BL.Services
                 Address = disco.TokenEndpoint,
                 ClientId = clientId,
                 ClientSecret = clientSecret,
-                UserName = username,// "testingtreapi",
-                Password = password// "statuszero0!"
+                UserName = username,
+                Password = password
             });
 
 

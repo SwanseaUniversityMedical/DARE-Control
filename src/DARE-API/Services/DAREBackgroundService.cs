@@ -1,4 +1,5 @@
 ﻿using BL.Models;
+using BL.Models.Settings;
 using DARE_API.Repositories.DbContexts;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;

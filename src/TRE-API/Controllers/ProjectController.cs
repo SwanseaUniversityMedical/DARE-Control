@@ -18,8 +18,7 @@ namespace TRE_API.Controllers
 
         private readonly ApplicationDbContext _DbContext;
 
-        private readonly DAREAPISettings _dareAPISettings;
-
+        
         private readonly IDareClientWithoutTokenHelper _dareclientHelper;
   
         public ProjectController(IDareClientWithoutTokenHelper dareclient, ApplicationDbContext applicationDbContext)
@@ -37,7 +36,7 @@ namespace TRE_API.Controllers
         public List<Project> GetAllProjects()
         {
             
-            var allProjects =  _dareclientHelper.CallAPIWithoutModel<List<Project>>( "/api/Project/GetAllProjects/").Result;
+            var allProjects =  _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForEndpoint/").Result;
             return allProjects;
         }
 

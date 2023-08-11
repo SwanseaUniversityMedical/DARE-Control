@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BL.Models
 {
-    public class ControlCredentials
+    public class ControlCredentials: BaseModel
     {
         public int Id { get; set; }
 

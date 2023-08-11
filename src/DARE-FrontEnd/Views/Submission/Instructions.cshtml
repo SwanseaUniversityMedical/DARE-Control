@@ -13,7 +13,7 @@
     <h2>Access Token (JWT)</h2>
     <p>To submit a Crate you/Job you must be authenticated.  Then you login you are given a JWT Token that can be used to authenticate all the actions you take.  
         This token will expire overtime.</p>
-    <p>You can access the token under your name from the menu in the top right of this screen or <a href="/Home/NewTokenIssue">Click Here</a>, you token can also be renewed from this same screen</p>
+    <p>You can access the token under your name from the menu in the top right of this screen or <a href="/Account/NewTokenIssue">Click Here</a>, you token can also be renewed from this same screen</p>
     
     <h2>Message Format</h2>
     <p>The system used the <a href="https://www.ga4gh.org/news_item/ga4gh-tes-api-bringing-compatibility-to-task-execution-across-hpc-systems-the-cloud-and-beyond/" target="_blank">GA4GH TES</a> message format to pass a job to the system in order to tell a TRE to download and execute an RO-CRATE.</p>
@@ -60,7 +60,7 @@
         </p>
 
     <h2>Calling the REST API</h2>
-    <p>You will need a JWT Token (<a href="/Home/NewTokenIssue">Here</a>)</p>
+    <p>You will need a JWT Token (<a href="/Account/NewTokenIssue">Here</a>)</p>
     <p>Example command</p>
     <p><pre>
 curl -X 'POST' \

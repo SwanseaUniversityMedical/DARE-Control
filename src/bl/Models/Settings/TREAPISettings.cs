@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BL.Models
+namespace BL.Models.Settings
 {
-    public class DAREAPISettings
+    public class TREAPISettings
     {
-        public string? Address { get; set; }
+        public string? SignalRAddress { get; set; }
     }
 
 }

@@ -3,7 +3,7 @@ using Amazon.Runtime.Internal;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
-using BL.Models;
+using BL.Models.ViewModels;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Minio.Exceptions;
 using Serilog;

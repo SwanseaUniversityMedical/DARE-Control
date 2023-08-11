@@ -35,7 +35,7 @@ var hostBuilder = new HostBuilder()
 
 
         services.AddScoped<IDoWork, DoWork>();
-        services.AddScoped<IDareClientHelper, DareClientHelper>();
+        
         services.AddScoped<ITREClientHelper, TREClientHelper>();
 
       
