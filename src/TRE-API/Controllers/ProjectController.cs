@@ -9,8 +9,7 @@ using TRE_API.Repositories.DbContexts;
 
 namespace TRE_API.Controllers
 {
-    //[Authorize]
-    //[ApiController]
+    
     //[Authorize(Roles = "dare-tre,dare-control-admin")]
     [Route("api/[controller]")]
 
