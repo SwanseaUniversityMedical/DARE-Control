@@ -34,52 +34,55 @@ namespace DARE_API.Controllers
 
         }
 
-
-
-
         [HttpPost("AddProject")]
         public async Task<Project?> AddProject(FormData data)
         {
             try
-            { 
+            {
                 Project projects = JsonConvert.DeserializeObject<Project>(data.FormIoString);
-                var model = new Project();
-
                 //2023-06-01 14:30:00 use this as the datetime
-                model.Name = projects.Name.Trim();
+                projects.Name = projects.Name.Trim();
+                projects.StartDate = projects.StartDate.ToUniversalTime();
+                projects.EndDate = projects.EndDate.ToUniversalTime();
+                //projects.Id = 4;
+                projects.SubmissionBucket = GenerateRandomName(projects.Name) + "submission";
+                projects.OutputBucket = GenerateRandomName(projects.Name) + "output";
+                projects.FormData = data.FormIoString;
+                projects.Display = projects.Display;
                 //model.Display = projects.Display.Trim();
-                if (_DbContext.Projects.Any(x => x.Name.ToLower() == model.Name.ToLower().Trim() && x.Id != model.Id))
+                if (_DbContext.Projects.Any(x => x.Name.ToLower() == projects.Name.ToLower().Trim() && x.Id != projects.Id))
                 {
 
                     return new Project() { Error = true, ErrorMessage = "Another project already exists with the same name" };
                 }
-               
-                model.StartDate = projects.StartDate.ToUniversalTime();
-                model.EndDate = projects.EndDate.ToUniversalTime();
 
-                model.SubmissionBucket = GenerateRandomName(model.Name) + "submission";
-                model.OutputBucket = GenerateRandomName(model.Name) + "output";
-                model.FormData = data.FormIoString;
-                model.Display = projects.Display;
-                var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, model.SubmissionBucket);
+
+                var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, projects.SubmissionBucket);
                 if (!submissionBucket)
                 {
-                    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", model.SubmissionBucket);
+                    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", projects.SubmissionBucket);
                 }
-                var outputBucket = await _minioHelper.CreateBucket(_minioSettings, model.OutputBucket);
+                var outputBucket = await _minioHelper.CreateBucket(_minioSettings, projects.OutputBucket);
                 if (!outputBucket)
                 {
-                    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", model.OutputBucket);
+                    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", projects.OutputBucket);
 
                 }
 
-
-                _DbContext.Projects.Add(model);
+                if (projects.Id > 0)
+                {
+                    if (_DbContext.Projects.Select(x => x.Id == projects.Id).Any())
+                        _DbContext.Projects.Update(projects);
+                    else
+                        _DbContext.Projects.Add(projects);
+                }
+                else
+                _DbContext.Projects.Add(projects);
 
                 await _DbContext.SaveChangesAsync();
 
                 Log.Information("{Function} Projects added successfully", "CreateProject");
-                return model;
+                return projects;
             }
             catch (Exception ex)
             {

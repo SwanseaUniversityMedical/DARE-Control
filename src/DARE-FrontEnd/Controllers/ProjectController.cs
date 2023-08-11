@@ -153,14 +153,25 @@ namespace DARE_FrontEnd.Controllers
         }
 
 
-        [HttpGet]
-        public IActionResult AddProjectForm(int Projectid)
+
+        public IActionResult AddProjectForm(int projectId)
         {
-            return View(new FormData()
+            var formData = new FormData()
             {
                 FormIoUrl = _formIOSettings.ProjectForm,
                 FormIoString = @"{""id"":0}"
-            }); ;
+            };
+
+            if (projectId > 0)
+            {
+                var paramList = new Dictionary<string, string>();
+                paramList.Add("projectId", projectId.ToString());
+                var project = _clientHelper.CallAPIWithoutModel<BL.Models.Project>("/api/Project/GetProject/", paramList).Result;
+                formData.FormIoString = project?.FormData;
+                formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""id"":" + projectId.ToString());
+            }
+
+            return View(formData);
         }
 
         [HttpGet]
