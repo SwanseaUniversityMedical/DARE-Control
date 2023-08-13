@@ -32,7 +32,7 @@ namespace TRE_API.Controllers
         
 
         [HttpGet("GetAllProjects")]
-        [Authorize(Roles = "dare-tre-admin")]
+        //[Authorize(Roles = "dare-tre-admin")]
         public List<Project> GetAllProjects()
         {
             

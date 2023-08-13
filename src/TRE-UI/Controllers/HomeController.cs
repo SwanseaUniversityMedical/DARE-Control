@@ -19,10 +19,11 @@ namespace TRE_UI.Controllers
 
         public async Task<IActionResult> IndexAsync()
         {
-            var alreadyset =await  _treClientHelper.CallAPIWithoutModel<BoolReturn>("/api/ControlCredentials/CheckCredentialsAreValid");
+             var alreadyset =await  _treClientHelper.CallAPIWithoutModel<BoolReturn>("/api/ControlCredentials/CheckCredentialsAreValid");
             if (!alreadyset.Result)
             {
-                return RedirectToAction("UpdateCredentials", "ControlCredentials");
+                return View();
+                //return RedirectToAction("UpdateCredentials", "ControlCredentials");
             }
             return View();
         }
