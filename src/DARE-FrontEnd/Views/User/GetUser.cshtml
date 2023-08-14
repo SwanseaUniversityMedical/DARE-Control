@@ -10,9 +10,12 @@
             <h1 class="fs-3 mb-0">@Model.Name</h1>
             <p class="text-muted small mb-0">Organisation Name</p>
         </div>
-        <a href="#" class="btn btn-primary btn-sm d-flex align-items-center">
-            <i class="fa fa-edit align-middle me-2"></i>
-            <span>Edit Person</span>
+@*        <a href="#" class="btn btn-primary btn-sm d-flex align-items-center">
+            <i class="fa fa-edit align-middle me-2"></i>*@
+            @if (User.IsInRole("dare-control-admin"))
+            {
+                <a href="@Url.Action("AddUserForm", "User",new{userId=@Model.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+            }
         </a>
     </div>
     <div class="mt-4">
