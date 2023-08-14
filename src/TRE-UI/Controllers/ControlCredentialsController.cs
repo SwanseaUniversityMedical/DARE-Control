@@ -32,7 +32,8 @@ namespace TRE_UI.Controllers
 
 
             return View(new ControlCredentials()
-                { Valid = valid.Result });
+                { Valid = valid.Result })
+                ;
         }
 
         [HttpPost]
