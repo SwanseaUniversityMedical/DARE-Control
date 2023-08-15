@@ -9,7 +9,7 @@ using BL.Models.Settings;
 
 namespace DARE_FrontEnd.Controllers
 {
-    [Authorize(Roles = "dare-control-admin")]
+    //[Authorize(Roles = "dare-control-admin")]
     public class ProjectController : Controller
     {
         private readonly IDareClientHelper _clientHelper;

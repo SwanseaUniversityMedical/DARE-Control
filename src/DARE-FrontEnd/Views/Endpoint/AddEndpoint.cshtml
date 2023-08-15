@@ -7,6 +7,17 @@
     {
         Model.FormIoUrl = $"{Context.Request.Scheme}://{Context.Request.Host.Value}" + Model.FormIoUrl;
     }
+    
+    var parameter = Context.Request.Query["ac"];
+    //Check parameter here and display Message
+    if (parameter != "")
+    {
+        <div class="alert alert-success alert-dismissable">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <strong><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> @parameter</strong>
+        </div>
+    }
+    
 }
 
 <div class="container-lg p-4">

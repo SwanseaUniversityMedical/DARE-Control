@@ -9,7 +9,7 @@ using BL.Models.Settings;
 
 namespace DARE_FrontEnd.Controllers
 {
-    [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
+    //[Authorize(Roles = "dare-control-admin,dare-tre-admin")]
     public class EndpointController : Controller
     {
 
@@ -67,9 +67,11 @@ namespace DARE_FrontEnd.Controllers
                 theEndpoint.FormIoString = str;
 
                 var result = await _clientHelper.CallAPI<FormData, Endpoint>("/api/Endpoint/AddEndpoint", theEndpoint);
-                if (result.Error)
+                if (result.ErrorMessage!= null)
                 {
+                    
                     return BadRequest(result.ErrorMessage);
+                   
                 } 
                 return Ok(result);
             }

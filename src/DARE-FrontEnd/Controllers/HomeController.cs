@@ -19,8 +19,6 @@ using BL.Models;
 using System.Data;
 using System.Text.Json;
 using Newtonsoft.Json;
-
-
 using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Xml.Linq;
