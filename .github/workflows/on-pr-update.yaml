@@ -165,24 +165,6 @@ jobs:
       github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
 
-#  test-container-airflow:
-#    # Test the airflow container
-#    needs:
-#      - slack
-#      - build-container-airflow
-#    uses: SwanseaUniversityMedical/workflows/.github/workflows/test-container.yaml@main
-#    with:
-#      job-name: container-airflow
-#      container-registry: ${{ vars.HARBOR_REGISTRY }}
-#      container-registry-user: ${{ vars.HARBOR_USER }}
-#      container-registry-digest: ${{ needs.build-container-airflow.outputs.digest }}
-#      slack-channel: ${{ vars.SLACK_CHANNEL }}
-#      slack-thread: ${{ needs.slack.outputs.thread }}
-#      command: |
-#        docker run --entrypoint=/bin/bash $IMAGE airflow -h
-#    secrets:
-#      container-registry-token: ${{ secrets.HARBOR_TOKEN }}
-#      slack-token: ${{ secrets.SLACK_TOKEN }}
 
   slack-update:
     # Update the original Slack message with the final workflow status
@@ -195,7 +177,6 @@ jobs:
       - build-tre-api-container
       - build-tre-ui-container
       - build-tre-agent-container
-#      - test-container-airflow
     uses: SwanseaUniversityMedical/workflows/.github/workflows/slack-pr-thread.yaml@v1.0.0
     if: always()
     with:
