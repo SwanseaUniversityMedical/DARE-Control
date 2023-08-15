@@ -102,8 +102,6 @@ namespace DARE_FrontEnd.Controllers
             });
         }
 
-
-
         public IActionResult Logout()
         {
             return new SignOutResult(new[]

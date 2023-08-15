@@ -7,10 +7,13 @@
 <div class="container-lg p-4">
     <div class="d-flex align-items-center justify-content-between">
         <h1 class="fs-3 mb-0">People</h1>
+                                                        @if (User.IsInRole("dare-control-admin"))
+                                {
         <a asp-controller="User" asp-action="AddUserForm" class="btn btn-primary btn-sm d-flex align-items-center">
             <i class="fa fa-plus align-middle me-2"></i>
             <span>Create New User</span>
         </a>
+                                }
     </div>
     <hr class="d-flex my-4">
     <div class="table-responsive">
@@ -30,9 +33,10 @@
                                         </h2>
                                     </a>
                                 </div>
-                                @*                            <a href="@Url.Action("EditProject", "Project",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
-                            *@
-                                <a href="@Url.Action("AddUserForm", "User",new{userId=user.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+                                @if (User.IsInRole("dare-control-admin"))
+                                {
+                                    <a href="@Url.Action("AddUserForm", "User",new{userId=user.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+                                }
                             </div>
                             <div class="">
                                 <a href="@Url.Action("GetUser", "User", new { id = user.Id })#projects" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">

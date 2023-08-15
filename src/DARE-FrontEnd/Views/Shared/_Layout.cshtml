@@ -56,7 +56,9 @@
                         </li>
                         <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="#">Account</a></li>
                         <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="#">Helpdesk</a></li>
-                        <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="/Account/Logout">Logout</a></li>
+                        <li class="mobile-account-nav nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                        </li>
                     </ul>
                 </div>
                 <div class="account-nav align-items-center">
@@ -71,7 +73,8 @@
                             <li><a class="dropdown-item" href="#">Account</a></li>
                             <li><a class="dropdown-item" href="#">Helpdesk</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/Account/Logout">Logout</a></li>
+                           @* <li><a class="dropdown-item" href="/Account/Logout">Logout</a></li>*@
+                            <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a></li>
                         </ul>
                     </div>
                     @*<a href="#" class="btn btn-outline-primary">Sign In</a>*@
