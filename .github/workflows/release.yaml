@@ -8,7 +8,7 @@ on:
       - 'containers/**'
       - 'charts/**'
     branches:
-      - '**'
+      - 'main'
 
 
 env:
