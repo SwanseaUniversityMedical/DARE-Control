@@ -10,7 +10,7 @@ using TRE_API.Repositories.DbContexts;
 namespace TRE_API.Controllers
 {
     
-    [Authorize(Roles = "dare-tre,dare-control-admin")]
+    //[Authorize(Roles = "dare-tre,dare-control-admin")]
     [Route("api/[controller]")]
 
     public class ProjectController : ControllerBase
@@ -32,7 +32,7 @@ namespace TRE_API.Controllers
         
 
         [HttpGet("GetAllProjects")]
-        //[Authorize(Roles = "dare-tre-admin")]
+        [Authorize(Roles = "dare-tre-admin")]
         public List<Project> GetAllProjects()
         {
             

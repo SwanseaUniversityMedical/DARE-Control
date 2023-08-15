@@ -22,7 +22,7 @@ namespace TRE_UI.Controllers
              var alreadyset =await  _treClientHelper.CallAPIWithoutModel<BoolReturn>("/api/ControlCredentials/CheckCredentialsAreValid");
             if (!alreadyset.Result)
             {
-                //return View();
+               
                 return RedirectToAction("UpdateCredentials", "ControlCredentials");
             }
             return View();

@@ -35,8 +35,27 @@ namespace DARE_FrontEnd.Controllers
 
             }); ;
         }
+        public IActionResult EditEndpoint(int userId)
+        {
+            var formData = new FormData()
+            {
+                FormIoUrl = _formIOSettings.UserForm,
+                FormIoString = @"{""id"":0}"
+            };
 
-      
+            if (userId > 0)
+            {
+                var paramList = new Dictionary<string, string>();
+                paramList.Add("userId", userId.ToString());
+                var user = _clientHelper.CallAPIWithoutModel<BL.Models.User?>("/api/Endpoint/EditEndpoint/", paramList).Result;
+                formData.FormIoString = user?.FormData;
+                formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""id"":" + userId.ToString());
+            }
+
+            return View(formData);
+        }
+
+
 
 
         [HttpGet]
