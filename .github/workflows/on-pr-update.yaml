@@ -138,6 +138,7 @@ jobs:
       - changes
       - build-api-container
       - build-ui-container
+      - container-tre-api
 #      - test-container-airflow
     uses: SwanseaUniversityMedical/workflows/.github/workflows/slack-pr-thread.yaml@main
     if: always()
