@@ -39,7 +39,7 @@ jobs:
           - 'src/BL/**'
         container-tre-ui:
           - './.github/workflows/on-pr-update.yaml'
-          - 'src/TRE-API/**'
+          - 'src/TRE-UI/**'
           - 'src/BL/**'
 
     secrets:
@@ -132,7 +132,7 @@ jobs:
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       slack-thread: ${{ needs.slack.outputs.thread }}
       command: |
-        docker build -t $IMAGE -f src/TRE-API/Dockerfile src/
+        docker build -t $IMAGE -f src/TRE-UI/Dockerfile src/
     secrets:
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
