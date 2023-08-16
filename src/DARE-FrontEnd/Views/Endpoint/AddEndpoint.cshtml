@@ -6,6 +6,7 @@
 }
 @{
     ViewData["Title"] = "TRE Registration Form";
+    //<p>@TempData["Friend"]</p>
     if (Model != null && Model.FormIoUrl.StartsWith('/'))
     {
         Model.FormIoUrl = $"{Context.Request.Scheme}://{Context.Request.Host.Value}" + Model.FormIoUrl;
@@ -16,7 +17,7 @@
         <h1 class="fs-3 mb-0">Create TRE</h1>
     </div>
     <hr class="d-flex my-4">
-    @*<script src="~/Scripts/js/formIo.js"></script>*@
+
     <div class="row">
         <div class="col-md-6">
             <div id="errorMsg" style="color: #D63301; background-color: #FFCCBA; background-image: url('https://i.imgur.com/GnyDvKN.png'); border: 1px solid;margin: 10px 0px;padding: 15px 10px 15px 50px;background-repeat: no-repeat;background-position: 10px center;display: none;"></div>
@@ -29,6 +30,7 @@
 </div>
 <script>
     window.onload = function () {
-        renderForm(@Html.Raw(Json.Serialize(Model)), "@Html.Raw(Model?.FormIoUrl)", @Html.Raw(Json.Serialize(Model?.FormIoString)) , '/Endpoint/EndpointFormSubmission');
+        renderForm("@Model.FormIoUrl", @Html.Raw(Model.FormIoString), '/Endpoint/EndpointFormSubmission/@Url.ActionContext.RouteData.Values["id"]', false, 'formio', "/Endpoint/GetAllEndpoints");
     }
+
 </script>

@@ -159,7 +159,8 @@ namespace DARE_FrontEnd.Controllers
             var formData = new FormData()
             {
                 FormIoUrl = _formIOSettings.ProjectForm,
-                FormIoString = @"{""id"":0}"
+                FormIoString = @"{""id"":0}",
+            
             };
 
             if (projectId > 0)
@@ -168,8 +169,10 @@ namespace DARE_FrontEnd.Controllers
                 paramList.Add("projectId", projectId.ToString());
                 var project = _clientHelper.CallAPIWithoutModel<BL.Models.Project>("/api/Project/GetProject/", paramList).Result;
                 formData.FormIoString = project?.FormData;
+         
                 formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""id"":" + projectId.ToString());
             }
+
 
             return View(formData);
         }
