@@ -139,21 +139,24 @@ namespace TRE_API.Controllers
 
         }
         [HttpGet("GetAllProjectsForApproval")]
-        public List<ProjectApproval> GetAllProjectsForApproval()
+        //public List<ProjectApproval> GetAllProjectsForApproval()
+        public List<Project> GetAllProjectMemberships()
         {
             try
             {
+                var allProjects = _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForEndpoint/").Result;
+                return allProjects;
 
-                var allApprovedProjects = _DbContext.ProjectApprovals
-                    //.Include(x => x.Approved)
-                    .ToList();
+                //var allApprovedProjects = _DbContext.ProjectApprovals
+                //    //.Include(x => x.Approved)
+                //    .ToList();
 
-                Log.Information("{Function} Projects retrieved successfully", "GetAllProjectForApproval");
-                return allApprovedProjects;
+                //Log.Information("{Function} Projects retrieved successfully", "GetAllProjectForApproval");
+                //return allApprovedProjects;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} Crashed", "GetAllProjectForApproval");
+                Log.Error(ex, "{Function} Crashed", "GetAllProjectsForApproval");
                 throw;
             }
 

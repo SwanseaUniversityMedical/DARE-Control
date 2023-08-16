@@ -40,7 +40,7 @@ namespace DARE_FrontEnd.Controllers
                 var paramList = new Dictionary<string, string>();
                 paramList.Add("endpointId", endpointId.ToString());
                 var endpoint = _clientHelper.CallAPIWithoutModel<BL.Models.Endpoint>("/api/Endpoint/GetanEndpoint/", paramList).Result;
-                //TempData["Friend"] = endpoint.ErrorMessage.ToString();
+                //TempData["end"] = endpoint.ErrorMessage.ToString();
                 formData.FormIoString = endpoint?.FormData;
                 formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""id"":" + endpointId.ToString());
             }
