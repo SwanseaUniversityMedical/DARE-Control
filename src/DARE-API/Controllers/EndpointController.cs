@@ -10,7 +10,7 @@ using BL.Models;
 
 namespace DARE_API.Controllers
 {
-    //[Authorize(Roles = "dare-control-admin")]
+    [Authorize(Roles = "dare-control-admin")]
     //[ApiController]
     [Route("api/[controller]")]
     public class EndpointController : Controller
