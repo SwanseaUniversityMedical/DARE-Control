@@ -43,8 +43,11 @@ jobs:
           - 'src/BL/**'
         container-tre-agent:
           - './.github/workflows/on-pr-update.yaml'
-          -  'src/TREAgent/**'
+          - 'src/TREAgent/**'
           - 'src/BL/**'
+        chart:
+        - './.github/workflows/on-pr-update.yaml'
+        - 'charts/**'
 
     secrets:
       slack-token: ${{ secrets.SLACK_TOKEN }}
@@ -165,6 +168,27 @@ jobs:
       github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
 
+  build-pr-chart:
+    # Build the chart and push it as :pr-42 and :pr-42-fe45b3h
+    needs:
+      - slack
+      - changes
+    if: fromJSON(needs.changes.outputs.changes).chart == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-pr-update-chart.yaml@v1.0.0
+    with:
+      job-name: chart
+      chart: charts/**
+      chart-registry: ${{ vars.HARBOR_REGISTRY }}
+      chart-registry-user: ${{ vars.HARBOR_USER }}
+      chart-registry-project: ${{ vars.HARBOR_PROJECT }}
+      chart-registry-repo: ${{ vars.HARBOR_REPO }}
+      github-app-id: ${{ vars.APP_ID }}
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+    secrets:
+      chart-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
 
   slack-update:
     # Update the original Slack message with the final workflow status
@@ -177,6 +201,7 @@ jobs:
       - build-tre-api-container
       - build-tre-ui-container
       - build-tre-agent-container
+      - build-pr-chart
     uses: SwanseaUniversityMedical/workflows/.github/workflows/slack-pr-thread.yaml@v1.0.0
     if: always()
     with:
