@@ -12,7 +12,7 @@ namespace BL.Models
         [NotMapped]
         public bool Error { get; set; }
         [NotMapped]
-        public string ErrorMessage { get; set; }
+        public string? ErrorMessage { get; set; }
     }
 
     
