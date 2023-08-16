@@ -39,7 +39,8 @@ namespace DARE_FrontEnd.Controllers
             {
                 var paramList = new Dictionary<string, string>();
                 paramList.Add("endpointId", endpointId.ToString());
-                var endpoint = _clientHelper.CallAPIWithoutModel<BL.Models.Endpoint>("/api/Endpoint/GetAnEndpoint/", paramList).Result;
+                var endpoint = _clientHelper.CallAPIWithoutModel<BL.Models.Endpoint>("/api/Endpoint/GetanEndpoint/", paramList).Result;
+                //TempData["Friend"] = endpoint.ErrorMessage.ToString();
                 formData.FormIoString = endpoint?.FormData;
                 formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""id"":" + endpointId.ToString());
             }
@@ -53,19 +54,12 @@ namespace DARE_FrontEnd.Controllers
         public IActionResult GetAllEndpoints()
         {
 
-            var test = _clientHelper.CallAPIWithoutModel<List<Endpoint>>("/api/Endpoint/GetAllEndpoints/").Result;
+            var endpoints = _clientHelper.CallAPIWithoutModel<List<Endpoint>>("/api/Endpoint/GetAllEndpoints/").Result;
 
-            return View(test);
+            return View(endpoints);
         }
 
-        [AllowAnonymous]
-        [HttpGet]
-        public async Task<IActionResult> GetEndpoints(int projectId)
-        {
-            var endpointsList = _clientHelper.CallAPIWithoutModel<List<Endpoint>>("/api/Endpoint/GetEndPointsInProject/{projectId}").Result;
-            return View(endpointsList);
-        }
-
+     
 
         [HttpGet]
         public IActionResult GetAnEndpoint(int id)
@@ -97,6 +91,10 @@ namespace DARE_FrontEnd.Controllers
             }
             return BadRequest();
         }
+
+
+
+   
 
     }
 }

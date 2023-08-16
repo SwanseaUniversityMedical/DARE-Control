@@ -34,16 +34,17 @@ namespace DARE_API.Controllers
         }
 
         [HttpPost("AddProject")]
-        public async Task<Project?> AddProject(FormData data)
+        public async Task<Project?> AddProject([FromBody] FormData data)
         {
             try
             {
+           
                 Project projects = JsonConvert.DeserializeObject<Project>(data.FormIoString);
                 //2023-06-01 14:30:00 use this as the datetime
                 projects.Name = projects.Name.Trim();
                 projects.StartDate = projects.StartDate.ToUniversalTime();
                 projects.EndDate = projects.EndDate.ToUniversalTime();
-                //projects.Id = 4;
+                //projects.Id = projects.Id;
                 projects.SubmissionBucket = GenerateRandomName(projects.Name) + "submission";
                 projects.OutputBucket = GenerateRandomName(projects.Name) + "output";
                 projects.FormData = data.FormIoString;
@@ -73,10 +74,10 @@ namespace DARE_API.Controllers
                     if (_DbContext.Projects.Select(x => x.Id == projects.Id).Any())
                         _DbContext.Projects.Update(projects);
                     else
-                        _DbContext.Projects.Add(projects);
+                       _DbContext.Projects.Add(projects);
                 }
-                else
-                _DbContext.Projects.Add(projects);
+                else { 
+                _DbContext.Projects.Add(projects);}
 
                 await _DbContext.SaveChangesAsync();
 
@@ -94,48 +95,6 @@ namespace DARE_API.Controllers
 
         }
 
-        [HttpPost("EditProject")]
-        public async Task<Project?> EditProject(FormData data)
-        {
-            try
-            {
-                Project project = JsonConvert.DeserializeObject<Project>(data.FormIoString);
-                var id = data.Id;
-                var dbproject = _DbContext.Projects.Find(id);
-                if (_DbContext.Projects.Any(x => x.Name.ToLower() == project.Name.ToLower().Trim() && x.Id != project.Id))
-                {
-
-                    return new Project() { Error = true, ErrorMessage = "Another project already exists with the same name" };
-                }
-                //var model = new Project();
-
-                if (dbproject != null)
-                {
-                    dbproject.Id = id;
-                    dbproject.Name = project.Name;
-                    dbproject.OutputBucket = project.OutputBucket;
-                    dbproject.SubmissionBucket = project.SubmissionBucket;
-                    dbproject.StartDate = project.StartDate.ToUniversalTime();
-                    dbproject.EndDate = project.EndDate.ToUniversalTime();
-                    dbproject.FormData=data.FormIoString;
-                }
-
-                _DbContext.Projects.Update(dbproject);
-
-                await _DbContext.SaveChangesAsync();
-
-                Log.Information("{Function} Projects Updated successfully", "UpdateProject");
-                return dbproject;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crash", "UpdateProject");
-                var errorModel = new Project();
-                return errorModel;
-                throw;
-            }
-
-        }
 
         [HttpPost("AddUserMembership")]
         public async Task<ProjectUser?> AddUserMembership(ProjectUser model)

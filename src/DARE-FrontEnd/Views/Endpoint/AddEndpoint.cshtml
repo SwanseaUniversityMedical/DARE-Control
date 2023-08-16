@@ -6,6 +6,7 @@
 }
 @{
     ViewData["Title"] = "TRE Registration Form";
+    <p>Using TempData: @TempData["Friend"]</p>
     if (Model != null && Model.FormIoUrl.StartsWith('/'))
     {
         Model.FormIoUrl = $"{Context.Request.Scheme}://{Context.Request.Host.Value}" + Model.FormIoUrl;

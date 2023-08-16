@@ -27,7 +27,7 @@
 
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <div>
-                                    <a href="@Url.Action("GetProject", "Project", new { id = project.Id })">
+                                    <a href="@Url.Action("GetProject", "Project", new {id = project.Id })">
                                         <h2 class="mb-0 fw-bold hover-underline fs-5">
                                             @project.Name
                                         </h2>
@@ -36,7 +36,7 @@
                                 </div>
                                 @if (User.IsInRole("dare-control-admin"))
                                 {
-                                    <a href="@Url.Action("AddProjectForm", "Project",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+                                    <a href="@Url.Action("AddProjectForm", "Project",new{ProjectId=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
                                 }
                             </div>
                             <div class="">
