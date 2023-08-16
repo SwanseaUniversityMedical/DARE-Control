@@ -41,7 +41,10 @@ Log.Information("API logging LastStatusUpdate.");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
-    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+    {
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+        options.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
+    }
 ); ;
 builder.Services.AddDbContext<ApplicationDbContext>(options => options
     .UseLazyLoadingProxies(true)

@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,7 +27,10 @@ Log.Information("API logging LastStatusUpdate.");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
-    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+{
+    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    options.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
+}
 ); ;
 builder.Services.AddDbContext<ApplicationDbContext>(options => options
     .UseLazyLoadingProxies(true)

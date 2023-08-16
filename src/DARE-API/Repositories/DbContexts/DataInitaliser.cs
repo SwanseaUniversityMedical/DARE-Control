@@ -45,30 +45,30 @@ namespace DARE_API.Repositories.DbContexts
             AddMissingEndpoint(head, dpuk);
             AddMissingEndpoint(head, alspac);
             AddMissingUser(head, jaybee);
-            //AddMissingUser(head, mikeb);
-            //AddMissingUser(head, mikew);
-            //AddMissingUser(head, simon);
-            //AddMissingUser(head, luke);
-            //AddMissingUser(head, gayathri);
-            //AddMissingUser(head, patricia);
-            //AddMissingUser(head, mahadi);
-            //AddMissingUser(head, hazel);
+                AddMissingUser(head, mikeb);
+                AddMissingUser(head, mikew);
+                AddMissingUser(head, simon);
+                AddMissingUser(head, luke);
+                AddMissingUser(head, gayathri);
+                AddMissingUser(head, patricia);
+                AddMissingUser(head, mahadi);
+                AddMissingUser(head, hazel);
 
-            //AddMissingEndpoint(shoulders, sail);
-            //AddMissingEndpoint(shoulders, msregister);
-            //AddMissingUser(shoulders, jaybee);
-            //AddMissingUser(shoulders, simon);
-            //AddMissingUser(shoulders, luke);
+                AddMissingEndpoint(shoulders, sail);
+                AddMissingEndpoint(shoulders, msregister);
+                AddMissingUser(shoulders, jaybee);
+                AddMissingUser(shoulders, simon);
+                AddMissingUser(shoulders, luke);
 
-            //AddMissingEndpoint(knees, dpuk);
-            //AddMissingUser(knees, jaybee);
-            //AddMissingUser(knees, simon);
-            //AddMissingUser(knees, luke);
-           context.SaveChanges();
+                AddMissingEndpoint(knees, dpuk);
+                AddMissingUser(knees, jaybee);
+                AddMissingUser(knees, simon);
+                AddMissingUser(knees, luke);
+                context.SaveChanges();
             AddSubmission("Sub1", "Head", "jaybee", "", context);
-            //AddSubmission("Sub2", "Head", "simon", "SAIL|DPUK", context);
-            //AddSubmission("Sub3", "Shoulders", "luke.young", "MSRegister", context);
-            //AddSubmission("Sub4", "Knees", "jaybee", "", context);
+                AddSubmission("Sub2", "Head", "simon", "SAIL|DPUK", context);
+                AddSubmission("Sub3", "Shoulders", "luke.young", "MSRegister", context);
+                AddSubmission("Sub4", "Knees", "jaybee", "", context);
 
             }
             catch (Exception e)
