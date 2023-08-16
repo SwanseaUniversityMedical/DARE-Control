@@ -45,11 +45,11 @@
                                     </div>
 
                                     <div>
-                                        <p>Status: </p>
+                                        <p>StatusType: </p>
                                         @{
                                             switch(submission.Status)
                                             {
-                                                case BL.Models.SubmissionStatus.DataOutApproved:
+                                                case BL.Models.Enums.StatusType.DataOutApproved:
                                                      <h6><span class="badge bg-dark-blue rounded-pill">@submission.Status</span></h6>
                                                     break;
                                                 default:
@@ -58,7 +58,7 @@
                                             }
                                         }
                                     </div>
-                                    @*TODO Display a nice version of status instead of just an enum*@
+                                    @*TODO Display a nice version of statusType instead of just an enum*@
                                     @{
                                         string value;
                                         string defaultValue = "N/A";
@@ -97,7 +97,7 @@
                 </a>
                 <p class="text-muted small mb-0">#ID</p>
             </div>
-            <h6><span class="badge bg-dark-blue rounded-pill">Status</span></h6>
+            <h6><span class="badge bg-dark-blue rounded-pill">StatusType</span></h6>
         </div>
         <p class="">Submitted by #Person's Name
             <br />
@@ -106,7 +106,7 @@
         <p class="">TREs</p>
 
         
-        <p class="">Status description</p>
+        <p class="">StatusType description</p>
 
     </div>*@
 </div>

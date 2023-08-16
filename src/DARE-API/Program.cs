@@ -37,7 +37,7 @@ ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
 Log.Logger = CreateSerilogLogger(configuration, environment);
-Log.Information("API logging Start.");
+Log.Information("API logging LastStatusUpdate.");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
@@ -134,6 +134,9 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
+
+var serviceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedProto
@@ -171,7 +174,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
-    //DataInitaliser.SeedData(db, SeedSettings).Wait();
+    DataInitaliser.SeedData(db);
 }
 
 

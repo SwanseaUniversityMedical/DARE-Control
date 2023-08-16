@@ -29,7 +29,7 @@ ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
 Log.Logger = CreateSerilogLogger(configuration, environment);
-Log.Information("Dare-FrontEnd logging Start.");
+Log.Information("Dare-FrontEnd logging LastStatusUpdate.");
 
 
 

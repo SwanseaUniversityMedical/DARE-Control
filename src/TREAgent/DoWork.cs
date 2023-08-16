@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using BL.Models;
+using BL.Models.Enums;
 using BL.Models.ViewModels;
 using BL.Models.Tes;
 using BL.Rabbit;
@@ -51,8 +52,8 @@ namespace TREAgent
                     var tes = JsonConvert.DeserializeObject<TesTask>(submission.TesJson);
                     rabbit.Advanced.Publish(exch, RoutingConstants.Subs, false, new Message<TesTask>(tes));
                     var result = treApi.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForEndpoint",
-                        new Dictionary<string, string>() {  {"tesId", submission.TesId}, {"status",SubmissionStatus.TransferredToPod.ToString() } }).Result;
-                    //TODO: Update status of subs
+                        new Dictionary<string, string>() {  {"tesId", submission.TesId}, {"statusType",StatusType.TransferredToPod.ToString() }, {"description", "" }}).Result;
+                    //TODO: Update statusType of subs
 
                 }
 

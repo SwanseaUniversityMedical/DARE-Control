@@ -24,7 +24,7 @@ ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
 Log.Logger = CreateSerilogLogger(configuration, environment);
-Log.Information("TRE-UI logging Start.");
+Log.Information("TRE-UI logging LastStatusUpdate.");
 
 
 
