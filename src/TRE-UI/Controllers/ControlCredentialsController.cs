@@ -14,7 +14,7 @@ using BL.Models.APISimpleTypeReturns;
 
 namespace TRE_UI.Controllers
 {
-    //[Authorize(Roles = "dare-tre-admin")]
+    [Authorize(Roles = "dare-tre-admin")]
     public class ControlCredentialsController : Controller
     {
         private readonly ITREClientHelper _clientHelper;

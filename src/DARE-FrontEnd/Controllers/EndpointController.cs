@@ -6,10 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Endpoint = BL.Models.Endpoint;
 using BL.Models.Settings;
+using Microsoft.CodeAnalysis;
 
 namespace DARE_FrontEnd.Controllers
 {
-    //[Authorize(Roles = "dare-control-admin,dare-tre-admin")]
+    [Authorize(Roles = "dare-control-admin")]
     public class EndpointController : Controller
     {
 
@@ -25,19 +26,28 @@ namespace DARE_FrontEnd.Controllers
             configuration.Bind(nameof(FormIOSettings), _formIOSettings);
         }
 
-        [HttpGet]
-        public IActionResult AddEndpoint()
+        
+        public IActionResult AddEndpoint(int endpointId)
         {
-            return View(new FormData()
+            var formData = new FormData()
             {
                 FormIoUrl = _formIOSettings.EndpointForm,
                 FormIoString = @"{""id"":0}"
+            };
 
-            }); ;
+            if (endpointId > 0)
+            {
+                var paramList = new Dictionary<string, string>();
+                paramList.Add("endpointId", endpointId.ToString());
+                var endpoint = _clientHelper.CallAPIWithoutModel<BL.Models.Endpoint>("/api/Endpoint/GetAnEndpoint/", paramList).Result;
+                formData.FormIoString = endpoint?.FormData;
+                formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""id"":" + endpointId.ToString());
+            }
+
+            return View(formData);
         }
 
-      
-
+     
 
         [HttpGet]
         public IActionResult GetAllEndpoints()
@@ -55,30 +65,6 @@ namespace DARE_FrontEnd.Controllers
             var endpointsList = _clientHelper.CallAPIWithoutModel<List<Endpoint>>("/api/Endpoint/GetEndPointsInProject/{projectId}").Result;
             return View(endpointsList);
         }
-     
-        [HttpPost]
-        public async Task<IActionResult> EndpointFormSubmission([FromBody] object arg, int id)
-        {
-            var str = arg?.ToString();
-
-            if (!string.IsNullOrEmpty(str))
-            {
-                var theEndpoint = System.Text.Json.JsonSerializer.Deserialize<FormData>(str);
-                theEndpoint.FormIoString = str;
-
-                var result = await _clientHelper.CallAPI<FormData, Endpoint>("/api/Endpoint/AddEndpoint", theEndpoint);
-                if (result.ErrorMessage!= null)
-                {
-                    
-                    return BadRequest(result.ErrorMessage);
-                   
-                } 
-                return Ok(result);
-            }
-            return BadRequest();
-        }
-
-       
 
 
         [HttpGet]
@@ -90,6 +76,26 @@ namespace DARE_FrontEnd.Controllers
                 "/api/Endpoint/GetAnEndpoint/", paramlist).Result;
 
             return View(test);
+        }
+ 
+        [HttpPost]
+        public async Task<IActionResult> EndpointFormSubmission([FromBody] object arg, int id)
+        {
+            var str = arg?.ToString();
+
+            if (!string.IsNullOrEmpty(str))
+            {
+                var data = System.Text.Json.JsonSerializer.Deserialize<FormData>(str);
+                data.FormIoString = str;
+
+                var result = await _clientHelper.CallAPI<FormData, Endpoint?>("/api/Endpoint/AddEndpoint", data);
+
+                if (result.Id == 0)
+                    return BadRequest();
+
+                return Ok(result);
+            }
+            return BadRequest();
         }
 
     }

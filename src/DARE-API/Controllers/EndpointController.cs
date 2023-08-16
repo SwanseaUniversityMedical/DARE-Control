@@ -6,6 +6,7 @@ using Serilog;
 using Endpoint = BL.Models.Endpoint;
 using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Authentication;
+using BL.Models;
 
 namespace DARE_API.Controllers
 {
@@ -44,7 +45,15 @@ namespace DARE_API.Controllers
                     return new Endpoint() { Error = true, ErrorMessage = "Another endpoint already exists with the same TRE Admin Name" };
                 }
                 endpoint.FormData = data.FormIoString;
-                _DbContext.Endpoints.Add(endpoint);
+
+                if (endpoint.Id > 0)
+                {
+                    if (_DbContext.Endpoints.Select(x => x.Id == endpoint.Id).Any())
+                        _DbContext.Endpoints.Update(endpoint);
+                    else
+                        _DbContext.Endpoints.Add(endpoint);
+                }
+               
 
                 await _DbContext.SaveChangesAsync();
                 return endpoint;
@@ -120,5 +129,45 @@ namespace DARE_API.Controllers
 
 
         }
+
+        [HttpPost("EditEndpoint")]
+        public async Task<Endpoint?> EditEndpoint(FormData data)
+        {
+            try
+            {
+                Endpoint endpoint = JsonConvert.DeserializeObject<Endpoint>(data.FormIoString);
+                var id = data.Id;
+                var dbendpoint = _DbContext.Endpoints.Find(id);
+                if (_DbContext.Projects.Any(x => x.Name.ToLower() == endpoint.Name.ToLower().Trim() && x.Id != endpoint.Id))
+                {
+
+                    return new Endpoint() { Error = true, ErrorMessage = "Another endpoint already exists with the same name" };
+                }
+
+                if (dbendpoint != null)
+                {
+                    dbendpoint.Id = id;
+                    dbendpoint.Name = endpoint.Name;
+                    dbendpoint.AdminUsername = endpoint.AdminUsername;
+                    dbendpoint.FormData = data.FormIoString;
+                }
+
+                _DbContext.Endpoints.Update(dbendpoint);
+
+                await _DbContext.SaveChangesAsync();
+
+                Log.Information("{Function} Endpoint Updated successfully", "EditEndpoint");
+                return dbendpoint;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "EditEndpoint");
+                var errorModel = new Endpoint();
+                return errorModel;
+                throw;
+            }
+
+        }
+
     }
 }

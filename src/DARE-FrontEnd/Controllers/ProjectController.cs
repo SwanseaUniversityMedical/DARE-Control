@@ -9,7 +9,7 @@ using BL.Models.Settings;
 
 namespace DARE_FrontEnd.Controllers
 {
-    //[Authorize(Roles = "dare-control-admin")]
+    [Authorize(Roles = "dare-control-admin")]
     public class ProjectController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
@@ -221,58 +221,7 @@ namespace DARE_FrontEnd.Controllers
             return BadRequest();
         }
 
-        [HttpGet]
-        public async Task<IActionResult> EditProject(int? projectId)
-        {
-            var users = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
-            var endpoints = _clientHelper.CallAPIWithoutModel<List<Endpoint>>("/api/Endpoint/GetAllEndpoints/").Result;
-
-            var userItems = users
-                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
-                .ToList();
-
-            var endpointItems = endpoints
-                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
-                .ToList();
-
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("projectId", projectId.ToString());
-            var project = _clientHelper.CallAPIWithoutModel<Project?>(
-                "/api/Project/GetProject/", paramlist).Result;
-
-            var projectView = new ProjectUserEndpoint()
-            {
-                Id = project.Id,
-                FormData = project.FormData,
-                FormIoUrl = _formIOSettings.ProjectForm,
-                Name = project.Name,
-                Users = project.Users,
-                StartDate = project.StartDate,
-                EndDate = project.EndDate,
-                Endpoints = project.Endpoints,
-                UserItemList = userItems,
-                EndpointItemList = endpointItems
-            };
-
-            return View(projectView);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> ProjectEditFormSubmission([FromBody] FormData model)
-        {
-
-            var result =
-                await _clientHelper.CallAPI<FormData, Project?>("/api/Project/EditProject", model);
-
-            if (result.Id == 0)
-            {
-                return BadRequest();
-            }
-
-            return Redirect("/home");
-        }
-
-        [HttpGet]
+       
         public async Task<IActionResult> RemoveUserFromProject(int projectId, int userId)
         {
             var model = new ProjectUser()
