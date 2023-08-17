@@ -50,7 +50,8 @@
                                     
                                     switch (Model.Status)
                                     {
-                                    case BL.Models.SubmissionStatus.DataOutApproved:
+                                        
+                                    case BL.Models.Enums.StatusType.DataOutApproved:
                                     <h6><span class="badge bg-dark-blue rounded-pill">@Model.Status</span></h6>
                                     break;
                                     default:
@@ -75,7 +76,7 @@
                                         switch (tre.Status)
                                         {
 
-                                            case BL.Models.SubmissionStatus.DataOutApproved:
+                                            case BL.Models.Enums.StatusType.DataOutApproved:
                                                 <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span></h6>
                                                 break;
 
