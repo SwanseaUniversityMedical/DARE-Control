@@ -115,6 +115,8 @@ namespace DARE_API.Controllers
         {
             try
             {
+                //TODO: CHANGE BACK TO NON HARD CODED ONCE IT WORKS PROPERLY
+                id = 1;
                 var Submission = _DbContext.Submissions.Where(x => x.Id == id).FirstOrDefault();
 
                 Log.Information("{Function} Submission retrieved successfully", "GetASubmission");

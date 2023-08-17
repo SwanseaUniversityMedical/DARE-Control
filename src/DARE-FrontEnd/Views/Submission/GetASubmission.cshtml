@@ -12,53 +12,107 @@
             <h1 class="fs-3 mb-0">@*@Model.Name*@</h1>
             <p class="text-muted small mb-0">#@Model.Id</p>
         </div>
-        <a href="@Url.Action("EditProject", "Project",new{Projectid=@Model.Id})" class="btn btn-primary btn-sm d-flex align-items-center">
-            <i class="fa fa-edit align-middle me-2"></i>
-            <span>Edit Project</span>
-        </a>
+
     </div>
-    <div class="mt-4">
-        <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
-            <li class="nav-item" role="presentation">
-                <a href="#about" class="nav-link text-dark active" id="about" data-bs-toggle="tab" data-bs-target="#project" role="tab" aria-controls="Project" aria-selected="true">About</a>
-            </li>
-            <li class="nav-item" role="presentation">
-                <a href="#submissions" class="nav-link text-dark" id="submissions" data-bs-toggle="tab" data-bs-target="#submissions-tab" role="tab" aria-controls="submissions" aria-selected="false">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>Submissions</span>
-                        <span class="badge bg-dark-blue rounded-pill ms-2">@*@Model.Submissions.Count*@</span>
-                    </div>
-                </a>
-            </li>
-            <li class="nav-item" role="presentation">
-                <a href="#people" class="nav-link text-dark" id="people" data-bs-toggle="tab" data-bs-target="#userMembership" role="tab" aria-controls="User Membership" aria-selected="false">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>People</span>
-                        <span class="badge bg-dark-blue rounded-pill ms-2">@*@Model.Users.Count*@</span>
-                    </div>
-                </a>
-            </li>
-            <li class="nav-item" role="presentation">
-                <a href="#tre" class="nav-link text-dark" id="tre" data-bs-toggle="tab" data-bs-target="#endpoint" role="tab" aria-controls="Endpoint" aria-selected="false">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>TREs</span>
-                        <span class="badge bg-dark-blue rounded-pill ms-2">@*@Model.Endpoints.Count*@</span>
-                    </div>
-                </a>
-            </li>
-        </ul>
 
 
-        <div class="tab-content py-5" id="myTabContent">
-            <div class="tab-pane fade show active" id="project" role="tabpanel" aria-labelledby="home-tab">
-                <div class="row">
-                    <div class="col-md-6">
-                        <p class="text-muted fs-7">
-                            LastStatusUpdate Date:  <span class="mx-2"></span>End Date:
-                        </p>
+
+    <div class="tab-content py-5" id="myTabContent">
+        <div class="tab-pane fade show active" id="project" role="tabpanel" aria-labelledby="home-tab">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div>
+                            <a href="@Url.Action("GetASubmission", "Submission", new { id = Model.Id })">
+                                <h2 class="mb-0 fw-bold hover-underline fs-5">
+                                    @Model.TesName
+                                </h2>
+                            </a>
+                            <p class="text-muted small mb-0">Submission ID: @Model.Id</p>
+                            <a href="@Url.Action("GetProject", "Project", new { id = Model.Project.Id })">
+                                <h2 class="mb-0 fw-bold hover-underline fs-5">
+                                    @Model.Project.Name
+                                </h2>
+                            </a>
+                            <a href="#">
+                                <h2 class="mb-0 fw-bold hover-underline fs-5">
+                                    <a href="@Url.Action("GetUser", "User", new { id = @Model.SubmittedBy.Id })">@Model.SubmittedBy.Name</a>
+                                </h2>
+                            </a>
+                            @*TODO: talk to justin might need to add a submission time in the model*@
+
+                            <p class="mb-0">Project Submission Date:  ADD A SUBMISSION DATE VAR</p>
+                            <p class="mb-0">Children count: @Model.Children.Count</p>
+
+                            <div>
+                                <p>Overall Status: </p>
+                                @{
+                                    
+                                    switch (Model.Status)
+                                    {
+                                    case BL.Models.SubmissionStatus.DataOutApproved:
+                                    <h6><span class="badge bg-dark-blue rounded-pill">@Model.Status</span></h6>
+                                    break;
+                                    default:
+                                    <h6><span class="badge bg-dark-blue rounded-pill">@Model.Status</span></h6>
+                                    break;
+                                    }
+                                    }
+                                </div>
+                                <div>
+                                    <p>TRE's Submitted To: </p>
+                                    @{
+                                    @foreach (var tre in Model.Children)
+                                    {
+                                        var endpointName = @tre.EndPoint?.Name.ToString();
+                                        if (endpointName == null)
+                                        {
+                                            endpointName = "None";
+                                        }
+                                            //<p class="mb-0">@Model.EndPoint.Name</p>
+                                        <p class="mb-0">@endpointName</p>
+                                        
+                                        switch (tre.Status)
+                                        {
+
+                                            case BL.Models.SubmissionStatus.DataOutApproved:
+                                                <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span></h6>
+                                                break;
+
+                                            default:
+                                                <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span></h6>
+                                                break;
+                                        }
+                                        //@foreach (var tasks in Model.Tasks)
+                                        //{
+                                        //    <p class="mb-0">Name: @tasks.Name</p>
+                                        //    switch (tasks.Status)
+                                        //    {
+                                        //        case BL.Models.SubmissionStatus.DataOutApproved:
+                                        //            <h6><span class="badge bg-dark-blue rounded-pill">@Model.Status</span></h6>
+                                        //            break;
+                                        //        default:
+                                        //            <h6><span class="badge bg-dark-blue rounded-pill">@Model.Status</span></h6>
+                                        //            break;
+                                        //    }
+
+                                        //}
+
+                                    }
+                                }
+
+                            </div>
+                            <div>
+                                Query: @Model.TesJson
+                            </div>
+                            <div>
+                                <p>
+                                    <a href="@Url.Action("GetProjectBuckets", "Project", new { id = Model.Project.Id })">@Model.Project.Name Buckets</a>
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
