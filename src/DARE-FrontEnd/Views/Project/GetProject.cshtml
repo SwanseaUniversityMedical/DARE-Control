@@ -14,17 +14,18 @@
         </div>
                                                 @if (User.IsInRole("dare-control-admin"))
                                 {
-        <a href="@Url.Action("EditProject", "Project",new{Projectid=@Model.Id})" class="btn btn-primary btn-sm d-flex align-items-center">
-            <i class="fa fa-edit align-middle me-2"></i>
-            <span>Edit Project</span>
-        </a>
-                                }
+
+            @if (User.IsInRole("dare-control-admin"))
+            {
+                <a href="@Url.Action("AddProjectForm", "Project",new{Projectid=@Model.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+            }
+            }
         @if (User.IsInRole("dare-control-admin"))
         {
-            <a href="@Url.Action("EditProject", "Project",new{Projectid=@Model.Id})" class="btn btn-primary btn-sm d-flex align-items-center">
-                <i class="fa fa-edit align-middle me-2"></i>
+            <a asp-controller="Submission" asp-action="Instructions" class="btn btn-primary btn-sm d-flex align-items-center">
+                <i class="fa fa-plus align-middle me-2"></i>
                 <span>Manual</span>
-            </a>
+            </a>             
         }
     </div>
     <div class="mt-4">
