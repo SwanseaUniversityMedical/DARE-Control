@@ -49,11 +49,11 @@
                                     </div>
 
                                     <div>
-                                        <p>Status: </p>
+                                        <p>StatusType: </p>
                                         @{
                                             switch(submission.Status)
                                             {
-                                                case BL.Models.SubmissionStatus.DataOutApproved:
+                                                case BL.Models.Enums.StatusType.DataOutApproved:
                                                      <h6><span class="badge bg-dark-blue rounded-pill">@submission.Status</span></h6>
                                                     break;
                                                 default:
@@ -64,24 +64,19 @@
 
 
                                     </div>
+                                    @*TODO Display a nice version of status instead of just an enum*@
+                                    @{
+                                        string value;
+                                        string defaultValue = "N/A";
+                                        if (submission.EndPoint == null)
+                                        {
+                                            value = defaultValue;
+                                        }
+                                        else
+                                        {
+                                            value = submission.EndPoint.Name;
+                                        }
 
-                                @{
-                                            string value;
-                                            string defaultValue = "N/A";
-                                            if (submission == null)
-                                            {
-                                                value = defaultValue;
-                                            <p class="mb-0">@value</p>
-
-                                            }
-                                            else
-                                            {
-                                               // value = submission.EndPoint.Name;
-                                            <p class="mb-0">"sad"</p>
-
-
-                                            }
-                                       
                                     }
 
                                     @*TODO Display a nice version of status instead of just an enum*@
@@ -114,7 +109,7 @@
                 </a>
                 <p class="text-muted small mb-0">#ID</p>
             </div>
-            <h6><span class="badge bg-dark-blue rounded-pill">Status</span></h6>
+            <h6><span class="badge bg-dark-blue rounded-pill">StatusType</span></h6>
         </div>
         <p class="">Submitted by #Person's Name
             <br />
@@ -123,7 +118,7 @@
         <p class="">TREs</p>
 
         
-        <p class="">Status description</p>
+        <p class="">StatusType description</p>
 
     </div>*@
 </div>
