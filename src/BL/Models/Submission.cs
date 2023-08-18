@@ -34,7 +34,9 @@ namespace BL.Models
         public virtual User SubmittedBy { get; set; }
 
         public DateTime LastStatusUpdate { get; set; }
-        
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+
 
 
         public StatusType Status { get; set; }

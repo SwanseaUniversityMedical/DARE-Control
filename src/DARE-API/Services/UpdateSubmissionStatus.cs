@@ -1,6 +1,7 @@
 ﻿using BL.Models.Enums;
 using BL.Models;
 using DARE_API.Repositories.DbContexts;
+using System.Net.NetworkInformation;
 
 namespace DARE_API.Services
 {
@@ -13,8 +14,13 @@ namespace DARE_API.Services
                 Start = sub.LastStatusUpdate.ToUniversalTime(),
                 End = DateTime.Now.ToUniversalTime(),
                 Status = sub.Status,
+
                 StatusDescription = sub.StatusDescription
             });
+            if (type == StatusType.Cancelled || type == StatusType.Completed)
+            {
+                sub.EndTime = DateTime.Now.ToUniversalTime();
+            }
             sub.Status = type;
             sub.LastStatusUpdate = DateTime.Now.ToUniversalTime();
             sub.StatusDescription = description;
