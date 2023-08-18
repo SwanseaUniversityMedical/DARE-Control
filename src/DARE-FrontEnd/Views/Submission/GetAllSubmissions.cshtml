@@ -48,8 +48,31 @@
                                         }*@
                                     </div>
 
-                                    <div>
-                                        <p>StatusType: </p>
+
+
+                            <div>
+                                <p>TRE's Submitted To: </p>
+                                @{
+                                    @foreach (var tre in Model)
+                                    {
+                                        var endpointName = @tre.EndPoint?.Name.ToString();
+                                        if (endpointName == null)
+                                        {
+                                            endpointName = "None";
+                                        }
+                                        //<p class="mb-0">@Model.EndPoint.Name</p>
+                                        <p class="mb-0">@endpointName</p>
+
+                                    }
+                                }
+                            </div>
+
+
+
+
+
+                                        <div>
+                                        <p>Overall Status: </p>
                                         @{
                                             switch(submission.Status)
                                             {
