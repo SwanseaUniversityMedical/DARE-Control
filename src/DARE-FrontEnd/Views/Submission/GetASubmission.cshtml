@@ -41,21 +41,27 @@
                             </a>
                             @*TODO: talk to justin might need to add a submission time in the model*@
 
-                            <p class="mb-0">Project Submission Date:   ADD A SUBMISSION DATE VAR</p>
+                            <p class="mb-0">Project Submission Date: @Model.StartTime</p>
                             <p class="mb-0">Children count: @Model.Children.Count</p>
 
                             <div>
                                 <p>Overall Status: </p>
                                 @{
-
+                                    //var Date1 = DateTime.Now.AddDays(-3).AddHours(-2).AddMinutes(-33);
+                                    var startDate = Model.StartTime;
+                                    var currTime = DateTime.Now;
+                                    TimeSpan result1 = currTime.Subtract(startDate);
+                                    int days = result1.Days;
+                                    int hours = result1.Hours;
+                                    int minutes = result1.Minutes;
                                     switch (Model.Status)
                                     {
 
                                         case BL.Models.Enums.StatusType.DataOutApproved:
-                                            <h6><span class="badge bg-dark-blue rounded-pill">@Model.Status</span></h6>
+                                            <h6><span class="badge bg-dark-blue rounded-pill">@Model.Status @Model.EndTime</span></h6>
                                             break;
                                         default:
-                                            <h6><span class="badge bg-dark-blue rounded-pill">@Model.Status </span> Last Update: @Model.LastStatusUpdate</h6>
+                                            <h6><span class="badge bg-dark-blue rounded-pill">@Model.Status </span> Elapsed Time: @days days, @hours hours, @minutes minutes.</h6>
                                             break;
                                     }
                                 }
@@ -72,16 +78,15 @@
                                         }
                                         //<p class="mb-0">@Model.EndPoint.Name</p>
                                         <p class="mb-0">@endpointName</p>
-
                                         switch (tre.Status)
                                         {
 
                                             case BL.Models.Enums.StatusType.DataOutApproved:
-                                                <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span> </h6>
+                                                <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span>End Time: @Model.EndTime</h6>
                                                 break;
 
                                             default:
-                                                <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span> Last Update: @Model.LastStatusUpdate</h6>
+                                                <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span> Elapsed Time: @days days, @hours hours, @minutes minutes</h6>
                                                 break;
                                         }
                                     }
@@ -95,17 +100,22 @@
                                 <div class="json-viewer" id="jsonViewer" style="display: none;"></div>
 
                                 <script>
-                                    document.getElementById("showJsonButton").addEventListener("click", function () {
-
-                                        var jsonData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.TesJson));
-
-                                        var jsonViewer = document.getElementById("jsonViewer");
-                                        jsonViewer.textContent = JSON.stringify(jsonData)
-                                        jsonViewer.style.display = "block";
+                                    var tesJson = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.TesJson));
+                                    var jsonViewer = document.getElementById("jsonViewer");
+                                    var showJsonButton = document.getElementById("showJsonButton");
+                                    var jsonVisible = false;
+                                    
+                                    showJsonButton.addEventListener("click", function () {
+                                        if (jsonVisible) {
+                                            jsonViewer.style.display = "none";
+                                            jsonVisible = false;
+                                        } else {
+                                            jsonViewer.textContent = JSON.stringify(tesJson)
+                                            jsonViewer.style.display = "block";
+                                            jsonVisible = true;
+                                        }
                                     });
                                 </script>
-
-
                             </div>
                             <div>
                                 <p>
