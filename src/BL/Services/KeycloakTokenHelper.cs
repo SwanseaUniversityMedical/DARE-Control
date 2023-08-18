@@ -9,13 +9,13 @@ namespace BL.Services
     public class KeycloakTokenHelper: IKeycloakTokenHelper
     {
 
-        public ControlKeyCloakSettings _settings { get; set; }
+        public BaseKeyCloakSettings _settings { get; set; }
 
-        public KeycloakTokenHelper(ControlKeyCloakSettings settings)
+        public KeycloakTokenHelper(BaseKeyCloakSettings settings)
         {
             _settings = settings;
         }
-        public async Task<string> GetTokenForUser(string username, string password)
+        public async Task<string> GetTokenForUser(string username, string password, string requiredRole)
         {
 
             string keycloakBaseUrl = _settings.BaseUrl;
@@ -65,17 +65,31 @@ namespace BL.Services
             {
                 roles = new List<string>()
             };
-            if (groupClaims.Any())
+            if (!string.IsNullOrWhiteSpace(requiredRole))
             {
-                roles = JsonConvert.DeserializeObject<TokenRoles>(groupClaims.First());
+
+
+                if (groupClaims.Any())
+                {
+                    roles = JsonConvert.DeserializeObject<TokenRoles>(groupClaims.First());
+                }
+
+                if (!roles.roles.Any(gc => gc.Equals(dareTreAdminRole)))
+                {
+                    Log.Information("{Function} User {Username} does not have correct role {AdminRole}",
+                        "GetTokenForUser", username, dareTreAdminRole);
+                    return "";
+                }
+
+                Log.Information("{Function} Token found with correct role {AdminRole} for User {Username}",
+                    "GetTokenForUser", dareTreAdminRole, username);
             }
-            if (!roles.roles.Any(gc => gc.Equals(dareTreAdminRole)))
+            else
             {
-                Log.Information("{Function} User {Username} does not have correct role {AdminRole}", "GetTokenForUser", username, dareTreAdminRole);
-                return "";
+                Log.Information("{Function} Token found for User {Username}, no role required",
+                    "GetTokenForUser", dareTreAdminRole, username);
             }
-            Log.Information("{Function} Token found with correct role {AdminRole} for User {Username}", "GetTokenForUser", dareTreAdminRole, username);
-            
+
             return tokenResponse.AccessToken;
         }
     }
