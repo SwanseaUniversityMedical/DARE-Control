@@ -71,7 +71,7 @@ namespace DARE_API.Services
 
                 Enum.TryParse(status, out StatusType myStatus);
                 UpdateSubmissionStatus.UpdateStatus(sub, myStatus, "");
-                sub.Status = myStatus;
+               
 
                 _DbContext.SaveChanges();
             }

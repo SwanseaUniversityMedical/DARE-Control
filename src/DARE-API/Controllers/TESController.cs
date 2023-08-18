@@ -292,6 +292,7 @@ namespace DARE_API.Controllers
             {
                 DockerInputLocation = tesTask.Executors.First().Image,
                 Project = dbproj,
+                StartTime = DateTime.Now.ToUniversalTime(),
                 Status = StatusType.WaitingForChildSubsToComplete,
                 LastStatusUpdate = DateTime.Now.ToUniversalTime(),
                 SubmittedBy = user,
