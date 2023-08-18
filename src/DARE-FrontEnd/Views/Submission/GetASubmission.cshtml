@@ -41,28 +41,28 @@
                             </a>
                             @*TODO: talk to justin might need to add a submission time in the model*@
 
-                            <p class="mb-0">Project Submission Date:  ADD A SUBMISSION DATE VAR</p>
+                            <p class="mb-0">Project Submission Date:   ADD A SUBMISSION DATE VAR</p>
                             <p class="mb-0">Children count: @Model.Children.Count</p>
 
                             <div>
                                 <p>Overall Status: </p>
                                 @{
-                                    
+
                                     switch (Model.Status)
                                     {
-                                        
-                                    case BL.Models.Enums.StatusType.DataOutApproved:
-                                    <h6><span class="badge bg-dark-blue rounded-pill">@Model.Status</span></h6>
-                                    break;
-                                    default:
-                                    <h6><span class="badge bg-dark-blue rounded-pill">@Model.Status</span></h6>
-                                    break;
+
+                                        case BL.Models.Enums.StatusType.DataOutApproved:
+                                            <h6><span class="badge bg-dark-blue rounded-pill">@Model.Status</span></h6>
+                                            break;
+                                        default:
+                                            <h6><span class="badge bg-dark-blue rounded-pill">@Model.Status </span> Last Update: @Model.LastStatusUpdate</h6>
+                                            break;
                                     }
-                                    }
-                                </div>
-                                <div>
-                                    <p>TRE's Submitted To: </p>
-                                    @{
+                                }
+                            </div>
+                            <div>
+                                <p>TRE's Submitted To: </p>
+                                @{
                                     @foreach (var tre in Model.Children)
                                     {
                                         var endpointName = @tre.EndPoint?.Name.ToString();
@@ -70,40 +70,42 @@
                                         {
                                             endpointName = "None";
                                         }
-                                            //<p class="mb-0">@Model.EndPoint.Name</p>
+                                        //<p class="mb-0">@Model.EndPoint.Name</p>
                                         <p class="mb-0">@endpointName</p>
-                                        
+
                                         switch (tre.Status)
                                         {
 
                                             case BL.Models.Enums.StatusType.DataOutApproved:
-                                                <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span></h6>
+                                                <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span> </h6>
                                                 break;
 
                                             default:
-                                                <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span></h6>
+                                                <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span> Last Update: @Model.LastStatusUpdate</h6>
                                                 break;
                                         }
-                                        //@foreach (var tasks in Model.Tasks)
-                                        //{
-                                        //    <p class="mb-0">Name: @tasks.Name</p>
-                                        //    switch (tasks.Status)
-                                        //    {
-                                        //        case BL.Models.SubmissionStatus.DataOutApproved:
-                                        //            <h6><span class="badge bg-dark-blue rounded-pill">@Model.Status</span></h6>
-                                        //            break;
-                                        //        default:
-                                        //            <h6><span class="badge bg-dark-blue rounded-pill">@Model.Status</span></h6>
-                                        //            break;
-                                        //    }
-
-                                        //}
-
                                     }
                                 }
                             </div>
                             <div>
-                                Query: @Model.TesJson
+
+                        
+
+                                <button id="showJsonButton">View Query</button>
+                                <div class="json-viewer" id="jsonViewer" style="display: none;"></div>
+
+                                <script>
+                                    document.getElementById("showJsonButton").addEventListener("click", function () {
+
+                                        var jsonData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.TesJson));
+
+                                        var jsonViewer = document.getElementById("jsonViewer");
+                                        jsonViewer.textContent = JSON.stringify(jsonData)
+                                        jsonViewer.style.display = "block";
+                                    });
+                                </script>
+
+
                             </div>
                             <div>
                                 <p>

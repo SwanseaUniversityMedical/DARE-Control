@@ -82,6 +82,7 @@ namespace DARE_API.Services
                     {
                         DockerInputLocation = tesTask.Executors.First().Image,
                         Project = dbproj,
+                        StartTime = DateTime.Now.ToUniversalTime(),
                         Status = StatusType.WaitingForAgentToTransfer,
                         LastStatusUpdate = DateTime.Now.ToUniversalTime(),
                         SubmittedBy = sub.SubmittedBy,
