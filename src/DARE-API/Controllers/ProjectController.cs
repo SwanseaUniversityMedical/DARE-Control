@@ -44,6 +44,7 @@ namespace DARE_API.Controllers
                 projects.Name = projects.Name.Trim();
                 projects.StartDate = projects.StartDate.ToUniversalTime();
                 projects.EndDate = projects.EndDate.ToUniversalTime();
+                projects.ProjectDescription = projects.ProjectDescription.Trim();
                 //projects.Id = projects.Id;
                 projects.SubmissionBucket = GenerateRandomName(projects.Name) + "submission";
                 projects.OutputBucket = GenerateRandomName(projects.Name) + "output";

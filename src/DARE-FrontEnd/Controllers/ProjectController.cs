@@ -44,6 +44,7 @@ namespace DARE_FrontEnd.Controllers
                 Users = project.Users,
                 StartDate = project.StartDate,
                 EndDate = project.EndDate,
+                ProjectDescription = project.ProjectDescription,
                 Endpoints = project.Endpoints,
                 SubmissionBucket = project.SubmissionBucket,
                 OutputBucket = project.OutputBucket,
