@@ -8,7 +8,7 @@
 
     <link rel="stylesheet" href="~/css/datatables.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <script src="~/js/formIo.js"></script>
+    
     <link rel="stylesheet" href="https://use.typekit.net/tyz0nfb.css">
 </head>
 <body class="d-flex flex-column h-100">
@@ -64,8 +64,10 @@
                         <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="#">Account</a></li>
                             <li><a class="dropdown-item" href="#">Helpdesk</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/Account/Logout">Logout</a></li>
+                            <li><hr class="dropdown-divider"></li> 
+                            <li><a class="dropdown-item" href="/Home/Logout">Logout</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Logout">Logout</a></li>
+
                         </ul>
                     </div>
             </div>
