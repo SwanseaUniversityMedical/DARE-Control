@@ -44,6 +44,10 @@ namespace DARE_API.Controllers
                 {
                     return new Endpoint() { Error = true, ErrorMessage = "Another endpoint already exists with the same TRE Admin Name" };
                 }
+                if (_DbContext.Endpoints.Any(x => x.About.ToLower() == endpoint.About.ToLower() && x.Id != endpoint.Id))
+                {
+                    return new Endpoint() { Error = true, ErrorMessage = "Another endpoint already exists with the same TRE Admin Name" };
+                }
                 endpoint.FormData = data.FormIoString;
 
                 if (endpoint.Id > 0)
