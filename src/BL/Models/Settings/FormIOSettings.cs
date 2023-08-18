@@ -22,9 +22,11 @@ namespace BL.Models.Settings
         
         private bool useInternal = false;
         private string baseURL = "";
-        const string in_projectForm="/formio/project.json";
-        const string in_userForm="/formio/user.json";
+        //const string in_projectForm="/formio/project.json";
+        //const string in_userForm="/formio/user.json";
         //const string in_endpointForm="/formio/endpoint.json";
+        const string in_projectForm = "https://rikojtsvfwnqslz.form.io/darecontrolproject";
+        const string in_userForm = "https://rikojtsvfwnqslz.form.io/darecontroluser";      
         const string in_endpointForm = "https://rikojtsvfwnqslz.form.io/darecontrolendpoint";
 
 
