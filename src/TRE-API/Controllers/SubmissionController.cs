@@ -1,6 +1,7 @@
 ﻿
 using BL.Models.ViewModels;
 using BL.Models;
+using BL.Models.Enums;
 using BL.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -51,10 +52,10 @@ namespace TRE_API.Controllers
         [ValidateModelState]
         [SwaggerOperation("UpdateStatusForEndpoint")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public IActionResult UpdateStatusForEndpoint(string tesId, SubmissionStatus status)
+        public IActionResult UpdateStatusForEndpoint(string tesId, StatusType statusType, string description)
         {
             var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForEndpoint",
-                new Dictionary<string, string>() { { "tesId", tesId }, { "status", status.ToString() } }).Result;
+                new Dictionary<string, string>() { { "tesId", tesId }, { "statusType", statusType.ToString() },{"description", description} }).Result;
             return StatusCode(200, result);
         }
     }

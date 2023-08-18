@@ -10,6 +10,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using BL.Models.Enums;
 
 namespace DARE_API.Services
 {
@@ -68,7 +69,8 @@ namespace DARE_API.Services
                     return;
                 }
 
-                Enum.TryParse(status, out SubmissionStatus myStatus);
+                Enum.TryParse(status, out StatusType myStatus);
+                UpdateSubmissionStatus.UpdateStatus(sub, myStatus, "");
                 sub.Status = myStatus;
 
                 _DbContext.SaveChanges();

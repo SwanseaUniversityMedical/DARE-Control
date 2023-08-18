@@ -42,7 +42,7 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public IActionResult GetASubmission(int id)
         {
-            var res = _clientHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetAllSubmissions/").Result;
+            var res = _clientHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/").Result;
 
             return View(res);
         }
