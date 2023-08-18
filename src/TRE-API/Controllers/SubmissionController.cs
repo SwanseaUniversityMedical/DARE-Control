@@ -7,7 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using TRE_API.Attributes;
+using TRE_API.Services;
 using TRE_API.Services.SignalR;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace TRE_API.Controllers
 {
@@ -25,7 +28,7 @@ namespace TRE_API.Controllers
             _dareHelper = helper;
         }
 
-
+        [Authorize(Roles = "dare-tre-agent")]
         [HttpPost("DAREUpdateSubmission")]
         public async void DAREUpdateSubmission(string endpointname, string tesId, string submissionStatus) 
         {
@@ -33,7 +36,7 @@ namespace TRE_API.Controllers
             await _signalRService.SendUpdateMessage("TREUpdateStatus", StringList);
         }
 
-
+        [Authorize(Roles = "dare-tre-agent")]
         [HttpGet]
         [Route("GetWaitingSubmissionsForEndpoint")]
         [ValidateModelState]

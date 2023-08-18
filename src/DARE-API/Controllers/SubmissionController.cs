@@ -45,7 +45,7 @@ namespace DARE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(List<Submission>), description: "")]
         public virtual IActionResult GetWaitingSubmissionsForEndpoint()
         {
-            //ToDo alter to get endpoint from validated token
+            
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
             var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName);
             if (endpoint == null)

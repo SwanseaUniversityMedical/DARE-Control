@@ -26,6 +26,8 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TREAgent", "src\TREAgent\TREAgent.csproj", "{97D09002-2CA7-4D78-81E6-36AC912F089B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PasswordEncryptor", "..\PasswordEncryptor\PasswordEncryptor.csproj", "{E3113006-5E32-451D-9541-CEA84F55EC9D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,6 +62,10 @@ Global
 		{97D09002-2CA7-4D78-81E6-36AC912F089B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97D09002-2CA7-4D78-81E6-36AC912F089B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97D09002-2CA7-4D78-81E6-36AC912F089B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3113006-5E32-451D-9541-CEA84F55EC9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3113006-5E32-451D-9541-CEA84F55EC9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3113006-5E32-451D-9541-CEA84F55EC9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3113006-5E32-451D-9541-CEA84F55EC9D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,6 +80,7 @@ Global
 		{7E5C3A67-D4F6-490D-B24A-BCB1008DC7CA} = {505AD4FB-0822-4989-9A01-1F56C3820D0D}
 		{0F576ABA-E84A-4176-8AB9-D15C76952305} = {ED66814A-91F3-4E06-AE48-B7A9F666659E}
 		{97D09002-2CA7-4D78-81E6-36AC912F089B} = {505AD4FB-0822-4989-9A01-1F56C3820D0D}
+		{E3113006-5E32-451D-9541-CEA84F55EC9D} = {505AD4FB-0822-4989-9A01-1F56C3820D0D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {29E246A8-202C-4544-A30D-33E0AB416005}

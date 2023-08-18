@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using BL.Services;
 
-namespace TRE_API.Services
+namespace TREAgent.Services
 {
-    public interface IDareClientWithoutTokenHelper: IBaseClientHelper
+    public interface ITreClientWithoutTokenHelper: IBaseClientHelper
     {
 
 

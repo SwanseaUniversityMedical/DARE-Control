@@ -42,7 +42,7 @@ AddServices(builder);
 //Add Dependancies
 AddDependencies(builder, configuration);
 
-var treKeyCloakSettings = new TreKeyCloakSettings();
+var treKeyCloakSettings = new BaseKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
 builder.Services.AddSingleton(treKeyCloakSettings);
 
