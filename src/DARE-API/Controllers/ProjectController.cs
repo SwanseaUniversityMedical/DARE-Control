@@ -41,10 +41,10 @@ namespace DARE_API.Controllers
            
                 Project project = JsonConvert.DeserializeObject<Project>(data.FormIoString);
                 //2023-06-01 14:30:00 use this as the datetime
-                projects.Name = projects.Name.Trim();
-                projects.StartDate = projects.StartDate.ToUniversalTime();
-                projects.EndDate = projects.EndDate.ToUniversalTime();
-                projects.ProjectDescription = projects.ProjectDescription.Trim();
+                project.Name = project.Name.Trim();
+                project.StartDate = project.StartDate.ToUniversalTime();
+                project.EndDate = project.EndDate.ToUniversalTime();
+                project.ProjectDescription = project.ProjectDescription.Trim();
                 //projects.Id = projects.Id;
                 
                 
