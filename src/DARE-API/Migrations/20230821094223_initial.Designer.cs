@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DARE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230817144655_AddAboutColumntoEndpointTable")]
-    partial class AddAboutColumntoEndpointTable
+    [Migration("20230821094223_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -113,6 +113,10 @@ namespace DARE_API.Migrations
                     b.Property<string>("OutputBucket")
                         .HasColumnType("text");
 
+                    b.Property<string>("ProjectDescription")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -139,6 +143,9 @@ namespace DARE_API.Migrations
                     b.Property<int?>("EndPointId")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("LastStatusUpdate")
                         .HasColumnType("timestamp with time zone");
 
@@ -154,6 +161,9 @@ namespace DARE_API.Migrations
                     b.Property<string>("SourceCrate")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
