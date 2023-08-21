@@ -17,7 +17,10 @@ namespace BL.Services
         }
         public async Task<string> GetTokenForUser(string username, string password, string requiredRole)
         {
+            try
+            {
 
+            
             string keycloakBaseUrl = _settings.BaseUrl;
             string clientId = _settings.ClientId;
             string clientSecret = _settings.ClientSecret;
@@ -57,7 +60,7 @@ namespace BL.Services
                 return "";
             }
 
-            var dareTreAdminRole = "dare-tre-admin";
+            
             var jwtHandler = new JwtSecurityTokenHandler();
             var token = jwtHandler.ReadJwtToken(tokenResponse.AccessToken);
             var groupClaims = token.Claims.Where(c => c.Type == "realm_access").Select(c => c.Value);
@@ -74,23 +77,29 @@ namespace BL.Services
                     roles = JsonConvert.DeserializeObject<TokenRoles>(groupClaims.First());
                 }
 
-                if (!roles.roles.Any(gc => gc.Equals(dareTreAdminRole)))
+                if (!roles.roles.Any(gc => gc.Equals(requiredRole)))
                 {
                     Log.Information("{Function} User {Username} does not have correct role {AdminRole}",
-                        "GetTokenForUser", username, dareTreAdminRole);
+                        "GetTokenForUser", username, requiredRole);
                     return "";
                 }
 
                 Log.Information("{Function} Token found with correct role {AdminRole} for User {Username}",
-                    "GetTokenForUser", dareTreAdminRole, username);
+                    "GetTokenForUser", requiredRole, username);
             }
             else
             {
                 Log.Information("{Function} Token found for User {Username}, no role required",
-                    "GetTokenForUser", dareTreAdminRole, username);
+                    "GetTokenForUser", requiredRole, username);
             }
 
             return tokenResponse.AccessToken;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
     }
 

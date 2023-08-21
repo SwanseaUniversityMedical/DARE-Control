@@ -42,11 +42,11 @@ AddServices(builder);
 //Add Dependancies
 AddDependencies(builder, configuration);
 
-var treKeyCloakSettings = new BaseKeyCloakSettings();
+var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
 builder.Services.AddSingleton(treKeyCloakSettings);
 
-var controlKeyCloakSettings = new ControlKeyCloakSettings();
+var controlKeyCloakSettings = new BaseKeyCloakSettings();
 configuration.Bind(nameof(controlKeyCloakSettings), controlKeyCloakSettings);
 builder.Services.AddSingleton(controlKeyCloakSettings);
 builder.Services.AddScoped<IDareClientWithoutTokenHelper, DareClientWithoutTokenHelper>();

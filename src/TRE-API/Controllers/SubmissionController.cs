@@ -50,12 +50,13 @@ namespace TRE_API.Controllers
         }
 
 
+        [Authorize(Roles = "dare-tre-agent")]
         [HttpGet]
         [Route("UpdateStatusForEndpoint")]
         [ValidateModelState]
         [SwaggerOperation("UpdateStatusForEndpoint")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public IActionResult UpdateStatusForEndpoint(string tesId, StatusType statusType, string description)
+        public IActionResult UpdateStatusForEndpoint(string tesId, StatusType statusType, string? description)
         {
             var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForEndpoint",
                 new Dictionary<string, string>() { { "tesId", tesId }, { "statusType", statusType.ToString() },{"description", description} }).Result;

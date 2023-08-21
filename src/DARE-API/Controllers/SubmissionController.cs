@@ -65,9 +65,9 @@ namespace DARE_API.Controllers
         [ValidateModelState]
         [SwaggerOperation("UpdateStatusForEndpoint")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public  IActionResult UpdateStatusForEndpoint(string tesId, StatusType statusType, string description)
+        public  IActionResult UpdateStatusForEndpoint(string tesId, StatusType statusType, string? description)
         {
-            //ToDo alter to get endpoint from validated token
+            
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
             var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
             if (endpoint == null)

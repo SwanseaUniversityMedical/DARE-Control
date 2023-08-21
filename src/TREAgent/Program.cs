@@ -43,7 +43,7 @@ var hostBuilder = new HostBuilder()
         services.AddScoped<IKeycloakTokenHelper, KeycloakTokenHelper>();
         services.AddHttpContextAccessor();
         services.AddHttpClient();
-        services.AddHttpContextAccessor();
+        services.AddHttpContextAccessor();      
 
         services.AddScoped<IDoWork, DoWork>();
         
@@ -93,7 +93,7 @@ public class Startup
     {
         
         app.UseHangfireDashboard();
-        RecurringJob.AddOrUpdate<IDoWork>(a => a.Execute(), Cron.MinuteInterval(1));
+        RecurringJob.AddOrUpdate<IDoWork>(a => a.Execute(), Cron.MinuteInterval(10));
         var serverAddressesFeature = app.ServerFeatures.Get<IServerAddressesFeature>();
         var port = serverAddressesFeature?.Addresses.FirstOrDefault()?.Split(':').Last();
 
