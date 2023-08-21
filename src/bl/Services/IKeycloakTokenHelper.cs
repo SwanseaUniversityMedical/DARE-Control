@@ -2,6 +2,6 @@
 {
     public interface IKeycloakTokenHelper
     {
-        Task<string> GetTokenForUser(string username, string password);
+        Task<string> GetTokenForUser(string username, string password, string requiredRole);
     }
 }

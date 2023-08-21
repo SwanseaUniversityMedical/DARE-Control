@@ -24,6 +24,7 @@ namespace BL.Services
         protected readonly string _address;
         protected readonly JsonSerializerOptions _jsonSerializerOptions;
         protected readonly IKeycloakTokenHelper? __keycloakTokenHelper;
+        public string _requiredRole { get; set; }
         public string _password { get; set; }
         public string _username { get; set; }
         
@@ -100,7 +101,7 @@ namespace BL.Services
                 {
                     usetoken = false;
                 };
-
+                usetoken = true;
                 HttpClient? apiClient;
                 if (usetoken)
                 {
@@ -169,7 +170,7 @@ namespace BL.Services
             var accessToken = "";
             if (__keycloakTokenHelper != null)
             {
-                accessToken = await  __keycloakTokenHelper.GetTokenForUser(_username, _password);
+                accessToken = await  __keycloakTokenHelper.GetTokenForUser(_username, _password, _requiredRole);
             }
             else
             {

@@ -30,7 +30,7 @@
         "maxLength": "",
         "pattern": ""
       },
-      "key": "name",
+      "key": "Name",
       "type": "textfield",
       "input": true,
       "id": "etbkee9",
@@ -107,7 +107,7 @@
         "pattern": ""
       },
       "unique": true,
-      "key": "email",
+      "key": "Email",
       "type": "email",
       "input": true,
       "id": "ebubueh",
