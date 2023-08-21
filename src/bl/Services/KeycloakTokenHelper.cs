@@ -6,7 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace BL.Services
 {
-    public class KeycloakTokenHelper: IKeycloakTokenHelper
+    public class KeycloakTokenHelper : IKeycloakTokenHelper
     {
 
         public BaseKeyCloakSettings _settings { get; set; }
@@ -15,17 +15,17 @@ namespace BL.Services
         {
             _settings = settings;
         }
+
         public async Task<string> GetTokenForUser(string username, string password, string requiredRole)
         {
-            try
-            {
 
-            
+
+
             string keycloakBaseUrl = _settings.BaseUrl;
             string clientId = _settings.ClientId;
             string clientSecret = _settings.ClientSecret;
 
-           
+
 
             var client = new HttpClient();
 
@@ -60,7 +60,7 @@ namespace BL.Services
                 return "";
             }
 
-            
+
             var jwtHandler = new JwtSecurityTokenHandler();
             var token = jwtHandler.ReadJwtToken(tokenResponse.AccessToken);
             var groupClaims = token.Claims.Where(c => c.Type == "realm_access").Select(c => c.Value);
@@ -94,12 +94,7 @@ namespace BL.Services
             }
 
             return tokenResponse.AccessToken;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+
         }
     }
 
