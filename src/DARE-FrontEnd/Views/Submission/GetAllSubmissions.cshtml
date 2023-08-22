@@ -15,7 +15,7 @@
     </div>
     <hr class="d-flex my-4">
     <div class="table-responsive">
-        <table id="submissionList" class="table table-bordered table-striped no-head" caption="List of Submissions">
+        <table id="submissionList" class="table no-head" caption="List of Submissions">
             <thead><tr><td>Submissions</td></tr></thead>
             <tbody>
                 @foreach (var submission in Model)
@@ -33,7 +33,7 @@
                                     <p class="text-muted small mb-0">Submission ID: @submission.Id</p>
                                     <h2 class="mb-0 fw-bold fs-5">
                                         <small>@submission.Project.Name</small>      
-                                    </h2                              
+                                    </h2>                              
                                     <p class="mb-0">Submitted by:  @submission.SubmittedBy.Name</p>
                                     @*TODO: talk to justin might need to add a submission time in the model*@
                                     <p class="mb-0">Project Start Date:  @submission.Project.StartDate</p>
