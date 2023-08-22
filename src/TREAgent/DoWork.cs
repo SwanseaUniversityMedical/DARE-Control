@@ -8,6 +8,7 @@ using BL.Services;
 using Microsoft.Extensions.DependencyInjection;
 using EasyNetQ;
 using Newtonsoft.Json;
+using TREAgent.Services;
 
 namespace TREAgent
 {
@@ -31,11 +32,12 @@ namespace TREAgent
 
         public void Execute()
         {
+           
             using (var scope = _serviceProvider.CreateScope())
             {
                 var rabbit = scope.ServiceProvider.GetRequiredService<IBus>(); ;
                 var exch = rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
-                var treApi = scope.ServiceProvider.GetRequiredService<ITREClientHelper>();
+                var treApi = scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
                 
                 
                 var subs = treApi.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForEndpoint").Result;

@@ -7,7 +7,7 @@ namespace DARE_API.Services
 {
     public class UpdateSubmissionStatus
     {
-        public static void UpdateStatus(Submission sub, StatusType type, string description)
+        public static void UpdateStatus(Submission sub, StatusType type, string? description)
         {
             sub.HistoricStatuses.Add(new HistoricStatus()
             {

@@ -19,7 +19,7 @@
       "label": "Name",
       "placeholder": "Enter name of TRE",
       "tableView": true,
-      "key": "name",
+      "key": "Name",
       "type": "textfield",
       "input": true,
       "id": "enxwmy",
