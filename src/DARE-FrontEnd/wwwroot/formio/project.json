@@ -124,7 +124,7 @@
               },
               "enableMinDateInput": false,
               "enableMaxDateInput": false,
-              "key": "startDate",
+              "key": "StartDate",
               "type": "datetime",
               "input": true,
               "widget": {
@@ -165,7 +165,7 @@
               },
               "enableMinDateInput": false,
               "enableMaxDateInput": false,
-              "key": "endDate",
+              "key": "EndDate",
               "type": "datetime",
               "input": true,
               "widget": {
@@ -206,7 +206,7 @@
       "labelPosition": "left-left",
       "applyMaskOn": "change",
       "tableView": true,
-      "key": "projectOwner",
+      "key": "ProjectOwner",
       "type": "textfield",
       "input": true,
       "labelWidth": 20
@@ -216,7 +216,7 @@
       "labelPosition": "left-left",
       "applyMaskOn": "change",
       "tableView": true,
-      "key": "projectContact",
+      "key": "ProjectContact",
       "type": "email",
       "input": true,
       "labelWidth": 20
@@ -226,7 +226,7 @@
       "applyMaskOn": "change",
       "autoExpand": false,
       "tableView": true,
-      "key": "projectDescription",
+      "key": "ProjectDescription",
       "type": "textarea",
       "input": true
     },
@@ -236,7 +236,7 @@
       "autoExpand": true,
       "tableView": true,
       "calculateValue": "value = \"Project lead : \" + data.projectOwner + \"<br>\" + data.projectDescription",
-      "key": "display",
+      "key": "Display",
       "type": "textarea",
       "rows": 1,
       "input": true

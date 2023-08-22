@@ -6,6 +6,7 @@ using Serilog;
 using Microsoft.Extensions.Options;
 using BL.Services;
 using TRE_API.Repositories.DbContexts;
+using TRE_API.Services;
 
 namespace TRE_API.Controllers
 {

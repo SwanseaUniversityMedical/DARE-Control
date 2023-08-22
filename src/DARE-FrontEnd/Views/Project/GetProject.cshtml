@@ -82,6 +82,9 @@
                 <p>List of submissions this project has...</p>
             </div>
             <div class="tab-pane fade" id="userMembership" role="tabpanel" aria-labelledby="people">
+                <div class="mt-2 mb-2">
+                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addUser">Add User</button>
+                </div>
                 <div class="row">
                     <div class="col-12">
                         <ul class="list-group">
@@ -89,6 +92,9 @@
                             {
                                 <li class="list-group-item">
                                     <a href="@Url.Action("GetUser", "User", new { id = user.Id })">@user.Name</a>
+                                    <a href="@Url.Action("RemoveUserFromProject", "Project",new{ProjectId=Model.Id,UserId=@user.Id})">
+                                        <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove user from project"></span>
+                                    </a>
                                 </li>
                             }
                         </ul>
@@ -97,6 +103,9 @@
 
             </div>
             <div class="tab-pane fade" id="endpoint" role="tabpanel" aria-labelledby="contact-tab">
+                <div class="mt-2 mb-2">
+                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addEndpint">Add TRE</button>
+                </div>
                 <div class="row">
                     <div class="col-12">
                         <div class="table-responsive">
@@ -106,6 +115,9 @@
                                     <tr>
                                         <td>
                                             <a href="@Url.Action("GetAnEndpoint", "Endpoint", new { id = endpoint.Id })">@endpoint.Name</a>
+                                            <a href="@Url.Action("RemoveEndFromProject", "Project",new{ProjectId=Model.Id,EndpointId=@endpoint.Id})">
+                                                <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
+                                            </a>
                                         </td>
                                     </tr>
                                 }
@@ -113,6 +125,70 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bd-user-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="userModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Add User</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="UserList">
+                                @foreach (var user in Model.UserItemList)
+                                {
+                                    <tr>
+                                        <td><input type="checkbox" value="@user.Value" id="@user.Value" name="selectedUser" /></td>
+                                        <td>@user.Text</td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="SaveUserList(@Model.Id)">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bd-endpoint-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="endpointModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Add TRE</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="EndpointList">
+                                @foreach (var endpoint in Model.EndpointItemList)
+                                {
+                                    <tr>
+                                        <td><input type="checkbox" value="@endpoint.Value" id="Endpoint_@endpoint.Value" name="selectedEndpoint" /></td>
+                                        <td>@endpoint.Text</td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="SaveEndpointList(@Model.Id)">Add</button>
             </div>
         </div>
     </div>

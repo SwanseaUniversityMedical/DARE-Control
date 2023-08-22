@@ -6,23 +6,26 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace BL.Services
 {
-    public class KeycloakTokenHelper: IKeycloakTokenHelper
+    public class KeycloakTokenHelper : IKeycloakTokenHelper
     {
 
-        public ControlKeyCloakSettings _settings { get; set; }
+        public BaseKeyCloakSettings _settings { get; set; }
 
-        public KeycloakTokenHelper(ControlKeyCloakSettings settings)
+        public KeycloakTokenHelper(BaseKeyCloakSettings settings)
         {
             _settings = settings;
         }
-        public async Task<string> GetTokenForUser(string username, string password)
+
+        public async Task<string> GetTokenForUser(string username, string password, string requiredRole)
         {
+
+
 
             string keycloakBaseUrl = _settings.BaseUrl;
             string clientId = _settings.ClientId;
             string clientSecret = _settings.ClientSecret;
 
-           
+
 
             var client = new HttpClient();
 
@@ -57,7 +60,7 @@ namespace BL.Services
                 return "";
             }
 
-            var dareTreAdminRole = "dare-tre-admin";
+
             var jwtHandler = new JwtSecurityTokenHandler();
             var token = jwtHandler.ReadJwtToken(tokenResponse.AccessToken);
             var groupClaims = token.Claims.Where(c => c.Type == "realm_access").Select(c => c.Value);
@@ -65,18 +68,33 @@ namespace BL.Services
             {
                 roles = new List<string>()
             };
-            if (groupClaims.Any())
+            if (!string.IsNullOrWhiteSpace(requiredRole))
             {
-                roles = JsonConvert.DeserializeObject<TokenRoles>(groupClaims.First());
+
+
+                if (groupClaims.Any())
+                {
+                    roles = JsonConvert.DeserializeObject<TokenRoles>(groupClaims.First());
+                }
+
+                if (!roles.roles.Any(gc => gc.Equals(requiredRole)))
+                {
+                    Log.Information("{Function} User {Username} does not have correct role {AdminRole}",
+                        "GetTokenForUser", username, requiredRole);
+                    return "";
+                }
+
+                Log.Information("{Function} Token found with correct role {AdminRole} for User {Username}",
+                    "GetTokenForUser", requiredRole, username);
             }
-            if (!roles.roles.Any(gc => gc.Equals(dareTreAdminRole)))
+            else
             {
-                Log.Information("{Function} User {Username} does not have correct role {AdminRole}", "GetTokenForUser", username, dareTreAdminRole);
-                return "";
+                Log.Information("{Function} Token found for User {Username}, no role required",
+                    "GetTokenForUser", requiredRole, username);
             }
-            Log.Information("{Function} Token found with correct role {AdminRole} for User {Username}", "GetTokenForUser", dareTreAdminRole, username);
-            
+
             return tokenResponse.AccessToken;
+
         }
     }
 

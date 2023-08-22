@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using BL.Models.Settings;
 using BL.Rabbit;
 using BL.Services;
 using EasyNetQ;
@@ -13,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using TREAgent;
+using TREAgent.Services;
 
 Console.WriteLine("Hello, World!");
 
@@ -25,18 +27,27 @@ var hostBuilder = new HostBuilder()
     })
     .ConfigureServices((hostContext, services) =>
     {
+        var treKeyCloakSettings = new BaseKeyCloakSettings();
+        hostContext.Configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
+        services.AddSingleton(treKeyCloakSettings);
 
 
-
-
-       
+        var encryptionSettings = new EncryptionSettings();
+        hostContext.Configuration.Bind(nameof(encryptionSettings), encryptionSettings);
+        services.AddSingleton(encryptionSettings);
+        
+        var storedKeycloakLogin = new StoredKeycloakLogin();
+        hostContext.Configuration.Bind(nameof(storedKeycloakLogin), storedKeycloakLogin);
+        services.AddSingleton(storedKeycloakLogin);
+        services.AddScoped<IEncDecHelper, EncDecHelper>();
+        services.AddScoped<IKeycloakTokenHelper, KeycloakTokenHelper>();
         services.AddHttpContextAccessor();
         services.AddHttpClient();
-
+        services.AddHttpContextAccessor();      
 
         services.AddScoped<IDoWork, DoWork>();
         
-        services.AddScoped<ITREClientHelper, TREClientHelper>();
+        services.AddScoped<ITreClientWithoutTokenHelper, TreClientWithoutTokenHelper>();
 
       
     }).ConfigureWebHostDefaults(webBuilder =>
@@ -82,7 +93,7 @@ public class Startup
     {
         
         app.UseHangfireDashboard();
-        RecurringJob.AddOrUpdate<IDoWork>(a => a.Execute(), Cron.MinuteInterval(1));
+        RecurringJob.AddOrUpdate<IDoWork>(a => a.Execute(), Cron.MinuteInterval(10));
         var serverAddressesFeature = app.ServerFeatures.Get<IServerAddressesFeature>();
         var port = serverAddressesFeature?.Addresses.FirstOrDefault()?.Split(':').Last();
 
