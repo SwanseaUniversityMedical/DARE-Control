@@ -195,7 +195,7 @@
                     type: "POST",
                     data: { ProjectId: el, ItemList: commaSeparatedIds },
                     success: function (reponse) {
-                        window.location.href = "/Project/EditProject?projectId=" + el;
+                        window.location.href = "/Project/GetProject/" + el;
                     }
                 })
             }
@@ -224,11 +224,11 @@
                 commaSeparatedIds = arrItem.toString();
 
                 $.ajax({
-                    url: "/Project/AddEndpintList",
+                    url: "/Project/AddEndpointList",
                     type: "POST",
                     data: { ProjectId: el, ItemList: commaSeparatedIds },
                     success: function (reponse) {
-                        window.location.href = "/Project/EditProject?projectId=" + el;
+                        window.location.href = "/Project/GetProject/" + el;
                     }
                 })
             }
