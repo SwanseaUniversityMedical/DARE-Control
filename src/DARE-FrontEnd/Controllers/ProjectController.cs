@@ -170,8 +170,8 @@ namespace DARE_FrontEnd.Controllers
                 paramList.Add("projectId", projectId.ToString());
                 var project = _clientHelper.CallAPIWithoutModel<BL.Models.Project>("/api/Project/GetProject/", paramList).Result;
                 formData.FormIoString = project?.FormData;
-         
-                formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""id"":" + projectId.ToString());
+
+                formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""Id"":" + projectId.ToString(), StringComparison.CurrentCultureIgnoreCase);
             }
 
 
