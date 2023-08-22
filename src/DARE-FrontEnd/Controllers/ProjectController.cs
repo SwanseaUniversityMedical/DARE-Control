@@ -29,10 +29,23 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public IActionResult GetProject(int id)
         {
+            var users = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
+            var endpoints = _clientHelper.CallAPIWithoutModel<List<Endpoint>>("/api/Endpoint/GetAllEndpoints/").Result;
+
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());
             var project = _clientHelper.CallAPIWithoutModel<Project?>(
                 "/api/Project/GetProject/", paramlist).Result;
+
+            var userItems2 = users.Where(p => !project.Users.Select(x => x.Id).Contains(p.Id)).ToList();
+            var endpointItems2 = endpoints.Where(p => !project.Endpoints.Select(x => x.Id).Contains(p.Id)).ToList();
+
+            var userItems = userItems2
+                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
+                .ToList();
+            var endpointItems = endpointItems2
+                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
+                .ToList();
 
             var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
 
@@ -49,7 +62,9 @@ namespace DARE_FrontEnd.Controllers
                 SubmissionBucket = project.SubmissionBucket,
                 OutputBucket = project.OutputBucket,
                 MinioEndpoint = minioEndpoint.Url,
-                Submissions=project.Submissions
+                Submissions=project.Submissions,
+                UserItemList = userItems,
+                EndpointItemList = endpointItems
             };
 
             return View(projectView);
@@ -235,7 +250,7 @@ namespace DARE_FrontEnd.Controllers
             };
             var result =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/RemoveUserMembership", model);
-            return RedirectToAction("EditProject", new { projectId = projectId });
+            return RedirectToAction("GetProject", new { id = projectId });
         }
 
         [HttpGet]
@@ -248,7 +263,7 @@ namespace DARE_FrontEnd.Controllers
             };
             var result =
                 await _clientHelper.CallAPI<ProjectEndpoint, ProjectEndpoint?>("/api/Project/RemoveEndpointMembership", model);
-            return RedirectToAction("EditProject", new { projectId = projectId });
+            return RedirectToAction("GetProject", new { id = projectId });
         }
 
         [HttpPost]
@@ -265,11 +280,11 @@ namespace DARE_FrontEnd.Controllers
                 var result =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
             }
-            return RedirectToAction("EditProject", new { projectId = ProjectId });
+            return RedirectToAction("GetProject", new {  id = ProjectId });
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddEndpintList(string ProjectId, string ItemList)
+        public async Task<IActionResult> AddEndpointList(string ProjectId, string ItemList)
         {
             string[] arr = ItemList.Split(',');
             foreach (string s in arr)
@@ -283,7 +298,7 @@ namespace DARE_FrontEnd.Controllers
                 await _clientHelper.CallAPI<ProjectEndpoint, ProjectEndpoint?>("/api/Project/AddEndpointMembership",
                     model);
             }
-            return RedirectToAction("EditProject", new { projectId = ProjectId });
+            return RedirectToAction("GetProject", new { id = ProjectId });
         }
 
         [HttpGet]
