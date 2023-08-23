@@ -1,4 +1,6 @@
 ﻿@model BL.Models.Submission
+@using BL.Models.ViewModels
+
 @{
     ViewData["Title"] = "@Model.Name";
 
@@ -48,10 +50,13 @@
         Date submitted: @*TODO: talk to justin might need to add a submission time in the model*@
     </p>
     <p>
-        Minio URL: <a href="#">insert link here</a><br />
-        Submission bucket: <a href="#">insert link here</a><br />
-        Output bucket: <a href="#">insert link here</a>
+        Minio URL: <a href="http://@ViewBag.minioendpoint" ">@Model.Project.Name Buckets</a><br />
+        <br>Submission Bucket: @Html.Raw(Model.Project.SubmissionBucket)
+        <br>Output Bucket: @Html.Raw(Model.Project.OutputBucket)
+@*        Submission bucket: <a href="#">insert link here</a><br />
+        Output bucket: <a href="#">insert link here</a>*@
     </p>
+
     <div class="mb-5">
         <button id="showJsonButton" class="btn btn-sm btn-primary">
             <i class="fa fa-code me-1"></i>
@@ -103,6 +108,7 @@
 
 </div>
 
+<br />
 <script>
     var tesJson = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.TesJson));
     var jsonViewer = document.getElementById("jsonViewer");
