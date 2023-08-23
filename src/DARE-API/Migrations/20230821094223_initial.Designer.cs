@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DARE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230818100230_SubTimes")]
-    partial class SubTimes
+    [Migration("20230821094223_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,6 +35,10 @@ namespace DARE_API.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("About")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("AdminUsername")
                         .IsRequired()
@@ -107,6 +111,10 @@ namespace DARE_API.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("OutputBucket")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProjectDescription")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("StartDate")

@@ -20,6 +20,7 @@ namespace DARE_API.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
                     AdminUsername = table.Column<string>(type: "text", nullable: false),
+                    About = table.Column<string>(type: "text", nullable: false),
                     FormData = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
@@ -38,6 +39,7 @@ namespace DARE_API.Migrations
                     Display = table.Column<string>(type: "text", nullable: false),
                     StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ProjectDescription = table.Column<string>(type: "text", nullable: false),
                     SubmissionBucket = table.Column<string>(type: "text", nullable: true),
                     OutputBucket = table.Column<string>(type: "text", nullable: true)
                 },
@@ -126,6 +128,8 @@ namespace DARE_API.Migrations
                     EndPointId = table.Column<int>(type: "integer", nullable: true),
                     SubmittedById = table.Column<int>(type: "integer", nullable: false),
                     LastStatusUpdate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    StartTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    EndTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     StatusDescription = table.Column<string>(type: "text", nullable: true)
                 },

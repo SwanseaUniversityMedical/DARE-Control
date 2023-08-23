@@ -1,8 +1,6 @@
 ﻿using BL.Models.ViewModels;
 using BL.Services;
-
 using Microsoft.AspNetCore.Mvc;
-
 using Microsoft.AspNetCore.Authorization;
 using Endpoint = BL.Models.Endpoint;
 using BL.Models.Settings;
@@ -21,7 +19,7 @@ namespace DARE_FrontEnd.Controllers
         public EndpointController(IDareClientHelper client, IConfiguration configuration)
         {
             _clientHelper = client;
-            
+
             _formIOSettings = new FormIOSettings();
             configuration.Bind(nameof(FormIOSettings), _formIOSettings);
         }
@@ -31,6 +29,7 @@ namespace DARE_FrontEnd.Controllers
         {
             var formData = new FormData()
             {
+                
                 FormIoUrl = _formIOSettings.EndpointForm,
                 FormIoString = @"{""id"":0}"
             };
@@ -42,7 +41,7 @@ namespace DARE_FrontEnd.Controllers
                 var endpoint = _clientHelper.CallAPIWithoutModel<BL.Models.Endpoint>("/api/Endpoint/GetanEndpoint/", paramList).Result;
                 //TempData["end"] = endpoint.ErrorMessage.ToString();
                 formData.FormIoString = endpoint?.FormData;
-                formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""id"":" + endpointId.ToString());
+                formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""Id"":" + endpointId.ToString(), StringComparison.CurrentCultureIgnoreCase);
             }
 
             return View(formData);

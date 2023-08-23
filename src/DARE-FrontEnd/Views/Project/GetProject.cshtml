@@ -12,21 +12,6 @@
             <h1 class="fs-3 mb-0">@Model.Name</h1>
             <p class="text-muted small mb-0">#@Model.Id</p>
         </div>
-                                                @if (User.IsInRole("dare-control-admin"))
-                                {
-
-            @if (User.IsInRole("dare-control-admin"))
-            {
-                <a href="@Url.Action("AddProjectForm", "Project",new{Projectid=@Model.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
-            }
-            }
-        @if (User.IsInRole("dare-control-admin"))
-        {
-            <a asp-controller="Submission" asp-action="Instructions" class="btn btn-primary btn-sm d-flex align-items-center">
-                <i class="fa fa-plus align-middle me-2"></i>
-                <span>Manual</span>
-            </a>             
-        }
     </div>
     <div class="mt-4">
         <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
@@ -64,13 +49,34 @@
             <div class="tab-pane fade show active" id="project" role="tabpanel" aria-labelledby="home-tab">
                 <div class="row">
                     <div class="col-md-6">
+                        @if (User.IsInRole("dare-control-admin"))
+                        {
+                            <a href="@Url.Action("AddProjectForm", "Project",new{Projectid=@Model.Id})" class="btn btn-sm btn-primary mb-3"><span class="small">Edit</span></a>
+                        }
                         <p class="text-muted fs-7">
-                            LastStatusUpdate Date: @Model.StartDate <span class="mx-2"></span>End Date: @Model.EndDate
+                            @Model.ProjectDescription
+                        </p>
+                        <p class="text-muted fs-7">
+                            Last Updated: @Model.StartDate <br />
+                            Proiject End Date: @Model.EndDate
                         </p>
                     </div>
                 </div>
             </div>
             <div class="tab-pane fade" id="submissions-tab" role="tabpanel" aria-labelledby="submissions">
+                @if (User.IsInRole("dare-control-admin"))
+                {
+                    <div class="d-flex align-items-center mb-3">
+                    <a asp-controller="Submission" asp-action="Instructions" class="btn btn-primary btn-sm d-flex align-items-center mb-3 me-2">
+                        <i class="fa fa-info-circle align-middle me-2"></i>
+                        <span>Submit with API</span>
+                    </a>
+                    <a href="#" class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none">
+                        <i class="fa fa-table-columns align-middle me-2"></i>
+                        <span>Submit with Wizard</span>
+                    </a>
+                    </div>
+                }
                 <p>
                     Minio URL: <a href="#">http://@Html.Raw(Model.MinioEndpoint)</a><br />
                     Submission Bucket: @Html.Raw(Model.SubmissionBucket)<br />
@@ -79,6 +85,11 @@
                 <p>List of submissions this project has...</p>
             </div>
             <div class="tab-pane fade" id="userMembership" role="tabpanel" aria-labelledby="people">
+                @if (User.IsInRole("dare-control-admin"))
+                {
+                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addUser">Add User</button>
+                }
+
                 <div class="row">
                     <div class="col-12">
                         <ul class="list-group">
@@ -86,6 +97,9 @@
                             {
                                 <li class="list-group-item">
                                     <a href="@Url.Action("GetUser", "User", new { id = user.Id })">@user.Name</a>
+                                    <a href="@Url.Action("RemoveUserFromProject", "Project",new{ProjectId=Model.Id,UserId=@user.Id})">
+                                        <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove user from project"></span>
+                                    </a>
                                 </li>
                             }
                         </ul>
@@ -94,6 +108,11 @@
 
             </div>
             <div class="tab-pane fade" id="endpoint" role="tabpanel" aria-labelledby="contact-tab">
+                @if (User.IsInRole("dare-control-admin"))
+                {
+                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addEndpint">Add TRE</button>
+                }
+
                 <div class="row">
                     <div class="col-12">
                         <div class="table-responsive">
@@ -103,6 +122,9 @@
                                     <tr>
                                         <td>
                                             <a href="@Url.Action("GetAnEndpoint", "Endpoint", new { id = endpoint.Id })">@endpoint.Name</a>
+                                            <a href="@Url.Action("RemoveEndFromProject", "Project",new{ProjectId=Model.Id,EndpointId=@endpoint.Id})">
+                                                <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
+                                            </a>
                                         </td>
                                     </tr>
                                 }
@@ -110,6 +132,70 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bd-user-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="userModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Add User</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="UserList">
+                                @foreach (var user in Model.UserItemList)
+                                {
+                                    <tr>
+                                        <td><input type="checkbox" value="@user.Value" id="@user.Value" name="selectedUser" /></td>
+                                        <td>@user.Text</td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="SaveUserList(@Model.Id)">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bd-endpoint-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="endpointModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Add TRE</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="EndpointList">
+                                @foreach (var endpoint in Model.EndpointItemList)
+                                {
+                                    <tr>
+                                        <td><input type="checkbox" value="@endpoint.Value" id="Endpoint_@endpoint.Value" name="selectedEndpoint" /></td>
+                                        <td>@endpoint.Text</td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="SaveEndpointList(@Model.Id)">Add</button>
             </div>
         </div>
     </div>

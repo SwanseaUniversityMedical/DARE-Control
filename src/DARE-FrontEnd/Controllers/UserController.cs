@@ -43,7 +43,7 @@ namespace DARE_FrontEnd.Controllers
                 paramList.Add("userId", userId.ToString());
                 var user = _clientHelper.CallAPIWithoutModel<BL.Models.User?>("/api/User/GetUser/", paramList).Result;
                 formData.FormIoString = user?.FormData;
-                formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""id"":"+userId.ToString());
+                formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""Id"":"+userId.ToString(), StringComparison.CurrentCultureIgnoreCase);
             }
 
             return View(formData);

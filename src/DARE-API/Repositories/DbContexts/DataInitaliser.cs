@@ -95,7 +95,8 @@ namespace DARE_API.Repositories.DbContexts
                     StartDate = DateTime.Now.ToUniversalTime(),
                     Endpoints = new List<Endpoint>(),
                     Users = new List<BL.Models.User>(),
-                    Submissions = new List<Submission>()
+                    Submissions = new List<Submission>(),
+                    ProjectDescription = ""
                 };
                 proj.FormData = JsonConvert.SerializeObject(proj);
                 context.Projects.Add(proj);
@@ -130,7 +131,8 @@ namespace DARE_API.Repositories.DbContexts
                 endpoint = new Endpoint()
                 {
                     Name = name,
-                    AdminUsername = adminUser
+                    AdminUsername = adminUser,
+                    About = ""
                 };
                 endpoint.FormData = JsonConvert.SerializeObject(endpoint);
                 context.Endpoints.Add(endpoint);

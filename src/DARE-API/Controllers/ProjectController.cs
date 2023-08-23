@@ -39,50 +39,58 @@ namespace DARE_API.Controllers
             try
             {
            
-                Project projects = JsonConvert.DeserializeObject<Project>(data.FormIoString);
+                Project project = JsonConvert.DeserializeObject<Project>(data.FormIoString);
                 //2023-06-01 14:30:00 use this as the datetime
-                projects.Name = projects.Name.Trim();
-                projects.StartDate = projects.StartDate.ToUniversalTime();
-                projects.EndDate = projects.EndDate.ToUniversalTime();
+                project.Name = project.Name.Trim();
+                project.StartDate = project.StartDate.ToUniversalTime();
+                project.EndDate = project.EndDate.ToUniversalTime();
+                project.ProjectDescription = project.ProjectDescription.Trim();
                 //projects.Id = projects.Id;
-                projects.SubmissionBucket = GenerateRandomName(projects.Name) + "submission";
-                projects.OutputBucket = GenerateRandomName(projects.Name) + "output";
-                projects.FormData = data.FormIoString;
-                projects.Display = projects.Display;
+                
+                
+                project.FormData = data.FormIoString;
+                project.Display = project.Display;
                 //model.Display = projects.Display.Trim();
-                if (_DbContext.Projects.Any(x => x.Name.ToLower() == projects.Name.ToLower().Trim() && x.Id != projects.Id))
+                if (_DbContext.Projects.Any(x => x.Name.ToLower() == project.Name.ToLower().Trim() && x.Id != project.Id))
                 {
 
                     return new Project() { Error = true, ErrorMessage = "Another project already exists with the same name" };
                 }
 
-
-                var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, projects.SubmissionBucket);
-                if (!submissionBucket)
+                if (project.Id == 0)
                 {
-                    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", projects.SubmissionBucket);
+                    project.SubmissionBucket = GenerateRandomName(project.Name) + "submission";
+                    project.OutputBucket = GenerateRandomName(project.Name) + "output";
+                    var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, project.SubmissionBucket);
+                    if (!submissionBucket)
+                    {
+                        Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", project.SubmissionBucket);
+                    }
+                    var outputBucket = await _minioHelper.CreateBucket(_minioSettings, project.OutputBucket);
+                    if (!outputBucket)
+                    {
+                        Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", project.OutputBucket);
+
+                    }
                 }
-                var outputBucket = await _minioHelper.CreateBucket(_minioSettings, projects.OutputBucket);
-                if (!outputBucket)
-                {
-                    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", projects.OutputBucket);
+               
 
-                }
-
-                if (projects.Id > 0)
+                if (project.Id > 0)
                 {
-                    if (_DbContext.Projects.Select(x => x.Id == projects.Id).Any())
-                        _DbContext.Projects.Update(projects);
+                    if (_DbContext.Projects.Select(x => x.Id == project.Id).Any())
+                        _DbContext.Projects.Update(project);
                     else
-                       _DbContext.Projects.Add(projects);
+                       _DbContext.Projects.Add(project);
                 }
                 else { 
-                _DbContext.Projects.Add(projects);}
+                    _DbContext.Projects.Add(project);
+
+                }
 
                 await _DbContext.SaveChangesAsync();
 
                 Log.Information("{Function} Projects added successfully", "CreateProject");
-                return projects;
+                return project;
             }
             catch (Exception ex)
             {

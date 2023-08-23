@@ -33,6 +33,10 @@ namespace DARE_API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("About")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("AdminUsername")
                         .IsRequired()
                         .HasColumnType("text");
@@ -104,6 +108,10 @@ namespace DARE_API.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("OutputBucket")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProjectDescription")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("StartDate")
