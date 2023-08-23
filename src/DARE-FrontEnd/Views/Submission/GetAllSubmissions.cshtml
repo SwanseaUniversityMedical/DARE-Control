@@ -49,12 +49,14 @@
                                     </div>
 
 
-
-                            <div>
+@*                                   TODO:// show the endpoint names + maybe urls
+*@                            <div>
                                 <p>TRE's Submitted To: </p>
                                 @{
                                     @foreach (var tre in Model)
                                     {
+                                    @ViewBag.endpoints
+
                                         var endpointName = @tre.EndPoint?.Name.ToString();
                                         if (endpointName == null)
                                         {

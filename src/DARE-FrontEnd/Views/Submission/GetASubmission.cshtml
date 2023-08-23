@@ -1,4 +1,6 @@
-﻿@model BL.Models.Submission
+﻿@using BL.Models.ViewModels
+@model BL.Models.Submission
+
 @{
     ViewData["Title"] = "@Model.Name";
 
@@ -92,6 +94,16 @@
                                     }
                                 }
                             </div>
+                            
+                            <div>
+
+                                <a href="http://@ViewBag.minioendpoint">@Model.Project.Name Buckets</a>
+                                <br>Submission Bucket: @Html.Raw(Model.Project.SubmissionBucket)
+                                <br>Output Bucket: @Html.Raw(Model.Project.OutputBucket)
+                                
+
+                            </div>
+                            <br />
                             <div>
 
                         
@@ -117,11 +129,7 @@
                                     });
                                 </script>
                             </div>
-                            <div>
-                                <p>
-                                    <a href="@Url.Action("GetProjectBuckets", "Project", new { id = Model.Project.Id })">@Model.Project.Name Buckets</a>
-                                </p>
-                            </div>
+
                         </div>
                     </div>
                 </div>
