@@ -52,35 +52,55 @@
         Submission bucket: <a href="#">insert link here</a><br />
         Output bucket: <a href="#">insert link here</a>
     </p>
-    <button id="showJsonButton" class="btn btn-sm btn-primary"><small>View Query</small></button>
-    <div class="json-viewer" id="jsonViewer"></div>
+    <div class="mb-5">
+        <button id="showJsonButton" class="btn btn-sm btn-primary">
+            <i class="fa fa-code me-1"></i>
+            <small>View Query</small></button>
+        <pre style="white-space:break-spaces;"><code class="json-viewer card card-body mt-2" id="jsonViewer" style="display:none;"></code></pre>
+    </div>
+
     <div>
-        <h6>TRE's Submitted To</h6>
-        @{
-            @foreach (var tre in Model.Children)
-            {
-                var endpointName = @tre.EndPoint?.Name.ToString();
-                if (endpointName == null)
+        <h2 class="fs-5">TRE's Submitted To</h2>
+        <div class="accordion accordion-flush" id="accordionFlushExample">
+            @{
+                @foreach (var tre in Model.Children)
                 {
-                    endpointName = "None";
-                }
-                //<p class="mb-0">@Model.EndPoint.Name</p>
-                <p class="mb-0">@endpointName</p>
-                switch (tre.Status)
-                {
+                    var endpointName = @tre.EndPoint?.Name.ToString();
+                    if (endpointName == null)
+                    {
+                        endpointName = "None";
+                    }
+                    //switch (tre.Status)
+                    //{
 
-                    case BL.Models.Enums.StatusType.DataOutApproved:
-                        <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span>End Time: @Model.EndTime</h6>
-                        break;
+                    //    case BL.Models.Enums.StatusType.DataOutApproved:
+                    //        <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span>End Time: @Model.EndTime</h6>
+                    //        break;
 
-                    default:
-                        <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span> Elapsed Time: @days days, @hours hours, @minutes minutes</h6>
-                        break;
+                    //    default:
+                    //        <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span> Elapsed Time: @days days, @hours hours, @minutes minutes</h6>
+                    //        break;
+                    //}
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@endpointName" aria-expanded="false" aria-controls="@endpointName">
+                                <span class="fw-bold">@endpointName</span>
+                                <div><small><span class="badge bg-dark-blue rounded-pill ms-4 me-2">@tre.Status</span><span class="text-muted fs-7">Elapsed Time: @days days, @hours hours, @minutes minutes</span></small></div>
+                            </button>
+                        </h3>
+                        <div id="@endpointName" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                            <div class="accordion-body">
+                                Job/task information
+                            </div>
+                        </div>
+                    </div>
+
                 }
             }
-        }
+        </div>
+
     </div>
-    
+
 </div>
 
 <script>
