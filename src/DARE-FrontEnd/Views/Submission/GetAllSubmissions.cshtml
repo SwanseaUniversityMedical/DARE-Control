@@ -71,17 +71,15 @@
                             <div>
                                 <p>TRE's submitted to: </p>
                                 @{
-                                    @foreach (var tre in Model)
+                                    @foreach (var child in submission.Children)
                                     {
-                                        //@ViewBag.endpoints
 
-                                        var endpointName = @tre.EndPoint?.Name.ToString();
+                                        var endpointName = @child.EndPoint?.Name.ToString();
                                         if (endpointName == null)
                                         {
                                             endpointName = "None";
                                         }
-                                        //<p class="mb-0">@Model.EndPoint.Name</p>
-                                        <a href="@Url.Action("GetAnEndpoint", "Endpoint", new { id = 3 })" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">@endpointName</a>
+                                        <a href="@Url.Action("GetAnEndpoint", "Endpoint", new { id = child.EndPoint.Id })" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">@endpointName</a>
 
                                     }
                                 }

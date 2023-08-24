@@ -47,7 +47,7 @@
     <p>
         Project: <a href="@Url.Action("GetProject", "Project", new { id = Model.Project.Id })">@Model.Project.Name</a><br />
         Submitted by: <a href="@Url.Action("GetUser", "User", new { id = @Model.SubmittedBy.Id })">@Model.SubmittedBy.Name</a><br />
-        Date submitted: @*TODO: talk to justin might need to add a submission time in the model*@
+        Date submitted: @Model.StartTime
     </p>
     <p>
         Minio URL: <a href="http://@ViewBag.minioendpoint" ">@Model.Project.Name Buckets</a><br />

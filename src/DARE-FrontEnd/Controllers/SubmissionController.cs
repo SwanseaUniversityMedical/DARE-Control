@@ -36,10 +36,7 @@ namespace DARE_FrontEnd.Controllers
             var res = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions/").Result;
 
             res = res.Where(x => x.Parent == null).ToList();
-            //foreach (var submission in res) {
-            //    ViewBag.endpoints = submission.Project.Endpoints.ToString();
-            //}
-            
+
 
             return View(res);
         }
