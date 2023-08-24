@@ -8,10 +8,13 @@
 <div class="container-lg p-4">
     <div class="d-flex align-items-center justify-content-between">
         <h1 class="fs-3 mb-0">Submissions</h1>
-        <a asp-controller="Submission" asp-action="Instructions" class="btn btn-primary btn-sm d-flex align-items-center">
-            <i class="fa fa-plus align-middle me-2"></i>
-            <span>Instructions</span>
-        </a>
+        @if (User.IsInRole("dare-control-admin"))
+        {
+            <a asp-controller="Submission" asp-action="Instructions" class="btn btn-primary btn-sm d-flex align-items-center">
+                <i class="fa fa-info-circle align-middle me-2"></i>
+                <span>Instructions</span>
+            </a>
+        }
     </div>
     <hr class="d-flex my-4">
     <div class="table-responsive">
@@ -30,90 +33,75 @@
                                             @submission.TesName
                                         </h2>
                                     </a>
-                                    <p class="text-muted small mb-0">Submission ID: @submission.Id</p>
-                                    <h2 class="mb-0 fw-bold fs-5">
-                                        <small>@submission.Project.Name</small>      
-                                    </h2>                              
-                                    <p class="mb-0">Submitted by:  @submission.SubmittedBy.Name</p>
-                                    @*TODO: talk to justin might need to add a submission time in the model*@
-                                    <p class="mb-0">Project Start Date:  @submission.Project.StartDate</p>
-                                    <p class="mb-0">TRE's Submitted to:  @submission.EndPoint?.Name</p>
+                                    <p class="text-muted small mb-0">Submission ID: @submission.Id<br>
+                                        Project: @submission.Project.Name </p>
+                                </div>
+                                <div>
+                                    @{
+                                        switch (submission.Status)
+                                        {
+                                            case BL.Models.Enums.StatusType.DataOutApproved:
+                                                <h6><span class="badge bg-dark-blue rounded-pill">@submission.Status</span></h6>
+                                                break;
+                                            default:
+                                                <h6><span class="badge bg-dark-blue rounded-pill">@submission.Status</span></h6>
+                                                break;
+                                        }
+                                    }
+                                </div>
+                            </div>
+                            <p>Submitted by:  @submission.SubmittedBy.Name<br />
+                                Date submitted:</p>
+                            @*TODO: talk to justin might need to add a submission time in the model*@
+                            @*<p class="mb-0"></p>
+                            <p class="mb-0">TRE's Submitted to:  @submission.EndPoint?.Name</p>
 
-                                    <div> @*Add back when endpont name is added*@
-@*                                        <p class="mb-0">@submission.EndPoint.Name</p>
-                                        @{
-                                            foreach (var child in submission.Children) { 
-                                                <p class="mb-0">@child.EndPoint.Name</p>
-                                            }
-                                        }*@
-                                    </div>
+                            <div>
+                                @*Add back when endpont name is added*@
+                                @*                                        <p class="mb-0">@submission.EndPoint.Name</p>
+                            @{
+                            foreach (var child in submission.Children) {
+                            <p class="mb-0">@child.EndPoint.Name</p>
+                            }
+                            }
+                            </div>*@
 
 
 
                             <div>
-                                <p>TRE's Submitted To: </p>
+                                <p>TRE's submitted to: </p>
                                 @{
-                                    @foreach (var tre in Model)
+                                    @foreach (var child in submission.Children)
                                     {
-                                        var endpointName = @tre.EndPoint?.Name.ToString();
+
+                                        var endpointName = @child.EndPoint?.Name.ToString();
                                         if (endpointName == null)
                                         {
                                             endpointName = "None";
                                         }
-                                        //<p class="mb-0">@Model.EndPoint.Name</p>
-                                        <p class="mb-0">@endpointName</p>
+                                        <a href="@Url.Action("GetAnEndpoint", "Endpoint", new { id = child.EndPoint.Id })" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">@endpointName</a>
 
                                     }
                                 }
                             </div>
 
 
+                            @*TODO Display a nice version of status instead of just an enum*@
+                            @{
+                                string value;
+                                string defaultValue = "N/A";
+                                if (submission.EndPoint == null)
+                                {
+                                    value = defaultValue;
+                                }
+                                else
+                                {
+                                    value = submission.EndPoint.Name;
+                                }
 
+                            }
 
-
-                                        <div>
-                                        <p>Overall Status: </p>
-                                        @{
-                                            switch(submission.Status)
-                                            {
-                                                case BL.Models.Enums.StatusType.DataOutApproved:
-                                                     <h6><span class="badge bg-dark-blue rounded-pill">@submission.Status</span></h6>
-                                                    break;
-                                                default:
-                                                    <h6><span class="badge bg-dark-blue rounded-pill">@submission.Status</span></h6>
-                                                    break;
-                                            }
-                                        }
-
-
-                                    </div>
-                                    @*TODO Display a nice version of status instead of just an enum*@
-                                    @{
-                                        string value;
-                                        string defaultValue = "N/A";
-                                        if (submission.EndPoint == null)
-                                        {
-                                            value = defaultValue;
-                                        }
-                                        else
-                                        {
-                                            value = submission.EndPoint.Name;
-                                        }
-
-                                    }
-
-                                    @*TODO Display a nice version of status instead of just an enum*@
-                                    <div>
-
-
-                                    </div>
-                                 </div>
-                            </div>
-
-
-
-
-
+                            @*TODO Display a nice version of status instead of just an enum*@
                         </td>
                     </tr>
                 }
@@ -123,25 +111,25 @@
     </div>
     @*<div class="card mb-2 p-3 bg-white shadow-sm border-1">
 
-        <div class="d-flex align-items-center justify-content-between mb-3">
-            <div>
-                <a href="#">
-                    <h2 class="mb-0 fw-bold hover-underline fs-5">
-                        SubmissionName
-                    </h2>
-                </a>
-                <p class="text-muted small mb-0">#ID</p>
-            </div>
-            <h6><span class="badge bg-dark-blue rounded-pill">StatusType</span></h6>
-        </div>
-        <p class="">Submitted by #Person's Name
-            <br />
-            Date submitted xx/xx/xxxx
-        </p>
-        <p class="">TREs</p>
+    <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+    <a href="#">
+    <h2 class="mb-0 fw-bold hover-underline fs-5">
+    SubmissionName
+    </h2>
+    </a>
+    <p class="text-muted small mb-0">#ID</p>
+    </div>
+    <h6><span class="badge bg-dark-blue rounded-pill">StatusType</span></h6>
+    </div>
+    <p class="">Submitted by #Person's Name
+    <br />
+    Date submitted xx/xx/xxxx
+    </p>
+    <p class="">TREs</p>
 
-        
-        <p class="">StatusType description</p>
+
+    <p class="">StatusType description</p>
 
     </div>*@
 </div>

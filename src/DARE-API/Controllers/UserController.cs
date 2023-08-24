@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authorization;
 using Serilog;
 using BL.Models.ViewModels;
+using System.Linq;
 
 namespace BL.Controllers
 {
@@ -116,7 +117,7 @@ namespace BL.Controllers
 
             
         }
-
+      
         //[AllowAnonymous]
         //[HttpPost("UpdateUser")]
         //public User? UpdateUser([FromBody] FormData data)
