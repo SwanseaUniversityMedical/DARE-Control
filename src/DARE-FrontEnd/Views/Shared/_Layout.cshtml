@@ -167,6 +167,12 @@
 
         })
 
+        $('#addProject').on('click', function () {
+
+            $('#projectModal').modal('show');
+
+        })
+
     </script>
 
     <script>
@@ -229,6 +235,38 @@
                     data: { ProjectId: el, ItemList: commaSeparatedIds },
                     success: function (reponse) {
                         window.location.href = "/Project/GetProject/" + el;
+                    }
+                })
+            }
+
+        }
+    </script>
+    <script>
+        var SaveProjectList = function (el) {
+            debugger;
+            var arrItem = [];
+            var commaSeparatedIds = "";
+
+            $("#ProjectList tr td input[type=checkbox]").each(function (index, val) {
+                debugger;
+                var checkId = $(val).attr("Id");              
+
+                var Ischecked = $("#" + checkId).is(":checked", true);
+
+                if (Ischecked) {
+                    arrItem.push(checkId);
+                }
+            })
+
+            if (arrItem.length != 0) {
+                commaSeparatedIds = arrItem.toString();
+                debugger;
+                $.ajax({
+                    url: "/User/AddProjectList",
+                    type: "POST",
+                    data: { Id: el, ItemList: commaSeparatedIds },
+                    success: function (reponse) {
+                        window.location.href = "/User/GetUser/" + el;
                     }
                 })
             }
