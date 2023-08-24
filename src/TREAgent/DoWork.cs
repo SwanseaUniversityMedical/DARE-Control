@@ -32,6 +32,7 @@ namespace TREAgent
 
         public void Execute()
         {
+
            
             using (var scope = _serviceProvider.CreateScope())
             {

@@ -15,6 +15,7 @@ namespace DARE_API.Attributes
     /// </summary>
     public class ValidateModelStateAttribute : ActionFilterAttribute
     {
+
         /// <summary>
         /// Called before the action method is invoked
         /// </summary>
