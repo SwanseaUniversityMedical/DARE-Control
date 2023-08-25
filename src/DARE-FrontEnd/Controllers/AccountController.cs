@@ -23,6 +23,7 @@ namespace DARE_FrontEnd.Controllers
             _keycloakSettings = keycloakSettings;
         }
 
+
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> NewTokenIssue()

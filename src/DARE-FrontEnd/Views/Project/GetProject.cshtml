@@ -51,14 +51,19 @@
                     <div class="col-md-6">
                         @if (User.IsInRole("dare-control-admin"))
                         {
-                            <a href="@Url.Action("AddProjectForm", "Project",new{Projectid=@Model.Id})" class="btn btn-sm btn-primary mb-3"><span class="small">Edit</span></a>
+                            <a href="@Url.Action("AddProjectForm", "Project",new{Projectid=@Model.Id})" class="btn btn-sm btn-primary mb-3">Edit</a>
                         }
                         <p class="text-muted fs-7">
                             @Model.ProjectDescription
                         </p>
                         <p class="text-muted fs-7">
                             Last Updated: @Model.StartDate <br />
-                            Proiject End Date: @Model.EndDate
+                            Project End Date: @Model.EndDate
+                        </p>
+                        <p>
+                            Minio URL: <a href="#">http://@Html.Raw(Model.MinioEndpoint)</a><br />
+                            Submission Bucket: @Html.Raw(Model.SubmissionBucket)<br />
+                            Output Bucket: @Html.Raw(Model.OutputBucket)
                         </p>
                     </div>
                 </div>
@@ -77,11 +82,7 @@
                     </a>
                     </div>
                 }
-                <p>
-                    Minio URL: <a href="#">http://@Html.Raw(Model.MinioEndpoint)</a><br />
-                    Submission Bucket: @Html.Raw(Model.SubmissionBucket)<br />
-                    Output Bucket: @Html.Raw(Model.OutputBucket)
-                </p>
+                
                 <p>List of submissions this project has...</p>
             </div>
             <div class="tab-pane fade" id="userMembership" role="tabpanel" aria-labelledby="people">
@@ -91,11 +92,11 @@
                 }
 
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-lg-5 col-md-6">
                         <ul class="list-group">
                             @foreach (var user in Model.Users)
                             {
-                                <li class="list-group-item">
+                                <li class="list-group-item justify-content-between d-flex">
                                     <a href="@Url.Action("GetUser", "User", new { id = user.Id })">@user.Name</a>
                                     <a href="@Url.Action("RemoveUserFromProject", "Project",new{ProjectId=Model.Id,UserId=@user.Id})">
                                         <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove user from project"></span>
@@ -112,24 +113,19 @@
                 {
                     <button type="button" class="btn btn-sm btn-primary mb-3" id="addEndpint">Add TRE</button>
                 }
-
                 <div class="row">
-                    <div class="col-12">
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                @foreach (var endpoint in Model.Endpoints)
-                                {
-                                    <tr>
-                                        <td>
-                                            <a href="@Url.Action("GetAnEndpoint", "Endpoint", new { id = endpoint.Id })">@endpoint.Name</a>
-                                            <a href="@Url.Action("RemoveEndFromProject", "Project",new{ProjectId=Model.Id,EndpointId=@endpoint.Id})">
-                                                <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                }
-                            </table>
-                        </div>
+                    <div class="col-lg-5 col-md-6">
+                        <ul class="list-group">
+                            @foreach (var endpoint in Model.Endpoints)
+                            {
+                                <li class="list-group-item justify-content-between d-flex">
+                                    <a href="@Url.Action("GetAnEndpoint", "Endpoint", new { id = endpoint.Id })">@endpoint.Name</a>
+                                    <a href="@Url.Action("RemoveEndFromProject", "Project",new{ProjectId=Model.Id,EndpointId=@endpoint.Id})">
+                                        <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
                     </div>
                 </div>
             </div>

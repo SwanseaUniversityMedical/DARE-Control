@@ -145,5 +145,83 @@ namespace BL.Controllers
         //    return user;
 
         //}
+
+        [HttpPost("AddProjectMembership")]
+        public async Task<ProjectUser?> AddProjectMembership([FromBody]ProjectUser model)
+        {
+            try
+            {
+                var user = _DbContext.Users.FirstOrDefault(x => x.Id == model.UserId);
+                if (user == null)
+                {
+                    Log.Error("{Function} Invalid user id {UserId}", "AddProjectMembership", model.UserId);
+                    return null;
+                }
+
+                var project = _DbContext.Projects.FirstOrDefault(x => x.Id == model.ProjectId);
+                if (project == null)
+                {
+                    Log.Error("{Function} Invalid project id {UserId}", "AddProjectMembership", model.ProjectId);
+                    return null;
+                }
+
+               
+                if (user.Projects.Any(x => x == project))
+                {
+                    Log.Error("{Function} User {UserName} is already on {ProjectName}", "AddProjectMembership", user.Name, project.Name);
+                    return null;
+                }
+                user.Projects.Add(project);
+
+                await _DbContext.SaveChangesAsync();
+                Log.Information("{Function} Added User {UserName} to {ProjectName}", "AddProjectMembership", user.Name, project.Name);
+                return model;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "AddProjectMembership");
+                throw;
+            }
+
+
+        }
+
+        [HttpPost("RemoveProjectMembership")]
+        public async Task<ProjectUser?> RemoveProjectMembership([FromBody] ProjectUser model)
+        {
+            try
+            {
+                var user = _DbContext.Users.FirstOrDefault(x => x.Id == model.UserId);
+                if (user == null)
+                {
+                    Log.Error("{Function} Invalid user id {UserId}", "RemoveProjectMembership", model.UserId);
+                    return null;
+                }
+
+                var project = _DbContext.Projects.FirstOrDefault(x => x.Id == model.ProjectId);
+                if (project == null)
+                {
+                    Log.Error("{Function} Invalid project id {UserId}", "RemoveProjectMembership", model.ProjectId);
+                    return null;
+                }
+              
+                if (!user.Projects.Any(x => x == project))
+                {
+                    Log.Error("{Function} User {UserName} is not in the {ProjectName}", "RemoveProjectMembership", user.Name, project.Name);
+                    return null;
+                }
+                user.Projects.Remove(project);              
+                await _DbContext.SaveChangesAsync();
+                Log.Information("{Function} Added Project {ProjectName} to {UserName}", "RemoveProjectMembership", project.Name, user.Name);
+                return model;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "RemoveUserMembership");
+                throw;
+            }
+
+
+        }
     }
 }

@@ -2,6 +2,7 @@
 {
     public class BaseKeyCloakSettings
     {
+
         public string Authority { get; set; }
 
         public string BaseUrl { get; set; }
