@@ -13,7 +13,7 @@
         </div>
 
     </div>
-     @* <hr class="d-flex mt-4 mb-5">*@
+ 
     <div class="mt-4">
         <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
         </ul>
@@ -49,23 +49,21 @@
                                 
                                 <div>
                                     <span>
-                                        <input type="radio" name='foo' required id="EmailYes" value="EmailYes" />
-                                        <label for="EmailYes"><b>Approve:</b> </label>
+                                <input type="radio" name='foo' required id="Approve" value="Approve" />
+                                <label for="Approve"><b>Approve:</b> </label>
                                     </span>
                                     <span>
-                                        <input type="radio" name='foo' required id="EmailNo" value="EmailNo" />
-                                        <label for="EmailYes"><b>Reject:</b></label>
+                                <input type="radio" name='foo' required id="Reject" value="Reject" />
+                                <label for="Reject"><b>Reject:</b></label>
                                     </span><span>
-                                        <input type="radio" name='foo' required id="EmailNo" value="EmailNo" />
-                                        <label for="EmailYes"><b>Archive:</b></label>
+                                <input type="radio" name='foo' required id="Archive" value="Archive" />
+                                <label for="Archive"><b>Archive:</b></label>
                                     </span>
                                 </div>
                                 </fieldset>
                             <div class="mt-5 d-flex align-items-center">
                                 <button type="submit" class="btn btn-md btn-primary mr-2">Save</button>
-                                @*<a href="@Url.Action("RemoveUserFromProject", "Project", new { id = Model.ProjectId })" class="btn btn-link">
-                                    Remove
-                                </a>*@
+                               
                             </div>
                         </form>
                     </div>

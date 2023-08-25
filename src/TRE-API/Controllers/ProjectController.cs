@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using BL.Services;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace TRE_API.Controllers
 {
@@ -104,19 +105,32 @@ namespace TRE_API.Controllers
             try
 
             {
-                var approved = IsUserApprovedonProject(model.Id, model.Id);
-                 //edit userId above  
+                var userItems = model.Users
+           .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
+            .ToList();
+                var username = userItems.First().Text;
+                var userid = userItems.First().Value;
+
+                var approved = IsUserApprovedonProject(model.Id, int.Parse(userid));
+                   
                 var paramlist = new Dictionary<string, string>();
                 paramlist.Add("projectId", model.Id.ToString());
                 var Projects = _dareclientHelper.CallAPIWithoutModel<Project?>("/api/Project/GetProject/", paramlist).Result;
 
                 
                 var projectapproval = new ProjectApproval();
-
+                if (projectapproval.Id > 0)
+                {
+                    if (_DbContext.ProjectApprovals.Select(x => x.Id == projectapproval.Id).Any())
+                        _DbContext.ProjectApprovals.Update(projectapproval);
+                    else
+                        _DbContext.ProjectApprovals.Add(projectapproval);
+                }
                 if (approved == true && Projects == null)
+                    //review 
                 {
                     projectapproval.Approved = "Archive";
-                   if(_DbContext.ProjectApprovals.Select(x => x.Id == model.Id).Any())
+                   if(_DbContext.ProjectApprovals.Select(x => x.ProjectId == model.Id).Any())
                     _DbContext.ProjectApprovals.Update(projectapproval);
                     else
                         _DbContext.ProjectApprovals.Add(projectapproval);
@@ -125,10 +139,9 @@ namespace TRE_API.Controllers
                 {
                     projectapproval.Date = DateTime.Now.ToUniversalTime();
                     projectapproval.ProjectId = model.Id;
-                    //pass username below
-                    //proj.UserId = model.Users.;
+                    projectapproval.UserId = int.Parse(userid);
                     projectapproval.Projectname = model.Name;
-                    //proj.Username = model.Username;
+                    projectapproval.Username = username;
                     projectapproval.LocalProjectName = model.FormData;
                     projectapproval.Approved = model.OutputBucket;
 
