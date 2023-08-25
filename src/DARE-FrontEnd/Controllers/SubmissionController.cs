@@ -44,8 +44,12 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public IActionResult GetASubmission(int id)
         {
-            var res = _clientHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/").Result;
-            var test = new ProjectUserEndpoint();
+            var paramlist = new Dictionary<string, string>();
+
+            paramlist.Add("submissionId", id.ToString());
+
+            var res = _clientHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist).Result;
+            //var test = new ProjectUserEndpoint();
             var minio = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
             ViewBag.minioendpoint = minio?.Url;
 

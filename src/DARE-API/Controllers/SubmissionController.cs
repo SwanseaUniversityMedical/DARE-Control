@@ -111,13 +111,12 @@ namespace DARE_API.Controllers
 
         [AllowAnonymous]
         [HttpGet("GetASubmission")]
-        public Submission GetASubmission(int id)
+        public Submission GetASubmission(int submissionId)
         {
             try
             {
-                //TODO: CHANGE BACK TO NON HARD CODED ONCE IT WORKS PROPERLY
-                id = 1;
-                var Submission = _DbContext.Submissions.Where(x => x.Id == id).FirstOrDefault();
+
+                var Submission = _DbContext.Submissions.Where(x => x.Id == submissionId).FirstOrDefault();
 
                 Log.Information("{Function} Submission retrieved successfully", "GetASubmission");
                 return Submission;
