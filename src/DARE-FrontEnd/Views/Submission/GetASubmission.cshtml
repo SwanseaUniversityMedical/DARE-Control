@@ -17,13 +17,9 @@
         <div>
             <div class="text-end">
                 @{
-                    //var Date1 = DateTime.Now.AddDays(-3).AddHours(-2).AddMinutes(-33);
-                    var startDate = Model.StartTime;
-                    var currTime = DateTime.Now;
-                    TimeSpan result1 = currTime.Subtract(startDate);
-                    int days = result1.Days;
-                    int hours = result1.Hours;
-                    int minutes = result1.Minutes;
+
+
+
                     switch (Model.Status)
                     {
 
@@ -35,7 +31,8 @@
                                 <h6 class="mb-0">
                                     <span class="badge bg-dark-blue rounded-pill">@Model.Status</span>
                                 </h6>
-                                <span class="small">Elapsed Time: @days days, @hours hours, @minutes minute</span>
+                              @* <span class="small">Total Elapsed Time: @days days, @hours hours, @minutes minute</span>*@
+
                             </div>
                             break;
                     }
@@ -67,9 +64,28 @@
     <div>
         <h2 class="fs-5">TRE's Submitted To</h2>
         <div class="accordion accordion-flush" id="accordionFlushExample">
-            @{
+        @{
+            //var jsonString = Model.TesJson;
+            //static string Unescape(string jsonString) { return jsonString; }
+
+
+            //var pleasework = Unescape(Model.TesJson);
                 @foreach (var tre in Model.Children)
                 {
+                //var Date1 = DateTime.Now.AddDays(-3).AddHours(-2).AddMinutes(-33);
+                var startDate = tre.StartTime;
+                var currTime = DateTime.Now;
+                TimeSpan result1 = currTime.Subtract(startDate);
+                int days = result1.Days;
+                int hours = result1.Hours;
+                int minutes = result1.Minutes;
+
+                var progressTimer = "Total Elapsed Time:";
+                var lastStatusUpdate = tre.LastStatusUpdate;
+                TimeSpan result2 = currTime.Subtract(lastStatusUpdate);
+                int days1 = result2.Days;
+                int hours1 = result2.Hours;
+                int minutes1 = result2.Minutes;
                     var endpointName = @tre.EndPoint?.Name.ToString();
                     if (endpointName == null)
                     {
@@ -90,11 +106,18 @@
                         <h3 class="accordion-header">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@endpointName" aria-expanded="false" aria-controls="@endpointName">
                                 <span class="fw-bold">@endpointName</span>
-                                <div><small><span class="badge bg-dark-blue rounded-pill ms-4 me-2">@tre.Status</span><span class="text-muted fs-7">Elapsed Time: @days days, @hours hours, @minutes minutes</span></small></div>
+                            @{
+                                if (tre.Status == BL.Models.Enums.StatusType.DataOutApproved)
+                                {
+                                    progressTimer = "Total Run Time:";
+                                }
+                            }
+                                <div><small><span class="badge bg-dark-blue rounded-pill ms-4 me-2">@tre.Status</span><span class="text-muted fs-7">@progressTimer @days days, @hours hours, @minutes minutes</span><span class="text-muted fs-7"> &nbsp Current Status Elapsed Time: @days1 days, @hours1 hours, @minutes1 minutes</span></small></div>
                             </button>
                         </h3>
                         <div id="@endpointName" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
                             <div class="accordion-body">
+                                @Model.HistoricStatuses
                                 Job/task information
                             </div>
                         </div>
@@ -110,17 +133,21 @@
 
 <br />
 <script>
+    //"{\"id\":\"1\",\"state\":0,\"name\":\"Sub1\",\"description\":null,\"inputs\":null,\"outputs\":null,\"resources\":null,\"executors\":[{\"image\":\"\\\\\\\\minio\\\\justin1.crate\",\"command\":null,\"workdir\":null,\"stdin\":null,\"stdout\":null,\"stderr\":null,\"env\":null}],\"volumes\":null,\"tags\":{\"project\":\"Head\",\"endpoints\":\"\"},\"logs\":null,\"creation_time\":null}"
+    //var test1 = { "id": "1", "state": 0, "name": "Sub1", "description": null, "inputs": null, "outputs": null, "resources": null, "executors": [{ "image": "\\\\minio\\justin1.crate", "command": null, "workdir": null, "stdin": null, "stdout": null, "stderr": null, "env": null }], "volumes": null, "tags": { "project": "Head", "endpoints": "" }, "logs": null, "creation_time": null };
     var tesJson = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.TesJson));
+    //var test2 = "{\"id\":\"1\",\"state\":0,\"name\":\"Sub1\",\"description\":null,\"inputs\":null,\"outputs\":null,\"resources\":null,\"executors\":[{\"image\":\"\\\\\\\\minio\\\\justin1.crate\",\"command\":null,\"workdir\":null,\"stdin\":null,\"stdout\":null,\"stderr\":null,\"env\":null}],\"volumes\":null,\"tags\":{\"project\":\"Head\",\"endpoints\":\"\"},\"logs\":null,\"creation_time\":null}";
     var jsonViewer = document.getElementById("jsonViewer");
     var showJsonButton = document.getElementById("showJsonButton");
     var jsonVisible = false;
-
+    var test = jsonViewer.textContent = JSON.stringify(tesJson, null, 9);
+    //var test = jsonViewer.textContent = JSON.stringify(test1, null, "\t");
     showJsonButton.addEventListener("click", function () {
         if (jsonVisible) {
             jsonViewer.style.display = "none";
             jsonVisible = false;
         } else {
-            jsonViewer.textContent = JSON.stringify(tesJson)
+            test;
             jsonViewer.style.display = "block";
             jsonVisible = true;
         }
