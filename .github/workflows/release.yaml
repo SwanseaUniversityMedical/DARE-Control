@@ -199,7 +199,7 @@ jobs:
   ######################################################################################################################
 
   chart:
-    # Build the helloworld chart and push it as x.y.z-rc
+    # Build the chart and push it as x.y.z-rc
     needs:
       - slack
       - changes
