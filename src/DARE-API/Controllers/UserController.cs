@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Serilog;
 using BL.Models.ViewModels;
 using System.Linq;
+using DARE_API.Services.Contract;
 
 namespace BL.Controllers
 {
@@ -18,12 +19,16 @@ namespace BL.Controllers
     {
         
         private readonly ApplicationDbContext _DbContext;
+        private readonly IKeycloakMinioUserService _keycloakMinioUserService;
+        protected readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserController(ApplicationDbContext applicationDbContext)
+        public UserController(ApplicationDbContext applicationDbContext, IKeycloakMinioUserService keycloakMinioUserService, IHttpContextAccessor httpContextAccessor)
         {
 
             _DbContext = applicationDbContext;
-        
+            _keycloakMinioUserService = keycloakMinioUserService;
+            _httpContextAccessor = httpContextAccessor;
+
         }
 
 
@@ -173,6 +178,12 @@ namespace BL.Controllers
                 }
                 user.Projects.Add(project);
 
+                var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
+                var attributeName = "policy";
+                var attributeValue = project.Name.ToLower() + "_policy";
+
+                await _keycloakMinioUserService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, attributeValue);
+
                 await _DbContext.SaveChangesAsync();
                 Log.Information("{Function} Added User {UserName} to {ProjectName}", "AddProjectMembership", user.Name, project.Name);
                 return model;
@@ -210,7 +221,14 @@ namespace BL.Controllers
                     Log.Error("{Function} User {UserName} is not in the {ProjectName}", "RemoveProjectMembership", user.Name, project.Name);
                     return null;
                 }
-                user.Projects.Remove(project);              
+                user.Projects.Remove(project);
+
+                var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
+                var attributeName = "policy";
+                var attributeValue = project.Name.ToLower() + "_policy";
+
+                await _keycloakMinioUserService.RemoveMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, attributeValue);
+
                 await _DbContext.SaveChangesAsync();
                 Log.Information("{Function} Added Project {ProjectName} to {UserName}", "RemoveProjectMembership", project.Name, user.Name);
                 return model;
