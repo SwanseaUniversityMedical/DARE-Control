@@ -23,6 +23,7 @@ namespace DARE_FrontEnd.Controllers
             _keycloakSettings = keycloakSettings;
         }
 
+
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> NewTokenIssue()
@@ -108,6 +109,9 @@ namespace DARE_FrontEnd.Controllers
             {
                 OpenIdConnectDefaults.AuthenticationScheme,
                 CookieAuthenticationDefaults.AuthenticationScheme
+            }, new AuthenticationProperties
+            {
+                RedirectUri = Url.Action("Login", "Account")
             });
         }
         public async Task<IActionResult> AccessDenied(string ReturnUrl)

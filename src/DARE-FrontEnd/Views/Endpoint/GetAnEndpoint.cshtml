@@ -9,10 +9,7 @@
         <div>
             <h1 class="fs-3 mb-0">@Model.Name</h1>
         </div>
-        <a href="#" class="btn btn-primary btn-sm d-flex align-items-center">
-            <i class="fa fa-edit align-middle me-2"></i>
-            <span>Edit TRE</span>
-        </a>
+            <a href="@Url.Action("AddEndpoint", "Endpoint",new{endpointId=Model.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
     </div>
     <div class="mt-4">
         <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
@@ -42,10 +39,13 @@
             <div class="tab-pane fade show active" id="tre" role="tabpanel" aria-labelledby="tre">
                 <div class="row">
                     <div class="col-md-6">
-                        <p class="mb-0">
+                        @*<p class="mb-0">
                             TRE Name has a rich history and we are constantly evolving to provide word-leading support for research communities to access, link and analyse routinely collected health and administrative data within a safe and secure remote access environment.
                             <br /><br />
                             <a href="#">www.trewebsite.com</a>
+                        </p>*@
+                        <p class="mb-0">
+                            @Model.About
                         </p>
                     </div>
                 </div>
@@ -93,7 +93,7 @@
                                                         Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in...
                                                     </p>
                                                     <p class="text-muted fs-7 mb-0">
-                                                        Start Date: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate
+                                                        LastStatusUpdate Date: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate
                                                     </p>
                                                 </td>
                                             </tr>

@@ -1,5 +1,5 @@
 ﻿using BL.Models;
-
+using Users = BL.Models.User;
 using BL.Models.Settings;
 using BL.Services;
 using EasyNetQ.Management.Client.Model;
@@ -11,6 +11,8 @@ using Serilog;
 using System.Data;
 using BL.Models.ViewModels;
 using User = EasyNetQ.Management.Client.Model.User;
+using Microsoft.AspNetCore.Mvc.Rendering;
+//using Microsoft.CodeAnalysis;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -43,7 +45,7 @@ namespace DARE_FrontEnd.Controllers
                 paramList.Add("userId", userId.ToString());
                 var user = _clientHelper.CallAPIWithoutModel<BL.Models.User?>("/api/User/GetUser/", paramList).Result;
                 formData.FormIoString = user?.FormData;
-                formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""id"":"+userId.ToString());
+                formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""Id"":"+userId.ToString(), StringComparison.CurrentCultureIgnoreCase);
             }
 
             return View(formData);
@@ -63,10 +65,23 @@ namespace DARE_FrontEnd.Controllers
         [AllowAnonymous]
         public IActionResult GetUser(int id)
         {
+            var projects = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;            
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("userId", id.ToString());
             var result = _clientHelper.CallAPIWithoutModel<BL.Models.User?>(
                 "/api/User/GetUser/", paramlist).Result;
+
+            var projectItems2 = projects.Where(p => !result.Projects.Select(x => x.Id).Contains(p.Id)).ToList();          
+
+            var projectItems = projectItems2
+                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
+                .ToList();
+            //var userView = new ProjectUser()
+            //{              
+            //    //ProjectItemList = projectItems               
+            //};
+
+            ViewBag.ProjectItems = projectItems;
 
             return View(result);
         }
@@ -91,6 +106,76 @@ namespace DARE_FrontEnd.Controllers
             return BadRequest();
         }
 
-       
+        [HttpGet]
+        public IActionResult AddProjectMembership()
+        {
+
+            var projmem = GetProjectUserModel();
+            return View(projmem);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddProjectMembership(ProjectUser model)
+        {
+            var result =
+                await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/User/AddProjectMembership", model);
+            result = GetProjectUserModel();
+
+
+            return View(result);
+
+
+        }
+
+        public async Task<IActionResult> RemoveProjectFromUser(int userId, int projectId)
+        {
+            var model = new ProjectUser()
+            {
+                UserId = userId,
+                ProjectId = projectId               
+            };
+            var result =
+                await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/User/RemoveProjectMembership", model);
+            return RedirectToAction("GetUser", new { id = userId });
+        }
+
+        private ProjectUser GetProjectUserModel()
+        {
+            var projs = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
+            var users = _clientHelper.CallAPIWithoutModel<List<Users>>("/api/User/GetAllUsers/").Result;
+
+            var projectItems = projs
+                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
+                .ToList();
+
+            var userItems = users
+                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
+                .ToList();
+
+            var projmem = new ProjectUser()
+            {
+                ProjectItemList = projectItems,
+                UserItemList = userItems
+            };
+            return projmem;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddProjectList(string Id, string ItemList)
+        {
+            string[] arr = ItemList.Split(',');
+            foreach (string s in arr)
+            {
+                var model = new ProjectUser()
+                {
+                    UserId = Int32.Parse(Id),
+                    ProjectId = Int32.Parse(s)
+                };
+                var result =
+                await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/User/AddProjectMembership", model);
+            }
+            return RedirectToAction("GetUser", new { id = Id });
+        }
+
     }
 }

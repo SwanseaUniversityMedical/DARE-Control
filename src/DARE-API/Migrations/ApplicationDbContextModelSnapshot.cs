@@ -33,6 +33,10 @@ namespace DARE_API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("About")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("AdminUsername")
                         .IsRequired()
                         .HasColumnType("text");
@@ -48,6 +52,36 @@ namespace DARE_API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Endpoints");
+                });
+
+            modelBuilder.Entity("BL.Models.HistoricStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("End")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("Start")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StatusDescription")
+                        .HasColumnType("text");
+
+                    b.Property<int>("SubmissionId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubmissionId");
+
+                    b.ToTable("Statuses");
                 });
 
             modelBuilder.Entity("BL.Models.Project", b =>
@@ -76,6 +110,10 @@ namespace DARE_API.Migrations
                     b.Property<string>("OutputBucket")
                         .HasColumnType("text");
 
+                    b.Property<string>("ProjectDescription")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -102,6 +140,12 @@ namespace DARE_API.Migrations
                     b.Property<int?>("EndPointId")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("LastStatusUpdate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int?>("ParentID")
                         .HasColumnType("integer");
 
@@ -114,6 +158,9 @@ namespace DARE_API.Migrations
                     b.Property<string>("SourceCrate")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -202,6 +249,17 @@ namespace DARE_API.Migrations
                     b.ToTable("ProjectUser");
                 });
 
+            modelBuilder.Entity("BL.Models.HistoricStatus", b =>
+                {
+                    b.HasOne("BL.Models.Submission", "Submission")
+                        .WithMany("HistoricStatuses")
+                        .HasForeignKey("SubmissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Submission");
+                });
+
             modelBuilder.Entity("BL.Models.Submission", b =>
                 {
                     b.HasOne("BL.Models.Endpoint", "EndPoint")
@@ -276,6 +334,8 @@ namespace DARE_API.Migrations
             modelBuilder.Entity("BL.Models.Submission", b =>
                 {
                     b.Navigation("Children");
+
+                    b.Navigation("HistoricStatuses");
                 });
 
             modelBuilder.Entity("BL.Models.User", b =>

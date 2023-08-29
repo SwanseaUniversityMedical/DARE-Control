@@ -25,6 +25,7 @@ namespace DARE_API.Repositories.DbContexts
         
 
         public DbSet<Submission> Submissions { get; set; }
+        public DbSet<HistoricStatus> Statuses { get; set; }
 
 
 

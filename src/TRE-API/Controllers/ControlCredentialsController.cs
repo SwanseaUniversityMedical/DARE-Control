@@ -39,7 +39,7 @@ namespace TRE_API.Controllers
             if (creds != null)
             {
                 var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
-                    _encDecHelper.Decrypt(creds.PasswordEnc));
+                    _encDecHelper.Decrypt(creds.PasswordEnc), "dare-tre-admin");
                 result.Result = !string.IsNullOrWhiteSpace(token);
                     
             }
@@ -54,7 +54,7 @@ namespace TRE_API.Controllers
             {
                 creds.Valid = true;
                 var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
-                    creds.PasswordEnc);
+                    creds.PasswordEnc, "dare-tre-admin");
                 if (string.IsNullOrWhiteSpace(token))
                 {
                     creds.Valid = false;

@@ -3,6 +3,7 @@ using Amazon.Runtime.Internal;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
+using Aws4RequestSigner;
 using BL.Models.ViewModels;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Minio.Exceptions;
@@ -182,6 +183,32 @@ namespace BL.Services
                 {
                     await transferUtility.UploadAsync(new MemoryStream(contentBytes), bucketName, key);
                 }
+            }
+
+            return true;
+        }
+
+        public async Task<bool> CreateBucketPolicy(string bucketName)
+        {
+
+            var signer = new AWS4RequestSigner(_minioSettings.AccessKey, _minioSettings.SecretKey);
+
+            var content = new StringContent("{\r\n    \"Version\": \"2012-10-17\",\r\n    \"Statement\": [\r\n        {\r\n            \"Effect\": \"Allow\",\r\n            \"Action\": [\r\n                \"s3:List*\",\r\n                \"s3:ListBucket\",\r\n                \"s3:PutObject\",\r\n                \"s3:DeleteObject\",\r\n                \"s3:GetBucketLocation\"\r\n            ],\r\n            \"Resource\": [\r\n                \"arn:aws:s3:::" + bucketName + "\"\r\n            ]\r\n        }\r\n    ]\r\n}", null, "application/json");
+
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Put,
+                RequestUri = new Uri("http://" + _minioSettings.Url + "/minio/admin/v3/add-canned-policy?name=" + bucketName + "_policy"),
+                Content = content
+            };
+
+            request = await signer.Sign(request, _minioSettings.AWSService, _minioSettings.AWSRegion);
+            var client = new HttpClient();
+            var response = await client.SendAsync(request);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return false;
             }
 
             return true;

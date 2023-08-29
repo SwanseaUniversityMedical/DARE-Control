@@ -20,6 +20,8 @@ using BL.Models.Tes;
 using BL.Rabbit;
 using EasyNetQ;
 using System.Data;
+using BL.Models.Enums;
+using DARE_API.Services;
 using Microsoft.AspNetCore.Authorization;
 
 
@@ -90,14 +92,19 @@ namespace DARE_API.Controllers
            
             foreach (var asub in allsubs)
             {
+                var newstart = DateTime.Now.ToUniversalTime();
+                
                 asub.TesJson = SetTesTaskStateToCancelled(asub.TesJson, asub.Id);
+                
                 if (asub.Parent == null)
                 {
-                    asub.Status = SubmissionStatus.CancellingChildren;
+                    UpdateSubmissionStatus.UpdateStatus(sub, StatusType.CancellingChildren, "");
+                    
                 }
                 else
                 {
-                    asub.Status = SubmissionStatus.RequestCancellation;
+                    UpdateSubmissionStatus.UpdateStatus(sub, StatusType.RequestCancellation, "");
+                    
                 }
             }
 
@@ -285,7 +292,9 @@ namespace DARE_API.Controllers
             {
                 DockerInputLocation = tesTask.Executors.First().Image,
                 Project = dbproj,
-                Status = SubmissionStatus.WaitingForChildSubsToComplete,
+                StartTime = DateTime.Now.ToUniversalTime(),
+                Status = StatusType.WaitingForChildSubsToComplete,
+                LastStatusUpdate = DateTime.Now.ToUniversalTime(),
                 SubmittedBy = user,
                 TesName = tesTask.Name,
                 SourceCrate = tesTask.Executors.First().Image,

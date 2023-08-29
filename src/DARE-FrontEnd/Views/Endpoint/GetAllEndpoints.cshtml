@@ -32,7 +32,7 @@
                                     </a>
                                     @*<p class="text-muted small mb-0">#@endpoint.Id</p>*@
                                 </div>
-                                <a href="@Url.Action("EditEndpoint", "Endpoint",new{endpointId=endpoint.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+                                <a href="@Url.Action("AddEndpoint", "Endpoint",new{endpointId=endpoint.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
                             </div>
                             <div class="">
                                 <a href="@Url.Action("GetAnEndpoint", "Endpoint", new { id = endpoint.Id })#projects" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
@@ -43,7 +43,8 @@
                                 </a>
                             </div>
                             <p class="my-4">
-                                TRE Name has a rich history and we are constantly evolving to provide word-leading support for research communities to access, link and analyse routinely collected health and administrative data within a safe and secure remote access environment....
+                                @endpoint.About
+                                @*TRE Name has a rich history and we are constantly evolving to provide word-leading support for research communities to access, link and analyse routinely collected health and administrative data within a safe and secure remote access environment....*@
                             </p>
                         </td>
                     </tr>

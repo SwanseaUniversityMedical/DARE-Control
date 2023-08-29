@@ -1,4 +1,5 @@
 ﻿using BL.Models;
+using BL.Models.ViewModels;
 using BL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -36,13 +37,17 @@ namespace DARE_FrontEnd.Controllers
 
             res = res.Where(x => x.Parent == null).ToList();
 
+
             return View(res);
         }
 
         [HttpGet]
         public IActionResult GetASubmission(int id)
         {
-            var res = _clientHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetAllSubmissions/").Result;
+            var res = _clientHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/").Result;
+            var test = new ProjectUserEndpoint();
+            var minio = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
+            ViewBag.minioendpoint = minio?.Url;
 
             return View(res);
         }

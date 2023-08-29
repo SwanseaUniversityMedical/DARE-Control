@@ -37,11 +37,14 @@ ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
 Log.Logger = CreateSerilogLogger(configuration, environment);
-Log.Information("API logging Start.");
+Log.Information("API logging LastStatusUpdate.");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
-    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+    {
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+        options.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
+    }
 ); ;
 builder.Services.AddDbContext<ApplicationDbContext>(options => options
     .UseLazyLoadingProxies(true)
@@ -134,6 +137,9 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
+
+var serviceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedProto
@@ -171,7 +177,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
-    //DataInitaliser.SeedData(db, SeedSettings).Wait();
+    DataInitaliser.SeedData(db);
 }
 
 
@@ -215,7 +221,8 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
    
     builder.Services.AddScoped<IMinioService, MinioService>();
     builder.Services.AddScoped<IMinioHelper, MinioHelper>();
-    
+    builder.Services.AddScoped<IKeycloakMinioUserService, KeycloakMinioUserService>();
+
     //    .AddNewtonsoftJson(options =>
     //    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
     //); 

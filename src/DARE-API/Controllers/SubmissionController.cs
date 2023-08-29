@@ -1,12 +1,15 @@
 ﻿using BL.Models;
+using BL.Models.Enums;
 using DARE_API.Repositories.DbContexts;
 using DARE_API.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
 using BL.Models.ViewModels;
+using DARE_API.Services;
 using EasyNetQ;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace DARE_API.Controllers
@@ -42,7 +45,7 @@ namespace DARE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(List<Submission>), description: "")]
         public virtual IActionResult GetWaitingSubmissionsForEndpoint()
         {
-            //ToDo alter to get endpoint from validated token
+            
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
             var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName);
             if (endpoint == null)
@@ -50,8 +53,8 @@ namespace DARE_API.Controllers
                 return BadRequest("User " + usersName + " doesn't have an endpoint");
             }
 
-            var results = endpoint.Submissions.Where(x =>x.Status == SubmissionStatus.WaitingForAgentToTransfer).ToList();
-            //var results = _DbContext.Submissions.Where(x => x.EndPoint != null && x.EndPoint.Name == endpointname.ToLower() && x.Status == SubmissionStatus.WaitingForAgentToTransfer).ToList();
+            var results = endpoint.Submissions.Where(x =>x.Status == StatusType.WaitingForAgentToTransfer).ToList();
+            //var results = _DbContext.Submissions.Where(x => x.EndPoint != null && x.EndPoint.Name == endpointname.ToLower() && x.StatusType == StatusType.WaitingForAgentToTransfer).ToList();
 
             return StatusCode(200, results);
         }
@@ -62,9 +65,9 @@ namespace DARE_API.Controllers
         [ValidateModelState]
         [SwaggerOperation("UpdateStatusForEndpoint")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public  IActionResult UpdateStatusForEndpoint(string tesId, SubmissionStatus status)
+        public  IActionResult UpdateStatusForEndpoint(string tesId, StatusType statusType, string? description)
         {
-            //ToDo alter to get endpoint from validated token
+            
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
             var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
             if (endpoint == null)
@@ -78,13 +81,15 @@ namespace DARE_API.Controllers
             {
                 return BadRequest("Invalid tesid or endpoint not valid for tes");
             }
-            sub.Status = status;
             
+            UpdateSubmissionStatus.UpdateStatus(sub, statusType, description);
             _DbContext.SaveChanges();
-            
+
 
             return StatusCode(200, new APIReturn(){ReturnType = ReturnType.voidReturn});
         }
+
+        
 
         [AllowAnonymous]
         [HttpGet("GetAllSubmissions")]
@@ -110,6 +115,8 @@ namespace DARE_API.Controllers
         {
             try
             {
+                //TODO: CHANGE BACK TO NON HARD CODED ONCE IT WORKS PROPERLY
+                id = 1;
                 var Submission = _DbContext.Submissions.Where(x => x.Id == id).FirstOrDefault();
 
                 Log.Information("{Function} Submission retrieved successfully", "GetASubmission");

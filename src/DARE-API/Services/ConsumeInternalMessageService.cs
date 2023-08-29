@@ -5,6 +5,7 @@ using Serilog;
 using System.Text;
 using BL.Models;
 using System;
+using BL.Models.Enums;
 using DARE_API.Repositories.DbContexts;
 using BL.Models.Tes;
 using EasyNetQ.Management.Client.Model;
@@ -73,15 +74,17 @@ namespace DARE_API.Services
                         dbendpoints.Add(dbproj.Endpoints.First(x => x.Name.ToLower() == endpoint.ToLower()));
                     }
                 }
-
-                sub.Status = SubmissionStatus.WaitingForChildSubsToComplete;
+                UpdateSubmissionStatus.UpdateStatus(sub, StatusType.WaitingForChildSubsToComplete, "");
+                
                 foreach (var endp in dbendpoints)
                 {
                     _dbContext.Add(new Submission()
                     {
                         DockerInputLocation = tesTask.Executors.First().Image,
                         Project = dbproj,
-                        Status = SubmissionStatus.WaitingForAgentToTransfer,
+                        StartTime = DateTime.Now.ToUniversalTime(),
+                        Status = StatusType.WaitingForAgentToTransfer,
+                        LastStatusUpdate = DateTime.Now.ToUniversalTime(),
                         SubmittedBy = sub.SubmittedBy,
                         Parent = sub,
                         TesId = tesTask.Id,

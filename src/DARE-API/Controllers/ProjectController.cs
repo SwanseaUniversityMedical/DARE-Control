@@ -9,7 +9,8 @@ using Newtonsoft.Json;
 using Serilog;
 using Endpoint = BL.Models.Endpoint;
 using BL.Services;
-
+using DARE_API.Services.Contract;
+using Microsoft.AspNetCore.Authentication;
 
 namespace DARE_API.Controllers
 {
@@ -23,65 +24,93 @@ namespace DARE_API.Controllers
         private readonly ApplicationDbContext _DbContext;
         private readonly MinioSettings _minioSettings;
         private readonly IMinioHelper _minioHelper;
+        private readonly IKeycloakMinioUserService _keycloakMinioUserService;
+        protected readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ProjectController(ApplicationDbContext applicationDbContext, MinioSettings minioSettings, IMinioHelper minioHelper)
+        public ProjectController(ApplicationDbContext applicationDbContext, MinioSettings minioSettings, IMinioHelper minioHelper, IKeycloakMinioUserService keycloakMinioUserService, IHttpContextAccessor httpContextAccessor)
         {
 
             _DbContext = applicationDbContext;
             _minioSettings = minioSettings;
             _minioHelper = minioHelper;
-
+            _keycloakMinioUserService = keycloakMinioUserService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpPost("AddProject")]
-        public async Task<Project?> AddProject(FormData data)
+        public async Task<Project?> AddProject([FromBody] FormData data)
         {
             try
             {
-                Project projects = JsonConvert.DeserializeObject<Project>(data.FormIoString);
+           
+                Project project = JsonConvert.DeserializeObject<Project>(data.FormIoString);
                 //2023-06-01 14:30:00 use this as the datetime
-                projects.Name = projects.Name.Trim();
-                projects.StartDate = projects.StartDate.ToUniversalTime();
-                projects.EndDate = projects.EndDate.ToUniversalTime();
-                //projects.Id = 4;
-                projects.SubmissionBucket = GenerateRandomName(projects.Name) + "submission";
-                projects.OutputBucket = GenerateRandomName(projects.Name) + "output";
-                projects.FormData = data.FormIoString;
-                projects.Display = projects.Display;
+                project.Name = project.Name.Trim();
+                project.StartDate = project.StartDate.ToUniversalTime();
+                project.EndDate = project.EndDate.ToUniversalTime();
+                project.ProjectDescription = project.ProjectDescription.Trim();
+                //projects.Id = projects.Id;
+                
+                
+                project.FormData = data.FormIoString;
+                project.Display = project.Display;
                 //model.Display = projects.Display.Trim();
-                if (_DbContext.Projects.Any(x => x.Name.ToLower() == projects.Name.ToLower().Trim() && x.Id != projects.Id))
+                if (_DbContext.Projects.Any(x => x.Name.ToLower() == project.Name.ToLower().Trim() && x.Id != project.Id))
                 {
 
                     return new Project() { Error = true, ErrorMessage = "Another project already exists with the same name" };
                 }
 
-
-                var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, projects.SubmissionBucket);
-                if (!submissionBucket)
+                if (project.Id == 0)
                 {
-                    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", projects.SubmissionBucket);
-                }
-                var outputBucket = await _minioHelper.CreateBucket(_minioSettings, projects.OutputBucket);
-                if (!outputBucket)
-                {
-                    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", projects.OutputBucket);
-
-                }
-
-                if (projects.Id > 0)
-                {
-                    if (_DbContext.Projects.Select(x => x.Id == projects.Id).Any())
-                        _DbContext.Projects.Update(projects);
+                    project.SubmissionBucket = GenerateRandomName(project.Name) + "submission";
+                    project.OutputBucket = GenerateRandomName(project.Name) + "output";
+                    var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, project.SubmissionBucket);
+                    if (!submissionBucket)
+                    {
+                        Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", project.SubmissionBucket);
+                    }
                     else
-                        _DbContext.Projects.Add(projects);
+                    {
+                        var submistionBucketPolicy = await _minioHelper.CreateBucketPolicy(project.SubmissionBucket);
+                        if (!submistionBucketPolicy)
+                        {
+                            Log.Error("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.", "AddProject", project.SubmissionBucket);
+                        }
+                    }
+                    var outputBucket = await _minioHelper.CreateBucket(_minioSettings, project.OutputBucket);
+                    if (!outputBucket)
+                    {
+                        Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", project.OutputBucket);
+
+                    }
+                    else
+                    {
+                        var outputBucketPolicy = await _minioHelper.CreateBucketPolicy(project.OutputBucket);
+                        if (!outputBucketPolicy)
+                        {
+                            Log.Error("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.", "AddProject", project.OutputBucket);
+                        }
+                    }
                 }
-                else
-                _DbContext.Projects.Add(projects);
+               
+
+                if (project.Id > 0)
+                {
+                    if (_DbContext.Projects.Select(x => x.Id == project.Id).Any())
+                        _DbContext.Projects.Update(project);
+                    else
+                       _DbContext.Projects.Add(project);
+                }
+                else { 
+                    _DbContext.Projects.Add(project);
+
+                }
 
                 await _DbContext.SaveChangesAsync();
 
                 Log.Information("{Function} Projects added successfully", "CreateProject");
-                return projects;
+                return project;
             }
             catch (Exception ex)
             {
@@ -94,48 +123,6 @@ namespace DARE_API.Controllers
 
         }
 
-        [HttpPost("EditProject")]
-        public async Task<Project?> EditProject(FormData data)
-        {
-            try
-            {
-                Project project = JsonConvert.DeserializeObject<Project>(data.FormIoString);
-                var id = data.Id;
-                var dbproject = _DbContext.Projects.Find(id);
-                if (_DbContext.Projects.Any(x => x.Name.ToLower() == project.Name.ToLower().Trim() && x.Id != project.Id))
-                {
-
-                    return new Project() { Error = true, ErrorMessage = "Another project already exists with the same name" };
-                }
-                //var model = new Project();
-
-                if (dbproject != null)
-                {
-                    dbproject.Id = id;
-                    dbproject.Name = project.Name;
-                    dbproject.OutputBucket = project.OutputBucket;
-                    dbproject.SubmissionBucket = project.SubmissionBucket;
-                    dbproject.StartDate = project.StartDate.ToUniversalTime();
-                    dbproject.EndDate = project.EndDate.ToUniversalTime();
-                    dbproject.FormData=data.FormIoString;
-                }
-
-                _DbContext.Projects.Update(dbproject);
-
-                await _DbContext.SaveChangesAsync();
-
-                Log.Information("{Function} Projects Updated successfully", "UpdateProject");
-                return dbproject;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crash", "UpdateProject");
-                var errorModel = new Project();
-                return errorModel;
-                throw;
-            }
-
-        }
 
         [HttpPost("AddUserMembership")]
         public async Task<ProjectUser?> AddUserMembership(ProjectUser model)
@@ -163,6 +150,12 @@ namespace DARE_API.Controllers
                 }
 
                 project.Users.Add(user);
+
+                var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
+                var attributeName = "policy";
+                var attributeValue = project.Name.ToLower() + "_policy";
+
+                await _keycloakMinioUserService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, attributeValue);
 
                 await _DbContext.SaveChangesAsync();
                 Log.Information("{Function} Added User {UserName} to {ProjectName}", "AddUserMembership", user.Name, project.Name);
@@ -203,6 +196,12 @@ namespace DARE_API.Controllers
                 }
 
                 project.Users.Remove(user);
+
+                var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
+                var attributeName = "policy";
+                var attributeValue = project.Name.ToLower() + "_policy";
+
+                await _keycloakMinioUserService.RemoveMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, attributeValue);
 
                 await _DbContext.SaveChangesAsync();
                 Log.Information("{Function} Added User {UserName} to {ProjectName}", "RemoveUserMembership", user.Name, project.Name);

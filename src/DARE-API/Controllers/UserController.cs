@@ -5,6 +5,9 @@ using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authorization;
 using Serilog;
 using BL.Models.ViewModels;
+using System.Linq;
+using DARE_API.Services.Contract;
+using Microsoft.AspNetCore.Authentication;
 
 namespace BL.Controllers
 {
@@ -17,12 +20,16 @@ namespace BL.Controllers
     {
         
         private readonly ApplicationDbContext _DbContext;
+        private readonly IKeycloakMinioUserService _keycloakMinioUserService;
+        protected readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserController(ApplicationDbContext applicationDbContext)
+        public UserController(ApplicationDbContext applicationDbContext, IKeycloakMinioUserService keycloakMinioUserService, IHttpContextAccessor httpContextAccessor)
         {
 
             _DbContext = applicationDbContext;
-        
+            _keycloakMinioUserService = keycloakMinioUserService;
+            _httpContextAccessor = httpContextAccessor;
+
         }
 
 
@@ -35,8 +42,8 @@ namespace BL.Controllers
                 User userData = JsonConvert.DeserializeObject<User>(data.FormIoString);
                 userData.Name = userData.Name.Trim();
                 userData.Email = userData.Email.Trim();
+                userData.FormData = data.FormIoString;
 
-               
 
                 if (_DbContext.Users.Any(x => x.Name.ToLower() == userData.Name.ToLower().Trim() && x.Id != userData.Id))
                 {
@@ -44,7 +51,7 @@ namespace BL.Controllers
                     return new User() { Error = true, ErrorMessage = "Another user already exists with the same name" };
                 }
 
-                userData.FormData = data.FormIoString;
+                
 
                 if (userData.Id > 0)
                 {
@@ -116,7 +123,7 @@ namespace BL.Controllers
 
             
         }
-
+      
         //[AllowAnonymous]
         //[HttpPost("UpdateUser")]
         //public User? UpdateUser([FromBody] FormData data)
@@ -144,5 +151,96 @@ namespace BL.Controllers
         //    return user;
 
         //}
+
+        [HttpPost("AddProjectMembership")]
+        public async Task<ProjectUser?> AddProjectMembership([FromBody]ProjectUser model)
+        {
+            try
+            {
+                var user = _DbContext.Users.FirstOrDefault(x => x.Id == model.UserId);
+                if (user == null)
+                {
+                    Log.Error("{Function} Invalid user id {UserId}", "AddProjectMembership", model.UserId);
+                    return null;
+                }
+
+                var project = _DbContext.Projects.FirstOrDefault(x => x.Id == model.ProjectId);
+                if (project == null)
+                {
+                    Log.Error("{Function} Invalid project id {UserId}", "AddProjectMembership", model.ProjectId);
+                    return null;
+                }
+
+               
+                if (user.Projects.Any(x => x == project))
+                {
+                    Log.Error("{Function} User {UserName} is already on {ProjectName}", "AddProjectMembership", user.Name, project.Name);
+                    return null;
+                }
+                user.Projects.Add(project);
+
+                var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
+                var attributeName = "policy";
+                var attributeValue = project.Name.ToLower() + "_policy";
+
+                await _keycloakMinioUserService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, attributeValue);
+
+                await _DbContext.SaveChangesAsync();
+                Log.Information("{Function} Added User {UserName} to {ProjectName}", "AddProjectMembership", user.Name, project.Name);
+                return model;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "AddProjectMembership");
+                throw;
+            }
+
+
+        }
+
+        [HttpPost("RemoveProjectMembership")]
+        public async Task<ProjectUser?> RemoveProjectMembership([FromBody] ProjectUser model)
+        {
+            try
+            {
+                var user = _DbContext.Users.FirstOrDefault(x => x.Id == model.UserId);
+                if (user == null)
+                {
+                    Log.Error("{Function} Invalid user id {UserId}", "RemoveProjectMembership", model.UserId);
+                    return null;
+                }
+
+                var project = _DbContext.Projects.FirstOrDefault(x => x.Id == model.ProjectId);
+                if (project == null)
+                {
+                    Log.Error("{Function} Invalid project id {UserId}", "RemoveProjectMembership", model.ProjectId);
+                    return null;
+                }
+              
+                if (!user.Projects.Any(x => x == project))
+                {
+                    Log.Error("{Function} User {UserName} is not in the {ProjectName}", "RemoveProjectMembership", user.Name, project.Name);
+                    return null;
+                }
+                user.Projects.Remove(project);
+
+                var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
+                var attributeName = "policy";
+                var attributeValue = project.Name.ToLower() + "_policy";
+
+                await _keycloakMinioUserService.RemoveMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, attributeValue);
+
+                await _DbContext.SaveChangesAsync();
+                Log.Information("{Function} Added Project {ProjectName} to {UserName}", "RemoveProjectMembership", project.Name, user.Name);
+                return model;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "RemoveUserMembership");
+                throw;
+            }
+
+
+        }
     }
 }

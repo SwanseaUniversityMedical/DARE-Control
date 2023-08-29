@@ -6,6 +6,7 @@ using Serilog;
 using Microsoft.Extensions.Options;
 using BL.Services;
 using TRE_API.Repositories.DbContexts;
+using TRE_API.Services;
 
 namespace TRE_API.Controllers
 {
@@ -26,10 +27,7 @@ namespace TRE_API.Controllers
             _dareclientHelper = dareclient;
             _DbContext = applicationDbContext;
 
-        }
-
-       
-        
+        }  
 
         [HttpGet("GetAllProjects")]
         [Authorize(Roles = "dare-tre-admin")]
@@ -40,126 +38,189 @@ namespace TRE_API.Controllers
             return allProjects;
         }
 
+        [HttpGet("GetProject")]
+        public Project? GetProject(int? projectId)
+        {
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("projectId", projectId.ToString());
+            var Projects = _dareclientHelper.CallAPIWithoutModel<Project?>("/api/Project/GetProject/", paramlist).Result;
+            return Projects;
 
-        [HttpPost("RequestMembership")]
-        public async Task<ProjectApproval?> RequestMembership(ProjectUserTre model)
+        }
+        [HttpGet("GetUser")]
+        public User? GetUser(int? userId)
+        {
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("userId", userId.ToString());
+            var User = _dareclientHelper.CallAPIWithoutModel<User?>("/api/User/GetUser/", paramlist).Result;
+            return User;
+
+        }
+        [HttpGet("GetAllProjectsForApproval")]
+        public List<Project> GetAllProjectsForApproval()
         {
             try
             {
-
-                var proj = new ProjectApproval();
-
-                proj.Date = DateTime.Now.ToUniversalTime();
-                proj.ProjectId = model.ProjectId;
-                proj.UserId = model.UserId;
-                proj.Projectname = model.Projectname;
-                proj.Username = model.Username;
-                proj.LocalProjectName = model.LocalProjectName;
-
-
-                _DbContext.ProjectApprovals.Add(proj);
-
-                await _DbContext.SaveChangesAsync();
-
-                Log.Information("{Function} Membership Request added successfully", "MembershipRequest");
-                return proj;
-            }
+                var allProjects = _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForEndpoint/").Result;
+                return allProjects;
+                
+                 }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} Crash", "RequestMembership");
-                var errorModel = new ProjectApproval();
-                return errorModel;
+                Log.Error(ex, "{Function} Crashed", "GetAllProjectsForApproval");
                 throw;
             }
 
 
         }
+        [HttpGet("GetAllUsers")]
+        public List<User> GetAllUsers()
+        {
 
-        [HttpPost("EditProjectApproval")]
-        public async Task<ProjectApproval?> EditProjectApproval(ProjectApproval model)
+            var allUsers = _dareclientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
+            return allUsers;
+        }
+
+        [HttpGet("IsUserApprovedonProject")]
+        public bool IsUserApprovedonProject(int projectId, int userId)
         {
             try
             {
+                bool IsUserApprovedonProject = _DbContext.ProjectApprovals.Any(p => p.Approved == "Approved" && p.Users.Any(u => u.Id == userId));
+                return IsUserApprovedonProject;
+            }
 
-                var proj = new ProjectApproval();
-
-                proj.Id = model.Id;
-                proj.ProjectId = model.ProjectId;
-                proj.UserId = model.UserId;
-                proj.Projectname = model.Projectname;
-                proj.Username = model.Username;
-                proj.LocalProjectName = model.LocalProjectName;
-                proj.Approved = model.Approved;
-                proj.Approved = model.ApprovedBy;
-                proj.Date = DateTime.Now.ToUniversalTime(); 
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} crash", "IsUserApprovedonProject");
+                throw;
+            }
+        }
 
 
-                var returned = _DbContext.ProjectApprovals.Find(model.Id);
-                if( returned != null)
-                    _DbContext.ProjectApprovals.Update(proj); ;
+        [HttpPost("ApproveProjectMembership")]
+        public async Task<ProjectApproval?> ApproveProjectMembership(Project model)
+        {
+            try
+
+            {
+                var approved = IsUserApprovedonProject(model.Id, model.Id);
+                 //edit userId above  
+                var paramlist = new Dictionary<string, string>();
+                paramlist.Add("projectId", model.Id.ToString());
+                var Projects = _dareclientHelper.CallAPIWithoutModel<Project?>("/api/Project/GetProject/", paramlist).Result;
+
+                
+                var projectapproval = new ProjectApproval();
+
+                if (approved == true && Projects == null)
+                {
+                    projectapproval.Approved = "Archive";
+                   if(_DbContext.ProjectApprovals.Select(x => x.Id == model.Id).Any())
+                    _DbContext.ProjectApprovals.Update(projectapproval);
+                    else
+                        _DbContext.ProjectApprovals.Add(projectapproval);
+                }
+                else
+                {
+                    projectapproval.Date = DateTime.Now.ToUniversalTime();
+                    projectapproval.ProjectId = model.Id;
+                    //pass username below
+                    //proj.UserId = model.Users.;
+                    projectapproval.Projectname = model.Name;
+                    //proj.Username = model.Username;
+                    projectapproval.LocalProjectName = model.FormData;
+                    projectapproval.Approved = model.OutputBucket;
+
+
+                    _DbContext.ProjectApprovals.Add(projectapproval);
+                }
                 await _DbContext.SaveChangesAsync();
 
                 Log.Information("{Function} Membership Request added successfully", "MembershipRequest");
-                return proj;
+                return projectapproval;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} Crash", "EditMembership");
+                Log.Error(ex, "{Function} Crash", "ApproveProjectMembership");
                 var errorModel = new ProjectApproval();
                 return errorModel;
                 throw;
             }
 
-
         }
 
+     
         [AllowAnonymous]
-        [HttpGet("GetProjectApproval")]
-        public ProjectApproval? GetProjectApproval(int projectId)
+        [HttpGet("GetAllMemberships")]
+        public List<ProjectApproval> GetAllMemberships()
+        {
+            try 
+            {     
+                var generalmemberships = _DbContext.ProjectApprovals.ToList(); ;
+                if (generalmemberships == null)
+                {
+                    return null;
+                }
+
+                Log.Information("{Function} Projects retrieved successfully", "GetProject");
+                return generalmemberships;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetAllMemberships");
+                throw;
+            }
+
+
+        }
+
+        [HttpGet("GetAllDisabledMemberships")]
+        public List<ProjectApproval> GetAllDisabledMemberships()
         {
             try
             {
-
-        
-                var returned = _DbContext.ProjectApprovals.Find(projectId);
+                var returned = _DbContext.ProjectApprovals.Where(p => p.Approved == "Archived").ToList();
                 if (returned == null)
                 {
                     return null;
                 }
 
-                Log.Information("{Function} Project retrieved successfully", "GetProject");
+                Log.Information("{Function} Projects retrieved successfully", "GetProject");
                 return returned;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} Crashed", "GetProjectApproval");
+                Log.Error(ex, "{Function} Crashed", "GetAllDisabledMemberships");
                 throw;
             }
 
-
         }
-        [HttpGet("GetAllProjectsForApproval")]
-        public List<ProjectApproval> GetAllProjectsForApproval()
+
+        [HttpGet("GetAllUnApprovedMemberships")]
+        public List<ProjectApproval> GetAllUnApprovedMemberships()
         {
             try
             {
+                var returned = _DbContext.ProjectApprovals.Where(p => p.Approved != "Approved").ToList();
+                if (returned == null)
+                {
+                    return null;
+                }
 
-                var allApprovedProjects = _DbContext.ProjectApprovals
-                    //.Include(x => x.Approved)
-                    .ToList();
-
-                Log.Information("{Function} Projects retrieved successfully", "GetAllProjectForApproval");
-                return allApprovedProjects;
+                Log.Information("{Function} Projects retrieved successfully", "GetProject");
+                return returned;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} Crashed", "GetAllProjectForApproval");
+                Log.Error(ex, "{Function} Crashed", "GetAllUnApprovedMembership");
                 throw;
             }
 
 
         }
 
-       
+
+
     }
 }

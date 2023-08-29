@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BL.Models.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -24,38 +25,30 @@ namespace BL.Models
         public virtual Submission? Parent { get; set; }
 
         public virtual List<Submission> Children { get; set; }
+        public virtual List<HistoricStatus> HistoricStatuses { get; set; }
 
-        public SubmissionStatus Status { get; set; }
+
 
         public virtual Endpoint? EndPoint { get; set; }
 
         public virtual User SubmittedBy { get; set; }
 
+        public DateTime LastStatusUpdate { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+
+
+
+        public StatusType Status { get; set; }
+
+
         public string? StatusDescription { get; set; }
-        
-        
+
+
+
+
 
     }
 
-    public enum SubmissionStatus
-    {
-        WaitingForChildSubsToComplete =0,
-        WaitingForAgentToTransfer=1,
-        TransferredToPod=2,
-        PodProcessing=3,
-        PodProcessingComplete=4,
-        DataOutApprovalBegun=5,
-        DataOutApprovalRejected=6,
-        DataOutApproved=7,
-        UserNotOnProject=8,
-        InvalidUser=9,
-        TRENotAuthorisedForProject=10,
-        Completed=11,
-        InvalidSubmission=12,
-        CancellingChildren = 13,
-        RequestCancellation = 14,
-        CancellationRequestSent = 15,
-        Cancelled = 16,
-        WaitingForCrateFormatCheck=17
-    }
+  
 }

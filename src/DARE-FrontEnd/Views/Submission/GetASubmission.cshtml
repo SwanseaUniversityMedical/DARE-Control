@@ -1,4 +1,6 @@
 ﻿@model BL.Models.Submission
+@using BL.Models.ViewModels
+
 @{
     ViewData["Title"] = "@Model.Name";
 
@@ -9,56 +11,118 @@
 <div class="container-lg mt-4 p-4 bg-white border-1 shadow-sm">
     <div class="d-flex align-items-center justify-content-between">
         <div>
-            <h1 class="fs-3 mb-0">@*@Model.Name*@</h1>
-            <p class="text-muted small mb-0">#@Model.Id</p>
+            <h1 class="fs-3 mb-0">@Model.TesName</h1>
+            <p class="text-muted small mb-0">Submission ID: @Model.Id</p>
         </div>
-        <a href="@Url.Action("EditProject", "Project",new{Projectid=@Model.Id})" class="btn btn-primary btn-sm d-flex align-items-center">
-            <i class="fa fa-edit align-middle me-2"></i>
-            <span>Edit Project</span>
-        </a>
-    </div>
-    <div class="mt-4">
-        <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
-            <li class="nav-item" role="presentation">
-                <a href="#about" class="nav-link text-dark active" id="about" data-bs-toggle="tab" data-bs-target="#project" role="tab" aria-controls="Project" aria-selected="true">About</a>
-            </li>
-            <li class="nav-item" role="presentation">
-                <a href="#submissions" class="nav-link text-dark" id="submissions" data-bs-toggle="tab" data-bs-target="#submissions-tab" role="tab" aria-controls="submissions" aria-selected="false">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>Submissions</span>
-                        <span class="badge bg-dark-blue rounded-pill ms-2">@*@Model.Submissions.Count*@</span>
-                    </div>
-                </a>
-            </li>
-            <li class="nav-item" role="presentation">
-                <a href="#people" class="nav-link text-dark" id="people" data-bs-toggle="tab" data-bs-target="#userMembership" role="tab" aria-controls="User Membership" aria-selected="false">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>People</span>
-                        <span class="badge bg-dark-blue rounded-pill ms-2">@*@Model.Users.Count*@</span>
-                    </div>
-                </a>
-            </li>
-            <li class="nav-item" role="presentation">
-                <a href="#tre" class="nav-link text-dark" id="tre" data-bs-toggle="tab" data-bs-target="#endpoint" role="tab" aria-controls="Endpoint" aria-selected="false">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>TREs</span>
-                        <span class="badge bg-dark-blue rounded-pill ms-2">@*@Model.Endpoints.Count*@</span>
-                    </div>
-                </a>
-            </li>
-        </ul>
+        <div>
+            <div class="text-end">
+                @{
+                    //var Date1 = DateTime.Now.AddDays(-3).AddHours(-2).AddMinutes(-33);
+                    var startDate = Model.StartTime;
+                    var currTime = DateTime.Now;
+                    TimeSpan result1 = currTime.Subtract(startDate);
+                    int days = result1.Days;
+                    int hours = result1.Hours;
+                    int minutes = result1.Minutes;
+                    switch (Model.Status)
+                    {
 
-
-        <div class="tab-content py-5" id="myTabContent">
-            <div class="tab-pane fade show active" id="project" role="tabpanel" aria-labelledby="home-tab">
-                <div class="row">
-                    <div class="col-md-6">
-                        <p class="text-muted fs-7">
-                            Start Date:  <span class="mx-2"></span>End Date:
-                        </p>
-                    </div>
-                </div>
+                        case BL.Models.Enums.StatusType.DataOutApproved:
+                            <h6><span class="badge bg-dark-blue rounded-pill">@Model.Status @Model.EndTime</span></h6>
+                            break;
+                        default:
+                            <div class="mb-0">
+                                <h6 class="mb-0">
+                                    <span class="badge bg-dark-blue rounded-pill">@Model.Status</span>
+                                </h6>
+                                <span class="small">Elapsed Time: @days days, @hours hours, @minutes minute</span>
+                            </div>
+                            break;
+                    }
+                }
             </div>
         </div>
     </div>
+    <hr class="d-flex my-4 mb-5">
+    <p>
+        Project: <a href="@Url.Action("GetProject", "Project", new { id = Model.Project.Id })">@Model.Project.Name</a><br />
+        Submitted by: <a href="@Url.Action("GetUser", "User", new { id = @Model.SubmittedBy.Id })">@Model.SubmittedBy.Name</a><br />
+        Date submitted: @Model.StartTime
+    </p>
+    <p>
+        Minio URL: <a href="http://@ViewBag.minioendpoint" ">@Model.Project.Name Buckets</a><br />
+        <br>Submission Bucket: @Html.Raw(Model.Project.SubmissionBucket)
+        <br>Output Bucket: @Html.Raw(Model.Project.OutputBucket)
+@*        Submission bucket: <a href="#">insert link here</a><br />
+        Output bucket: <a href="#">insert link here</a>*@
+    </p>
+
+    <div class="mb-5">
+        <button id="showJsonButton" class="btn btn-sm btn-primary">
+            <i class="fa fa-code me-1"></i>
+            <small>View Query</small></button>
+        <pre style="white-space:break-spaces;"><code class="json-viewer card card-body mt-2" id="jsonViewer" style="display:none;"></code></pre>
+    </div>
+
+    <div>
+        <h2 class="fs-5">TRE's Submitted To</h2>
+        <div class="accordion accordion-flush" id="accordionFlushExample">
+            @{
+                @foreach (var tre in Model.Children)
+                {
+                    var endpointName = @tre.EndPoint?.Name.ToString();
+                    if (endpointName == null)
+                    {
+                        endpointName = "None";
+                    }
+                    //switch (tre.Status)
+                    //{
+
+                    //    case BL.Models.Enums.StatusType.DataOutApproved:
+                    //        <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span>End Time: @Model.EndTime</h6>
+                    //        break;
+
+                    //    default:
+                    //        <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span> Elapsed Time: @days days, @hours hours, @minutes minutes</h6>
+                    //        break;
+                    //}
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@endpointName" aria-expanded="false" aria-controls="@endpointName">
+                                <span class="fw-bold">@endpointName</span>
+                                <div><small><span class="badge bg-dark-blue rounded-pill ms-4 me-2">@tre.Status</span><span class="text-muted fs-7">Elapsed Time: @days days, @hours hours, @minutes minutes</span></small></div>
+                            </button>
+                        </h3>
+                        <div id="@endpointName" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                            <div class="accordion-body">
+                                Job/task information
+                            </div>
+                        </div>
+                    </div>
+
+                }
+            }
+        </div>
+
+    </div>
+
 </div>
+
+<br />
+<script>
+    var tesJson = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.TesJson));
+    var jsonViewer = document.getElementById("jsonViewer");
+    var showJsonButton = document.getElementById("showJsonButton");
+    var jsonVisible = false;
+
+    showJsonButton.addEventListener("click", function () {
+        if (jsonVisible) {
+            jsonViewer.style.display = "none";
+            jsonVisible = false;
+        } else {
+            jsonViewer.textContent = JSON.stringify(tesJson)
+            jsonViewer.style.display = "block";
+            jsonVisible = true;
+        }
+    });
+</script>
