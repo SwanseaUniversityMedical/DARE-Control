@@ -141,6 +141,31 @@ jobs:
       slack-token: ${{ secrets.SLACK_TOKEN }}
       github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
+  tre-agent-container:
+    # Build the tre agent container and push it as :rc-1.0.0
+    needs:
+      - slack
+      - changes
+    if: fromJSON(needs.changes.outputs.changes).tre-agent-container == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v1.1.0
+    with:
+      job-name: container-tre-agent
+      container-registry: ${{ vars.HARBOR_REGISTRY }}
+      github-app-id: ${{ vars.APP_ID }}
+      container-registry-user: ${{ vars.HARBOR_USER }}
+      container-registry-project: ${{ vars.HARBOR_PROJECT }}
+      container-registry-repo: TEST-${{ vars.HARBOR_REPO }}-tre-agent
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      build-command: |
+        docker build -t $IMAGE -f src/TREAgent/Dockerfile src/
+      test-command: |
+        echo '0'
+    secrets:
+      container-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
   tre-ui-container:
     # Build the tre ui container and push it as :rc-1.0.0
     needs:
@@ -208,6 +233,7 @@ jobs:
       - ui-container
       - tre-api-container
       - tre-ui-container
+      - tre-agent-container
       #- chart-helloworld
 
     uses: SwanseaUniversityMedical/workflows/.github/workflows/slack-release-thread.yaml@v1.1.0
