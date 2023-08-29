@@ -29,23 +29,23 @@ namespace DARE_API.Services
                     user.attributes = new UserAttributes();
                 }
 
-                if (user.attributes.Policy == null)
+                if (user.attributes.policy == null)
                 {
-                    user.attributes.Policy = new string[] { attributeValue };
+                    user.attributes.policy = new string[] { attributeValue };
                 }
                 else
                 {
-                    var policyIndex = Array.IndexOf(user.attributes.Policy, attributeName);
+                    var policyIndex = Array.IndexOf(user.attributes.policy, attributeName);
                     if (policyIndex >= 0)
                     {
-                        user.attributes.Policy[policyIndex] = attributeValue;
+                        user.attributes.policy[policyIndex] = attributeValue;
                     }
                     else
                     {
-                        var updatedPolicy = new string[user.attributes.Policy.Length + 1];
-                        Array.Copy(user.attributes.Policy, updatedPolicy, user.attributes.Policy.Length);
+                        var updatedPolicy = new string[user.attributes.policy.Length + 1];
+                        Array.Copy(user.attributes.policy, updatedPolicy, user.attributes.policy.Length);
                         updatedPolicy[updatedPolicy.Length - 1] = attributeValue;
-                        user.attributes.Policy = updatedPolicy;
+                        user.attributes.policy = updatedPolicy;
                     }
                 }
 
@@ -77,13 +77,11 @@ namespace DARE_API.Services
                 var userId = await GetUserIDAsync(baseUrl, realm, accessToken, userName);
                 var user = await GetUserAttributesAsync(baseUrl, realm, accessToken, userId);
 
-                if (user.attributes != null && user.attributes.Policy != null)
-                {
-                    //var updatedPolicy = user.attributes.Policy.Where(attr => attr != attributeValue).ToArray();
-                    //user.attributes.Policy = updatedPolicy;
-                    if (user.attributes.Policy.Contains(attributeValue))
+                if (user.attributes != null && user.attributes.policy != null)
+                { 
+                    if (user.attributes.policy.Contains(attributeValue))
                     {
-                        user.attributes.Policy = user.attributes.Policy.Where(attr => attr != attributeValue).ToArray();
+                        user.attributes.policy = user.attributes.policy.Where(attr => attr != attributeValue).ToArray();
                     }
                 }
 
