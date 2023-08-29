@@ -112,6 +112,7 @@ namespace TRE_UI.Controllers
 
             return View(projects);
         }
+
         [HttpGet]
         public IActionResult GetAllMemberships()
         {
