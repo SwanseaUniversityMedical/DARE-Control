@@ -66,11 +66,27 @@ namespace DARE_API.Controllers
                     {
                         Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", project.SubmissionBucket);
                     }
+                    else
+                    {
+                        var submistionBucketPolicy = await _minioHelper.CreateBucketPolicy(project.SubmissionBucket);
+                        if (!submistionBucketPolicy)
+                        {
+                            Log.Error("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.", "AddProject", project.SubmissionBucket);
+                        }
+                    }
                     var outputBucket = await _minioHelper.CreateBucket(_minioSettings, project.OutputBucket);
                     if (!outputBucket)
                     {
                         Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", project.OutputBucket);
 
+                    }
+                    else
+                    {
+                        var outputBucketPolicy = await _minioHelper.CreateBucketPolicy(project.OutputBucket);
+                        if (!outputBucketPolicy)
+                        {
+                            Log.Error("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.", "AddProject", project.OutputBucket);
+                        }
                     }
                 }
                
