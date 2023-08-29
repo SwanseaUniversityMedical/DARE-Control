@@ -52,15 +52,7 @@ jobs:
         chart:
           - './.github/workflows/release.yaml'
           - 'charts/**'
-#        chart-helloworld:
-#          - './.github/workflows/on-release.yaml'
-#          - './.github/workflows/slack-release-thread.yaml'
-#          - './.github/workflows/changes.yaml'
-#          - './.github/workflows/version.yaml'
-#          - './.github/workflows/build-release-chart.yaml'
-#          - './.github/workflows/test-chart.yaml'
-#          - './.github/workflows/release-chart.yaml'
-#          - './charts/helloworld/**'
+
     secrets:
       slack-token: ${{ secrets.SLACK_TOKEN }}
       github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
