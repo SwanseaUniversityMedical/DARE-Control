@@ -33,15 +33,15 @@ jobs:
           - 'containers/api/**'
           - 'src/DARE-API/**'
           - 'src/BL/**'
-        chart-helloworld:
-          - './.github/workflows/on-release.yaml'
-          - './.github/workflows/slack-release-thread.yaml'
-          - './.github/workflows/changes.yaml'
-          - './.github/workflows/version.yaml'
-          - './.github/workflows/build-release-chart.yaml'
-          - './.github/workflows/test-chart.yaml'
-          - './.github/workflows/release-chart.yaml'
-          - './charts/helloworld/**'
+#        chart-helloworld:
+#          - './.github/workflows/on-release.yaml'
+#          - './.github/workflows/slack-release-thread.yaml'
+#          - './.github/workflows/changes.yaml'
+#          - './.github/workflows/version.yaml'
+#          - './.github/workflows/build-release-chart.yaml'
+#          - './.github/workflows/test-chart.yaml'
+#          - './.github/workflows/release-chart.yaml'
+#          - './charts/helloworld/**'
     secrets:
       slack-token: ${{ secrets.SLACK_TOKEN }}
       github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
@@ -77,32 +77,32 @@ jobs:
 
 
   ######################################################################################################################
-  # Chart HelloWorld Tasks
+  # Chart Tasks
   ######################################################################################################################
 
-  chart-helloworld:
-    # Build the helloworld chart and push it as x.y.z-rc
-    needs:
-      - slack
-      - changes
-    if: fromJSON(needs.changes.outputs.changes).chart-helloworld == 'true'
-    uses: ./.github/workflows/on-release-chart.yaml
-    with:
-      job-name: chart-helloworld
-      chart-registry: ${{ vars.HARBOR_REGISTRY }}
-      chart-registry-user: ${{ vars.HARBOR_USER }}
-      chart-registry-project: ${{ vars.HARBOR_PROJECT }}
-      chart-registry-repo: helloworld
-      github-app-id: ${{ vars.APP_ID }}
-      slack-channel: ${{ vars.SLACK_CHANNEL }}
-      slack-thread: ${{ needs.slack.outputs.thread }}
-      chart: charts/helloworld
-      test-command: |
-        helm template $CHART --values charts/helloworld/values.yaml
-    secrets:
-      chart-registry-token: ${{ secrets.HARBOR_TOKEN }}
-      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
-      slack-token: ${{ secrets.SLACK_TOKEN }}
+#  chart-helloworld:
+#    # Build the helloworld chart and push it as x.y.z-rc
+#    needs:
+#      - slack
+#      - changes
+#    if: fromJSON(needs.changes.outputs.changes).chart-helloworld == 'true'
+#    uses: ./.github/workflows/on-release-chart.yaml
+#    with:
+#      job-name: chart-helloworld
+#      chart-registry: ${{ vars.HARBOR_REGISTRY }}
+#      chart-registry-user: ${{ vars.HARBOR_USER }}
+#      chart-registry-project: ${{ vars.HARBOR_PROJECT }}
+#      chart-registry-repo: helloworld
+#      github-app-id: ${{ vars.APP_ID }}
+#      slack-channel: ${{ vars.SLACK_CHANNEL }}
+#      slack-thread: ${{ needs.slack.outputs.thread }}
+#      chart: charts/helloworld
+#      test-command: |
+#        helm template $CHART --values charts/helloworld/values.yaml
+#    secrets:
+#      chart-registry-token: ${{ secrets.HARBOR_TOKEN }}
+#      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+#      slack-token: ${{ secrets.SLACK_TOKEN }}
 
   ######################################################################################################################
   # Post-Tasks
@@ -115,7 +115,7 @@ jobs:
       - slack
       - changes
       - DARE-api-container
-      - chart-helloworld
+      #- chart-helloworld
 
     uses: ./.github/workflows/slack-release-thread.yaml
     if: always()
