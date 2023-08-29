@@ -56,7 +56,7 @@ jobs:
       - slack
       - changes
     if: fromJSON(needs.changes.outputs.changes).DARE-api-container == 'true'
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/release-container.yaml@v1.1.0
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v1.1.0
     with:
       job-name: DARE-api-container
       container-registry: ${{ vars.HARBOR_REGISTRY }}
