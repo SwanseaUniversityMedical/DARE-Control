@@ -7,6 +7,7 @@ using Serilog;
 using BL.Models.ViewModels;
 using System.Linq;
 using DARE_API.Services.Contract;
+using Microsoft.AspNetCore.Authentication;
 
 namespace BL.Controllers
 {
