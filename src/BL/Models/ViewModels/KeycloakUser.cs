@@ -26,7 +26,7 @@ namespace BL.Models.ViewModels
 
     public class UserAttributes
     {
-        public string[] Policy { get; set; }
+        public string[] policy { get; set; }
     }
 
     public class Access
