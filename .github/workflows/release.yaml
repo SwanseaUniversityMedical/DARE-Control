@@ -28,12 +28,12 @@ jobs:
       slack-thread: ${{ needs.slack.outputs.thread }}
       github-app-id: ${{ vars.APP_ID }}
       filters: |
-        DARE-api-container:
+        api-container:
           - '.github/workflows/release.yaml'
           - 'containers/api/**'
           - 'src/DARE-API/**'
           - 'src/BL/**'
-        DARE-ui-container:
+        ui-container:
           - './.github/workflows/release.yaml'
           - 'src/DARE-FrontEnd/**'
           - 'src/BL/**'
@@ -66,7 +66,7 @@ jobs:
     needs:
       - slack
       - changes
-    if: fromJSON(needs.changes.outputs.changes).DARE-api-container == 'true'
+    if: fromJSON(needs.changes.outputs.changes).api-container == 'true'
     uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v1.2.0
     with:
       job-name: container-api
@@ -92,7 +92,7 @@ jobs:
     needs:
       - slack
       - changes
-    if: fromJSON(needs.changes.outputs.changes).DARE-ui-container == 'true'
+    if: fromJSON(needs.changes.outputs.changes).ui-container == 'true'
     uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v1.2.0
     with:
       job-name: container-ui
