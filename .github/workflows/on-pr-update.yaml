@@ -1,0 +1,224 @@
+name: PR Update
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+
+  slack:
+    # Open a new PR thread on Slack for this CI run.
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/slack-pr-thread.yaml@v1.0.0
+    with:
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+    secrets:
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+
+  changes:
+    # Detect which files have been changed on this PR's full history
+    needs: slack
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/changes.yaml@v1.0.0
+    with:
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      github-app-id: ${{ vars.APP_ID }}
+      filters: |
+        container-api:
+          - './.github/workflows/on-pr-update.yaml'
+          - 'src/DARE-API/**'
+          - 'src/BL/**'
+        container-ui:
+          - './.github/workflows/on-pr-update.yaml'
+          - 'src/DARE-FrontEnd/**'
+          - 'src/BL/**'
+        container-tre-api:
+          - './.github/workflows/on-pr-update.yaml'
+          - 'src/TRE-API/**'
+          - 'src/BL/**'
+        container-tre-ui:
+          - './.github/workflows/on-pr-update.yaml'
+          - 'src/TRE-UI/**'
+          - 'src/BL/**'
+        container-tre-agent:
+          - './.github/workflows/on-pr-update.yaml'
+          - 'src/TREAgent/**'
+          - 'src/BL/**'
+        chart:
+        - './.github/workflows/on-pr-update.yaml'
+        - 'charts/**'
+
+    secrets:
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+  build-api-container:
+    # Build the api container and push it as :pr-42 and :pr-42-fe45b3h
+    needs:
+      - slack
+      - changes
+    if: fromJSON(needs.changes.outputs.changes).container-api == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-pr-update-container.yaml@v1.0.0
+    with:
+      job-name: container-api
+      container-registry: ${{ vars.HARBOR_REGISTRY }}
+      container-registry-user: ${{ vars.HARBOR_USER }}
+      container-registry-project: ${{ vars.HARBOR_PROJECT }}
+      container-registry-repo: ${{ vars.HARBOR_REPO }}-main-api
+      github-app-id: ${{ vars.APP_ID }}
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      build-command: |
+        docker build -t $IMAGE -f src/DARE-API/Dockerfile src/
+      test-command: |
+        echo '0'
+    secrets:
+      container-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+
+  build-ui-container:
+    # Build the ui container and push it as :pr-42 and :pr-42-fe45b3h
+    needs:
+      - slack
+      - changes
+    if: fromJSON(needs.changes.outputs.changes).container-ui == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-pr-update-container.yaml@v1.0.0
+    with:
+      job-name: container-ui
+      container-registry: ${{ vars.HARBOR_REGISTRY }}
+      container-registry-user: ${{ vars.HARBOR_USER }}
+      container-registry-project: ${{ vars.HARBOR_PROJECT }}
+      container-registry-repo:  ${{ vars.HARBOR_REPO }}-main-ui
+      github-app-id: ${{ vars.APP_ID }}
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      build-command: |
+        docker build -t $IMAGE -f src/DARE-FrontEnd/Dockerfile src/
+      test-command: |
+        echo '0'
+    secrets:
+      container-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+
+  build-tre-api-container:
+    # Build the tre-api container and push it as :pr-42 and :pr-42-fe45b3h
+    needs:
+      - slack
+      - changes
+    if: fromJSON(needs.changes.outputs.changes).container-tre-api == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-pr-update-container.yaml@v1.0.0
+    with:
+      job-name: container-tre-api
+      container-registry: ${{ vars.HARBOR_REGISTRY }}
+      container-registry-user: ${{ vars.HARBOR_USER }}
+      container-registry-project: ${{ vars.HARBOR_PROJECT }}
+      container-registry-repo: ${{ vars.HARBOR_REPO }}-tre-api
+      github-app-id: ${{ vars.APP_ID }}
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      build-command: |
+        docker build -t $IMAGE -f src/TRE-API/Dockerfile src/
+      test-command: |
+        echo '0'
+    secrets:
+      container-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+
+  build-tre-ui-container:
+    # Build the tre-ui container and push it as :pr-42 and :pr-42-fe45b3h
+    needs:
+      - slack
+      - changes
+    if: fromJSON(needs.changes.outputs.changes).container-tre-ui == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-pr-update-container.yaml@v1.0.0
+    with:
+      job-name: container-tre-ui
+      container-registry: ${{ vars.HARBOR_REGISTRY }}
+      container-registry-user: ${{ vars.HARBOR_USER }}
+      container-registry-project: ${{ vars.HARBOR_PROJECT }}
+      container-registry-repo: ${{ vars.HARBOR_REPO }}-tre-ui
+      github-app-id: ${{ vars.APP_ID }}
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      build-command: |
+        docker build -t $IMAGE -f src/TRE-UI/Dockerfile src/
+      test-command: |
+        echo '0'
+    secrets:
+      container-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+
+  build-tre-agent-container:
+    # Build the tre-agent container and push it as :pr-42 and :pr-42-fe45b3h
+    needs:
+      - slack
+      - changes
+    if: fromJSON(needs.changes.outputs.changes).container-tre-agent == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-pr-update-container.yaml@v1.0.0
+    with:
+      job-name: container-tre-agent
+      container-registry: ${{ vars.HARBOR_REGISTRY }}
+      container-registry-user: ${{ vars.HARBOR_USER }}
+      container-registry-project: ${{ vars.HARBOR_PROJECT }}
+      container-registry-repo: ${{ vars.HARBOR_REPO }}-tre-agent
+      github-app-id: ${{ vars.APP_ID }}
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      build-command: |
+        docker build -t $IMAGE -f src/TREAgent/Dockerfile src/
+      test-command: |
+        echo '0'
+    secrets:
+      container-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+
+  build-pr-chart:
+    # Build the chart and push it as :pr-42 and :pr-42-fe45b3h
+    needs:
+      - slack
+      - changes
+    if: fromJSON(needs.changes.outputs.changes).chart == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-pr-update-chart.yaml@v1.0.0
+    with:
+      job-name: chart
+      chart: charts/**
+      chart-registry: ${{ vars.HARBOR_REGISTRY }}
+      chart-registry-user: ${{ vars.HARBOR_USER }}
+      chart-registry-project: ${{ vars.HARBOR_PROJECT }}
+      chart-registry-repo: ${{ vars.HARBOR_REPO }}
+      github-app-id: ${{ vars.APP_ID }}
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      test-command: |
+        helm template $CHART --values charts/control/values.yaml
+    secrets:
+      chart-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+
+  slack-update:
+    # Update the original Slack message with the final workflow status
+    # WARNING! ALL UPSTREAM JOBS MUST BE DECLARED HERE TO REPORT FAILURES CORRECTLY!
+    needs:
+      - slack
+      - changes
+      - build-api-container
+      - build-ui-container
+      - build-tre-api-container
+      - build-tre-ui-container
+      - build-tre-agent-container
+      - build-pr-chart
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/slack-pr-thread.yaml@v1.0.0
+    if: always()
+    with:
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      status: ${{ contains(join(needs.*.result, ','), 'failure') && ':no_entry:' || ':white_check_mark:' }}
+    secrets:
+      slack-token: ${{ secrets.SLACK_TOKEN }}
