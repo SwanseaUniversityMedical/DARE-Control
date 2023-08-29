@@ -81,6 +81,7 @@ jobs:
         docker build -t $IMAGE -f src/DARE-API/Dockerfile src/
       test-command: |
         echo '0'
+      release-branches: 'ci/create-new-release-ci-using-reusable-workflows'
     secrets:
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
