@@ -34,19 +34,19 @@ jobs:
           - 'src/DARE-API/**'
           - 'src/BL/**'
         DARE-ui-container:
-          - './.github/workflows/on-pr-update.yaml'
+          - './.github/workflows/release.yaml'
           - 'src/DARE-FrontEnd/**'
           - 'src/BL/**'
         tre-api-container:
-          - './.github/workflows/on-pr-update.yaml'
+          - './.github/workflows/release.yaml'
           - 'src/TRE-API/**'
           - 'src/BL/**'
         tre-ui-container:
-          - './.github/workflows/on-pr-update.yaml'
+          - './.github/workflows/release.yaml'
           - 'src/TRE-UI/**'
           - 'src/BL/**'
         tre-agent-container:
-          - './.github/workflows/on-pr-update.yaml'
+          - './.github/workflows/release.yaml'
           - 'src/TREAgent/**'
           - 'src/BL/**'
 #        chart-helloworld:
@@ -117,6 +117,8 @@ jobs:
       github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
 
+
+
   ######################################################################################################################
   # Chart Tasks
   ######################################################################################################################
@@ -157,6 +159,7 @@ jobs:
       - changes
       - DARE-api-container
       - DARE-ui-container
+      - tre-api-container
       #- chart-helloworld
 
     uses: SwanseaUniversityMedical/workflows/.github/workflows/slack-release-thread.yaml@v1.1.0
