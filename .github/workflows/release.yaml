@@ -13,7 +13,7 @@ jobs:
 
   slack:
     # Open a new PR thread on Slack for this CI run
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/slack-release-thread.yaml@v1.2.0
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/slack-release-thread.yaml@v2.0.0
     with:
       slack-channel: ${{ vars.SLACK_CHANNEL }}
     secrets:
@@ -22,7 +22,7 @@ jobs:
   changes:
     # Detect which files have been changed on this PR's full history
     needs: slack
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/changes.yaml@v1.2.0
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/changes.yaml@v2.0.0
     with:
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       slack-thread: ${{ needs.slack.outputs.thread }}
@@ -67,7 +67,7 @@ jobs:
       - slack
       - changes
     if: fromJSON(needs.changes.outputs.changes).api-container == 'true'
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v1.2.0
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.0.0
     with:
       job-name: container-api
       container-registry: ${{ vars.HARBOR_REGISTRY }}
@@ -94,7 +94,7 @@ jobs:
       - slack
       - changes
     if: fromJSON(needs.changes.outputs.changes).ui-container == 'true'
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v1.2.0
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.0.0
     with:
       job-name: container-ui
       container-registry: ${{ vars.HARBOR_REGISTRY }}
@@ -119,7 +119,7 @@ jobs:
       - slack
       - changes
     if: fromJSON(needs.changes.outputs.changes).tre-api-container == 'true'
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v1.2.0
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.0.0
     with:
       job-name: container-tre-api
       container-registry: ${{ vars.HARBOR_REGISTRY }}
@@ -144,7 +144,7 @@ jobs:
       - slack
       - changes
     if: fromJSON(needs.changes.outputs.changes).tre-ui-container == 'true'
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v1.2.0
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.0.0
     with:
       job-name: container-tre-ui
       container-registry: ${{ vars.HARBOR_REGISTRY }}
@@ -169,7 +169,7 @@ jobs:
       - slack
       - changes
     if: fromJSON(needs.changes.outputs.changes).tre-agent-container == 'true'
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v1.2.0
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.0.0
     with:
       job-name: container-tre-agent
       container-registry: ${{ vars.HARBOR_REGISTRY }}
@@ -200,7 +200,7 @@ jobs:
       - slack
       - changes
     if: fromJSON(needs.changes.outputs.changes).chart == 'true'
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-chart.yaml@v1.2.0
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-chart.yaml@v2.0.0
     with:
       job-name: chart
       chart-registry: ${{ vars.HARBOR_REGISTRY }}
@@ -235,7 +235,7 @@ jobs:
       - tre-agent-container
       - chart
 
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/slack-release-thread.yaml@v1.2.0
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/slack-release-thread.yaml@v2.0.0
     if: always()
     with:
       slack-channel: ${{ vars.SLACK_CHANNEL }}
