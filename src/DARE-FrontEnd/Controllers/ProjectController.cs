@@ -3,7 +3,6 @@ using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using BL.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Endpoint = BL.Models.Endpoint;
 using Microsoft.AspNetCore.Authorization;
 using BL.Models.Settings;
 
@@ -13,15 +12,15 @@ namespace DARE_FrontEnd.Controllers
     public class ProjectController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
-        private readonly IConfiguration _configuration;
-        private readonly IFormIOSettings _formIOSettings;
+        
+        private readonly FormIOSettings _formIOSettings;
 
-        public ProjectController(IDareClientHelper client, IConfiguration configuration)
+        public ProjectController(IDareClientHelper client, FormIOSettings formIo)
         {
             _clientHelper = client;
-            _configuration = configuration;
-            _formIOSettings = new FormIOSettings();
-            configuration.Bind(nameof(FormIOSettings), _formIOSettings);
+            
+            _formIOSettings = formIo;
+            
 
         }
 
@@ -30,7 +29,7 @@ namespace DARE_FrontEnd.Controllers
         public IActionResult GetProject(int id)
         {
             var users = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
-            var endpoints = _clientHelper.CallAPIWithoutModel<List<Endpoint>>("/api/Endpoint/GetAllEndpoints/").Result;
+            var endpoints = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Endpoint/GetAllEndpoints/").Result;
 
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());
@@ -38,7 +37,7 @@ namespace DARE_FrontEnd.Controllers
                 "/api/Project/GetProject/", paramlist).Result;
 
             var userItems2 = users.Where(p => !project.Users.Select(x => x.Id).Contains(p.Id)).ToList();
-            var endpointItems2 = endpoints.Where(p => !project.Endpoints.Select(x => x.Id).Contains(p.Id)).ToList();
+            var endpointItems2 = endpoints.Where(p => !project.Tres.Select(x => x.Id).Contains(p.Id)).ToList();
 
             var userItems = userItems2
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
@@ -49,7 +48,7 @@ namespace DARE_FrontEnd.Controllers
 
             var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
 
-            var projectView = new ProjectUserEndpoint()
+            var projectView = new ProjectUserTre()
             {
                 Id = project.Id,
                 FormData = project.FormData,
@@ -58,7 +57,7 @@ namespace DARE_FrontEnd.Controllers
                 StartDate = project.StartDate,
                 EndDate = project.EndDate,
                 ProjectDescription = project.ProjectDescription,
-                Endpoints = project.Endpoints,
+                Endpoints = project.Tres,
                 SubmissionBucket = project.SubmissionBucket,
                 OutputBucket = project.OutputBucket,
                 MinioEndpoint = minioEndpoint.Url,
@@ -124,7 +123,7 @@ namespace DARE_FrontEnd.Controllers
         private ProjectEndpoint GetProjectEndpointModel()
         {
             var projs = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
-            var users = _clientHelper.CallAPIWithoutModel<List<Endpoint>>("/api/Endpoint/GetAllEndpoints/").Result;
+            var users = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Endpoint/GetAllEndpoints/").Result;
 
             var projectItems = projs
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
@@ -203,7 +202,7 @@ namespace DARE_FrontEnd.Controllers
 
             var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
 
-            var projectView = new ProjectUserEndpoint()
+            var projectView = new ProjectUserTre()
             {
                 Id = project.Id,
                 FormData = project.FormData,
@@ -211,7 +210,7 @@ namespace DARE_FrontEnd.Controllers
                 Users = project.Users,
                 StartDate = project.StartDate,
                 EndDate = project.EndDate,
-                Endpoints = project.Endpoints,
+                Endpoints = project.Tres,
                 SubmissionBucket = project.SubmissionBucket,
                 OutputBucket = project.OutputBucket,
                 MinioEndpoint = minioEndpoint.Url

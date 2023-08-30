@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Serilog;
-
-
-    using EasyNetQ.Management.Client;
-    using EasyNetQ.Management.Client.Model;
+﻿using Serilog;
+using EasyNetQ.Management.Client;
+using EasyNetQ.Management.Client.Model;
 
 namespace BL.Rabbit
 {

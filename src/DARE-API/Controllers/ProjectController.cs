@@ -7,7 +7,6 @@ using BL.Models.ViewModels;
 
 using Newtonsoft.Json;
 using Serilog;
-using Endpoint = BL.Models.Endpoint;
 using BL.Services;
 using DARE_API.Services.Contract;
 using Microsoft.AspNetCore.Authentication;
@@ -223,7 +222,7 @@ namespace DARE_API.Controllers
         {
             try
             {
-                var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.Id == model.EndpointId);
+                var endpoint = _DbContext.Tres.FirstOrDefault(x => x.Id == model.EndpointId);
                 if (endpoint == null)
                 {
                     Log.Error("{Function} Invalid endpoint id {UserId}", "AddEndpointMembership", model.EndpointId);
@@ -237,13 +236,13 @@ namespace DARE_API.Controllers
                     return null;
                 }
 
-                if (project.Endpoints.Any(x => x == endpoint))
+                if (project.Tres.Any(x => x == endpoint))
                 {
                     Log.Error("{Function} Endpoint {Endpoint} is already on {ProjectName}", "AddEndpointMembership", endpoint.Name, project.Name);
                     return null;
                   }
 
-                project.Endpoints.Add(endpoint);
+                project.Tres.Add(endpoint);
 
                 await _DbContext.SaveChangesAsync();
                 Log.Information("{Function} Added endpoint {Enpoint} to {ProjectName}", "AddEndpointMembership", endpoint.Name, project.Name);
@@ -263,7 +262,7 @@ namespace DARE_API.Controllers
         {
             try
             {
-                var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.Id == model.EndpointId);
+                var endpoint = _DbContext.Tres.FirstOrDefault(x => x.Id == model.EndpointId);
                 if (endpoint == null)
                 {
                     Log.Error("{Function} Invalid endpoint id {UserId}", "AddEndpointMembership", model.EndpointId);
@@ -277,13 +276,13 @@ namespace DARE_API.Controllers
                     return null;
                 }
 
-                if (!project.Endpoints.Any(x => x == endpoint))
+                if (!project.Tres.Any(x => x == endpoint))
                 {
                     Log.Error("{Function} Endpoint {Endpoint} is already on {ProjectName}", "AddEndpointMembership", endpoint.Name, project.Name);
                     return null;
                 }
 
-                project.Endpoints.Remove(endpoint);
+                project.Tres.Remove(endpoint);
 
                 await _DbContext.SaveChangesAsync();
                 Log.Information("{Function} Added endpoint {Enpoint} to {ProjectName}", "AddEndpointMembership", endpoint.Name, project.Name);
@@ -331,7 +330,7 @@ namespace DARE_API.Controllers
                 //TODO - use User.Identity.IsAuthenticated to alter list returned : embargoed etc
 
                 var allProjects = _DbContext.Projects
-                    //.Include(x => x.Endpoints)
+                    //.Include(x => x.Tres)
                     //.Include(x => x.Submissions)
                     //.Include(x => x.Users)
                     .ToList();
@@ -358,7 +357,7 @@ namespace DARE_API.Controllers
             {
                 
                 var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-                var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
+                var endpoint = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
                 if (endpoint == null)
                 {
                     throw new Exception("User " + usersName + " doesn't have an endpoint");
@@ -381,9 +380,9 @@ namespace DARE_API.Controllers
 
         [HttpGet("GetEndPointsInProject")]
         [AllowAnonymous]
-        public List<Endpoint> GetEndPointsInProject(int projectId)
+        public List<Tre> GetEndPointsInProject(int projectId)
         {
-            List<Endpoint> endpoints = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Endpoints).ToList();
+            List<Tre> endpoints = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Tres).ToList();
 
             return endpoints;
         }

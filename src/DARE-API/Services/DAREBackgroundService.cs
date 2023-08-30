@@ -55,7 +55,7 @@ namespace DARE_API.Services
             using (var scope = _serviceScopeFactory.CreateScope())
             {
                 var _DbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.Name.ToLower() == endpointname.ToLower());
+                var endpoint = _DbContext.Tres.FirstOrDefault(x => x.Name.ToLower() == endpointname.ToLower());
                 if (endpoint == null)
                 {
                     Log.Error("DAREBackgroundService: Unable to find endpoint");

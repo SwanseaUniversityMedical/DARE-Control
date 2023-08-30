@@ -20,15 +20,15 @@ namespace DARE_FrontEnd.Controllers
     public class UserController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
-        private readonly IConfiguration _configuration;
-        private readonly IFormIOSettings _formIOSettings;
+        
+        private readonly FormIOSettings _formIOSettings;
 
-        public UserController(IDareClientHelper client, IConfiguration configuration)
+        public UserController(IDareClientHelper client, FormIOSettings formIo)
         {
             _clientHelper = client;
-            _configuration = configuration;
-            _formIOSettings = new FormIOSettings();
-            configuration.Bind(nameof(FormIOSettings), _formIOSettings);
+            
+            _formIOSettings = formIo;
+            
         }
 
         public IActionResult AddUserForm(int userId)

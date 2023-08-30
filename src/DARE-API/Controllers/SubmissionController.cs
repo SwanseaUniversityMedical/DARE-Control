@@ -47,7 +47,7 @@ namespace DARE_API.Controllers
         {
             
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-            var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName);
+            var endpoint = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName);
             if (endpoint == null)
             {
                 return BadRequest("User " + usersName + " doesn't have an endpoint");
@@ -69,7 +69,7 @@ namespace DARE_API.Controllers
         {
             
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-            var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
+            var endpoint = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
             if (endpoint == null)
             {
                 return BadRequest("User " + usersName + " doesn't have an endpoint");
@@ -99,7 +99,7 @@ namespace DARE_API.Controllers
             {
                 var allSubmissions = _DbContext.Submissions.ToList();
 
-                Log.Information("{Function} Endpoints retrieved successfully", "GetAllSubmissions");
+                Log.Information("{Function} Tres retrieved successfully", "GetAllSubmissions");
                 return allSubmissions;
             }
             catch (Exception ex)

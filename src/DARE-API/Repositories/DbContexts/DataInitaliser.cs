@@ -7,7 +7,6 @@ using System.Threading;
 using BL.Models.Enums;
 using DARE_API.Services;
 using Serilog;
-using Endpoint = BL.Models.Endpoint;
 using User = BL.Models.User;
 
 namespace DARE_API.Repositories.DbContexts
@@ -93,7 +92,7 @@ namespace DARE_API.Repositories.DbContexts
                     Display = name,
                     EndDate = DateTime.Now.ToUniversalTime(),
                     StartDate = DateTime.Now.ToUniversalTime(),
-                    Endpoints = new List<Endpoint>(),
+                    Tres = new List<Tre>(),
                     Users = new List<BL.Models.User>(),
                     Submissions = new List<Submission>(),
                     ProjectDescription = ""
@@ -123,29 +122,29 @@ namespace DARE_API.Repositories.DbContexts
 
         }
 
-        private static Endpoint CreateEndpoint(string name, string adminUser, ApplicationDbContext context)
+        private static Tre CreateEndpoint(string name, string adminUser, ApplicationDbContext context)
         {
-            var endpoint = context.Endpoints.FirstOrDefault(x => x.Name.ToLower() == name.ToLower());
+            var endpoint = context.Tres.FirstOrDefault(x => x.Name.ToLower() == name.ToLower());
             if (endpoint == null)
             {
-                endpoint = new Endpoint()
+                endpoint = new Tre()
                 {
                     Name = name,
                     AdminUsername = adminUser,
                     About = ""
                 };
                 endpoint.FormData = JsonConvert.SerializeObject(endpoint);
-                context.Endpoints.Add(endpoint);
+                context.Tres.Add(endpoint);
             }
             return endpoint;
 
         }
 
-        private static void AddMissingEndpoint(Project project, Endpoint endpoint)
+        private static void AddMissingEndpoint(Project project, Tre tre)
         {
-            if (!project.Endpoints.Contains(endpoint))
+            if (!project.Tres.Contains(tre))
             {
-                project.Endpoints.Add(endpoint);
+                project.Tres.Add(tre);
             }
         }
 
@@ -227,17 +226,17 @@ namespace DARE_API.Repositories.DbContexts
 
 
 
-            var dbEndpoints = new List<BL.Models.Endpoint>();
+            var dbEndpoints = new List<BL.Models.Tre>();
 
             if (endpoints.Count == 0)
             {
-                dbEndpoints = dbProject.Endpoints;
+                dbEndpoints = dbProject.Tres;
             }
             else
             {
                 foreach (var endpoint in endpoints)
                 {
-                    dbEndpoints.Add(dbProject.Endpoints.First(x => x.Name.ToLower() == endpoint.ToLower()));
+                    dbEndpoints.Add(dbProject.Tres.First(x => x.Name.ToLower() == endpoint.ToLower()));
                 }
             }
             UpdateSubmissionStatus.UpdateStatus(sub, StatusType.WaitingForChildSubsToComplete, "");

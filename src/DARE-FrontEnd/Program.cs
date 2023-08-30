@@ -43,6 +43,10 @@ var controlKeyCloakSettings = new ControlKeyCloakSettings();
 configuration.Bind(nameof(controlKeyCloakSettings), controlKeyCloakSettings);
 builder.Services.AddSingleton(controlKeyCloakSettings);
 
+var formIOSettings = new FormIOSettings();
+configuration.Bind(nameof(formIOSettings), formIOSettings);
+builder.Services.AddSingleton(formIOSettings);
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
 

@@ -4,7 +4,6 @@ using BL.Models.Enums;
 using BL.Models.ViewModels;
 using BL.Models.Tes;
 using BL.Rabbit;
-using BL.Services;
 using Microsoft.Extensions.DependencyInjection;
 using EasyNetQ;
 using Newtonsoft.Json;

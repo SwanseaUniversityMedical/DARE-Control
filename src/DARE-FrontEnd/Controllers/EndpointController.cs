@@ -1,8 +1,8 @@
-﻿using BL.Models.ViewModels;
+﻿using BL.Models;
+using BL.Models.ViewModels;
 using BL.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Endpoint = BL.Models.Endpoint;
 using BL.Models.Settings;
 using Microsoft.CodeAnalysis;
 
@@ -14,14 +14,14 @@ namespace DARE_FrontEnd.Controllers
 
         private readonly IDareClientHelper _clientHelper;
         
-        private readonly IFormIOSettings _formIOSettings;
+        private readonly FormIOSettings _formIOSettings;
 
-        public EndpointController(IDareClientHelper client, IConfiguration configuration)
+        public EndpointController(IDareClientHelper client, FormIOSettings formIo)
         {
             _clientHelper = client;
 
-            _formIOSettings = new FormIOSettings();
-            configuration.Bind(nameof(FormIOSettings), _formIOSettings);
+            _formIOSettings = formIo;
+            
         }
 
         
@@ -38,7 +38,7 @@ namespace DARE_FrontEnd.Controllers
             {
                 var paramList = new Dictionary<string, string>();
                 paramList.Add("endpointId", endpointId.ToString());
-                var endpoint = _clientHelper.CallAPIWithoutModel<BL.Models.Endpoint>("/api/Endpoint/GetanEndpoint/", paramList).Result;
+                var endpoint = _clientHelper.CallAPIWithoutModel<BL.Models.Tre>("/api/Endpoint/GetanEndpoint/", paramList).Result;
                 //TempData["end"] = endpoint.ErrorMessage.ToString();
                 formData.FormIoString = endpoint?.FormData;
                 formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""Id"":" + endpointId.ToString(), StringComparison.CurrentCultureIgnoreCase);
@@ -53,7 +53,7 @@ namespace DARE_FrontEnd.Controllers
         public IActionResult GetAllEndpoints()
         {
 
-            var endpoints = _clientHelper.CallAPIWithoutModel<List<Endpoint>>("/api/Endpoint/GetAllEndpoints/").Result;
+            var endpoints = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Endpoint/GetAllEndpoints/").Result;
 
             return View(endpoints);
         }
@@ -65,7 +65,7 @@ namespace DARE_FrontEnd.Controllers
         {
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("endpointId", id.ToString());
-            var test = _clientHelper.CallAPIWithoutModel<Endpoint?>(
+            var test = _clientHelper.CallAPIWithoutModel<Tre?>(
                 "/api/Endpoint/GetAnEndpoint/", paramlist).Result;
 
             return View(test);
@@ -81,7 +81,7 @@ namespace DARE_FrontEnd.Controllers
                 var data = System.Text.Json.JsonSerializer.Deserialize<FormData>(str);
                 data.FormIoString = str;
 
-                var result = await _clientHelper.CallAPI<FormData, Endpoint?>("/api/Endpoint/AddEndpoint", data);
+                var result = await _clientHelper.CallAPI<FormData, Tre?>("/api/Endpoint/AddEndpoint", data);
 
                 if (result.Error)
                     return BadRequest();

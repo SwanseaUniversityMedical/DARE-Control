@@ -61,17 +61,17 @@ namespace DARE_API.Services
 
                 
 
-                var dbendpoints = new List<BL.Models.Endpoint>();
+                var dbendpoints = new List<BL.Models.Tre>();
 
                 if (endpoints.Count == 0)
                 {
-                    dbendpoints = dbproj.Endpoints;
+                    dbendpoints = dbproj.Tres;
                 }
                 else
                 {
                     foreach (var endpoint in endpoints)
                     {
-                        dbendpoints.Add(dbproj.Endpoints.First(x => x.Name.ToLower() == endpoint.ToLower()));
+                        dbendpoints.Add(dbproj.Tres.First(x => x.Name.ToLower() == endpoint.ToLower()));
                     }
                 }
                 UpdateSubmissionStatus.UpdateStatus(sub, StatusType.WaitingForChildSubsToComplete, "");

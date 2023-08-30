@@ -3,7 +3,6 @@ using DARE_API.Repositories.DbContexts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
-using Endpoint = BL.Models.Endpoint;
 using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using BL.Models;
@@ -28,48 +27,48 @@ namespace DARE_API.Controllers
 
 
         [HttpPost("AddEndpoint")]
-        public async Task<Endpoint> AddEndpoint([FromBody] FormData data)
+        public async Task<Tre> AddEndpoint([FromBody] FormData data)
         {           
             try
             {
-                Endpoint endpoint = JsonConvert.DeserializeObject<Endpoint>(data.FormIoString);
-                endpoint.Name = endpoint.Name?.Trim();
-                if (_DbContext.Endpoints.Any(x => x.Name.ToLower() == endpoint.Name.ToLower().Trim() && x.Id != endpoint.Id))
+                Tre tre = JsonConvert.DeserializeObject<Tre>(data.FormIoString);
+                tre.Name = tre.Name?.Trim();
+                if (_DbContext.Tres.Any(x => x.Name.ToLower() == tre.Name.ToLower().Trim() && x.Id != tre.Id))
                 {
                     
-                    return new Endpoint(){Error = true, ErrorMessage = "Another endpoint already exists with the same name"};
+                    return new Tre(){Error = true, ErrorMessage = "Another endpoint already exists with the same name"};
                 }
                 
-                if  (_DbContext.Endpoints.Any(x => x.AdminUsername.ToLower() == endpoint.AdminUsername.ToLower() && x.Id != endpoint.Id))
+                if  (_DbContext.Tres.Any(x => x.AdminUsername.ToLower() == tre.AdminUsername.ToLower() && x.Id != tre.Id))
                 {
-                    return new Endpoint() { Error = true, ErrorMessage = "Another endpoint already exists with the same TRE Admin Name" };
+                    return new Tre() { Error = true, ErrorMessage = "Another endpoint already exists with the same TRE Admin Name" };
                 }
-                if (_DbContext.Endpoints.Any(x => x.About.ToLower() == endpoint.About.ToLower() && x.Id != endpoint.Id))
+                if (_DbContext.Tres.Any(x => x.About.ToLower() == tre.About.ToLower() && x.Id != tre.Id))
                 {
-                    return new Endpoint() { Error = true, ErrorMessage = "Another endpoint already exists with the same TRE Admin Name" };
+                    return new Tre() { Error = true, ErrorMessage = "Another endpoint already exists with the same TRE Admin Name" };
                 }
-                endpoint.FormData = data.FormIoString;
+                tre.FormData = data.FormIoString;
 
-                if (endpoint.Id > 0)
+                if (tre.Id > 0)
                 {
-                    if(_DbContext.Endpoints.Select(x => x.Id == endpoint.Id).Any())
-                        _DbContext.Endpoints.Update(endpoint);
+                    if(_DbContext.Tres.Select(x => x.Id == tre.Id).Any())
+                        _DbContext.Tres.Update(tre);
                     else
-                        _DbContext.Endpoints.Add(endpoint);
+                        _DbContext.Tres.Add(tre);
                 }
 
                 else {
-                    _DbContext.Endpoints.Add(endpoint);
+                    _DbContext.Tres.Add(tre);
                 }
                 await _DbContext.SaveChangesAsync();
-                return endpoint;
+                return tre;
 
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "{Function} Crashed", "AddEndpoint");
 
-                var errorEndpoint = new Endpoint();
+                var errorEndpoint = new Tre();
                 return errorEndpoint;
                 throw;
             }
@@ -77,11 +76,11 @@ namespace DARE_API.Controllers
      
         [HttpGet("GetEndPointsInProject/{projectId}")]
         [AllowAnonymous]
-        public List<Endpoint> GetEndPointsInProject(int projectId)
+        public List<Tre> GetEndPointsInProject(int projectId)
         {
             try
             {
-                List<Endpoint> endpointsList = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Endpoints).ToList();
+                List<Tre> endpointsList = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Tres).ToList();
                 return endpointsList;
             }
             catch (Exception ex)
@@ -92,16 +91,16 @@ namespace DARE_API.Controllers
         }
 
         [HttpGet("GetAllEndpoints")]
-        public async Task<List<Endpoint>> GetAllEndpoints()
+        public async Task<List<Tre>> GetAllEndpoints()
         {
             try
             {
                 var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
-                var allEndpoints = _DbContext.Endpoints.ToList();
+                var allEndpoints = _DbContext.Tres.ToList();
 
                 
 
-                Log.Information("{Function} Endpoints retrieved successfully", "GetAllEndpoints");
+                Log.Information("{Function} Tres retrieved successfully", "GetAllEndpoints");
                 return allEndpoints;
             }
             catch (Exception ex)
@@ -114,11 +113,11 @@ namespace DARE_API.Controllers
         }
         
         [HttpGet("GetAnEndpoint")]
-        public Endpoint? GetAnEndpoint(int endpointId)
+        public Tre? GetAnEndpoint(int endpointId)
         {
             try
             {
-                var returned = _DbContext.Endpoints.Find(endpointId);
+                var returned = _DbContext.Tres.Find(endpointId);
                 if (returned == null)
                 {
                     return null;
