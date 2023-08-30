@@ -91,26 +91,9 @@ namespace DARE_FrontEnd.Controllers
             return BadRequest();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddEndpointList(string ProjectId, string ItemList)
-        {
-            string[] arr = ItemList.Split(',');
-            foreach (string s in arr)
-            {
-                var model = new ProjectEndpoint()
-                {
-                    ProjectId = Int32.Parse(ProjectId),
-                    EndpointId = Int32.Parse(s)
-                };
-                var result =
-                await _clientHelper.CallAPI<ProjectEndpoint, ProjectEndpoint?>("/api/Project/AddEndpointMembership",
-                    model);
-            }
-            return RedirectToAction("GetAnEndpoint", new { id = ProjectId });
-        }
 
 
-
+   
 
     }
 }
