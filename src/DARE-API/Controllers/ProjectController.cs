@@ -9,7 +9,8 @@ using Newtonsoft.Json;
 using Serilog;
 using Endpoint = BL.Models.Endpoint;
 using BL.Services;
-
+using DARE_API.Services.Contract;
+using Microsoft.AspNetCore.Authentication;
 
 namespace DARE_API.Controllers
 {
@@ -23,14 +24,17 @@ namespace DARE_API.Controllers
         private readonly ApplicationDbContext _DbContext;
         private readonly MinioSettings _minioSettings;
         private readonly IMinioHelper _minioHelper;
+        private readonly IKeycloakMinioUserService _keycloakMinioUserService;
+        protected readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ProjectController(ApplicationDbContext applicationDbContext, MinioSettings minioSettings, IMinioHelper minioHelper)
+        public ProjectController(ApplicationDbContext applicationDbContext, MinioSettings minioSettings, IMinioHelper minioHelper, IKeycloakMinioUserService keycloakMinioUserService, IHttpContextAccessor httpContextAccessor)
         {
 
             _DbContext = applicationDbContext;
             _minioSettings = minioSettings;
             _minioHelper = minioHelper;
-
+            _keycloakMinioUserService = keycloakMinioUserService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpPost("AddProject")]
@@ -66,11 +70,27 @@ namespace DARE_API.Controllers
                     {
                         Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", project.SubmissionBucket);
                     }
+                    else
+                    {
+                        var submistionBucketPolicy = await _minioHelper.CreateBucketPolicy(project.SubmissionBucket);
+                        if (!submistionBucketPolicy)
+                        {
+                            Log.Error("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.", "AddProject", project.SubmissionBucket);
+                        }
+                    }
                     var outputBucket = await _minioHelper.CreateBucket(_minioSettings, project.OutputBucket);
                     if (!outputBucket)
                     {
                         Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", project.OutputBucket);
 
+                    }
+                    else
+                    {
+                        var outputBucketPolicy = await _minioHelper.CreateBucketPolicy(project.OutputBucket);
+                        if (!outputBucketPolicy)
+                        {
+                            Log.Error("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.", "AddProject", project.OutputBucket);
+                        }
                     }
                 }
                
@@ -131,6 +151,13 @@ namespace DARE_API.Controllers
 
                 project.Users.Add(user);
 
+                var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
+                var attributeName = "policy";
+
+                await _keycloakMinioUserService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.SubmissionBucket.ToLower() + "_policy");
+
+                await _keycloakMinioUserService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.OutputBucket.ToLower() + "_policy");
+
                 await _DbContext.SaveChangesAsync();
                 Log.Information("{Function} Added User {UserName} to {ProjectName}", "AddUserMembership", user.Name, project.Name);
                 return model;
@@ -170,6 +197,13 @@ namespace DARE_API.Controllers
                 }
 
                 project.Users.Remove(user);
+
+                var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
+                var attributeName = "policy";
+                var attributeValue = project.Name.ToLower() + "_policy";
+
+                await _keycloakMinioUserService.RemoveMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.SubmissionBucket.ToLower() + "_policy");
+                await _keycloakMinioUserService.RemoveMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.OutputBucket.ToLower() + "_policy");
 
                 await _DbContext.SaveChangesAsync();
                 Log.Information("{Function} Added User {UserName} to {ProjectName}", "RemoveUserMembership", user.Name, project.Name);

@@ -221,7 +221,8 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
    
     builder.Services.AddScoped<IMinioService, MinioService>();
     builder.Services.AddScoped<IMinioHelper, MinioHelper>();
-    
+    builder.Services.AddScoped<IKeycloakMinioUserService, KeycloakMinioUserService>();
+
     //    .AddNewtonsoftJson(options =>
     //    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
     //); 
