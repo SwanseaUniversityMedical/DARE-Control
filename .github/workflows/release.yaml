@@ -74,7 +74,8 @@ jobs:
       github-app-id: ${{ vars.APP_ID }}
       container-registry-user: ${{ vars.HARBOR_USER }}
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
-      container-registry-repo: TEST-${{ vars.HARBOR_REPO }}-main-api
+      container-registry-repo: ${{ vars.HARBOR_REPO }}-main-api
+      release-tag-format: 'TEST-DARE-Control-API-Container-${version}'
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       slack-thread: ${{ needs.slack.outputs.thread }}
       build-command: |
