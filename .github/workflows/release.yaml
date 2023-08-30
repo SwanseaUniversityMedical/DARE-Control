@@ -29,7 +29,7 @@ jobs:
       github-app-id: ${{ vars.APP_ID }}
       filters: |
         api-container:
-          - '.github/workflows/release.yaml'
+          - './.github/workflows/release.yaml'
           - 'containers/api/**'
           - 'src/DARE-API/**'
           - 'src/BL/**'
