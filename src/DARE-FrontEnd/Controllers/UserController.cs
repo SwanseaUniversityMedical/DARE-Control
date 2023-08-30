@@ -76,10 +76,6 @@ namespace DARE_FrontEnd.Controllers
             var projectItems = projectItems2
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
-            //var userView = new ProjectUser()
-            //{              
-            //    //ProjectItemList = projectItems               
-            //};
 
             ViewBag.ProjectItems = projectItems;
 

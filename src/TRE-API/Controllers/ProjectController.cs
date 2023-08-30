@@ -57,6 +57,7 @@ namespace TRE_API.Controllers
             return User;
 
         }
+
         [HttpGet("GetAllProjectsForApproval")]
         public List<Project> GetAllProjectsForApproval()
         {
@@ -78,7 +79,7 @@ namespace TRE_API.Controllers
         public List<User> GetAllUsers()
         {
 
-            var allUsers = _dareclientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
+            var allUsers = _dareclientHelper.CallAPIWithoutModel<List<BL.Models.User>>("/api/User/GetAllUsers/").Result;
             return allUsers;
         }
 
@@ -100,7 +101,7 @@ namespace TRE_API.Controllers
 
 
         [HttpPost("ApproveProjectMembership")]
-        public async Task<ProjectApproval?> ApproveProjectMembership(Project model)
+        public async Task<ProjectApproval?> ApproveProjectMembership(Project model, string Approval)
         {
             try
 
@@ -143,7 +144,7 @@ namespace TRE_API.Controllers
                     projectapproval.Projectname = model.Name;
                     projectapproval.Username = username;
                     projectapproval.LocalProjectName = model.FormData;
-                    projectapproval.Approved = model.OutputBucket;
+                    projectapproval.Approved = Approval;
 
 
                     _DbContext.ProjectApprovals.Add(projectapproval);

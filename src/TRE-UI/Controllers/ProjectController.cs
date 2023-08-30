@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using EasyNetQ.Management.Client.Model;
 using System.Xml.Linq;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
+
 
 namespace TRE_UI.Controllers
 {
@@ -68,31 +68,66 @@ namespace TRE_UI.Controllers
         [HttpPost]
         public async Task<IActionResult> EditProjectSubmission(Project model)
         {
+            
+              string Approval = Request.Form["foo"].ToString();
+
             var paramlist = new Dictionary<string, string>();
-            paramlist.Add("projectId", model.Id.ToString());
+            paramlist.Add("Approval", Approval);
         
-            var result = await _treclientHelper.CallAPI<Project, Project?>("/api/Project/ApproveProjectMembership", model);
+            var result = await _treclientHelper.CallAPI<Project, Project?>("/api/Project/ApproveProjectMembership", model,paramlist);
 
             return RedirectToAction("GetAllProjectsForApproval");
         }
 
         public IActionResult GetUser(int id)
         {
+            var projects = _treclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("userId", id.ToString());
             var result = _treclientHelper.CallAPIWithoutModel<BL.Models.User?>(
-                "/api/User/GetUser/", paramlist).Result;
+                "/api/Project/GetUser/", paramlist).Result;
+
+            var projectItems2 = projects.Where(p => !result.Projects.Select(x => x.Id).Contains(p.Id)).ToList();
+
+            var projectItems = projectItems2
+                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
+                .ToList();
+           
+
+            ViewBag.ProjectItems = projectItems;
 
             return View(result);
         }
         public IActionResult GetProject(int id)
         {
+            var users = _treclientHelper.CallAPIWithoutModel<List<BL.Models.User>>("/api/Project/GetAllUsers/").Result;
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());
-            var result = _treclientHelper.CallAPIWithoutModel<BL.Models.Project?>(
+            var project = _treclientHelper.CallAPIWithoutModel<Project?>(
                 "/api/Project/GetProject/", paramlist).Result;
 
-            return View(result);
+            var userItems2 = users.Where(p => !project.Users.Select(x => x.Id).Contains(p.Id)).ToList();
+           
+            var userItems = userItems2
+                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
+                .ToList();
+          
+            var projectView = new ProjectUserEndpoint()
+            {
+                Id = project.Id,
+                FormData = project.FormData,
+                Name = project.Name,
+                Users = project.Users,
+                StartDate = project.StartDate,
+                EndDate = project.EndDate,
+                ProjectDescription = project.ProjectDescription,
+                Endpoints = project.Endpoints,
+                Submissions = project.Submissions,
+                UserItemList = userItems,
+              
+            };
+
+            return View(projectView);
         }
 
         [HttpGet]
