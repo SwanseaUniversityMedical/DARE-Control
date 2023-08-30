@@ -128,7 +128,7 @@ jobs:
       container-registry-user: ${{ vars.HARBOR_USER }}
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: ${{ vars.HARBOR_REPO }}-tre-api
-      release-tag-format: 'TEST-TRE-API-UI-Container-${version}'
+      release-tag-format: 'TEST-DARE-TRE-API-Container-${version}'
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       slack-thread: ${{ needs.slack.outputs.thread }}
       build-command: |
@@ -154,6 +154,7 @@ jobs:
       container-registry-user: ${{ vars.HARBOR_USER }}
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: TEST-${{ vars.HARBOR_REPO }}-tre-ui
+      release-tag-format: 'TEST-TRE-API-UI-Container-${version}'
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       slack-thread: ${{ needs.slack.outputs.thread }}
       build-command: |
