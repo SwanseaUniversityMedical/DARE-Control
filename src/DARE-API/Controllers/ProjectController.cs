@@ -63,8 +63,8 @@ namespace DARE_API.Controllers
 
                 if (project.Id == 0)
                 {
-                    project.SubmissionBucket = GenerateRandomName(project.Name) + "submission";
-                    project.OutputBucket = GenerateRandomName(project.Name) + "output";
+                    project.SubmissionBucket = GenerateRandomName(project.Name.ToLower()) + "submission";
+                    project.OutputBucket = GenerateRandomName(project.Name.ToLower()) + "output";
                     var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, project.SubmissionBucket);
                     if (!submissionBucket)
                     {
@@ -153,9 +153,10 @@ namespace DARE_API.Controllers
 
                 var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
                 var attributeName = "policy";
-                var attributeValue = project.Name.ToLower() + "_policy";
 
-                await _keycloakMinioUserService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, attributeValue);
+                await _keycloakMinioUserService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.SubmissionBucket.ToLower() + "_policy");
+
+                await _keycloakMinioUserService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.OutputBucket.ToLower() + "_policy");
 
                 await _DbContext.SaveChangesAsync();
                 Log.Information("{Function} Added User {UserName} to {ProjectName}", "AddUserMembership", user.Name, project.Name);
@@ -201,7 +202,8 @@ namespace DARE_API.Controllers
                 var attributeName = "policy";
                 var attributeValue = project.Name.ToLower() + "_policy";
 
-                await _keycloakMinioUserService.RemoveMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, attributeValue);
+                await _keycloakMinioUserService.RemoveMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.SubmissionBucket.ToLower() + "_policy");
+                await _keycloakMinioUserService.RemoveMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.OutputBucket.ToLower() + "_policy");
 
                 await _DbContext.SaveChangesAsync();
                 Log.Information("{Function} Added User {UserName} to {ProjectName}", "RemoveUserMembership", user.Name, project.Name);

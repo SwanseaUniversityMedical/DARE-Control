@@ -25,5 +25,7 @@
 
         public string MetadataAddress { get; set; }
         public string? ValidAudiences { get; set; }
+        public string Server { get; set; }
+        public string Realm { get; set; }
     }
 }
