@@ -76,10 +76,7 @@
                             <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a></li>
                         </ul>
                     </div>
-                    @if (@User?.FindFirst("name")?.Value == null)
-                                {
-                                <a href="@Url.Action("Login", "Account")" class="btn btn-outline-primary">Sign In</a>
-                    }
+                    <a href="#" class="btn btn-outline-primary">Sign In</a>
                 </div>
 
             </div>

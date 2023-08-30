@@ -8,7 +8,6 @@ using EasyNetQ.Management.Client.Model;
 using System.Xml.Linq;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace TRE_UI.Controllers
 {
     [Authorize]
@@ -21,20 +20,26 @@ namespace TRE_UI.Controllers
             
             _treclientHelper = treClient;
         }
+    
+
         
      
         [HttpGet]
         public IActionResult GetAllProjects()
         
         {
+
             var projects = _treclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
 
             return View(projects);
         }
-
         [HttpGet]
         public IActionResult GetAllProjectsForApproval()
         {
+
+            //var projects = _treclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
+
+            //var projmem = GetProjectUserModel();
 
             var projects = _treclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForApproval/").Result;
 
@@ -48,10 +53,8 @@ namespace TRE_UI.Controllers
             paramlist.Add("projectId", projectId.ToString());
             var project = _treclientHelper.CallAPIWithoutModel<Project?>(
                 "/api/Project/GetProject/", paramlist).Result;
-            
-
-            var projectView = new Project()
-
+         
+                var projectView = new Project()
             {
                 Id = project.Id,
                     Name = project.Name, 
@@ -60,81 +63,48 @@ namespace TRE_UI.Controllers
                     EndDate = project.EndDate,
                     Submissions = project.Submissions
 
-                };
-          
+                };         
+        
             return View(projectView);
         }
 
         [HttpPost]
         public async Task<IActionResult> EditProjectSubmission(Project model)
         {
-            
-              string Approval = Request.Form["foo"].ToString();
-
             var paramlist = new Dictionary<string, string>();
-            paramlist.Add("Approval", Approval);
+            paramlist.Add("projectId", model.Id.ToString());
         
-            var result = await _treclientHelper.CallAPI<Project, Project?>("/api/Project/ApproveProjectMembership", model,paramlist);
+            var result = await _treclientHelper.CallAPI<Project, Project?>("/api/Project/ApproveProjectMembership", model);
+
+
 
             return RedirectToAction("GetAllProjectsForApproval");
         }
 
         public IActionResult GetUser(int id)
         {
-            var projects = _treclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("userId", id.ToString());
             var result = _treclientHelper.CallAPIWithoutModel<BL.Models.User?>(
-                "/api/Project/GetUser/", paramlist).Result;
-
-            var projectItems2 = projects.Where(p => !result.Projects.Select(x => x.Id).Contains(p.Id)).ToList();
-
-            var projectItems = projectItems2
-                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
-                .ToList();
-           
-
-            ViewBag.ProjectItems = projectItems;
+                "/api/User/GetUser/", paramlist).Result;
 
             return View(result);
         }
         public IActionResult GetProject(int id)
         {
-            var users = _treclientHelper.CallAPIWithoutModel<List<BL.Models.User>>("/api/Project/GetAllUsers/").Result;
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());
-            var project = _treclientHelper.CallAPIWithoutModel<Project?>(
+            var result = _treclientHelper.CallAPIWithoutModel<BL.Models.Project?>(
                 "/api/Project/GetProject/", paramlist).Result;
 
-            var userItems2 = users.Where(p => !project.Users.Select(x => x.Id).Contains(p.Id)).ToList();
-           
-            var userItems = userItems2
-                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
-                .ToList();
-          
-            var projectView = new ProjectUserEndpoint()
-            {
-                Id = project.Id,
-                FormData = project.FormData,
-                Name = project.Name,
-                Users = project.Users,
-                StartDate = project.StartDate,
-                EndDate = project.EndDate,
-                ProjectDescription = project.ProjectDescription,
-                Endpoints = project.Endpoints,
-                Submissions = project.Submissions,
-                UserItemList = userItems,
-              
-            };
-
-            return View(projectView);
+            return View(result);
         }
 
         [HttpGet]
         public IActionResult GetAllUnApprovedMemberships()
         {
 
-            var projects = _treclientHelper.CallAPIWithoutModel<List<ProjectApproval>>("/api/Project/GetAllUnApprovedMemberships/").Result;
+            var projects = _treclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllUnApprovedMemberships/").Result;
 
             return View(projects);
         }
@@ -143,19 +113,39 @@ namespace TRE_UI.Controllers
         public IActionResult GetAllDisabledMemberships()
         {
 
-            var projects = _treclientHelper.CallAPIWithoutModel<List<ProjectApproval>>("/api/Project/GetAllDisabledMemberships/").Result;
+            var projects = _treclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllDisabledMemberships/").Result;
 
             return View(projects);
         }
 
-        [HttpGet]
-        public IActionResult GetAllMemberships()
-        {
 
-            var projects = _treclientHelper.CallAPIWithoutModel<List<ProjectApproval>>("/api/Project/GetAllMemberships/").Result;
+        //[HttpGet]
+        //public IActionResult RequestProjectMembership()
+        //{
 
-            return View(projects);
-        }
+        //    //var projmem = GetProjectUserModel();
+        //    //return View(projmem);
+        //}
+        //private ProjectUserTre GetProjectUserModelSubmit(int projectId,int userId,string Localprojectname)
+        //{
+        //    var projs = _treclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
+        //    var users = _treclientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
+
+        //    var projectItems = projs
+        //        .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
+        //        .ToList();
+
+        //    var userItems = users
+        //        .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
+        //        .ToList();
+
+        //    var projmem = new ProjectUserTre()
+        //    {
+        //        Username = userItems.Where(p => p.Value == "1").First().Text,
+        //        Projectname = projectItems.Where(p => p.Value == "1").First().Text,
+        // 
+        //    };
+
 
 
 

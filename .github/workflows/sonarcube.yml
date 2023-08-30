@@ -3,7 +3,7 @@ name: Scan
 on:
   push:
     branches:
-      - 'main'
+      - 'fix/sonar-qube'
 
 env:
   DAREUI: dare-control-ui

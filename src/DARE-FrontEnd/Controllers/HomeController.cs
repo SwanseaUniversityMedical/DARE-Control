@@ -7,6 +7,7 @@ using System.Linq;
 using Newtonsoft.Json.Linq;
 using System.Security.Claims;
 using System.Net.Http.Headers;
+using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
