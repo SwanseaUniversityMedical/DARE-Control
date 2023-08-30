@@ -8,8 +8,6 @@ using System;
 using BL.Models.Enums;
 using DARE_API.Repositories.DbContexts;
 using BL.Models.Tes;
-using EasyNetQ.Management.Client.Model;
-using Microsoft.EntityFrameworkCore;
 
 namespace DARE_API.Services
 {
@@ -37,7 +35,7 @@ namespace DARE_API.Services
             catch (Exception e)
             {
                 Log.Error("{Function} ConsumeProcessForm:- Failed to subscribe due to error: {e}","ExecuteAsync", e.Message);
-                //throw;
+                
             }
         }
 
@@ -52,31 +50,31 @@ namespace DARE_API.Services
                 var dbproj = sub.Project;
                 var tesTask = JsonConvert.DeserializeObject<TesTask>(sub.TesJson);
 
-                var endpointstr = tesTask.Tags.Where(x => x.Key.ToLower() == "endpoints").Select(x => x.Value).FirstOrDefault();
-                List<string> endpoints = new List<string>();
-                if (!string.IsNullOrWhiteSpace(endpointstr))
+                var trestr = tesTask.Tags.Where(x => x.Key.ToLower() == "tres").Select(x => x.Value).FirstOrDefault();
+                List<string> tres = new List<string>();
+                if (!string.IsNullOrWhiteSpace(trestr))
                 {
-                    endpoints = endpointstr.Split('|').Select(x => x.ToLower()).ToList();
+                    tres = trestr.Split('|').Select(x => x.ToLower()).ToList();
                 }
 
                 
 
-                var dbendpoints = new List<BL.Models.Tre>();
+                var dbtres = new List<BL.Models.Tre>();
 
-                if (endpoints.Count == 0)
+                if (tres.Count == 0)
                 {
-                    dbendpoints = dbproj.Tres;
+                    dbtres = dbproj.Tres;
                 }
                 else
                 {
-                    foreach (var endpoint in endpoints)
+                    foreach (var tre in tres)
                     {
-                        dbendpoints.Add(dbproj.Tres.First(x => x.Name.ToLower() == endpoint.ToLower()));
+                        dbtres.Add(dbproj.Tres.First(x => x.Name.ToLower() == tre.ToLower()));
                     }
                 }
                 UpdateSubmissionStatus.UpdateStatus(sub, StatusType.WaitingForChildSubsToComplete, "");
                 
-                foreach (var endp in dbendpoints)
+                foreach (var tre in dbtres)
                 {
                     _dbContext.Add(new Submission()
                     {
@@ -89,7 +87,7 @@ namespace DARE_API.Services
                         Parent = sub,
                         TesId = tesTask.Id,
                         TesJson = sub.TesJson,
-                        EndPoint = endp,
+                        Tre = tre,
                         TesName = tesTask.Name,
                         SourceCrate = tesTask.Executors.First().Image,
                     });

@@ -1,9 +1,6 @@
 ﻿using BL.Models;
 using BL.Models.Tes;
-using EasyNetQ.Management.Client.Model;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using System.Threading;
 using BL.Models.Enums;
 using DARE_API.Services;
 using Serilog;
@@ -35,14 +32,14 @@ namespace DARE_API.Repositories.DbContexts
             var mahadi = CreateUser("mahadi", "mahadi@chi.swan.ac.uk", context);
             var hazel = CreateUser("hazel", "hazel@chi.swan.ac.uk", context);
 
-            var sail = CreateEndpoint("SAIL", "sailtreapi", context);
-            var dpuk = CreateEndpoint("DPUK", "dpuktreapi", context);
-            var alspac = CreateEndpoint("ALSPAC", "alspactreapi", context);
-            var msregister = CreateEndpoint("MSRegister", "msregistertreapi", context);
+            var sail = CreateTre("SAIL", "sailtreapi", context);
+            var dpuk = CreateTre("DPUK", "dpuktreapi", context);
+            var alspac = CreateTre("ALSPAC", "alspactreapi", context);
+            var msregister = CreateTre("MSRegister", "msregistertreapi", context);
 
-            AddMissingEndpoint(head, sail);
-            AddMissingEndpoint(head, dpuk);
-            AddMissingEndpoint(head, alspac);
+            AddMissingTre(head, sail);
+            AddMissingTre(head, dpuk);
+            AddMissingTre(head, alspac);
             AddMissingUser(head, jaybee);
                 AddMissingUser(head, mikeb);
                 AddMissingUser(head, mikew);
@@ -53,13 +50,13 @@ namespace DARE_API.Repositories.DbContexts
                 AddMissingUser(head, mahadi);
                 AddMissingUser(head, hazel);
 
-                AddMissingEndpoint(shoulders, sail);
-                AddMissingEndpoint(shoulders, msregister);
+                AddMissingTre(shoulders, sail);
+                AddMissingTre(shoulders, msregister);
                 AddMissingUser(shoulders, jaybee);
                 AddMissingUser(shoulders, simon);
                 AddMissingUser(shoulders, luke);
 
-                AddMissingEndpoint(knees, dpuk);
+                AddMissingTre(knees, dpuk);
                 AddMissingUser(knees, jaybee);
                 AddMissingUser(knees, simon);
                 AddMissingUser(knees, luke);
@@ -122,25 +119,25 @@ namespace DARE_API.Repositories.DbContexts
 
         }
 
-        private static Tre CreateEndpoint(string name, string adminUser, ApplicationDbContext context)
+        private static Tre CreateTre(string name, string adminUser, ApplicationDbContext context)
         {
-            var endpoint = context.Tres.FirstOrDefault(x => x.Name.ToLower() == name.ToLower());
-            if (endpoint == null)
+            var tre = context.Tres.FirstOrDefault(x => x.Name.ToLower() == name.ToLower());
+            if (tre == null)
             {
-                endpoint = new Tre()
+                tre = new Tre()
                 {
                     Name = name,
                     AdminUsername = adminUser,
                     About = ""
                 };
-                endpoint.FormData = JsonConvert.SerializeObject(endpoint);
-                context.Tres.Add(endpoint);
+                tre.FormData = JsonConvert.SerializeObject(tre);
+                context.Tres.Add(tre);
             }
-            return endpoint;
+            return tre;
 
         }
 
-        private static void AddMissingEndpoint(Project project, Tre tre)
+        private static void AddMissingTre(Project project, Tre tre)
         {
             if (!project.Tres.Contains(tre))
             {
@@ -156,7 +153,7 @@ namespace DARE_API.Repositories.DbContexts
             }
         }
 
-        private static void AddSubmission(string name, string project,string username, string endpointStr, ApplicationDbContext dbContext)
+        private static void AddSubmission(string name, string project,string username, string treStr, ApplicationDbContext dbContext)
         {
             try
             {
@@ -184,13 +181,13 @@ namespace DARE_API.Repositories.DbContexts
                           "\"env\":null" +
                           "}]," +
                           "\"volumes\":null," +
-                          "\"tags\":{\"project\":\"{project}\",\"endpoints\":\"{endpoints}\"}," +
+                          "\"tags\":{\"project\":\"{project}\",\"tres\":\"{tres}\"}," +
                           "\"logs\":null," +
                           "\"creation_time\":null" +
                           "}";
            
             var tesString = template.Replace("{name}", name).Replace("{project}", project)
-                .Replace("{endpoints}", endpointStr);
+                .Replace("{tres}", treStr);
             var tesTask = JsonConvert.DeserializeObject<TesTask>(tesString);
             var dbProject = dbContext.Projects.First(x => x.Name.ToLower() == project.ToLower());
             var user = dbContext.Users.First(x => x.Name.ToLower() == username.ToLower());
@@ -218,30 +215,30 @@ namespace DARE_API.Repositories.DbContexts
             dbContext.SaveChanges();
 
             
-            List<string> endpoints = new List<string>();
-            if (!string.IsNullOrWhiteSpace(endpointStr))
+            List<string> tres = new List<string>();
+            if (!string.IsNullOrWhiteSpace(treStr))
             {
-                endpoints = endpointStr.Split('|').Select(x => x.ToLower()).ToList();
+                tres = treStr.Split('|').Select(x => x.ToLower()).ToList();
             }
 
 
 
-            var dbEndpoints = new List<BL.Models.Tre>();
+            var dbTres = new List<BL.Models.Tre>();
 
-            if (endpoints.Count == 0)
+            if (tres.Count == 0)
             {
-                dbEndpoints = dbProject.Tres;
+                dbTres = dbProject.Tres;
             }
             else
             {
-                foreach (var endpoint in endpoints)
+                foreach (var tre in tres)
                 {
-                    dbEndpoints.Add(dbProject.Tres.First(x => x.Name.ToLower() == endpoint.ToLower()));
+                    dbTres.Add(dbProject.Tres.First(x => x.Name.ToLower() == tre.ToLower()));
                 }
             }
             UpdateSubmissionStatus.UpdateStatus(sub, StatusType.WaitingForChildSubsToComplete, "");
             
-            foreach (var endpoint in dbEndpoints)
+            foreach (var tre in dbTres)
             {
                 dbContext.Add(new Submission()
                 {
@@ -255,7 +252,7 @@ namespace DARE_API.Repositories.DbContexts
                     TesId = tesTask.Id,
                     TesJson = sub.TesJson,
                     HistoricStatuses = new List<HistoricStatus>(),
-                    EndPoint = endpoint,
+                    Tre = tre,
                     TesName = tesTask.Name,
                     SourceCrate = tesTask.Executors.First().Image,
                 });

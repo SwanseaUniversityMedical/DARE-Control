@@ -1,16 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 using BL.Models.APISimpleTypeReturns;
 using BL.Services;
-using TRE_UI.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
+
 
 namespace TRE_UI.Controllers
 {
+    [Authorize(Roles = "dare-tre-admin")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;

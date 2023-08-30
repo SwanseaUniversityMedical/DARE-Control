@@ -9,7 +9,7 @@
         <h1 class="fs-3 mb-0">Projects</h1>
                                         @if (User.IsInRole("dare-control-admin"))
                                 {
-        <a asp-controller="Project" asp-action="AddProjectForm" class="btn btn-primary btn-sm d-flex align-items-center">
+        <a asp-controller="Project" asp-action="SaveProjectForm" class="btn btn-primary btn-sm d-flex align-items-center">
             <i class="fa fa-plus align-middle me-2"></i>
             <span>Create Project</span>
         </a>
@@ -39,7 +39,7 @@
                                 </div>
                                 @if (User.IsInRole("dare-control-admin"))
                                 {
-                                    <a href="@Url.Action("AddProjectForm", "Project",new{ProjectId=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+                                    <a href="@Url.Action("SaveProjectForm", "Project",new{ProjectId=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
                                 }
                             </div>
                             <div class="">

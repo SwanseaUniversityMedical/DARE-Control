@@ -8,7 +8,7 @@ namespace BL.Models.ViewModels
     {
         public int Id { get; set; }
         public virtual List<User> Users { get; set; }
-        public virtual List<Tre> Endpoints { get; set; }
+        public virtual List<Tre> Tres { get; set; }
         public string FormData { get; set; }
         public string FormIoUrl { get; set; }
         public string Name { get; set; }
@@ -24,7 +24,7 @@ namespace BL.Models.ViewModels
         public virtual List<Submission> Submissions { get; set; }
 
         [JsonIgnore]
-        public IEnumerable<SelectListItem>? EndpointItemList { get; set; }
+        public IEnumerable<SelectListItem>? TreItemList { get; set; }
 
         [JsonIgnore]
         public IEnumerable<SelectListItem>? UserItemList { get; set; }

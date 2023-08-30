@@ -20,13 +20,13 @@ namespace TREAgent
     {
         private readonly IServiceProvider _serviceProvider;
 
-        private readonly string TreName;
+        
 
 
-        public DoWork(IConfiguration configuration, IServiceProvider serviceProvider)
+        public DoWork(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            TreName = configuration["TREName"];
+        
         }
 
         public void Execute()
@@ -40,7 +40,7 @@ namespace TREAgent
                 var treApi = scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
                 
                 
-                var subs = treApi.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForEndpoint").Result;
+                var subs = treApi.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre").Result;
 
 
                
@@ -53,7 +53,7 @@ namespace TREAgent
 
                     var tes = JsonConvert.DeserializeObject<TesTask>(submission.TesJson);
                     rabbit.Advanced.Publish(exch, RoutingConstants.Subs, false, new Message<TesTask>(tes));
-                    var result = treApi.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForEndpoint",
+                    var result = treApi.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusTre",
                         new Dictionary<string, string>() {  {"tesId", submission.TesId}, {"statusType",StatusType.TransferredToPod.ToString() }, {"description", "" }}).Result;
                     //TODO: Update statusType of subs
 

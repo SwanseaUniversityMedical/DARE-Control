@@ -108,9 +108,6 @@ namespace DARE_API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("EndPointId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("timestamp with time zone");
 
@@ -152,15 +149,18 @@ namespace DARE_API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.Property<int?>("TreId")
+                        .HasColumnType("integer");
 
-                    b.HasIndex("EndPointId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ParentID");
 
                     b.HasIndex("ProjectId");
 
                     b.HasIndex("SubmittedById");
+
+                    b.HasIndex("TreId");
 
                     b.ToTable("Submissions");
                 });
@@ -221,15 +221,15 @@ namespace DARE_API.Migrations
 
             modelBuilder.Entity("ProjectTre", b =>
                 {
-                    b.Property<int>("EndpointsId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("ProjectsId")
                         .HasColumnType("integer");
 
-                    b.HasKey("EndpointsId", "ProjectsId");
+                    b.Property<int>("TresId")
+                        .HasColumnType("integer");
 
-                    b.HasIndex("ProjectsId");
+                    b.HasKey("ProjectsId", "TresId");
+
+                    b.HasIndex("TresId");
 
                     b.ToTable("ProjectTre");
                 });
@@ -262,10 +262,6 @@ namespace DARE_API.Migrations
 
             modelBuilder.Entity("BL.Models.Submission", b =>
                 {
-                    b.HasOne("BL.Models.Tre", "EndPoint")
-                        .WithMany("Submissions")
-                        .HasForeignKey("EndPointId");
-
                     b.HasOne("BL.Models.Submission", "Parent")
                         .WithMany("Children")
                         .HasForeignKey("ParentID");
@@ -282,26 +278,30 @@ namespace DARE_API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("EndPoint");
+                    b.HasOne("BL.Models.Tre", "Tre")
+                        .WithMany("Submissions")
+                        .HasForeignKey("TreId");
 
                     b.Navigation("Parent");
 
                     b.Navigation("Project");
 
                     b.Navigation("SubmittedBy");
+
+                    b.Navigation("Tre");
                 });
 
             modelBuilder.Entity("ProjectTre", b =>
                 {
-                    b.HasOne("BL.Models.Tre", null)
-                        .WithMany()
-                        .HasForeignKey("EndpointsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("BL.Models.Project", null)
                         .WithMany()
                         .HasForeignKey("ProjectsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BL.Models.Tre", null)
+                        .WithMany()
+                        .HasForeignKey("TresId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

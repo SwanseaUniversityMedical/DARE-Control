@@ -10,14 +10,14 @@ using BL.Models;
 namespace DARE_API.Controllers
 {
     [Authorize(Roles = "dare-control-admin")]
-    //[ApiController]
+    [ApiController]
     [Route("api/[controller]")]
-    public class EndpointController : Controller
+    public class TreController : Controller
     {
         private readonly ApplicationDbContext _DbContext;
         protected readonly IHttpContextAccessor _httpContextAccessor;
 
-        public EndpointController(ApplicationDbContext applicationDbContext, IHttpContextAccessor httpContextAccessor)
+        public TreController(ApplicationDbContext applicationDbContext, IHttpContextAccessor httpContextAccessor)
         {
 
             _DbContext = applicationDbContext;
@@ -26,8 +26,8 @@ namespace DARE_API.Controllers
         }
 
 
-        [HttpPost("AddEndpoint")]
-        public async Task<Tre> AddEndpoint([FromBody] FormData data)
+        [HttpPost("SaveTre")]
+        public async Task<Tre> SaveTre([FromBody] FormData data)
         {           
             try
             {
@@ -36,16 +36,16 @@ namespace DARE_API.Controllers
                 if (_DbContext.Tres.Any(x => x.Name.ToLower() == tre.Name.ToLower().Trim() && x.Id != tre.Id))
                 {
                     
-                    return new Tre(){Error = true, ErrorMessage = "Another endpoint already exists with the same name"};
+                    return new Tre(){Error = true, ErrorMessage = "Another tre already exists with the same name"};
                 }
                 
                 if  (_DbContext.Tres.Any(x => x.AdminUsername.ToLower() == tre.AdminUsername.ToLower() && x.Id != tre.Id))
                 {
-                    return new Tre() { Error = true, ErrorMessage = "Another endpoint already exists with the same TRE Admin Name" };
+                    return new Tre() { Error = true, ErrorMessage = "Another tre already exists with the same TRE Admin Name" };
                 }
                 if (_DbContext.Tres.Any(x => x.About.ToLower() == tre.About.ToLower() && x.Id != tre.Id))
                 {
-                    return new Tre() { Error = true, ErrorMessage = "Another endpoint already exists with the same TRE Admin Name" };
+                    return new Tre() { Error = true, ErrorMessage = "Another tre already exists with the same TRE Admin Name" };
                 }
                 tre.FormData = data.FormIoString;
 
@@ -66,69 +66,71 @@ namespace DARE_API.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} Crashed", "AddEndpoint");
+                Log.Error(ex, "{Function} Crashed", "SaveTre");
 
-                var errorEndpoint = new Tre();
-                return errorEndpoint;
+                var errorTre = new Tre();
+                return errorTre;
                 throw;
             }
         }
      
-        [HttpGet("GetEndPointsInProject/{projectId}")]
+        [HttpGet("GetTresInProject/{projectId}")]
         [AllowAnonymous]
-        public List<Tre> GetEndPointsInProject(int projectId)
+        public List<Tre> GetTresInProject(int projectId)
         {
             try
             {
-                List<Tre> endpointsList = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Tres).ToList();
-                return endpointsList;
+                List<Tre> treslist = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Tres).ToList();
+                return treslist;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function Crashed", "GetEndPointsInProject");
+                Log.Error(ex, "{Function Crashed", "GetTresInProject");
                 throw;
             }
         }
 
-        [HttpGet("GetAllEndpoints")]
-        public async Task<List<Tre>> GetAllEndpoints()
+        [HttpGet("GetAllTres")]
+        [AllowAnonymous]
+        public async Task<List<Tre>> GetAllTres()
         {
             try
             {
                 var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
-                var allEndpoints = _DbContext.Tres.ToList();
+                var allTres = _DbContext.Tres.ToList();
 
                 
 
-                Log.Information("{Function} Tres retrieved successfully", "GetAllEndpoints");
-                return allEndpoints;
+                Log.Information("{Function} Tres retrieved successfully", "GetAllTres");
+                return allTres;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} Crashed", "GetAllEndpoints");
+                Log.Error(ex, "{Function} Crashed", "GetAllTres");
                 throw;
             }
 
 
         }
         
-        [HttpGet("GetAnEndpoint")]
-        public Tre? GetAnEndpoint(int endpointId)
+        [HttpGet("GetATre")]
+        [AllowAnonymous]
+        public Tre? GetATre(int treId)
         {
             try
             {
-                var returned = _DbContext.Tres.Find(endpointId);
+                var returned = _DbContext.Tres.Find(treId);
                 if (returned == null)
                 {
                     return null;
                 }
 
-                Log.Information("{Function} Project retrieved successfully", "GetAnEndpoint");
+                Log.Information("{Function} Project retrieved successfully", "GetATre");
                 return returned;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} Crashed", "GetAnEndpoint");
+                Log.Error(ex, "{Function} Crashed", "GetATre");
                 throw;
             }
 

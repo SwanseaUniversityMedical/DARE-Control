@@ -49,7 +49,7 @@ namespace DARE_FrontEnd.Controllers
             paramlist.Add("submissionId", id.ToString());
 
             var res = _clientHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist).Result;
-            //var test = new ProjectUserEndpoint();
+            
             var minio = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
             ViewBag.minioendpoint = minio?.Url;
 

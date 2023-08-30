@@ -24,7 +24,7 @@ namespace BL.Models
 
 
 
-        public virtual Tre? EndPoint { get; set; }
+        public virtual Tre? Tre { get; set; }
 
         public virtual User SubmittedBy { get; set; }
 

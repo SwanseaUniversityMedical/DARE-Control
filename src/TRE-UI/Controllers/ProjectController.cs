@@ -4,14 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using BL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using EasyNetQ.Management.Client.Model;
-using System.Xml.Linq;
-using Microsoft.EntityFrameworkCore;
+
 
 
 namespace TRE_UI.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "dare-tre-admin")]
     public class ProjectController : Controller
     {
         
@@ -121,7 +119,7 @@ namespace TRE_UI.Controllers
                 StartDate = project.StartDate,
                 EndDate = project.EndDate,
                 ProjectDescription = project.ProjectDescription,
-                Endpoints = project.Tres,
+                Tres = project.Tres,
                 Submissions = project.Submissions,
                 UserItemList = userItems,
               

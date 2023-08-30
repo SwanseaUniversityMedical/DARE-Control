@@ -2,14 +2,8 @@
 using BL.Models.Settings;
 using DARE_API.Repositories.DbContexts;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Serilog;
-using System;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 using BL.Models.Enums;
 
 namespace DARE_API.Services
@@ -39,30 +33,30 @@ namespace DARE_API.Services
                 await connection.StartAsync();
             };
 
-            connection.On<List<string>>("TREUpdateStatus", UpdateStatusForEndpoint);
+            connection.On<List<string>>("TREUpdateStatus", UpdateStatusForTre);
 
             connection.StartAsync();
 
             return Task.CompletedTask;
         }
 
-        private void UpdateStatusForEndpoint(List<string> varList)
+        private void UpdateStatusForTre(List<string> varList)
         {
-            string endpointname = varList[0];
+            string trename = varList[0];
             string tesId = varList[1];
             string status = varList[2];
 
             using (var scope = _serviceScopeFactory.CreateScope())
             {
                 var _DbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                var endpoint = _DbContext.Tres.FirstOrDefault(x => x.Name.ToLower() == endpointname.ToLower());
-                if (endpoint == null)
+                var tre = _DbContext.Tres.FirstOrDefault(x => x.Name.ToLower() == trename.ToLower());
+                if (tre == null)
                 {
-                    Log.Error("DAREBackgroundService: Unable to find endpoint");
+                    Log.Error("DAREBackgroundService: Unable to find tre");
                     return;
                 }
 
-                var sub = _DbContext.Submissions.FirstOrDefault(x => x.TesId == tesId && x.EndPoint == endpoint);
+                var sub = _DbContext.Submissions.FirstOrDefault(x => x.TesId == tesId && x.Tre == tre);
                 if (sub == null)
                 {
                     Log.Error("DAREBackgroundService: Unable to find submission");

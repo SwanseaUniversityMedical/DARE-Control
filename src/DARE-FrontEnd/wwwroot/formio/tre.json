@@ -1,8 +1,8 @@
 {
   "_id": "64c8b80f8c240f99dcaef32a",
-  "title": "DARE Control Endpoint",
-  "name": "dareControlEndpoint",
-  "path": "darecontrolendpoint",
+  "title": "DARE Control Tre",
+  "name": "dareControlTre",
+  "path": "darecontrolTre",
   "type": "form",
   "display": "form",
   "tags": [],
@@ -112,6 +112,6 @@
   "_vid": 0,
   "created": "2023-08-01T07:45:19.191Z",
   "modified": "2023-08-01T07:45:19.195Z",
-  "machineName": "rikojtsvfwnqslz:dareControlEndpoint",
+  "machineName": "rikojtsvfwnqslz:dareControlTre",
   "plan": "commercial"
 }

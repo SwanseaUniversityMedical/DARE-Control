@@ -3,15 +3,15 @@ using Newtonsoft.Json;
 
 namespace BL.Models.ViewModels
 {
-    public class ProjectEndpoint
+    public class ProjectTre
     {
         public int ProjectId { get; set; }
-        public int EndpointId { get; set; }
+        public int TreId { get; set; }
 
         [JsonIgnore]
         public IEnumerable<SelectListItem>? ProjectItemList { get; set; }
 
         [JsonIgnore]
-        public IEnumerable<SelectListItem>? EndpointItemList { get; set; }
+        public IEnumerable<SelectListItem>? TreItemList { get; set; }
     }
 }

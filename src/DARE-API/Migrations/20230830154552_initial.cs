@@ -67,12 +67,12 @@ namespace DARE_API.Migrations
                 name: "ProjectTre",
                 columns: table => new
                 {
-                    EndpointsId = table.Column<int>(type: "integer", nullable: false),
-                    ProjectsId = table.Column<int>(type: "integer", nullable: false)
+                    ProjectsId = table.Column<int>(type: "integer", nullable: false),
+                    TresId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProjectTre", x => new { x.EndpointsId, x.ProjectsId });
+                    table.PrimaryKey("PK_ProjectTre", x => new { x.ProjectsId, x.TresId });
                     table.ForeignKey(
                         name: "FK_ProjectTre_Projects_ProjectsId",
                         column: x => x.ProjectsId,
@@ -80,8 +80,8 @@ namespace DARE_API.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProjectTre_Tres_EndpointsId",
-                        column: x => x.EndpointsId,
+                        name: "FK_ProjectTre_Tres_TresId",
+                        column: x => x.TresId,
                         principalTable: "Tres",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -125,7 +125,7 @@ namespace DARE_API.Migrations
                     DockerInputLocation = table.Column<string>(type: "text", nullable: false),
                     ProjectId = table.Column<int>(type: "integer", nullable: false),
                     ParentID = table.Column<int>(type: "integer", nullable: true),
-                    EndPointId = table.Column<int>(type: "integer", nullable: true),
+                    TreId = table.Column<int>(type: "integer", nullable: true),
                     SubmittedById = table.Column<int>(type: "integer", nullable: false),
                     LastStatusUpdate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     StartTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -148,8 +148,8 @@ namespace DARE_API.Migrations
                         principalTable: "Submissions",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Submissions_Tres_EndPointId",
-                        column: x => x.EndPointId,
+                        name: "FK_Submissions_Tres_TreId",
+                        column: x => x.TreId,
                         principalTable: "Tres",
                         principalColumn: "Id");
                     table.ForeignKey(
@@ -189,19 +189,14 @@ namespace DARE_API.Migrations
                 column: "SubmissionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProjectTre_ProjectsId",
+                name: "IX_ProjectTre_TresId",
                 table: "ProjectTre",
-                column: "ProjectsId");
+                column: "TresId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProjectUser_UsersId",
                 table: "ProjectUser",
                 column: "UsersId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Submissions_EndPointId",
-                table: "Submissions",
-                column: "EndPointId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Submissions_ParentID",
@@ -217,6 +212,11 @@ namespace DARE_API.Migrations
                 name: "IX_Submissions_SubmittedById",
                 table: "Submissions",
                 column: "SubmittedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Submissions_TreId",
+                table: "Submissions",
+                column: "TreId");
         }
 
         /// <inheritdoc />

@@ -9,14 +9,14 @@ using Microsoft.CodeAnalysis;
 namespace DARE_FrontEnd.Controllers
 {
     [Authorize(Roles = "dare-control-admin")]
-    public class EndpointController : Controller
+    public class TreController : Controller
     {
 
         private readonly IDareClientHelper _clientHelper;
         
         private readonly FormIOSettings _formIOSettings;
 
-        public EndpointController(IDareClientHelper client, FormIOSettings formIo)
+        public TreController(IDareClientHelper client, FormIOSettings formIo)
         {
             _clientHelper = client;
 
@@ -24,24 +24,24 @@ namespace DARE_FrontEnd.Controllers
             
         }
 
+        [HttpGet]
         
-        public IActionResult AddEndpoint(int endpointId)
+        public IActionResult SaveATre(int treId)
         {
             var formData = new FormData()
             {
                 
-                FormIoUrl = _formIOSettings.EndpointForm,
+                FormIoUrl = _formIOSettings.TreForm,
                 FormIoString = @"{""id"":0}"
             };
 
-            if (endpointId > 0)
+            if (treId > 0)
             {
                 var paramList = new Dictionary<string, string>();
-                paramList.Add("endpointId", endpointId.ToString());
-                var endpoint = _clientHelper.CallAPIWithoutModel<BL.Models.Tre>("/api/Endpoint/GetanEndpoint/", paramList).Result;
-                //TempData["end"] = endpoint.ErrorMessage.ToString();
-                formData.FormIoString = endpoint?.FormData;
-                formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""Id"":" + endpointId.ToString(), StringComparison.CurrentCultureIgnoreCase);
+                paramList.Add("treId", treId.ToString());
+                var tre = _clientHelper.CallAPIWithoutModel<Tre>("/api/Tre/GetATre/", paramList).Result;
+                formData.FormIoString = tre?.FormData;
+                formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""Id"":" + treId.ToString(), StringComparison.CurrentCultureIgnoreCase);
             }
 
             return View(formData);
@@ -50,29 +50,29 @@ namespace DARE_FrontEnd.Controllers
      
 
         [HttpGet]
-        public IActionResult GetAllEndpoints()
+        [AllowAnonymous]
+        public IActionResult GetAllTres()
         {
 
-            var endpoints = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Endpoint/GetAllEndpoints/").Result;
+            var tres = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Tre/GetAllTres/").Result;
 
-            return View(endpoints);
+            return View(tres);
         }
 
-     
-
         [HttpGet]
-        public IActionResult GetAnEndpoint(int id)
+        public IActionResult GetATre(int id)
         {
             var paramlist = new Dictionary<string, string>();
-            paramlist.Add("endpointId", id.ToString());
+            paramlist.Add("treId", id.ToString());
             var test = _clientHelper.CallAPIWithoutModel<Tre?>(
-                "/api/Endpoint/GetAnEndpoint/", paramlist).Result;
+                "/api/Tre/GetATre/", paramlist).Result;
 
             return View(test);
         }
- 
+
+
         [HttpPost]
-        public async Task<IActionResult> EndpointFormSubmission([FromBody] object arg, int id)
+        public async Task<IActionResult> TreFormSubmission([FromBody] object arg, int id)
         {
             var str = arg?.ToString();
 
@@ -81,7 +81,7 @@ namespace DARE_FrontEnd.Controllers
                 var data = System.Text.Json.JsonSerializer.Deserialize<FormData>(str);
                 data.FormIoString = str;
 
-                var result = await _clientHelper.CallAPI<FormData, Tre?>("/api/Endpoint/AddEndpoint", data);
+                var result = await _clientHelper.CallAPI<FormData, Tre?>("/api/Tre/SaveTre", data);
 
                 if (result.Error)
                     return BadRequest();
