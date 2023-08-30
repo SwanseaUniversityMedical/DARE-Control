@@ -12,18 +12,18 @@ namespace TRE_UI.Controllers
     [Authorize(Roles = "dare-tre-admin")]
     public class ProjectController : Controller
     {
-        
+
         private readonly ITREClientHelper _treclientHelper;
         public ProjectController(ITREClientHelper treClient)
         {
-            
+
             _treclientHelper = treClient;
         }
         
      
         [HttpGet]
         public IActionResult GetAllProjects()
-        
+
         {
             var projects = _treclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
 
@@ -52,11 +52,11 @@ namespace TRE_UI.Controllers
 
             {
                 Id = project.Id,
-                    Name = project.Name, 
-                     Users = project.Users,
-                    StartDate = project.StartDate,
-                    EndDate = project.EndDate,
-                    Submissions = project.Submissions
+                Name = project.Name,
+                Users = project.Users,
+                StartDate = project.StartDate,
+                EndDate = project.EndDate,
+                Submissions = project.Submissions
 
                 };
           
@@ -66,13 +66,36 @@ namespace TRE_UI.Controllers
         [HttpPost]
         public async Task<IActionResult> EditProjectSubmission(Project model)
         {
-            
-              string Approval = Request.Form["foo"].ToString();
 
+            string Approval = Request.Form["foo"].ToString();
             var paramlist = new Dictionary<string, string>();
-            paramlist.Add("Approval", Approval);
-        
-            var result = await _treclientHelper.CallAPI<Project, Project?>("/api/Project/ApproveProjectMembership", model,paramlist);
+            paramlist.Add("projectId", model.Id.ToString());
+            var project = _treclientHelper.CallAPIWithoutModel<Project?>(
+                "/api/Project/GetProject/", paramlist).Result;
+            project = new Project()
+
+            {
+                Id = project.Id,
+                Name = project.Name,
+                Users = project.Users,
+                //StartDate = model.StartDate,
+                //EndDate = model.EndDate,
+                FormData = project.FormData,
+            };
+            var userItems = project.Users
+     .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
+      .ToList();
+            var username = userItems.First().Text;
+            var userid = userItems.First().Value;
+
+            var paramlist1 = new Dictionary<string, string>();
+            paramlist1.Add("Approval", Approval);
+            paramlist1.Add("ProjectId", project.Id.ToString());
+            paramlist1.Add("UserId", userid);
+            paramlist1.Add("UserName", username);
+            paramlist1.Add("FormData", project.FormData);
+            paramlist1.Add("ProjectName", project.Name);
+            var result = await _treclientHelper.CallAPI<Project, Project?>("/api/Project/ApproveProjectMembership", model, paramlist1);
 
             return RedirectToAction("GetAllProjectsForApproval");
         }
@@ -90,7 +113,7 @@ namespace TRE_UI.Controllers
             var projectItems = projectItems2
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
-           
+
 
             ViewBag.ProjectItems = projectItems;
 
