@@ -50,8 +50,7 @@
         Minio URL: <a href="http://@ViewBag.minioendpoint" ">@Model.Project.Name Buckets</a><br />
         <br>Submission Bucket: @Html.Raw(Model.Project.SubmissionBucket)
         <br>Output Bucket: @Html.Raw(Model.Project.OutputBucket)
-@*        Submission bucket: <a href="#">insert link here</a><br />
-        Output bucket: <a href="#">insert link here</a>*@
+
     </p>
 
     <div class="mb-5">
@@ -65,14 +64,8 @@
         <h2 class="fs-5">TRE's Submitted To</h2>
         <div class="accordion accordion-flush" id="accordionFlushExample">
         @{
-            //var jsonString = Model.TesJson;
-            //static string Unescape(string jsonString) { return jsonString; }
-
-
-            //var pleasework = Unescape(Model.TesJson);
                 @foreach (var tre in Model.Children)
                 {
-                //var Date1 = DateTime.Now.AddDays(-3).AddHours(-2).AddMinutes(-33);
                 var startDate = tre.StartTime;
                 var currTime = DateTime.Now;
                 TimeSpan result1 = currTime.Subtract(startDate);
@@ -133,15 +126,11 @@
 
 <br />
 <script>
-    //"{\"id\":\"1\",\"state\":0,\"name\":\"Sub1\",\"description\":null,\"inputs\":null,\"outputs\":null,\"resources\":null,\"executors\":[{\"image\":\"\\\\\\\\minio\\\\justin1.crate\",\"command\":null,\"workdir\":null,\"stdin\":null,\"stdout\":null,\"stderr\":null,\"env\":null}],\"volumes\":null,\"tags\":{\"project\":\"Head\",\"endpoints\":\"\"},\"logs\":null,\"creation_time\":null}"
-    //var test1 = { "id": "1", "state": 0, "name": "Sub1", "description": null, "inputs": null, "outputs": null, "resources": null, "executors": [{ "image": "\\\\minio\\justin1.crate", "command": null, "workdir": null, "stdin": null, "stdout": null, "stderr": null, "env": null }], "volumes": null, "tags": { "project": "Head", "endpoints": "" }, "logs": null, "creation_time": null };
-    var tesJson = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.TesJson));
-    //var test2 = "{\"id\":\"1\",\"state\":0,\"name\":\"Sub1\",\"description\":null,\"inputs\":null,\"outputs\":null,\"resources\":null,\"executors\":[{\"image\":\"\\\\\\\\minio\\\\justin1.crate\",\"command\":null,\"workdir\":null,\"stdin\":null,\"stdout\":null,\"stderr\":null,\"env\":null}],\"volumes\":null,\"tags\":{\"project\":\"Head\",\"endpoints\":\"\"},\"logs\":null,\"creation_time\":null}";
+    var tesJson = @Html.Raw(Model.TesJson);
     var jsonViewer = document.getElementById("jsonViewer");
     var showJsonButton = document.getElementById("showJsonButton");
     var jsonVisible = false;
     var test = jsonViewer.textContent = JSON.stringify(tesJson, null, 9);
-    //var test = jsonViewer.textContent = JSON.stringify(test1, null, "\t");
     showJsonButton.addEventListener("click", function () {
         if (jsonVisible) {
             jsonViewer.style.display = "none";
