@@ -63,8 +63,8 @@ namespace DARE_API.Controllers
 
                 if (project.Id == 0)
                 {
-                    project.SubmissionBucket = GenerateRandomName(project.Name) + "submission";
-                    project.OutputBucket = GenerateRandomName(project.Name) + "output";
+                    project.SubmissionBucket = GenerateRandomName(project.Name.ToLower()) + "submission";
+                    project.OutputBucket = GenerateRandomName(project.Name.ToLower()) + "output";
                     var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, project.SubmissionBucket);
                     if (!submissionBucket)
                     {

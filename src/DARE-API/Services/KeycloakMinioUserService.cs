@@ -1,4 +1,5 @@
-﻿using BL.Models.ViewModels;
+﻿using BL.Models.Settings;
+using BL.Models.ViewModels;
 using DARE_API.Services.Contract;
 using IdentityModel;
 using Newtonsoft.Json;
@@ -11,6 +12,11 @@ namespace DARE_API.Services
 {
     public class KeycloakMinioUserService : IKeycloakMinioUserService
     {
+        private readonly ControlKeyCloakSettings _controlKeyCloakSettings;
+        public KeycloakMinioUserService(ControlKeyCloakSettings controlKeyCloakSettings)
+        {
+            _controlKeyCloakSettings = controlKeyCloakSettings;
+        }
         public async Task<bool> SetMinioUserAttribute(string accessToken, string userName, string attributeName, string attributeValue)
         {
             try
@@ -19,8 +25,8 @@ namespace DARE_API.Services
 
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                var baseUrl = "auth2.ukserp.ac.uk";
-                var realm = "Dare-Control";
+                var baseUrl = _controlKeyCloakSettings.Server;
+                var realm = _controlKeyCloakSettings.Realm;
                 var userId = await GetUserIDAsync(baseUrl, realm, accessToken, userName);
                 var user = await GetUserAttributesAsync(baseUrl, realm, accessToken, userId);
 
@@ -72,8 +78,8 @@ namespace DARE_API.Services
 
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                var baseUrl = "auth2.ukserp.ac.uk";
-                var realm = "Dare-Control";
+                var baseUrl = _controlKeyCloakSettings.Server;
+                var realm = _controlKeyCloakSettings.Realm;
                 var userId = await GetUserIDAsync(baseUrl, realm, accessToken, userName);
                 var user = await GetUserAttributesAsync(baseUrl, realm, accessToken, userId);
 
