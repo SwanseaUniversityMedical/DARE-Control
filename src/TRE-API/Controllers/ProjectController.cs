@@ -11,11 +11,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace TRE_API.Controllers
 {
-
-    //[Authorize(Roles = "dare-tre,dare-control-admin")]
+    
+    [Authorize(Roles = "dare-tre-admin")]
     [Route("api/[controller]")]
+    [ApiController]
 
-    public class ProjectController : ControllerBase
+    public class ProjectController : Controller
     {
 
         private readonly ApplicationDbContext _DbContext;
@@ -34,8 +35,8 @@ namespace TRE_API.Controllers
         [Authorize(Roles = "dare-tre-admin")]
         public List<Project> GetAllProjects()
         {
-
-            var allProjects = _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForEndpoint/").Result;
+            
+            var allProjects =  _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForTre/").Result;
             return allProjects;
         }
 
@@ -63,7 +64,7 @@ namespace TRE_API.Controllers
         {
             try
             {
-                var allProjects = _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForEndpoint/").Result;
+                var allProjects = _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForTre/").Result;
                 return allProjects;
 
             }

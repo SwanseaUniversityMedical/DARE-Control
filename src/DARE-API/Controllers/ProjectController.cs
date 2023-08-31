@@ -7,7 +7,6 @@ using BL.Models.ViewModels;
 
 using Newtonsoft.Json;
 using Serilog;
-using Endpoint = BL.Models.Endpoint;
 using BL.Services;
 using DARE_API.Services.Contract;
 using Microsoft.AspNetCore.Authentication;
@@ -17,8 +16,8 @@ namespace DARE_API.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-
-    public class ProjectController : ControllerBase
+    [Authorize(Roles = "dare-control-admin")]
+    public class ProjectController : Controller
     {
 
         private readonly ApplicationDbContext _DbContext;
@@ -37,8 +36,8 @@ namespace DARE_API.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
-        [HttpPost("AddProject")]
-        public async Task<Project?> AddProject([FromBody] FormData data)
+        [HttpPost("SaveProject")]
+        public async Task<Project?> SaveProject([FromBody] FormData data)
         {
             try
             {
@@ -49,12 +48,12 @@ namespace DARE_API.Controllers
                 project.StartDate = project.StartDate.ToUniversalTime();
                 project.EndDate = project.EndDate.ToUniversalTime();
                 project.ProjectDescription = project.ProjectDescription.Trim();
-                //projects.Id = projects.Id;
+                
                 
                 
                 project.FormData = data.FormIoString;
                 project.Display = project.Display;
-                //model.Display = projects.Display.Trim();
+                
                 if (_DbContext.Projects.Any(x => x.Name.ToLower() == project.Name.ToLower().Trim() && x.Id != project.Id))
                 {
 
@@ -68,20 +67,20 @@ namespace DARE_API.Controllers
                     var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, project.SubmissionBucket);
                     if (!submissionBucket)
                     {
-                        Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", project.SubmissionBucket);
+                        Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SaveProject", project.SubmissionBucket);
                     }
                     else
                     {
                         var submistionBucketPolicy = await _minioHelper.CreateBucketPolicy(project.SubmissionBucket);
                         if (!submistionBucketPolicy)
                         {
-                            Log.Error("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.", "AddProject", project.SubmissionBucket);
+                            Log.Error("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.", "SaveProject", project.SubmissionBucket);
                         }
                     }
                     var outputBucket = await _minioHelper.CreateBucket(_minioSettings, project.OutputBucket);
                     if (!outputBucket)
                     {
-                        Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "AddProject", project.OutputBucket);
+                        Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SaveProject", project.OutputBucket);
 
                     }
                     else
@@ -89,7 +88,7 @@ namespace DARE_API.Controllers
                         var outputBucketPolicy = await _minioHelper.CreateBucketPolicy(project.OutputBucket);
                         if (!outputBucketPolicy)
                         {
-                            Log.Error("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.", "AddProject", project.OutputBucket);
+                            Log.Error("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.", "SaveProject", project.OutputBucket);
                         }
                     }
                 }
@@ -114,7 +113,7 @@ namespace DARE_API.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} Crash", "AddProject");
+                Log.Error(ex, "{Function} Crash", "SaveProject");
                 var errorModel = new Project();
                 return errorModel;
                 throw;
@@ -218,80 +217,80 @@ namespace DARE_API.Controllers
 
         }
 
-        [HttpPost("AddEndpointMembership")]
-        public async Task<ProjectEndpoint?> AddEndpointMembership(ProjectEndpoint model)
+        [HttpPost("AddTreMembership")]
+        public async Task<ProjectTre?> AddTreMembership(ProjectTre model)
         {
             try
             {
-                var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.Id == model.EndpointId);
-                if (endpoint == null)
+                var tre = _DbContext.Tres.FirstOrDefault(x => x.Id == model.TreId);
+                if (tre == null)
                 {
-                    Log.Error("{Function} Invalid endpoint id {UserId}", "AddEndpointMembership", model.EndpointId);
+                    Log.Error("{Function} Invalid tre id {UserId}", "AddTreMembership", model.TreId);
                     return null;
                 }
 
                 var project = _DbContext.Projects.FirstOrDefault(x => x.Id == model.ProjectId);
                 if (project == null)
                 {
-                    Log.Error("{Function} Invalid project id {UserId}", "AddEndpointMembership", model.ProjectId);
+                    Log.Error("{Function} Invalid project id {UserId}", "AddTreMembership", model.ProjectId);
                     return null;
                 }
 
-                if (project.Endpoints.Any(x => x == endpoint))
+                if (project.Tres.Any(x => x == tre))
                 {
-                    Log.Error("{Function} Endpoint {Endpoint} is already on {ProjectName}", "AddEndpointMembership", endpoint.Name, project.Name);
+                    Log.Error("{Function} Tre {Tre} is already on {ProjectName}", "AddTreMembership", tre.Name, project.Name);
                     return null;
                   }
 
-                project.Endpoints.Add(endpoint);
+                project.Tres.Add(tre);
 
                 await _DbContext.SaveChangesAsync();
-                Log.Information("{Function} Added endpoint {Enpoint} to {ProjectName}", "AddEndpointMembership", endpoint.Name, project.Name);
+                Log.Information("{Function} Added Tre {Tre} to {ProjectName}", "AddTreMembership", tre.Name, project.Name);
                 return model;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} Crash", "AddEndpointMembership");
+                Log.Error(ex, "{Function} Crash", "AddTreMembership");
                 throw;
             }
 
 
         }
 
-        [HttpPost("RemoveEndpointMembership")]
-        public async Task<ProjectEndpoint?> RemoveEndpointMembership(ProjectEndpoint model)
+        [HttpPost("RemoveTreMembership")]
+        public async Task<ProjectTre?> RemoveTreMembership(ProjectTre model)
         {
             try
             {
-                var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.Id == model.EndpointId);
-                if (endpoint == null)
+                var tre = _DbContext.Tres.FirstOrDefault(x => x.Id == model.TreId);
+                if (tre == null)
                 {
-                    Log.Error("{Function} Invalid endpoint id {UserId}", "AddEndpointMembership", model.EndpointId);
+                    Log.Error("{Function} Invalid tre id {UserId}", "AddTreMembership", model.TreId);
                     return null;
                 }
 
                 var project = _DbContext.Projects.FirstOrDefault(x => x.Id == model.ProjectId);
                 if (project == null)
                 {
-                    Log.Error("{Function} Invalid project id {UserId}", "AddEndpointMembership", model.ProjectId);
+                    Log.Error("{Function} Invalid project id {UserId}", "AddTreMembership", model.ProjectId);
                     return null;
                 }
 
-                if (!project.Endpoints.Any(x => x == endpoint))
+                if (!project.Tres.Any(x => x == tre))
                 {
-                    Log.Error("{Function} Endpoint {Endpoint} is already on {ProjectName}", "AddEndpointMembership", endpoint.Name, project.Name);
+                    Log.Error("{Function} Tre {Tre} is already on {ProjectName}", "AddTreMembership", tre.Name, project.Name);
                     return null;
                 }
 
-                project.Endpoints.Remove(endpoint);
+                project.Tres.Remove(tre);
 
                 await _DbContext.SaveChangesAsync();
-                Log.Information("{Function} Added endpoint {Enpoint} to {ProjectName}", "AddEndpointMembership", endpoint.Name, project.Name);
+                Log.Information("{Function} Added Tre {Tre} to {ProjectName}", "AddTreMembership", tre.Name, project.Name);
                 return model;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} Crash", "AddEndpointMembership");
+                Log.Error(ex, "{Function} Crash", "AddTreMembership");
                 throw;
             }
 
@@ -331,7 +330,7 @@ namespace DARE_API.Controllers
                 //TODO - use User.Identity.IsAuthenticated to alter list returned : embargoed etc
 
                 var allProjects = _DbContext.Projects
-                    //.Include(x => x.Endpoints)
+                    //.Include(x => x.Tres)
                     //.Include(x => x.Submissions)
                     //.Include(x => x.Users)
                     .ToList();
@@ -350,42 +349,42 @@ namespace DARE_API.Controllers
         }
 
 
-        [HttpGet("GetAllProjectsForEndpoint")]
-        [AllowAnonymous]
-        public List<Project> GetAllProjectsForEndpoint()
+        [HttpGet("GetAllProjectsForTre")]
+        [Authorize(Roles = "dare-tre-admin")]
+        public List<Project> GetAllProjectsForTre()
         {
             try
             {
                 
                 var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-                var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
-                if (endpoint == null)
+                var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
+                if (tre == null)
                 {
-                    throw new Exception("User " + usersName + " doesn't have an endpoint");
+                    throw new Exception("User " + usersName + " doesn't have a tre");
                     
                 }
 
-                var allProjects = endpoint.Projects;
+                var allProjects = tre.Projects;
 
-                Log.Information("{Function} Projects retrieved successfully", "GetAllProjectsForEndpoint");
+                Log.Information("{Function} Projects retrieved successfully", "GetAllProjectsForTre");
                 return allProjects;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} Crashed", "GetAllProjectsForEndpoint");
+                Log.Error(ex, "{Function} Crashed", "GetAllProjectsForTre");
                 throw;
             }
 
 
         }
 
-        [HttpGet("GetEndPointsInProject")]
+        [HttpGet("GetTresInProject")]
         [AllowAnonymous]
-        public List<Endpoint> GetEndPointsInProject(int projectId)
+        public List<Tre> GetTresInProject(int projectId)
         {
-            List<Endpoint> endpoints = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Endpoints).ToList();
+            List<Tre> tres = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Tres).ToList();
 
-            return endpoints;
+            return tres;
         }
 
         private static string GenerateRandomName(string prefix)
@@ -429,6 +428,7 @@ namespace DARE_API.Controllers
         }
 
         [HttpGet("GetMinioEndPoint")]
+        [AllowAnonymous]
         public MinioEndpoint? GetMinioEndPoint()
         {
 

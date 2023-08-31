@@ -1,6 +1,4 @@
 ﻿using BL.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using TRE_API.Repositories.DbContexts;
 
 namespace TRE_API.Services

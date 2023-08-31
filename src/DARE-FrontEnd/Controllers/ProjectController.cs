@@ -3,7 +3,6 @@ using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using BL.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Endpoint = BL.Models.Endpoint;
 using Microsoft.AspNetCore.Authorization;
 using BL.Models.Settings;
 
@@ -13,24 +12,24 @@ namespace DARE_FrontEnd.Controllers
     public class ProjectController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
-        private readonly IConfiguration _configuration;
-        private readonly IFormIOSettings _formIOSettings;
+        
+        private readonly FormIOSettings _formIOSettings;
 
-        public ProjectController(IDareClientHelper client, IConfiguration configuration)
+        public ProjectController(IDareClientHelper client, FormIOSettings formIo)
         {
             _clientHelper = client;
-            _configuration = configuration;
-            _formIOSettings = new FormIOSettings();
-            configuration.Bind(nameof(FormIOSettings), _formIOSettings);
+            
+            _formIOSettings = formIo;
+            
 
         }
 
-        //[AllowAnonymous]
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult GetProject(int id)
         {
             var users = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
-            var endpoints = _clientHelper.CallAPIWithoutModel<List<Endpoint>>("/api/Endpoint/GetAllEndpoints/").Result;
+            var tres = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Tre/GetAllTres/").Result;
 
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());
@@ -38,18 +37,18 @@ namespace DARE_FrontEnd.Controllers
                 "/api/Project/GetProject/", paramlist).Result;
 
             var userItems2 = users.Where(p => !project.Users.Select(x => x.Id).Contains(p.Id)).ToList();
-            var endpointItems2 = endpoints.Where(p => !project.Endpoints.Select(x => x.Id).Contains(p.Id)).ToList();
+            var treItems2 = tres.Where(p => !project.Tres.Select(x => x.Id).Contains(p.Id)).ToList();
 
             var userItems = userItems2
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
-            var endpointItems = endpointItems2
+            var treItems = treItems2
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
 
             var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
 
-            var projectView = new ProjectUserEndpoint()
+            var projectView = new ProjectUserTre()
             {
                 Id = project.Id,
                 FormData = project.FormData,
@@ -58,13 +57,13 @@ namespace DARE_FrontEnd.Controllers
                 StartDate = project.StartDate,
                 EndDate = project.EndDate,
                 ProjectDescription = project.ProjectDescription,
-                Endpoints = project.Endpoints,
+                Tres = project.Tres,
                 SubmissionBucket = project.SubmissionBucket,
                 OutputBucket = project.OutputBucket,
                 MinioEndpoint = minioEndpoint.Url,
                 Submissions=project.Submissions,
                 UserItemList = userItems,
-                EndpointItemList = endpointItems
+                TreItemList = treItems
             };
 
             return View(projectView);
@@ -113,31 +112,31 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpGet]
-        public IActionResult AddEndpointMembership()
+        public IActionResult AddTreMembership()
         {
 
-            var projmem = GetProjectEndpointModel();
+            var projmem = GetProjectTreModel();
             return View(projmem);
         }
 
 
-        private ProjectEndpoint GetProjectEndpointModel()
+        private ProjectTre GetProjectTreModel()
         {
             var projs = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
-            var users = _clientHelper.CallAPIWithoutModel<List<Endpoint>>("/api/Endpoint/GetAllEndpoints/").Result;
+            var users = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Tre/GetAllTres/").Result;
 
             var projectItems = projs
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
 
-            var endpointItems = users
+            var treItems = users
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
 
-            var projmem = new ProjectEndpoint()
+            var projmem = new ProjectTre()
             {
                 ProjectItemList = projectItems,
-                EndpointItemList = endpointItems
+                TreItemList = treItems
             };
             return projmem;
         }
@@ -156,12 +155,12 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddEndpointMembership(ProjectEndpoint model)
+        public async Task<IActionResult> AddTreMembership(ProjectTre model)
         {
             var result =
-                await _clientHelper.CallAPI<ProjectEndpoint, ProjectEndpoint?>("/api/Project/AddEndpointMembership",
+                await _clientHelper.CallAPI<ProjectTre, ProjectTre?>("/api/Project/AddTreMembership",
                     model);
-            result = GetProjectEndpointModel();
+            result = GetProjectTreModel();
 
             return View(result);
 
@@ -169,8 +168,8 @@ namespace DARE_FrontEnd.Controllers
         }
 
 
-
-        public IActionResult AddProjectForm(int projectId)
+        [HttpGet]
+        public IActionResult SaveProjectForm(int projectId)
         {
             var formData = new FormData()
             {
@@ -203,7 +202,7 @@ namespace DARE_FrontEnd.Controllers
 
             var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
 
-            var projectView = new ProjectUserEndpoint()
+            var projectView = new ProjectUserTre()
             {
                 Id = project.Id,
                 FormData = project.FormData,
@@ -211,7 +210,7 @@ namespace DARE_FrontEnd.Controllers
                 Users = project.Users,
                 StartDate = project.StartDate,
                 EndDate = project.EndDate,
-                Endpoints = project.Endpoints,
+                Tres = project.Tres,
                 SubmissionBucket = project.SubmissionBucket,
                 OutputBucket = project.OutputBucket,
                 MinioEndpoint = minioEndpoint.Url
@@ -230,7 +229,7 @@ namespace DARE_FrontEnd.Controllers
                 var data = System.Text.Json.JsonSerializer.Deserialize<FormData>(str);
                 data.FormIoString = str;
 
-                var result = await _clientHelper.CallAPI<FormData, Project?>("/api/Project/AddProject", data);
+                var result = await _clientHelper.CallAPI<FormData, Project?>("/api/Project/SaveProject", data);
 
                 if (result.Id == 0)
                     return BadRequest();
@@ -254,15 +253,15 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> RemoveEndFromProject(int projectId, int endpointId)
+        public async Task<IActionResult> RemoveTreFromProject(int projectId, int treId)
         {
-            var model = new ProjectEndpoint()
+            var model = new ProjectTre()
             {
                 ProjectId = projectId,
-                EndpointId = endpointId
+                TreId = treId
             };
             var result =
-                await _clientHelper.CallAPI<ProjectEndpoint, ProjectEndpoint?>("/api/Project/RemoveEndpointMembership", model);
+                await _clientHelper.CallAPI<ProjectTre, ProjectTre?>("/api/Project/RemoveTreMembership", model);
             return RedirectToAction("GetProject", new { id = projectId });
         }
 
@@ -284,18 +283,18 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddEndpointList(string ProjectId, string ItemList)
+        public async Task<IActionResult> AddTreList(string ProjectId, string ItemList)
         {
             string[] arr = ItemList.Split(',');
             foreach (string s in arr)
             {
-                var model = new ProjectEndpoint()
+                var model = new ProjectTre()
                 {
                     ProjectId = Int32.Parse(ProjectId),
-                    EndpointId = Int32.Parse(s)
+                    TreId = Int32.Parse(s)
                 };
                 var result =
-                await _clientHelper.CallAPI<ProjectEndpoint, ProjectEndpoint?>("/api/Project/AddEndpointMembership",
+                await _clientHelper.CallAPI<ProjectTre, ProjectTre?>("/api/Project/AddTreMembership",
                     model);
             }
             return RedirectToAction("GetProject", new { id = ProjectId });
@@ -303,7 +302,7 @@ namespace DARE_FrontEnd.Controllers
 
         [HttpGet]
         [Authorize(Roles = "dare-control-admin")]
-        public void IsUSerOnProject(int projectId, int userId)
+        public void IsUserOnProject(int projectId, int userId)
         {
             var model = new ProjectUser()
             {

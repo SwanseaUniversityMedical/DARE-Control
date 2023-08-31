@@ -1,10 +1,8 @@
 ﻿using BL.Models.Settings;
 using BL.Models.ViewModels;
 using DARE_API.Services.Contract;
-using IdentityModel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 

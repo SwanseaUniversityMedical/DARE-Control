@@ -4,14 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using BL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using EasyNetQ.Management.Client.Model;
-using System.Xml.Linq;
-using Microsoft.EntityFrameworkCore;
+
 
 
 namespace TRE_UI.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "dare-tre-admin")]
     public class ProjectController : Controller
     {
 
@@ -21,8 +19,8 @@ namespace TRE_UI.Controllers
 
             _treclientHelper = treClient;
         }
-
-
+        
+     
         [HttpGet]
         public IActionResult GetAllProjects()
 
@@ -48,7 +46,7 @@ namespace TRE_UI.Controllers
             paramlist.Add("projectId", projectId.ToString());
             var project = _treclientHelper.CallAPIWithoutModel<Project?>(
                 "/api/Project/GetProject/", paramlist).Result;
-
+            
 
             var projectView = new Project()
 
@@ -60,8 +58,8 @@ namespace TRE_UI.Controllers
                 EndDate = project.EndDate,
                 Submissions = project.Submissions
 
-            };
-
+                };
+          
             return View(projectView);
         }
 
@@ -130,12 +128,12 @@ namespace TRE_UI.Controllers
                 "/api/Project/GetProject/", paramlist).Result;
 
             var userItems2 = users.Where(p => !project.Users.Select(x => x.Id).Contains(p.Id)).ToList();
-
+           
             var userItems = userItems2
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
-
-            var projectView = new ProjectUserEndpoint()
+          
+            var projectView = new ProjectUserTre()
             {
                 Id = project.Id,
                 FormData = project.FormData,
@@ -144,10 +142,10 @@ namespace TRE_UI.Controllers
                 StartDate = project.StartDate,
                 EndDate = project.EndDate,
                 ProjectDescription = project.ProjectDescription,
-                Endpoints = project.Endpoints,
+                Tres = project.Tres,
                 Submissions = project.Submissions,
                 UserItemList = userItems,
-
+              
             };
 
             return View(projectView);

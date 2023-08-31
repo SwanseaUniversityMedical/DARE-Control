@@ -1,4 +1,4 @@
-﻿@model BL.Models.ViewModels.ProjectUserEndpoint
+﻿@model BL.Models.ViewModels.ProjectUserTre
 @{
     ViewData["Title"] = "@Model.Name";
 
@@ -35,10 +35,10 @@
                 </a>
             </li>
             <li class="nav-item" role="presentation">
-                <a href="#tre" class="nav-link text-dark" id="tre" data-bs-toggle="tab" data-bs-target="#endpoint" role="tab" aria-controls="Endpoint" aria-selected="false">
+                <a href="#tre" class="nav-link text-dark" id="treLink" data-bs-toggle="tab" data-bs-target="#tre" role="tab" aria-controls="Tre" aria-selected="false">
                     <div class="d-flex justify-content-between align-items-center">
                         <span>TREs</span>
-                        <span class="badge bg-dark-blue rounded-pill ms-2">@Model.Endpoints.Count</span>
+                        <span class="badge bg-dark-blue rounded-pill ms-2">@Model.Tres.Count</span>
                     </div>
                 </a>
             </li>
@@ -51,7 +51,7 @@
                     <div class="col-md-6">
                         @if (User.IsInRole("dare-control-admin"))
                         {
-                            <a href="@Url.Action("AddProjectForm", "Project",new{Projectid=@Model.Id})" class="btn btn-sm btn-primary mb-3">Edit</a>
+                            <a href="@Url.Action("SaveProjectForm", "Project",new{Projectid=@Model.Id})" class="btn btn-sm btn-primary mb-3">Edit</a>
                         }
                         <p class="text-muted fs-7">
                             @Model.ProjectDescription
@@ -108,19 +108,19 @@
                 </div>
 
             </div>
-            <div class="tab-pane fade" id="endpoint" role="tabpanel" aria-labelledby="contact-tab">
+            <div class="tab-pane fade" id="tre" role="tabpanel" aria-labelledby="contact-tab">
                 @if (User.IsInRole("dare-control-admin"))
                 {
-                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addEndpint">Add TRE</button>
+                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addTre">Add TRE</button>
                 }
                 <div class="row">
                     <div class="col-lg-5 col-md-6">
                         <ul class="list-group">
-                            @foreach (var endpoint in Model.Endpoints)
+                            @foreach (var tre in Model.Tres)
                             {
                                 <li class="list-group-item justify-content-between d-flex">
-                                    <a href="@Url.Action("GetAnEndpoint", "Endpoint", new { id = endpoint.Id })">@endpoint.Name</a>
-                                    <a href="@Url.Action("RemoveEndFromProject", "Project",new{ProjectId=Model.Id,EndpointId=@endpoint.Id})">
+                                    <a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })">@tre.Name</a>
+                                    <a href="@Url.Action("RemoveTreFromProject", "Project",new{ProjectId=Model.Id,TreId=tre.Id})">
                                         <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
                                     </a>
                                 </li>
@@ -165,7 +165,7 @@
     </div>
 </div>
 
-<div class="modal fade bd-endpoint-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="endpointModal">
+<div class="modal fade bd-tre-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="treModal">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -176,12 +176,12 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="table-responsive">
-                            <table class="table table-bordered" id="EndpointList">
-                                @foreach (var endpoint in Model.EndpointItemList)
+                            <table class="table table-bordered" id="TreList">
+                                @foreach (var tre in Model.TreItemList)
                                 {
                                     <tr>
-                                        <td><input type="checkbox" value="@endpoint.Value" id="Endpoint_@endpoint.Value" name="selectedEndpoint" /></td>
-                                        <td>@endpoint.Text</td>
+                                        <td><input type="checkbox" value="@tre.Value" id="Tre_@tre.Value" name="selectedTre" /></td>
+                                        <td>@tre.Text</td>
                                     </tr>
                                 }
                             </table>
@@ -191,7 +191,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="SaveEndpointList(@Model.Id)">Add</button>
+                <button type="button" class="btn btn-primary" onclick="SaveTreList(@Model.Id)">Add</button>
             </div>
         </div>
     </div>

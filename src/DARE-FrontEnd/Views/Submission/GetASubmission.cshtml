@@ -47,7 +47,7 @@
         Date submitted: @Model.StartTime
     </p>
     <p>
-        Minio URL: <a href="http://@ViewBag.minioendpoint" ">@Model.Project.Name Buckets</a><br />
+        Minio URL: <a href="http://@ViewBag.minioendpoint" >@Model.Project.Name Buckets</a><br />
         <br>Submission Bucket: @Html.Raw(Model.Project.SubmissionBucket)
         <br>Output Bucket: @Html.Raw(Model.Project.OutputBucket)
 
@@ -79,10 +79,10 @@
                 int days1 = result2.Days;
                 int hours1 = result2.Hours;
                 int minutes1 = result2.Minutes;
-                    var endpointName = @tre.EndPoint?.Name.ToString();
-                    if (endpointName == null)
+                    var treName = @tre.Tre?.Name.ToString();
+                    if (treName == null)
                     {
-                        endpointName = "None";
+                        treName = "None";
                     }
                     //switch (tre.Status)
                     //{
@@ -97,8 +97,8 @@
                     //}
                     <div class="accordion-item">
                         <h3 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@endpointName" aria-expanded="false" aria-controls="@endpointName">
-                                <span class="fw-bold">@endpointName</span>
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@treName" aria-expanded="false" aria-controls="@treName">
+                                <span class="fw-bold">@treName</span>
                             @{
                                 if (tre.Status == BL.Models.Enums.StatusType.DataOutApproved)
                                 {
@@ -108,7 +108,7 @@
                                 <div><small><span class="badge bg-dark-blue rounded-pill ms-4 me-2">@tre.Status</span><span class="text-muted fs-7">@progressTimer @days days, @hours hours, @minutes minutes</span><span class="text-muted fs-7"> &nbsp Current Status Elapsed Time: @days1 days, @hours1 hours, @minutes1 minutes</span></small></div>
                             </button>
                         </h3>
-                        <div id="@endpointName" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                        <div id="@treName" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
                             <div class="accordion-body">
                                 @Model.HistoricStatuses
                                 Job/task information

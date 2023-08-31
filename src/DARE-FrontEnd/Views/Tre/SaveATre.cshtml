@@ -30,7 +30,7 @@
 </div>
 <script>
     window.onload = function () {
-        renderForm("@Model.FormIoUrl", @Html.Raw(Model.FormIoString), '/Endpoint/EndpointFormSubmission/@Url.ActionContext.RouteData.Values["id"]', false, 'formio', "/Endpoint/GetAllEndpoints");
+        renderForm("@Model.FormIoUrl", @Html.Raw(Model.FormIoString), '/Tre/TreFormSubmission/@Url.ActionContext.RouteData.Values["id"]', false, 'formio', "/Tre/GetAllTres");
     }
 
 </script>

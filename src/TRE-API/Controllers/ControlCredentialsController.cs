@@ -3,20 +3,17 @@ using BL.Models;
 using BL.Models.APISimpleTypeReturns;
 using BL.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
-using TRE_API.Models;
 using TRE_API.Repositories.DbContexts;
-using TRE_API.Services;
+
 
 namespace TRE_API.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize(Roles = "dare-tre-admin")]
     [ApiController]
-    public class ControlCredentialsController : ControllerBase
+    public class ControlCredentialsController : Controller
     {
 
         private readonly ApplicationDbContext _DbContext;
@@ -30,7 +27,7 @@ namespace TRE_API.Controllers
             _keycloakTokenHelper = keycloakTokenHelper;
         }
 
-        [AllowAnonymous]
+        
         [HttpGet("CheckCredentialsAreValid")]
         public async Task<BoolReturn> CheckCredentialsAreValidAsync()
         {

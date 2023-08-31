@@ -46,7 +46,7 @@
                         </li>
                         
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Endpoint" asp-action="GetAllEndpoints">TREs</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Tre" asp-action="GetAllTres">TREs</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="NewTokenIssue">API Access Token</a>
@@ -165,9 +165,9 @@
 
         })
 
-        $('#addEndpint').on('click', function () {
+        $('#addTre').on('click', function () {
 
-            $('#endpointModal').modal('show');
+            $('#treModal').modal('show');
 
         })
 
@@ -212,12 +212,12 @@
         }
     </script>
     <script>
-        var SaveEndpointList = function (el) {
+        var SaveTreList = function (el) {
             debugger;
             var arrItem = [];
             var commaSeparatedIds = "";
 
-            $("#EndpointList tr td input[type=checkbox]").each(function (index, val) {
+            $("#TreList tr td input[type=checkbox]").each(function (index, val) {
                 debugger;
                 var checkId = $(val).attr("Id");
                 var arr = checkId.split('_');
@@ -234,7 +234,7 @@
                 commaSeparatedIds = arrItem.toString();
 
                 $.ajax({
-                    url: "/Project/AddEndpointList",
+                    url: "/Project/AddTreList",
                     type: "POST",
                     data: { ProjectId: el, ItemList: commaSeparatedIds },
                     success: function (reponse) {
@@ -266,7 +266,7 @@
                 commaSeparatedIds = arrItem.toString();
                 debugger;
                 $.ajax({
-                    url: "/User/AddProjectList",
+                    url: "/User/UpdateProjectList",
                     type: "POST",
                     data: { Id: el, ItemList: commaSeparatedIds },
                     success: function (reponse) {
