@@ -53,7 +53,7 @@ namespace TREAgent
 
                     var tes = JsonConvert.DeserializeObject<TesTask>(submission.TesJson);
                     rabbit.Advanced.Publish(exch, RoutingConstants.Subs, false, new Message<TesTask>(tes));
-                    var result = treApi.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusTre",
+                    var result = treApi.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
                         new Dictionary<string, string>() {  {"tesId", submission.TesId}, {"statusType",StatusType.TransferredToPod.ToString() }, {"description", "" }}).Result;
                     //TODO: Update statusType of subs
 
