@@ -11,6 +11,8 @@ using Newtonsoft.Json.Linq;
 using Amazon.Runtime;
 using IdentityModel.Client;
 using Serilog;
+using System.Text.Json;
+using System.Text;
 
 namespace DARE_API.Controllers
 {
@@ -18,6 +20,7 @@ namespace DARE_API.Controllers
     {
         private readonly IICODAClientHelper _clientHelper;
         protected readonly IHttpClientFactory _httpClientFactory;
+
         private readonly string ICODAAddress = "https://localhost:5005";
         private static readonly HttpClient client = new HttpClient();
 
@@ -33,8 +36,17 @@ namespace DARE_API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> ListJobs(string token, [FromQuery] string view = "MINIMAL", [FromQuery] int page_size = 256, [FromQuery] int page_number = 1)
         {
-            var res = HTTPGet<List<TesTask>>(ICODAAddress + $"/tasks?view={view}&page_size={page_size}&page_number={page_number}", token);
-            return Ok(new { res });
+            try
+            {
+                var res = await _clientHelper.CallAPIWithoutModelWithAccessCode<List<TesTask>>($"/tasks?view={view}&page_size={page_size}&page_number={page_number}", token, null);
+                //var res = HTTPGet<List<TesTask>>(ICODAAddress + $"/tasks?view={view}&page_size={page_size}&page_number={page_number}", token);
+                return Ok(new { res });
+            }
+            catch (Exception e)
+            {
+                return BadRequest("Failed to get the specific task");
+            }
+
         }
 
         [HttpGet("/tasks/{task_id}")]
@@ -45,16 +57,16 @@ namespace DARE_API.Controllers
         {
             try 
             {
-                //var param = new Dictionary<string, string>();
-                //param.Add("view", view);
-                //var content = new FormUrlEncodedContent(param);
+                var param = new Dictionary<string, string>();
+                param.Add("view", view);
+                var content = new FormUrlEncodedContent(param);
 
-                var res = HTTPGet<TesTask>(ICODAAddress + $"/tasks/{task_id}?view={view}", token);
+                //var res = HTTPGet<TesTask>(ICODAAddress + $"/tasks/{task_id}?view={view}", token);
 
                 //var res = await apiClient.GetAsync($"https://localhost:5005/tasks/{task_id}?view={view}");
                 //var res = await client.GetStringAsync($"https://localhost:5005/Job/tasks/{task_id}?view={view}");
 
-                //var res = await _clientHelper.CallAPIWithoutModel<TesTask>($"/tasks/{task_id}", param);
+                var res = await _clientHelper.CallAPIWithoutModelWithAccessCode<TesTask>($"/tasks/{task_id}", token, param);
                 if (res != null)
                 {
                     return Ok(new { res });
@@ -143,38 +155,6 @@ namespace DARE_API.Controllers
             if (string.IsNullOrEmpty(taskVm.Executors.First().Image)) return BadRequest("image has to be present in the executor setting");
 
             return null;
-        }
-
-        private async Task<T> HTTPGet<T>(string url, string token)
-        {
-            var client = await CreateClient(token);
-
-            HttpResponseMessage res = new HttpResponseMessage
-            {
-                StatusCode = System.Net.HttpStatusCode.BadRequest
-            };
-
-            res = await client.GetAsync(url);
-
-            if (!res.IsSuccessStatusCode)
-            {
-                throw new Exception("API Call Failure: " + res.StatusCode + ": " + res.ReasonPhrase);
-            }
-            Log.Information("{Function} The response {res}", "ClientHelperRequestAsync", res);
-
-            var result = res.Content;
-
-            var data = await result.ReadAsStringAsync();
-
-            return JsonConvert.DeserializeObject<T>(data) ?? throw new InvalidOperationException();
-        }
-
-        private async Task<HttpClient> CreateClient(string token)
-        {
-            var apiClient = _httpClientFactory.CreateClient();
-            apiClient.SetBearerToken(token);
-            apiClient.DefaultRequestHeaders.Add("Accept", "application/json");
-            return apiClient;
         }
     }
 }
