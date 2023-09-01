@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - ci/create-new-release-ci-using-reusable-workflows
+      - main
 
 jobs:
 
