@@ -75,14 +75,13 @@ jobs:
       container-registry-user: ${{ vars.HARBOR_USER }}
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: ${{ vars.HARBOR_REPO }}-main-api
-      release-tag-format: 'TEST-DARE-Control-API-Container-${version}'
+      release-tag-format: 'TEST2-DARE-Control-API-Container-${version}'
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       slack-thread: ${{ needs.slack.outputs.thread }}
       build-command: |
         docker build -t $IMAGE -f src/DARE-API/Dockerfile src/
       test-command: |
         echo '0'
-      release-branches: 'ci/create-new-release-ci-using-reusable-workflows'
     secrets:
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
@@ -102,7 +101,7 @@ jobs:
       container-registry-user: ${{ vars.HARBOR_USER }}
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: ${{ vars.HARBOR_REPO }}-main-ui
-      release-tag-format: 'TEST-DARE-Control-UI-Container-${version}'
+      release-tag-format: 'TEST2-DARE-Control-UI-Container-${version}'
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       slack-thread: ${{ needs.slack.outputs.thread }}
       build-command: |
@@ -128,7 +127,7 @@ jobs:
       container-registry-user: ${{ vars.HARBOR_USER }}
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: ${{ vars.HARBOR_REPO }}-tre-api
-      release-tag-format: 'TEST-DARE-TRE-API-Container-${version}'
+      release-tag-format: 'TEST2-DARE-TRE-API-Container-${version}'
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       slack-thread: ${{ needs.slack.outputs.thread }}
       build-command: |
@@ -154,7 +153,7 @@ jobs:
       container-registry-user: ${{ vars.HARBOR_USER }}
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: ${{ vars.HARBOR_REPO }}-tre-ui
-      release-tag-format: 'TEST-DARE-TRE-UI-Container-${version}'
+      release-tag-format: 'TEST2-DARE-TRE-UI-Container-${version}'
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       slack-thread: ${{ needs.slack.outputs.thread }}
       build-command: |
@@ -180,7 +179,7 @@ jobs:
       container-registry-user: ${{ vars.HARBOR_USER }}
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: ${{ vars.HARBOR_REPO }}-tre-agent
-      release-tag-format: 'TEST-DARE-Agent-Container-${version}'
+      release-tag-format: 'TEST2-DARE-Agent-Container-${version}'
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       slack-thread: ${{ needs.slack.outputs.thread }}
       build-command: |
@@ -211,7 +210,7 @@ jobs:
       chart-registry-user: ${{ vars.HARBOR_USER }}
       chart-registry-project: ${{ vars.HARBOR_PROJECT }}
       chart-registry-repo: ${{ vars.HARBOR_REPO }}
-      release-tag-format: 'TEST-DARE-Control-Helm-${version}'
+      release-tag-format: 'TEST2-DARE-Control-Helm-${version}'
       github-app-id: ${{ vars.APP_ID }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       slack-thread: ${{ needs.slack.outputs.thread }}
