@@ -1,998 +1,249 @@
-name: Build and Release Container
+name: Release
 
 on:
   push:
-    paths:
-      - '.github/workflows/release.yaml'
-      - 'src/**'
-      - 'containers/**'
-      - 'charts/**'
     branches:
-      - 'main'
-
-
-env:
-  HARBOR_REGISTRY: ${{ vars.HARBOR_REGISTRY }}
-  HARBOR_PROJECT: ${{ vars.HARBOR_PROJECT }}
-  HARBOR_REPO: ${{ vars.HARBOR_REPO }}
-  HARBOR_USER: ${{ vars.HARBOR_USER }}
-  HARBOR_TOKEN: ${{ secrets.HARBOR_TOKEN }}
+      - main
 
 jobs:
-  release-api-container:
-    runs-on: [self-hosted, linux, x64]
 
-    env:
-      TAG_PREFIX: 'DARE-Control-API-Container'
-      TAG_FORMAT: 'DARE-Control-API-Container-${version}'
-      HARBOR_API_REPO: ${{ vars.HARBOR_REPO }}-main-api
-
-    steps:
-      - name: clone repo
-        uses: actions/checkout@v3
-
-      - uses: dorny/paths-filter@v2
-        id: container-changes
-        with:
-          filters: |
-            src:
-              - '.github/workflows/release.yaml'
-              - 'containers/api/**'
-              - 'src/DARE-API/**'
-              - 'src/BL/**'
-
-      - name: build container
-        if: steps.container-changes.outputs.src == 'true'      
-        working-directory: src/
-        run: |
-          docker build -t image -f "DARE-API/Dockerfile" .
-
-      - name: registry login
-        if: steps.container-changes.outputs.src == 'true'
-        run: |
-          echo "$HARBOR_TOKEN" | docker login $HARBOR_REGISTRY -u $HARBOR_USER --password-stdin
-
-      - name: generate token
-        if: steps.container-changes.outputs.src == 'true'
-        id: generate-token
-        uses: tibdex/github-app-token@v1.8.0
-        with:
-          app_id: ${{ vars.APP_ID }}
-          private_key: ${{ secrets.APP_PRIVATE_KEY }}
-
-      - name: semantic release dry run
-        if: steps.container-changes.outputs.src == 'true'
-        uses: docker://ghcr.io/codfish/semantic-release-action:v2
-        id: semantic-dry
-        with:
-          dry_run: true
-
-          branches: |
-            [
-              '+([0-9])?(.{+([0-9]),x}).x',
-              'main'
-            ]
-
-          tag_format: ${{ env.TAG_FORMAT }}
-
-          plugins: |-
-            [
-              ['@semantic-release/commit-analyzer', {
-                "releaseRules": [
-                  {"type": "major", "release": "major"},
-                  {"type": "minor", "release": "minor"},
-                  {"type": "patch", "release": "patch"},
-                  {"type": "no-release", "release": false},
-            
-                  {"type": "chore", "release": "patch"},
-                  {"type": "refactor", "release": "patch"},
-                  {"type": "style", "release": "patch"},
-                  
-                  {"type": "docs", "release": false},
-                  {"type": "test", "release": false},
-                  {"type": "ci", "release": false},
-                  
-                  {"type": "feat", "release": "minor"},
-                  
-                  {"type": "revert", "release": "patch"},
-                  {"type": "perf", "release": "patch"},
-                  {"type": "fix", "release": "patch"},
-                  {"type": "build", "release": "patch"},
-                ],
-              }]
-            ]
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-
-      - name: semantic release
-        if: steps.container-changes.outputs.src == 'true' && steps.semantic-dry.outputs.new-release-published == 'true'
-        uses: docker://ghcr.io/codfish/semantic-release-action:v2
-        id: semantic
-        with:
-          branches: |
-            [
-              '+([0-9])?(.{+([0-9]),x}).x',
-              'main'
-            ]
-
-          tag_format: ${{ env.TAG_FORMAT }}
-
-          additional_packages: |
-            ['@semantic-release/exec']
-
-          plugins: |-
-            [
-              ['@semantic-release/commit-analyzer', {
-                "releaseRules": [
-                  {"type": "major", "release": "major"},
-                  {"type": "minor", "release": "minor"},
-                  {"type": "patch", "release": "patch"},
-                  {"type": "no-release", "release": false},
-            
-                  {"type": "chore", "release": "patch"},
-                  {"type": "refactor", "release": "patch"},
-                  {"type": "style", "release": "patch"},
-                  
-                  {"type": "docs", "release": false},
-                  {"type": "test", "release": false},
-                  {"type": "ci", "release": false},
-                  
-                  {"type": "feat", "release": "minor"},
-                  
-                  {"type": "revert", "release": "patch"},
-                  {"type": "perf", "release": "patch"},
-                  {"type": "fix", "release": "patch"},
-                  {"type": "build", "release": "patch"},
-                ],
-              }], 
-              ['@semantic-release/exec', { 
-                "generateNotesCmd": "echo '${ process.env.RELEASE_NOTES }'" 
-              }],
-              '@semantic-release/release-notes-generator',
-              ['@semantic-release/github', {
-                "successComment": false,
-                "failTitle": false
-              }]
-            ]
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-          RELEASE_NOTES: |
-            ```
-            echo "<token>" | docker login ${{ env.HARBOR_REGISTRY }} -u <username> --password-stdin
-            docker pull ${{ env.HARBOR_REGISTRY }}/${{ env.HARBOR_PROJECT }}/${{ env.HARBOR_API_REPO }}:${{ steps.semantic-dry.outputs.release-version }}
-            ```
-
-      - name: container push to registry
-        id: container-push
-        if: steps.container-changes.outputs.src == 'true' && steps.semantic.outputs.new-release-published == 'true'
-        run: |
-          docker tag image $HARBOR_REGISTRY/$HARBOR_PROJECT/$HARBOR_API_REPO:$TAG
-          docker push $HARBOR_REGISTRY/$HARBOR_PROJECT/$HARBOR_API_REPO:$TAG
-        env:
-          TAG: ${{ steps.semantic.outputs.release-version }}
-          
-      - name: delete orphaned release on container push failure
-        uses: dev-drprasad/delete-tag-and-release@v0.2.1
-        if: (failure() && steps.container-push.outcome == 'failure') && steps.semantic.outputs.new-release-published == 'true'
-        with:
-          tag_name: ${ env.TAG_PREFIX }-${{ steps.semantic.outputs.release-version }}
-          delete_release: true
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-
-  release-ui-container:
-    runs-on: [self-hosted, linux, x64]
-
-    env:
-      TAG_PREFIX: 'DARE-Control-UI-Container'
-      TAG_FORMAT: 'DARE-Control-UI-Container-${version}'
-      HARBOR_UI_REPO: ${{ vars.HARBOR_REPO }}-main-ui
-
-    steps:
-      - name: clone repo
-        uses: actions/checkout@v3
-
-      - uses: dorny/paths-filter@v2
-        id: container-changes
-        with:
-          filters: |
-            src:
-              - '.github/workflows/release.yaml'
-              - 'containers/ui/**'
-              - 'src/DARE-FrontEnd/**'
-              - 'src/BL/**'
-
-      - name: build container
-        if: steps.container-changes.outputs.src == 'true'
-        working-directory: src/
-        run: |
-          docker build -t image -f "DARE-FrontEnd/Dockerfile" .
-
-      - name: registry login
-        if: steps.container-changes.outputs.src == 'true'
-        run: |
-          echo "$HARBOR_TOKEN" | docker login $HARBOR_REGISTRY -u $HARBOR_USER --password-stdin
-
-      - name: generate token
-        if: steps.container-changes.outputs.src == 'true'
-        id: generate-token
-        uses: tibdex/github-app-token@v1.8.0
-        with:
-          app_id: ${{ vars.APP_ID }}
-          private_key: ${{ secrets.APP_PRIVATE_KEY }}
-
-      - name: semantic release dry run
-        if: steps.container-changes.outputs.src == 'true'
-        uses: docker://ghcr.io/codfish/semantic-release-action:v2
-        id: semantic-dry
-        with:
-          dry_run: true
-
-          branches: |
-            [
-              '+([0-9])?(.{+([0-9]),x}).x',
-              'main'
-            ]
-
-          tag_format: ${{ env.TAG_FORMAT }}
-
-          plugins: |-
-            [
-              ['@semantic-release/commit-analyzer', {
-                "releaseRules": [
-                  {"type": "major", "release": "major"},
-                  {"type": "minor", "release": "minor"},
-                  {"type": "patch", "release": "patch"},
-                  {"type": "no-release", "release": false},
-            
-                  {"type": "chore", "release": "patch"},
-                  {"type": "refactor", "release": "patch"},
-                  {"type": "style", "release": "patch"},
-                  
-                  {"type": "docs", "release": false},
-                  {"type": "test", "release": false},
-                  {"type": "ci", "release": false},
-                  
-                  {"type": "feat", "release": "minor"},
-                  
-                  {"type": "revert", "release": "patch"},
-                  {"type": "perf", "release": "patch"},
-                  {"type": "fix", "release": "patch"},
-                  {"type": "build", "release": "patch"},
-                ],
-              }]
-            ]
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-
-      - name: semantic release
-        if: steps.container-changes.outputs.src == 'true' && steps.semantic-dry.outputs.new-release-published == 'true'
-        uses: docker://ghcr.io/codfish/semantic-release-action:v2
-        id: semantic
-        with:
-          branches: |
-            [
-              '+([0-9])?(.{+([0-9]),x}).x',
-              'main'
-            ]
-
-          tag_format: ${{ env.TAG_FORMAT }}
-
-          additional_packages: |
-            ['@semantic-release/exec']
-
-          plugins: |-
-            [
-              ['@semantic-release/commit-analyzer', {
-                "releaseRules": [
-                  {"type": "major", "release": "major"},
-                  {"type": "minor", "release": "minor"},
-                  {"type": "patch", "release": "patch"},
-                  {"type": "no-release", "release": false},
-            
-                  {"type": "chore", "release": "patch"},
-                  {"type": "refactor", "release": "patch"},
-                  {"type": "style", "release": "patch"},
-                  
-                  {"type": "docs", "release": false},
-                  {"type": "test", "release": false},
-                  {"type": "ci", "release": false},
-                  
-                  {"type": "feat", "release": "minor"},
-                  
-                  {"type": "revert", "release": "patch"},
-                  {"type": "perf", "release": "patch"},
-                  {"type": "fix", "release": "patch"},
-                  {"type": "build", "release": "patch"},
-                ],
-              }], 
-              ['@semantic-release/exec', { 
-                "generateNotesCmd": "echo '${ process.env.RELEASE_NOTES }'" 
-              }],
-              '@semantic-release/release-notes-generator',
-              ['@semantic-release/github', {
-                "successComment": false,
-                "failTitle": false
-              }]
-            ]
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-          RELEASE_NOTES: |
-            ```
-            echo "<token>" | docker login ${{ env.HARBOR_REGISTRY }} -u <username> --password-stdin
-            docker pull ${{ env.HARBOR_REGISTRY }}/${{ env.HARBOR_PROJECT }}/${{ env.HARBOR_UI_REPO }}:${{ steps.semantic-dry.outputs.release-version }}
-            ```
-
-      - name: container push to registry
-        id: container-push
-        if: steps.container-changes.outputs.src == 'true' && steps.semantic.outputs.new-release-published == 'true'
-        run: |
-          docker tag image $HARBOR_REGISTRY/$HARBOR_PROJECT/$HARBOR_UI_REPO:$TAG
-          docker push $HARBOR_REGISTRY/$HARBOR_PROJECT/$HARBOR_UI_REPO:$TAG
-        env:
-          TAG: ${{ steps.semantic.outputs.release-version }}
-
-      - name: delete orphaned release on container push failure
-        uses: dev-drprasad/delete-tag-and-release@v0.2.1
-        if: (failure() && steps.container-push.outcome == 'failure') && steps.semantic.outputs.new-release-published == 'true'
-        with:
-          tag_name: ${ env.TAG_PREFIX }-${{ steps.semantic.outputs.release-version }}
-          delete_release: true
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-
-
-  release-tre-api-container:
-    runs-on: [self-hosted, linux, x64]
-
-    env:
-      TAG_PREFIX: 'DARE-TRE-API-Container'
-      TAG_FORMAT: 'DARE-TRE-API-Container-${version}'
-      HARBOR_API_REPO: ${{ vars.HARBOR_REPO }}-tre-api
-
-    steps:
-      - name: clone repo
-        uses: actions/checkout@v3
-
-      - uses: dorny/paths-filter@v2
-        id: container-changes
-        with:
-          filters: |
-            src:
-              - '.github/workflows/release.yaml'
-              - 'containers/api/**'
-              - 'src/TRE-API/**'
-              - 'src/BL/**'
-
-      - name: build container
-        if: steps.container-changes.outputs.src == 'true'      
-        working-directory: src/
-        run: |
-          docker build -t image -f "TRE-API/Dockerfile" .
-
-      - name: registry login
-        if: steps.container-changes.outputs.src == 'true'
-        run: |
-          echo "$HARBOR_TOKEN" | docker login $HARBOR_REGISTRY -u $HARBOR_USER --password-stdin
-
-      - name: generate token
-        if: steps.container-changes.outputs.src == 'true'
-        id: generate-token
-        uses: tibdex/github-app-token@v1.8.0
-        with:
-          app_id: ${{ vars.APP_ID }}
-          private_key: ${{ secrets.APP_PRIVATE_KEY }}
-
-      - name: semantic release dry run
-        if: steps.container-changes.outputs.src == 'true'
-        uses: docker://ghcr.io/codfish/semantic-release-action:v2
-        id: semantic-dry
-        with:
-          dry_run: true
-
-          branches: |
-            [
-              '+([0-9])?(.{+([0-9]),x}).x',
-              'main'
-            ]
-
-          tag_format: ${{ env.TAG_FORMAT }}
-
-          plugins: |-
-            [
-              ['@semantic-release/commit-analyzer', {
-                "releaseRules": [
-                  {"type": "major", "release": "major"},
-                  {"type": "minor", "release": "minor"},
-                  {"type": "patch", "release": "patch"},
-                  {"type": "no-release", "release": false},
-            
-                  {"type": "chore", "release": "patch"},
-                  {"type": "refactor", "release": "patch"},
-                  {"type": "style", "release": "patch"},
-                  
-                  {"type": "docs", "release": false},
-                  {"type": "test", "release": false},
-                  {"type": "ci", "release": false},
-                  
-                  {"type": "feat", "release": "minor"},
-                  
-                  {"type": "revert", "release": "patch"},
-                  {"type": "perf", "release": "patch"},
-                  {"type": "fix", "release": "patch"},
-                  {"type": "build", "release": "patch"},
-                ],
-              }]
-            ]
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-
-      - name: semantic release
-        if: steps.container-changes.outputs.src == 'true' && steps.semantic-dry.outputs.new-release-published == 'true'
-        uses: docker://ghcr.io/codfish/semantic-release-action:v2
-        id: semantic
-        with:
-          branches: |
-            [
-              '+([0-9])?(.{+([0-9]),x}).x',
-              'main'
-            ]
-
-          tag_format: ${{ env.TAG_FORMAT }}
-
-          additional_packages: |
-            ['@semantic-release/exec']
-
-          plugins: |-
-            [
-              ['@semantic-release/commit-analyzer', {
-                "releaseRules": [
-                  {"type": "major", "release": "major"},
-                  {"type": "minor", "release": "minor"},
-                  {"type": "patch", "release": "patch"},
-                  {"type": "no-release", "release": false},
-            
-                  {"type": "chore", "release": "patch"},
-                  {"type": "refactor", "release": "patch"},
-                  {"type": "style", "release": "patch"},
-                  
-                  {"type": "docs", "release": false},
-                  {"type": "test", "release": false},
-                  {"type": "ci", "release": false},
-                  
-                  {"type": "feat", "release": "minor"},
-                  
-                  {"type": "revert", "release": "patch"},
-                  {"type": "perf", "release": "patch"},
-                  {"type": "fix", "release": "patch"},
-                  {"type": "build", "release": "patch"},
-                ],
-              }], 
-              ['@semantic-release/exec', { 
-                "generateNotesCmd": "echo '${ process.env.RELEASE_NOTES }'" 
-              }],
-              '@semantic-release/release-notes-generator',
-              ['@semantic-release/github', {
-                "successComment": false,
-                "failTitle": false
-              }]
-            ]
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-          RELEASE_NOTES: |
-            ```
-            echo "<token>" | docker login ${{ env.HARBOR_REGISTRY }} -u <username> --password-stdin
-            docker pull ${{ env.HARBOR_REGISTRY }}/${{ env.HARBOR_PROJECT }}/${{ env.HARBOR_API_REPO }}:${{ steps.semantic-dry.outputs.release-version }}
-            ```
-
-      - name: container push to registry
-        id: container-push
-        if: steps.container-changes.outputs.src == 'true' && steps.semantic.outputs.new-release-published == 'true'
-        run: |
-          docker tag image $HARBOR_REGISTRY/$HARBOR_PROJECT/$HARBOR_API_REPO:$TAG
-          docker push $HARBOR_REGISTRY/$HARBOR_PROJECT/$HARBOR_API_REPO:$TAG
-        env:
-          TAG: ${{ steps.semantic.outputs.release-version }}
-          
-      - name: delete orphaned release on container push failure
-        uses: dev-drprasad/delete-tag-and-release@v0.2.1
-        if: (failure() && steps.container-push.outcome == 'failure') && steps.semantic.outputs.new-release-published == 'true'
-        with:
-          tag_name: ${ env.TAG_PREFIX }-${{ steps.semantic.outputs.release-version }}
-          delete_release: true
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-
-  release-tre-ui-container:
-    runs-on: [self-hosted, linux, x64]
-
-    env:
-      TAG_PREFIX: 'DARE-TRE-UI-Container'
-      TAG_FORMAT: 'DARE-TRE-UI-Container-${version}'
-      HARBOR_UI_REPO: ${{ vars.HARBOR_REPO }}-tre-ui
-
-    steps:
-      - name: clone repo
-        uses: actions/checkout@v3
-
-      - uses: dorny/paths-filter@v2
-        id: container-changes
-        with:
-          filters: |
-            src:
-              - '.github/workflows/release.yaml'
-              - 'containers/ui/**'
-              - 'src/TRE-UI/**'
-              - 'src/BL/**'
-
-      - name: build container
-        if: steps.container-changes.outputs.src == 'true'
-        working-directory: src/
-        run: |
-          docker build -t image -f "TRE-UI/Dockerfile" .
-
-      - name: registry login
-        if: steps.container-changes.outputs.src == 'true'
-        run: |
-          echo "$HARBOR_TOKEN" | docker login $HARBOR_REGISTRY -u $HARBOR_USER --password-stdin
-
-      - name: generate token
-        if: steps.container-changes.outputs.src == 'true'
-        id: generate-token
-        uses: tibdex/github-app-token@v1.8.0
-        with:
-          app_id: ${{ vars.APP_ID }}
-          private_key: ${{ secrets.APP_PRIVATE_KEY }}
-
-      - name: semantic release dry run
-        if: steps.container-changes.outputs.src == 'true'
-        uses: docker://ghcr.io/codfish/semantic-release-action:v2
-        id: semantic-dry
-        with:
-          dry_run: true
-
-          branches: |
-            [
-              '+([0-9])?(.{+([0-9]),x}).x',
-              'main'
-            ]
-
-          tag_format: ${{ env.TAG_FORMAT }}
-
-          plugins: |-
-            [
-              ['@semantic-release/commit-analyzer', {
-                "releaseRules": [
-                  {"type": "major", "release": "major"},
-                  {"type": "minor", "release": "minor"},
-                  {"type": "patch", "release": "patch"},
-                  {"type": "no-release", "release": false},
-            
-                  {"type": "chore", "release": "patch"},
-                  {"type": "refactor", "release": "patch"},
-                  {"type": "style", "release": "patch"},
-                  
-                  {"type": "docs", "release": false},
-                  {"type": "test", "release": false},
-                  {"type": "ci", "release": false},
-                  
-                  {"type": "feat", "release": "minor"},
-                  
-                  {"type": "revert", "release": "patch"},
-                  {"type": "perf", "release": "patch"},
-                  {"type": "fix", "release": "patch"},
-                  {"type": "build", "release": "patch"},
-                ],
-              }]
-            ]
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-
-      - name: semantic release
-        if: steps.container-changes.outputs.src == 'true' && steps.semantic-dry.outputs.new-release-published == 'true'
-        uses: docker://ghcr.io/codfish/semantic-release-action:v2
-        id: semantic
-        with:
-          branches: |
-            [
-              '+([0-9])?(.{+([0-9]),x}).x',
-              'main'
-            ]
-
-          tag_format: ${{ env.TAG_FORMAT }}
-
-          additional_packages: |
-            ['@semantic-release/exec']
-
-          plugins: |-
-            [
-              ['@semantic-release/commit-analyzer', {
-                "releaseRules": [
-                  {"type": "major", "release": "major"},
-                  {"type": "minor", "release": "minor"},
-                  {"type": "patch", "release": "patch"},
-                  {"type": "no-release", "release": false},
-            
-                  {"type": "chore", "release": "patch"},
-                  {"type": "refactor", "release": "patch"},
-                  {"type": "style", "release": "patch"},
-                  
-                  {"type": "docs", "release": false},
-                  {"type": "test", "release": false},
-                  {"type": "ci", "release": false},
-                  
-                  {"type": "feat", "release": "minor"},
-                  
-                  {"type": "revert", "release": "patch"},
-                  {"type": "perf", "release": "patch"},
-                  {"type": "fix", "release": "patch"},
-                  {"type": "build", "release": "patch"},
-                ],
-              }], 
-              ['@semantic-release/exec', { 
-                "generateNotesCmd": "echo '${ process.env.RELEASE_NOTES }'" 
-              }],
-              '@semantic-release/release-notes-generator',
-              ['@semantic-release/github', {
-                "successComment": false,
-                "failTitle": false
-              }]
-            ]
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-          RELEASE_NOTES: |
-            ```
-            echo "<token>" | docker login ${{ env.HARBOR_REGISTRY }} -u <username> --password-stdin
-            docker pull ${{ env.HARBOR_REGISTRY }}/${{ env.HARBOR_PROJECT }}/${{ env.HARBOR_UI_REPO }}:${{ steps.semantic-dry.outputs.release-version }}
-            ```
-
-      - name: container push to registry
-        id: container-push
-        if: steps.container-changes.outputs.src == 'true' && steps.semantic.outputs.new-release-published == 'true'
-        run: |
-          docker tag image $HARBOR_REGISTRY/$HARBOR_PROJECT/$HARBOR_UI_REPO:$TAG
-          docker push $HARBOR_REGISTRY/$HARBOR_PROJECT/$HARBOR_UI_REPO:$TAG
-        env:
-          TAG: ${{ steps.semantic.outputs.release-version }}
-
-      - name: delete orphaned release on container push failure
-        uses: dev-drprasad/delete-tag-and-release@v0.2.1
-        if: (failure() && steps.container-push.outcome == 'failure') && steps.semantic.outputs.new-release-published == 'true'
-        with:
-          tag_name: ${ env.TAG_PREFIX }-${{ steps.semantic.outputs.release-version }}
-          delete_release: true
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-
-
-  release-tre-agent-container:
-    runs-on: [self-hosted, linux, x64]
-        
-    env:
-        TAG_PREFIX: 'DARE-Agent-Container'
-        TAG_FORMAT: 'DARE-Agent-Container-${version}'
-        HARBOR_UI_REPO: ${{ vars.HARBOR_REPO }}-tre-agent
-        
-    steps:
-      - name: clone repo
-        uses: actions/checkout@v3
-        
-      - uses: dorny/paths-filter@v2
-        id: container-changes
-        with:
-          filters: |
-            src:
-            - '.github/workflows/release.yaml'
-            - 'src/TREAgent/**'
-            - 'src/BL/**'
-        
-      - name: build container
-        if: steps.container-changes.outputs.src == 'true'
-        working-directory: src/
-        run: |
-            docker build -t image -f "TREAgent/Dockerfile" .
-        
-      - name: registry login
-        if: steps.container-changes.outputs.src == 'true'
-        run: |
-            echo "$HARBOR_TOKEN" | docker login $HARBOR_REGISTRY -u $HARBOR_USER --password-stdin
-        
-      - name: generate token
-        if: steps.container-changes.outputs.src == 'true'
-        id: generate-token
-        uses: tibdex/github-app-token@v1.8.0
-        with:
-            app_id: ${{ vars.APP_ID }}
-            private_key: ${{ secrets.APP_PRIVATE_KEY }}
-        
-      - name: semantic release dry run
-        if: steps.container-changes.outputs.src == 'true'
-        uses: docker://ghcr.io/codfish/semantic-release-action:v2
-        id: semantic-dry
-        with:
-            dry_run: true
-        
-            branches: |
-                [
-                    '+([0-9])?(.{+([0-9]),x}).x',
-                    'main'
-                ]
-        
-            tag_format: ${{ env.TAG_FORMAT }}
-        
-            plugins: |-
-                [
-                    ['@semantic-release/commit-analyzer', {
-                    "releaseRules": [
-                        {"type": "major", "release": "major"},
-                        {"type": "minor", "release": "minor"},
-                        {"type": "patch", "release": "patch"},
-                        {"type": "no-release", "release": false},
-                    
-                        {"type": "chore", "release": "patch"},
-                        {"type": "refactor", "release": "patch"},
-                        {"type": "style", "release": "patch"},
-                          
-                        {"type": "docs", "release": false},
-                        {"type": "test", "release": false},
-                        {"type": "ci", "release": false},
-                          
-                        {"type": "feat", "release": "minor"},
-                          
-                        {"type": "revert", "release": "patch"},
-                        {"type": "perf", "release": "patch"},
-                        {"type": "fix", "release": "patch"},
-                        {"type": "build", "release": "patch"},
-                    ],
-                    }]
-                ]
-        env:
-            GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-        
-      - name: semantic release
-        if: steps.container-changes.outputs.src == 'true' && steps.semantic-dry.outputs.new-release-published == 'true'
-        uses: docker://ghcr.io/codfish/semantic-release-action:v2
-        id: semantic
-        with:
-            branches: |
-                [
-                    '+([0-9])?(.{+([0-9]),x}).x',
-                    'main'
-                ]
-        
-            tag_format: ${{ env.TAG_FORMAT }}
-        
-            additional_packages: |
-                ['@semantic-release/exec']
-        
-            plugins: |-
-                [
-                    ['@semantic-release/commit-analyzer', {
-                    "releaseRules": [
-                        {"type": "major", "release": "major"},
-                        {"type": "minor", "release": "minor"},
-                        {"type": "patch", "release": "patch"},
-                        {"type": "no-release", "release": false},
-                    
-                        {"type": "chore", "release": "patch"},
-                        {"type": "refactor", "release": "patch"},
-                        {"type": "style", "release": "patch"},
-                          
-                        {"type": "docs", "release": false},
-                        {"type": "test", "release": false},
-                        {"type": "ci", "release": false},
-                          
-                        {"type": "feat", "release": "minor"},
-                          
-                        {"type": "revert", "release": "patch"},
-                        {"type": "perf", "release": "patch"},
-                        {"type": "fix", "release": "patch"},
-                        {"type": "build", "release": "patch"},
-                    ],
-                    }], 
-                    ['@semantic-release/exec', { 
-                    "generateNotesCmd": "echo '${ process.env.RELEASE_NOTES }'" 
-                    }],
-                    '@semantic-release/release-notes-generator',
-                    ['@semantic-release/github', {
-                    "successComment": false,
-                    "failTitle": false
-                    }]
-                ]
-        env:
-            GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-            RELEASE_NOTES: |
-                ```
-                echo "<token>" | docker login ${{ env.HARBOR_REGISTRY }} -u <username> --password-stdin
-                docker pull ${{ env.HARBOR_REGISTRY }}/${{ env.HARBOR_PROJECT }}/${{ env.HARBOR_UI_REPO }}:${{ steps.semantic-dry.outputs.release-version }}
-                ```
-        
-      - name: container push to registry
-        id: container-push
-        if: steps.container-changes.outputs.src == 'true' && steps.semantic.outputs.new-release-published == 'true'
-        run: |
-            docker tag image $HARBOR_REGISTRY/$HARBOR_PROJECT/$HARBOR_UI_REPO:$TAG
-            docker push $HARBOR_REGISTRY/$HARBOR_PROJECT/$HARBOR_UI_REPO:$TAG
-        env:
-            TAG: ${{ steps.semantic.outputs.release-version }}
-        
-      - name: delete orphaned release on container push failure
-        uses: dev-drprasad/delete-tag-and-release@v0.2.1
-        if: (failure() && steps.container-push.outcome == 'failure') && steps.semantic.outputs.new-release-published == 'true'
-        with:
-            tag_name: ${ env.TAG_PREFIX }-${{ steps.semantic.outputs.release-version }}
-            delete_release: true
-        env:
-            GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-        
-        
-  release-chart:
-    needs: [release-api-container, release-ui-container, release-tre-api-container, release-tre-ui-container]
-    runs-on: [ self-hosted, linux, x64 ]
-
-    env:
-      TAG_PREFIX: 'DARE-Control-Helm'
-      TAG_FORMAT: 'DARE-Control-Helm-${version}'
-
-    steps:
-      - name: clone repo
-        uses: actions/checkout@v3
-
-      - uses: dorny/paths-filter@v2
-        id: chart-changes
-        with:
-          filters: |
-            src:
-              - '.github/workflows/release.yaml'
-              - 'charts/**'
-
-      - name: generate token
-        if: steps.chart-changes.outputs.src == 'true'
-        id: generate-token
-        uses: tibdex/github-app-token@v1.8.0
-        with:
-          app_id: ${{ vars.APP_ID }}
-          private_key: ${{ secrets.APP_PRIVATE_KEY }}
-
-      - name: install helm
-        if: steps.chart-changes.outputs.src == 'true'
-        uses: azure/setup-helm@v3
-        with:
-          version: 'latest'
-          token: ${{ steps.generate-token.outputs.token }}
-
-      - name: semantic release dry run
-        if: steps.chart-changes.outputs.src == 'true'
-        uses: docker://ghcr.io/codfish/semantic-release-action:v2
-        id: semantic-dry
-        with:
-          dry_run: true
-
-          branches: |
-            [
-              '+([0-9])?(.{+([0-9]),x}).x',
-              'main'
-            ]
-
-          tag_format: ${{ env.TAG_FORMAT }}
-
-          plugins: |-
-            [
-              ['@semantic-release/commit-analyzer', {
-                "releaseRules": [
-                  {"type": "major", "release": "major"},
-                  {"type": "minor", "release": "minor"},
-                  {"type": "patch", "release": "patch"},
-                  {"type": "no-release", "release": false},
-
-                  {"type": "chore", "release": "patch"},
-                  {"type": "refactor", "release": "patch"},
-                  {"type": "style", "release": "patch"},
-
-                  {"type": "docs", "release": false},
-                  {"type": "test", "release": false},
-                  {"type": "ci", "release": false},
-
-                  {"type": "feat", "release": "minor"},
-
-                  {"type": "revert", "release": "patch"},
-                  {"type": "perf", "release": "patch"},
-                  {"type": "fix", "release": "patch"},
-                  {"type": "build", "release": "patch"},
-                ],
-              }]
-            ]
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-
-      - name: helm package
-        if: steps.chart-changes.outputs.src == 'true' && steps.semantic-dry.outputs.new-release-published == 'true'
-        run: |
-          set -x
-          helm package ./charts/$HARBOR_REPO -d . --version $TAG --app-version $TAG
-          tar -xzf $(echo *.tgz) -C ./charts $HARBOR_REPO/Chart.yaml
-        env:
-          TAG: ${{ steps.semantic-dry.outputs.release-version }}
-
-      - name: semantic release
-        if: steps.chart-changes.outputs.src == 'true' && steps.semantic-dry.outputs.new-release-published == 'true'
-        uses: docker://ghcr.io/codfish/semantic-release-action:v2
-        id: semantic
-        with:
-          branches: |
-            [
-              '+([0-9])?(.{+([0-9]),x}).x',
-              'main'
-            ]
-
-          tag_format: ${{ env.TAG_FORMAT }}
-
-          additional_packages: |
-            ['@semantic-release/exec', '@semantic-release/git']
-
-          plugins: |-
-            [
-              ['@semantic-release/commit-analyzer', {
-                "releaseRules": [
-                  {"type": "major", "release": "major"},
-                  {"type": "minor", "release": "minor"},
-                  {"type": "patch", "release": "patch"},
-                  {"type": "no-release", "release": false},
-
-                  {"type": "chore", "release": "patch"},
-                  {"type": "refactor", "release": "patch"},
-                  {"type": "style", "release": "patch"},
-
-                  {"type": "docs", "release": false},
-                  {"type": "test", "release": false},
-                  {"type": "ci", "release": false},
-
-                  {"type": "feat", "release": "minor"},
-
-                  {"type": "revert", "release": "patch"},
-                  {"type": "perf", "release": "patch"},
-                  {"type": "fix", "release": "patch"},
-                  {"type": "build", "release": "patch"},
-                ],
-              }], 
-              ['@semantic-release/exec', { 
-                "generateNotesCmd": "echo '${ process.env.RELEASE_NOTES }'" 
-              }],
-              '@semantic-release/release-notes-generator',
-              ['@semantic-release/github', {
-                "successComment": false,
-                "failTitle": false
-              }]
-            ]
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-          RELEASE_NOTES: |
-            ```
-            helm repo add --pass-credentials --username <username> --password <password> <repo> https://${{ env.HARBOR_REGISTRY }}/chartrepo/${{ env.HARBOR_PROJECT }}
-            helm pull --version ${{ steps.semantic-dry.outputs.release-version }} <repo>/${{ env.HARBOR_REPO }}
-            ls *.tgz
-            # ${{ env.HARBOR_REPO }}-${{ steps.semantic-dry.outputs.release-version }}.tgz
-            ```
-
-      - name: helm push to registry
-        id: chart-push
-        if: steps.chart-changes.outputs.src == 'true' && steps.semantic.outputs.new-release-published == 'true'
-        run: |
-          set -x
-          helm plugin install https://github.com/chartmuseum/helm-push
-          helm repo add --pass-credentials --username "$HARBOR_USER" --password "$HARBOR_TOKEN" harbor https://$HARBOR_REGISTRY/chartrepo/$HARBOR_PROJECT
-          helm cm-push $(echo *.tgz) harbor
-          sleep 2
-          helm repo update
-          helm pull harbor/$HARBOR_REPO --version $TAG
-        env:
-          TAG: ${{ steps.semantic.outputs.release-version }}
-
-      - name: delete orphaned release on chart push failure
-        uses: dev-drprasad/delete-tag-and-release@v0.2.1
-        if: (failure() && steps.chart-push.outcome == 'failure') && steps.semantic.outputs.new-release-published == 'true'
-        with:
-          tag_name: ${ env.TAG_PREFIX }-${{ steps.semantic.outputs.release-version }}
-          delete_release: true
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+  ######################################################################################################################
+  # Pre-Tasks
+  ######################################################################################################################
+
+  slack:
+    # Open a new PR thread on Slack for this CI run
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/slack-release-thread.yaml@v2.1.0
+    with:
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+    secrets:
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+
+  changes:
+    # Detect which files have been changed on this PR's full history
+    needs: slack
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/changes.yaml@v2.1.0
+    with:
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      github-app-id: ${{ vars.APP_ID }}
+      filters: |
+        api-container:
+          - './.github/workflows/release.yaml'
+          - 'containers/api/**'
+          - 'src/DARE-API/**'
+          - 'src/BL/**'
+        ui-container:
+          - './.github/workflows/release.yaml'
+          - 'src/DARE-FrontEnd/**'
+          - 'src/BL/**'
+        tre-api-container:
+          - './.github/workflows/release.yaml'
+          - 'src/TRE-API/**'
+          - 'src/BL/**'
+        tre-ui-container:
+          - './.github/workflows/release.yaml'
+          - 'src/TRE-UI/**'
+          - 'src/BL/**'
+        tre-agent-container:
+          - './.github/workflows/release.yaml'
+          - 'src/TREAgent/**'
+          - 'src/BL/**'
+        chart:
+          - './.github/workflows/release.yaml'
+          - 'charts/**'
+
+    secrets:
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+  ######################################################################################################################
+  # Container Tasks
+  ######################################################################################################################
+
+  api-container:
+    # Build the DARE api container and push it as :rc-1.0.0
+    needs:
+      - slack
+      - changes
+    if: fromJSON(needs.changes.outputs.changes).api-container == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.1.0
+    with:
+      job-name: container-api
+      container-registry: ${{ vars.HARBOR_REGISTRY }}
+      github-app-id: ${{ vars.APP_ID }}
+      container-registry-user: ${{ vars.HARBOR_USER }}
+      container-registry-project: ${{ vars.HARBOR_PROJECT }}
+      container-registry-repo: ${{ vars.HARBOR_REPO }}-main-api
+      release-tag-format: 'TEST2-DARE-Control-API-Container-${version}'
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      build-command: |
+        docker build -t $IMAGE -f src/DARE-API/Dockerfile src/
+      test-command: |
+        echo '0'
+    secrets:
+      container-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+  ui-container:
+    # Build the DARE ui container and push it as :rc-1.0.0
+    needs:
+      - slack
+      - changes
+    if: fromJSON(needs.changes.outputs.changes).ui-container == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.1.0
+    with:
+      job-name: container-ui
+      container-registry: ${{ vars.HARBOR_REGISTRY }}
+      github-app-id: ${{ vars.APP_ID }}
+      container-registry-user: ${{ vars.HARBOR_USER }}
+      container-registry-project: ${{ vars.HARBOR_PROJECT }}
+      container-registry-repo: ${{ vars.HARBOR_REPO }}-main-ui
+      release-tag-format: 'TEST2-DARE-Control-UI-Container-${version}'
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      build-command: |
+        docker build -t $IMAGE -f src/DARE-FrontEnd/Dockerfile src/
+      test-command: |
+        echo '0'
+    secrets:
+      container-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+  tre-api-container:
+    # Build the tre api container and push it as :rc-1.0.0
+    needs:
+      - slack
+      - changes
+    if: fromJSON(needs.changes.outputs.changes).tre-api-container == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.1.0
+    with:
+      job-name: container-tre-api
+      container-registry: ${{ vars.HARBOR_REGISTRY }}
+      github-app-id: ${{ vars.APP_ID }}
+      container-registry-user: ${{ vars.HARBOR_USER }}
+      container-registry-project: ${{ vars.HARBOR_PROJECT }}
+      container-registry-repo: ${{ vars.HARBOR_REPO }}-tre-api
+      release-tag-format: 'TEST2-DARE-TRE-API-Container-${version}'
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      build-command: |
+        docker build -t $IMAGE -f src/TRE-API/Dockerfile src/
+      test-command: |
+        echo '0'
+    secrets:
+      container-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+  tre-ui-container:
+    # Build the tre ui container and push it as :rc-1.0.0
+    needs:
+      - slack
+      - changes
+    if: fromJSON(needs.changes.outputs.changes).tre-ui-container == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.1.0
+    with:
+      job-name: container-tre-ui
+      container-registry: ${{ vars.HARBOR_REGISTRY }}
+      github-app-id: ${{ vars.APP_ID }}
+      container-registry-user: ${{ vars.HARBOR_USER }}
+      container-registry-project: ${{ vars.HARBOR_PROJECT }}
+      container-registry-repo: ${{ vars.HARBOR_REPO }}-tre-ui
+      release-tag-format: 'TEST2-DARE-TRE-UI-Container-${version}'
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      build-command: |
+        docker build -t $IMAGE -f src/TRE-UI/Dockerfile src/
+      test-command: |
+        echo '0'
+    secrets:
+      container-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+  tre-agent-container:
+    # Build the tre agent container and push it as :rc-1.0.0
+    needs:
+      - slack
+      - changes
+    if: fromJSON(needs.changes.outputs.changes).tre-agent-container == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.1.0
+    with:
+      job-name: container-tre-agent
+      container-registry: ${{ vars.HARBOR_REGISTRY }}
+      github-app-id: ${{ vars.APP_ID }}
+      container-registry-user: ${{ vars.HARBOR_USER }}
+      container-registry-project: ${{ vars.HARBOR_PROJECT }}
+      container-registry-repo: ${{ vars.HARBOR_REPO }}-tre-agent
+      release-tag-format: 'TEST2-DARE-Agent-Container-${version}'
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      build-command: |
+        docker build -t $IMAGE -f src/TREAgent/Dockerfile src/
+      test-command: |
+        echo '0'
+    secrets:
+      container-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+
+
+  ######################################################################################################################
+  # Chart Tasks
+  ######################################################################################################################
+
+  chart:
+    # Build the chart and push it as x.y.z-rc
+    needs:
+      - slack
+      - changes
+    if: fromJSON(needs.changes.outputs.changes).chart == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-chart.yaml@v2.1.0
+    with:
+      job-name: chart
+      chart-registry: ${{ vars.HARBOR_REGISTRY }}
+      chart-registry-user: ${{ vars.HARBOR_USER }}
+      chart-registry-project: ${{ vars.HARBOR_PROJECT }}
+      chart-registry-repo: ${{ vars.HARBOR_REPO }}
+      release-tag-format: 'TEST2-DARE-Control-Helm-${version}'
+      github-app-id: ${{ vars.APP_ID }}
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      chart: charts/**
+      test-command: |
+        helm template $CHART --values charts/control/values.yaml
+    secrets:
+      chart-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+
+  ######################################################################################################################
+  # Post-Tasks
+  ######################################################################################################################
+
+  slack-update:
+    # Update the original Slack message with the final workflow status
+    # WARNING! ALL UPSTREAM JOBS MUST BE DECLARED HERE TO REPORT FAILURES CORRECTLY!
+    needs:
+      - slack
+      - changes
+      - api-container
+      - ui-container
+      - tre-api-container
+      - tre-ui-container
+      - tre-agent-container
+      - chart
+
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/slack-release-thread.yaml@v2.1.0
+    if: always()
+    with:
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      status: ${{ contains(join(needs.*.result, ','), 'failure') && ':no_entry:' || ':white_check_mark:' }}
+    secrets:
+      slack-token: ${{ secrets.SLACK_TOKEN }}
