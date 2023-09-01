@@ -83,6 +83,8 @@ var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
 
+builder.Services.AddScoped<IICODAClientHelper, ICODAClientHelper>();
+
 builder.Services.AddHostedService<ConsumeInternalMessageService>();
 var TVP = new TokenValidationParameters
 {
