@@ -15,5 +15,9 @@ namespace BL.Services
 
         Task<TOutput?> CallAPIWithoutModelWithAccessCode<TOutput>(string endPoint, string AccessCode, Dictionary<string, string>? paramList = null)
             where TOutput : class?, new();
+
+        Task GenericHTTPRequest(string endPoint, string AccessCode, StringContent jsonString = null, bool usePut = false);
+
+        Task<HttpResponseMessage> ClientHelperRequestAsyncICODA(string endPoint, string AccessCode, HttpMethod method, StringContent? jsonString = null, Dictionary<string, string>? paramlist = null)
     }
 }

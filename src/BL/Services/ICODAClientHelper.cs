@@ -41,7 +41,16 @@ namespace BL.Services
             return CallAPIWithReturnTypeICODA<TOutput>(endPoint, AccessCode, null, paramList);
         }
 
-         private async Task<T> CallAPIWithReturnTypeICODA<T>(string endPoint, string AccessCode, StringContent? jsonString = null, Dictionary<string, string>? paramlist = null, bool usePut = false) where T : class?, new()
+        public async Task GenericHTTPRequest(string endPoint, string AccessCode,StringContent jsonString = null, bool usePut = false)
+        {
+            var response = jsonString == null
+                ? await ClientHelperRequestAsyncICODA(_address + endPoint, AccessCode, HttpMethod.Get)
+                : usePut
+                    ? await ClientHelperRequestAsyncICODA(_address + endPoint, AccessCode, HttpMethod.Put, jsonString)
+                    : await ClientHelperRequestAsyncICODA(_address + endPoint, AccessCode, HttpMethod.Post, jsonString);
+        }
+
+        private async Task<T> CallAPIWithReturnTypeICODA<T>(string endPoint, string AccessCode, StringContent? jsonString = null, Dictionary<string, string>? paramlist = null, bool usePut = false) where T : class?, new()
         {
 
             HttpResponseMessage response = null;

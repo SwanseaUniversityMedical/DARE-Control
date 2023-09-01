@@ -13,6 +13,8 @@ using IdentityModel.Client;
 using Serilog;
 using System.Text.Json;
 using System.Text;
+using System.Reflection.Metadata.Ecma335;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace DARE_API.Controllers
 {
@@ -84,10 +86,21 @@ namespace DARE_API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Authorize(Policy = "ProjectTaskMembershipRequired")]
-        public async Task<IActionResult> SubmitTES(TesTask taskVm)
+        public async Task<IActionResult> SubmitTES(TesTask taskVm, string token)
         {
-
-            return Ok();
+            try
+            {
+                var res = await _clientHelper.CallAPIWithAccessCode<TesTask, TesTask>($"/tasks", token, taskVm, null);
+                if (res != null)
+                { 
+                    return Ok(new { id = res.Id });
+                }
+            } 
+            catch (Exception e) 
+            {
+                return BadRequest("Failed to get the specific task");
+            }
+            return BadRequest("Failed to get the specific task");
         }
 
         [HttpPost("/tasks/validate")]
@@ -114,11 +127,14 @@ namespace DARE_API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CancelTask(string task_id)
+        public async Task<IActionResult> CancelTask(string task_id, string token)
         {
             try
             {
-                return NotFound();
+                var res = await _clientHelper.ClientHelperRequestAsyncICODA($"https://localhost:5005/Job/tasks/tasks/{task_id}/cancel", token, HttpMethod.Get, null, null);
+                var data = await res.Content.ReadAsStringAsync();
+                //string res = _clientHelper.GenericHTTPRequest($"/tasks/{task_id}/cancel", token).ToString();
+                return Ok(data);
             }
             catch (Exception e)
             {
