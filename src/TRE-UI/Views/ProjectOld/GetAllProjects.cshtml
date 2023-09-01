@@ -1,4 +1,4 @@
-﻿@model List<BL.Models.TreProject>
+﻿@model List<BL.Models.Project>
 @{
     ViewData["Title"] = "Projects";
     var projectsCount = Model.Count;
@@ -21,21 +21,25 @@
 
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <div>
-                                    <a href="#"><h2 class="mb-0 fw-bold hover-underline fs-5">@project.SubmissionProjectName</h2></a>
+                                    <a href="#"><h2 class="mb-0 fw-bold hover-underline fs-5">@project.Name</h2></a>
                                     <p class="text-muted small mb-0">#[Project ID = @project.Id]</p>
                                 </div>
                                 @*                                <a href="@Url.Action("EditProject", "Project",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>*@
                             </div>
                             <div class="">
                                
-                                <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#memberships" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                    @project.MemberDecisions.Count Memberships
+                                <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#people" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                    @project.Users.Count People
                                 </a>
-                                
+                                <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#submissions" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                    @project.Submissions.Count Submissions
+                                </a>
 
                             </div>
 
-                            
+                            <p class="text-muted fs-6 mb-0">
+                                LastStatusUpdate Date: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate
+                            </p>
 
 
 

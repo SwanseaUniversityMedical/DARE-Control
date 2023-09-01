@@ -9,11 +9,13 @@ namespace BL.Models
         
        
         public string? SubmissionProjectName { get; set; }
+        public string? Description { get; set; }
         public virtual List<TreMembershipDecision> MemberDecisions { get; set; }
         public string? LocalProjectName { get; set; }
-        public DecisionStatus Decision { get; set; } 
+        public bool Approved { get; set; }
+        public bool Archived { get; set; }
         public string? ApprovedBy { get; set; } 
-        public DateTime Date { get; set; }
+        public DateTime LastDecisionDate { get; set; }
     }
     
 }

@@ -12,8 +12,8 @@ using TRE_API.Repositories.DbContexts;
 namespace TRE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230831144330_newapprovals")]
-    partial class newapprovals
+    [Migration("20230901113612_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -268,13 +268,16 @@ namespace TRE_API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Approved")
-                        .HasColumnType("integer");
+                    b.Property<bool>("Approved")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("ApprovedBy")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("Date")
+                    b.Property<bool>("Archived")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("LastDecisionDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("ProjectId")
@@ -300,14 +303,20 @@ namespace TRE_API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Approved")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("ApprovedBy")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<bool>("Archived")
+                        .HasColumnType("boolean");
 
-                    b.Property<int>("Decision")
-                        .HasColumnType("integer");
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("LastDecisionDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("LocalProjectName")
                         .HasColumnType("text");
@@ -330,6 +339,12 @@ namespace TRE_API.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Archived")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
 
                     b.Property<int>("SubmissionUserId")
                         .HasColumnType("integer");

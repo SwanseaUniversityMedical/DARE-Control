@@ -10,11 +10,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace TRE_UI.Controllers
 {
     [Authorize(Roles = "dare-tre-admin")]
-    public class ProjectController : Controller
+    public class ProjectControllerOld : Controller
     {
 
         private readonly ITREClientHelper _treclientHelper;
-        public ProjectController(ITREClientHelper treClient)
+        public ProjectControllerOld(ITREClientHelper treClient)
         {
 
             _treclientHelper = treClient;
@@ -25,7 +25,7 @@ namespace TRE_UI.Controllers
         public IActionResult GetAllProjects()
 
         {
-            var projects = _treclientHelper.CallAPIWithoutModel<List<TreProject>>("/api/Project/GetAllProjectsTre/").Result;
+            var projects = _treclientHelper.CallAPIWithoutModel<List<Project>>("/api/ProjectOld/GetAllProjects/").Result;
 
             return View(projects);
         }
@@ -34,7 +34,7 @@ namespace TRE_UI.Controllers
         public IActionResult GetAllProjectsForApproval()
         {
 
-            var projects = _treclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForApproval/").Result;
+            var projects = _treclientHelper.CallAPIWithoutModel<List<Project>>("/api/ProjectOld/GetAllProjectsForApproval/").Result;
 
             return View(projects);
         }
@@ -45,7 +45,7 @@ namespace TRE_UI.Controllers
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", projectId.ToString());
             var project = _treclientHelper.CallAPIWithoutModel<Project?>(
-                "/api/Project/GetProject/", paramlist).Result;
+                "/api/ProjectOld/GetProject/", paramlist).Result;
             
 
             var projectView = new Project()
@@ -71,7 +71,7 @@ namespace TRE_UI.Controllers
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", model.Id.ToString());
             var project = _treclientHelper.CallAPIWithoutModel<Project?>(
-                "/api/Project/GetProject/", paramlist).Result;
+                "/api/ProjectOld/GetProject/", paramlist).Result;
             project = new Project()
 
             {
@@ -95,14 +95,14 @@ namespace TRE_UI.Controllers
             paramlist1.Add("UserName", username);
             paramlist1.Add("FormData", project.FormData);
             paramlist1.Add("ProjectName", project.Name);
-            var result = await _treclientHelper.CallAPI<Project, Project?>("/api/Project/ApproveProjectMembership", model, paramlist1);
+            var result = await _treclientHelper.CallAPI<Project, Project?>("/api/ProjectOld/ApproveProjectMembership", model, paramlist1);
 
             return RedirectToAction("GetAllProjectsForApproval");
         }
 
         public IActionResult GetUser(int id)
         {
-            var projects = _treclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
+            var projects = _treclientHelper.CallAPIWithoutModel<List<Project>>("/api/ProjectOld/GetAllProjects/").Result;
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("userId", id.ToString());
             var result = _treclientHelper.CallAPIWithoutModel<BL.Models.User?>(
@@ -121,7 +121,7 @@ namespace TRE_UI.Controllers
         }
         public IActionResult GetProject(int id)
         {
-            var users = _treclientHelper.CallAPIWithoutModel<List<BL.Models.User>>("/api/Project/GetAllUsers/").Result;
+            var users = _treclientHelper.CallAPIWithoutModel<List<BL.Models.User>>("/api/ProjectOld/GetAllUsers/").Result;
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());
             var project = _treclientHelper.CallAPIWithoutModel<Project?>(
@@ -155,7 +155,7 @@ namespace TRE_UI.Controllers
         public IActionResult GetAllUnApprovedMemberships()
         {
 
-            var projects = _treclientHelper.CallAPIWithoutModel<List<ProjectApproval>>("/api/Project/GetAllUnApprovedMemberships/").Result;
+            var projects = _treclientHelper.CallAPIWithoutModel<List<ProjectApproval>>("/api/ProjectOld/GetAllUnApprovedMemberships/").Result;
 
             return View(projects);
         }
@@ -164,7 +164,7 @@ namespace TRE_UI.Controllers
         public IActionResult GetAllDisabledMemberships()
         {
 
-            var projects = _treclientHelper.CallAPIWithoutModel<List<ProjectApproval>>("/api/Project/GetAllDisabledMemberships/").Result;
+            var projects = _treclientHelper.CallAPIWithoutModel<List<ProjectApproval>>("/api/ProjectOld/GetAllDisabledMemberships/").Result;
 
             return View(projects);
         }
@@ -173,7 +173,7 @@ namespace TRE_UI.Controllers
         public IActionResult GetAllMemberships()
         {
 
-            var projects = _treclientHelper.CallAPIWithoutModel<List<ProjectApproval>>("/api/Project/GetAllMemberships/").Result;
+            var projects = _treclientHelper.CallAPIWithoutModel<List<ProjectApproval>>("/api/ProjectOld/GetAllMemberships/").Result;
 
             return View(projects);
         }

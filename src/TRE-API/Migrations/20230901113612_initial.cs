@@ -7,11 +7,97 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace TRE_API.Migrations
 {
     /// <inheritdoc />
-    public partial class newapprovals : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "ControlCredentials",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserName = table.Column<string>(type: "text", nullable: false),
+                    PasswordEnc = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ControlCredentials", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProjectApprovals",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    ProjectId = table.Column<int>(type: "integer", nullable: false),
+                    Projectname = table.Column<string>(type: "text", nullable: true),
+                    Username = table.Column<string>(type: "text", nullable: true),
+                    LocalProjectName = table.Column<string>(type: "text", nullable: true),
+                    Approved = table.Column<string>(type: "text", nullable: true),
+                    ApprovedBy = table.Column<string>(type: "text", nullable: true),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectApprovals", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Projects",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    SubmissionProjectId = table.Column<int>(type: "integer", nullable: false),
+                    SubmissionProjectName = table.Column<string>(type: "text", nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    LocalProjectName = table.Column<string>(type: "text", nullable: true),
+                    Approved = table.Column<bool>(type: "boolean", nullable: false),
+                    Archived = table.Column<bool>(type: "boolean", nullable: false),
+                    ApprovedBy = table.Column<string>(type: "text", nullable: true),
+                    LastDecisionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Projects", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tre",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    AdminUsername = table.Column<string>(type: "text", nullable: false),
+                    About = table.Column<string>(type: "text", nullable: false),
+                    FormData = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tre", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    SubmissionUserId = table.Column<int>(type: "integer", nullable: false),
+                    Archived = table.Column<bool>(type: "boolean", nullable: false),
+                    Username = table.Column<string>(type: "text", nullable: true),
+                    Email = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Project",
                 columns: table => new
@@ -39,40 +125,6 @@ namespace TRE_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Projects",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    SubmissionProjectId = table.Column<int>(type: "integer", nullable: false),
-                    SubmissionProjectName = table.Column<string>(type: "text", nullable: true),
-                    LocalProjectName = table.Column<string>(type: "text", nullable: true),
-                    Decision = table.Column<int>(type: "integer", nullable: false),
-                    ApprovedBy = table.Column<string>(type: "text", nullable: true),
-                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Projects", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Tre",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    AdminUsername = table.Column<string>(type: "text", nullable: false),
-                    About = table.Column<string>(type: "text", nullable: false),
-                    FormData = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Tre", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "User",
                 columns: table => new
                 {
@@ -94,17 +146,33 @@ namespace TRE_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "MembershipDecisions",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    SubmissionUserId = table.Column<int>(type: "integer", nullable: false),
-                    Username = table.Column<string>(type: "text", nullable: true)
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    ProjectId = table.Column<int>(type: "integer", nullable: false),
+                    Archived = table.Column<bool>(type: "boolean", nullable: false),
+                    Approved = table.Column<bool>(type: "boolean", nullable: false),
+                    ApprovedBy = table.Column<string>(type: "text", nullable: true),
+                    LastDecisionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_MembershipDecisions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MembershipDecisions_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MembershipDecisions_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -205,35 +273,6 @@ namespace TRE_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MembershipDecisions",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<int>(type: "integer", nullable: false),
-                    ProjectId = table.Column<int>(type: "integer", nullable: false),
-                    Approved = table.Column<int>(type: "integer", nullable: false),
-                    ApprovedBy = table.Column<string>(type: "text", nullable: true),
-                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MembershipDecisions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_MembershipDecisions_Projects_ProjectId",
-                        column: x => x.ProjectId,
-                        principalTable: "Projects",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_MembershipDecisions_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "HistoricStatus",
                 columns: table => new
                 {
@@ -316,6 +355,9 @@ namespace TRE_API.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "ControlCredentials");
+
+            migrationBuilder.DropTable(
                 name: "HistoricStatus");
 
             migrationBuilder.DropTable(
@@ -344,6 +386,9 @@ namespace TRE_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "User");
+
+            migrationBuilder.DropTable(
+                name: "ProjectApprovals");
         }
     }
 }

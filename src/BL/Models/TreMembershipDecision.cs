@@ -1,4 +1,5 @@
-﻿using BL.Models.Enums;
+﻿using System.Security.AccessControl;
+using BL.Models.Enums;
 
 namespace BL.Models
 {
@@ -7,10 +8,10 @@ namespace BL.Models
         public int Id { get; set; }
         public virtual TreUser User { get; set; }
         public virtual TreProject Project { get; set; }
-
-        public DecisionStatus Approved { get; set; } 
+        public bool Archived { get; set; }
+        public bool Approved { get; set; } 
         public string? ApprovedBy { get; set; } 
-        public DateTime Date { get; set; }
+        public DateTime LastDecisionDate { get; set; }
     }
     
 }
