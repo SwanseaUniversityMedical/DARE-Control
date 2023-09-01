@@ -1,15 +1,12 @@
 ﻿using Amazon;
-using Amazon.Runtime.Internal;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using Aws4RequestSigner;
 using BL.Models.ViewModels;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Minio.Exceptions;
 using Serilog;
 using System.Net;
-using System.Security.AccessControl;
 
 namespace BL.Services
 {

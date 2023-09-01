@@ -214,11 +214,7 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
 
 
     builder.Services.AddScoped<ISignalRService, SignalRService>();
-    builder.Services.AddMvc().AddControllersAsServices()
-    //    .AddNewtonsoftJson(options =>
-    //    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-    //); 
-    ;
+    builder.Services.AddMvc().AddControllersAsServices();
 
 }
 

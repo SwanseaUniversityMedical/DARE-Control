@@ -1,21 +1,14 @@
-
 using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Newtonsoft.Json;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-
 using Microsoft.AspNetCore.Http;
-
 using Serilog;
 
 namespace BL.Services
 {
-    
-
+  
     public class BaseClientHelper : IBaseClientHelper
     {
         

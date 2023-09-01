@@ -14,7 +14,7 @@ using System.Data;
 
 namespace TRE_API.Controllers
 {
-    //[Authorize]
+    [Authorize(Roles = "dare-tre-agent")]
     [ApiController]
     [Route("api/[controller]")]
     public class SubmissionController : Controller
@@ -28,37 +28,37 @@ namespace TRE_API.Controllers
             _dareHelper = helper;
         }
 
-        [Authorize(Roles = "dare-tre-agent")]
+       
         [HttpPost("DAREUpdateSubmission")]
-        public async void DAREUpdateSubmission(string endpointname, string tesId, string submissionStatus) 
+        public async void DAREUpdateSubmission(string trename, string tesId, string submissionStatus) 
         {
-            List<string> StringList = new List<string> { endpointname, tesId, submissionStatus };
+            List<string> StringList = new List<string> { trename, tesId, submissionStatus };
             await _signalRService.SendUpdateMessage("TREUpdateStatus", StringList);
         }
 
-        [Authorize(Roles = "dare-tre-agent")]
+        
         [HttpGet]
-        [Route("GetWaitingSubmissionsForEndpoint")]
+        [Route("GetWaitingSubmissionsForTre")]
         [ValidateModelState]
-        [SwaggerOperation("GetWaitingSubmissionsForEndpoint")]
+        [SwaggerOperation("GetWaitingSubmissionsForTre")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<Submission>), description: "")]
-        public virtual IActionResult GetWaitingSubmissionsForEndpoint()
+        public virtual IActionResult GetWaitingSubmissionsForTre()
         {
             var result =
-                _dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForEndpoint").Result;
+                _dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre").Result;
             return StatusCode(200, result);
         }
 
 
-        [Authorize(Roles = "dare-tre-agent")]
+        
         [HttpGet]
-        [Route("UpdateStatusForEndpoint")]
+        [Route("UpdateStatusForTre")]
         [ValidateModelState]
-        [SwaggerOperation("UpdateStatusForEndpoint")]
+        [SwaggerOperation("UpdateStatusForTre")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public IActionResult UpdateStatusForEndpoint(string tesId, StatusType statusType, string? description)
+        public IActionResult UpdateStatusForTre(string tesId, StatusType statusType, string? description)
         {
-            var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForEndpoint",
+            var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
                 new Dictionary<string, string>() { { "tesId", tesId }, { "statusType", statusType.ToString() },{"description", description} }).Result;
             return StatusCode(200, result);
         }

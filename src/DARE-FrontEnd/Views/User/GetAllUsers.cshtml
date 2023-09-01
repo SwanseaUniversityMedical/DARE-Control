@@ -9,7 +9,7 @@
         <h1 class="fs-3 mb-0">People</h1>
                                                         @if (User.IsInRole("dare-control-admin"))
                                 {
-        <a asp-controller="User" asp-action="AddUserForm" class="btn btn-primary btn-sm d-flex align-items-center">
+        <a asp-controller="User" asp-action="SaveUserForm" class="btn btn-primary btn-sm d-flex align-items-center">
             <i class="fa fa-plus align-middle me-2"></i>
             <span>Create New User</span>
         </a>
@@ -35,7 +35,7 @@
                                 </div>
                                 @if (User.IsInRole("dare-control-admin"))
                                 {
-                                    <a href="@Url.Action("AddUserForm", "User",new{userId=user.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+                                    <a href="@Url.Action("SaveUserForm", "User",new{userId=user.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
                                 }
                             </div>
                             <div class="">

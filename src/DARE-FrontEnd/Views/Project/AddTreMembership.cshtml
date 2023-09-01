@@ -1,4 +1,4 @@
-﻿@model BL.Models.ViewModels.ProjectEndpoint
+﻿@model BL.Models.ViewModels.ProjectTre
 <div class="row">
     <div class="col-sm-12">
         <h1>Add User to Project</h1>
@@ -7,15 +7,15 @@
 
         
 
-        @using (Html.BeginForm("AddEndpointMembership", "Project", FormMethod.Post, new { id = "frmMain" }))
+        @using (Html.BeginForm("AddTreMembership", "Project", FormMethod.Post, new { id = "frmMain" }))
         {
             @Html.AntiForgeryToken()
 
 
             <div class="form-group">
                 @{
-                    @Html.LabelFor(m => m.EndpointId, "Select the TRE")
-                    @Html.DropDownListFor(m => m.EndpointId, Model.EndpointItemList, new {@class = "form-control show-tick noBottomMargin"})
+                    @Html.LabelFor(m => m.TreId, "Select the TRE")
+                    @Html.DropDownListFor(m => m.TreId, Model.TreItemList, new {@class = "form-control show-tick noBottomMargin"})
 
                 }
 

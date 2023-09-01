@@ -13,22 +13,6 @@ namespace DARE_API.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Endpoints",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    AdminUsername = table.Column<string>(type: "text", nullable: false),
-                    About = table.Column<string>(type: "text", nullable: false),
-                    FormData = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Endpoints", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Projects",
                 columns: table => new
                 {
@@ -49,6 +33,22 @@ namespace DARE_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Tres",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    AdminUsername = table.Column<string>(type: "text", nullable: false),
+                    About = table.Column<string>(type: "text", nullable: false),
+                    FormData = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tres", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -64,25 +64,25 @@ namespace DARE_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "EndpointProject",
+                name: "ProjectTre",
                 columns: table => new
                 {
-                    EndpointsId = table.Column<int>(type: "integer", nullable: false),
-                    ProjectsId = table.Column<int>(type: "integer", nullable: false)
+                    ProjectsId = table.Column<int>(type: "integer", nullable: false),
+                    TresId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EndpointProject", x => new { x.EndpointsId, x.ProjectsId });
+                    table.PrimaryKey("PK_ProjectTre", x => new { x.ProjectsId, x.TresId });
                     table.ForeignKey(
-                        name: "FK_EndpointProject_Endpoints_EndpointsId",
-                        column: x => x.EndpointsId,
-                        principalTable: "Endpoints",
+                        name: "FK_ProjectTre_Projects_ProjectsId",
+                        column: x => x.ProjectsId,
+                        principalTable: "Projects",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_EndpointProject_Projects_ProjectsId",
-                        column: x => x.ProjectsId,
-                        principalTable: "Projects",
+                        name: "FK_ProjectTre_Tres_TresId",
+                        column: x => x.TresId,
+                        principalTable: "Tres",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -125,7 +125,7 @@ namespace DARE_API.Migrations
                     DockerInputLocation = table.Column<string>(type: "text", nullable: false),
                     ProjectId = table.Column<int>(type: "integer", nullable: false),
                     ParentID = table.Column<int>(type: "integer", nullable: true),
-                    EndPointId = table.Column<int>(type: "integer", nullable: true),
+                    TreId = table.Column<int>(type: "integer", nullable: true),
                     SubmittedById = table.Column<int>(type: "integer", nullable: false),
                     LastStatusUpdate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     StartTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -136,11 +136,6 @@ namespace DARE_API.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Submissions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Submissions_Endpoints_EndPointId",
-                        column: x => x.EndPointId,
-                        principalTable: "Endpoints",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Submissions_Projects_ProjectId",
                         column: x => x.ProjectId,
@@ -153,6 +148,11 @@ namespace DARE_API.Migrations
                         principalTable: "Submissions",
                         principalColumn: "Id");
                     table.ForeignKey(
+                        name: "FK_Submissions_Tres_TreId",
+                        column: x => x.TreId,
+                        principalTable: "Tres",
+                        principalColumn: "Id");
+                    table.ForeignKey(
                         name: "FK_Submissions_Users_SubmittedById",
                         column: x => x.SubmittedById,
                         principalTable: "Users",
@@ -161,7 +161,7 @@ namespace DARE_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Statuses",
+                name: "HistoricStatuses",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -174,9 +174,9 @@ namespace DARE_API.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Statuses", x => x.Id);
+                    table.PrimaryKey("PK_HistoricStatuses", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Statuses_Submissions_SubmissionId",
+                        name: "FK_HistoricStatuses_Submissions_SubmissionId",
                         column: x => x.SubmissionId,
                         principalTable: "Submissions",
                         principalColumn: "Id",
@@ -184,24 +184,19 @@ namespace DARE_API.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_EndpointProject_ProjectsId",
-                table: "EndpointProject",
-                column: "ProjectsId");
+                name: "IX_HistoricStatuses_SubmissionId",
+                table: "HistoricStatuses",
+                column: "SubmissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectTre_TresId",
+                table: "ProjectTre",
+                column: "TresId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProjectUser_UsersId",
                 table: "ProjectUser",
                 column: "UsersId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Statuses_SubmissionId",
-                table: "Statuses",
-                column: "SubmissionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Submissions_EndPointId",
-                table: "Submissions",
-                column: "EndPointId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Submissions_ParentID",
@@ -217,28 +212,33 @@ namespace DARE_API.Migrations
                 name: "IX_Submissions_SubmittedById",
                 table: "Submissions",
                 column: "SubmittedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Submissions_TreId",
+                table: "Submissions",
+                column: "TreId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "EndpointProject");
+                name: "HistoricStatuses");
+
+            migrationBuilder.DropTable(
+                name: "ProjectTre");
 
             migrationBuilder.DropTable(
                 name: "ProjectUser");
 
             migrationBuilder.DropTable(
-                name: "Statuses");
-
-            migrationBuilder.DropTable(
                 name: "Submissions");
 
             migrationBuilder.DropTable(
-                name: "Endpoints");
+                name: "Projects");
 
             migrationBuilder.DropTable(
-                name: "Projects");
+                name: "Tres");
 
             migrationBuilder.DropTable(
                 name: "Users");

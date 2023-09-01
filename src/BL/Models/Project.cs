@@ -7,7 +7,7 @@ namespace BL.Models
         
         public virtual List<User> Users { get; set; }
 
-        public virtual List<Endpoint> Endpoints { get; set; }
+        public virtual List<Tre> Tres { get; set; }
         public string FormData { get; set; }
         public string Name { get; set; }
         public string Display { get; set; }
@@ -18,8 +18,7 @@ namespace BL.Models
         public string? SubmissionBucket { get; set; }
         public string? OutputBucket { get; set; }
 
-        //public virtual List<ProjectMembership> ProjectMemberships { get; set; }
-
+        
         public virtual List<Submission> Submissions { get; set; }
 
     }
