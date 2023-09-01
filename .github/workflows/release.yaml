@@ -109,7 +109,6 @@ jobs:
         docker build -t $IMAGE -f src/DARE-FrontEnd/Dockerfile src/
       test-command: |
         echo '0'
-      release-branches: 'ci/create-new-release-ci-using-reusable-workflows'
     secrets:
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
@@ -136,7 +135,6 @@ jobs:
         docker build -t $IMAGE -f src/TRE-API/Dockerfile src/
       test-command: |
         echo '0'
-      release-branches: 'ci/create-new-release-ci-using-reusable-workflows'
     secrets:
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
@@ -163,7 +161,6 @@ jobs:
         docker build -t $IMAGE -f src/TRE-UI/Dockerfile src/
       test-command: |
         echo '0'
-      release-branches: 'ci/create-new-release-ci-using-reusable-workflows'
     secrets:
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
@@ -190,7 +187,6 @@ jobs:
         docker build -t $IMAGE -f src/TREAgent/Dockerfile src/
       test-command: |
         echo '0'
-      release-branches: 'ci/create-new-release-ci-using-reusable-workflows'
     secrets:
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
@@ -222,7 +218,6 @@ jobs:
       chart: charts/**
       test-command: |
         helm template $CHART --values charts/control/values.yaml
-      release-branches: 'ci/create-new-release-ci-using-reusable-workflows'
     secrets:
       chart-registry-token: ${{ secrets.HARBOR_TOKEN }}
       github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
