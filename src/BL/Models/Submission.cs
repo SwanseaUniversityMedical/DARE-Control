@@ -1,10 +1,5 @@
 ﻿using BL.Models.Enums;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BL.Models
 {
@@ -29,7 +24,7 @@ namespace BL.Models
 
 
 
-        public virtual Endpoint? EndPoint { get; set; }
+        public virtual Tre? Tre { get; set; }
 
         public virtual User SubmittedBy { get; set; }
 

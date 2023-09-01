@@ -34,14 +34,7 @@
                     </div>
                 </a>
             </li>
-            <li class="nav-item" role="presentation">
-                <a href="#tre" class="nav-link text-dark" id="treLink" data-bs-toggle="tab" data-bs-target="#tre" role="tab" aria-controls="Tre" aria-selected="false">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>TREs</span>
-                        <span class="badge bg-dark-blue rounded-pill ms-2">@Model.Tres.Count</span>
-                    </div>
-                </a>
-            </li>
+
         </ul>
 
 
@@ -49,10 +42,7 @@
             <div class="tab-pane fade show active" id="project" role="tabpanel" aria-labelledby="home-tab">
                 <div class="row">
                     <div class="col-md-6">
-                        @if (User.IsInRole("dare-control-admin"))
-                        {
-                            <a href="@Url.Action("SaveProjectForm", "Project",new{Projectid=@Model.Id})" class="btn btn-sm btn-primary mb-3">Edit</a>
-                        }
+
                         <p class="text-muted fs-7">
                             @Model.ProjectDescription
                         </p>
@@ -60,37 +50,27 @@
                             Last Updated: @Model.StartDate <br />
                             Project End Date: @Model.EndDate
                         </p>
-                        <p>
-                            Minio URL: <a href="#">http://@Html.Raw(Model.MinioEndpoint)</a><br />
-                            Submission Bucket: @Html.Raw(Model.SubmissionBucket)<br />
-                            Output Bucket: @Html.Raw(Model.OutputBucket)
-                        </p>
+
                     </div>
                 </div>
             </div>
             <div class="tab-pane fade" id="submissions-tab" role="tabpanel" aria-labelledby="submissions">
-                @if (User.IsInRole("dare-control-admin"))
-                {
-                    <div class="d-flex align-items-center mb-3">
+
+                <div class="d-flex align-items-center mb-3">
                     <a asp-controller="Submission" asp-action="Instructions" class="btn btn-primary btn-sm d-flex align-items-center mb-3 me-2">
                         <i class="fa fa-info-circle align-middle me-2"></i>
-                        <span>Submit with API</span>
+
                     </a>
                     <a href="#" class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none">
                         <i class="fa fa-table-columns align-middle me-2"></i>
-                        <span>Submit with Wizard</span>
+
                     </a>
-                    </div>
-                }
-                
+                </div>
+
+
                 <p>List of submissions this project has...</p>
             </div>
             <div class="tab-pane fade" id="userMembership" role="tabpanel" aria-labelledby="people">
-                @if (User.IsInRole("dare-control-admin"))
-                {
-                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addUser">Add User</button>
-                }
-
                 <div class="row">
                     <div class="col-lg-5 col-md-6">
                         <ul class="list-group">
@@ -99,7 +79,7 @@
                                 <li class="list-group-item justify-content-between d-flex">
                                     <a href="@Url.Action("GetUser", "User", new { id = user.Id })">@user.Name</a>
                                     <a href="@Url.Action("RemoveUserFromProject", "Project",new{ProjectId=Model.Id,UserId=@user.Id})">
-                                        <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove user from project"></span>
+
                                     </a>
                                 </li>
                             }
@@ -108,27 +88,7 @@
                 </div>
 
             </div>
-            <div class="tab-pane fade" id="tre" role="tabpanel" aria-labelledby="contact-tab">
-                @if (User.IsInRole("dare-control-admin"))
-                {
-                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addTre">Add TRE</button>
-                }
-                <div class="row">
-                    <div class="col-lg-5 col-md-6">
-                        <ul class="list-group">
-                            @foreach (var tre in Model.Tres)
-                            {
-                                <li class="list-group-item justify-content-between d-flex">
-                                    <a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })">@tre.Name</a>
-                                    <a href="@Url.Action("RemoveTreFromProject", "Project",new{ProjectId=Model.Id,TreId=tre.Id})">
-                                        <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
-                                    </a>
-                                </li>
-                            }
-                        </ul>
-                    </div>
-                </div>
-            </div>
+
         </div>
     </div>
 </div>
@@ -137,8 +97,6 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Add User</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
@@ -165,34 +123,4 @@
     </div>
 </div>
 
-<div class="modal fade bd-tre-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="treModal">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Add TRE</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="table-responsive">
-                            <table class="table table-bordered" id="TreList">
-                                @foreach (var tre in Model.TreItemList)
-                                {
-                                    <tr>
-                                        <td><input type="checkbox" value="@tre.Value" id="Tre_@tre.Value" name="selectedTre" /></td>
-                                        <td>@tre.Text</td>
-                                    </tr>
-                                }
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="SaveTreList(@Model.Id)">Add</button>
-            </div>
-        </div>
-    </div>
-</div>
+

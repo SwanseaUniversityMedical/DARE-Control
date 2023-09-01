@@ -35,7 +35,7 @@ var hostBuilder = new HostBuilder()
         var encryptionSettings = new EncryptionSettings();
         hostContext.Configuration.Bind(nameof(encryptionSettings), encryptionSettings);
         services.AddSingleton(encryptionSettings);
-        
+
         var storedKeycloakLogin = new StoredKeycloakLogin();
         hostContext.Configuration.Bind(nameof(storedKeycloakLogin), storedKeycloakLogin);
         services.AddSingleton(storedKeycloakLogin);
@@ -43,19 +43,19 @@ var hostBuilder = new HostBuilder()
         services.AddScoped<IKeycloakTokenHelper, KeycloakTokenHelper>();
         services.AddHttpContextAccessor();
         services.AddHttpClient();
-        services.AddHttpContextAccessor();      
+        services.AddHttpContextAccessor();
 
         services.AddScoped<IDoWork, DoWork>();
-        
+
         services.AddScoped<ITreClientWithoutTokenHelper, TreClientWithoutTokenHelper>();
 
-      
+
     }).ConfigureWebHostDefaults(webBuilder =>
     {
         webBuilder.UseStartup<Startup>();
         webBuilder.UseUrls("http://localhost:5000"); // Specify the desired port here
     });
-;
+
     
 
 // Build and run the host
@@ -74,24 +74,24 @@ public class Startup
     {
         // Configure Hangfire
         string hangfireConnectionString = Configuration.GetConnectionString("DefaultConnection");
-        services.AddHangfire(config =>
-        {
-            config.UsePostgreSqlStorage(hangfireConnectionString);
-        });
+        services.AddHangfire(config => { config.UsePostgreSqlStorage(hangfireConnectionString); });
 
         services.AddHangfireServer();
 
         services.Configure<RabbitMQSetting>(Configuration.GetSection("RabbitMQ"));
         services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);
         var bus =
-            services.AddSingleton(RabbitHutch.CreateBus($"host={Configuration["RabbitMQ:HostAddress"]}:{int.Parse(Configuration["RabbitMQ:PortNumber"])};virtualHost={Configuration["RabbitMQ:VirtualHost"]};username={Configuration["RabbitMQ:Username"]};password={Configuration["RabbitMQ:Password"]}"));
-        Task task = SetUpRabbitMQ.DoItAsync(Configuration["RabbitMQ:HostAddress"], Configuration["RabbitMQ:PortNumber"], Configuration["RabbitMQ:VirtualHost"], Configuration["RabbitMQ:Username"], Configuration["RabbitMQ:Password"]);
+            services.AddSingleton(RabbitHutch.CreateBus(
+                $"host={Configuration["RabbitMQ:HostAddress"]}:{int.Parse(Configuration["RabbitMQ:PortNumber"])};virtualHost={Configuration["RabbitMQ:VirtualHost"]};username={Configuration["RabbitMQ:Username"]};password={Configuration["RabbitMQ:Password"]}"));
+        Task task = SetUpRabbitMQ.DoItAsync(Configuration["RabbitMQ:HostAddress"], Configuration["RabbitMQ:PortNumber"],
+            Configuration["RabbitMQ:VirtualHost"], Configuration["RabbitMQ:Username"],
+            Configuration["RabbitMQ:Password"]);
 
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        
+
         app.UseHangfireDashboard();
         RecurringJob.AddOrUpdate<IDoWork>(a => a.Execute(), Cron.MinuteInterval(10));
         var serverAddressesFeature = app.ServerFeatures.Get<IServerAddressesFeature>();
@@ -99,10 +99,10 @@ public class Startup
 
         // Print the port number
         Console.WriteLine("Application is running on port: " + port);
-        
+
     }
 
-    
 
-    
+
+
 }

@@ -20,12 +20,12 @@ namespace DARE_API.Repositories.DbContexts
         public DbSet<Project> Projects { get; set; }
         
         
-        public DbSet<BL.Models.Endpoint> Endpoints { get; set; }
+        public DbSet<BL.Models.Tre> Tres { get; set; }
 
         
 
         public DbSet<Submission> Submissions { get; set; }
-        public DbSet<HistoricStatus> Statuses { get; set; }
+        public DbSet<HistoricStatus> HistoricStatuses { get; set; }
 
 
 

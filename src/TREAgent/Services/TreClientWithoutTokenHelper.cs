@@ -14,9 +14,6 @@ namespace TREAgent.Services
             httpContextAccessor,
             config["TREAPISettings:Address"], keycloak)
         {
-
-
-
             _username = creds.Username;
             _password = encDec.Decrypt(creds.EncPass);
             _requiredRole = "dare-tre-agent";
