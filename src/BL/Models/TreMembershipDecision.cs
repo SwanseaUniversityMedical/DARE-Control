@@ -1,4 +1,6 @@
-﻿using System.Security.AccessControl;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Security.AccessControl;
+using System.Xml.Linq;
 using BL.Models.Enums;
 
 namespace BL.Models
@@ -9,8 +11,12 @@ namespace BL.Models
         public virtual TreUser User { get; set; }
         public virtual TreProject Project { get; set; }
         public bool Archived { get; set; }
-        public bool Approved { get; set; } 
-        public string? ApprovedBy { get; set; } 
+        public bool Approved { get; set; }
+
+        [Display(Name = "Approved By")]
+        public string? ApprovedBy { get; set; }
+
+        [Display(Name = "Date of Last Decision")]
         public DateTime LastDecisionDate { get; set; }
     }
     

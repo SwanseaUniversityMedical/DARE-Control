@@ -40,6 +40,12 @@ namespace TRE_API.Controllers
             return _DbContext.Projects.ToList();
         }
 
+        [HttpGet("GetTreProject")]
+        public TreProject GetTreProject(int projectId)
+        {
+            return _DbContext.Projects.First(x => x.Id == projectId);
+        }
+
         [HttpGet("GetAllActiveTreProjects")]
         public List<TreProject> GetAllActiveTreProjects()
         {

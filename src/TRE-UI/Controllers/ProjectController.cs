@@ -25,7 +25,7 @@ namespace TRE_UI.Controllers
         public IActionResult GetAllProjects()
 
         {
-            var projects = _treclientHelper.CallAPIWithoutModel<List<TreProject>>("/api/Project/GetAllProjectsTre/").Result;
+            var projects = _treclientHelper.CallAPIWithoutModel<List<TreProject>>("/api/Project/GetAllTreProjects/").Result;
 
             return View(projects);
         }
@@ -44,23 +44,13 @@ namespace TRE_UI.Controllers
 
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", projectId.ToString());
-            var project = _treclientHelper.CallAPIWithoutModel<Project?>(
-                "/api/Project/GetProject/", paramlist).Result;
+            var project = _treclientHelper.CallAPIWithoutModel<TreProject>(
+                "/api/Project/GetTreProject/", paramlist).Result;
             
 
-            var projectView = new Project()
-
-            {
-                Id = project.Id,
-                Name = project.Name,
-                Users = project.Users,
-                StartDate = project.StartDate,
-                EndDate = project.EndDate,
-                Submissions = project.Submissions
-
-                };
+           
           
-            return View(projectView);
+            return View(project);
         }
 
         [HttpPost]

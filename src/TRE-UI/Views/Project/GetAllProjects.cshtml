@@ -21,20 +21,48 @@
 
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <div>
-                                    <a href="#"><h2 class="mb-0 fw-bold hover-underline fs-5">@project.SubmissionProjectName</h2></a>
-                                    <p class="text-muted small mb-0">#[Project ID = @project.Id]</p>
+                                    <a href="@Url.Action("EditProject", "Project", new { projectId = project.Id })">
+                                        <h2 class="mb-0 fw-bold hover-underline fs-5">@project.SubmissionProjectName</h2>
+                                    </a>
+                                    @if (project.Archived)
+                                    {
+                                        <p class="my-4">
+                                            Archived
+                                        </p>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(project.LocalProjectName))
+                                    {
+                                        <p class="my-4">
+                                            Local Name: @project.LocalProjectName
+                                        </p>
+                                    }
+                                    <p class="my-4">
+                                        @project.Description
+                                    </p>
+                                    <p class="text-muted small mb-0">#[Submission Project ID = @project.SubmissionProjectId]</p>
+                                    
                                 </div>
-                                @*                                <a href="@Url.Action("EditProject", "Project",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>*@
+                                <a href="@Url.Action("EditProject", "Project",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
                             </div>
                             <div class="">
                                
-                                <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#memberships" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                <a href="@Url.Action("EditMembers", new { id = project.Id })#memberships" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
                                     @project.MemberDecisions.Count Memberships
                                 </a>
                                 
 
                             </div>
-
+                            <p class="text-muted fs-7 mt-4 mb-0">
+                                @if (string.IsNullOrWhiteSpace(project.ApprovedBy))
+                                {
+                                    @:This project hasn't been processed yet
+                                }
+                                else
+                                {
+                                    @:Last Updated: @project.LastDecisionDate by @project.ApprovedBy 
+                                }
+                                
+                            </p>
                             
 
 
