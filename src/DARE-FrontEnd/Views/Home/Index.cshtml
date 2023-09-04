@@ -1,69 +1,180 @@
-﻿<div class="home-banner text-center">
-    <h1 class="display-5 text-light">Safe &amp; Transparent Research</h1>
-    <p class="text-light mb-5 fs-6">Search and discover the types of research this trusted platform is enabling for public good.</p>
-    <div class="col-xl-4 col-lg-6 col-md-8 mx-auto">
-        <form class="col-12 col-lg-auto mb-3 mb-lg-0">
-            <input type="search" class="form-control border-0" placeholder="Search..." aria-label="Search">
-        </form>
-    </div>
-</div>
-<div class="container mt-5">
+﻿@model BL.Models.User
+@if (User.IsInRole("dare-control-admin"))
+{
+    <div class="container-lg mt-4 p-4 bg-white border-1 shadow-sm">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h1 class="fs-3 mb-0">Welcome back, @User?.FindFirst("name")?.Value</h1>
+            </div>
+        </div>
+        <div class="mt-4">
+            <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a href="#about" class="nav-link text-dark active" id="about" data-bs-toggle="tab" data-bs-target="#project" role="tab" aria-controls="Project" aria-selected="true">
+                        <span>Projects</span>
+                        <span class="badge bg-dark-blue rounded-pill ms-2">Model.Projects.Count</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a href="#submissions" class="nav-link text-dark" id="submissions" data-bs-toggle="tab" data-bs-target="#submissions-tab" role="tab" aria-controls="submissions" aria-selected="false">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Submissions</span>
+                            <span class="badge bg-dark-blue rounded-pill ms-2">Model.Submissions.Count</span>
+                        </div>
+                    </a>
+                </li>
+            </ul>
 
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-md-5 g-4">
-        <div class="col">
-            <a asp-area="" asp-controller="Submission" asp-action="GetAllSubmissions" class="card shadow-sm">
-                <img class="card-img-top" src="/img/data-image.jpg" alt="Submissions image" />
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="m-0 text-dark fs-5">Submissions</h4>
-                        <span class="badge bg-dark-blue rounded-pill">X</span>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col">
-            <a asp-area="" asp-controller="Project" asp-action="GetAllProjects" class="card shadow-sm">
-                <img class="card-img-top" src="/img/shutterstock_1081970570-Reduced-740x481.jpg" alt="Projects image" />
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="m-0 text-dark fs-5">Projects</h4>
-                        <span class="badge bg-dark-blue rounded-pill">X</span>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col">
-            <a asp-area="" asp-controller="User" asp-action="GetAllUsers" class="card shadow-sm">
-                <img class="card-img-top" src="/img/shutterstock_376975414-740x481.jpg.webp" alt="People image" />
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="m-0 text-dark fs-5">People</h4>
-                        <span class="badge bg-dark-blue rounded-pill">X</span>
-                    </div>
-                </div>
-            </a>
-        </div>
-        
-        <div class="col">
-            <a asp-area="" asp-controller="Tre" asp-action="GetAllTres" class="card shadow-sm">
-                <img class="card-img-top" src="/img/about-banner.jpg" alt="TREs image" />
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="m-0 text-dark fs-5">TREs</h4>
-                        <span class="badge bg-dark-blue rounded-pill">X</span>
-                    </div>
-                </div>
-            </a>
-        </div>
 
-    </div>
-</div>
-<div class="container my-5">
-    <div class="col-lg-8 mx-auto">
-        <h3 class="text-center mb-4">About TRE FX</h3>
+            <div class="tab-content py-5" id="myTabContent">
+                <div class="tab-pane fade show active" id="project" role="tabpanel" aria-labelledby="home-tab">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <div class="table-responsive">
+                                    <table id="projectList" class="table table-bordered table-striped no-head" caption="List of Projects">
+                                        <thead><tr><td>Project</td></tr></thead>
+                                        <tbody>
+                                            @* foreach (var project in Model.Projects)
+                                            {
+                                                <tr>
+                                                    <td class="card mb-2 p-3 bg-white shadow-sm border-1">
 
-        <p>TRE FX was developed by UKRI's DARE UK to support fast and efficient sharing, linkage, and advanced analysis of sensitive data in an ethical and secure manner.</p>
-        <p>TRE FX allows approved researchers to work with a ‘federated’ network of trusted research environments (TREs) by querying the data held by different TREs from one location - meaning the data doesn't have to be joined or moved from its secure location and the researcher saves time by submitting a query once for multiple TREs.</p>
-        <p>The platform adopts a transparent approach and is open for the public to see what research is being conducted across the different TREs and also opens up the possibility of more collaboration in the research community.</p>
+                                                        <div class="d-flex align-items-center justify-content-between mb-3">
+                                                            <div>
+                                                                <a href="@Url.Action("GetProject", "Project", new { id = project.Id })">
+                                                                    <h2 class="mb-0 fw-bold hover-underline fs-5">
+                                                                        @project.Name
+                                                                    </h2>
+                                                                </a>
+                                                                <a href="@Url.Action("RemoveProjectfromUser", "User",new{UserId=Model.Id,ProjectId=@project.Id})">
+                                                                    <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove user from project"></span>
+                                                                </a>
+                                                                <p class="text-muted small mb-0">#@project.Id</p>
+                                                            </div>
+                                                            @if (User.IsInRole("dare-control-admin"))
+                                                            {
+                                                                <a href="@Url.Action("AddProjectForm", "Project",new{ProjectId=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+                                                            }
+                                                        </div>
+                                                        <div class="">
+                                                            <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#submissions" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                                                @project.Submissions.Count Submissions
+                                                            </a>
+                                                            <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#people" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                                                @project.Users.Count People
+                                                            </a>
+                                                            <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#tre" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                                                @project.Endpoints.Count TREs
+                                                            </a>
+                                                        </div>
+                                                        <p class="my-4">
+                                                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                                                            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in...
+                                                        </p>
+                                                        <p class="text-muted fs-7 mb-0">
+                                                            LastStatusUpdate Date: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate
+                                                        </p>
+                                                    </td>
+                                                </tr>
+                                            }*@
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="submissions-tab" role="tabpanel" aria-labelledby="submissions">
+                    @if (User.IsInRole("dare-control-admin"))
+                    {
+                        <div class="d-flex align-items-center mb-3">
+                            <a asp-controller="Submission" asp-action="Instructions" class="btn btn-primary btn-sm d-flex align-items-center mb-3 me-2">
+                                <i class="fa fa-info-circle align-middle me-2"></i>
+                                <span>Submit with API</span>
+                            </a>
+                            <a href="#" class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none">
+                                <i class="fa fa-table-columns align-middle me-2"></i>
+                                <span>Submit with Wizard</span>
+                            </a>
+                        </div>
+                    }
+
+                    <p>List of submissions this user has made...</p>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+}
+else
+{
+    <div class="home-banner text-center">
+        <h1 class="display-5 text-light">Safe &amp; Transparent Research</h1>
+        <p class="text-light mb-5 fs-6">Search and discover the types of research this trusted platform is enabling for public good.</p>
+        <div class="col-xl-4 col-lg-6 col-md-8 mx-auto">
+            <form class="col-12 col-lg-auto mb-3 mb-lg-0">
+                <input type="search" class="form-control border-0" placeholder="Search..." aria-label="Search">
+            </form>
+        </div>
+    </div>
+    <div class="container mt-5">
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-md-5 g-4">
+            <div class="col">
+                <a asp-area="" asp-controller="Submission" asp-action="GetAllSubmissions" class="card shadow-sm">
+                    <img class="card-img-top" src="/img/data-image.jpg" alt="Submissions image" />
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="m-0 text-dark fs-5">Submissions</h4>
+                            <span class="badge bg-dark-blue rounded-pill">X</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col">
+                <a asp-area="" asp-controller="Project" asp-action="GetAllProjects" class="card shadow-sm">
+                    <img class="card-img-top" src="/img/shutterstock_1081970570-Reduced-740x481.jpg" alt="Projects image" />
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="m-0 text-dark fs-5">Projects</h4>
+                            <span class="badge bg-dark-blue rounded-pill">X</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col">
+                <a asp-area="" asp-controller="User" asp-action="GetAllUsers" class="card shadow-sm">
+                    <img class="card-img-top" src="/img/shutterstock_376975414-740x481.jpg.webp" alt="People image" />
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="m-0 text-dark fs-5">People</h4>
+                            <span class="badge bg-dark-blue rounded-pill">X</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col">
+                <a asp-area="" asp-controller="Endpoint" asp-action="GetAllEndpoints" class="card shadow-sm">
+                    <img class="card-img-top" src="/img/about-banner.jpg" alt="TREs image" />
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="m-0 text-dark fs-5">TREs</h4>
+                            <span class="badge bg-dark-blue rounded-pill">X</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+    </div>
+    <div class="container my-5">
+        <div class="col-lg-8 mx-auto">
+            <h3 class="text-center mb-4">About TRE FX</h3>
+
+            <p>TRE FX was developed by UKRI's DARE UK to support fast and efficient sharing, linkage, and advanced analysis of sensitive data in an ethical and secure manner.</p>
+            <p>TRE FX allows approved researchers to work with a ‘federated’ network of trusted research environments (TREs) by querying the data held by different TREs from one location - meaning the data doesn't have to be joined or moved from its secure location and the researcher saves time by submitting a query once for multiple TREs.</p>
+            <p>The platform adopts a transparent approach and is open for the public to see what research is being conducted across the different TREs and also opens up the possibility of more collaboration in the research community.</p>
+        </div>
+    </div>
+}
