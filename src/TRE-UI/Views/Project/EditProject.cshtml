@@ -13,66 +13,64 @@
         </div>
 
     </div>
-     @* <hr class="d-flex mt-4 mb-5">*@
+
     <div class="mt-4">
         <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
         </ul>
 
         <div class="row">
-                    <div class="col-md-6">
-                        <form method="post" asp-action="EditMembership">
-                            <div asp-validation-summary="All"></div>
-                            <input asp-for="Id" hidden />
-                            <div class="form-group mb-4">
-                                <label asp-for="Name">Project Name</label>
-                                <input asp-for="Name" class="form-control form-control-md" />
-                                <span asp-validation-for="Name" class="text-danger"></span>
-                            </div>
-                    
-                            <div class="form-group mb-4">
-                                <label asp-for="StartDate">Start Date</label>
-                                <input asp-for="StartDate" class="form-control form-control-md" />
-                                <span asp-validation-for="StartDate" class="text-danger"></span>
-                            </div>
-                              <div class="form-group mb-4">
-                                <label asp-for="EndDate">End Date</label>
-                                <input asp-for="EndDate" class="form-control form-control-md" />
-                                <span asp-validation-for="EndDate" class="text-danger"></span>
-                            </div>
-                            <div class="form-group mb-4">
-                                <label asp-for="FormData">Local Project Name</label>
-                                <input asp-for="FormData" class="form-control form-control-md" />
-                                <span asp-validation-for="FormData" class="text-danger"></span>
-                            </div>
-                  
-                            <fieldset>
-                                
-                                <div>
-                                    <span>
-                                        <input type="radio" name='foo' required id="EmailYes" value="EmailYes" />
-                                        <label for="EmailYes"><b>Approve:</b> </label>
-                                    </span>
-                                    <span>
-                                        <input type="radio" name='foo' required id="EmailNo" value="EmailNo" />
-                                        <label for="EmailYes"><b>Reject:</b></label>
-                                    </span><span>
-                                        <input type="radio" name='foo' required id="EmailNo" value="EmailNo" />
-                                        <label for="EmailYes"><b>Archive:</b></label>
-                                    </span>
-                                </div>
-                                </fieldset>
-                            <div class="mt-5 d-flex align-items-center">
-                                <button type="submit" class="btn btn-md btn-primary mr-2">Save</button>
-                                @*<a href="@Url.Action("RemoveUserFromProject", "Project", new { id = Model.ProjectId })" class="btn btn-link">
-                                    Remove
-                                </a>*@
-                            </div>
-                        </form>
+            <div class="col-md-6">
+                <form method="post" asp-action="EditProjectSubmission">
+                    <div asp-validation-summary="All"></div>
+                    <input asp-for="Id" hidden />
+                    <div class="form-group mb-4">
+                        <label asp-for="Name">Project Name</label>
+                        <input asp-for="Name" class="form-control form-control-md" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
                     </div>
-                </div>
+
+                    <div class="form-group mb-4">
+                        <label asp-for="StartDate">Start Date</label>
+                        <input asp-for="StartDate" class="form-control form-control-md" />
+                        <span asp-validation-for="StartDate" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label asp-for="EndDate">End Date</label>
+                        <input asp-for="EndDate" class="form-control form-control-md" />
+                        <span asp-validation-for="EndDate" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label asp-for="FormData">Local Project Name</label>
+                        <input asp-for="FormData" class="form-control form-control-md" />
+                        <span asp-validation-for="FormData" class="text-danger"></span>
+                    </div>
+
+                    <fieldset>
+
+                        <div>
+                            <span>
+                                <input type="radio" name='foo' required id="Approve" value="Approve" />
+                                <label for="Approve"><b>Approve:</b> </label>
+                            </span>
+                            <span>
+                                <input type="radio" name='foo' required id="Reject" value="Reject" />
+                                <label for="Reject"><b>Reject:</b></label>
+                            </span><span>
+                                <input type="radio" name='foo' required id="Archive" value="Archive" />
+                                <label for="Archive"><b>Archive:</b></label>
+                            </span>
+                        </div>
+                    </fieldset>
+                    <div class="mt-5 d-flex align-items-center">
+                        <button type="submit" class="btn btn-md btn-primary mr-2">Save</button>
+
+                    </div>
+                </form>
             </div>
-
-
+        </div>
     </div>
+
+
+</div>
 
 
