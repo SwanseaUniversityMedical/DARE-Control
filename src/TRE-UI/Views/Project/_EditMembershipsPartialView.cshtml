@@ -16,26 +16,25 @@
             <tbody>
                 @foreach (var member in Model)
                 {
-                    @using (Html.BeginForm("UpdateMembership", "Project", new {id = member.Id}))
-                    <tr>
-                        <td class="card mb-2 p-3 bg-white shadow-sm border-1">
+                    @using (Html.BeginForm("UpdateMembership", "Project", new { id = member.Id }))
+                    {
+                        <tr>
+                            <td class="card mb-2 p-3 bg-white shadow-sm border-1">
 
-                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                <div>
-                                    <a href="#">
-                                        <h2 class="mb-0 fw-bold hover-underline fs-5">
-                                            <a href="@Url.Action("GetUser", "User", new { id = member.Id })">@member.Id</a>
-                                        </h2>
-                                    </a>
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div>
+                                        <a href="#">
+                                            <h2 class="mb-0 fw-bold hover-underline fs-5">
+                                                <a href="@Url.Action("GetUser", "User", new { id = member.Id })">@member.Id</a>
+                                            </h2>
+                                        </a>
+                                    </div>
+
                                 </div>
-                                @if (User.IsInRole("dare-control-admin"))
-                                {
-                                    <a href="@Url.Action("SaveUserForm", "User",new{memberId=member.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
-                                }
-                            </div>
-                            
-                        </td>
-                    </tr>
+
+                            </td>
+                        </tr>
+                    }
                 }
             </tbody>
         </table>
