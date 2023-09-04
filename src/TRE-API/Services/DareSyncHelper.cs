@@ -48,6 +48,7 @@ namespace TRE_API.Services
                 projectUnarchive.Archived = false;
             }
 
+            await _DbContext.SaveChangesAsync();
             var users = subprojs.SelectMany(x => x.Users).Distinct();
             var dbusers = _DbContext.Users.ToList();
             var userAdds = users.Where(x => !_DbContext.Users.Any(y => y.SubmissionUserId == x.Id));
@@ -72,7 +73,7 @@ namespace TRE_API.Services
             {
                 userUnarchive.Archived = false;
             }
-
+            await _DbContext.SaveChangesAsync();
             var projectUserPairs = subprojs
                 .SelectMany(project => project.Users, (project, user) => new
                 {
