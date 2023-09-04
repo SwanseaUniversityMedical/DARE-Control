@@ -107,7 +107,6 @@ namespace TRE_API.Controllers
 
             {
 
-
                 var approved = IsUserApprovedonProject(int.Parse(ProjectId), int.Parse(UserId));
 
                 var paramlist = new Dictionary<string, string>();
