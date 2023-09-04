@@ -83,12 +83,12 @@ namespace TRE_API.Controllers
             return allUsers;
         }
 
-        [HttpGet("IsUserApprovedonProject")]
-        public bool IsUserApprovedonProject(int projectId, int userId)
+        [HttpGet("IsUserApproved")]
+        public bool IsUserApproved(int projectId, int userId)
         {
             try
             {
-                bool IsUserApprovedonProject = _DbContext.ProjectApprovals.Any(p => p.Approved == "Approved");
+                bool IsUserApprovedonProject = _DbContext.ProjectApprovals.Any(p => p.Approved == "Approved" && p.ProjectId == projectId && p.UserId == userId);
                 return IsUserApprovedonProject;
             }
 
@@ -99,6 +99,17 @@ namespace TRE_API.Controllers
             }
         }
 
+        [HttpGet("IsUserApprovedOnProject")]
+        public Task<ProjectUser?> IsUserApprovedOnProject(int projectId, int userId)
+        {
+            var model = new ProjectUser()
+            {
+                ProjectId = projectId,
+                UserId = userId
+            };
+            var IsUserApprovedOnProject = _dareclientHelper.CallAPI<ProjectUser, ProjectUser?>("api/Project/IsUserOnProject", model);
+            return IsUserApprovedOnProject;
+        }
 
         [HttpPost("ApproveProjectMembership")]
         public async Task<ProjectApproval?> ApproveProjectMembership(Project model, string Approval, string ProjectId, string UserId, string UserName, string FormData, string ProjectName)
@@ -107,10 +118,11 @@ namespace TRE_API.Controllers
 
             {
 
-                var approved = IsUserApprovedonProject(int.Parse(ProjectId), int.Parse(UserId));
-
+                var approved = IsUserApproved(int.Parse(ProjectId), int.Parse(UserId));
+                //var Userapproved = IsUserApprovedOnProject(int.Parse(ProjectId), int.Parse(UserId));
+                    //UserApproved returned statuswaitingforactivation
                 var paramlist = new Dictionary<string, string>();
-                paramlist.Add("projectId", model.Id.ToString());
+                paramlist.Add("projectId", ProjectId.ToString());
                 var Projects = _dareclientHelper.CallAPIWithoutModel<Project?>("/api/Project/GetProject/", paramlist).Result;
 
 
@@ -140,7 +152,7 @@ namespace TRE_API.Controllers
                     projectapproval.Username = UserName;
                     projectapproval.LocalProjectName = FormData;
                     projectapproval.Approved = Approval;
-
+                    projectapproval.ApprovedBy = @User?.FindFirst("name")?.Value;
 
                     _DbContext.ProjectApprovals.Add(projectapproval);
                 }
@@ -189,7 +201,7 @@ namespace TRE_API.Controllers
         {
             try
             {
-                var returned = _DbContext.ProjectApprovals.Where(p => p.Approved == "Archived").ToList();
+                var returned = _DbContext.ProjectApprovals.Where(p => p.Approved != "Approve").ToList();
                 if (returned == null)
                 {
                     return null;

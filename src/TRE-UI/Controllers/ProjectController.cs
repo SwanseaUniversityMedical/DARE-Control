@@ -82,7 +82,7 @@ namespace TRE_UI.Controllers
                 Users = project.Users,
                 //StartDate = model.StartDate,
                 //EndDate = model.EndDate,
-                FormData = project.FormData,
+                FormData = model.FormData,
             };
             var userItems = project.Users
      .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
@@ -95,7 +95,7 @@ namespace TRE_UI.Controllers
             paramlist1.Add("ProjectId", project.Id.ToString());
             paramlist1.Add("UserId", userid);
             paramlist1.Add("UserName", username);
-            paramlist1.Add("FormData", project.FormData);
+            paramlist1.Add("FormData", model.FormData);
             paramlist1.Add("ProjectName", project.Name);
             var result = await _treclientHelper.CallAPI<Project, Project?>("/api/Project/ApproveProjectMembership", model, paramlist1);
 
