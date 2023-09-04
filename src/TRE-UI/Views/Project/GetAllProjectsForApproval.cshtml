@@ -3,11 +3,9 @@
     ViewData["Title"] = "Projects Approval";
     var projectsCount = Model.Count;
 }
-
 <div class="container-lg p-4">
     <div class="d-flex align-items-center justify-content-between">
         <h1 class="fs-3 mb-0">Projects Approval</h1>
-
 
     </div>
     <hr class="d-flex mt-4 mb-5">
@@ -33,24 +31,15 @@
                                     <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#submissions" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
                                         @project.Submissions.Count Submissions
                                     </a>
-
                             </div>
 
                             <p class="text-muted fs-6 mb-0">
                                 LastStatusUpdate Date: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate
                             </p>
-
-
-
-
-
-
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
-
     </div>
-    @*<p>Showing @projectsCount results</p>*@
 </div>

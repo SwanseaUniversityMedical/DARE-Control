@@ -8,24 +8,21 @@ using EasyNetQ.Management.Client.Model;
 using System.Xml.Linq;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace TRE_UI.Controllers
 {
     [Authorize]
     public class ProjectController : Controller
     {
 
-        private readonly ITREClientHelper _treclientHelper;
+     private readonly ITREClientHelper _treclientHelper;
         public ProjectController(ITREClientHelper treClient)
         {
 
             _treclientHelper = treClient;
         }
 
-
         [HttpGet]
         public IActionResult GetAllProjects()
-
         {
             var projects = _treclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
 
@@ -43,15 +40,12 @@ namespace TRE_UI.Controllers
 
         public IActionResult EditProject(int? projectId)
         {
-
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", projectId.ToString());
             var project = _treclientHelper.CallAPIWithoutModel<Project?>(
                 "/api/Project/GetProject/", paramlist).Result;
 
-
             var projectView = new Project()
-
             {
                 Id = project.Id,
                 Name = project.Name,
@@ -59,7 +53,6 @@ namespace TRE_UI.Controllers
                 StartDate = project.StartDate,
                 EndDate = project.EndDate,
                 Submissions = project.Submissions
-
             };
 
             return View(projectView);
@@ -80,8 +73,6 @@ namespace TRE_UI.Controllers
                 Id = project.Id,
                 Name = project.Name,
                 Users = project.Users,
-                //StartDate = model.StartDate,
-                //EndDate = model.EndDate,
                 FormData = model.FormData,
             };
             var userItems = project.Users
@@ -98,7 +89,6 @@ namespace TRE_UI.Controllers
             paramlist1.Add("FormData", model.FormData);
             paramlist1.Add("ProjectName", project.Name);
             var result = await _treclientHelper.CallAPI<Project, Project?>("/api/Project/ApproveProjectMembership", model, paramlist1);
-
             return RedirectToAction("GetAllProjectsForApproval");
         }
 
@@ -115,8 +105,6 @@ namespace TRE_UI.Controllers
             var projectItems = projectItems2
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
-
-
             ViewBag.ProjectItems = projectItems;
 
             return View(result);
@@ -147,7 +135,6 @@ namespace TRE_UI.Controllers
                 Endpoints = project.Endpoints,
                 Submissions = project.Submissions,
                 UserItemList = userItems,
-
             };
 
             return View(projectView);
@@ -156,7 +143,6 @@ namespace TRE_UI.Controllers
         [HttpGet]
         public IActionResult GetAllUnApprovedMemberships()
         {
-
             var projects = _treclientHelper.CallAPIWithoutModel<List<ProjectApproval>>("/api/Project/GetAllUnApprovedMemberships/").Result;
 
             return View(projects);
@@ -165,7 +151,6 @@ namespace TRE_UI.Controllers
         [HttpGet]
         public IActionResult GetAllDisabledMemberships()
         {
-
             var projects = _treclientHelper.CallAPIWithoutModel<List<ProjectApproval>>("/api/Project/GetAllDisabledMemberships/").Result;
 
             return View(projects);
@@ -174,13 +159,10 @@ namespace TRE_UI.Controllers
         [HttpGet]
         public IActionResult GetAllMemberships()
         {
-
             var projects = _treclientHelper.CallAPIWithoutModel<List<ProjectApproval>>("/api/Project/GetAllMemberships/").Result;
 
             return View(projects);
         }
-
-
 
     }
 

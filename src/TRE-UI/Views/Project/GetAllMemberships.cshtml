@@ -1,11 +1,7 @@
 ﻿@model List<BL.Models.ProjectApproval>
-
-
 @{
     ViewData["Title"] = "ProjectApproval";
-    //var projectsCount = Model.Count;
 }
-
 <div class="container-lg p-4">
     <div class="d-flex align-items-center justify-content-between">
         <h1 class="fs-3 mb-0">Memberships</h1>
@@ -27,15 +23,7 @@
                                     <p class="text-muted small mb-0">#[Project ID = @project.Id]</p>
                                     <a href="@Url.Action("EditProject", "Project",new{ProjectId=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Approve</span></a>
                                 </div>
-                                @*<div class="">
-                            <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#people" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                            @project.Users.Count People
-                            </a>
-                            <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#submissions" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                            @project.Submissions.Count Submissions
-                            </a>
-
-                            </div>*@
+                   
                                 <p>
                                     ProjectName: @project.Projectname
 
@@ -55,18 +43,10 @@
                                 <p class="text-muted fs-6 mb-0">
                                     ApprovedBy: @project.ApprovedBy
                                 </p>
-
-
-
-
-
-
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
-
     </div>
-
 </div>

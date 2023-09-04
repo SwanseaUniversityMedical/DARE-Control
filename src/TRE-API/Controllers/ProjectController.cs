@@ -11,18 +11,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace TRE_API.Controllers
 {
-
     //[Authorize(Roles = "dare-tre,dare-control-admin")]
     [Route("api/[controller]")]
-
     public class ProjectController : ControllerBase
     {
-
         private readonly ApplicationDbContext _DbContext;
-
-
         private readonly IDareClientWithoutTokenHelper _dareclientHelper;
-
         public ProjectController(IDareClientWithoutTokenHelper dareclient, ApplicationDbContext applicationDbContext)
         {
             _dareclientHelper = dareclient;
@@ -34,7 +28,6 @@ namespace TRE_API.Controllers
         [Authorize(Roles = "dare-tre-admin")]
         public List<Project> GetAllProjects()
         {
-
             var allProjects = _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForEndpoint/").Result;
             return allProjects;
         }
@@ -55,7 +48,6 @@ namespace TRE_API.Controllers
             paramlist.Add("userId", userId.ToString());
             var User = _dareclientHelper.CallAPIWithoutModel<User?>("/api/User/GetUser/", paramlist).Result;
             return User;
-
         }
 
         [HttpGet("GetAllProjectsForApproval")]
@@ -72,7 +64,6 @@ namespace TRE_API.Controllers
                 Log.Error(ex, "{Function} Crashed", "GetAllProjectsForApproval");
                 throw;
             }
-
 
         }
         [HttpGet("GetAllUsers")]
@@ -117,14 +108,12 @@ namespace TRE_API.Controllers
             try
 
             {
-
                 var approved = IsUserApproved(int.Parse(ProjectId), int.Parse(UserId));
                 //var Userapproved = IsUserApprovedOnProject(int.Parse(ProjectId), int.Parse(UserId));
                     //UserApproved returned statuswaitingforactivation
                 var paramlist = new Dictionary<string, string>();
                 paramlist.Add("projectId", ProjectId.ToString());
                 var Projects = _dareclientHelper.CallAPIWithoutModel<Project?>("/api/Project/GetProject/", paramlist).Result;
-
 
                 var projectapproval = new ProjectApproval();
                 if (projectapproval.Id > 0)
@@ -171,7 +160,6 @@ namespace TRE_API.Controllers
 
         }
 
-
         [AllowAnonymous]
         [HttpGet("GetAllMemberships")]
         public List<ProjectApproval> GetAllMemberships()
@@ -192,8 +180,6 @@ namespace TRE_API.Controllers
                 Log.Error(ex, "{Function} Crashed", "GetAllMemberships");
                 throw;
             }
-
-
         }
 
         [HttpGet("GetAllDisabledMemberships")]
@@ -238,10 +224,7 @@ namespace TRE_API.Controllers
                 throw;
             }
 
-
         }
-
-
 
     }
 }

@@ -3,15 +3,9 @@
     ViewData["Title"] = "Projects";
     var projectsCount = Model.Count;
 }
-
 <div class="container-lg p-4">
     <div class="d-flex align-items-center justify-content-between">
         <h1 class="fs-3 mb-0">Projects</h1>
-
-        @*<a asp-controller="Project" asp-action="AddProjectForm" class="btn btn-primary btn-sm">
-        <i class="fa fa-plus align-middle mr-2"></i>
-        <span>Create Project</span>
-        </a>*@
     </div>
     <hr class="d-flex mt-4 mb-5">
     <div class="table-responsive">
@@ -27,8 +21,7 @@
                                 <div>
                                     <a href="#"><h2 class="mb-0 fw-bold hover-underline fs-5">@project.Name</h2></a>
                                     <p class="text-muted small mb-0">#[Project ID = @project.Id]</p>
-                                </div>
-                                @*                                <a href="@Url.Action("EditProject", "Project",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>*@
+                                </div>                          
                             </div>
                             <div class="">
                                
@@ -38,24 +31,14 @@
                                 <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#submissions" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
                                     @project.Submissions.Count Submissions
                                 </a>
-
                             </div>
-
                             <p class="text-muted fs-6 mb-0">
                                 LastStatusUpdate Date: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate
                             </p>
-
-
-
-
-
-
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
-
     </div>
-    @*<p>Showing @projectsCount results</p>*@
 </div>
