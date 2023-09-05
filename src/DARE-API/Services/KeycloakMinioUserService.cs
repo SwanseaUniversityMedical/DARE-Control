@@ -78,10 +78,9 @@ namespace DARE_API.Services
             try
             {
 
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-                var baseUrl = _controlKeyCloakSettings.Server;
-                var realm = _controlKeyCloakSettings.Realm;
+                var baseUrl = _submissionKeyCloakSettings.Server;
+                var realm = _submissionKeyCloakSettings.Realm;
+                var attributeKey = "policy";
                 var userId = await GetUserIDAsync(baseUrl, realm, accessToken, userName);
                 var userAttributesJson = await GetUserAttributesAsync(baseUrl, realm, accessToken, userId);
 
