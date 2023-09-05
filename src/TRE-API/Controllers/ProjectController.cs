@@ -8,6 +8,7 @@ using BL.Services;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using BL.Models.Enums;
 
 namespace TRE_API.Controllers
 {
@@ -21,7 +22,6 @@ namespace TRE_API.Controllers
         {
             _dareclientHelper = dareclient;
             _DbContext = applicationDbContext;
-
         }
 
         [HttpGet("GetAllProjects")]
@@ -31,7 +31,6 @@ namespace TRE_API.Controllers
             var allProjects = _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForEndpoint/").Result;
             return allProjects;
         }
-
         [HttpGet("GetProject")]
         public Project? GetProject(int? projectId)
         {
@@ -39,7 +38,6 @@ namespace TRE_API.Controllers
             paramlist.Add("projectId", projectId.ToString());
             var Projects = _dareclientHelper.CallAPIWithoutModel<Project?>("/api/Project/GetProject/", paramlist).Result;
             return Projects;
-
         }
         [HttpGet("GetUser")]
         public User? GetUser(int? userId)
@@ -56,36 +54,33 @@ namespace TRE_API.Controllers
             try
             {
                 var allProjects = _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForEndpoint/").Result;
+               
                 return allProjects;
-
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "{Function} Crashed", "GetAllProjectsForApproval");
                 throw;
             }
-
         }
         [HttpGet("GetAllUsers")]
         public List<User> GetAllUsers()
         {
-
             var allUsers = _dareclientHelper.CallAPIWithoutModel<List<BL.Models.User>>("/api/User/GetAllUsers/").Result;
             return allUsers;
         }
 
         [HttpGet("IsUserApproved")]
-        public bool IsUserApproved(int projectId, int userId)
+        public List<ProjectApproval> IsUserApproved(int projectId, int userId)
         {
             try
             {
-                bool IsUserApprovedonProject = _DbContext.ProjectApprovals.Any(p => p.Approved == "Approved" && p.ProjectId == projectId && p.UserId == userId);
-                return IsUserApprovedonProject;
+                var results = _DbContext.ProjectApprovals.Where(p => p.Approved == "Approved" || p.Approved == "Archive" || p.Approved == "Reject" && p.ProjectId == projectId && p.UserId == userId).ToList();                
+                return results;
             }
-
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} crash", "IsUserApprovedonProject");
+                Log.Error(ex, "{Function} crash", "IsUserApproved");
                 throw;
             }
         }
@@ -106,32 +101,37 @@ namespace TRE_API.Controllers
         public async Task<ProjectApproval?> ApproveProjectMembership(Project model, string Approval, string ProjectId, string UserId, string UserName, string FormData, string ProjectName)
         {
             try
-
             {
-                var approved = IsUserApproved(int.Parse(ProjectId), int.Parse(UserId));
+                var approved = IsUserApproved(int.Parse(ProjectId), int.Parse(UserId));               
                 //var Userapproved = IsUserApprovedOnProject(int.Parse(ProjectId), int.Parse(UserId));
                     //UserApproved returned statuswaitingforactivation
                 var paramlist = new Dictionary<string, string>();
                 paramlist.Add("projectId", ProjectId.ToString());
                 var Projects = _dareclientHelper.CallAPIWithoutModel<Project?>("/api/Project/GetProject/", paramlist).Result;
-
                 var projectapproval = new ProjectApproval();
-                if (projectapproval.Id > 0)
+              
+                if (approved.Count > 0)                  
                 {
-                    if (_DbContext.ProjectApprovals.Select(x => x.Id == projectapproval.Id).Any())
+                    var Id = approved[0].Id;
+                    projectapproval.Approved = Approval;
+                    projectapproval.LocalProjectName = ProjectName;
+                    projectapproval.ApprovedBy = @User?.FindFirst("name")?.Value;
+                    _DbContext.ProjectApprovals.Select(x => x.Id == Id).Any();
                         _DbContext.ProjectApprovals.Update(projectapproval);
-                    else
-                        _DbContext.ProjectApprovals.Add(projectapproval);
+                    await _DbContext.SaveChangesAsync();
+
                 }
-                if (approved == true && Projects == null)
-                //review 
-                {
-                    projectapproval.Approved = "Archive";
-                    if (_DbContext.ProjectApprovals.Select(x => x.ProjectId == model.Id).Any())
-                        _DbContext.ProjectApprovals.Update(projectapproval);
-                    else
-                        _DbContext.ProjectApprovals.Add(projectapproval);
-                }
+                //once I get values for IsUserApproved,I would add validation below
+                //if (approved.Count > 0 && IsUserApproved == false)
+
+                //{
+                //    projectapproval.Approved = "Archive";
+                //    projectapproval.ApprovedBy = @User?.FindFirst("name")?.Value;
+                //    if (_DbContext.ProjectApprovals.Select(x => x.ProjectId == model.Id).Any())
+                //        _DbContext.ProjectApprovals.Update(projectapproval);
+                //    else
+                //        _DbContext.ProjectApprovals.Add(projectapproval);
+                //}
                 else
                 {
                     projectapproval.Date = DateTime.Now.ToUniversalTime();
@@ -157,9 +157,7 @@ namespace TRE_API.Controllers
                 return errorModel;
                 throw;
             }
-
         }
-
         [AllowAnonymous]
         [HttpGet("GetAllMemberships")]
         public List<ProjectApproval> GetAllMemberships()
@@ -171,7 +169,6 @@ namespace TRE_API.Controllers
                 {
                     return null;
                 }
-
                 Log.Information("{Function} Projects retrieved successfully", "GetProject");
                 return generalmemberships;
             }
@@ -192,7 +189,6 @@ namespace TRE_API.Controllers
                 {
                     return null;
                 }
-
                 Log.Information("{Function} Projects retrieved successfully", "GetProject");
                 return returned;
             }
@@ -201,9 +197,7 @@ namespace TRE_API.Controllers
                 Log.Error(ex, "{Function} Crashed", "GetAllDisabledMemberships");
                 throw;
             }
-
         }
-
         [HttpGet("GetAllUnApprovedMemberships")]
         public List<ProjectApproval> GetAllUnApprovedMemberships()
         {
