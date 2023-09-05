@@ -12,7 +12,7 @@ using TRE_API.Repositories.DbContexts;
 namespace TRE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230905120137_initial")]
+    [Migration("20230905154110_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -27,27 +27,6 @@ namespace TRE_API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("BL.Models.ControlCredentials", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("PasswordEnc")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ControlCredentials");
-                });
 
             modelBuilder.Entity("BL.Models.HistoricStatus", b =>
                 {
@@ -229,6 +208,27 @@ namespace TRE_API.Migrations
                     b.HasIndex("TreId");
 
                     b.ToTable("Submission");
+                });
+
+            modelBuilder.Entity("BL.Models.SubmissionCredentials", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("PasswordEnc")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SubmissionCredentials");
                 });
 
             modelBuilder.Entity("BL.Models.Tre", b =>

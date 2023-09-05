@@ -31,22 +31,22 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" href="@Url.Action("GetAllProjects","Project", new {  showOnlyUnprocessed = false })">All Projects</a>
+                            <a class="nav-link text-dark" href="@Url.Action("GetAllProjects","Approval", new {  showOnlyUnprocessed = false })">All Projects</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" href="@Url.Action("GetAllProjects","Project", new {  showOnlyUnprocessed = true })">Undecided Projects</a>
+                            <a class="nav-link text-dark" href="@Url.Action("GetAllProjects","Approval", new {  showOnlyUnprocessed = true })">Undecided Projects</a>
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link text-dark" href="@Url.Action("EditMemberships","Project", new { projectId = 0, showOnlyUnprocessed = false })">All Memberships</a>
+                            <a class="nav-link text-dark" href="@Url.Action("EditMemberships","Approval", new { projectId = 0, showOnlyUnprocessed = false })">All Memberships</a>
                             
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" href="@Url.Action("EditMemberships","Project", new { projectId = 0, showOnlyUnprocessed = true })">Undecided Memberships</a>
+                            <a class="nav-link text-dark" href="@Url.Action("EditMemberships","Approval", new { projectId = 0, showOnlyUnprocessed = true })">Undecided Memberships</a>
                         </li>
                         
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="ControlCredentials" asp-action="UpdateCredentials">Update Control Credentials</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="SubmissionCredentials" asp-action="UpdateCredentials">Update Control Credentials</a>
                         </li>
                         <li class="mobile-account-nav">
                             <hr class="mobile-account-nav dropdown-divider" />

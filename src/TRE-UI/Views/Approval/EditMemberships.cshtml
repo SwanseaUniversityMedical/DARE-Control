@@ -16,7 +16,7 @@
         <table id="memberList" class="table table-bordered table-striped no-head" caption="List of Memberships">
             <thead><tr><td>People</td></tr></thead>
             <tbody>
-                @using (Html.BeginForm("EditMemberships", "Project", FormMethod.Post, new { id = "frmMain" }))
+                @using (Html.BeginForm("EditMemberships", "Approval", FormMethod.Post, new { id = "frmMain" }))
             {
                 @for (int i = 0; i < Model.Count; i++)
                 {

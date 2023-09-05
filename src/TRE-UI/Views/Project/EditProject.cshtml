@@ -1,6 +1,5 @@
 ﻿@using BL.Models.ViewModels
-@using BL.Models.Enums
-@model BL.Models.TreProject
+@model BL.Models.Project
 @*{
     ViewData["Title"] = "Edit @Model.Name";
 }*@
@@ -9,73 +8,69 @@
 
     <div class="d-flex align-items-center justify-content-between">
         <div>
-            <h1 class="fs-3 mb-0">Approve Project</h1>
+            <h1 class="fs-3 mb-0">Approve Membership</h1>
 
         </div>
 
     </div>
 
     <div class="mt-4">
-        <div class="d-flex align-items-center justify-content-between">
-            <div>
-                <h1 class="fs-3 mb-0">@Model.SubmissionProjectName</h1>
-                <p class="text-muted small mb-0">#@Model.SubmissionProjectId</p>
-                @if (Model.Archived)
-                {
-                    <p class="text-muted small mb-0">Archived</p>
-                }
-                
-                
-            </div>
-            <div class="form-group mb-4">
-                @Model.Description
-            </div>
-            <div class="form-group mb-4">
-                Last Approved by: @Model.ApprovedBy on @Model.LastDecisionDate
-            </div>
-        </div>
-        <div class="mt-4">
         <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
         </ul>
 
         <div class="row">
             <div class="col-md-6">
-                    @using (Html.BeginForm("EditProject", "Project", FormMethod.Post, new { id = "frmMain" }))
-                {
+                <form method="post" asp-action="EditProjectSubmission">
+                    <div asp-validation-summary="All"></div>
+                    <input asp-for="Id" hidden />
                     <div class="form-group mb-4">
-                        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+                        <label asp-for="Name">Project Name</label>
+                        <input asp-for="Name" class="form-control form-control-md" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
                     </div>
 
                     <div class="form-group mb-4">
-                        @Html.LabelFor(x => x.LocalProjectName)
-                        @Html.TextBoxFor(x => x.LocalProjectName)
+                        <label asp-for="StartDate">Start Date</label>
+                        <input asp-for="StartDate" class="form-control form-control-md" />
+                        <span asp-validation-for="StartDate" class="text-danger"></span>
                     </div>
                     <div class="form-group mb-4">
-                        @Html.HiddenFor(x => x.Id)
-                        @Html.RadioButtonFor(x => x.Decision, Decision.Approved)
-                        @Html.Label(Decision.Approved.ToString())
-                        @Html.RadioButtonFor(x => x.Decision, Decision.Rejected)
-                        @Html.Label(Decision.Rejected.ToString())
-                        @if (Model.Decision == Decision.Undecided)
-                        {
-                            @Html.RadioButtonFor(x => x.Decision, Decision.Undecided)
-                            @Html.Label(Decision.Undecided.ToString())
-                        }
+                        <label asp-for="EndDate">End Date</label>
+                        <input asp-for="EndDate" class="form-control form-control-md" />
+                        <span asp-validation-for="EndDate" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label asp-for="FormData">Local Project Name</label>
+                        <input asp-for="FormData" class="form-control form-control-md" />
+                        <span asp-validation-for="FormData" class="text-danger"></span>
                     </div>
 
-                    <div class="hero-block-1">
-                        <button  type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i>Update</button>
+                    <fieldset>
+
+                        <div>
+                            <span>
+                                <input type="radio" name='foo' required id="Approve" value="Approve" />
+                                <label for="Approve"><b>Approve:</b> </label>
+                            </span>
+                            <span>
+                                <input type="radio" name='foo' required id="Reject" value="Reject" />
+                                <label for="Reject"><b>Reject:</b></label>
+                            </span><span>
+                                <input type="radio" name='foo' required id="Archive" value="Archive" />
+                                <label for="Archive"><b>Archive:</b></label>
+                            </span>
+                        </div>
+                    </fieldset>
+                    <div class="mt-5 d-flex align-items-center">
+                        <button type="submit" class="btn btn-md btn-primary mr-2">Save</button>
+
                     </div>
-                }
-                    
-
-
-                
+                </form>
             </div>
         </div>
     </div>
 
 
 </div>
-</div>
+
 

@@ -13,20 +13,6 @@ namespace TRE_API.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "ControlCredentials",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserName = table.Column<string>(type: "text", nullable: false),
-                    PasswordEnc = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ControlCredentials", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ProjectApprovals",
                 columns: table => new
                 {
@@ -64,6 +50,20 @@ namespace TRE_API.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Projects", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SubmissionCredentials",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserName = table.Column<string>(type: "text", nullable: false),
+                    PasswordEnc = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubmissionCredentials", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -353,9 +353,6 @@ namespace TRE_API.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ControlCredentials");
-
-            migrationBuilder.DropTable(
                 name: "HistoricStatus");
 
             migrationBuilder.DropTable(
@@ -366,6 +363,9 @@ namespace TRE_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "ProjectUser");
+
+            migrationBuilder.DropTable(
+                name: "SubmissionCredentials");
 
             migrationBuilder.DropTable(
                 name: "Submission");

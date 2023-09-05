@@ -10,10 +10,10 @@ namespace DARE_API.Services
 {
     public class KeycloakMinioUserService : IKeycloakMinioUserService
     {
-        private readonly ControlKeyCloakSettings _controlKeyCloakSettings;
-        public KeycloakMinioUserService(ControlKeyCloakSettings controlKeyCloakSettings)
+        private readonly SubmissionKeyCloakSettings _submissionKeyCloakSettings;
+        public KeycloakMinioUserService(SubmissionKeyCloakSettings submissionKeyCloakSettings)
         {
-            _controlKeyCloakSettings = controlKeyCloakSettings;
+            _submissionKeyCloakSettings = submissionKeyCloakSettings;
         }
         public async Task<bool> SetMinioUserAttribute(string accessToken, string userName, string attributeName, string attributeValue)
         {
@@ -23,8 +23,8 @@ namespace DARE_API.Services
 
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                var baseUrl = _controlKeyCloakSettings.Server;
-                var realm = _controlKeyCloakSettings.Realm;
+                var baseUrl = _submissionKeyCloakSettings.Server;
+                var realm = _submissionKeyCloakSettings.Realm;
                 var userId = await GetUserIDAsync(baseUrl, realm, accessToken, userName);
                 var user = await GetUserAttributesAsync(baseUrl, realm, accessToken, userId);
 
@@ -76,8 +76,8 @@ namespace DARE_API.Services
 
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                var baseUrl = _controlKeyCloakSettings.Server;
-                var realm = _controlKeyCloakSettings.Realm;
+                var baseUrl = _submissionKeyCloakSettings.Server;
+                var realm = _submissionKeyCloakSettings.Realm;
                 var userId = await GetUserIDAsync(baseUrl, realm, accessToken, userName);
                 var user = await GetUserAttributesAsync(baseUrl, realm, accessToken, userId);
 
