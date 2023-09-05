@@ -15,11 +15,11 @@ namespace BL.Models
         public string? Description { get; set; }
 
         [Display(Name = "Membership Decisions")]
-        public virtual List<TreMembershipDecision> MemberDecisions { get; set; }
+        public virtual List<TreMembershipDecision>? MemberDecisions { get; set; }
 
         [Display(Name = "Local Name")]
         public string? LocalProjectName { get; set; }
-        public bool Approved { get; set; }
+        public Decision Decision { get; set; }
         public bool Archived { get; set; }
 
         [Display(Name = "Approved By")]

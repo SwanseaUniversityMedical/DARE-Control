@@ -265,22 +265,22 @@ namespace TRE_API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Approved")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("ApprovedBy")
                         .HasColumnType("text");
 
                     b.Property<bool>("Archived")
                         .HasColumnType("boolean");
 
+                    b.Property<int>("Decision")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("LastDecisionDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("ProjectId")
+                    b.Property<int?>("ProjectId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -300,14 +300,14 @@ namespace TRE_API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Approved")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("ApprovedBy")
                         .HasColumnType("text");
 
                     b.Property<bool>("Archived")
                         .HasColumnType("boolean");
+
+                    b.Property<int>("Decision")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
@@ -467,15 +467,11 @@ namespace TRE_API.Migrations
                 {
                     b.HasOne("BL.Models.TreProject", "Project")
                         .WithMany("MemberDecisions")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProjectId");
 
                     b.HasOne("BL.Models.TreUser", "User")
                         .WithMany("MemberDecisions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Project");
 

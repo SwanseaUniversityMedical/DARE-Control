@@ -1,0 +1,75 @@
+﻿@using System.Xml.XPath
+@using BL.Models.Enums
+@model List<BL.Models.TreMembershipDecision>
+@{
+    ViewData["Title"] = "Membership Decisions";
+   
+
+}
+<div class="container-lg p-4">
+    <div class="d-flex align-items-center justify-content-between">
+        <h1 class="fs-3 mb-0">Memberships</h1>
+                                         
+    </div>
+    <hr class="d-flex my-4">
+    <div class="table-responsive">
+        <table id="memberList" class="table table-bordered table-striped no-head" caption="List of Memberships">
+            <thead><tr><td>People</td></tr></thead>
+            <tbody>
+                @using (Html.BeginForm("EditMemberships", "Project", FormMethod.Post, new { id = "frmMain" }))
+            {
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    <tr>
+                        <td class="card mb-2 p-3 bg-white shadow-sm border-1">
+
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div>
+                                    <h2 class="mb-0 fw-bold fs-5">@Model[i].User.Username on @Model[i].Project.SubmissionProjectName</h2>
+                                    @if (Model[i].Archived)
+                                    {
+                                        <p class="my-4">
+                                            Archived
+                                        </p>
+                                    }
+                                    <p class="my-4">
+                                        @Html.HiddenFor(x => x[i].Id)
+                                        @Html.RadioButtonFor(x => x[i].Decision, Decision.Approved)
+                                        @Html.Label(Decision.Approved.ToString())
+                                        @Html.RadioButtonFor(x => x[i].Decision, Decision.Rejected)
+                                        @Html.Label(Decision.Rejected.ToString())
+                                        @if (Model[i].Decision == Decision.Undecided)
+                                        {
+                                            @Html.RadioButtonFor(x => x[i].Decision, Decision.Undecided)
+                                            @Html.Label(Decision.Undecided.ToString())
+                                        }
+                                        
+                                    </p>
+                                </div>
+
+
+                            </div>
+                            <p class="text-muted fs-7 mt-4 mb-0">
+                                @if (Model[i].Decision == Decision.Undecided)
+                                {
+                                    @:This project hasn't been processed yet
+                                }
+                                else
+                                {
+                                    @:Last Updated: @Model[i].LastDecisionDate by @Model[i].ApprovedBy
+                                }
+
+                            </p>
+                        </td>
+                    </tr>
+                       
+                }
+                <div class="hero-block-1">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i>Update</button>
+                </div>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+

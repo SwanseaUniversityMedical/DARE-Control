@@ -32,12 +32,19 @@ namespace TRE_API.Controllers
             _DbContext = applicationDbContext;
 
         }
-
+        
+        [HttpGet("GetMemberships")]
+        public List<TreMembershipDecision> GetMemberships(int projectId, bool showOnlyUnprocessed)
+        {
+            return _DbContext.MembershipDecisions.Where(x =>
+                (projectId <= 0 || x.Project.Id == projectId) &&
+                (!showOnlyUnprocessed || x.Decision == Decision.Undecided)).ToList();
+        }
 
         [HttpGet("GetAllTreProjects")]
-        public List<TreProject> GetAllTreProjects()
+        public List<TreProject> GetAllTreProjects(bool showOnlyUnprocessed)
         {
-            return _DbContext.Projects.ToList();
+            return _DbContext.Projects.Where(x => !showOnlyUnprocessed || x.Decision == Decision.Undecided).ToList();
         }
 
         [HttpGet("GetTreProject")]
@@ -52,11 +59,7 @@ namespace TRE_API.Controllers
             return _DbContext.Projects.Where(x => !x.Archived).ToList();
         }
 
-        [HttpGet("GetAllUndecidedTreProjects")]
-        public List<TreProject> GetAllUndecidedTreProjects()
-        {
-            return _DbContext.Projects.Where(x => !x.Archived && string.IsNullOrWhiteSpace(x.ApprovedBy)).ToList();
-        }
+        
 
         [HttpGet("GetAllTreUsers")]
         public List<TreUser> GetAllTreUsers()
@@ -85,35 +88,44 @@ namespace TRE_API.Controllers
         [HttpGet("GetAllUndecidedMembershipDecisions")]
         public List<TreMembershipDecision> GetAllUndecidedActiveMembershipDecisions()
         {
-            return _DbContext.MembershipDecisions.Where(x => !x.Archived && string.IsNullOrWhiteSpace(x.ApprovedBy))
+            return _DbContext.MembershipDecisions.Where(x => !x.Archived && x.Decision  == Decision.Undecided)
                 .ToList();
         }
 
-        [HttpPost("UpdateProjectApprovals")]
-        public async Task UpdateProjectApprovals(List<TreProject> projects, string approvedBy)
+        [HttpPost("UpdateProjects")]
+        public async Task<List<TreProject>> UpdateProjects(List<TreProject> projects)
         {
+            var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
             if (string.IsNullOrWhiteSpace(approvedBy))
             {
                 approvedBy = "[Unknown]";
             }
-
+            var resultList = new List<TreProject>();
             var approvedDate = DateTime.Now.ToUniversalTime();
             foreach (var treProject in projects)
             {
                 var dbproj = _DbContext.Projects.First(x => x.Id == treProject.Id);
-                dbproj.Approved = treProject.Approved;
-                dbproj.ApprovedBy = approvedBy;
-                dbproj.LastDecisionDate = approvedDate;
+                dbproj.LocalProjectName = treProject.LocalProjectName;
+                if (dbproj.Decision == Decision.Undecided)
+                {
+                    dbproj.Decision = treProject.Decision;
+                    dbproj.ApprovedBy = approvedBy;
+                    dbproj.LastDecisionDate = approvedDate;
+                }
+                resultList.Add(dbproj);
 
             }
 
             await _DbContext.SaveChangesAsync();
+            return resultList;
 
         }
 
-        [HttpPost("UpdateMembershipApprovals")]
-        public async Task UpdateMembershipApprovals(List<TreMembershipDecision> membershipDecisions, string approvedBy)
+        [HttpPost("UpdateMembershipDecisions")]
+        public async Task<List<TreMembershipDecision>> UpdateMembershipDecisions(List<TreMembershipDecision> membershipDecisions)
         {
+            var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+            var returnResult = new List<TreMembershipDecision>();
             if (string.IsNullOrWhiteSpace(approvedBy))
             {
                 approvedBy = "[Unknown]";
@@ -123,13 +135,19 @@ namespace TRE_API.Controllers
             foreach (var membershipDecision in membershipDecisions)
             {
                 var dbMembership = _DbContext.MembershipDecisions.First(x => x.Id == membershipDecision.Id);
-                dbMembership.Approved = membershipDecision.Approved;
-                dbMembership.ApprovedBy = approvedBy;
-                dbMembership.LastDecisionDate = approvedDate;
+                if (membershipDecision.Decision != Decision.Undecided)
+                {
+                    dbMembership.Decision = membershipDecision.Decision;
+                    dbMembership.ApprovedBy = approvedBy;
+                    dbMembership.LastDecisionDate = approvedDate;
+                }
+                
+                returnResult.Add(dbMembership);
 
             }
 
             await _DbContext.SaveChangesAsync();
+            return returnResult; 
 
         }
 

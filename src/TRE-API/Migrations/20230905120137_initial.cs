@@ -56,7 +56,7 @@ namespace TRE_API.Migrations
                     SubmissionProjectName = table.Column<string>(type: "text", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: true),
                     LocalProjectName = table.Column<string>(type: "text", nullable: true),
-                    Approved = table.Column<bool>(type: "boolean", nullable: false),
+                    Decision = table.Column<int>(type: "integer", nullable: false),
                     Archived = table.Column<bool>(type: "boolean", nullable: false),
                     ApprovedBy = table.Column<string>(type: "text", nullable: true),
                     LastDecisionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
@@ -151,10 +151,10 @@ namespace TRE_API.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<int>(type: "integer", nullable: false),
-                    ProjectId = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<int>(type: "integer", nullable: true),
+                    ProjectId = table.Column<int>(type: "integer", nullable: true),
                     Archived = table.Column<bool>(type: "boolean", nullable: false),
-                    Approved = table.Column<bool>(type: "boolean", nullable: false),
+                    Decision = table.Column<int>(type: "integer", nullable: false),
                     ApprovedBy = table.Column<string>(type: "text", nullable: true),
                     LastDecisionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -165,14 +165,12 @@ namespace TRE_API.Migrations
                         name: "FK_MembershipDecisions_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_MembershipDecisions_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(

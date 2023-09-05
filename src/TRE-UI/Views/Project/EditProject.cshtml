@@ -1,4 +1,5 @@
 ﻿@using BL.Models.ViewModels
+@using BL.Models.Enums
 @model BL.Models.TreProject
 @*{
     ViewData["Title"] = "Edit @Model.Name";
@@ -39,7 +40,7 @@
 
         <div class="row">
             <div class="col-md-6">
-                @using (Html.BeginForm())
+                    @using (Html.BeginForm("EditProject", "Project", FormMethod.Post, new { id = "frmMain" }))
                 {
                     <div class="form-group mb-4">
                         @Html.ValidationSummary(false, "", new { @class = "text-danger" })
@@ -50,11 +51,21 @@
                         @Html.TextBoxFor(x => x.LocalProjectName)
                     </div>
                     <div class="form-group mb-4">
-                        @Html.LabelFor(x => x.Approved)
-                        @Html.EditorFor(x => x.Approved)
+                        @Html.HiddenFor(x => x.Id)
+                        @Html.RadioButtonFor(x => x.Decision, Decision.Approved)
+                        @Html.Label(Decision.Approved.ToString())
+                        @Html.RadioButtonFor(x => x.Decision, Decision.Rejected)
+                        @Html.Label(Decision.Rejected.ToString())
+                        @if (Model.Decision == Decision.Undecided)
+                        {
+                            @Html.RadioButtonFor(x => x.Decision, Decision.Undecided)
+                            @Html.Label(Decision.Undecided.ToString())
+                        }
                     </div>
 
-
+                    <div class="hero-block-1">
+                        <button  type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i>Update</button>
+                    </div>
                 }
                     
 

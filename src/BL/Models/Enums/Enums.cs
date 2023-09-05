@@ -24,5 +24,12 @@ namespace BL.Models.Enums
         WaitingForCrateFormatCheck = 17
     }
 
+    public enum Decision
+    {
+        Undecided = 0,
+        Approved = 1,
+        Rejected = 2
+    }
+
    
 }
