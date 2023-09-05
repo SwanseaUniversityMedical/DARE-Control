@@ -1,32 +1,19 @@
 using BL.Models.Settings;
 using DARE_API.Repositories.DbContexts;
-//using DARE_API.Models;
 using DARE_API.Services.Contract;
 using DARE_API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Net;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Serilog.Exceptions;
-using Serilog.Exceptions.Core;
-using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
-using Microsoft.AspNetCore.Builder;
+
 using Newtonsoft.Json;
 using BL.Rabbit;
 using EasyNetQ;
 using BL.Services;
-using static IdentityModel.ClaimComparer;
-using EasyNetQ.Management.Client.Model;
-using Microsoft.AspNetCore.SignalR.Client;
-using System.Runtime.CompilerServices;
-using Microsoft.AspNetCore.Components;
-using DARE_API.Controllers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using BL.Models.ViewModels;
@@ -223,9 +210,7 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
     builder.Services.AddScoped<IMinioHelper, MinioHelper>();
     builder.Services.AddScoped<IKeycloakMinioUserService, KeycloakMinioUserService>();
 
-    //    .AddNewtonsoftJson(options =>
-    //    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-    //); 
+  
 }
 
 

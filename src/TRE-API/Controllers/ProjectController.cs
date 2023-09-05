@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using BL.Models;
 using BL.Models.ViewModels;
@@ -116,10 +116,10 @@ namespace TRE_API.Controllers
                     projectapproval.Approved = Approval;
                     projectapproval.LocalProjectName = ProjectName;
                     projectapproval.ApprovedBy = @User?.FindFirst("name")?.Value;
-                    _DbContext.ProjectApprovals.Select(x => x.Id == Id).Any();
+                    if (_DbContext.ProjectApprovals.Select(x => x.Id==Id).Any())
                         _DbContext.ProjectApprovals.Update(projectapproval);
-                    await _DbContext.SaveChangesAsync();
-
+                    else
+                        _DbContext.ProjectApprovals.Add(projectapproval);
                 }
                 //once I get values for IsUserApproved,I would add validation below
                 //if (approved.Count > 0 && IsUserApproved == false)

@@ -1,15 +1,7 @@
 ﻿using BL.Models;
-
 using BL.Services;
-using IdentityModel.Client;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Serilog;
-using System.IdentityModel.Tokens.Jwt;
 using BL.Models.APISimpleTypeReturns;
 
 namespace TRE_UI.Controllers

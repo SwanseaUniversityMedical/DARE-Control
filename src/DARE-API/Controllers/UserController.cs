@@ -5,16 +5,15 @@ using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authorization;
 using Serilog;
 using BL.Models.ViewModels;
-using System.Linq;
 using DARE_API.Services.Contract;
 using Microsoft.AspNetCore.Authentication;
 
-namespace BL.Controllers
+namespace DARE_API.Controllers
 {
 
     [Authorize]
     //[ApiController]
-    [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
+    [Authorize(Roles = "dare-control-admin")]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
@@ -33,8 +32,8 @@ namespace BL.Controllers
         }
 
 
-        [HttpPost("AddUser")]
-        public async Task<User> AddUser([FromBody] FormData data) 
+        [HttpPost("SaveUser")]
+        public async Task<User> SaveUser([FromBody] FormData data) 
         {
             try
             {
@@ -69,7 +68,7 @@ namespace BL.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} Crashed", "AddUser");
+                Log.Error(ex, "{Function} Crashed", "SaveUser");
                 return new User(); ;
                 throw;
             }

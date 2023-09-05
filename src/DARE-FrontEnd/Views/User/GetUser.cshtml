@@ -14,7 +14,7 @@
             <i class="fa fa-edit align-middle me-2"></i>*@
             @if (User.IsInRole("dare-control-admin"))
             {
-                <a href="@Url.Action("AddUserForm", "User",new{userId=@Model.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+                <a href="@Url.Action("SaveUserForm", "User",new{userId=@Model.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
             }
         </a>
     </div>
@@ -89,7 +89,7 @@
                                                         </div>
                                                         @if (User.IsInRole("dare-control-admin"))
                                                         {
-                                                            <a href="@Url.Action("AddProjectForm", "Project",new{ProjectId=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+                                                            <a href="@Url.Action("SaveProjectForm", "Project",new{ProjectId=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
                                                         }
                                                     </div>
                                                     <div class="">
@@ -100,7 +100,7 @@
                                                             @project.Users.Count People
                                                         </a>
                                                         <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#tre" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                                            @project.Endpoints.Count TREs
+                                                            @project.Tres.Count TREs
                                                         </a>
                                                     </div>
                                                     <p class="my-4">

@@ -88,7 +88,7 @@ namespace DARE_FrontEnd.Controllers
             {
                 return Challenge(OpenIdConnectDefaults.AuthenticationScheme);
             }
-            return RedirectToAction("Index", "ProjectFolder");
+            return RedirectToAction("Index", "Home");
         }
 
         public IActionResult LoginAfterTokenExpired()

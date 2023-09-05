@@ -9,14 +9,14 @@ using BL.Models.ViewModels;
 using DARE_API.Services;
 using EasyNetQ;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
+
 
 
 namespace DARE_API.Controllers
 {
 
     [Route("api/[controller]")]
-    [Authorize(Roles = "dare-control-admin")]
+    [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
     [ApiController]
     
     
@@ -39,47 +39,47 @@ namespace DARE_API.Controllers
 
         
         [HttpGet]
-        [Route("GetWaitingSubmissionsForEndpoint")]
+        [Route("GetWaitingSubmissionsForTre")]
         [ValidateModelState]
-        [SwaggerOperation("GetWaitingSubmissionsForEndpoint")]
+        [SwaggerOperation("GetWaitingSubmissionsForTre")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<Submission>), description: "")]
-        public virtual IActionResult GetWaitingSubmissionsForEndpoint()
+        public virtual IActionResult GetWaitingSubmissionsForTre()
         {
             
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-            var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName);
-            if (endpoint == null)
+            var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName);
+            if (tre == null)
             {
-                return BadRequest("User " + usersName + " doesn't have an endpoint");
+                return BadRequest("User " + usersName + " doesn't have a tre");
             }
 
-            var results = endpoint.Submissions.Where(x =>x.Status == StatusType.WaitingForAgentToTransfer).ToList();
-            //var results = _DbContext.Submissions.Where(x => x.EndPoint != null && x.EndPoint.Name == endpointname.ToLower() && x.StatusType == StatusType.WaitingForAgentToTransfer).ToList();
+            var results = tre.Submissions.Where(x =>x.Status == StatusType.WaitingForAgentToTransfer).ToList();
+            
 
             return StatusCode(200, results);
         }
 
 
         [HttpGet]
-        [Route("UpdateStatusForEndpoint")]
+        [Route("UpdateStatusForTre")]
         [ValidateModelState]
-        [SwaggerOperation("UpdateStatusForEndpoint")]
+        [SwaggerOperation("UpdateStatusForTre")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public  IActionResult UpdateStatusForEndpoint(string tesId, StatusType statusType, string? description)
+        public  IActionResult UpdateStatusForTre(string tesId, StatusType statusType, string? description)
         {
             
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-            var endpoint = _DbContext.Endpoints.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
-            if (endpoint == null)
+            var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
+            if (tre == null)
             {
-                return BadRequest("User " + usersName + " doesn't have an endpoint");
+                return BadRequest("User " + usersName + " doesn't have an tre");
             }
         
 
-            var sub = _DbContext.Submissions.FirstOrDefault(x => x.TesId == tesId && x.EndPoint == endpoint);
+            var sub = _DbContext.Submissions.FirstOrDefault(x => x.TesId == tesId && x.Tre == tre);
             if (sub == null)
             {
-                return BadRequest("Invalid tesid or endpoint not valid for tes");
+                return BadRequest("Invalid tesid or tre not valid for tes");
             }
             
             UpdateSubmissionStatus.UpdateStatus(sub, statusType, description);
@@ -99,7 +99,7 @@ namespace DARE_API.Controllers
             {
                 var allSubmissions = _DbContext.Submissions.ToList();
 
-                Log.Information("{Function} Endpoints retrieved successfully", "GetAllSubmissions");
+                Log.Information("{Function} Submissions retrieved successfully", "GetAllSubmissions");
                 return allSubmissions;
             }
             catch (Exception ex)

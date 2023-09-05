@@ -1,11 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
-using System.Xml;
-using System;
-using System.Collections.Generic;
 using DARE_API.Attributes;
 using Microsoft.AspNetCore.WebUtilities;
 using Swashbuckle.AspNetCore.Annotations;
@@ -13,13 +9,9 @@ using BL.Models;
 using DARE_API.Repositories.DbContexts;
 using DARE_API.ContractResolvers;
 using Serilog;
-using Microsoft.AspNetCore.SignalR;
-using Newtonsoft.Json.Linq;
-using System.Drawing;
 using BL.Models.Tes;
 using BL.Rabbit;
 using EasyNetQ;
-using System.Data;
 using BL.Models.Enums;
 using DARE_API.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -28,7 +20,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace DARE_API.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(Roles = "dare-control-admin,dare-control-submitter,dare-tre,dare-tre-admin")]
+    [Authorize]
     [ApiController]
     /// <summary>
     /// API endpoints for <see cref="TesTask"/>s.
@@ -243,11 +235,11 @@ namespace DARE_API.Controllers
                 return BadRequest("Tags must contain key project.");
             }
 
-            var endpointstr = tesTask.Tags.Where(x => x.Key.ToLower() == "endpoints").Select(x => x.Value).FirstOrDefault();
-            List<string> endpoints = new List<string>();
-            if (!string.IsNullOrWhiteSpace(endpointstr))
+            var trestr = tesTask.Tags.Where(x => x.Key.ToLower() == "tres").Select(x => x.Value).FirstOrDefault();
+            List<string> tres = new List<string>();
+            if (!string.IsNullOrWhiteSpace(trestr))
             {
-                endpoints = endpointstr.Split('|').Select(x => x.ToLower()).ToList();
+                tres = trestr.Split('|').Select(x => x.ToLower()).ToList();
             }
 
             var dbproj = _DbContext.Projects.FirstOrDefault(x => x.Name.ToLower() == project.ToLower());
@@ -263,28 +255,28 @@ namespace DARE_API.Controllers
                 return BadRequest("User " + User.Identity.Name + "isn't on project " + project + ".");
             }
 
-            if (endpoints.Count > 0 && !AreEndpointsOnProject(dbproj, endpoints))
+            if (tres.Count > 0 && !AreTresOnProject(dbproj, tres))
             {
-                return BadRequest("One or more of the endpoints are not authorised for this project " + project + ".");
+                return BadRequest("One or more of the tres are not authorised for this project " + project + ".");
             }
 
-            var dbendpoints = new List<BL.Models.Endpoint>();
+            var dbtres = new List<BL.Models.Tre>();
 
-            if (endpoints.Count == 0)
+            if (tres.Count == 0)
             {
-                dbendpoints = dbproj.Endpoints;
+                dbtres = dbproj.Tres;
             }
             else
             {
-                foreach (var endpoint in endpoints)
+                foreach (var tre in tres)
                 {
-                    dbendpoints.Add(dbproj.Endpoints.First(x => x.Name.ToLower() == endpoint.ToLower()));
+                    dbtres.Add(dbproj.Tres.First(x => x.Name.ToLower() == tre.ToLower()));
                 }
             }
 
-            if (dbendpoints.Count == 0)
+            if (dbtres.Count == 0)
             {
-                return BadRequest("No valid endpoints for this project " + project + ".");
+                return BadRequest("No valid tres for this project " + project + ".");
             }
 
            
@@ -326,13 +318,13 @@ namespace DARE_API.Controllers
             return StatusCode(200, new TesCreateTaskResponse { Id = tesTask.Id });
         }
 
-        private bool AreEndpointsOnProject(Project project, List<string> endpoints)
+        private bool AreTresOnProject(Project project, List<string> tres)
         {
             
-            var projends = project.Endpoints.Select(x => x.Name.ToLower()).ToList();
-            foreach (var endpoint in endpoints)
+            var projends = project.Tres.Select(x => x.Name.ToLower()).ToList();
+            foreach (var tre in tres)
             {
-                if (! projends.Contains(endpoint))
+                if (! projends.Contains(tre))
                 {
                     return false;
                 }
@@ -407,7 +399,7 @@ namespace DARE_API.Controllers
                 Tags = new Dictionary<string, string>()
                 {
                     { "project", "Head" },
-                    { "endpoints", "SAIL|DPUK" }
+                    { "tres", "SAIL|DPUK" }
                 }
 
             };

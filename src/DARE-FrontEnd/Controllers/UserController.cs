@@ -16,22 +16,23 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace DARE_FrontEnd.Controllers
 {
-    [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
+    [Authorize(Roles = "dare-control-admin")]
     public class UserController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
-        private readonly IConfiguration _configuration;
-        private readonly IFormIOSettings _formIOSettings;
+        
+        private readonly FormIOSettings _formIOSettings;
 
-        public UserController(IDareClientHelper client, IConfiguration configuration)
+        public UserController(IDareClientHelper client, FormIOSettings formIo)
         {
             _clientHelper = client;
-            _configuration = configuration;
-            _formIOSettings = new FormIOSettings();
-            configuration.Bind(nameof(FormIOSettings), _formIOSettings);
+            
+            _formIOSettings = formIo;
+            
         }
 
-        public IActionResult AddUserForm(int userId)
+        [HttpGet]
+        public IActionResult SaveUserForm(int userId)
         {
             var formData = new FormData()
             {
@@ -76,10 +77,7 @@ namespace DARE_FrontEnd.Controllers
             var projectItems = projectItems2
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
-            //var userView = new ProjectUser()
-            //{              
-            //    //ProjectItemList = projectItems               
-            //};
+           
 
             ViewBag.ProjectItems = projectItems;
 
@@ -96,7 +94,7 @@ namespace DARE_FrontEnd.Controllers
                 var data = System.Text.Json.JsonSerializer.Deserialize<FormData>(str);
                 data.FormIoString = str;
 
-                var result = await _clientHelper.CallAPI<FormData, BL.Models.User>("/api/User/AddUser", data);
+                var result = await _clientHelper.CallAPI<FormData, BL.Models.User>("/api/User/SaveUser", data);
 
                 if (result.Id == 0)
                     return BadRequest();
@@ -127,6 +125,7 @@ namespace DARE_FrontEnd.Controllers
 
         }
 
+        [HttpGet]
         public async Task<IActionResult> RemoveProjectFromUser(int userId, int projectId)
         {
             var model = new ProjectUser()
