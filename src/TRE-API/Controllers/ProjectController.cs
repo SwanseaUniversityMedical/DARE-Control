@@ -9,6 +9,7 @@ using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using BL.Models.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace TRE_API.Controllers
 {
@@ -112,14 +113,12 @@ namespace TRE_API.Controllers
               
                 if (approved.Count > 0)                  
                 {
-                    var Id = approved[0].Id;
-                    projectapproval.Approved = Approval;
-                    projectapproval.LocalProjectName = ProjectName;
-                    projectapproval.ApprovedBy = @User?.FindFirst("name")?.Value;
-                    if (_DbContext.ProjectApprovals.Select(x => x.Id==Id).Any())
-                        _DbContext.ProjectApprovals.Update(projectapproval);
-                    else
-                        _DbContext.ProjectApprovals.Add(projectapproval);
+                        var Id = approved[0].Id;
+                        var project = await _DbContext.ProjectApprovals.Where(x => x.Id == Id).FirstOrDefaultAsync();
+                        project.Approved = Approval;
+                        project.LocalProjectName = ProjectName;
+                        project.ApprovedBy = @User?.FindFirst("name")?.Value;
+                        _DbContext.ProjectApprovals.Update(project);
                 }
                 //once I get values for IsUserApproved,I would add validation below
                 //if (approved.Count > 0 && IsUserApproved == false)
