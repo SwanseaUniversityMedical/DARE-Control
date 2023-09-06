@@ -55,13 +55,7 @@ namespace TRE_UI.Controllers
             paramlist.Add("projectId", model.Id.ToString());
             var project = _treclientHelper.CallAPIWithoutModel<Project?>(
                 "/api/Project/GetProject/", paramlist).Result;
-            project = new Project()
-            {
-                Id = project.Id,
-                Name = project.Name,
-                Users = project.Users,
-                FormData = model.FormData,
-            };
+
             var userItems = project.Users
      .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
       .ToList();

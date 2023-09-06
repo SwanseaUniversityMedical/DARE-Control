@@ -113,7 +113,7 @@ namespace TRE_API.Controllers
               
                 if (approved.Count > 0)                  
                 {
-                        var Id = approved[0].Id;
+                       var Id = approved[0].Id;
                         var project = await _DbContext.ProjectApprovals.Where(x => x.Id == Id).FirstOrDefaultAsync();
                         project.Approved = Approval;
                         project.LocalProjectName = ProjectName;
