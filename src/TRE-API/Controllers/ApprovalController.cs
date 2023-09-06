@@ -109,7 +109,7 @@ namespace TRE_API.Controllers
             {
                 var dbproj = _DbContext.Projects.First(x => x.Id == treProject.Id);
                 dbproj.LocalProjectName = treProject.LocalProjectName;
-                if (treProject.Decision == Decision.Undecided)
+                if (treProject.Decision != dbproj.Decision)
                 {
                     dbproj.Decision = treProject.Decision;
                     dbproj.ApprovedBy = approvedBy;
@@ -138,7 +138,7 @@ namespace TRE_API.Controllers
             foreach (var membershipDecision in membershipDecisions)
             {
                 var dbMembership = _DbContext.MembershipDecisions.First(x => x.Id == membershipDecision.Id);
-                if (membershipDecision.Decision != Decision.Undecided)
+                if (membershipDecision.Decision != dbMembership.Decision)
                 {
                     dbMembership.Decision = membershipDecision.Decision;
                     dbMembership.ApprovedBy = approvedBy;

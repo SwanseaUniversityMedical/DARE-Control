@@ -9,9 +9,9 @@ namespace DARE_API.Services
 {
     public class KeyclockTokenAPIHelper : IKeyclockTokenAPIHelper
     {
-        public ControlKeyCloakSettings _settings { get; set; }
+        public SubmissionKeyCloakSettings _settings { get; set; }
 
-        public KeyclockTokenAPIHelper(ControlKeyCloakSettings settings)
+        public KeyclockTokenAPIHelper(SubmissionKeyCloakSettings settings)
         {
             _settings = settings;
         }
