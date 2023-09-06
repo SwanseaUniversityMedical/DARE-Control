@@ -11,6 +11,8 @@ using TRE_API.Services;
 using TRE_API.Services.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
+using BL.Models.APISimpleTypeReturns;
+using TRE_API.Repositories.DbContexts;
 
 namespace TRE_API.Controllers
 {
@@ -21,11 +23,14 @@ namespace TRE_API.Controllers
     {
         private readonly ISignalRService _signalRService;
         private readonly IDareClientWithoutTokenHelper _dareHelper;
+        private readonly ApplicationDbContext _dbContext;
 
-        public SubmissionController(ISignalRService signalRService, IDareClientWithoutTokenHelper helper) 
+        public SubmissionController(ISignalRService signalRService, IDareClientWithoutTokenHelper helper, ApplicationDbContext dbContext) 
         { 
             _signalRService = signalRService;
             _dareHelper = helper;
+            _dbContext = dbContext;
+            
         }
 
        
@@ -36,7 +41,22 @@ namespace TRE_API.Controllers
             await _signalRService.SendUpdateMessage("TREUpdateStatus", StringList);
         }
 
+
         
+        [HttpGet("IsUserApprovedOnProject")]
+        public BoolReturn IsUserApprovedOnProject(int projectId, int userId)
+        {
+            
+            return new BoolReturn()
+            {
+                Result = _dbContext.MembershipDecisions.Any(x =>
+                    x.Project != null && x.Project.SubmissionProjectId == projectId && x.User != null &&
+                    x.User.SubmissionUserId == userId &&
+                    !x.Project.Archived && x.Project.Decision == Decision.Approved && !x.Archived &&
+                    x.Decision == Decision.Approved) 
+            };
+        }
+
         [HttpGet]
         [Route("GetWaitingSubmissionsForTre")]
         [ValidateModelState]
