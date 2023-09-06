@@ -121,15 +121,17 @@ namespace TRE_API.Controllers
                         _DbContext.ProjectApprovals.Update(project);
                 }
                 //once I get values for IsUserApproved,I would add validation below
-                //if (approved.Count > 0 && IsUserApproved == false)
-
+                //if (approved.Count < 1 && IsUserApproved == true)
                 //{
-                //    projectapproval.Approved = "Archive";
-                //    projectapproval.ApprovedBy = @User?.FindFirst("name")?.Value;
-                //    if (_DbContext.ProjectApprovals.Select(x => x.ProjectId == model.Id).Any())
-                //        _DbContext.ProjectApprovals.Update(projectapproval);
-                //    else
-                //        _DbContext.ProjectApprovals.Add(projectapproval);
+                //projectapproval.Date = DateTime.Now.ToUniversalTime();
+                //projectapproval.ProjectId = int.Parse(ProjectId);
+                //projectapproval.UserId = int.Parse(UserId);
+                //projectapproval.Projectname = ProjectName;
+                //projectapproval.Username = UserName;
+                //projectapproval.LocalProjectName = FormData;
+                //projectapproval.Approved = "Archive";
+                //projectapproval.ApprovedBy = @User?.FindFirst("name")?.Value;
+                //_DbContext.ProjectApprovals.Add(projectapproval);
                 //}
                 else
                 {
