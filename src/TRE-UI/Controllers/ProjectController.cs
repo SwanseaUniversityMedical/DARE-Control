@@ -104,7 +104,7 @@ namespace TRE_UI.Controllers
             var userItems = userItems2
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
-            var projectView = new ProjectUserEndpoint()
+            var projectView = new ProjectUserTre()
             {
                 Id = project.Id,
                 FormData = project.FormData,
@@ -113,7 +113,7 @@ namespace TRE_UI.Controllers
                 StartDate = project.StartDate,
                 EndDate = project.EndDate,
                 ProjectDescription = project.ProjectDescription,
-                Endpoints = project.Endpoints,
+                Tres = project.Tres,
                 Submissions = project.Submissions,
                 UserItemList = userItems,
             };
