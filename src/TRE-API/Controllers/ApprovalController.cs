@@ -109,7 +109,7 @@ namespace TRE_API.Controllers
             {
                 var dbproj = _DbContext.Projects.First(x => x.Id == treProject.Id);
                 dbproj.LocalProjectName = treProject.LocalProjectName;
-                if (dbproj.Decision == Decision.Undecided)
+                if (treProject.Decision == Decision.Undecided)
                 {
                     dbproj.Decision = treProject.Decision;
                     dbproj.ApprovedBy = approvedBy;

@@ -49,11 +49,11 @@ namespace TRE_API.Controllers
             
             return new BoolReturn()
             {
-                Result = _dbContext.MembershipDecisions.FirstOrDefault(x =>
+                Result = _dbContext.MembershipDecisions.Any(x =>
                     x.Project != null && x.Project.SubmissionProjectId == projectId && x.User != null &&
                     x.User.SubmissionUserId == userId &&
                     !x.Project.Archived && x.Project.Decision == Decision.Approved && !x.Archived &&
-                    x.Decision == Decision.Approved) != null
+                    x.Decision == Decision.Approved) 
             };
         }
 
