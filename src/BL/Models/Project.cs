@@ -14,6 +14,8 @@ namespace BL.Models
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 
+        public bool IsEmbargoed { get; set; }
+
         public string ProjectDescription { get; set; }
         public string? SubmissionBucket { get; set; }
         public string? OutputBucket { get; set; }

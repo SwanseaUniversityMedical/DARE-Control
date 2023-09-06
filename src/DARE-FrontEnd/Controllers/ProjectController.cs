@@ -119,6 +119,17 @@ namespace DARE_FrontEnd.Controllers
             return View(projmem);
         }
 
+        [HttpPost]
+        public ProjectUserTre MarkProjectEmbargoed(int projectId, bool isEmbargoed)
+        {
+            var result = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/AddEmbargoedProject/").Result;
+            var projmem = new ProjectUserTre
+            {
+                IsEmbargoed = isEmbargoed
+            };
+            return projmem;
+        }
+
 
         private ProjectTre GetProjectTreModel()
         {

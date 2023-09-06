@@ -29,13 +29,15 @@
                                 <div>
                                     <a href="@Url.Action("GetProject", "Project", new {id = project.Id })">
                                         <h2 class="mb-0 fw-bold hover-underline fs-5">
-                                            @project.Name
+                                            @project.Name   
                                         </h2>
                                         <p class="my-4">
                                             @project.ProjectDescription
                                         </p>
                                     </a>
                                     <p class="text-muted small mb-0">#@project.Id</p>
+                                    <label class="my-4">Mark as Embargoed:</label>
+                                    <input type="checkbox" id="embargoCheckbox_@project.Id" class="embargoCheckbox" asp-controller="Project" asp-action="MarkProjectEmbargoed" />
                                 </div>
                                 @if (User.IsInRole("dare-control-admin"))
                                 {
