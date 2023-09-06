@@ -57,7 +57,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 builder.Services.Configure<RabbitMQSetting>(configuration.GetSection("RabbitMQ"));
 builder.Services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);
-var bus = 
+var bus =
 builder.Services.AddSingleton(RabbitHutch.CreateBus($"host={configuration["RabbitMQ:HostAddress"]}:{int.Parse(configuration["RabbitMQ:PortNumber"])};virtualHost={configuration["RabbitMQ:VirtualHost"]};username={configuration["RabbitMQ:Username"]};password={configuration["RabbitMQ:Password"]}"));
 Task task = SetUpRabbitMQ.DoItAsync(configuration["RabbitMQ:HostAddress"], configuration["RabbitMQ:PortNumber"], configuration["RabbitMQ:VirtualHost"], configuration["RabbitMQ:Username"], configuration["RabbitMQ:Password"]);
 
@@ -82,7 +82,7 @@ var TVP = new TokenValidationParameters
 };
 
 builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
- 
+
 
 
 builder.Services.AddAuthentication(options =>
@@ -106,7 +106,7 @@ builder.Services.AddAuthentication(options =>
             };
         }
         options.Authority = controlKeyCloakSettings.Authority;
-        options.Audience = controlKeyCloakSettings.ClientId;          
+        options.Audience = controlKeyCloakSettings.ClientId;
         options.MetadataAddress = controlKeyCloakSettings.MetadataAddress;
 
         options.RequireHttpsMetadata = false; // dev only
@@ -114,7 +114,7 @@ builder.Services.AddAuthentication(options =>
 
         options.TokenValidationParameters = TVP;
 
-       
+
     });
 
 // - authorize here
@@ -163,8 +163,14 @@ if (!app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var keytoken = scope.ServiceProvider.GetRequiredService<IKeyclockTokenAPIHelper>();
+    var miniosettings = scope.ServiceProvider.GetRequiredService<MinioSettings>();
+    var miniohelper = scope.ServiceProvider.GetRequiredService<IMinioHelper>();
+    var userService = scope.ServiceProvider.GetRequiredService<IKeycloakMinioUserService>();
+
     db.Database.Migrate();
-    DataInitaliser.SeedData(db);
+    var initialiser = new DataInitaliser(miniosettings, miniohelper, db, keytoken, userService);
+    initialiser.SeedData();
 }
 
 
@@ -205,12 +211,14 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
 
     builder.Services.AddHttpContextAccessor();
 
-   
+
     builder.Services.AddScoped<IMinioService, MinioService>();
     builder.Services.AddScoped<IMinioHelper, MinioHelper>();
     builder.Services.AddScoped<IKeycloakMinioUserService, KeycloakMinioUserService>();
+    builder.Services.AddScoped<IKeyclockTokenAPIHelper, KeyclockTokenAPIHelper>();
 
-  
+
+
 }
 
 
