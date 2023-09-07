@@ -83,7 +83,19 @@
                     </div>
                 }
                 
-                <p>List of submissions this project has...</p>
+                <div class="row">
+                    <div class="col-lg-5 col-md-6">
+                        <ul class="list-group">
+                            @foreach (var submission in Model.Submissions)
+                            {
+                                <li class="list-group-item justify-content-between d-flex">
+                                    <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })">@submission.TesName</a>
+
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
             </div>
             <div class="tab-pane fade" id="userMembership" role="tabpanel" aria-labelledby="people">
                 @if (User.IsInRole("dare-control-admin"))
