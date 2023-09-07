@@ -12,7 +12,7 @@ namespace TRE_API.Services
             config["DareAPISettings:Address"], keycloak)
         {
             
-            var creds = db.ControlCredentials.FirstOrDefault();
+            var creds = db.SubmissionCredentials.FirstOrDefault();
             if (creds != null)
             {
                 _username = creds.UserName;

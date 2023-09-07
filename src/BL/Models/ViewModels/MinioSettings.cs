@@ -9,5 +9,6 @@ namespace BL.Models.ViewModels
         public string BucketName { get; set; }
         public string AWSRegion { get; set; }
         public string AWSService { get; set; }
+        public string AttributeName { get; set; }
     }
 }

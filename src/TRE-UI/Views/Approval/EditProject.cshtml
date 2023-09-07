@@ -1,0 +1,89 @@
+﻿@using BL.Models.ViewModels
+@using BL.Models.Enums
+@model BL.Models.TreProject
+@*{
+    ViewData["Title"] = "Edit @Model.Name";
+}*@
+
+<div class="container-lg mt-4 p-4 bg-white border-1 shadow-sm">
+
+    <div class="d-flex align-items-center justify-content-between">
+        <div>
+            <h1 class="fs-3 mb-0">Approve Project</h1>
+
+        </div>
+
+    </div>
+
+    <div class="mt-4">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h1 class="fs-3 mb-0">@Model.SubmissionProjectName</h1>
+                <p class="text-muted small mb-0">#@Model.SubmissionProjectId</p>
+                @if (Model.Archived)
+                {
+                    <p class="text-muted small mb-0">Archived</p>
+                }
+                
+                
+            </div>
+            <div class="form-group mb-4">
+                @Model.Description
+            </div>
+            <div class="form-group mb-4">
+                @if (Model.Decision == Decision.Undecided)
+                {
+                    @:This project hasn't been processed yet
+                }
+                else
+                {
+                    @:Last Updated: @Model.LastDecisionDate by @Model.ApprovedBy 
+                }
+                
+            </div>
+        </div>
+        <div class="mt-4">
+        <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
+        </ul>
+
+        <div class="row">
+            <div class="col-md-6">
+                    @using (Html.BeginForm("EditProject", "Approval", FormMethod.Post, new { id = "frmMain" }))
+                {
+                    <div class="form-group mb-4">
+                        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="form-group mb-4">
+                        @Html.LabelFor(x => x.LocalProjectName)
+                        @Html.TextBoxFor(x => x.LocalProjectName)
+                    </div>
+                    <div class="form-group mb-4">
+                        @Html.HiddenFor(x => x.Id)
+                        @Html.RadioButtonFor(x => x.Decision, Decision.Approved)
+                        @Html.Label(Decision.Approved.ToString())
+                        @Html.RadioButtonFor(x => x.Decision, Decision.Rejected)
+                        @Html.Label(Decision.Rejected.ToString())
+                        @if (Model.Decision == Decision.Undecided)
+                        {
+                            @Html.RadioButtonFor(x => x.Decision, Decision.Undecided)
+                            @Html.Label(Decision.Undecided.ToString())
+                        }
+                    </div>
+
+                    <div class="hero-block-1">
+                        <button  type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i>Update</button>
+                    </div>
+                }
+                    
+
+
+                
+            </div>
+        </div>
+    </div>
+
+
+</div>
+</div>
+
