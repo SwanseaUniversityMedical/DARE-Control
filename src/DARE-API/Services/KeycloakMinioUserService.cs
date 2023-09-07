@@ -41,9 +41,7 @@ namespace DARE_API.Services
                     {
                         user["attributes"][attributeKey] = new JArray(attributeValueToAdd);
                     }
-
-
-
+                    
                     
 
                     string updatedUserData = user.ToString();
