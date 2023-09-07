@@ -44,7 +44,7 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="GetAllUsers">People</a>
                         </li>
-                        
+
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Tre" asp-action="GetAllTres">TREs</a>
                         </li>
@@ -65,21 +65,23 @@
                     <form class="me-3 d-none d-lg-block">
                         <input type="search" class="form-control form-control-sm" placeholder="Search..." aria-label="Search">
                     </form>
-                    <div class="nav-item dropdown">
-                        <a class="nav-link text-dark dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            @User?.FindFirst("name")?.Value
-                        </a>
-                        <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="#">Account</a></li>
-                            <li><a class="dropdown-item" href="#">Helpdesk</a></li>
-                            <li><hr class="dropdown-divider"></li>                         
-                            <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a></li>
-                        </ul>
-                    </div>
-                  
-                    @if (@User?.FindFirst("name")?.Value == null)
+                    @if (User.IsInRole("dare-control-admin"))
                     {
-                        <a href="@Url.Action("Login", "Account")" class="btn btn-outline-primary">Sign In</a>
+                        <div class="nav-item dropdown">
+                            <a class="nav-link text-dark dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                @User?.FindFirst("name")?.Value
+                            </a>
+                            <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="#">Account</a></li>
+                                <li><a class="dropdown-item" href="#">Helpdesk</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a></li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-area="" asp-controller="Account" asp-action="Login" class="btn btn-outline-primary">Sign In</a>
                     }
                 </div>
 
@@ -165,9 +167,9 @@
 
         })
 
-        $('#addTre').on('click', function () {
+        $('#addEndpint').on('click', function () {
 
-            $('#treModal').modal('show');
+            $('#endpointModal').modal('show');
 
         })
 
@@ -212,12 +214,12 @@
         }
     </script>
     <script>
-        var SaveTreList = function (el) {
+        var SaveEndpointList = function (el) {
             debugger;
             var arrItem = [];
             var commaSeparatedIds = "";
 
-            $("#TreList tr td input[type=checkbox]").each(function (index, val) {
+            $("#EndpointList tr td input[type=checkbox]").each(function (index, val) {
                 debugger;
                 var checkId = $(val).attr("Id");
                 var arr = checkId.split('_');
@@ -234,7 +236,7 @@
                 commaSeparatedIds = arrItem.toString();
 
                 $.ajax({
-                    url: "/Project/AddTreList",
+                    url: "/Project/AddEndpointList",
                     type: "POST",
                     data: { ProjectId: el, ItemList: commaSeparatedIds },
                     success: function (reponse) {
@@ -253,7 +255,7 @@
 
             $("#ProjectList tr td input[type=checkbox]").each(function (index, val) {
                 debugger;
-                var checkId = $(val).attr("Id");              
+                var checkId = $(val).attr("Id");
 
                 var Ischecked = $("#" + checkId).is(":checked", true);
 
@@ -266,7 +268,7 @@
                 commaSeparatedIds = arrItem.toString();
                 debugger;
                 $.ajax({
-                    url: "/User/UpdateProjectList",
+                    url: "/User/AddProjectList",
                     type: "POST",
                     data: { Id: el, ItemList: commaSeparatedIds },
                     success: function (reponse) {

@@ -4,14 +4,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BL.Models
 {
-    public class ControlCredentials: BaseModel
+    public class SubmissionCredentials: BaseModel
     {
         public int Id { get; set; }
 
-        [DisplayName("Enter Control Keycloak username")]
+        [DisplayName("Enter Submission Keycloak username")]
         [Required(ErrorMessage = "Username is required.")]
         public string UserName { get; set; }
-        [DisplayName("Enter Control Keycloak password")]
+        [DisplayName("Enter Submission Keycloak password")]
         [Required(ErrorMessage = "Password is required.")]
         public string PasswordEnc { get; set; }
 

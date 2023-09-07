@@ -1,0 +1,85 @@
+﻿@using BL.Models.Enums
+@model List<BL.Models.TreProject>
+@{
+    ViewData["Title"] = "Projects";
+    var projectsCount = Model.Count;
+}
+
+<div class="container-lg p-4">
+    <div class="d-flex align-items-center justify-content-between">
+        <h1 class="fs-3 mb-0">Projects</h1>
+
+    </div>
+    <hr class="d-flex mt-4 mb-5">
+    <div class="table-responsive">
+        <table id="projectList" class="table table-bordered table-striped no-head" caption="List of Projects">
+            <thead><tr><td>Project</td></tr></thead>
+            <tbody>
+                @foreach (var project in Model)
+                {
+                    <tr>
+                        <td class="card mb-2 p-3 bg-white shadow-sm border-1">
+
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div>
+                                    <a href="@Url.Action("EditProject", new { projectId = project.Id })">
+                                        <h2 class="mb-0 fw-bold hover-underline fs-5">@project.SubmissionProjectName</h2>
+                                    </a>
+                                    @if (project.Archived)
+                                    {
+                                        <p class="my-4">
+                                            Archived
+                                        </p>
+                                    }
+                                    <p class="my-4">
+                                        @project.Decision.ToString()
+                                    </p>
+                                    @if (!string.IsNullOrWhiteSpace(project.LocalProjectName))
+                                    {
+                                        <p class="my-4">
+                                            Local Name: @project.LocalProjectName
+                                        </p>
+                                    }
+                                    <p class="my-4">
+                                        @project.Description
+                                    </p>
+                                    <p class="text-muted small mb-0">#[Submission Project ID = @project.SubmissionProjectId]</p>
+                                    
+                                </div>
+                                <a href="@Url.Action("EditProject",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+                            </div>
+                            <div class="">
+
+                                <a href="@Url.Action("EditMemberships", new { projectId = project.Id, showOnlyUnprocessed = false })#memberships" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                    @project.MemberDecisions.Count Memberships
+                                </a>
+                                
+
+                            </div>
+                            <p class="text-muted fs-7 mt-4 mb-0">
+                                @if (project.Decision == Decision.Undecided)
+                                {
+                                    @:This project hasn't been processed yet
+                                }
+                                else
+                                {
+                                    @:Last Updated: @project.LastDecisionDate by @project.ApprovedBy 
+                                }
+                                
+                            </p>
+                            
+
+
+
+
+
+
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+
+</div>

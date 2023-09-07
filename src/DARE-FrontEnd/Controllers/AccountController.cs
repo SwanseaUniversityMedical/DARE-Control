@@ -16,9 +16,9 @@ namespace DARE_FrontEnd.Controllers
     public class AccountController : Controller
     {
 
-        public ControlKeyCloakSettings _keycloakSettings { get; set; }
+        public SubmissionKeyCloakSettings _keycloakSettings { get; set; }
 
-        public AccountController(ControlKeyCloakSettings keycloakSettings)
+        public AccountController(SubmissionKeyCloakSettings keycloakSettings)
         {
             _keycloakSettings = keycloakSettings;
         }
@@ -88,7 +88,7 @@ namespace DARE_FrontEnd.Controllers
             {
                 return Challenge(OpenIdConnectDefaults.AuthenticationScheme);
             }
-            return RedirectToAction("Index", "");
+            return RedirectToAction("Index", "Home");
         }
 
         public IActionResult LoginAfterTokenExpired()
