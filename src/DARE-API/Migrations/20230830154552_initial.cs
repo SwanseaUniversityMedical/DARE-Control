@@ -182,7 +182,23 @@ namespace DARE_API.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
+            migrationBuilder.CreateTable(
+               name: "AuditLogs",
+               columns: table => new
+               {
+                   Id = table.Column<int>(type: "integer", nullable: false)
+                       .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                   Action = table.Column<string>(type: "text", nullable: false),
+                   Module = table.Column<string>(type: "text", nullable: false),
+                   AuditValues = table.Column<string>(type: "text", nullable: false),
+                   UserName = table.Column<string>(type: "text", nullable: false),
+                   Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                   FormData = table.Column<string>(type: "text", nullable: false)
+               },
+               constraints: table =>
+               {
+                   table.PrimaryKey("PK_AuditLogs", x => x.Id);
+               });
             migrationBuilder.CreateIndex(
                 name: "IX_HistoricStatuses_SubmissionId",
                 table: "HistoricStatuses",
@@ -217,6 +233,12 @@ namespace DARE_API.Migrations
                 name: "IX_Submissions_TreId",
                 table: "Submissions",
                 column: "TreId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AuditLogs_Id",
+                table: "AuditLogs",
+                column: "AuditId");
+
         }
 
         /// <inheritdoc />
@@ -242,6 +264,9 @@ namespace DARE_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "AuditLogs");
         }
     }
 }
