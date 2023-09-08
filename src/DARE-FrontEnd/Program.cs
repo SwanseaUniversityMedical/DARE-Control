@@ -39,9 +39,9 @@ Log.Information("Dare-FrontEnd logging LastStatusUpdate.");
 
 
 // -- authentication here
-var controlKeyCloakSettings = new ControlKeyCloakSettings();
-configuration.Bind(nameof(controlKeyCloakSettings), controlKeyCloakSettings);
-builder.Services.AddSingleton(controlKeyCloakSettings);
+var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
+configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
+builder.Services.AddSingleton(submissionKeyCloakSettings);
 
 var formIOSettings = new FormIOSettings();
 configuration.Bind(nameof(formIOSettings), formIOSettings);
@@ -130,7 +130,7 @@ builder.Services.AddAuthentication(options =>
              })
             .AddOpenIdConnect(options =>
             {
-                if (controlKeyCloakSettings.Proxy)
+                if (submissionKeyCloakSettings.Proxy)
                 {
                     options.BackchannelHttpHandler = new HttpClientHandler
                     {
@@ -138,19 +138,19 @@ builder.Services.AddAuthentication(options =>
                         UseDefaultCredentials = true,
                         Proxy = new WebProxy()
                         {
-                            Address = new Uri(controlKeyCloakSettings.ProxyAddresURL),
-                            BypassList = new[] { controlKeyCloakSettings.BypassProxy }
+                            Address = new Uri(submissionKeyCloakSettings.ProxyAddresURL),
+                            BypassList = new[] { submissionKeyCloakSettings.BypassProxy }
                         }
                     };
                 }
                 
                
                 // URL of the Keycloak server
-                options.Authority = controlKeyCloakSettings.Authority;
+                options.Authority = submissionKeyCloakSettings.Authority;
                 //// Client configured in the Keycloak
-                options.ClientId = controlKeyCloakSettings.ClientId;
+                options.ClientId = submissionKeyCloakSettings.ClientId;
                 //// Client secret shared with Keycloak
-                options.ClientSecret = controlKeyCloakSettings.ClientSecret;
+                options.ClientSecret = submissionKeyCloakSettings.ClientSecret;
 
                 options.Events = new OpenIdConnectEvents
                 {
@@ -173,8 +173,8 @@ builder.Services.AddAuthentication(options =>
                         Log.Error("OnRemoteFailure: {ex}", context.Failure);
                         if (context.Failure.Message.Contains("Correlation failed"))
                         {
-                            Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", controlKeyCloakSettings.TokenExpiredAddress);
-                            context.Response.Redirect(controlKeyCloakSettings.TokenExpiredAddress);
+                            Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", submissionKeyCloakSettings.TokenExpiredAddress);
+                            context.Response.Redirect(submissionKeyCloakSettings.TokenExpiredAddress);
                         }
                         else
                         {
@@ -220,9 +220,9 @@ builder.Services.AddAuthentication(options =>
 
 
 
-                        if (controlKeyCloakSettings.UseRedirectURL)
+                        if (submissionKeyCloakSettings.UseRedirectURL)
                         {
-                            context.ProtocolMessage.RedirectUri = controlKeyCloakSettings.RedirectURL;
+                            context.ProtocolMessage.RedirectUri = submissionKeyCloakSettings.RedirectURL;
                         }
 
 
@@ -231,7 +231,7 @@ builder.Services.AddAuthentication(options =>
                         await Task.FromResult(0);
                     }
                 };
-                //options.MetadataAddress = controlKeyCloakSettings.MetadataAddress;
+                //options.MetadataAddress = submissionKeyCloakSettings.MetadataAddress;
 
                 options.RequireHttpsMetadata = false;
                 options.SaveTokens = true;
@@ -241,9 +241,9 @@ builder.Services.AddAuthentication(options =>
                 
                 options.GetClaimsFromUserInfoEndpoint = true;
 
-                if (string.IsNullOrEmpty(controlKeyCloakSettings.MetadataAddress) == false)
+                if (string.IsNullOrEmpty(submissionKeyCloakSettings.MetadataAddress) == false)
                 {
-                    options.MetadataAddress = controlKeyCloakSettings.MetadataAddress;
+                    options.MetadataAddress = submissionKeyCloakSettings.MetadataAddress;
                 }
                 
 

@@ -151,7 +151,7 @@ namespace DARE_API.Controllers
                 project.Users.Add(user);
 
                 var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
-                var attributeName = "policy";
+                var attributeName = _minioSettings.AttributeName;
 
                 await _keycloakMinioUserService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.SubmissionBucket.ToLower() + "_policy");
 
@@ -198,7 +198,7 @@ namespace DARE_API.Controllers
                 project.Users.Remove(user);
 
                 var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
-                var attributeName = "policy";
+                var attributeName = _minioSettings.AttributeName;
                 var attributeValue = project.Name.ToLower() + "_policy";
 
                 await _keycloakMinioUserService.RemoveMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.SubmissionBucket.ToLower() + "_policy");

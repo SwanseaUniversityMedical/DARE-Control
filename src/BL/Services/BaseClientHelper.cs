@@ -188,6 +188,7 @@ namespace BL.Services
 
         protected StringContent GetStringContent<T>(T datasetObj) where T : class?
         {
+            
             var jsonString = new StringContent(
                 System.Text.Json.JsonSerializer.Serialize(datasetObj, _jsonSerializerOptions),
                 Encoding.UTF8,

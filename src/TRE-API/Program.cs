@@ -15,6 +15,10 @@ using Microsoft.AspNetCore.HttpOverrides;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
 using Newtonsoft.Json;
+using Hangfire;
+using Hangfire.PostgreSql;
+using Microsoft.AspNetCore.Hosting.Server.Features;
+using TRE_API;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,16 +50,21 @@ var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
 builder.Services.AddSingleton(treKeyCloakSettings);
 
-var controlKeyCloakSettings = new BaseKeyCloakSettings();
-configuration.Bind(nameof(controlKeyCloakSettings), controlKeyCloakSettings);
-builder.Services.AddSingleton(controlKeyCloakSettings);
+var submissionKeyCloakSettings = new BaseKeyCloakSettings();
+configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
+builder.Services.AddSingleton(submissionKeyCloakSettings);
 builder.Services.AddScoped<IDareClientWithoutTokenHelper, DareClientWithoutTokenHelper>();
-   
+string hangfireConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddHangfire(config => { config.UsePostgreSqlStorage(hangfireConnectionString); });
+
+builder.Services.AddHangfireServer();
 var encryptionSettings = new EncryptionSettings();
 configuration.Bind(nameof(encryptionSettings), encryptionSettings);
 builder.Services.AddSingleton(encryptionSettings);
 builder.Services.AddScoped<IKeycloakTokenHelper, KeycloakTokenHelper>();
 builder.Services.AddScoped<IEncDecHelper, EncDecHelper>();
+builder.Services.AddScoped<IDareSyncHelper, DareSyncHelper>();
+builder.Services.AddScoped<IDoWork, DoWork>();
 
 
 var TVP = new TokenValidationParameters
@@ -272,7 +281,13 @@ app.MapHub<SignalRService>("/signalRHub", options =>
 {
     options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
 }).RequireCors(MyAllowSpecificOrigins);
+app.UseHangfireDashboard();
+RecurringJob.AddOrUpdate<IDoWork>(a => a.Execute(), Cron.MinuteInterval(10));
 
+var port = app.Environment.WebRootPath;
+
+// Print the port number
+Console.WriteLine("Application is running on port: " + port);
 app.Run();
 
 

@@ -3,6 +3,7 @@ using BL.Models.ViewModels;
 using DARE_API.Services.Contract;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Serilog;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -10,54 +11,59 @@ namespace DARE_API.Services
 {
     public class KeycloakMinioUserService : IKeycloakMinioUserService
     {
-        private readonly ControlKeyCloakSettings _controlKeyCloakSettings;
-        public KeycloakMinioUserService(ControlKeyCloakSettings controlKeyCloakSettings)
+        private readonly SubmissionKeyCloakSettings _submissionKeyCloakSettings;
+        public KeycloakMinioUserService(SubmissionKeyCloakSettings submissionKeyCloakSettings)
         {
-            _controlKeyCloakSettings = controlKeyCloakSettings;
+            _submissionKeyCloakSettings = submissionKeyCloakSettings;
         }
-        public async Task<bool> SetMinioUserAttribute(string accessToken, string userName, string attributeName, string attributeValue)
+        public async Task<bool> SetMinioUserAttribute(string accessToken, string userName, string attributeName, string attributeValueToAdd)
         {
             try
             {
-                HttpClient httpClient = new HttpClient();
-
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-                var baseUrl = _controlKeyCloakSettings.Server;
-                var realm = _controlKeyCloakSettings.Realm;
+                var baseUrl = _submissionKeyCloakSettings.Server;
+                var realm = _submissionKeyCloakSettings.Realm;
+                var attributeKey = "policy";
                 var userId = await GetUserIDAsync(baseUrl, realm, accessToken, userName);
-                var user = await GetUserAttributesAsync(baseUrl, realm, accessToken, userId);
+                var userAttributesJson = await GetUserAttributesAsync(baseUrl, realm, accessToken, userId);
 
-                if (user.attributes == null)
+                if (userAttributesJson != null)
                 {
-                    user.attributes = new UserAttributes();
-                }
 
-                if (user.attributes.policy == null)
-                {
-                    user.attributes.policy = new string[] { attributeValue };
-                }
-                else
-                {
-                    var policyIndex = Array.IndexOf(user.attributes.policy, attributeName);
-                    if (policyIndex >= 0)
+                    JObject user = JObject.Parse(userAttributesJson);
+
+                    if (user["attributes"][attributeKey] != null)
                     {
-                        user.attributes.policy[policyIndex] = attributeValue;
+                        var existingValues = user["attributes"][attributeKey].ToObject<JArray>();
+                        existingValues.Add(attributeValueToAdd);
+                        user["attributes"][attributeKey] = existingValues;
                     }
                     else
                     {
-                        var updatedPolicy = new string[user.attributes.policy.Length + 1];
-                        Array.Copy(user.attributes.policy, updatedPolicy, user.attributes.policy.Length);
-                        updatedPolicy[updatedPolicy.Length - 1] = attributeValue;
-                        user.attributes.policy = updatedPolicy;
+                        user["attributes"][attributeKey] = new JArray(attributeValueToAdd);
+                    }
+
+
+                    string updatedUserData = user.ToString();
+
+
+                    bool updateResult = await UpdateUserAttributes(baseUrl, realm, userId, accessToken, updatedUserData);
+
+                    if (updateResult)
+                    {
+                        Log.Information("{Function} attributes added successfully", "SetMinioUserAttribute");
+                        return true;
+                    }
+                    else
+                    {
+                        Log.Error("{Function} Failed to update user attributes.", "SetMinioUserAttribute");
+                        return true;
                     }
                 }
-
-                var apiUrlforUpdate = $"https://{baseUrl}/admin/realms/{realm}/users/{user.id}";
-
-                var updatedUserJson = JsonConvert.SerializeObject(user);
-                var updatedContent = new StringContent(updatedUserJson, Encoding.UTF8, "application/json");
-                var putResponse = await httpClient.PutAsync(apiUrlforUpdate, updatedContent);
+                else
+                {
+                    Log.Error("{Function} Failed to retrieve user attributes.", "SetMinioUserAttribute");
+                    return true;
+                }
 
 
             }
@@ -66,38 +72,62 @@ namespace DARE_API.Services
 
                 throw;
             }
-            return true;
         }
-        public async Task<bool> RemoveMinioUserAttribute(string accessToken, string userName, string attributeName, string attributeValue)
+        public async Task<bool> RemoveMinioUserAttribute(string accessToken, string userName, string attributeName, string attributeValueToRemove)
         {
             try
             {
-                HttpClient httpClient = new HttpClient();
 
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-                var baseUrl = _controlKeyCloakSettings.Server;
-                var realm = _controlKeyCloakSettings.Realm;
+                var baseUrl = _submissionKeyCloakSettings.Server;
+                var realm = _submissionKeyCloakSettings.Realm;
+                var attributeKey = "policy";
                 var userId = await GetUserIDAsync(baseUrl, realm, accessToken, userName);
-                var user = await GetUserAttributesAsync(baseUrl, realm, accessToken, userId);
+                var userAttributesJson = await GetUserAttributesAsync(baseUrl, realm, accessToken, userId);
 
-                if (user.attributes != null && user.attributes.policy != null)
-                { 
-                    if (user.attributes.policy.Contains(attributeValue))
+                if (userAttributesJson != null)
+                {
+
+                    JObject user = JObject.Parse(userAttributesJson);
+
+                    if (user["attributes"][attributeKey] != null)
                     {
-                        user.attributes.policy = user.attributes.policy.Where(attr => attr != attributeValue).ToArray();
+
+                        var existingValues = user["attributes"][attributeKey].ToObject<JArray>();
+
+
+                        var updatedValues = new JArray();
+
+
+                        foreach (var value in existingValues)
+                        {
+                            if (value.ToString() != attributeValueToRemove)
+                            {
+                                updatedValues.Add(value);
+                            }
+                        }
+
+                        user["attributes"][attributeKey] = updatedValues;
+                    }
+
+                    string updatedUserData = user.ToString();
+
+                    bool updateResult = await UpdateUserAttributes(baseUrl, realm, userId, accessToken, updatedUserData);
+
+                    if (updateResult)
+                    {
+                        Log.Information("{Function} attributes added successfully.", "RemoveMinioUserAttribute");
+                        return true;
+                    }
+                    else
+                    {
+                        Log.Error("{Function} Failed to update user attributes.", "RemoveMinioUserAttribute");
+                        return false;
                     }
                 }
-
-                var apiUrlforUpdate = $"https://{baseUrl}/admin/realms/{realm}/users/{user.id}";
-
-                var updatedUserJson = JsonConvert.SerializeObject(user);
-                var updatedContent = new StringContent(updatedUserJson, Encoding.UTF8, "application/json");
-                var putResponse = await httpClient.PutAsync(apiUrlforUpdate, updatedContent);
-
-                if (!putResponse.IsSuccessStatusCode)
+                else
                 {
-                    // Handle error here
+                    Log.Error("{Function} Failed to retrieve user attributes.", "RemoveMinioUserAttribute");
+                    return false;
                 }
 
             }
@@ -106,7 +136,6 @@ namespace DARE_API.Services
 
                 throw;
             }
-            return true;
         }
         static async Task<string> GetUserIDAsync(string baseUrl, string realm, string accessToken, string userName)
         {
@@ -135,20 +164,38 @@ namespace DARE_API.Services
 
             return string.Empty;
         }
-        static async Task<KeycloakUser> GetUserAttributesAsync(string baseUrl, string realm, string accessToken, string userID)
+        static async Task<string> GetUserAttributesAsync(string baseUrl, string realm, string accessToken, string userID)
         {
-            HttpClient httpClient = new HttpClient();
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.BaseAddress = new Uri($"https://{baseUrl}/admin/realms/{realm}/users/{userID}");
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                var response = await httpClient.GetAsync("");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadAsStringAsync();
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+        static async Task<bool> UpdateUserAttributes(string keycloakBaseUrl, string realm, string userId, string accessToken, string updatedUserData)
+        {
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.BaseAddress = new Uri($"https://{keycloakBaseUrl}/admin/realms/{realm}/users/{userId}");
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            var apiUrl = $"https://{baseUrl}/admin/realms/{realm}/users/{userID}";
+                var content = new StringContent(updatedUserData, System.Text.Encoding.UTF8, "application/json");
+                var response = await httpClient.PutAsync("", content);
 
-            var response = await httpClient.GetAsync(apiUrl);
-
-            var userJson = await response.Content.ReadAsStringAsync();
-            var user = JsonConvert.DeserializeObject<KeycloakUser>(userJson);
-
-            return user;
+                return response.IsSuccessStatusCode;
+            }
         }
     }
 }

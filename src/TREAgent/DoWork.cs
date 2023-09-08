@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using BL.Models;
+using BL.Models.APISimpleTypeReturns;
 using BL.Models.Enums;
 using BL.Models.ViewModels;
 using BL.Models.Tes;
@@ -47,15 +48,40 @@ namespace TREAgent
                 
                 foreach (var submission in subs)
                 {
-                    //TODO: Validate against treapi
-                    //TODO: Check crate format
-                    //TODO: Call API or rabbit for testing (Only dump tesString)
+                    var paramlist = new Dictionary<string, string>
+                    {
+                        { "projectId", submission.Project.Id.ToString() },
+                        { "userId", submission.SubmittedBy.Id.ToString() }
 
-                    var tes = JsonConvert.DeserializeObject<TesTask>(submission.TesJson);
-                    rabbit.Advanced.Publish(exch, RoutingConstants.Subs, false, new Message<TesTask>(tes));
-                    var result = treApi.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-                        new Dictionary<string, string>() {  {"tesId", submission.TesId}, {"statusType",StatusType.TransferredToPod.ToString() }, {"description", "" }}).Result;
-                    //TODO: Update statusType of subs
+                    };
+
+                    if (!treApi.CallAPIWithoutModel<BoolReturn>("/api/Submission/IsUserApprovedOnProject", paramlist)
+                            .Result.Result)
+                    {
+                        var result = treApi.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
+                            new Dictionary<string, string>()
+                            {
+                                { "tesId", submission.TesId }, { "statusType", StatusType.InvalidUser.ToString() },
+                                { "description", "" }
+                            }).Result;
+                    }
+                    else
+                    {
+
+
+                        //TODO: Check crate format
+                        //TODO: Call API or rabbit for testing (Only dump tesString)
+
+                        var tes = JsonConvert.DeserializeObject<TesTask>(submission.TesJson);
+                        rabbit.Advanced.Publish(exch, RoutingConstants.Subs, false, new Message<TesTask>(tes));
+                        var result = treApi.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
+                            new Dictionary<string, string>()
+                            {
+                                { "tesId", submission.TesId }, { "statusType", StatusType.TransferredToPod.ToString() },
+                                { "description", "" }
+                            }).Result;
+                        
+                    }
 
                 }
 
