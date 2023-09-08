@@ -127,5 +127,122 @@ namespace DARE_API.Controllers
                 throw;
             }
         }
+        public static StatusType StatusTypes(StatusType[] listofStatus) {
+            //var stage1 = "validation";
+            //var stage2 = "processing";
+            //var stage3 = "result";
+            //List<string> stages = new List<string>();
+            //stages.Add(stage1);
+            //stages.Add(stage2);
+            //stages.Add(stage3);
+
+
+        //List<List<StatusType>> myList = new List<List<StatusType>>();
+        List<StatusType> stage1List = new List<StatusType>();
+            stage1List.Add(StatusType.WaitingForChildSubsToComplete);
+            stage1List.Add(StatusType.WaitingForAgentToTransfer);
+            stage1List.Add(StatusType.WaitingForCrateFormatCheck);
+
+            List<StatusType> stage2List = new List<StatusType>();
+            stage2List.Add(StatusType.PodProcessing);
+            stage2List.Add(StatusType.DataOutApprovalBegun);
+            stage2List.Add(StatusType.TransferredToPod);
+
+            List<StatusType> stage3List = new List<StatusType>();
+            stage3List.Add(StatusType.DataOutApprovalRejected);
+            stage3List.Add(StatusType.UserNotOnProject);
+            stage3List.Add(StatusType.InvalidSubmission);
+            stage3List.Add(StatusType.InvalidUser);
+            stage3List.Add(StatusType.TRENotAuthorisedForProject);
+            stage3List.Add(StatusType.CancellingChildren);
+            stage3List.Add(StatusType.Cancelled);
+
+            List<StatusType> stage4List = new List<StatusType>();
+            stage4List.Add(StatusType.PodProcessingComplete);
+            stage4List.Add(StatusType.DataOutApproved);
+            stage4List.Add(StatusType.Completed);
+            stage4List.Add(StatusType.DataOutApprovalRejected);
+
+
+            Dictionary<string, List<StatusType>> stages = new Dictionary<string, List<StatusType>>();
+            //just incase use this if i need to make the list of stage4List a list of a list e.g adding in TRE name or a colour
+            //Dictionary<string, List<List<StatusType>>> stages = new Dictionary<string, List<List<StatusType>>>();
+
+            stages.Add("stage1", stage1List);
+            stages.Add("stage2", stage2List);
+            stages.Add("stage3", stage3List);
+            stages.Add("stage4", stage4List);
+
+            return 0;
+
+        }
+        public static List<StageInfo> StageTypes()
+        {
+            var stage1List = new StageInfo();
+            stage1List.stageName = "Submission Layer Validation";
+            stage1List.stageNumber = 1;
+            stage1List.statusTypeList = new List<StatusType>
+            {
+                StatusType.InvalidUser ,
+                StatusType.UserNotOnProject ,
+                StatusType.InvalidSubmission,
+                StatusType.WaitingForCrateFormatCheck
+            };
+
+            var stage2List = new StageInfo();
+            stage2List.stageName = "Tre Layer Validation";
+            stage2List.stageNumber = 2;
+            stage2List.statusTypeList = new List<StatusType>
+            {
+                StatusType.WaitingForAgentToTransfer,
+                StatusType.TransferredToPod,
+                StatusType.TRENotAuthorisedForProject
+            };
+
+            var stage3List = new StageInfo();
+            stage3List.stageName = "Query Processing";
+            stage3List.stageNumber = 3;
+            stage3List.statusTypeList = new List<StatusType>
+            {
+                StatusType.WaitingForChildSubsToComplete,
+                StatusType.PodProcessing,
+                StatusType.RequestCancellation
+
+            };
+
+            var stage4List = new StageInfo();
+            stage4List.stageName = "Data Approval Processing";
+            stage4List.stageNumber = 4;
+            stage4List.statusTypeList = new List<StatusType>
+            {
+                StatusType.DataOutApprovalBegun,
+                StatusType.CancellationRequestSent,
+                StatusType.CancellingChildren
+            };
+
+            var stage5List = new StageInfo();
+            stage5List.stageName = "Result";
+            stage5List.stageNumber = 5;
+            stage5List.statusTypeList = new List<StatusType>
+            {
+                StatusType.PodProcessingComplete,
+                StatusType.DataOutApprovalRejected,
+                StatusType.DataOutApproved,
+                StatusType.Completed,
+                StatusType.Cancelled
+            };
+
+            List<StageInfo> infoList = new List<StageInfo>();
+            // var infoList = new List<List<StageInfo>>();
+            infoList.Add(stage1List);
+            infoList.Add(stage2List);
+            infoList.Add(stage3List);
+            infoList.Add(stage4List);
+            infoList.Add(stage5List);
+
+
+            return infoList;
+
+        }
     }
 }
