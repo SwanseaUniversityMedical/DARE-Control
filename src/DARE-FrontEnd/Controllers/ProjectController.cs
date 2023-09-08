@@ -5,6 +5,7 @@ using BL.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Authorization;
 using BL.Models.Settings;
+using BL.Models.Enums;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -12,15 +13,15 @@ namespace DARE_FrontEnd.Controllers
     public class ProjectController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
-        
+
         private readonly FormIOSettings _formIOSettings;
 
         public ProjectController(IDareClientHelper client, FormIOSettings formIo)
         {
             _clientHelper = client;
-            
+
             _formIOSettings = formIo;
-            
+
 
         }
 
@@ -61,7 +62,7 @@ namespace DARE_FrontEnd.Controllers
                 SubmissionBucket = project.SubmissionBucket,
                 OutputBucket = project.OutputBucket,
                 MinioEndpoint = minioEndpoint.Url,
-                Submissions=project.Submissions,
+                Submissions = project.Submissions,
                 UserItemList = userItems,
                 TreItemList = treItems
             };
@@ -73,8 +74,8 @@ namespace DARE_FrontEnd.Controllers
         [AllowAnonymous]
         public IActionResult GetAllProjects()
         {
-           
-            
+
+
             var projects = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
             return View(projects);
 
@@ -119,17 +120,18 @@ namespace DARE_FrontEnd.Controllers
             return View(projmem);
         }
 
-        [HttpPost]
-        public ProjectUserTre MarkProjectEmbargoed(int projectId, bool isEmbargoed)
+       
+        [HttpGet]
+        public IActionResult MarkProjectAsEmbargoed(int projectId, string isEmbargoed)
         {
-            var result = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/AddEmbargoedProject/").Result;
-            var projmem = new ProjectUserTre
-            {
-                IsEmbargoed = isEmbargoed
-            };
-            return projmem;
-        }
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("projectId", projectId.ToString());
+            paramlist.Add("isEmbargoed", isEmbargoed);
+            var project = _clientHelper.CallAPIWithoutModel<Project?>(
+                "/api/Project/MarkProjectAsEmbargoed/", paramlist).Result;
 
+            return RedirectToAction("GetAllProject");
+        }
 
         private ProjectTre GetProjectTreModel()
         {
@@ -186,7 +188,7 @@ namespace DARE_FrontEnd.Controllers
             {
                 FormIoUrl = _formIOSettings.ProjectForm,
                 FormIoString = @"{""id"":0}",
-            
+
             };
 
             if (projectId > 0)
@@ -250,7 +252,7 @@ namespace DARE_FrontEnd.Controllers
             return BadRequest();
         }
 
-       
+
         public async Task<IActionResult> RemoveUserFromProject(int projectId, int userId)
         {
             var model = new ProjectUser()
@@ -290,7 +292,7 @@ namespace DARE_FrontEnd.Controllers
                 var result =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
             }
-            return RedirectToAction("GetProject", new {  id = ProjectId });
+            return RedirectToAction("GetProject", new { id = ProjectId });
         }
 
         [HttpPost]

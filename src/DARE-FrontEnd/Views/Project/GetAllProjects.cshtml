@@ -18,7 +18,7 @@
     <hr class="d-flex my-4">
     <div class="table-responsive">
         <table id="projectList" class="table table-bordered table-striped no-head" caption="List of Projects">
-            <thead><tr><td>Project</td></tr></thead>
+            <thead><tr><td>Project</td> </tr></thead>
             <tbody>
                 @foreach (var project in Model)
                 {
@@ -36,8 +36,13 @@
                                         </p>
                                     </a>
                                     <p class="text-muted small mb-0">#@project.Id</p>
-                                    <label class="my-4">Mark as Embargoed:</label>
-                                    <input type="checkbox" id="embargoCheckbox_@project.Id" class="embargoCheckbox" asp-controller="Project" asp-action="MarkProjectEmbargoed" />
+                                    @*<label for="isEmbargoed_@project.Id" class="my-4">Mark as Embargoed:</label>
+                                    <input type="checkbox" id="isEmbargoed_@project.Id" @(project.IsEmbargoed ? "checked" : "") />        *@                                  
+                                </div>
+                                <div>
+                                    <label for="isEmbargoed_@project.Id" class="my-4">Mark as Embargoed:</label>
+                                    @*<input type="checkbox" class="" id="isEmbargoed_@project.Id" asp-controller="Project" asp-action="MarkProjectAsEmbargoed" name="IsEmbargoed" @(project.IsEmbargoed ? "checked" : "") />*@
+                                    <input type="checkbox" id="isEmbargoed_@project.Id" name="IsEmbargoed" @(project.IsEmbargoed ? "checked" : "") onclick="MarkProjectAsEmbargoed(@project.Id)" />
                                 </div>
                                 @if (User.IsInRole("dare-control-admin"))
                                 {

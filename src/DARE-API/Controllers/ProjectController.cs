@@ -10,6 +10,8 @@ using Serilog;
 using BL.Services;
 using DARE_API.Services.Contract;
 using Microsoft.AspNetCore.Authentication;
+using Castle.Components.DictionaryAdapter.Xml;
+using BL.Models.Enums;
 
 namespace DARE_API.Controllers
 {
@@ -41,19 +43,19 @@ namespace DARE_API.Controllers
         {
             try
             {
-           
+
                 Project project = JsonConvert.DeserializeObject<Project>(data.FormIoString);
                 //2023-06-01 14:30:00 use this as the datetime
                 project.Name = project.Name.Trim();
                 project.StartDate = project.StartDate.ToUniversalTime();
                 project.EndDate = project.EndDate.ToUniversalTime();
                 project.ProjectDescription = project.ProjectDescription.Trim();
-                
-                
-                
+
+
+
                 project.FormData = data.FormIoString;
                 project.Display = project.Display;
-                
+
                 if (_DbContext.Projects.Any(x => x.Name.ToLower() == project.Name.ToLower().Trim() && x.Id != project.Id))
                 {
 
@@ -92,16 +94,17 @@ namespace DARE_API.Controllers
                         }
                     }
                 }
-               
+
 
                 if (project.Id > 0)
                 {
                     if (_DbContext.Projects.Select(x => x.Id == project.Id).Any())
                         _DbContext.Projects.Update(project);
                     else
-                       _DbContext.Projects.Add(project);
+                        _DbContext.Projects.Add(project);
                 }
-                else { 
+                else
+                {
                     _DbContext.Projects.Add(project);
 
                 }
@@ -240,7 +243,7 @@ namespace DARE_API.Controllers
                 {
                     Log.Error("{Function} Tre {Tre} is already on {ProjectName}", "AddTreMembership", tre.Name, project.Name);
                     return null;
-                  }
+                }
 
                 project.Tres.Add(tre);
 
@@ -355,13 +358,13 @@ namespace DARE_API.Controllers
         {
             try
             {
-                
+
                 var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
                 var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
                 if (tre == null)
                 {
                     throw new Exception("User " + usersName + " doesn't have a tre");
-                    
+
                 }
 
                 var allProjects = tre.Projects;
@@ -435,11 +438,32 @@ namespace DARE_API.Controllers
             var minioEndPoint = new MinioEndpoint()
             {
                 Url = _minioSettings.Url,
-            };  
+            };
 
             return minioEndPoint;
+        }    
+        
+        [HttpGet("MarkProjectAsEmbargoed")]
+        public async Task<Project?> MarkProjectAsEmbargoed(int projectId, string isEmbargoed)
+        {
+            try
+            {
+                var returned = _DbContext.Projects.Find(projectId);
+                if (returned == null)
+                {
+                    return null;
+                }
+                returned.IsEmbargoed = Convert.ToBoolean(isEmbargoed);
+                await _DbContext.SaveChangesAsync();
+                Log.Information("Marked {ProjectId} project as Embargoed", "MarkProjectAsEmbargoed", returned.Id);
+                return returned;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "MarkProjectAsEmbargoed");
+                throw;
+            }
         }
-
 
         //End
 

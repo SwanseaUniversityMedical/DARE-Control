@@ -279,6 +279,27 @@
 
         }
     </script>
+
+    <script>
+        var MarkProjectAsEmbargoed = function (el) {
+            debugger;
+            
+                $.ajax({
+                    url: '/Project/MarkProjectAsEmbargoed',
+                    type: 'GET',
+                    data: {
+                        projectId: el,
+                        isEmbargoed: true
+                    },
+                    success: function (data) {
+                        console.log("Embargo status updated successfully.");
+                    },
+                    error: function () {
+                        console.error("Error updating embargo status.");
+                    }
+                });
+        }
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
