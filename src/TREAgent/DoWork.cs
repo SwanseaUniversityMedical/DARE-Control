@@ -101,6 +101,7 @@ namespace TREAgent
                             // TODO for rest API
                             try
                             {
+                                var callHUTCH = treApi.CallAPI("url", null, false);
 
                             }
                             catch (Exception e)
@@ -116,6 +117,8 @@ namespace TREAgent
                             // TODO RESTAPI and hangfire job to follow up
                             try
                             {
+                                var callTESK = treApi.CallAPI("url", null, false);
+
 
                             }
                             catch (Exception e)

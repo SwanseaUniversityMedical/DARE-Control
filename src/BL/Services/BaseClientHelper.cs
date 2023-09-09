@@ -105,34 +105,7 @@ namespace BL.Services
                     apiClient = await CreateClientWithOutKeycloak();
                 }
                     
-                if (paramlist != null)
-                {
-                    if (endPoint.EndsWith("/"))
-                    {
-                        endPoint = endPoint.Substring(0, endPoint.Length - 1);
-                    }
-
-                    if (!endPoint.EndsWith("?"))
-                    {
-                        endPoint += "?";
-                    }
-
-                    var firstparam = true;
-                    foreach (var item in paramlist)
-                    {
-                        if (firstparam)
-                        {
-                            firstparam = false;
-
-                        }
-                        else
-                        {
-                            endPoint += "&";
-                        }
-                        endPoint +=  item.Key + "=" + item.Value;
-                        
-                    }
-                }
+                endPoint = ConstructEndPoint(endPoint, paramlist);
 
                 HttpResponseMessage res = new HttpResponseMessage
                 {
@@ -156,6 +129,39 @@ namespace BL.Services
                 Log.Error(ex, "{Function} Crash", "ClientHelperRequestAsync");
                 throw;
             }
+        }
+
+        private static string ConstructEndPoint(string endPoint, Dictionary<string, string>? paramlist)
+        {
+            if (paramlist != null)
+            {
+                if (endPoint.EndsWith("/"))
+                {
+                    endPoint = endPoint.Substring(0, endPoint.Length - 1);
+                }
+
+                if (!endPoint.EndsWith("?"))
+                {
+                    endPoint += "?";
+                }
+
+                var firstparam = true;
+                foreach (var item in paramlist)
+                {
+                    if (firstparam)
+                    {
+                        firstparam = false;
+                    }
+                    else
+                    {
+                        endPoint += "&";
+                    }
+
+                    endPoint += item.Key + "=" + item.Value;
+                }
+            }
+
+            return endPoint;
         }
 
         protected async Task<HttpClient> CreateClientWithKeycloak()
@@ -196,6 +202,13 @@ namespace BL.Services
             return jsonString;
         }
 
+        public async Task<HttpResponseMessage> CallAPI(string endPoint,  Dictionary<string, string>? paramList = null, bool usePut = false) 
+        {
+           var apiClient = await CreateClientWithOutKeycloak();
+           endPoint = ConstructEndPoint(endPoint,paramList);
+           return await apiClient.GetAsync(endPoint);
+        }
+
         public async Task<TOutput?> CallAPI<TInput, TOutput>(string endPoint,TInput model, Dictionary<string, string>? paramList = null, bool usePut = false) where TInput : class? where TOutput : class?, new()
         {
             StringContent? modelString = null;
@@ -204,20 +217,13 @@ namespace BL.Services
                 modelString = GetStringContent<TInput>(model);
             }
             
-
             return await CallAPIWithReturnType<TOutput>(endPoint, modelString, paramList, usePut);
-           
         }
 
         public async Task<TOutput?> CallAPIWithoutModel<TOutput>(string endPoint, Dictionary<string, string>? paramList = null) where TOutput : class?, new()
         {
-            
-
             return await CallAPIWithReturnType<TOutput>(endPoint, null, paramList);
-
         }
-
-
 
         #endregion
     }
