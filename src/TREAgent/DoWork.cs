@@ -10,12 +10,15 @@ using EasyNetQ;
 using Newtonsoft.Json;
 using Serilog;
 using TREAgent.Services;
+using Microsoft.Extensions.Hosting;
+using Hangfire;
 
 namespace TREAgent
 {
     public interface IDoWork
     {
         void Execute();
+        void CheckTESK(string taskID);
     }
 
     public class DoWork : IDoWork
@@ -27,25 +30,43 @@ namespace TREAgent
         
         }
 
+        public void CheckTESK(string taskID)
+        {
+            Console.WriteLine(taskID);
+            RecurringJob.RemoveIfExists("task-999");
+        }
+
+
         // Method executed upon hangfire job
         public void Execute()
         {
             // control use of dependency injection
             using (var scope = _serviceProvider.CreateScope())
             {
+
+                RecurringJob.AddOrUpdate<IDoWork>("task-999",a => a.CheckTESK("simon"), Cron.MinuteInterval(1));
+
                 // OPTIONS
                 // TODO get these from somewhere
-                
+
                 var useRabbit = true;
                 var useHutch = true;
                 var useTESK = true;
 
-
                 // Get list of submissions
+                List<Submission> listOfSubmissions;
                 var treApi = scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
-                var listOfSubmissions = treApi.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre").Result;
-
-
+                try
+                {
+                    listOfSubmissions = treApi.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre").Result;
+                }
+                catch (Exception e)
+                {
+                   Log.Error("Error getting submissions: {message}", e.Message);
+                   Console.WriteLine(e.Message);
+                   throw;
+                }
+               
                 foreach (var aSubmission in listOfSubmissions)
                 {
                     Log.Information("Submission: {submission}", aSubmission);
@@ -84,6 +105,7 @@ namespace TREAgent
                         {
                             try
                             {
+                                // Not ideal to create each time around the loop but ???
                                 IBus rabbit = scope.ServiceProvider.GetRequiredService<IBus>();
                                 EasyNetQ.Topology.Exchange exchangeObject = rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
                                 rabbit.Advanced.Publish(exchangeObject, RoutingConstants.Subs, false, new Message<TesTask>(tesMessage));
@@ -105,6 +127,9 @@ namespace TREAgent
 
                                 var callHUTCH = treApi.CallAPI("url", x, null,false);
                               
+                                // GET task ID
+
+                                // Create HANGFIRE job to check periodically untill we have an completed job
 
                             }
                             catch (Exception e)
@@ -123,6 +148,7 @@ namespace TREAgent
                                 StringContent x = new StringContent("abc");
                                 var callTESK = treApi.CallAPI("url", x,null, false);
 
+                                //  curl - iv - X POST - s--header 'Content-Type: application/json'--header 'Accept: application/json' - d "@test.json" "https://tesk.test-tesk.dk.serp.ac.uk/ga4gh/tes/v1/tasks"
 
                             }
                             catch (Exception e)
