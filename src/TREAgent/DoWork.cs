@@ -44,8 +44,7 @@ namespace TREAgent
             using (var scope = _serviceProvider.CreateScope())
             {
 
-                RecurringJob.AddOrUpdate<IDoWork>("task-999",a => a.CheckTESK("simon"), Cron.MinuteInterval(1));
-
+                
                 // OPTIONS
                 // TODO get these from somewhere
 
