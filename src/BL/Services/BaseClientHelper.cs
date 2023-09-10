@@ -202,11 +202,9 @@ namespace BL.Services
             return jsonString;
         }
 
-        public async Task<HttpResponseMessage> CallAPI(string endPoint,  Dictionary<string, string>? paramList = null, bool usePut = false) 
+        public async Task<HttpResponseMessage> CallAPI(string endPoint, StringContent? jsonString, Dictionary<string, string>? paramList = null, bool usePut = false) 
         {
-           var apiClient = await CreateClientWithOutKeycloak();
-           endPoint = ConstructEndPoint(endPoint,paramList);
-           return await apiClient.GetAsync(endPoint);
+            return  await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Post, jsonString, paramList);
         }
 
         public async Task<TOutput?> CallAPI<TInput, TOutput>(string endPoint,TInput model, Dictionary<string, string>? paramList = null, bool usePut = false) where TInput : class? where TOutput : class?, new()
