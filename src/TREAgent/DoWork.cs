@@ -19,7 +19,11 @@ namespace TREAgent
     {
         void Execute();
         void CheckTESK(string taskID);
+        void testing()
     }
+
+    // TESK : http://172.16.34.31:8080/
+
 
     public class DoWork : IDoWork
     {
@@ -28,6 +32,18 @@ namespace TREAgent
         {
             _serviceProvider = serviceProvider;
         
+        }
+
+        public void testing()
+        {
+            Console.WriteLine("Testing);
+            using (var scope = _serviceProvider.CreateScope()) {
+
+                var treApi = scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
+                
+
+
+            }
         }
 
         public void CheckTESK(string taskID)
