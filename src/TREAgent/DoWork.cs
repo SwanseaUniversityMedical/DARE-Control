@@ -12,6 +12,9 @@ using Serilog;
 using TREAgent.Services;
 using Microsoft.Extensions.Hosting;
 using Hangfire;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Security.Policy;
 
 namespace TREAgent
 {
@@ -22,7 +25,7 @@ namespace TREAgent
         void testing();
     }
 
-    // TESK : http://172.16.34.31:8080/
+    // TESK : http://172.16.34.31:8080/    https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks
 
 
     public class DoWork : IDoWork
@@ -37,19 +40,58 @@ namespace TREAgent
         public void testing()
         {
             Console.WriteLine("Testing");
-            using (var scope = _serviceProvider.CreateScope()) {
 
-                var treApi = scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
-                
+            using (var httpClient = new HttpClient())
+            {
+                // Define the URL for the POST request
+                string apiUrl = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks";
+
+                // Create a HttpRequestMessage with the HTTP method set to POST
+                var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
+
+                // Set the headers
+                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                request.Headers.TryAddWithoutValidation("Content-Type", "application/json");
+
+                // Define the JSON string
+                string jsonContent = "{\"name\": \"Hello World\",\r\n  \"description\": \"Hello World, inspired by Funnel's most basic example\",\r\n  \"executors\": [\r\n    {\r\n      \"image\": \"alpine\",\r\n      \"command\": [\r\n        \"echo\",\r\n        \"TESK says: Hello World\"\r\n      ]\r\n    }\r\n  ]}"; // Replace with your JSON data
+
+                // Attach the JSON string to the request's content
+                request.Content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
 
+                // Send the POST request
+                HttpResponseMessage response = httpClient.SendAsync(request).Result;
+
+                // Check the response status
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = response.Content.ReadAsStringAsync().Result;
+                    Console.WriteLine("Request successful. Response:");
+                    Console.WriteLine(responseBody);
+                    Log.Information("Request successful. Response: {response}", responseBody);
+
+                    var responseObj = JsonConvert.DeserializeObject<ResponseModel>(responseBody);
+                    string id = responseObj.id;
+
+                    RecurringJob.AddOrUpdate<IDoWork>(id, a => a.CheckTESK(id), Cron.MinuteInterval(1));
+
+                }
+                else
+                {
+                    Console.WriteLine($"Request failed with status code: {response.StatusCode}");
+                }
             }
         }
 
+        class ResponseModel
+        {
+            public string id { get; set; }
+        }
         public void CheckTESK(string taskID)
         {
-            Console.WriteLine(taskID);
-            RecurringJob.RemoveIfExists("task-999");
+            Console.WriteLine("Check Task : "+taskID);
+            RecurringJob.RemoveIfExists(taskID);
         }
 
 

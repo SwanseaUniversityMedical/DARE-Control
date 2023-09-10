@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Serilog;
+using System.Net;
 
 namespace BL.Services
 {
@@ -202,7 +203,7 @@ namespace BL.Services
             return jsonString;
         }
 
-        public async Task<HttpResponseMessage> CallAPI(string endPoint, StringContent? jsonString, Dictionary<string, string>? paramList = null, bool usePut = false) 
+        public async Task<HttpResponseMessage> CallAPI(string endPoint, StringContent? jsonString, Dictionary<string, string>? paramList = null, bool usePut = false)
         {
             return  await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Post, jsonString, paramList);
         }
