@@ -48,6 +48,7 @@ namespace DARE_API.Controllers
                 project.StartDate = project.StartDate.ToUniversalTime();
                 project.EndDate = project.EndDate.ToUniversalTime();
                 project.ProjectDescription = project.ProjectDescription.Trim();
+                project.MarkAsEmbargoed = project.MarkAsEmbargoed;
                 
                 
                 
