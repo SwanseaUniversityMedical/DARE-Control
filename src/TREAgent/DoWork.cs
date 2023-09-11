@@ -43,8 +43,15 @@ namespace TREAgent
 
         public void testing()
         {
-            Console.WriteLine("Testing");
 
+            Console.WriteLine("Testing");
+            string jsonContent = "{\"name\": \"Hello World\",\r\n  \"description\": \"Hello World, inspired by Funnel's most basic example\",\r\n  \"executors\": [\r\n    {\r\n      \"image\": \"alpine\",\r\n      \"command\": [\r\n        \"echo\",\r\n        \"TESK says: Hello World\"\r\n      ]\r\n    }\r\n  ]}"; // Replace with your JSON data
+
+            CreateTESK(jsonContent);
+        }
+
+        public string CreateTESK(string jsonContent)
+        {
             using (var httpClient = new HttpClient())
             {
                 // Define the URL for the POST request
@@ -56,9 +63,6 @@ namespace TREAgent
                 // Set the headers
                 request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 request.Headers.TryAddWithoutValidation("Content-Type", "application/json");
-
-                // Define the JSON string
-                string jsonContent = "{\"name\": \"Hello World\",\r\n  \"description\": \"Hello World, inspired by Funnel's most basic example\",\r\n  \"executors\": [\r\n    {\r\n      \"image\": \"alpine\",\r\n      \"command\": [\r\n        \"echo\",\r\n        \"TESK says: Hello World\"\r\n      ]\r\n    }\r\n  ]}"; // Replace with your JSON data
 
                 // Attach the JSON string to the request's content
                 request.Content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
@@ -79,11 +83,13 @@ namespace TREAgent
                     string id = responseObj.id;
 
                     RecurringJob.AddOrUpdate<IDoWork>(id, a => a.CheckTESK(id), Cron.MinuteInterval(1));
-
+                    
+                    return id;
                 }
                 else
                 {
                     Console.WriteLine($"Request failed with status code: {response.StatusCode}");
+                    return "";
                 }
             }
         }
@@ -238,10 +244,6 @@ namespace TREAgent
 
                                 var callHUTCH = treApi.CallAPI("url", x, null,false);
                               
-                                // GET task ID
-
-                                // Create HANGFIRE job to check periodically untill we have an completed job
-
                             }
                             catch (Exception e)
                             {
@@ -253,21 +255,8 @@ namespace TREAgent
                         // **************  SEND TO TESK
                         if (useTESK)
                         {
-                            // TODO RESTAPI and hangfire job to follow up
-                            try
-                            {
-                                StringContent x = new StringContent("abc");
-                                var callTESK = treApi.CallAPI("url", x,null, false);
-
-                                //  curl - iv - X POST - s--header 'Content-Type: application/json'--header 'Accept: application/json' - d "@test.json" "https://tesk.test-tesk.dk.serp.ac.uk/ga4gh/tes/v1/tasks"
-
-                            }
-                            catch (Exception e)
-                            {
-                                Log.Error("Send TESK failed : {message}", e.Message);
-                                processedOK = false;
-                            }
-
+                            if (tesMessage is not null)
+                                CreateTESK(tesMessage);
                         }
 
                         // **************  TELL SUBMISSION LAYER WE DONE
