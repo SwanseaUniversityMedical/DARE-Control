@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using System;
 using TREAgent;
 using TREAgent.Repositories.DbContexts;
 using TREAgent.Services;
@@ -68,6 +69,8 @@ var hostBuilder = new HostBuilder()
 // Build and run the host
 await hostBuilder.RunConsoleAsync();
 
+
+
 public class Startup
 {
     public IConfiguration Configuration { get; }
@@ -82,8 +85,9 @@ public class Startup
         // Configure Hangfire
         string hangfireConnectionString = Configuration.GetConnectionString("DefaultConnection");
         services.AddHangfire(config => { config.UsePostgreSqlStorage(hangfireConnectionString); });
-
         services.AddHangfireServer();
+
+ 
 
         services.Configure<RabbitMQSetting>(Configuration.GetSection("RabbitMQ"));
         services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);

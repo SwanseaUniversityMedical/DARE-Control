@@ -15,6 +15,9 @@ using Hangfire;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Security.Policy;
+using Microsoft.EntityFrameworkCore;
+using TREAgent.Repositories;
+using TREAgent.Repositories.DbContexts;
 
 namespace TREAgent
 {
@@ -31,10 +34,11 @@ namespace TREAgent
     public class DoWork : IDoWork
     {
         private readonly IServiceProvider _serviceProvider;
-        public DoWork(IServiceProvider serviceProvider)
+        private readonly ApplicationDbContext _dbContext;
+        public DoWork(IServiceProvider serviceProvider, ApplicationDbContext dbContext)
         {
             _serviceProvider = serviceProvider;
-        
+            _dbContext = dbContext;
         }
 
         public void testing()
@@ -91,8 +95,58 @@ namespace TREAgent
         public void CheckTESK(string taskID)
         {
             Console.WriteLine("Check Task : "+taskID);
+
+            string url = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks/"+taskID+"?view=basic";
+            using (HttpClient client = new HttpClient())
+            {
+                HttpResponseMessage response =  client.GetAsync(url).Result;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string content =   response.Content.ReadAsStringAsync().Result;
+                    Console.WriteLine(content);
+                    TESKstatus status = JsonConvert.DeserializeObject<TESKstatus>(content);
+
+                  
+                        var shouldReport = false;
+
+                   
+                        var fromDatabase = (_dbContext.TESK_Status.Where(x => x.id == taskID)).FirstOrDefault();
+
+                        if (fromDatabase is null)
+                        {
+                            shouldReport = true;
+                           _dbContext.Add(status);
+                        }
+                        else
+                        {
+                            if (fromDatabase.state != status.state)
+                            {
+                                shouldReport = true;
+                                fromDatabase.state=status.state;
+                               _dbContext.Update(fromDatabase);
+                            }
+                        }
+
+                        if (shouldReport==true)
+                        {
+                            Console.WriteLine("*** status change *** ");
+                            _dbContext.SaveChanges();
+
+                        } else Console.WriteLine("NO CHANGE");
+                  
+
+                }
+                else
+                {
+                    Console.WriteLine($"HTTP Request {url} failed with status code: {response.StatusCode}");
+                }
+            }
+
+
             RecurringJob.RemoveIfExists(taskID);
         }
+
 
 
         // Method executed upon hangfire job
