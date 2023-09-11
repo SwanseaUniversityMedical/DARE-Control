@@ -9,11 +9,13 @@ using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using TREAgent;
+using TREAgent.Repositories.DbContexts;
 using TREAgent.Services;
 
 Console.WriteLine("Hello, World!");
@@ -44,6 +46,11 @@ var hostBuilder = new HostBuilder()
         services.AddHttpContextAccessor();
         services.AddHttpClient();
         services.AddHttpContextAccessor();
+        services.AddDbContext<ApplicationDbContext>(options => options
+            .UseLazyLoadingProxies(true)
+            .UseNpgsql(
+                hostContext.Configuration.GetConnectionString("DefaultConnection")
+            ));
 
         services.AddScoped<IDoWork, DoWork>();
 
@@ -82,9 +89,15 @@ public class Startup
         services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);
         var bus =
             services.AddSingleton(RabbitHutch.CreateBus(
-                $"host={Configuration["RabbitMQ:HostAddress"]}:{int.Parse(Configuration["RabbitMQ:PortNumber"])};virtualHost={Configuration["RabbitMQ:VirtualHost"]};username={Configuration["RabbitMQ:Username"]};password={Configuration["RabbitMQ:Password"]}"));
-        Task task = SetUpRabbitMQ.DoItAsync(Configuration["RabbitMQ:HostAddress"], Configuration["RabbitMQ:PortNumber"],
-            Configuration["RabbitMQ:VirtualHost"], Configuration["RabbitMQ:Username"],
+                $"host={Configuration["RabbitMQ:HostAddress"]}:{int.Parse(Configuration["RabbitMQ:PortNumber"])};" +
+                $"virtualHost={Configuration["RabbitMQ:VirtualHost"]};" +
+                $"username={Configuration["RabbitMQ:Username"]};" +
+                $"password={Configuration["RabbitMQ:Password"]}"));
+
+        Task task = SetUpRabbitMQ.DoItAsync(Configuration["RabbitMQ:HostAddress"], 
+            Configuration["RabbitMQ:PortNumber"],
+            Configuration["RabbitMQ:VirtualHost"], 
+            Configuration["RabbitMQ:Username"],
             Configuration["RabbitMQ:Password"]);
 
     }
@@ -104,6 +117,7 @@ public class Startup
         var port = serverAddressesFeature?.Addresses.FirstOrDefault()?.Split(':').Last();
 
         // Print the port number
+        Console.WriteLine("*** TRE AGENT ***");
         Console.WriteLine("Application is running on port: " + port);
 
     }
