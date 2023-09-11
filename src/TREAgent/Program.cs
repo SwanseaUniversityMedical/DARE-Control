@@ -20,7 +20,8 @@ using TREAgent;
 using TREAgent.Repositories.DbContexts;
 using TREAgent.Services;
 
-Console.WriteLine("Hello, World!");
+Console.WriteLine("loading ..");
+Console.WriteLine("");
 
 
 var hostBuilder = new HostBuilder()
@@ -129,7 +130,15 @@ public class Startup
         var port = serverAddressesFeature?.Addresses.FirstOrDefault()?.Split(':').Last();
 
         // Print the port number
-        Console.WriteLine("*** TRE AGENT ***");
+        Console.WriteLine("  _______ _____  ______                            _   ");
+        Console.WriteLine(" |__   __|  __ \\|  ____|     /\\                   | |  ");
+        Console.WriteLine("    | |  | |__) | |__       /  \\   __ _  ___ _ __ | |_ ");
+        Console.WriteLine("    | |  |  _  /|  __|     / /\\ \\ / _` |/ _ \\ '_ \\| __|");
+        Console.WriteLine("    | |  | | \\ \\| |____   / ____ \\ (_| |  __/ | | | |_ ");
+        Console.WriteLine("    |_|  |_|  \\_\\______| /_/    \\_\\__, |\\___|_| |_|\\__|");
+        Console.WriteLine("                                   __/ |            ");
+        Console.WriteLine("                                  |___/            ");
+        Console.WriteLine("");
         Console.WriteLine("Application is running on port: " + port);
 
     }
