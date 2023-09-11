@@ -17,7 +17,7 @@ namespace DARE_FrontEnd.Controllers
         private readonly IDareClientHelper _clientHelper;
         
         private readonly FormIOSettings _formIOSettings;
-                protected readonly IHttpContextAccessor _httpContextAccessor;
+        protected readonly IHttpContextAccessor _httpContextAccessor;
         public ProjectController(IDareClientHelper client, FormIOSettings formIo, IHttpContextAccessor httpContextAccessor)
         {
             _clientHelper = client;
