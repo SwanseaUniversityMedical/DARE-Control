@@ -47,7 +47,7 @@ namespace TREAgent
         {
 
             Console.WriteLine("Testing");
-            string jsonContent = "{ \"name\": \"Hello World\", \"description\": \"Hello World, inspired by Funnel's most basic example\",\r\n\"executors\": [\r\n{ \"image\": \"alpine\", \"command\": [ \"xxsleep\", \"5m\" ] },\r\n{ \"image\": \"alpine\", \"command\": [ \"echo\", \"TESK says:   Hello World\" ]    }\r\n  ]\r\n}";
+            string jsonContent = "{ \"name\": \"Hello World\", \"description\": \"Hello World, inspired by Funnel's most basic example\",\r\n\"executors\": [\r\n{ \"image\": \"alpine\", \"command\": [ \"sleep\", \"5m\" ] },\r\n{ \"image\": \"alpine\", \"command\": [ \"echo\", \"TESK says:   Hello World\" ]    }\r\n  ]\r\n}";
 
             CreateTESK(jsonContent,"99");
         }
