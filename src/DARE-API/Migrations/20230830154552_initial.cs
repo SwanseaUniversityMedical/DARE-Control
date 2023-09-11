@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -193,6 +194,7 @@ namespace DARE_API.Migrations
                    AuditValues = table.Column<string>(type: "text", nullable: false),
                    UserName = table.Column<string>(type: "text", nullable: false),
                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                   IPaddress = table.Column<string>(type: "text", nullable: false),
                    FormData = table.Column<string>(type: "text", nullable: false)
                },
                constraints: table =>
@@ -237,7 +239,7 @@ namespace DARE_API.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_AuditLogs_Id",
                 table: "AuditLogs",
-                column: "AuditId");
+                column: "Id");
 
         }
 

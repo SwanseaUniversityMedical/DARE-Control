@@ -5,6 +5,9 @@ using BL.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Authorization;
 using BL.Models.Settings;
+using Microsoft.AspNetCore.Http;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -14,13 +17,13 @@ namespace DARE_FrontEnd.Controllers
         private readonly IDareClientHelper _clientHelper;
         
         private readonly FormIOSettings _formIOSettings;
-
-        public ProjectController(IDareClientHelper client, FormIOSettings formIo)
+                protected readonly IHttpContextAccessor _httpContextAccessor;
+        public ProjectController(IDareClientHelper client, FormIOSettings formIo, IHttpContextAccessor httpContextAccessor)
         {
             _clientHelper = client;
             
             _formIOSettings = formIo;
-            
+            _httpContextAccessor = httpContextAccessor;
 
         }
 
@@ -147,7 +150,17 @@ namespace DARE_FrontEnd.Controllers
             var result =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
             result = GetProjectUserModel();
-
+            var audit = new AuditLog()
+            {
+                FormData = "ProjectId: " + model.ProjectId.ToString() + " /User Id: " + model.UserId.ToString(),
+                IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
+                UserName = @User?.FindFirst("name")?.Value,
+                Module = "ProjectUser",
+                AuditValues = "Added UserMembership- " + "ProjectId: " + model.ProjectId.ToString() + " /User Id: " + model.UserId.ToString(),
+                Action = "AddUserMembership",
+                Date = DateTime.Now.ToUniversalTime()
+            };
+            var log = await _clientHelper.CallAPI<AuditLog, AuditLog?>("/api/Audit/SaveAuditLogs", audit);
 
             return View(result);
 
@@ -161,6 +174,17 @@ namespace DARE_FrontEnd.Controllers
                 await _clientHelper.CallAPI<ProjectTre, ProjectTre?>("/api/Project/AddTreMembership",
                     model);
             result = GetProjectTreModel();
+            var audit = new AuditLog()
+            {
+                FormData = "ProjectId: "+ model.ProjectId.ToString() +" /Tre Id: "+ model.TreId.ToString(),
+                IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
+                UserName = @User?.FindFirst("name")?.Value,
+                Module = "ProjectTre",
+                AuditValues = "Added TreMembership- " + "ProjectId: " + model.ProjectId.ToString() + " /Tre Id: " + model.TreId.ToString(),
+                Action = "AddTreMembership",
+                Date = DateTime.Now.ToUniversalTime()
+            };
+            var log = await _clientHelper.CallAPI<AuditLog, AuditLog?>("/api/Audit/SaveAuditLogs", audit);
 
             return View(result);
 
@@ -187,7 +211,6 @@ namespace DARE_FrontEnd.Controllers
 
                 formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""Id"":" + projectId.ToString(), StringComparison.CurrentCultureIgnoreCase);
             }
-
 
             return View(formData);
         }
@@ -228,8 +251,19 @@ namespace DARE_FrontEnd.Controllers
             {
                 var data = System.Text.Json.JsonSerializer.Deserialize<FormData>(str);
                 data.FormIoString = str;
-
+       
                 var result = await _clientHelper.CallAPI<FormData, Project?>("/api/Project/SaveProject", data);
+                var audit = new AuditLog()
+                {
+                    FormData = data.FormIoString,
+                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
+                    UserName = @User?.FindFirst("name")?.Value,
+                    Module = "Projects",
+                    AuditValues = "Added Project/"+" "+ result.Id.ToString()+" "+result.ErrorMessage,
+                    Action = "ProjectFormSubmission",
+                    Date = DateTime.Now.ToUniversalTime()
+                };
+                var log = await _clientHelper.CallAPI<AuditLog, AuditLog?>("/api/Audit/SaveAuditLogs", audit);
 
                 if (result.Id == 0)
                     return BadRequest();
@@ -249,6 +283,19 @@ namespace DARE_FrontEnd.Controllers
             };
             var result =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/RemoveUserMembership", model);
+
+            var audit = new AuditLog()
+            {
+                FormData = "ProjectId: " + model.ProjectId.ToString() + " /User Id: " + model.UserId.ToString(),
+                IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
+                UserName = @User?.FindFirst("name")?.Value,
+                Module = "ProjectUser",
+                AuditValues = "Removed Project User- " + "ProjectId: " + model.ProjectId.ToString() + " /User Id: " + model.UserId.ToString(),
+                Action = "RemoveUserFromProject",
+                Date = DateTime.Now.ToUniversalTime()
+            };
+            var log = await _clientHelper.CallAPI<AuditLog, AuditLog?>("/api/Audit/SaveAuditLogs", audit);
+            
             return RedirectToAction("GetProject", new { id = projectId });
         }
 
@@ -262,6 +309,18 @@ namespace DARE_FrontEnd.Controllers
             };
             var result =
                 await _clientHelper.CallAPI<ProjectTre, ProjectTre?>("/api/Project/RemoveTreMembership", model);
+            var audit = new AuditLog()
+            {
+                FormData = "ProjectId: " + model.ProjectId.ToString() + " /Tre Id: " + model.TreId.ToString(),
+                IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
+                UserName = @User?.FindFirst("name")?.Value,
+                Module = "ProjectTre",
+                AuditValues = "Removed Project Tre- " + "ProjectId: " + model.ProjectId.ToString() + " /Tre Id: " + model.TreId.ToString(),
+                Action = "RemoveTreFromProject",
+                Date = DateTime.Now.ToUniversalTime()
+            };
+            var log = await _clientHelper.CallAPI<AuditLog, AuditLog?>("/api/Audit/SaveAuditLogs", audit);
+
             return RedirectToAction("GetProject", new { id = projectId });
         }
 

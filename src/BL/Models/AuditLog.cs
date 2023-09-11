@@ -9,6 +9,7 @@ namespace BL.Models
         public string AuditValues { get; set; }
         public string UserName { get; set; }
         public string FormData { get; set; }
+        public string IPaddress { get; set; }
         public DateTime Date { get; set; }
 
     }

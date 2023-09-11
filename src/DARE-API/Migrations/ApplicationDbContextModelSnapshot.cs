@@ -48,6 +48,10 @@ namespace DARE_API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("IPaddress")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Module")
                         .IsRequired()
                         .HasColumnType("text");

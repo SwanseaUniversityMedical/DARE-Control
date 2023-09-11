@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using BL.Models.Settings;
 using Microsoft.CodeAnalysis;
+using Microsoft.AspNetCore.Http;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -15,13 +16,14 @@ namespace DARE_FrontEnd.Controllers
         private readonly IDareClientHelper _clientHelper;
         
         private readonly FormIOSettings _formIOSettings;
-
-        public TreController(IDareClientHelper client, FormIOSettings formIo)
+        protected readonly IHttpContextAccessor _httpContextAccessor;
+        public TreController(IDareClientHelper client, FormIOSettings formIo, IHttpContextAccessor httpContextAccessor)
         {
             _clientHelper = client;
 
             _formIOSettings = formIo;
-            
+
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpGet]
@@ -82,6 +84,17 @@ namespace DARE_FrontEnd.Controllers
                 data.FormIoString = str;
 
                 var result = await _clientHelper.CallAPI<FormData, Tre?>("/api/Tre/SaveTre", data);
+                var audit = new AuditLog()
+                {
+                    FormData = data.FormIoString,
+                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
+                    UserName = @User?.FindFirst("name")?.Value,
+                    Module = "Tres",
+                    AuditValues = "Added Tre/" + " " + result.Id.ToString() + " " + result.ErrorMessage,
+                    Action = "TreFormSubmission",
+                    Date = DateTime.Now.ToUniversalTime()
+                };
+                var log = await _clientHelper.CallAPI<AuditLog, AuditLog?>("/api/Audit/SaveAuditLogs", audit);
 
                 if (result.Error)
                     return BadRequest();

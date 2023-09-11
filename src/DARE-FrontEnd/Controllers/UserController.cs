@@ -22,13 +22,13 @@ namespace DARE_FrontEnd.Controllers
         private readonly IDareClientHelper _clientHelper;
         
         private readonly FormIOSettings _formIOSettings;
-
-        public UserController(IDareClientHelper client, FormIOSettings formIo)
+        protected readonly IHttpContextAccessor _httpContextAccessor;
+        public UserController(IDareClientHelper client, FormIOSettings formIo, IHttpContextAccessor httpContextAccessor)
         {
             _clientHelper = client;
             
             _formIOSettings = formIo;
-            
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpGet]
@@ -95,6 +95,17 @@ namespace DARE_FrontEnd.Controllers
                 data.FormIoString = str;
 
                 var result = await _clientHelper.CallAPI<FormData, BL.Models.User>("/api/User/SaveUser", data);
+                var audit = new AuditLog()
+                {
+                    FormData = data.FormIoString,
+                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
+                    UserName = @User?.FindFirst("name")?.Value,
+                    Module = "Users",
+                    AuditValues = "Edited User/" + " " + result.Id.ToString() + " " + result.ErrorMessage,
+                    Action = "UserEditFormSubmission",
+                    Date = DateTime.Now.ToUniversalTime()
+                };
+                var log = await _clientHelper.CallAPI<AuditLog, AuditLog?>("/api/Audit/SaveAuditLogs", audit);
 
                 if (result.Id == 0)
                     return BadRequest();
@@ -111,7 +122,7 @@ namespace DARE_FrontEnd.Controllers
             var projmem = GetProjectUserModel();
             return View(projmem);
         }
-
+     
         [HttpPost]
         public async Task<IActionResult> AddProjectMembership(ProjectUser model)
         {
@@ -135,6 +146,18 @@ namespace DARE_FrontEnd.Controllers
             };
             var result =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/User/RemoveProjectMembership", model);
+            var audit = new AuditLog()
+            {
+                FormData = "ProjectId: " + model.ProjectId.ToString() + " /User Id: " + model.UserId.ToString(),
+                IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
+                UserName = @User?.FindFirst("name")?.Value,
+                Module = "ProjectUser",
+                AuditValues = "Removed Project User- " + "ProjectId: " + model.ProjectId.ToString() + " /User Id: " + model.UserId.ToString(),
+                Action = "RemoveProjectFromUser",
+                Date = DateTime.Now.ToUniversalTime()
+            };
+            var log = await _clientHelper.CallAPI<AuditLog, AuditLog?>("/api/Audit/SaveAuditLogs", audit);
+
             return RedirectToAction("GetUser", new { id = userId });
         }
 
