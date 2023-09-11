@@ -33,11 +33,10 @@ namespace DARE_API.Controllers
         {
             try
             {
-
                 _DbContext.AuditLogs.Add(model);
                 await _DbContext.SaveChangesAsync();
 
-                Log.Information("{Function} User: "+ model.UserName+" added a Project", "SaveAuditLogs", model.FormData, model.AuditValues);
+                Log.Information("{Function} User: "+ model.UserName+" "+ model.Action, "SaveAuditLogs", model.FormData, model.AuditValues);
                 return model;
             }
             catch (Exception ex)
