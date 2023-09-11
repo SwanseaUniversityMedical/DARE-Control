@@ -123,7 +123,7 @@ public class Startup
 
         //RecurringJob.AddOrUpdate<IDoWork>("Scan Submissions",a => a.Execute(), Cron.MinuteInterval(10));
         //RecurringJob.AddOrUpdate<IDoWork>("task-999", a => a.CheckTESK("simon"), Cron.MinuteInterval(1));
-        RecurringJob.AddOrUpdate<IDoWork>("testing2", a => a.testing(), Cron.MinuteInterval(1));
+        RecurringJob.AddOrUpdate<IDoWork>("testing2", a => a.testing(), Cron.MinuteInterval(4));
 
         var serverAddressesFeature = app.ServerFeatures.Get<IServerAddressesFeature>();
         var port = serverAddressesFeature?.Addresses.FirstOrDefault()?.Split(':').Last();

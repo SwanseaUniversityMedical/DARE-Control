@@ -47,7 +47,7 @@ namespace TREAgent
         {
 
             Console.WriteLine("Testing");
-            string jsonContent = "{ \"name\": \"Hello World\", \"description\": \"Hello World, inspired by Funnel's most basic example\",\r\n\"executors\": [\r\n{ \"image\": \"alpine\", \"command\": [ \"sleep\", \"5m\" ] },\r\n{ \"image\": \"alpine\", \"command\": [ \"echo\", \"TESK says:   Hello World\" ]    }\r\n  ]\r\n}";
+            string jsonContent = "{ \"name\": \"Hello World\", \"description\": \"Hello World, inspired by Funnel's most basic example\",\r\n\"executors\": [\r\n{ \"image\": \"alpine\", \"command\": [ \"xxsleep\", \"5m\" ] },\r\n{ \"image\": \"alpine\", \"command\": [ \"echo\", \"TESK says:   Hello World\" ]    }\r\n  ]\r\n}";
 
             CreateTESK(jsonContent,"99");
         }
@@ -112,28 +112,40 @@ namespace TREAgent
             {
                 HttpResponseMessage response =  client.GetAsync(url).Result;
 
+                Console.WriteLine(response.StatusCode);
+
                 if (response.IsSuccessStatusCode)
                 {
-                    string content =   response.Content.ReadAsStringAsync().Result;
-                    Console.WriteLine(content);
+                    string content = response.Content.ReadAsStringAsync().Result;
+//                    Console.WriteLine(content);
+
                     TESKstatus status = JsonConvert.DeserializeObject<TESKstatus>(content);
 
                     var shouldReport = false;
 
-                    var fromDatabase = (_dbContext.TESK_Status.Where(x => x.id == taskID)).FirstOrDefault();
+                    var fromDatabase = (_dbContext.TESK_Status.Where(x => x.id == status.id)).FirstOrDefault();
 
-                        if (fromDatabase is null)
+                    if (fromDatabase is null)
+                    {
+                        shouldReport = true;
+                        _dbContext.Add(status);
+                    }
+                    else
+                    {
+                        if (fromDatabase.state != status.state)
                         {
                             shouldReport = true;
-                           _dbContext.Add(status);
+                            fromDatabase.state = status.state;
+                            _dbContext.Update(fromDatabase);
+
                         }
-                        else
+                    }
+
+                    _dbContext.SaveChanges();
+
+                        if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR"))
                         {
-                            if (fromDatabase.state != status.state)
-                            {
-                                shouldReport = true;
-                                fromDatabase.state = status.state;
-                                _dbContext.Update(fromDatabase);
+                            Console.WriteLine("*** status change *** " + status.state);
 
                             // send update
                             using (var scope = _serviceProvider.CreateScope())
@@ -154,32 +166,29 @@ namespace TREAgent
                                         statusMessage = StatusType.Cancelled.ToString();
                                         break;
                                 }
-                                var treApi = scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
-                                var result = treApi.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-                                    new Dictionary<string, string>()
-                                    {
-                                        { "tesId", TesId },
-                                        { "statusType", statusMessage },
-                                        { "description", "" }
-                                    }).Result;
+
+                                //var treApi =
+                                //    scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
+                                //var result = treApi.CallAPIWithoutModel<APIReturn>(
+                                //    "/api/Submission/UpdateStatusForTre",
+                                //    new Dictionary<string, string>()
+                                //    {
+                                //        { "tesId", TesId },
+                                //        { "statusType", statusMessage },
+                                //        { "description", "" }
+                                //    }).Result;
                             }
 
                             // are we done ?
                             if (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR")
-                                {
-                                    // Do this to avoid db locking issues
-                                    BackgroundJob.Enqueue(() => ClearJob(taskID));
-                                    // RecurringJob.RemoveIfExists(taskID);
-                                }
+                            {
+                                // Do this to avoid db locking issues
+                                BackgroundJob.Enqueue(() => ClearJob(taskID));
+                                // RecurringJob.RemoveIfExists(taskID);
                             }
                         }
-
-                        if (shouldReport==true)
-                        {
-                            Console.WriteLine("*** status change *** ");
-                            _dbContext.SaveChanges();
-
-                        } else Console.WriteLine("NO CHANGE");
+                        else
+                            Console.WriteLine("NO CHANGE " + status.state);
                   
 
                 }
