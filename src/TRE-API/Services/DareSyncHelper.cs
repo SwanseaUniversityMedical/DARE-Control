@@ -1,6 +1,7 @@
 ﻿using BL.Models.APISimpleTypeReturns;
 using BL.Models;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using TRE_API.Repositories.DbContexts;
 
 namespace TRE_API.Services
@@ -17,6 +18,14 @@ namespace TRE_API.Services
 
         public async Task<BoolReturn> SyncSubmissionWithTre()
         {
+            if (!_dareclientHelper.CheckCredsAreAvailable())
+            {
+                Log.Error("{Function} Credential not yet entered for synching with Dare", "SyncSubmissionWithTre");
+                return new BoolReturn()
+                {
+                    Result = false
+                };
+            }
             var subprojs = await _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForTre");
             var dbprojs = _DbContext.Projects.ToList();
             var projectAdds = subprojs.Where(x => !_DbContext.Projects.Any(y => y.SubmissionProjectId == x.Id));
