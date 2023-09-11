@@ -18,6 +18,7 @@ using System.Security.Policy;
 using Microsoft.EntityFrameworkCore;
 using TREAgent.Repositories;
 using TREAgent.Repositories.DbContexts;
+using System.Threading.Tasks;
 
 namespace TREAgent
 {
@@ -25,6 +26,7 @@ namespace TREAgent
     {
         void Execute();
         void CheckTESK(string taskID, string TesId);
+        void ClearJob(string jobname);
         void testing();
     }
 
@@ -45,7 +47,7 @@ namespace TREAgent
         {
 
             Console.WriteLine("Testing");
-            string jsonContent = "{\"name\": \"Hello World\",\r\n  \"description\": \"Hello World, inspired by Funnel's most basic example\",\r\n  \"executors\": [\r\n    {\r\n      \"image\": \"alpine\",\r\n      \"command\": [\r\n        \"echo\",\r\n        \"TESK says: Hello World\"\r\n      ]\r\n    }\r\n  ]}"; // Replace with your JSON data
+            string jsonContent = "{ \"name\": \"Hello World\", \"description\": \"Hello World, inspired by Funnel's most basic example\",\r\n\"executors\": [\r\n{ \"image\": \"alpine\", \"command\": [ \"sleep\", \"5m\" ] },\r\n{ \"image\": \"alpine\", \"command\": [ \"echo\", \"TESK says:   Hello World\" ]    }\r\n  ]\r\n}";
 
             CreateTESK(jsonContent,"99");
         }
@@ -83,7 +85,10 @@ namespace TREAgent
                     string id = responseObj.id;
 
                     RecurringJob.AddOrUpdate<IDoWork>(id, a => a.CheckTESK(id,TesId), Cron.MinuteInterval(1));
-                    
+
+                    _dbContext.Add(new TeskAudit(){message = jsonContent, teskid = id});
+                    _dbContext.SaveChanges();
+
                     return id;
                 }
                 else
@@ -113,11 +118,9 @@ namespace TREAgent
                     Console.WriteLine(content);
                     TESKstatus status = JsonConvert.DeserializeObject<TESKstatus>(content);
 
-                  
-                        var shouldReport = false;
+                    var shouldReport = false;
 
-                   
-                        var fromDatabase = (_dbContext.TESK_Status.Where(x => x.id == taskID)).FirstOrDefault();
+                    var fromDatabase = (_dbContext.TESK_Status.Where(x => x.id == taskID)).FirstOrDefault();
 
                         if (fromDatabase is null)
                         {
@@ -129,8 +132,45 @@ namespace TREAgent
                             if (fromDatabase.state != status.state)
                             {
                                 shouldReport = true;
-                                fromDatabase.state=status.state;
-                               _dbContext.Update(fromDatabase);
+                                fromDatabase.state = status.state;
+                                _dbContext.Update(fromDatabase);
+
+                            // send update
+                            using (var scope = _serviceProvider.CreateScope())
+                            {
+                                var statusMessage = StatusType.TransferredToPod.ToString();
+                                switch (status.state)
+                                {
+                                    case "QUEUED":
+                                        statusMessage = StatusType.TransferredToPod.ToString();
+                                        break;
+                                    case "RUNNING":
+                                        statusMessage = StatusType.PodProcessing.ToString();
+                                        break;
+                                    case "COMPLETE":
+                                        statusMessage = StatusType.PodProcessingComplete.ToString();
+                                        break;
+                                    case "EXECUTOR_ERROR":
+                                        statusMessage = StatusType.Cancelled.ToString();
+                                        break;
+                                }
+                                var treApi = scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
+                                var result = treApi.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
+                                    new Dictionary<string, string>()
+                                    {
+                                        { "tesId", TesId },
+                                        { "statusType", statusMessage },
+                                        { "description", "" }
+                                    }).Result;
+                            }
+
+                            // are we done ?
+                            if (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR")
+                                {
+                                    // Do this to avoid db locking issues
+                                    BackgroundJob.Enqueue(() => ClearJob(taskID));
+                                    // RecurringJob.RemoveIfExists(taskID);
+                                }
                             }
                         }
 
@@ -149,8 +189,7 @@ namespace TREAgent
                 }
             }
 
-
-            RecurringJob.RemoveIfExists(taskID);
+           
         }
 
 
@@ -286,6 +325,10 @@ namespace TREAgent
             
         }
 
-   
+        public void ClearJob(string jobname)
+        {
+            Console.WriteLine("Hangfire clear job: "+jobname);
+            RecurringJob.RemoveIfExists(jobname);
+        }
     }
 }

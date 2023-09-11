@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Minio;
 using System;
 using TREAgent;
 using TREAgent.Repositories.DbContexts;
@@ -47,6 +48,7 @@ var hostBuilder = new HostBuilder()
         services.AddHttpContextAccessor();
         services.AddHttpClient();
         services.AddHttpContextAccessor();
+    
         services.AddDbContext<ApplicationDbContext>(options => options
             .UseLazyLoadingProxies(true)
             .UseNpgsql(
@@ -64,10 +66,19 @@ var hostBuilder = new HostBuilder()
         webBuilder.UseUrls("http://localhost:5000"); // Specify the desired port here
     });
 
-    
+
+var host = hostBuilder.Build();
+
+// Do database migration
+var scope = host.Services.CreateScope();
+var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+await db.Database.MigrateAsync();
+
+
+await host.RunAsync();
 
 // Build and run the host
-await hostBuilder.RunConsoleAsync();
+//await hostBuilder.RunConsoleAsync();
 
 
 
@@ -86,8 +97,6 @@ public class Startup
         string hangfireConnectionString = Configuration.GetConnectionString("DefaultConnection");
         services.AddHangfire(config => { config.UsePostgreSqlStorage(hangfireConnectionString); });
         services.AddHangfireServer();
-
- 
 
         services.Configure<RabbitMQSetting>(Configuration.GetSection("RabbitMQ"));
         services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);
@@ -108,14 +117,13 @@ public class Startup
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-
+  
         app.UseHangfireDashboard();
         RecurringJob.RemoveIfExists("Scan Submissions");
 
         //RecurringJob.AddOrUpdate<IDoWork>("Scan Submissions",a => a.Execute(), Cron.MinuteInterval(10));
         //RecurringJob.AddOrUpdate<IDoWork>("task-999", a => a.CheckTESK("simon"), Cron.MinuteInterval(1));
-        RecurringJob.AddOrUpdate<IDoWork>("testing", a => a.testing(), Cron.MinuteInterval(1));
-
+        RecurringJob.AddOrUpdate<IDoWork>("testing2", a => a.testing(), Cron.MinuteInterval(1));
 
         var serverAddressesFeature = app.ServerFeatures.Get<IServerAddressesFeature>();
         var port = serverAddressesFeature?.Addresses.FirstOrDefault()?.Split(':').Last();
