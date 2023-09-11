@@ -123,7 +123,7 @@ namespace BL.Services
                    throw new Exception("API Call Failure: " + res.StatusCode + ": " + res.ReasonPhrase);
                 }
                 Log.Information("{Function} The response {res}", "ClientHelperRequestAsync", res);
-                Console.Out.Write(res);
+               
                 return res;
             }
             catch (Exception ex) {

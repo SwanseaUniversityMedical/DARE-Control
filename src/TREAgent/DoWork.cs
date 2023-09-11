@@ -167,20 +167,20 @@ namespace TREAgent
                                         break;
                                 }
 
-                                //var treApi =
-                                //    scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
-                                //var result = treApi.CallAPIWithoutModel<APIReturn>(
-                                //    "/api/Submission/UpdateStatusForTre",
-                                //    new Dictionary<string, string>()
-                                //    {
-                                //        { "tesId", TesId },
-                                //        { "statusType", statusMessage },
-                                //        { "description", "" }
-                                //    }).Result;
-                            }
+                            var treApi =
+                                scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
+                            var result = treApi.CallAPIWithoutModel<APIReturn>(
+                                "/api/Submission/UpdateStatusForTre",
+                                new Dictionary<string, string>()
+                                {
+                                    { "tesId", TesId },
+                                    { "statusType", statusMessage },
+                                    { "description", "" }
+                                }).Result;
+                        }
 
-                            // are we done ?
-                            if (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR")
+                        // are we done ?
+                        if (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR")
                             {
                                 // Do this to avoid db locking issues
                                 BackgroundJob.Enqueue(() => ClearJob(taskID));
@@ -215,8 +215,10 @@ namespace TREAgent
                 // TODO get these from somewhere
 
                 var useRabbit = true;
-                var useHutch = true;
+                var useHutch = false;
                 var useTESK = true;
+
+                Console.WriteLine("Getting list of submissions");
 
                 // Get list of submissions
                 List<Submission> listOfSubmissions;
@@ -231,7 +233,9 @@ namespace TREAgent
                    Console.WriteLine(e.Message);
                    throw;
                 }
-               
+
+                Console.WriteLine("Number of submission = "+listOfSubmissions.Count);
+
                 foreach (var aSubmission in listOfSubmissions)
                 {
                     Log.Information("Submission: {submission}", aSubmission);
