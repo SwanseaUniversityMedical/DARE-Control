@@ -24,7 +24,7 @@ namespace TREAgent
     public interface IDoWork
     {
         void Execute();
-        void CheckTESK(string taskID);
+        void CheckTESK(string taskID, string TesId);
         void testing();
     }
 
@@ -47,10 +47,10 @@ namespace TREAgent
             Console.WriteLine("Testing");
             string jsonContent = "{\"name\": \"Hello World\",\r\n  \"description\": \"Hello World, inspired by Funnel's most basic example\",\r\n  \"executors\": [\r\n    {\r\n      \"image\": \"alpine\",\r\n      \"command\": [\r\n        \"echo\",\r\n        \"TESK says: Hello World\"\r\n      ]\r\n    }\r\n  ]}"; // Replace with your JSON data
 
-            CreateTESK(jsonContent);
+            CreateTESK(jsonContent,"99");
         }
 
-        public string CreateTESK(string jsonContent)
+        public string CreateTESK(string jsonContent, string TesId)
         {
             using (var httpClient = new HttpClient())
             {
@@ -82,7 +82,7 @@ namespace TREAgent
                     var responseObj = JsonConvert.DeserializeObject<ResponseModel>(responseBody);
                     string id = responseObj.id;
 
-                    RecurringJob.AddOrUpdate<IDoWork>(id, a => a.CheckTESK(id), Cron.MinuteInterval(1));
+                    RecurringJob.AddOrUpdate<IDoWork>(id, a => a.CheckTESK(id,TesId), Cron.MinuteInterval(1));
                     
                     return id;
                 }
@@ -98,9 +98,9 @@ namespace TREAgent
         {
             public string id { get; set; }
         }
-        public void CheckTESK(string taskID)
+        public void CheckTESK(string taskID, string TesId)
         {
-            Console.WriteLine("Check Task : "+taskID);
+            Console.WriteLine("Check TESK : "+taskID + ",  TES : "+TesId);
 
             string url = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks/"+taskID+"?view=basic";
             using (HttpClient client = new HttpClient())
@@ -256,7 +256,7 @@ namespace TREAgent
                         if (useTESK)
                         {
                             if (tesMessage is not null)
-                                CreateTESK(tesMessage);
+                                CreateTESK(aSubmission.TesJson, aSubmission.TesId);
                         }
 
                         // **************  TELL SUBMISSION LAYER WE DONE
