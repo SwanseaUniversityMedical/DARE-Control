@@ -9,14 +9,19 @@ using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Minio;
+using System;
 using TREAgent;
+using TREAgent.Repositories.DbContexts;
 using TREAgent.Services;
 
-Console.WriteLine("Hello, World!");
+Console.WriteLine("loading ..");
+Console.WriteLine("");
 
 
 var hostBuilder = new HostBuilder()
@@ -44,6 +49,12 @@ var hostBuilder = new HostBuilder()
         services.AddHttpContextAccessor();
         services.AddHttpClient();
         services.AddHttpContextAccessor();
+    
+        services.AddDbContext<ApplicationDbContext>(options => options
+            .UseLazyLoadingProxies(true)
+            .UseNpgsql(
+                hostContext.Configuration.GetConnectionString("DefaultConnection")
+            ));
 
         services.AddScoped<IDoWork, DoWork>();
 
@@ -56,10 +67,21 @@ var hostBuilder = new HostBuilder()
         webBuilder.UseUrls("http://localhost:5000"); // Specify the desired port here
     });
 
-    
+
+var host = hostBuilder.Build();
+
+// Do database migration
+var scope = host.Services.CreateScope();
+var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+await db.Database.MigrateAsync();
+
+
+await host.RunAsync();
 
 // Build and run the host
-await hostBuilder.RunConsoleAsync();
+//await hostBuilder.RunConsoleAsync();
+
+
 
 public class Startup
 {
@@ -75,29 +97,48 @@ public class Startup
         // Configure Hangfire
         string hangfireConnectionString = Configuration.GetConnectionString("DefaultConnection");
         services.AddHangfire(config => { config.UsePostgreSqlStorage(hangfireConnectionString); });
-
         services.AddHangfireServer();
 
         services.Configure<RabbitMQSetting>(Configuration.GetSection("RabbitMQ"));
         services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);
         var bus =
             services.AddSingleton(RabbitHutch.CreateBus(
-                $"host={Configuration["RabbitMQ:HostAddress"]}:{int.Parse(Configuration["RabbitMQ:PortNumber"])};virtualHost={Configuration["RabbitMQ:VirtualHost"]};username={Configuration["RabbitMQ:Username"]};password={Configuration["RabbitMQ:Password"]}"));
-        Task task = SetUpRabbitMQ.DoItAsync(Configuration["RabbitMQ:HostAddress"], Configuration["RabbitMQ:PortNumber"],
-            Configuration["RabbitMQ:VirtualHost"], Configuration["RabbitMQ:Username"],
+                $"host={Configuration["RabbitMQ:HostAddress"]}:{int.Parse(Configuration["RabbitMQ:PortNumber"])};" +
+                $"virtualHost={Configuration["RabbitMQ:VirtualHost"]};" +
+                $"username={Configuration["RabbitMQ:Username"]};" +
+                $"password={Configuration["RabbitMQ:Password"]}"));
+
+        Task task = SetUpRabbitMQ.DoItAsync(Configuration["RabbitMQ:HostAddress"], 
+            Configuration["RabbitMQ:PortNumber"],
+            Configuration["RabbitMQ:VirtualHost"], 
+            Configuration["RabbitMQ:Username"],
             Configuration["RabbitMQ:Password"]);
 
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-
+  
         app.UseHangfireDashboard();
-        RecurringJob.AddOrUpdate<IDoWork>(a => a.Execute(), Cron.MinuteInterval(10));
+        RecurringJob.RemoveIfExists("testings2");
+
+        RecurringJob.AddOrUpdate<IDoWork>("Scan Submissions",a => a.Execute(), Cron.MinuteInterval(10));
+        //RecurringJob.AddOrUpdate<IDoWork>("task-999", a => a.CheckTESK("simon"), Cron.MinuteInterval(1));
+        //RecurringJob.AddOrUpdate<IDoWork>("testing2", a => a.testing(), Cron.MinuteInterval(4));
+
         var serverAddressesFeature = app.ServerFeatures.Get<IServerAddressesFeature>();
         var port = serverAddressesFeature?.Addresses.FirstOrDefault()?.Split(':').Last();
 
         // Print the port number
+        Console.WriteLine("  _______ _____  ______                            _   ");
+        Console.WriteLine(" |__   __|  __ \\|  ____|     /\\                   | |  ");
+        Console.WriteLine("    | |  | |__) | |__       /  \\   __ _  ___ _ __ | |_ ");
+        Console.WriteLine("    | |  |  _  /|  __|     / /\\ \\ / _` |/ _ \\ '_ \\| __|");
+        Console.WriteLine("    | |  | | \\ \\| |____   / ____ \\ (_| |  __/ | | | |_ ");
+        Console.WriteLine("    |_|  |_|  \\_\\______| /_/    \\_\\__, |\\___|_| |_|\\__|");
+        Console.WriteLine("                                   __/ |            ");
+        Console.WriteLine("                                  |___/            ");
+        Console.WriteLine("");
         Console.WriteLine("Application is running on port: " + port);
 
     }
