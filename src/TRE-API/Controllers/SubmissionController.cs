@@ -82,5 +82,28 @@ namespace TRE_API.Controllers
                 new Dictionary<string, string>() { { "tesId", tesId }, { "statusType", statusType.ToString() },{"description", description} }).Result;
             return StatusCode(200, result);
         }
+
+        [HttpGet]
+        [Route("GetBucketInfo")]
+        [ValidateModelState]
+        [SwaggerOperation("GetBucketInfo")]
+        [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
+        public IActionResult GetBucketInfo(string submissionId)
+        {
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("submissionId", submissionId.ToString());
+            var submission = _dareHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist).Result;
+
+            var bucket = _dbContext.Projects
+                .Where(x => x.SubmissionProjectId == submission.Project.Id)
+                .Select(x => new { x.OutputBucketTre });
+
+            var outputBucket = bucket.FirstOrDefault();
+
+            var status = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
+                new Dictionary<string, string>() { { "tesId", submission.TesId }, { "statusType", StatusType.PodProcessingComplete.ToString()}, { "description", "" } }).Result;
+
+            return StatusCode(200, outputBucket);
+        }
     }
 }
