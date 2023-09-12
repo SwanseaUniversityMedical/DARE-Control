@@ -16,14 +16,13 @@ namespace DARE_FrontEnd.Controllers
         private readonly IDareClientHelper _clientHelper;
         
         private readonly FormIOSettings _formIOSettings;
-        protected readonly IHttpContextAccessor _httpContextAccessor;
-        public TreController(IDareClientHelper client, FormIOSettings formIo, IHttpContextAccessor httpContextAccessor)
+     
+        public TreController(IDareClientHelper client, FormIOSettings formIo)
         {
             _clientHelper = client;
 
             _formIOSettings = formIo;
 
-            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpGet]

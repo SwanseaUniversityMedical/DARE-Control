@@ -10,6 +10,9 @@ using BL.Services;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using BL.Models.Tes;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Threading;
 
 namespace TRE_API.Controllers
 {
@@ -22,15 +25,15 @@ namespace TRE_API.Controllers
     {
 
         private readonly ApplicationDbContext _DbContext;
-
+        protected readonly IHttpContextAccessor _httpContextAccessor;
 
         public IDareSyncHelper _dareSyncHelper { get; set; }
 
-        public ApprovalController(IDareSyncHelper dareSyncHelper, ApplicationDbContext applicationDbContext)
+        public ApprovalController(IDareSyncHelper dareSyncHelper, ApplicationDbContext applicationDbContext, IHttpContextAccessor httpContextAccessor)
         {
             _dareSyncHelper = dareSyncHelper;
             _DbContext = applicationDbContext;
-
+            _httpContextAccessor = httpContextAccessor;
         }
         
         [HttpGet("GetMemberships")]
@@ -117,11 +120,19 @@ namespace TRE_API.Controllers
                 }
                 resultList.Add(dbproj);
 
+                var audit = new TreAuditLog()
+                {
+                    Decision = "TreProject Decision:" + treProject.Decision.ToString(),
+                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
+                    ApprovedBy = approvedBy,                 
+                    Date = DateTime.Now.ToUniversalTime()
+                };
+                _DbContext.TreAuditLogs.Add(audit);
+                await _DbContext.SaveChangesAsync();
+                Log.Information("{Function}:", "SaveAuditLogs", "Treproject Decision:" + treProject.Decision.ToString(), "ApprovedBy:" + approvedBy);
             }
-
             await _DbContext.SaveChangesAsync();
             return resultList;
-
         }
 
         [HttpPost("UpdateMembershipDecisions")]
@@ -143,9 +154,19 @@ namespace TRE_API.Controllers
                     dbMembership.Decision = membershipDecision.Decision;
                     dbMembership.ApprovedBy = approvedBy;
                     dbMembership.LastDecisionDate = approvedDate;
-                }
-                
+                }           
                 returnResult.Add(dbMembership);
+
+                var audit = new TreAuditLog()
+                {
+                    Decision = "Membership Decision:" + membershipDecision.Decision.ToString(),
+                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
+                    ApprovedBy = approvedBy,
+                    Date = DateTime.Now.ToUniversalTime()
+                };
+                _DbContext.TreAuditLogs.Add(audit);
+                await _DbContext.SaveChangesAsync();
+                Log.Information("{Function}:", "SaveAuditLogs", "Membership Decision:" + membershipDecision.Decision.ToString(), "ApprovedBy:" + approvedBy);
 
             }
 
@@ -161,10 +182,6 @@ namespace TRE_API.Controllers
             
 
         }
-
-
-
-
 
     }
 }
