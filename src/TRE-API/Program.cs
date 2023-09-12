@@ -19,7 +19,6 @@ using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using TRE_API;
-using BL.Models.ViewModels;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,10 +49,6 @@ AddDependencies(builder, configuration);
 var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
 builder.Services.AddSingleton(treKeyCloakSettings);
-
-var minioSettings = new MinioSettings();
-configuration.Bind(nameof(MinioSettings), minioSettings);
-builder.Services.AddSingleton(minioSettings);
 
 var submissionKeyCloakSettings = new BaseKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
@@ -226,7 +221,7 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
 
     builder.Services.AddHttpContextAccessor();
 
-    builder.Services.AddScoped<IMinioHelper, MinioHelper>();
+
     builder.Services.AddScoped<ISignalRService, SignalRService>();
     builder.Services.AddMvc().AddControllersAsServices();
 

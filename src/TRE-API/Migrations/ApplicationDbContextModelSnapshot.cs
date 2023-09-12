@@ -107,14 +107,6 @@ namespace TRE_API.Migrations
                     b.Property<string>("LocalProjectName")
                         .HasColumnType("text");
 
-                    b.Property<string>("OutputBucketTre")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("SubmissionBucketTre")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<int>("SubmissionProjectId")
                         .HasColumnType("integer");
 

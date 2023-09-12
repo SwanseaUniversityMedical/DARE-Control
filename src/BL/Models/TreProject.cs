@@ -27,10 +27,6 @@ namespace BL.Models
 
         [Display(Name = "Date of Last Decision")]
         public DateTime LastDecisionDate { get; set; }
-        [Display(Name = "Submision Bucket for Tre Layer")]
-        public string SubmissionBucketTre { get; set; }
-        [Display(Name = "Output Bucket Out for Tre Layer")]
-        public string OutputBucketTre { get; set; }
     }
     
 }
