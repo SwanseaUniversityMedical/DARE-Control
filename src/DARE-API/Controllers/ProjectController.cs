@@ -47,10 +47,7 @@ namespace DARE_API.Controllers
                 project.Name = project.Name.Trim();
                 project.StartDate = project.StartDate.ToUniversalTime();
                 project.EndDate = project.EndDate.ToUniversalTime();
-                project.ProjectDescription = project.ProjectDescription.Trim();
-                
-                
-                
+                project.ProjectDescription = project.ProjectDescription.Trim();          
                 project.FormData = data.FormIoString;
                 project.Display = project.Display;
                 

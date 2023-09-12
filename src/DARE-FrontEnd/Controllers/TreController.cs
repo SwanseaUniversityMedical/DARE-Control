@@ -84,17 +84,14 @@ namespace DARE_FrontEnd.Controllers
                 data.FormIoString = str;
 
                 var result = await _clientHelper.CallAPI<FormData, Tre?>("/api/Tre/SaveTre", data);
-                var audit = new AuditLog()
-                {
-                    FormData = data.FormIoString,
-                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                    UserName = @User?.FindFirst("name")?.Value,
-                    Module = "Tres",
-                    AuditValues = "Added Tre/" + " " + result.Id.ToString() + " " + result.ErrorMessage,
-                    Action = "TreFormSubmission",
-                    Date = DateTime.Now.ToUniversalTime()
-                };
-                var log = await _clientHelper.CallAPI<AuditLog, AuditLog?>("/api/Audit/SaveAuditLogs", audit);
+               
+                var paramlist = new Dictionary<string, string>();
+                paramlist.Add("projectId", "");
+                paramlist.Add("userId", "");
+                paramlist.Add("treId", "");
+                paramlist.Add("testaskId", "");
+                paramlist.Add("data", data.FormIoString);
+                var auditlog = await _clientHelper.CallAPI<FormData, AuditLog?>("/api/Audit/SaveAuditLogs", data, paramlist);
 
                 if (result.Error)
                     return BadRequest();

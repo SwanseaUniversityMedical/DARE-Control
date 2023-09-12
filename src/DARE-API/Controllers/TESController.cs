@@ -15,7 +15,8 @@ using EasyNetQ;
 using BL.Models.Enums;
 using DARE_API.Services;
 using Microsoft.AspNetCore.Authorization;
-
+using System.Threading;
+using BL.Services;
 
 namespace DARE_API.Controllers
 {
@@ -30,7 +31,7 @@ namespace DARE_API.Controllers
 
         private readonly ApplicationDbContext _DbContext;
         private readonly IBus _rabbit;
-
+        private readonly IDareClientHelper _clientHelper;
 
         private static readonly Dictionary<TesView, JsonSerializerSettings> TesJsonSerializerSettings = new()
         {
@@ -47,11 +48,11 @@ namespace DARE_API.Controllers
         /// </summary>
         /// <param name="repository">The main <see cref="ApplicationDbContext"/> database repository</param>
         /// <param name="rabbit">The main <see cref="IBus"/> easynet q sender</param>
-        public TaskServiceApiController(ApplicationDbContext repository, IBus rabbit)
+        public TaskServiceApiController(ApplicationDbContext repository, IBus rabbit, IDareClientHelper client)
         {
             _DbContext = repository;
             _rabbit = rabbit;
-
+            _clientHelper = client;
 
 
 
@@ -307,9 +308,14 @@ namespace DARE_API.Controllers
 
             _rabbit.Advanced.Publish(exch, RoutingConstants.Subs, false, new Message<int>(sub.Id));
 
-           
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("projectId","");
+            paramlist.Add("treId", "");
+            paramlist.Add("userId", "");
+            paramlist.Add("testaskId",tesTask.Id);
+            paramlist.Add("data", "");
+            var auditlog = await _clientHelper.CallAPI<TesTask, AuditLog?>("/api/Audit/SaveAuditLogs", tesTask, paramlist);
 
-            
             Log.Debug("{Function} Creating task with id {Id} state {State}", "CreateTaskAsync", tesTask.Id,
                 tesTask.State);
 

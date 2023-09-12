@@ -95,17 +95,14 @@ namespace DARE_FrontEnd.Controllers
                 data.FormIoString = str;
 
                 var result = await _clientHelper.CallAPI<FormData, BL.Models.User>("/api/User/SaveUser", data);
-                var audit = new AuditLog()
-                {
-                    FormData = data.FormIoString,
-                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                    UserName = @User?.FindFirst("name")?.Value,
-                    Module = "Users",
-                    AuditValues = "Edited User/" + " " + result.Id.ToString() + " " + result.ErrorMessage,
-                    Action = "UserEditFormSubmission",
-                    Date = DateTime.Now.ToUniversalTime()
-                };
-                var log = await _clientHelper.CallAPI<AuditLog, AuditLog?>("/api/Audit/SaveAuditLogs", audit);
+
+                var paramlist = new Dictionary<string, string>();
+                paramlist.Add("projectId", "");
+                paramlist.Add("userId", "");
+                paramlist.Add("treId", "");
+                paramlist.Add("testaskId", "");
+                paramlist.Add("data", data.FormIoString);
+                var auditlog = await _clientHelper.CallAPI<FormData, AuditLog?>("/api/Audit/SaveAuditLogs", data, paramlist);
 
                 if (result.Id == 0)
                     return BadRequest();
@@ -144,19 +141,16 @@ namespace DARE_FrontEnd.Controllers
                 UserId = userId,
                 ProjectId = projectId               
             };
-            var result =
-                await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/User/RemoveProjectMembership", model);
-            var audit = new AuditLog()
-            {
-                FormData = "ProjectId: " + model.ProjectId.ToString() + " /User Id: " + model.UserId.ToString(),
-                IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                UserName = @User?.FindFirst("name")?.Value,
-                Module = "ProjectUser",
-                AuditValues = "Removed Project User- " + "ProjectId: " + model.ProjectId.ToString() + " /User Id: " + model.UserId.ToString(),
-                Action = "RemoveProjectFromUser",
-                Date = DateTime.Now.ToUniversalTime()
-            };
-            var log = await _clientHelper.CallAPI<AuditLog, AuditLog?>("/api/Audit/SaveAuditLogs", audit);
+
+            var result = await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/User/RemoveProjectMembership", model);
+
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("projectId", projectId.ToString());
+            paramlist.Add("userId", userId.ToString());
+            paramlist.Add("treId", "");
+            paramlist.Add("testaskId", "");
+            paramlist.Add("data", "");
+            var auditlog = await _clientHelper.CallAPI<ProjectUser, AuditLog?>("/api/Audit/SaveAuditLogs", model, paramlist);
 
             return RedirectToAction("GetUser", new { id = userId });
         }

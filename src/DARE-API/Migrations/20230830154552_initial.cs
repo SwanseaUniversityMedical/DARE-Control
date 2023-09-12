@@ -189,13 +189,14 @@ namespace DARE_API.Migrations
                {
                    Id = table.Column<int>(type: "integer", nullable: false)
                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                   Action = table.Column<string>(type: "text", nullable: false),
-                   Module = table.Column<string>(type: "text", nullable: false),
-                   AuditValues = table.Column<string>(type: "text", nullable: false),
+                   ProjectId = table.Column<int>(type: "integer", nullable: true),
+                   UserId = table.Column<int>(type: "integer", nullable: true),
+                   TreId = table.Column<int>(type: "integer", nullable: true),
+                   TestaskId = table.Column<int>(type: "integer", nullable: true),
                    UserName = table.Column<string>(type: "text", nullable: false),
                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                    IPaddress = table.Column<string>(type: "text", nullable: false),
-                   FormData = table.Column<string>(type: "text", nullable: false)
+                   FormData = table.Column<string>(type: "text", nullable: true)
                },
                constraints: table =>
                {
