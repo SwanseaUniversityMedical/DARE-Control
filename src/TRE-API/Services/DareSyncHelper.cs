@@ -1,22 +1,37 @@
 ﻿using BL.Models.APISimpleTypeReturns;
 using BL.Models;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using TRE_API.Repositories.DbContexts;
+using BL.Models.ViewModels;
+using BL.Services;
 
 namespace TRE_API.Services
 {
-    public class DareSyncHelper: IDareSyncHelper
+    public class DareSyncHelper : IDareSyncHelper
     {
         public ApplicationDbContext _DbContext { get; set; }
         public IDareClientWithoutTokenHelper _dareclientHelper { get; set; }
-        public DareSyncHelper(ApplicationDbContext dbContext, IDareClientWithoutTokenHelper dareClient)
+        private readonly MinioSettings _minioSettings;
+        private readonly IMinioHelper _minioHelper;
+        public DareSyncHelper(ApplicationDbContext dbContext, IDareClientWithoutTokenHelper dareClient, MinioSettings minioSettings, IMinioHelper minioHelper)
         {
             _DbContext = dbContext;
             _dareclientHelper = dareClient;
+            _minioSettings = minioSettings;
+            _minioHelper = minioHelper;
         }
 
         public async Task<BoolReturn> SyncSubmissionWithTre()
         {
+            if (!_dareclientHelper.CheckCredsAreAvailable())
+            {
+                Log.Error("{Function} Credential not yet entered for synching with Dare", "SyncSubmissionWithTre");
+                return new BoolReturn()
+                {
+                    Result = false
+                };
+            }
             var subprojs = await _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForTre");
             var dbprojs = _DbContext.Projects.ToList();
             var projectAdds = subprojs.Where(x => !_DbContext.Projects.Any(y => y.SubmissionProjectId == x.Id));
@@ -26,11 +41,29 @@ namespace TRE_API.Services
                 dbprojs.Where(x => x.Archived && subprojs.Any(y => y.Id == x.SubmissionProjectId));
             foreach (var project in projectAdds)
             {
+                var submission = project.SubmissionBucket.ToLower() + "tre";
+                var output = project.OutputBucket.ToLower() + "tre";
+                var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, submission);
+                if (!submissionBucket)
+                {
+                    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SyncSubmissionWithTre", submission);
+                    submission = "";
+                }
+                var outputBucket = await _minioHelper.CreateBucket(_minioSettings, output);
+                if (!outputBucket)
+                {
+                    Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SyncSubmissionWithTre", output);
+                    output = "";
+                }
+
                 _DbContext.Projects.Add(new TreProject()
                 {
                     SubmissionProjectId = project.Id,
                     SubmissionProjectName = project.Name,
-                    Description = project.ProjectDescription
+                    Description = project.ProjectDescription,
+                    SubmissionBucketTre = submission,
+                    OutputBucketTre = output,
+
                 });
             }
 
