@@ -50,7 +50,7 @@ namespace TRE_API.Services
                     submission = "";
                 }
                 var outputBucket = await _minioHelper.CreateBucket(_minioSettings, output);
-                if (!submissionBucket)
+                if (!outputBucket)
                 {
                     Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SyncSubmissionWithTre", output);
                     output = "";
