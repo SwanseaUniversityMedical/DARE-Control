@@ -9,7 +9,7 @@
         <div>
             <h1 class="fs-3 mb-0">@Model.Name</h1>
         </div>
-            <a href="@Url.Action("GetATre", "Tre",new{treId=Model.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+            <a href="@Url.Action("SaveATre", "Tre",new{treId=Model.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
     </div>
     <div class="mt-4">
         <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
@@ -51,7 +51,40 @@
                 </div>
             </div>
             <div class="tab-pane fade" id="submissions-tab" role="tabpanel" aria-labelledby="submissions">
-                <p>List of submissions that have been sent to this TRE...</p>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <div class="table-responsive">
+                                <table id="projectList" class="table table-bordered table-striped no-head" caption="List of Projects">
+                                    <thead><tr><td>Project</td></tr></thead>
+                                    <tbody>
+                                        @foreach (var submission in Model.Submissions)
+                                        {
+                                            <tr>
+                                                <td class="card mb-2 p-3 bg-white shadow-sm border-1">
+
+                                                    <div class="d-flex align-items-center justify-content-between mb-3">
+                                                        <div>
+                                                            <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })">
+                                                                <h2 class="mb-0 fw-bold hover-underline fs-5">
+                                                                    @submission.TesName
+                                                                </h2>
+                                                            </a>
+
+                                                            <p class="text-muted small mb-0">#@submission.Id</p>
+                                                        </div>
+
+                                                    </div>
+
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="tab-pane fade" id="projects-tab" role="tabpanel" aria-labelledby="projects">
                 <div class="row">
@@ -75,7 +108,7 @@
                                                             </a>
                                                             <p class="text-muted small mb-0">#@project.Id</p>
                                                         </div>
-                                                        <a href="@Url.Action("EditProject", "Project",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+                                                        <a href="@Url.Action("SaveProjectForm", "Project",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
                                                     </div>
                                                     <div class="">
                                                         <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#submissions" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">

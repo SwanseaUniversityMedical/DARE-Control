@@ -215,12 +215,12 @@ namespace DARE_API.Controllers
 
             }
 
-            if (tesTask.Executors.Count != 1)
-            {
-                return BadRequest("TES Task must contain one and only one Executer.");
+            //TODO: discuss Simon & Justin
+            //if (tesTask.Executors.Count != 1)
+            //{
+            //    return BadRequest("TES Task must contain one and only one Executer.");
+            //}
 
-                
-            }
             var exec = tesTask.Executors.First();
             //TODO: Implement IsDockerThere
             if (!IsDockerThere(exec.Image))
