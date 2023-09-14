@@ -13,7 +13,7 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password123
-      - POSTGRES_DB=listmonk
+      - POSTGRES_DB=DARE-Control
   rabbitmq:
     image: rabbitmq:3-management-alpine
     restart: unless-stopped

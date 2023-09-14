@@ -5,8 +5,8 @@ namespace TRE_API.Services
     public interface IDareClientWithoutTokenHelper: IBaseClientHelper
     {
 
+        bool CheckCredsAreAvailable();
 
 
-        
     }
 }
