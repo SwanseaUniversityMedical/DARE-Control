@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.S3" Version="3.7.201.1" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.203.14" />
     <PackageReference Include="EasyNetQ" Version="7.5.3" />
     <PackageReference Include="EasyNetQ.Management.Client" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
