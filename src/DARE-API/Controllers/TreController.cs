@@ -60,6 +60,18 @@ namespace DARE_API.Controllers
                 else {
                     _DbContext.Tres.Add(tre);
                 }
+                var audit = new AuditLog()
+                {
+                    FormData = data.FormIoString,
+                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
+                    UserName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
+                    TreId = tre.Id,
+                    Date = DateTime.Now.ToUniversalTime()
+                };
+
+                _DbContext.AuditLogs.Add(audit);
+                Log.Information("{Function}:", "AuditLogs", "SaveTre", "FormData: " + data.FormIoString + "TreId:" + tre.Id + @User?.FindFirst("name")?.Value);
+
                 await _DbContext.SaveChangesAsync();
                 return tre;
 

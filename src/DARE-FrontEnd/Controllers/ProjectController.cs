@@ -148,17 +148,7 @@ namespace DARE_FrontEnd.Controllers
             var result =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
             result = GetProjectUserModel();
-
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("projectId", model.ProjectId.ToString());
-            paramlist.Add("userId", model.UserId.ToString());
-            paramlist.Add("treId", "");
-            paramlist.Add("testaskId", "");
-            paramlist.Add("data", "");
-            var auditlog = await _clientHelper.CallAPI<ProjectUser, AuditLog?>("/api/Audit/SaveAuditLogs", model, paramlist);
-
             return View(result);
-
 
         }
 
@@ -170,16 +160,7 @@ namespace DARE_FrontEnd.Controllers
                     model);
             result = GetProjectTreModel();
 
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("projectId", model.ProjectId.ToString());
-            paramlist.Add("treId", model.TreId.ToString());
-            paramlist.Add("userId", "");
-            paramlist.Add("testaskId", "");
-            paramlist.Add("data", "");
-            var auditlog = await _clientHelper.CallAPI<ProjectTre, AuditLog?>("/api/Audit/SaveAuditLogs", model, paramlist);
-
             return View(result);
-
 
         }
 
@@ -246,14 +227,6 @@ namespace DARE_FrontEnd.Controllers
                   
                 var result = await _clientHelper.CallAPI<FormData, Project?>("/api/Project/SaveProject", data);
                
-                var paramlist = new Dictionary<string, string>();
-                paramlist.Add("projectId","");
-                paramlist.Add("userId","");
-                paramlist.Add("treId","");
-                paramlist.Add("testaskId","");
-                paramlist.Add("data",data.FormIoString);
-                var auditlog = await _clientHelper.CallAPI<FormData, AuditLog?>("/api/Audit/SaveAuditLogs", data, paramlist) ;
-
                 if (result.Id == 0)
                     return BadRequest();
 
@@ -273,14 +246,6 @@ namespace DARE_FrontEnd.Controllers
             var result =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/RemoveUserMembership", model);
 
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("projectId", projectId.ToString());
-            paramlist.Add("userId", userId.ToString());
-            paramlist.Add("treId", "");
-            paramlist.Add("testaskId","");
-            paramlist.Add("data", "");
-            var auditlog = await _clientHelper.CallAPI<ProjectUser, AuditLog?>("/api/Audit/SaveAuditLogs", model, paramlist);
-            
             return RedirectToAction("GetProject", new { id = projectId });
         }
 
@@ -294,15 +259,7 @@ namespace DARE_FrontEnd.Controllers
             };
             var result =
                 await _clientHelper.CallAPI<ProjectTre, ProjectTre?>("/api/Project/RemoveTreMembership", model);
-             
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("projectId", projectId.ToString());
-            paramlist.Add("treId", treId.ToString());
-            paramlist.Add("userId", "");
-            paramlist.Add("testaskId", "");
-            paramlist.Add("data", "");
-            var auditlog = await _clientHelper.CallAPI<ProjectTre, AuditLog?>("/api/Audit/SaveAuditLogs",model,paramlist);
-
+          
             return RedirectToAction("GetProject", new { id = projectId });
         }
 

@@ -129,7 +129,7 @@ namespace TRE_API.Controllers
                 };
                 _DbContext.TreAuditLogs.Add(audit);
                 await _DbContext.SaveChangesAsync();
-                Log.Information("{Function}:", "SaveAuditLogs", "Treproject Decision:" + treProject.Decision.ToString(), "ApprovedBy:" + approvedBy);
+                Log.Information("{Function}:", "AuditLogs", "Treproject Decision:" + treProject.Decision.ToString(), "ApprovedBy:" + approvedBy);
             }
             await _DbContext.SaveChangesAsync();
             return resultList;
@@ -166,7 +166,7 @@ namespace TRE_API.Controllers
                 };
                 _DbContext.TreAuditLogs.Add(audit);
                 await _DbContext.SaveChangesAsync();
-                Log.Information("{Function}:", "SaveAuditLogs", "Membership Decision:" + membershipDecision.Decision.ToString(), "ApprovedBy:" + approvedBy);
+                Log.Information("{Function}:", "AuditLogs", "Membership Decision:" + membershipDecision.Decision.ToString(), "ApprovedBy:" + approvedBy);
 
             }
 

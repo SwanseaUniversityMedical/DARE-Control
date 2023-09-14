@@ -17,6 +17,7 @@ using DARE_API.Services;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading;
 using BL.Services;
+using Microsoft.AspNetCore.Http;
 
 namespace DARE_API.Controllers
 {
@@ -32,7 +33,7 @@ namespace DARE_API.Controllers
         private readonly ApplicationDbContext _DbContext;
         private readonly IBus _rabbit;
         private readonly IDareClientHelper _clientHelper;
-
+        protected readonly IHttpContextAccessor _httpContextAccessor;
         private static readonly Dictionary<TesView, JsonSerializerSettings> TesJsonSerializerSettings = new()
         {
             {
@@ -48,13 +49,12 @@ namespace DARE_API.Controllers
         /// </summary>
         /// <param name="repository">The main <see cref="ApplicationDbContext"/> database repository</param>
         /// <param name="rabbit">The main <see cref="IBus"/> easynet q sender</param>
-        public TaskServiceApiController(ApplicationDbContext repository, IBus rabbit, IDareClientHelper client)
+        public TaskServiceApiController(ApplicationDbContext repository, IBus rabbit, IDareClientHelper client, IHttpContextAccessor httpContextAccessor)
         {
             _DbContext = repository;
             _rabbit = rabbit;
             _clientHelper = client;
-
-
+            _httpContextAccessor = httpContextAccessor;
 
         }
         
@@ -308,15 +308,15 @@ namespace DARE_API.Controllers
 
             _rabbit.Advanced.Publish(exch, RoutingConstants.Subs, false, new Message<int>(sub.Id));
 
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("projectId","");
-            paramlist.Add("treId", "");
-            paramlist.Add("userId", "");
-            paramlist.Add("testaskId",tesTask.Id);
-            paramlist.Add("data", "");
-            var auditlog = await _clientHelper.CallAPI<TesTask, AuditLog?>("/api/Audit/SaveAuditLogs", tesTask, paramlist);
-
-            Log.Debug("{Function} Creating task with id {Id} state {State}", "CreateTaskAsync", tesTask.Id,
+            var audit = new AuditLog()
+            {
+                IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
+                UserName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
+                TestaskId = Convert.ToInt32(tesTask.Id),        
+                Date = DateTime.Now.ToUniversalTime()
+            };
+            _DbContext.AuditLogs.Add(audit);
+          Log.Debug("{Function} Creating task with id {Id} state {State}", "CreateTaskAsync", tesTask.Id,
                 tesTask.State);
 
 
