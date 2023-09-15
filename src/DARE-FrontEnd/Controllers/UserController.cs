@@ -28,7 +28,7 @@ namespace DARE_FrontEnd.Controllers
             _clientHelper = client;
             
             _formIOSettings = formIo;
-            
+         
         }
 
         [HttpGet]
@@ -111,7 +111,7 @@ namespace DARE_FrontEnd.Controllers
             var projmem = GetProjectUserModel();
             return View(projmem);
         }
-
+     
         [HttpPost]
         public async Task<IActionResult> AddProjectMembership(ProjectUser model)
         {
@@ -133,8 +133,9 @@ namespace DARE_FrontEnd.Controllers
                 UserId = userId,
                 ProjectId = projectId               
             };
-            var result =
-                await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/User/RemoveProjectMembership", model);
+
+            var result = await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/User/RemoveProjectMembership", model);
+
             return RedirectToAction("GetUser", new { id = userId });
         }
 

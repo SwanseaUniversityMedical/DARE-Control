@@ -62,8 +62,8 @@
                     </ul>
                 </div>
                 <div class="account-nav align-items-center">
-                    <form class="me-3 d-none d-lg-block">
-                        <input type="search" class="form-control form-control-sm" placeholder="Search..." aria-label="Search">
+                    <form class="me-3 d-none d-lg-block" asp-controller="Home" asp-action="Index">
+                        <input type="search" class="form-control form-control-sm" name="SearchString" value="@ViewData["CurrentFilter"]" placeholder="Search..." aria-label="Search">
                     </form>
                     @if (User.IsInRole("dare-control-admin"))
                     {
