@@ -10,8 +10,6 @@ using DARE_API.Services;
 using EasyNetQ;
 using Microsoft.AspNetCore.Authorization;
 
-
-
 namespace DARE_API.Controllers
 {
 
@@ -127,56 +125,9 @@ namespace DARE_API.Controllers
                 throw;
             }
         }
-        public static StatusType StatusTypes(StatusType[] listofStatus) {
-            //var stage1 = "validation";
-            //var stage2 = "processing";
-            //var stage3 = "result";
-            //List<string> stages = new List<string>();
-            //stages.Add(stage1);
-            //stages.Add(stage2);
-            //stages.Add(stage3);
-
-
-        //List<List<StatusType>> myList = new List<List<StatusType>>();
-        List<StatusType> stage1List = new List<StatusType>();
-            stage1List.Add(StatusType.WaitingForChildSubsToComplete);
-            stage1List.Add(StatusType.WaitingForAgentToTransfer);
-            stage1List.Add(StatusType.WaitingForCrateFormatCheck);
-
-            List<StatusType> stage2List = new List<StatusType>();
-            stage2List.Add(StatusType.PodProcessing);
-            stage2List.Add(StatusType.DataOutApprovalBegun);
-            stage2List.Add(StatusType.TransferredToPod);
-
-            List<StatusType> stage3List = new List<StatusType>();
-            stage3List.Add(StatusType.DataOutApprovalRejected);
-            stage3List.Add(StatusType.UserNotOnProject);
-            stage3List.Add(StatusType.InvalidSubmission);
-            stage3List.Add(StatusType.InvalidUser);
-            stage3List.Add(StatusType.TRENotAuthorisedForProject);
-            stage3List.Add(StatusType.CancellingChildren);
-            stage3List.Add(StatusType.Cancelled);
-
-            List<StatusType> stage4List = new List<StatusType>();
-            stage4List.Add(StatusType.PodProcessingComplete);
-            stage4List.Add(StatusType.DataOutApproved);
-            stage4List.Add(StatusType.Completed);
-            stage4List.Add(StatusType.DataOutApprovalRejected);
-
-
-            Dictionary<string, List<StatusType>> stages = new Dictionary<string, List<StatusType>>();
-            //just incase use this if i need to make the list of stage4List a list of a list e.g adding in TRE name or a colour
-            //Dictionary<string, List<List<StatusType>>> stages = new Dictionary<string, List<List<StatusType>>>();
-
-            stages.Add("stage1", stage1List);
-            stages.Add("stage2", stage2List);
-            stages.Add("stage3", stage3List);
-            stages.Add("stage4", stage4List);
-
-            return 0;
-
-        }
-        public static List<StageInfo> StageTypes()
+        [AllowAnonymous]
+        [HttpGet("StageTypes")]
+        public List<StageInfo> StageTypes()
         {
             var stage1List = new StageInfo();
             stage1List.stageName = "Submission Layer Validation";
@@ -188,6 +139,9 @@ namespace DARE_API.Controllers
                 StatusType.InvalidSubmission,
                 StatusType.WaitingForCrateFormatCheck
             };
+            Dictionary<int, List<StatusType>> stage1Dict = new Dictionary<int, List<StatusType>>();
+            stage1Dict.Add(1, stage1List.statusTypeList);
+            stage1List.stagesDict = stage1Dict;
 
             var stage2List = new StageInfo();
             stage2List.stageName = "Tre Layer Validation";
@@ -197,7 +151,14 @@ namespace DARE_API.Controllers
                 StatusType.WaitingForAgentToTransfer,
                 StatusType.TransferredToPod,
                 StatusType.TRENotAuthorisedForProject
+
+
+
+
             };
+            Dictionary<int, List<StatusType>> stage2Dict = new Dictionary<int, List<StatusType>>();
+            stage2Dict.Add(2, stage2List.statusTypeList);
+            stage2List.stagesDict = stage2Dict;
 
             var stage3List = new StageInfo();
             stage3List.stageName = "Query Processing";
@@ -209,6 +170,9 @@ namespace DARE_API.Controllers
                 StatusType.RequestCancellation
 
             };
+            Dictionary<int, List<StatusType>> stage3Dict = new Dictionary<int, List<StatusType>>();
+            stage3Dict.Add(3, stage3List.statusTypeList);
+            stage3List.stagesDict = stage3Dict;
 
             var stage4List = new StageInfo();
             stage4List.stageName = "Data Approval Processing";
@@ -219,6 +183,9 @@ namespace DARE_API.Controllers
                 StatusType.CancellationRequestSent,
                 StatusType.CancellingChildren
             };
+            Dictionary<int, List<StatusType>> stage4Dict = new Dictionary<int, List<StatusType>>();
+            stage4Dict.Add(4, stage4List.statusTypeList);
+            stage4List.stagesDict = stage4Dict;
 
             var stage5List = new StageInfo();
             stage5List.stageName = "Result";
@@ -231,6 +198,9 @@ namespace DARE_API.Controllers
                 StatusType.Completed,
                 StatusType.Cancelled
             };
+            Dictionary<int, List<StatusType>> stage5Dict = new Dictionary<int, List<StatusType>>();
+            stage5Dict.Add(5, stage5List.statusTypeList);
+            stage5List.stagesDict = stage5Dict;
 
             List<StageInfo> infoList = new List<StageInfo>();
             // var infoList = new List<List<StageInfo>>();
@@ -240,8 +210,22 @@ namespace DARE_API.Controllers
             infoList.Add(stage4List);
             infoList.Add(stage5List);
 
-
             return infoList;
+
+        }
+        public Dictionary<int, StageInfo> DifferentStages() {
+
+            var stage1List = new StageInfo();
+            stage1List.stageName = "Submission Layer Validation";
+            stage1List.stageNumber = 1;
+            stage1List.statusTypeList = new List<StatusType>
+            {
+                StatusType.InvalidUser ,
+                StatusType.UserNotOnProject ,
+                StatusType.InvalidSubmission,
+                StatusType.WaitingForCrateFormatCheck
+            };
+            return null;
 
         }
     }

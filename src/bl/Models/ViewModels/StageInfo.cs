@@ -12,5 +12,6 @@ namespace BL.Models.ViewModels
         public List<StatusType> statusTypeList;
         public string stageName;
         public int stageNumber;
+        public Dictionary<int, List<StatusType>> stagesDict;
     }
 }
