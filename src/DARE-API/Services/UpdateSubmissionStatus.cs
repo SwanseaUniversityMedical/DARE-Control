@@ -6,15 +6,15 @@ namespace DARE_API.Services
 {
     public class UpdateSubmissionStatus
     {
-        public static void UpdateStatus(Submission sub, StatusType type, string? description)
+        public static void UpdateStatus(Submission sub, StatusType type, string? description,String? LastHeartBeatReceived)
         {
             sub.HistoricStatuses.Add(new HistoricStatus()
             {
                 Start = sub.LastStatusUpdate.ToUniversalTime(),
                 End = DateTime.Now.ToUniversalTime(),
                 Status = sub.Status,
-
-                StatusDescription = sub.StatusDescription
+                StatusDescription = sub.StatusDescription,
+                LastHeartBeatReceived = DateTime.Now.ToUniversalTime().ToString()
             });
             if (type == StatusType.Cancelled || type == StatusType.Completed)
             {
@@ -23,7 +23,9 @@ namespace DARE_API.Services
             sub.Status = type;
             sub.LastStatusUpdate = DateTime.Now.ToUniversalTime();
             sub.StatusDescription = description;
+            sub.LastHeartBeatReceived = DateTime.Now.ToUniversalTime().ToString();
             
+  
         }
     }
 }

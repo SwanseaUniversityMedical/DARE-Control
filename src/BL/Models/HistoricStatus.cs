@@ -18,8 +18,7 @@ namespace BL.Models
        
         public string? StatusDescription { get; set; }
         
-        
-
+        public string? LastHeartBeatReceived { get; set; }
     }
 
     

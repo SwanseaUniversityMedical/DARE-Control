@@ -65,7 +65,7 @@ namespace DARE_API.Controllers
         [ValidateModelState]
         [SwaggerOperation("UpdateStatusForTre")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public  IActionResult UpdateStatusForTre(string tesId, StatusType statusType, string? description)
+        public  IActionResult UpdateStatusForTre(string tesId, StatusType statusType, string? description, String? LastHeartBeatReceived)
         {
             
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
@@ -82,7 +82,7 @@ namespace DARE_API.Controllers
                 return BadRequest("Invalid tesid or tre not valid for tes");
             }
             
-            UpdateSubmissionStatus.UpdateStatus(sub, statusType, description);
+            UpdateSubmissionStatus.UpdateStatus(sub, statusType, description, LastHeartBeatReceived);
             _DbContext.SaveChanges();
 
 

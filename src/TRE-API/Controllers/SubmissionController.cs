@@ -66,6 +66,9 @@ namespace TRE_API.Controllers
         {
             var result =
                 _dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre").Result;
+            var treheartbeat = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
+              new Dictionary<string, string>() { { "tesId", ""}, { "statusType", "" }, { "description", ""}, { "LastHeartBeatReceived", DateTime.Now.ToUniversalTime().ToString()} }).Result;
+
             return StatusCode(200, result);
         }
 
@@ -76,10 +79,10 @@ namespace TRE_API.Controllers
         [ValidateModelState]
         [SwaggerOperation("UpdateStatusForTre")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public IActionResult UpdateStatusForTre(string tesId, StatusType statusType, string? description)
+        public IActionResult UpdateStatusForTre(string tesId, StatusType statusType, string? description,string? LastHeartBeatReceived)
         {
             var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-                new Dictionary<string, string>() { { "tesId", tesId }, { "statusType", statusType.ToString() },{"description", description} }).Result;
+                new Dictionary<string, string>() { { "tesId", tesId }, { "statusType", statusType.ToString() },{"description", description}, { "LastHeartBeatReceived", ""} }).Result;
             return StatusCode(200, result);
         }
 
