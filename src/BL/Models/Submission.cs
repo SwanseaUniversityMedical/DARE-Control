@@ -31,17 +31,9 @@ namespace BL.Models
         public DateTime LastStatusUpdate { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-
-
-
         public StatusType Status { get; set; }
-
-
         public string? StatusDescription { get; set; }
-
-
-
-
+        public string? LastHeartBeatReceived { get; set; }
 
     }
 
