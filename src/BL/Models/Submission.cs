@@ -22,6 +22,8 @@ namespace BL.Models
         public virtual List<Submission> Children { get; set; }
         public virtual List<HistoricStatus> HistoricStatuses { get; set; }
 
+        public virtual List<SubmissionFile> SubmissionFiles { get; set; }
+
 
 
         public virtual Tre? Tre { get; set; }

@@ -9,8 +9,7 @@ using BL.Models.ViewModels;
 using DARE_API.Services;
 using EasyNetQ;
 using Microsoft.AspNetCore.Authorization;
-
-
+using Microsoft.EntityFrameworkCore;
 
 namespace DARE_API.Controllers
 {
@@ -18,8 +17,8 @@ namespace DARE_API.Controllers
     [Route("api/[controller]")]
     [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
     [ApiController]
-    
-    
+
+
     /// <summary>
     /// API endpoints for <see cref="Submission"/>s.
     /// </summary>
@@ -27,17 +26,17 @@ namespace DARE_API.Controllers
     {
         private readonly ApplicationDbContext _DbContext;
 
-        
+
 
         public SubmissionController(ApplicationDbContext repository, IBus rabbit)
         {
             _DbContext = repository;
-            
+
 
         }
 
 
-        
+
         [HttpGet]
         [Route("GetWaitingSubmissionsForTre")]
         [ValidateModelState]
@@ -45,7 +44,7 @@ namespace DARE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(List<Submission>), description: "")]
         public virtual IActionResult GetWaitingSubmissionsForTre()
         {
-            
+
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
             var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName);
             if (tre == null)
@@ -53,8 +52,8 @@ namespace DARE_API.Controllers
                 return BadRequest("User " + usersName + " doesn't have a tre");
             }
 
-            var results = tre.Submissions.Where(x =>x.Status == StatusType.WaitingForAgentToTransfer).ToList();
-            
+            var results = tre.Submissions.Where(x => x.Status == StatusType.WaitingForAgentToTransfer).ToList();
+
 
             return StatusCode(200, results);
         }
@@ -65,31 +64,31 @@ namespace DARE_API.Controllers
         [ValidateModelState]
         [SwaggerOperation("UpdateStatusForTre")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public  IActionResult UpdateStatusForTre(string tesId, StatusType statusType, string? description)
+        public IActionResult UpdateStatusForTre(string tesId, StatusType statusType, string? description)
         {
-            
+
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
             var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
             if (tre == null)
             {
                 return BadRequest("User " + usersName + " doesn't have an tre");
             }
-        
+
 
             var sub = _DbContext.Submissions.FirstOrDefault(x => x.TesId == tesId && x.Tre == tre);
             if (sub == null)
             {
                 return BadRequest("Invalid tesid or tre not valid for tes");
             }
-            
+
             UpdateSubmissionStatus.UpdateStatus(sub, statusType, description);
             _DbContext.SaveChanges();
 
 
-            return StatusCode(200, new APIReturn(){ReturnType = ReturnType.voidReturn});
+            return StatusCode(200, new APIReturn() { ReturnType = ReturnType.voidReturn });
         }
 
-        
+
 
         [AllowAnonymous]
         [HttpGet("GetAllSubmissions")]
@@ -126,6 +125,42 @@ namespace DARE_API.Controllers
                 Log.Error(ex, "{Function} Crashed", "GetASubmission");
                 throw;
             }
+        }
+
+        [HttpPost("SaveSubmissionFiles")]
+        public IActionResult SaveSubmissionFiles(int submissionId, List<SubmissionFile> submissionFiles)
+        {
+            var existingSubmission = _DbContext.Submissions
+                .Include(d => d.SubmissionFiles)
+                .FirstOrDefault(d => d.Id == submissionId);
+
+            if (existingSubmission != null)
+            {
+                foreach (var file in submissionFiles)
+                {
+                    var existingFile = existingSubmission.SubmissionFiles.FirstOrDefault(f => f.Name == file.Name);
+                    if (existingFile != null)
+                    {
+                        existingFile.Name = file.Name;
+                        existingFile.TreBucketFullPath = file.TreBucketFullPath;
+                        existingFile.SubmisionBucketFullPath = file.SubmisionBucketFullPath;
+                        existingFile.Status = file.Status;
+                        existingFile.Description = file.Description;
+                    }
+                    else
+                    {
+                        existingSubmission.SubmissionFiles.Add(file);
+                    }
+                }
+
+                _DbContext.SaveChanges();
+                return Ok(existingSubmission);
+            }
+            else
+            {
+                return BadRequest();
+            }
+
         }
     }
 }

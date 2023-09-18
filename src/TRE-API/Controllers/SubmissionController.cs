@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Data;
 using BL.Models.APISimpleTypeReturns;
 using TRE_API.Repositories.DbContexts;
+using EasyNetQ.Management.Client.Model;
 
 namespace TRE_API.Controllers
 {
@@ -104,6 +105,46 @@ namespace TRE_API.Controllers
                 new Dictionary<string, string>() { { "tesId", submission.TesId }, { "statusType", StatusType.PodProcessingComplete.ToString() }, { "description", "" } }).Result;
 
             return StatusCode(200, outputBucket);
+        }
+
+        [HttpGet]
+        [Route("DataOutApproval")]
+        [ValidateModelState]
+        [SwaggerOperation("DataOutApproval")]
+        [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
+        public IActionResult DataOutApproval(string submissionId, bool isApproved)
+        {
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("submissionId", submissionId.ToString());
+            var submission = _dareHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist).Result;
+
+            var status = "";
+            if (isApproved)
+            {
+                status = StatusType.DataOutApproved.ToString();
+            }
+            else
+            {
+                status = StatusType.DataOutApprovalRejected.ToString();
+            }
+
+            var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
+                new Dictionary<string, string>() { { "tesId", submission.TesId }, { "statusType", status }, { "description", "" } }).Result;
+
+            return StatusCode(200, result);
+        }
+
+        [HttpPost]
+        [Route("SaveHutchFiles")]
+        [ValidateModelState]
+        [SwaggerOperation("SaveHutchFiles")]
+        [SwaggerResponse(statusCode: 200, type: typeof(Submission), description: "")]
+        public IActionResult SaveHutchFiles(string submissionId, List<SubmissionFile> submissionFiles)
+        {
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("submissionId", submissionId.ToString());
+            var submission = _dareHelper.CallAPI<List<SubmissionFile>,Submission>("/api/Submission/SubmissionFiles/", submissionFiles, paramlist).Result;
+            return StatusCode(200, submission);
         }
     }
 }
