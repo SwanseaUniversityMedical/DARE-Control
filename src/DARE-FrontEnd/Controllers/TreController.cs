@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using BL.Models.Settings;
 using Microsoft.CodeAnalysis;
+using Microsoft.AspNetCore.Http;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -15,13 +16,13 @@ namespace DARE_FrontEnd.Controllers
         private readonly IDareClientHelper _clientHelper;
         
         private readonly FormIOSettings _formIOSettings;
-
+     
         public TreController(IDareClientHelper client, FormIOSettings formIo)
         {
             _clientHelper = client;
 
             _formIOSettings = formIo;
-            
+
         }
 
         [HttpGet]
@@ -82,7 +83,7 @@ namespace DARE_FrontEnd.Controllers
                 data.FormIoString = str;
 
                 var result = await _clientHelper.CallAPI<FormData, Tre?>("/api/Tre/SaveTre", data);
-
+                         
                 if (result.Error)
                     return BadRequest();
 
@@ -90,10 +91,6 @@ namespace DARE_FrontEnd.Controllers
             }
             return BadRequest();
         }
-
-
-
-   
 
     }
 }

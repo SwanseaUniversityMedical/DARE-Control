@@ -18,8 +18,6 @@ namespace TREAgent.Services
             _password = encDec.Decrypt(creds.EncPass);
             _requiredRole = "dare-tre-agent";
 
-
-
         }
     }
 }

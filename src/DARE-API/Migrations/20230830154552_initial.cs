@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -182,7 +183,25 @@ namespace DARE_API.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
+            migrationBuilder.CreateTable(
+               name: "AuditLogs",
+               columns: table => new
+               {
+                   Id = table.Column<int>(type: "integer", nullable: false)
+                       .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                   ProjectId = table.Column<int>(type: "integer", nullable: true),
+                   UserId = table.Column<int>(type: "integer", nullable: true),
+                   TreId = table.Column<int>(type: "integer", nullable: true),
+                   TestaskId = table.Column<int>(type: "integer", nullable: true),
+                   UserName = table.Column<string>(type: "text", nullable: false),
+                   Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                   IPaddress = table.Column<string>(type: "text", nullable: false),
+                   FormData = table.Column<string>(type: "text", nullable: true)
+               },
+               constraints: table =>
+               {
+                   table.PrimaryKey("PK_AuditLogs", x => x.Id);
+               });
             migrationBuilder.CreateIndex(
                 name: "IX_HistoricStatuses_SubmissionId",
                 table: "HistoricStatuses",
@@ -217,6 +236,12 @@ namespace DARE_API.Migrations
                 name: "IX_Submissions_TreId",
                 table: "Submissions",
                 column: "TreId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AuditLogs_Id",
+                table: "AuditLogs",
+                column: "Id");
+
         }
 
         /// <inheritdoc />
@@ -242,6 +267,9 @@ namespace DARE_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "AuditLogs");
         }
     }
 }

@@ -5,6 +5,9 @@ using BL.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Authorization;
 using BL.Models.Settings;
+using Microsoft.AspNetCore.Http;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -14,13 +17,11 @@ namespace DARE_FrontEnd.Controllers
         private readonly IDareClientHelper _clientHelper;
         
         private readonly FormIOSettings _formIOSettings;
-
         public ProjectController(IDareClientHelper client, FormIOSettings formIo)
         {
             _clientHelper = client;
             
             _formIOSettings = formIo;
-            
 
         }
 
@@ -147,10 +148,7 @@ namespace DARE_FrontEnd.Controllers
             var result =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
             result = GetProjectUserModel();
-
-
             return View(result);
-
 
         }
 
@@ -163,7 +161,6 @@ namespace DARE_FrontEnd.Controllers
             result = GetProjectTreModel();
 
             return View(result);
-
 
         }
 
@@ -187,7 +184,6 @@ namespace DARE_FrontEnd.Controllers
 
                 formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""Id"":" + projectId.ToString(), StringComparison.CurrentCultureIgnoreCase);
             }
-
 
             return View(formData);
         }
@@ -228,9 +224,9 @@ namespace DARE_FrontEnd.Controllers
             {
                 var data = System.Text.Json.JsonSerializer.Deserialize<FormData>(str);
                 data.FormIoString = str;
-
+                  
                 var result = await _clientHelper.CallAPI<FormData, Project?>("/api/Project/SaveProject", data);
-
+               
                 if (result.Id == 0)
                     return BadRequest();
 
@@ -249,6 +245,7 @@ namespace DARE_FrontEnd.Controllers
             };
             var result =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/RemoveUserMembership", model);
+
             return RedirectToAction("GetProject", new { id = projectId });
         }
 
@@ -262,6 +259,7 @@ namespace DARE_FrontEnd.Controllers
             };
             var result =
                 await _clientHelper.CallAPI<ProjectTre, ProjectTre?>("/api/Project/RemoveTreMembership", model);
+          
             return RedirectToAction("GetProject", new { id = projectId });
         }
 

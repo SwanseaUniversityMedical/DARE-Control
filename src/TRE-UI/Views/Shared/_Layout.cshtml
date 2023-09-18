@@ -55,8 +55,9 @@
                     </ul>
                 </div>
                 <div class="account-nav align-items-center">
-                    <form class="me-3 d-none d-md-block">
-                        <input type="search" class="form-control form-control-sm" placeholder="Search..." aria-label="Search">
+                    <form class="me-3 d-none d-md-block" asp-controller="Home" asp-action="Index">
+
+                        <input type="search" class="form-control form-control-sm" name="SearchString" value="@ViewData["CurrentFilter"]" placeholder="Search..." aria-label="Search">
                     </form>
 
                     <div class="nav-item dropdown">

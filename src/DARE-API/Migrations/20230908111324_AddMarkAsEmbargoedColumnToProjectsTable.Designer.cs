@@ -3,6 +3,7 @@ using System;
 using DARE_API.Repositories.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DARE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230908111324_AddMarkAsEmbargoedColumnToProjectsTable")]
+    partial class AddMarkAsEmbargoedColumnToProjectsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,46 +27,6 @@ namespace DARE_API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("BL.Models.AuditLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("FormData")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("IPaddress")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TestaskId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TreId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AuditLogs");
-                });
 
             modelBuilder.Entity("BL.Models.HistoricStatus", b =>
                 {
