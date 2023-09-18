@@ -132,7 +132,8 @@ namespace DARE_API.Migrations
                     StartTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     EndTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
-                    StatusDescription = table.Column<string>(type: "text", nullable: true)
+                    StatusDescription = table.Column<string>(type: "text", nullable: true),
+                    LastHeartBeatReceived = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -171,7 +172,8 @@ namespace DARE_API.Migrations
                     End = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     SubmissionId = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
-                    StatusDescription = table.Column<string>(type: "text", nullable: true)
+                    StatusDescription = table.Column<string>(type: "text", nullable: true),
+                    LastHeartBeatReceived = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {

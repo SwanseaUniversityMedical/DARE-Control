@@ -269,7 +269,7 @@ namespace DARE_API.Repositories.DbContexts
                         dbTres.Add(dbProject.Tres.First(x => x.Name.ToLower() == tre.ToLower()));
                     }
                 }
-                UpdateSubmissionStatus.UpdateStatus(sub, StatusType.WaitingForChildSubsToComplete, "");
+                UpdateSubmissionStatus.UpdateStatus(sub, StatusType.WaitingForChildSubsToComplete, "","");
 
                 foreach (var tre in dbTres)
                 {

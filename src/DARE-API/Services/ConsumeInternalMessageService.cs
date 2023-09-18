@@ -72,7 +72,7 @@ namespace DARE_API.Services
                         dbtres.Add(dbproj.Tres.First(x => x.Name.ToLower() == tre.ToLower()));
                     }
                 }
-                UpdateSubmissionStatus.UpdateStatus(sub, StatusType.WaitingForChildSubsToComplete, "");
+                UpdateSubmissionStatus.UpdateStatus(sub, StatusType.WaitingForChildSubsToComplete, "","");
                 
                 foreach (var tre in dbtres)
                 {

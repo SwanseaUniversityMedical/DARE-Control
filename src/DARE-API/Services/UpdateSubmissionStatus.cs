@@ -14,7 +14,7 @@ namespace DARE_API.Services
                 End = DateTime.Now.ToUniversalTime(),
                 Status = sub.Status,
                 StatusDescription = sub.StatusDescription,
-                LastHeartBeatReceived = DateTime.Now.ToUniversalTime().ToString()
+                LastHeartBeatReceived = LastHeartBeatReceived
             });
             if (type == StatusType.Cancelled || type == StatusType.Completed)
             {
@@ -23,7 +23,7 @@ namespace DARE_API.Services
             sub.Status = type;
             sub.LastStatusUpdate = DateTime.Now.ToUniversalTime();
             sub.StatusDescription = description;
-            sub.LastHeartBeatReceived = DateTime.Now.ToUniversalTime().ToString();
+            sub.LastHeartBeatReceived = LastHeartBeatReceived;
             
   
         }
