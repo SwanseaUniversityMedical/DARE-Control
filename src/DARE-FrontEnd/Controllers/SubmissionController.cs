@@ -49,11 +49,17 @@ namespace DARE_FrontEnd.Controllers
             paramlist.Add("submissionId", id.ToString());
 
             var res = _clientHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist).Result;
-            
+            //var res1 = _clientHelper.CallAPIWithoutModel<SubmissionInfo>("/api/Submission/StageTypes/").Result;
+
             var minio = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
             ViewBag.minioendpoint = minio?.Url;
 
-            return View(res);
+            var test = new SubmissionInfo()
+            {
+                Submission = res,
+                StageInfo = _clientHelper.CallAPIWithoutModel<List<StageInfo>>("/api/Submission/StageTypes/").Result
+            };
+            return View(test);
         }
     }
 }
