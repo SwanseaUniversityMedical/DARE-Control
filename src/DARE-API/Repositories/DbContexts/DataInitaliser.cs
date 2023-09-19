@@ -100,14 +100,16 @@ namespace DARE_API.Repositories.DbContexts
         private Project CreateProject(string name)
         {
             var proj = _dbContext.Projects.FirstOrDefault(x => x.Name.ToLower() == name.ToLower());
-            var submission = GenerateRandomName(name.ToLower()) + "submission";
-            var output = GenerateRandomName(name.ToLower()) + "output";
-            var submissionBucket = _minioHelper.CreateBucket(_minioSettings, submission.ToLower()).Result;
-            var submistionBucketPolicy = _minioHelper.CreateBucketPolicy(submission.ToLower()).Result;
-            var outputBucket = _minioHelper.CreateBucket(_minioSettings, output.ToLower()).Result;
-            var outputBucketPolicy = _minioHelper.CreateBucketPolicy(output.ToLower()).Result;
+            
             if (proj == null)
             {
+                var submission = GenerateRandomName(name.ToLower()) + "submission";
+                var output = GenerateRandomName(name.ToLower()) + "output";
+                var submissionBucket = _minioHelper.CreateBucket(_minioSettings, submission.ToLower()).Result;
+                var submistionBucketPolicy = _minioHelper.CreateBucketPolicy(submission.ToLower()).Result;
+                var outputBucket = _minioHelper.CreateBucket(_minioSettings, output.ToLower()).Result;
+                var outputBucketPolicy = _minioHelper.CreateBucketPolicy(output.ToLower()).Result;
+
                 proj = new Project()
                 {
                     Name = name,

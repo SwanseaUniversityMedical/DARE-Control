@@ -26,6 +26,10 @@ namespace BL.Models
         [NotMapped]
         public virtual List<StageInfo> StageInfo { get; set; }
 
+        public virtual List<SubmissionFile> SubmissionFiles { get; set; }
+
+
+
         public virtual Tre? Tre { get; set; }
 
         public virtual User SubmittedBy { get; set; }

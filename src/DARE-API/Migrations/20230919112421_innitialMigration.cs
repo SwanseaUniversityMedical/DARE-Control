@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -8,11 +7,31 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DARE_API.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class innitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "AuditLogs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ProjectId = table.Column<int>(type: "integer", nullable: true),
+                    UserId = table.Column<int>(type: "integer", nullable: true),
+                    TreId = table.Column<int>(type: "integer", nullable: true),
+                    TestaskId = table.Column<int>(type: "integer", nullable: true),
+                    UserName = table.Column<string>(type: "text", nullable: true),
+                    FormData = table.Column<string>(type: "text", nullable: true),
+                    IPaddress = table.Column<string>(type: "text", nullable: true),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AuditLogs", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Projects",
                 columns: table => new
@@ -25,6 +44,7 @@ namespace DARE_API.Migrations
                     StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ProjectDescription = table.Column<string>(type: "text", nullable: false),
+                    MarkAsEmbargoed = table.Column<bool>(type: "boolean", nullable: false),
                     SubmissionBucket = table.Column<string>(type: "text", nullable: true),
                     OutputBucket = table.Column<string>(type: "text", nullable: true)
                 },
@@ -183,25 +203,31 @@ namespace DARE_API.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
             migrationBuilder.CreateTable(
-               name: "AuditLogs",
-               columns: table => new
-               {
-                   Id = table.Column<int>(type: "integer", nullable: false)
-                       .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                   ProjectId = table.Column<int>(type: "integer", nullable: true),
-                   UserId = table.Column<int>(type: "integer", nullable: true),
-                   TreId = table.Column<int>(type: "integer", nullable: true),
-                   TestaskId = table.Column<int>(type: "integer", nullable: true),
-                   UserName = table.Column<string>(type: "text", nullable: false),
-                   Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                   IPaddress = table.Column<string>(type: "text", nullable: false),
-                   FormData = table.Column<string>(type: "text", nullable: true)
-               },
-               constraints: table =>
-               {
-                   table.PrimaryKey("PK_AuditLogs", x => x.Id);
-               });
+                name: "SubmissionFiles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    TreBucketFullPath = table.Column<string>(type: "text", nullable: false),
+                    SubmisionBucketFullPath = table.Column<string>(type: "text", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    SubmissionId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubmissionFiles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SubmissionFiles_Submissions_SubmissionId",
+                        column: x => x.SubmissionId,
+                        principalTable: "Submissions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_HistoricStatuses_SubmissionId",
                 table: "HistoricStatuses",
@@ -216,6 +242,11 @@ namespace DARE_API.Migrations
                 name: "IX_ProjectUser_UsersId",
                 table: "ProjectUser",
                 column: "UsersId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubmissionFiles_SubmissionId",
+                table: "SubmissionFiles",
+                column: "SubmissionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Submissions_ParentID",
@@ -236,17 +267,14 @@ namespace DARE_API.Migrations
                 name: "IX_Submissions_TreId",
                 table: "Submissions",
                 column: "TreId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AuditLogs_Id",
-                table: "AuditLogs",
-                column: "Id");
-
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AuditLogs");
+
             migrationBuilder.DropTable(
                 name: "HistoricStatuses");
 
@@ -255,6 +283,9 @@ namespace DARE_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "ProjectUser");
+
+            migrationBuilder.DropTable(
+                name: "SubmissionFiles");
 
             migrationBuilder.DropTable(
                 name: "Submissions");
@@ -267,9 +298,6 @@ namespace DARE_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
-
-            migrationBuilder.DropTable(
-                name: "AuditLogs");
         }
     }
 }
