@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DARE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230912131606_initialMigration")]
-    partial class initialMigration
+    [Migration("20230919112421_innitialMigration")]
+    partial class innitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,27 +40,24 @@ namespace DARE_API.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("FormData")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("IPaddress")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("ProjectId")
+                    b.Property<int?>("ProjectId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("TestaskId")
+                    b.Property<int?>("TestaskId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("TreId")
+                    b.Property<int?>("TreId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("integer");
 
                     b.Property<string>("UserName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -116,6 +113,9 @@ namespace DARE_API.Migrations
                     b.Property<string>("FormData")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("MarkAsEmbargoed")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -206,6 +206,43 @@ namespace DARE_API.Migrations
                     b.HasIndex("TreId");
 
                     b.ToTable("Submissions");
+                });
+
+            modelBuilder.Entity("BL.Models.SubmissionFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SubmisionBucketFullPath")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("SubmissionId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TreBucketFullPath")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubmissionId");
+
+                    b.ToTable("SubmissionFiles");
                 });
 
             modelBuilder.Entity("BL.Models.Tre", b =>
@@ -334,6 +371,17 @@ namespace DARE_API.Migrations
                     b.Navigation("Tre");
                 });
 
+            modelBuilder.Entity("BL.Models.SubmissionFile", b =>
+                {
+                    b.HasOne("BL.Models.Submission", "Submission")
+                        .WithMany("SubmissionFiles")
+                        .HasForeignKey("SubmissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Submission");
+                });
+
             modelBuilder.Entity("ProjectTre", b =>
                 {
                     b.HasOne("BL.Models.Project", null)
@@ -374,6 +422,8 @@ namespace DARE_API.Migrations
                     b.Navigation("Children");
 
                     b.Navigation("HistoricStatuses");
+
+                    b.Navigation("SubmissionFiles");
                 });
 
             modelBuilder.Entity("BL.Models.Tre", b =>
