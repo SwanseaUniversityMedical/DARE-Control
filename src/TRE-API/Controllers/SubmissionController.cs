@@ -67,8 +67,7 @@ namespace TRE_API.Controllers
         {
             var result =
                 _dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre").Result;
-            var treheartbeat = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-              new Dictionary<string, string>() { { "tesId", ""}, { "statusType", "" }, { "description", ""} }).Result;
+           
 
             return StatusCode(200, result);
         }
