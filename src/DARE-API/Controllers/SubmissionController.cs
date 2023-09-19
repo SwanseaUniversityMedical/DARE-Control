@@ -241,7 +241,7 @@ namespace DARE_API.Controllers
             {
                 foreach (var file in submissionFiles)
                 {
-                    var existingFile = existingSubmission.SubmissionFiles.FirstOrDefault(f => f.Name == file.Name);
+                    var existingFile = existingSubmission.SubmissionFiles.FirstOrDefault(f => f.TreBucketFullPath == file.TreBucketFullPath);
                     if (existingFile != null)
                     {
                         existingFile.Name = file.Name;
