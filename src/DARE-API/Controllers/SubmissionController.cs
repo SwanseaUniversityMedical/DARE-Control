@@ -10,8 +10,6 @@ using DARE_API.Services;
 using EasyNetQ;
 using Microsoft.AspNetCore.Authorization;
 
-
-
 namespace DARE_API.Controllers
 {
 
@@ -126,6 +124,112 @@ namespace DARE_API.Controllers
                 Log.Error(ex, "{Function} Crashed", "GetASubmission");
                 throw;
             }
+        }
+        [AllowAnonymous]
+        [HttpGet("StageTypes")]
+        public List<StageInfo> StageTypes()
+        {
+            var stage1List = new StageInfo();
+            stage1List.stageName = "Submission Layer Validation";
+            stage1List.stageNumber = 1;
+            stage1List.statusTypeList = new List<StatusType>
+            {
+                StatusType.InvalidUser ,
+                StatusType.UserNotOnProject ,
+                StatusType.InvalidSubmission,
+                StatusType.WaitingForCrateFormatCheck
+            };
+            Dictionary<int, List<StatusType>> stage1Dict = new Dictionary<int, List<StatusType>>();
+            stage1Dict.Add(1, stage1List.statusTypeList);
+            stage1List.stagesDict = stage1Dict;
+
+            var stage2List = new StageInfo();
+            stage2List.stageName = "Tre Layer Validation";
+            stage2List.stageNumber = 2;
+            stage2List.statusTypeList = new List<StatusType>
+            {
+                StatusType.WaitingForAgentToTransfer,
+                StatusType.TransferredToPod,
+                StatusType.TRENotAuthorisedForProject
+
+
+
+
+            };
+            Dictionary<int, List<StatusType>> stage2Dict = new Dictionary<int, List<StatusType>>();
+            stage2Dict.Add(2, stage2List.statusTypeList);
+            stage2List.stagesDict = stage2Dict;
+
+            var stage3List = new StageInfo();
+            stage3List.stageName = "Query Processing";
+            stage3List.stageNumber = 3;
+            stage3List.statusTypeList = new List<StatusType>
+            {
+                StatusType.WaitingForChildSubsToComplete,
+                StatusType.PodProcessing,
+                StatusType.RequestCancellation
+
+            };
+            Dictionary<int, List<StatusType>> stage3Dict = new Dictionary<int, List<StatusType>>();
+            stage3Dict.Add(3, stage3List.statusTypeList);
+            stage3List.stagesDict = stage3Dict;
+
+            var stage4List = new StageInfo();
+            stage4List.stageName = "Data Approval Processing";
+            stage4List.stageNumber = 4;
+            stage4List.statusTypeList = new List<StatusType>
+            {
+                StatusType.DataOutApprovalBegun,
+                StatusType.CancellationRequestSent,
+                StatusType.CancellingChildren
+            };
+            Dictionary<int, List<StatusType>> stage4Dict = new Dictionary<int, List<StatusType>>();
+            stage4Dict.Add(4, stage4List.statusTypeList);
+            stage4List.stagesDict = stage4Dict;
+
+            var stage5List = new StageInfo();
+            stage5List.stageName = "Result";
+            stage5List.stageNumber = 5;
+            stage5List.statusTypeList = new List<StatusType>
+            {
+                StatusType.PodProcessingComplete,
+                StatusType.DataOutApprovalRejected,
+                StatusType.DataOutApproved,
+                StatusType.Completed,
+                StatusType.Cancelled
+            };
+            Dictionary<int, List<StatusType>> stage5Dict = new Dictionary<int, List<StatusType>>();
+            stage5Dict.Add(5, stage5List.statusTypeList);
+            stage5List.stagesDict = stage5Dict;
+
+            List<StageInfo> infoList = new List<StageInfo>();
+            // var infoList = new List<List<StageInfo>>();
+            infoList.Add(stage1List);
+            infoList.Add(stage2List);
+            infoList.Add(stage3List);
+            infoList.Add(stage4List);
+            infoList.Add(stage5List);
+
+            return infoList;
+
+        }
+
+        [AllowAnonymous]
+        [HttpGet("DifferentStages")]
+        public Dictionary<int, StageInfo> DifferentStages() {
+
+            var stage1List = new StageInfo();
+            stage1List.stageName = "Submission Layer Validation";
+            stage1List.stageNumber = 1;
+            stage1List.statusTypeList = new List<StatusType>
+            {
+                StatusType.InvalidUser ,
+                StatusType.UserNotOnProject ,
+                StatusType.InvalidSubmission,
+                StatusType.WaitingForCrateFormatCheck
+            };
+            return null;
+
         }
     }
 }
