@@ -12,14 +12,15 @@ namespace DARE_FrontEnd.Controllers
     [AllowAnonymous]
     public class HomeController : Controller
     {
-        private readonly IDareClientHelper _clientHelper;
+        
 
-        public HomeController(IDareClientHelper client)
+        
+
+        public IActionResult Index()
         {
-            _clientHelper = client;
-
+            return View();
         }
-     
+
         public IActionResult TermsAndConditions()
         {
             return View();
