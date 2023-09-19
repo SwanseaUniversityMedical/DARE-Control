@@ -213,6 +213,9 @@ namespace DARE_API.Controllers
             return infoList;
 
         }
+
+        [AllowAnonymous]
+        [HttpGet("DifferentStages")]
         public Dictionary<int, StageInfo> DifferentStages() {
 
             var stage1List = new StageInfo();
