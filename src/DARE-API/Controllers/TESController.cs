@@ -91,7 +91,7 @@ namespace DARE_API.Controllers
                 
                 if (asub.Parent == null)
                 {
-                    UpdateSubmissionStatus.UpdateStatus(sub, StatusType.CancellingChildren, "");
+                    UpdateSubmissionStatus.UpdateStatus(sub, StatusType.CancellingChildren,"");
                     
                 }
                 else

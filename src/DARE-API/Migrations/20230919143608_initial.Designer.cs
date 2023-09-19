@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DARE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230919112421_innitialMigration")]
-    partial class innitialMigration
+    [Migration("20230919143608_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -264,6 +264,9 @@ namespace DARE_API.Migrations
                     b.Property<string>("FormData")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("LastHeartBeatReceived")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()

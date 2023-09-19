@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DARE_API.Migrations
 {
     /// <inheritdoc />
-    public partial class innitialMigration : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -60,6 +60,7 @@ namespace DARE_API.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
+                    LastHeartBeatReceived = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     AdminUsername = table.Column<string>(type: "text", nullable: false),
                     About = table.Column<string>(type: "text", nullable: false),
                     FormData = table.Column<string>(type: "text", nullable: false)

@@ -13,7 +13,6 @@ namespace DARE_API.Services
                 Start = sub.LastStatusUpdate.ToUniversalTime(),
                 End = DateTime.Now.ToUniversalTime(),
                 Status = sub.Status,
-
                 StatusDescription = sub.StatusDescription
             });
             if (type == StatusType.Cancelled || type == StatusType.Completed)
@@ -23,7 +22,7 @@ namespace DARE_API.Services
             sub.Status = type;
             sub.LastStatusUpdate = DateTime.Now.ToUniversalTime();
             sub.StatusDescription = description;
-            
+
         }
     }
 }
