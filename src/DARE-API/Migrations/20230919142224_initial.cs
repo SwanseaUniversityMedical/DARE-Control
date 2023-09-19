@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DARE_API.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class innitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -206,6 +206,33 @@ namespace DARE_API.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+<<<<<<<< HEAD:src/DARE-API/Migrations/20230919142224_initial.cs
+========
+            migrationBuilder.CreateTable(
+                name: "SubmissionFiles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    TreBucketFullPath = table.Column<string>(type: "text", nullable: false),
+                    SubmisionBucketFullPath = table.Column<string>(type: "text", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    SubmissionId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubmissionFiles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SubmissionFiles_Submissions_SubmissionId",
+                        column: x => x.SubmissionId,
+                        principalTable: "Submissions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+>>>>>>>> main:src/DARE-API/Migrations/20230919112421_innitialMigration.cs
             migrationBuilder.CreateIndex(
                 name: "IX_HistoricStatuses_SubmissionId",
                 table: "HistoricStatuses",
@@ -220,6 +247,11 @@ namespace DARE_API.Migrations
                 name: "IX_ProjectUser_UsersId",
                 table: "ProjectUser",
                 column: "UsersId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubmissionFiles_SubmissionId",
+                table: "SubmissionFiles",
+                column: "SubmissionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Submissions_ParentID",
@@ -256,6 +288,9 @@ namespace DARE_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "ProjectUser");
+
+            migrationBuilder.DropTable(
+                name: "SubmissionFiles");
 
             migrationBuilder.DropTable(
                 name: "Submissions");
