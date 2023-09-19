@@ -175,7 +175,6 @@ namespace TREAgent
                                 {
                                     { "tesId", TesId },
                                     { "statusType", statusMessage },
-                                     { "LastHeartBeatReceived", DateTime.Now.ToUniversalTime().ToString()},
                                     { "description", "" }
                                 }).Result;
                         }

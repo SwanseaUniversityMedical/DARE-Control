@@ -51,7 +51,8 @@ namespace DARE_API.Controllers
             {
                 return BadRequest("User " + usersName + " doesn't have a tre");
             }
-
+            tre.LastHeartBeatReceived = DateTime.Now.ToUniversalTime();
+            _DbContext.SaveChanges();
             var results = tre.Submissions.Where(x => x.Status == StatusType.WaitingForAgentToTransfer).ToList();
 
 
@@ -64,7 +65,7 @@ namespace DARE_API.Controllers
         [ValidateModelState]
         [SwaggerOperation("UpdateStatusForTre")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public  IActionResult UpdateStatusForTre(string tesId, StatusType statusType, string? description, String? LastHeartBeatReceived)
+        public  IActionResult UpdateStatusForTre(string tesId, StatusType statusType, string? description)
         {
             
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
@@ -81,7 +82,7 @@ namespace DARE_API.Controllers
                 return BadRequest("Invalid tesid or tre not valid for tes");
             }
             
-            UpdateSubmissionStatus.UpdateStatus(sub, statusType, description, LastHeartBeatReceived);
+            UpdateSubmissionStatus.UpdateStatus(sub, statusType, description);
             _DbContext.SaveChanges();
 
 
@@ -115,10 +116,10 @@ namespace DARE_API.Controllers
             try
             {
 
-                var Submission = _DbContext.Submissions.Where(x => x.Id == submissionId).FirstOrDefault();
+                var submission = _DbContext.Submissions.First(x => x.Id == submissionId);
 
                 Log.Information("{Function} Submission retrieved successfully", "GetASubmission");
-                return Submission;
+                return submission;
             }
             catch (Exception ex)
             {

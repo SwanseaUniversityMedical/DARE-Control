@@ -39,7 +39,7 @@ namespace BL.Models
         public DateTime EndTime { get; set; }
         public StatusType Status { get; set; }
         public string? StatusDescription { get; set; }
-        public string? LastHeartBeatReceived { get; set; }
+        
 
     }
 
