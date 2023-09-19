@@ -1,4 +1,6 @@
 ﻿using BL.Models.Enums;
+using BL.Models.ViewModels;
+using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BL.Models
@@ -21,6 +23,8 @@ namespace BL.Models
 
         public virtual List<Submission> Children { get; set; }
         public virtual List<HistoricStatus> HistoricStatuses { get; set; }
+        [NotMapped]
+        public virtual List<StageInfo> StageInfo { get; set; }
 
         public virtual List<SubmissionFile> SubmissionFiles { get; set; }
 
