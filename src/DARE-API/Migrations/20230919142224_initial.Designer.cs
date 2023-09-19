@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DARE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230912131606_initialMigration")]
-    partial class initialMigration
+    [Migration("20230919142224_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,27 +40,24 @@ namespace DARE_API.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("FormData")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("IPaddress")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("ProjectId")
+                    b.Property<int?>("ProjectId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("TestaskId")
+                    b.Property<int?>("TestaskId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("TreId")
+                    b.Property<int?>("TreId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("integer");
 
                     b.Property<string>("UserName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -78,6 +75,9 @@ namespace DARE_API.Migrations
 
                     b.Property<DateTime>("End")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LastHeartBeatReceived")
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("Start")
                         .HasColumnType("timestamp with time zone");
@@ -117,6 +117,9 @@ namespace DARE_API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("MarkAsEmbargoed")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -153,6 +156,9 @@ namespace DARE_API.Migrations
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LastHeartBeatReceived")
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("LastStatusUpdate")
                         .HasColumnType("timestamp with time zone");
