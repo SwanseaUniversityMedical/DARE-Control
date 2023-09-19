@@ -22,9 +22,7 @@ namespace DARE_API.Services
             sub.Status = type;
             sub.LastStatusUpdate = DateTime.Now.ToUniversalTime();
             sub.StatusDescription = description;
-            
-            
-  
+
         }
     }
 }

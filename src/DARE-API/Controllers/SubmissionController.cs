@@ -51,6 +51,7 @@ namespace DARE_API.Controllers
             {
                 return BadRequest("User " + usersName + " doesn't have a tre");
             }
+
             tre.LastHeartBeatReceived = DateTime.Now.ToUniversalTime();
             _DbContext.SaveChanges();
             var results = tre.Submissions.Where(x => x.Status == StatusType.WaitingForAgentToTransfer).ToList();
@@ -65,9 +66,9 @@ namespace DARE_API.Controllers
         [ValidateModelState]
         [SwaggerOperation("UpdateStatusForTre")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public  IActionResult UpdateStatusForTre(string tesId, StatusType statusType, string? description)
+        public IActionResult UpdateStatusForTre(string tesId, StatusType statusType, string? description)
         {
-            
+
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
             var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
             if (tre == null)
@@ -81,7 +82,7 @@ namespace DARE_API.Controllers
             {
                 return BadRequest("Invalid tesid or tre not valid for tes");
             }
-            
+
             UpdateSubmissionStatus.UpdateStatus(sub, statusType, description);
             _DbContext.SaveChanges();
 
@@ -127,6 +128,7 @@ namespace DARE_API.Controllers
                 throw;
             }
         }
+
         [AllowAnonymous]
         [HttpGet("StageTypes")]
         public List<StageInfo> StageTypes()
@@ -136,8 +138,8 @@ namespace DARE_API.Controllers
             stage1List.stageNumber = 1;
             stage1List.statusTypeList = new List<StatusType>
             {
-                StatusType.InvalidUser ,
-                StatusType.UserNotOnProject ,
+                StatusType.InvalidUser,
+                StatusType.UserNotOnProject,
                 StatusType.InvalidSubmission,
                 StatusType.WaitingForCrateFormatCheck
             };
@@ -218,15 +220,16 @@ namespace DARE_API.Controllers
 
         [AllowAnonymous]
         [HttpGet("DifferentStages")]
-        public Dictionary<int, StageInfo> DifferentStages() {
+        public Dictionary<int, StageInfo> DifferentStages()
+        {
 
             var stage1List = new StageInfo();
             stage1List.stageName = "Submission Layer Validation";
             stage1List.stageNumber = 1;
             stage1List.statusTypeList = new List<StatusType>
             {
-                StatusType.InvalidUser ,
-                StatusType.UserNotOnProject ,
+                StatusType.InvalidUser,
+                StatusType.UserNotOnProject,
                 StatusType.InvalidSubmission,
                 StatusType.WaitingForCrateFormatCheck
             };
@@ -245,7 +248,9 @@ namespace DARE_API.Controllers
             {
                 foreach (var file in submissionFiles)
                 {
-                    var existingFile = existingSubmission.SubmissionFiles.FirstOrDefault(f => f.TreBucketFullPath == file.TreBucketFullPath);
+                    var existingFile =
+                        existingSubmission.SubmissionFiles.FirstOrDefault(f =>
+                            f.TreBucketFullPath == file.TreBucketFullPath);
                     if (existingFile != null)
                     {
                         existingFile.Name = file.Name;

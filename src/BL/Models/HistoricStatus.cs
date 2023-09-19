@@ -8,17 +8,10 @@ namespace BL.Models
         public int Id { get; set; }
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
-        
         public virtual Submission Submission { get; set; }
-
-       
-
         public StatusType Status { get; set; }
-
-       
         public string? StatusDescription { get; set; }
-        
-        
+
     }
 
     
