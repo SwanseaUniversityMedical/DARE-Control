@@ -16,4 +16,5 @@ namespace Data_Egress_API.Controllers
             return new BoolReturn() { Result = true };
         }
     }
+
 }
