@@ -9,11 +9,7 @@ namespace Data_Egress_API.Controllers
     {
         
 
-        public DataEgressController()
-        {
-           
-        }
-
+        
         [HttpPost(Name = "AddNewDataEgress")]
         public async Task<BoolReturn> AddNewDataEgress(int submissionId, List<string> files)
         {
