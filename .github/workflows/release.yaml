@@ -37,6 +37,14 @@ jobs:
           - './.github/workflows/release.yaml'
           - 'src/DARE-FrontEnd/**'
           - 'src/BL/**'
+        egress-api-container:
+          - './.github/workflows/release.yaml'
+          - 'src/Data-Egress-API/**'
+          - 'src/BL/**'
+        egress-ui-container:
+          - './.github/workflows/release.yaml'
+          - 'src/Data-Egress-UI/**'
+          - 'src/BL/**'
         tre-api-container:
           - './.github/workflows/release.yaml'
           - 'src/TRE-API/**'
@@ -69,7 +77,7 @@ jobs:
     if: fromJSON(needs.changes.outputs.changes).api-container == 'true'
     uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.6.0
     with:
-      job-name: container-api
+      job-name: api-container
       container-registry: ${{ vars.HARBOR_REGISTRY }}
       github-app-id: ${{ vars.APP_ID }}
       container-registry-user: ${{ vars.HARBOR_USER }}
@@ -93,7 +101,7 @@ jobs:
     if: fromJSON(needs.changes.outputs.changes).ui-container == 'true'
     uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.6.0
     with:
-      job-name: container-ui
+      job-name: ui-container
       container-registry: ${{ vars.HARBOR_REGISTRY }}
       github-app-id: ${{ vars.APP_ID }}
       container-registry-user: ${{ vars.HARBOR_USER }}
@@ -109,6 +117,54 @@ jobs:
       slack-token: ${{ secrets.SLACK_TOKEN }}
       github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
+  egress-api-container:
+    # Build the egress api container and push it as :rc-1.0.0
+    needs:
+      - slack
+      - changes
+    if: fromJSON(needs.changes.outputs.changes).egress-api-container == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.6.0
+    with:
+      job-name: egress-api-container
+      container-registry: ${{ vars.HARBOR_REGISTRY }}
+      github-app-id: ${{ vars.APP_ID }}
+      container-registry-user: ${{ vars.HARBOR_USER }}
+      container-registry-project: ${{ vars.HARBOR_PROJECT }}
+      container-registry-repo: ${{ vars.HARBOR_REPO }}-egress-api
+      release-tag-format: 'DARE-Egress-API-Container-${version}'
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      build-command: |
+        docker build -t $IMAGE -f src/Data-Egress-API/Dockerfile src/
+    secrets:
+      container-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+  egress-ui-container:
+    # Build the egress ui container and push it as :rc-1.0.0
+    needs:
+      - slack
+      - changes
+    if: fromJSON(needs.changes.outputs.changes).egress-ui-container == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.6.0
+    with:
+      job-name: egress-ui-container
+      container-registry: ${{ vars.HARBOR_REGISTRY }}
+      github-app-id: ${{ vars.APP_ID }}
+      container-registry-user: ${{ vars.HARBOR_USER }}
+      container-registry-project: ${{ vars.HARBOR_PROJECT }}
+      container-registry-repo: ${{ vars.HARBOR_REPO }}-egress-ui
+      release-tag-format: 'DARE-Egress-UI-Container-${version}'
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      slack-thread: ${{ needs.slack.outputs.thread }}
+      build-command: |
+        docker build -t $IMAGE -f src/Data-Egress-UI/Dockerfile src/
+    secrets:
+      container-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
   tre-api-container:
     # Build the tre api container and push it as :rc-1.0.0
     needs:
@@ -117,7 +173,7 @@ jobs:
     if: fromJSON(needs.changes.outputs.changes).tre-api-container == 'true'
     uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.6.0
     with:
-      job-name: container-tre-api
+      job-name: tre-api-container
       container-registry: ${{ vars.HARBOR_REGISTRY }}
       github-app-id: ${{ vars.APP_ID }}
       container-registry-user: ${{ vars.HARBOR_USER }}
@@ -141,7 +197,7 @@ jobs:
     if: fromJSON(needs.changes.outputs.changes).tre-ui-container == 'true'
     uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.6.0
     with:
-      job-name: container-tre-ui
+      job-name: tre-ui-container
       container-registry: ${{ vars.HARBOR_REGISTRY }}
       github-app-id: ${{ vars.APP_ID }}
       container-registry-user: ${{ vars.HARBOR_USER }}
@@ -165,7 +221,7 @@ jobs:
     if: fromJSON(needs.changes.outputs.changes).tre-agent-container == 'true'
     uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.6.0
     with:
-      job-name: container-tre-agent
+      job-name: tre-agent-container
       container-registry: ${{ vars.HARBOR_REGISTRY }}
       github-app-id: ${{ vars.APP_ID }}
       container-registry-user: ${{ vars.HARBOR_USER }}
@@ -196,6 +252,7 @@ jobs:
     uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-chart.yaml@v2.6.0
     with:
       job-name: chart
+      chart: charts/control
       chart-registry: ${{ vars.HARBOR_REGISTRY }}
       chart-registry-user: ${{ vars.HARBOR_USER }}
       chart-registry-project: ${{ vars.HARBOR_PROJECT }}
@@ -204,7 +261,6 @@ jobs:
       github-app-id: ${{ vars.APP_ID }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       slack-thread: ${{ needs.slack.outputs.thread }}
-      chart: charts/**
       test-command: |
         helm template $CHART --values charts/control/values.yaml
     secrets:
@@ -224,6 +280,8 @@ jobs:
       - changes
       - api-container
       - ui-container
+      - egress-api-container
+      - egress-ui-container
       - tre-api-container
       - tre-ui-container
       - tre-agent-container
