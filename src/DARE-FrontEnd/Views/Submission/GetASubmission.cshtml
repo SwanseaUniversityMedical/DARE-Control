@@ -2,7 +2,9 @@
 @using BL.Models.ViewModels
 
 @{
-    ViewData["Title"] = "@Model.Name";
+    string pageName = Model.Submission.TesName;
+
+    ViewData["Title"] = @pageName;
 
 
 }
