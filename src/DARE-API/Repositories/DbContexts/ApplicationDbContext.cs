@@ -22,10 +22,10 @@ namespace DARE_API.Repositories.DbContexts
         
         public DbSet<BL.Models.Tre> Tres { get; set; }
 
-        
-
         public DbSet<Submission> Submissions { get; set; }
         public DbSet<HistoricStatus> HistoricStatuses { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<SubmissionFile> SubmissionFiles { get; set; }
 
 
 

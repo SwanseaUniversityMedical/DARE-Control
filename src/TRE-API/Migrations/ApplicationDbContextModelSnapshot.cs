@@ -46,6 +46,31 @@ namespace TRE_API.Migrations
                     b.ToTable("SubmissionCredentials");
                 });
 
+            modelBuilder.Entity("BL.Models.TreAuditLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApprovedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Decision")
+                        .HasColumnType("text");
+
+                    b.Property<string>("IPaddress")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TreAuditLogs");
+                });
+
             modelBuilder.Entity("BL.Models.TreMembershipDecision", b =>
                 {
                     b.Property<int>("Id")

@@ -63,6 +63,22 @@ namespace TRE_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+        name: "TreAuditLogs",
+        columns: table => new
+        {
+            Id = table.Column<int>(type: "integer", nullable: false)
+                .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+            Decision = table.Column<string>(type: "text", nullable: false),
+            Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+            IPaddress = table.Column<string>(type: "text", nullable: false),
+            ApprovedBy = table.Column<string>(type: "text", nullable: false)
+        },
+        constraints: table =>
+        {
+            table.PrimaryKey("PK_AuditLogs", x => x.Id);
+        });
+
+            migrationBuilder.CreateTable(
                 name: "MembershipDecisions",
                 columns: table => new
                 {
@@ -99,6 +115,12 @@ namespace TRE_API.Migrations
                 name: "IX_MembershipDecisions_UserId",
                 table: "MembershipDecisions",
                 column: "UserId");
+
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AuditLogs_Id",
+                table: "TreAuditLogs",
+                column: "Id");
         }
 
         /// <inheritdoc />
@@ -115,6 +137,9 @@ namespace TRE_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+            name: "TreAuditLogs");
         }
     }
 }

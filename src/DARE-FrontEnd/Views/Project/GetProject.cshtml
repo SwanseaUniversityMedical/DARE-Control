@@ -1,6 +1,8 @@
 ﻿@model BL.Models.ViewModels.ProjectUserTre
 @{
-    ViewData["Title"] = "@Model.Name";
+    string pageName = Model.Name;
+
+    ViewData["Title"] = @pageName;
 
 
 }

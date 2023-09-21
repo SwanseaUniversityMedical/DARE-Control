@@ -18,6 +18,10 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Authentication;
 using Newtonsoft.Json;
 
+try
+{
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 
@@ -325,6 +329,12 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+}
+catch (Exception ex)
+{
+
+    throw;
+}
 
 
 #region SameSite Cookie Issue - https://community.auth0.com/t/correlation-failed-unknown-location-error-on-chrome-but-not-in-safari/40013/7

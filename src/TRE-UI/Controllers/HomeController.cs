@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-
+using BL.Models;
+using System.Collections.Generic;
 
 namespace TRE_UI.Controllers
 {
@@ -23,7 +24,8 @@ namespace TRE_UI.Controllers
 
         public async Task<IActionResult> IndexAsync()
         {
-             var alreadyset =await  _treClientHelper.CallAPIWithoutModel<BoolReturn>("/api/SubmissionCredentials/CheckCredentialsAreValid");
+           
+            var alreadyset =await  _treClientHelper.CallAPIWithoutModel<BoolReturn>("/api/SubmissionCredentials/CheckCredentialsAreValid");
             if (!alreadyset.Result)
             {
                
@@ -31,7 +33,7 @@ namespace TRE_UI.Controllers
             }
             return View();
         }
-
+     
         public IActionResult LoginAfterTokenExpired()
         {
             return new SignOutResult(new[]

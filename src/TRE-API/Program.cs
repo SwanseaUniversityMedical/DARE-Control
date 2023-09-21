@@ -155,8 +155,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 // --- Session Token
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+
     app.UseSwagger();
 
     app.UseSwaggerUI(c =>
@@ -167,6 +166,8 @@ if (app.Environment.IsDevelopment())
         c.OAuthClientSecret(treKeyCloakSettings.ClientSecret);
         c.OAuthAppName(treKeyCloakSettings.ClientId);
     });
+if (app.Environment.IsDevelopment())
+{
     app.UseDeveloperExceptionPage();
 }
 

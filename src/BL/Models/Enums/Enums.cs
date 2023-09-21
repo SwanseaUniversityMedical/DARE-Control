@@ -31,5 +31,12 @@ namespace BL.Models.Enums
         Rejected = 2
     }
 
-   
+    public enum FileStatus
+    {
+        ReadyToProcess = 0,
+        Approved = 1,
+        Rejected = 2
+    }
+
+
 }
