@@ -80,58 +80,59 @@
                 <h5 class="mb-0">Event Log</h5>
             </div>
             <div class="bg-white shadow-sm border-1 p-4 ">
-        <div class="accordion accordion-flush" id="accordionFlushExample">
-            @{
-                @foreach (var tre in Model.Submission.Children)
-                {
-                    var startDate = tre.StartTime;
-                    var currTime = DateTime.Now;
-                    TimeSpan result1 = currTime.Subtract(startDate);
-                    int days = result1.Days;
-                    int hours = result1.Hours;
-                    int minutes = result1.Minutes;
-
-                    var progressTimer = "Total Elapsed Time:";
-                    var lastStatusUpdate = tre.LastStatusUpdate;
-                    TimeSpan result2 = currTime.Subtract(lastStatusUpdate);
-                    int days1 = result2.Days;
-                    int hours1 = result2.Hours;
-                    int minutes1 = result2.Minutes;
-                    var treName = @tre.Tre?.Name.ToString();
-                    if (treName == null)
-                    {
-                        treName = "None";
-                    }
-                    //switch (tre.Status)
-                        //{
-
-                    //    case BL.Models.Enums.StatusType.DataOutApproved:
-                    //        <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span>End Time: @Model.EndTime</h6>
-                    //        break;
-
-                    //    default:
-                    //        <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span> Elapsed Time: @days days, @hours hours, @minutes minutes</h6>
-                    //        break;
-                    //}
-                    <div class="accordion-item">
-                        <h3 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@treName" aria-expanded="false" aria-controls="@treName">
-                                <span class="fw-bold">@treName</span>
-                                @{
-                                    if (tre.Status == BL.Models.Enums.StatusType.DataOutApproved)
-                                    {
-                                        progressTimer = "Total Run Time:";
-                                    }
-                                }
-                                <div><small><span class="badge bg-dark-blue rounded-pill ms-4 me-2">@tre.Status</span><span class="text-muted fs-7">@progressTimer @days days, @hours hours, @minutes minutes</span><span class="text-muted fs-7"> &nbsp Current Status Elapsed Time: @days1 days, @hours1 hours, @minutes1 minutes</span></small></div>
-                            </button>
-                        </h3>
-                        <div id="@treName" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
-                            <div class="accordion-body">
-                                @Model.Submission.HistoricStatuses
-                                Job/task information
+                <div class="accordion accordion-flush" id="accordionFlushExample">
+                    @{
+                        @foreach (var tre in Model.Submission.Children)
+                        {
+                            var startDate = tre.StartTime;
+                            var currTime = DateTime.Now;
+                            TimeSpan result1 = currTime.Subtract(startDate);
+                            int days = result1.Days;
+                            int hours = result1.Hours;
+                            int minutes = result1.Minutes;
+        
+                            var progressTimer = "Total Elapsed Time:";
+                            var lastStatusUpdate = tre.LastStatusUpdate;
+                            TimeSpan result2 = currTime.Subtract(lastStatusUpdate);
+                            int days1 = result2.Days;
+                            int hours1 = result2.Hours;
+                            int minutes1 = result2.Minutes;
+                            var treName = @tre.Tre?.Name.ToString();
+                            if (treName == null)
+                            {
+                                treName = "None";
+                            }
+                            //switch (tre.Status)
+                                //{
+        
+                            //    case BL.Models.Enums.StatusType.DataOutApproved:
+                            //        <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span>End Time: @Model.EndTime</h6>
+                            //        break;
+        
+                            //    default:
+                            //        <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span> Elapsed Time: @days days, @hours hours, @minutes minutes</h6>
+                            //        break;
+                            //}
+                            <div class="accordion-item">
+                                <h3 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@treName" aria-expanded="false" aria-controls="@treName">
+                                        <span class="fw-bold">@treName</span>
+                                        @{
+                                            if (tre.Status == BL.Models.Enums.StatusType.DataOutApproved)
+                                            {
+                                                progressTimer = "Total Run Time:";
+                                            }
+                                        }
+                                        <div><small><span class="badge bg-dark-blue rounded-pill ms-4 me-2">@tre.Status</span><span class="text-muted fs-7">@progressTimer @days days, @hours hours, @minutes minutes</span><span class="text-muted fs-7"> &nbsp Current Status Elapsed Time: @days1 days, @hours1 hours, @minutes1 minutes</span></small></div>
+                                    </button>
+                                </h3>
+                                <div id="@treName" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                                    <div class="accordion-body">
+                                        @Model.Submission.HistoricStatuses
+                                        Job/task information
+                                    </div>
+                                </div>
                             </div>
-
                         }
                     }
                 </div>
