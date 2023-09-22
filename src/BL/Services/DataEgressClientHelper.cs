@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 
 namespace BL.Services
 {
-    internal class DataEgressClientHelper
+    public class DataEgressClientHelper : BaseClientHelper, IDataEgressClientHelper
     {
+        public DataEgressClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, IConfiguration config) : base(httpClientFactory, httpContextAccessor, config["DataEgressAPISettings:Address"], null)
+        {
+
+        }
     }
 }

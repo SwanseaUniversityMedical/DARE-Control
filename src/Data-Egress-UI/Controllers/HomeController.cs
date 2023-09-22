@@ -5,18 +5,19 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using BL.Services;
 
 namespace Data_Egress_UI.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly ITREClientHelper _treClientHelper;
+        private readonly IDataEgressClientHelper _dataClientHelper;
 
-        public HomeController(ILogger<HomeController> logger, ITREClientHelper trehelper)
+        public HomeController(ILogger<HomeController> logger, IDataEgressClientHelper datahelper)
         {
             _logger = logger;
-            _treClientHelper = trehelper;
+            _dataClientHelper = datahelper;
         }
 
         public IActionResult LoginAfterTokenExpired()
