@@ -8,223 +8,228 @@
 
 
 }
-
-
-<div class="container-lg mt-4 p-4 bg-white border-1 shadow-sm">
-    <div class="d-flex align-items-center justify-content-between">
+<div class="container-lg mt-4 p-4">
+    <div class="d-flex align-items-center justify-content-between mb-5">
         <div>
-            <h1 class="fs-3 mb-0">Job Request: @Model.Submission.TesName</h1>
-            <p class="text-muted small mb-0">Submission ID: @Model.Submission.Id, Submitted by: @Model.Submission.SubmittedBy.Name</p>
+            <h1 class="fs-3 mb-0">@Model.Submission.TesName</h1>
+            <p class="text-muted small mb-0">Submission ID: @Model.Submission.Id</p>
+            <div class="mt-3 d-flex gap-4">
+                <div><i class="fa-solid fa-folder-open text-muted me-1"></i> <a href="@Url.Action("GetProject", "Project", new { id = Model.Submission.Project.Id })">@Model.Submission.Project.Name</a></div>
+                <div><i class="fa-solid fa-user text-muted me-1"></i> <a href="@Url.Action("GetUser", "User", new { id = @Model.Submission.SubmittedBy.Id })">@Model.Submission.SubmittedBy.Name</a></div>
+                <div><i class="fa-solid fa-calendar text-muted me-1"></i> @Model.Submission.StartTime</div>
+            </div>
         </div>
         <div>
-            <div class="text-end">
+            <div class="text-end d-flex">
+                <h6 class="mb-0">
+                    <span class="badge bg-success rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Completed: @Model.Submission.EndTime">
+                        <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
+                        <span>Completed</span>
+                    </span>
+                </h6>
+                <h6 class="mb-0">
+                    <span class="badge bg-danger rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Failed: error message">
+                        <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
+                        <span>Failed</span>
+                    </span>
+                </h6>
                 @{
-
-
-
                     switch (Model.Submission.Status)
                     {
-
                         case BL.Models.Enums.StatusType.DataOutApproved:
-                            <h6><span class="badge bg-dark-blue rounded-pill">@Model.Submission.Status @Model.Submission.EndTime</span></h6>
+                            <h6 class="mb-0">
+                                <span class="badge bg-primary rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Failed: error message">
+                                    <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
+                                    <span>@Model.Submission.Status @Model.Submission.EndTime</span>
+                                </span>
+                            </h6>
                             break;
                         default:
-                            <div class="mb-0">
-                                <h6 class="mb-0">
-                                    <span class="badge bg-dark-blue rounded-pill">@Model.Submission.Status</span>
-                                </h6>
-                                @* <span class="small">Total Elapsed Time: @days days, @hours hours, @minutes minute</span>*@
-
-                            </div>
+                            <h6 class="mb-0">
+                                <span class="badge bg-primary rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Running">
+                                    <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
+                                    <span>@Model.Submission.Status</span>
+                                </span>
+                            </h6>
+                            @* <span class="small">Total Elapsed Time: @days days, @hours hours, @minutes minute</span>*@
                             break;
                     }
                 }
             </div>
         </div>
     </div>
-    <hr class="d-flex my-4 mb-5">
-    <table>
-        <tr>
-            <th></th>
-            @{
 
-                foreach (var child in Model.Submission.Children)
-
-                {
-
-
-                    <th>@child.Tre?.Name.ToString()</th>
-
-
-                }
-
-                foreach (var stage in Model.StageInfo)
-                {
-                    var stageNum = stage.stageNumber;
-                    <tr><th>@stage.stageName @stage.stageNumber</th></tr>
-                    foreach (var child in Model.Submission.Children)
-
-                    {
-                        //get all histroical statuses and current stat that is  listed in current stage stat
-
-
-                        var validstats = child.HistoricStatuses.Where(x => stage.statusTypeList.Contains(x.Status)).ToList();
-                        //just for testing for now 
-                       // validstats.Add(new BL.Models.HistoricStatus() { Start = child.StartTime, Status = BL.Models.Enums.StatusType.Completed });
-
-                        //if (stage.statusTypeList.Contains(child.Status))
-                        if (stage.stagesDict.ContainsKey(stageNum) && stage.stageNumber == stageNum && stage.statusTypeList.Contains(child.Status))
-                        {
-                            validstats.Add(new BL.Models.HistoricStatus() { Start = child.StartTime, Status = child.Status });
-                            validstats = validstats.OrderBy(x => x.Start).ToList();
-
-
-                        }
-
-                        <table>
-                                @{
-                                    foreach (var status in validstats)
-                                    {
-                                    <tr><td>
-                                        <h6>@status.Status</h6>
-                                    </td>
-                                    </tr>
-                                    }
-
-                                }
-                        </table>
-
-
-                    }
-                    //if (stage.stagesDict.ContainsKey(stageNum) && stage.stageNumber == stageNum)
-                    //{
-                    //    foreach (var key in stage.stagesDict.Keys)
-                    //    {
-
-                    //        foreach (var item in stage.stagesDict[key])
-                    //        {
-
-                    //        <td><h6>@item</h6></td>
-
-
-                    //        }
-                    //    }
-
-
-
-
-                    //}
-
-                }
-
-            }
-        </tr>
-    </table>
-    <p>
-        Project: <a href="@Url.Action("GetProject", "Project", new { id = Model.Submission.Project.Id })">@Model.Submission.Project.Name</a><br />
-        @*        Submitted by: <a href="@Url.Action("GetUser", "User", new { id = @Model.SubmittedBy.Id })">@Model.SubmittedBy.Name</a><br />
-        *@        Date submitted: @Model.Submission.StartTime
-    </p>
-    <p>TIME LINE SPACEHOLDER</p>
-    <p>
-        Minio URL: <a href="http://@ViewBag.minioendpoint">@Model.Submission.Project.Name Buckets</a><br />
-        <br>Submission Bucket: @Html.Raw(Model.Submission.Project.SubmissionBucket)
-        <br>Output Bucket: @Html.Raw(Model.Submission.Project.OutputBucket)
-
-    </p>
-
-    <div class="mb-5">
-        <button id="showJsonButton" class="btn btn-sm btn-primary">
-            <i class="fa fa-code me-1"></i>
-            <small>View Query</small>
-        </button>
-        <pre style="white-space:break-spaces;"><code class="json-viewer card card-body mt-2" id="jsonViewer" style="display:none;"></code></pre>
-    </div>
-
-    @{
-        foreach (var test in Model.Submission.HistoricStatuses)
-        {
-
-
-
-
-            <td><h6>@test</h6></td>
-
-
-
-
-
-
-
-        }
-
-    }
-    }
-    <div>
-        <h2 class="fs-5">TRE's Submitted To</h2>
-        <div class="accordion accordion-flush" id="accordionFlushExample">
-            @{
-                @foreach (var tre in Model.Submission.Children)
-                {
-                    var startDate = tre.StartTime;
-                    var currTime = DateTime.Now;
-                    TimeSpan result1 = currTime.Subtract(startDate);
-                    int days = result1.Days;
-                    int hours = result1.Hours;
-                    int minutes = result1.Minutes;
-
-                    var progressTimer = "Total Elapsed Time:";
-                    var lastStatusUpdate = tre.LastStatusUpdate;
-                    TimeSpan result2 = currTime.Subtract(lastStatusUpdate);
-                    int days1 = result2.Days;
-                    int hours1 = result2.Hours;
-                    int minutes1 = result2.Minutes;
-                    var treName = @tre.Tre?.Name.ToString();
-                    if (treName == null)
-                    {
-                        treName = "None";
-                    }
-                    //switch (tre.Status)
-                        //{
-
-                    //    case BL.Models.Enums.StatusType.DataOutApproved:
-                    //        <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span>End Time: @Model.EndTime</h6>
-                    //        break;
-
-                    //    default:
-                    //        <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span> Elapsed Time: @days days, @hours hours, @minutes minutes</h6>
-                    //        break;
-                    //}
-                    <div class="accordion-item">
-                        <h3 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@treName" aria-expanded="false" aria-controls="@treName">
-                                <span class="fw-bold">@treName</span>
-                                @{
-                                    if (tre.Status == BL.Models.Enums.StatusType.DataOutApproved)
-                                    {
-                                        progressTimer = "Total Run Time:";
-                                    }
-                                }
-                                <div><small><span class="badge bg-dark-blue rounded-pill ms-4 me-2">@tre.Status</span><span class="text-muted fs-7">@progressTimer @days days, @hours hours, @minutes minutes</span><span class="text-muted fs-7"> &nbsp Current Status Elapsed Time: @days1 days, @hours1 hours, @minutes1 minutes</span></small></div>
-                            </button>
-                        </h3>
-                        <div id="@treName" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
-                            <div class="accordion-body">
-                                @Model.Submission.HistoricStatuses
-                                Job/task information
-                            </div>
-                        </div>
-                    </div>
-
-                }
-            }
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card-header bg-white shadow-sm border-1 p-4">
+                <h5 class="mb-0">Submission Details</h5>
+            </div>
+            <div class="bg-white shadow-sm border-1 p-4">
+                <p>
+                    Minio URL: <a href="http://@ViewBag.minioendpoint">@Model.Submission.Project.Name Buckets</a><br />
+                    Submission Bucket: <a href="#insertreallink">@Html.Raw(Model.Submission.Project.SubmissionBucket)</a><br />
+                    Output Bucket: <a href="#insertreallink">@Html.Raw(Model.Submission.Project.OutputBucket)</a>
+                </p>
+                <div class="">
+                    <button id="showJsonButton" class="btn btn-sm btn-primary">
+                        <i class="fa fa-code me-1"></i>
+                        <small>View Query</small>
+                    </button>
+                    <pre style="white-space:break-spaces;"><code class="json-viewer card card-body mt-2" id="jsonViewer" style="display:none;"></code></pre>
+                </div>
+            </div>
         </div>
-
+        <div class="col-md-4">
+            <div class="card-header bg-white shadow-sm border-1 p-4">
+                <h5 class="mb-0">Timeline</h5>
+            </div>
+            <div class="bg-white shadow-sm border-1 p-4">
+                <ul class="timeline list-unstyled">
+                    <li class="position-relative">
+                        <span class="position-absolute bg-grey h-100 timeline-line"></span>
+                        <span class="position-relative d-inline-flex">
+                            <span class="icon-wrap">
+                                <i class="fa-solid fa-circle-plus fs-3 text-primary me-3"></i>
+                            </span>
+                            <span class="d-flex flex-column">
+                                <span class="text-muted">
+                                    Created
+                                </span>
+                                <span class="text-dark" data-bs-toggle="tooltip" data-bs-title="xx/xx/xxxx 00:00:00">
+                                    1 day, 6 hours ago
+                                </span>
+                            </span>
+                        </span>
+                    </li>
+                    <li class="position-relative">
+                        <span class="position-absolute bg-grey h-100 timeline-line"></span>
+                        <span class="position-relative d-inline-flex">
+                            <span class="icon-wrap">
+                                <i class="fa-solid fa-circle-play fs-3 text-warning me-3"></i>
+                            </span>
+                            <span class="d-flex flex-column">
+                                <span class="text-muted">
+                                    Started
+                                </span>
+                                <span class="text-dark" data-bs-toggle="tooltip" data-bs-title="xx/xx/xxxx 00:00:00">
+                                    1 day, 6 hours ago
+                                </span>
+                            </span>
+                        </span>
+                    </li>
+                    <li class="position-relative">
+                        <span class="position-absolute bg-grey h-100 timeline-line"></span>
+                        <span class="position-relative d-inline-flex">
+                            <span class="icon-wrap">
+                                <i class="fa-solid fa-circle-check fs-3 text-success me-3"></i>
+                            </span>
+                            <span class="d-flex flex-column">
+                                <span class="text-muted">
+                                    Finished
+                                </span>
+                                <span class="text-dark" data-bs-toggle="tooltip" data-bs-title="xx/xx/xxxx 00:00:00">
+                                    1 day, 6 hours ago
+                                </span>
+                            </span>
+                        </span>
+                    </li>
+                    <li class="position-relative">
+                        <span class="position-absolute bg-grey h-100 timeline-line"></span>
+                        <span class="position-relative d-inline-flex">
+                            <span class="icon-wrap">
+                                <i class="fa-solid fa-clock fs-3 text-dark me-3"></i>
+                            </span>
+                            <span class="d-flex flex-column">
+                                <span class="text-muted">
+                                    Runtime
+                                </span>
+                                <span class="text-dark" data-bs-toggle="tooltip" data-bs-title="xx/xx/xxxx 00:00:00">
+                                    1 day, 6 hours ago
+                                </span>
+                            </span>
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card-header bg-white shadow-sm border-1 p-4 mt-4">
+                <h5 class="mb-0">Event Log</h5>
+            </div>
+            <div class="bg-white shadow-sm border-1 p-4 ">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            @{
+                                foreach (var child in Model.Submission.Children)
+                                {
+                                    <th>@child.Tre?.Name.ToString()</th>
+                                }
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            foreach (var stage in Model.StageInfo)
+                            {
+                                var stageNum = stage.stageNumber;
+                                <tr>
+                                    <td><strong>@stage.stageName @stage.stageNumber</strong></td>
+                                    @{
+                                        foreach (var child in Model.Submission.Children)
 
+                                        {
+                                            //get all histroical statuses and current stat that is  listed in current stage stat
+
+
+                                            var validstats = child.HistoricStatuses.Where(x => stage.statusTypeList.Contains(x.Status)).ToList();
+                                            //just for testing for now
+                                            // validstats.Add(new BL.Models.HistoricStatus() { Start = child.StartTime, Status = BL.Models.Enums.StatusType.Completed });
+
+                                            //if (stage.statusTypeList.Contains(child.Status))
+                                            if (stage.stagesDict.ContainsKey(stageNum) && stage.stageNumber == stageNum && stage.statusTypeList.Contains(child.Status))
+                                            {
+                                                validstats.Add(new BL.Models.HistoricStatus() { Start = child.StartTime, Status = child.Status });
+                                                validstats = validstats.OrderBy(x => x.Start).ToList();
+
+
+                                            }
+
+
+
+                                            foreach (var status in validstats)
+                                            {
+
+                                                <td>
+                                                    @status.Status
+                                                </td>
+
+                                            }
+                                        }
+                                    }
+                                </tr>
+                                //if (stage.stagesDict.ContainsKey(stageNum) && stage.stageNumber == stageNum)
+                                //{
+                                //    foreach (var key in stage.stagesDict.Keys)
+                                //    {
+                                //        foreach (var item in stage.stagesDict[key])
+                                //        {
+                                //        <td><h6>@item</h6></td>
+                                //        }
+                                //    }
+                                //}
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
-<br />
 <script>
     var tesJson = @Html.Raw(Model.Submission.TesJson);
     var jsonViewer = document.getElementById("jsonViewer");
