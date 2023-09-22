@@ -8,6 +8,7 @@ using System;
 using BL.Models.Enums;
 using DARE_API.Repositories.DbContexts;
 using BL.Models.Tes;
+using BL.Services;
 
 namespace DARE_API.Services
 {
@@ -15,12 +16,14 @@ namespace DARE_API.Services
     {
         private readonly IBus _bus;
         private readonly ApplicationDbContext _dbContext;
+        private readonly IMinioHelper _minioHelper;
 
 
         public ConsumeInternalMessageService(IBus bus , IServiceProvider serviceProvider)
         {
             _bus = bus;
-            _dbContext = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<ApplicationDbContext>(); ;
+            _dbContext = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<ApplicationDbContext>(); 
+            _minioHelper=serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IMinioHelper>();
         
         }
 
@@ -31,6 +34,9 @@ namespace DARE_API.Services
                 //Consume All Queue
                 var subs = await _bus.Advanced.QueueDeclareAsync(QueueConstants.Submissions);
                 _bus.Advanced.Consume<int>(subs, Process);
+
+                var fetch = await _bus.Advanced.QueueDeclareAsync(QueueConstants.FetchExtarnalFile);
+                _bus.Advanced.Consume<byte[]>(fetch, ProcessFetchExternal);
             }
             catch (Exception e)
             {
@@ -106,7 +112,22 @@ namespace DARE_API.Services
             }
         }
 
-       
+        private async Task ProcessFetchExternal(IMessage<byte[]> msgBytes,   MessageReceivedInfo info )
+        {
+            try
+            {
+                var message = Encoding.UTF8.GetString(msgBytes.Body);
+                await  _minioHelper.RabbitExternalObject(message);
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+        }
+
+
+
 
         private T ConvertByteArrayToType<T>(byte[] byteArray)
         {

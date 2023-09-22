@@ -5,6 +5,7 @@ using Amazon.S3.Transfer;
 using Aws4RequestSigner;
 using BL.Models.ViewModels;
 using Minio.Exceptions;
+using Newtonsoft.Json;
 using Serilog;
 using System.Net;
 
@@ -183,6 +184,20 @@ namespace BL.Services
             }
 
             return true;
+        }
+
+        public async Task<bool> RabbitExternalObject(string msgBytes)
+        {
+            var FileInfo= JsonConvert.DeserializeObject<fetchFileMQ>(msgBytes);
+            if (FileInfo == null)
+            {
+                return false;
+            }
+            else
+            {
+                await FetchAndStoreObject(FileInfo.Url, _minioSettings, FileInfo.BucketName, FileInfo.Key);
+                return true;
+            }
         }
 
         public async Task<bool> CreateBucketPolicy(string bucketName)
