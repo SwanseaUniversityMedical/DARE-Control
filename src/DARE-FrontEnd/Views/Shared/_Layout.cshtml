@@ -4,6 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" shrink-to-fit="no" />
     <title>@ViewData["Title"] - TRE FX</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
     <link rel="stylesheet" href="~/css/fontawesome.css" />
     <link rel="stylesheet" href="~/css/brands.css" />
     <link rel="stylesheet" href="~/css/solid.css" />
@@ -62,9 +66,12 @@
                     </ul>
                 </div>
                 <div class="account-nav align-items-center">
+                    @*Implement at later time*@
+                    @*
                     <form class="me-3 d-none d-lg-block" asp-controller="Home" asp-action="Index">
                         <input type="search" class="form-control form-control-sm" name="SearchString" value="@ViewData["CurrentFilter"]" placeholder="Search..." aria-label="Search">
                     </form>
+              *@
                     @if (User.IsInRole("dare-control-admin"))
                     {
                         <div class="nav-item dropdown">
@@ -155,6 +162,16 @@
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
         const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
         new DataTable('#projectList');
+        $('#submissionList').DataTable( {
+            columns: [
+                { orderable: false },
+                null,
+                null,
+                null,
+                null,
+                { orderable: false }
+            ]
+        });
         $('#launch-button').on('click', function () {
 
             $('#welcomeModal').modal('show');

@@ -99,6 +99,9 @@ hr {
         border-color: rgb(61, 178, 140);
         color: rgb(255, 255, 255);
     }
+.btn-sm {
+    padding: 6px 10px;
+}
 a.bg-grey:hover {
     background-color: rgb(208, 208, 208);
     box-shadow: 1px 1px 3px 0 rgba(0,0,0,.09);
@@ -290,14 +293,56 @@ footer img:hover {
 table {
     width:100% !important;
 }
+tbody, td, tfoot, th, thead, tr {
+    border-color: rgba(208, 211, 212, 0.75) !important;
+}
+th {
+    border-bottom-width: 2px !important;
+    border-color: rgba(208, 211, 212) !important;
+    padding: 0.875rem 0.5rem !important;
+}
+    th:before, th:after {
+        color: rgb(71, 93, 167);
+    }
+tbody {
+    color: #3c3c3b;
+}
     table.dataTable {
         margin: 2rem 0 !important;
+    }
+    .sorting_disabled:before, .sorting_disabled:after {
+        content:none !important;
     }
 table.no-head thead  {
    display:none;
 }
 .dataTables_filter, .dataTables_length {
     padding: 0.25rem !important;
+}
+table tr {
+    vertical-align:middle;
+}
+#submissionList tr td:last-child {
+    text-align:center;
+}
+.timeline li {
+    padding-bottom:2rem;
+}
+.timeline li:last-child {
+    padding-bottom: 0;
+}
+    .timeline li:last-child .timeline-line {
+        display:none;
+    }
+.timeline-line {
+    width:2px;
+    top:13px;
+    left:13px;
+}
+.timeline .icon-wrap {
+    display:flex;
+    height:28px;
+    background-color:#fff;
 }
 @media (min-width: 768px) {
     .navbar-expand-md .navbar-toggler {
