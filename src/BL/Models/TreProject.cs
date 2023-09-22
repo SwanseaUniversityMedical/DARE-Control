@@ -9,6 +9,8 @@ namespace BL.Models
         public int Id { get; set; }
         [Display(Name = "Submission Id")]
         public int SubmissionProjectId { get; set; }
+        public string UserName { get; set; }   
+        public string Password { get; set; }
 
         [Display(Name = "Submission Name")]
         public string? SubmissionProjectName { get; set; }
