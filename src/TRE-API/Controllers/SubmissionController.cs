@@ -25,6 +25,7 @@ namespace TRE_API.Controllers
         private readonly ISignalRService _signalRService;
         private readonly IDareClientWithoutTokenHelper _dareHelper;
         private readonly ApplicationDbContext _dbContext;
+        
 
         public SubmissionController(ISignalRService signalRService, IDareClientWithoutTokenHelper helper,
             ApplicationDbContext dbContext)
