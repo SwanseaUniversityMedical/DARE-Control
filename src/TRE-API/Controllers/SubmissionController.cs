@@ -14,6 +14,8 @@ using System.Data;
 using BL.Models.APISimpleTypeReturns;
 using TRE_API.Repositories.DbContexts;
 using EasyNetQ.Management.Client.Model;
+using BL.Rabbit;
+using EasyNetQ;
 
 namespace TRE_API.Controllers
 {
@@ -25,15 +27,16 @@ namespace TRE_API.Controllers
         private readonly ISignalRService _signalRService;
         private readonly IDareClientWithoutTokenHelper _dareHelper;
         private readonly ApplicationDbContext _dbContext;
-        
+        private readonly IBus _rabbit;
+
 
         public SubmissionController(ISignalRService signalRService, IDareClientWithoutTokenHelper helper,
-            ApplicationDbContext dbContext)
+            ApplicationDbContext dbContext, IBus rabbit)
         {
             _signalRService = signalRService;
             _dareHelper = helper;
             _dbContext = dbContext;
-
+            _rabbit = rabbit;
         }
 
 
@@ -160,6 +163,17 @@ namespace TRE_API.Controllers
                 .CallAPI<List<SubmissionFile>, Submission>("/api/Submission/SubmissionFiles/", submissionFiles,
                     paramlist).Result;
             return StatusCode(200, submission);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("TestFetchAndStore")]
+        public void TestFetchAndStore(string message)
+        {
+
+            var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
+
+            _rabbit.Advanced.Publish(exch, RoutingConstants.FetchFile, false, new Message<string>(message));
+
         }
     }
 }
