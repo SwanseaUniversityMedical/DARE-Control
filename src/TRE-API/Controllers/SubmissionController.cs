@@ -166,13 +166,13 @@ namespace TRE_API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("TestFetchAndStore")]
-        public void TestFetchAndStore(string message)
+        [HttpPost("TestFetchAndStore")]
+        public void TestFetchAndStore([FromBody]FetchFileMQ message)
         {
 
             var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
 
-            _rabbit.Advanced.Publish(exch, RoutingConstants.FetchFile, false, new Message<string>(message));
+            _rabbit.Advanced.Publish(exch, RoutingConstants.FetchFile, false, new Message<FetchFileMQ>(message));
 
         }
     }

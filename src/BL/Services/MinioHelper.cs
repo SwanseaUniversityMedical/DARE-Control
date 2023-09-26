@@ -186,16 +186,15 @@ namespace BL.Services
             return true;
         }
 
-        public async Task<bool> RabbitExternalObject(string msgBytes)
+        public async Task<bool> RabbitExternalObject(FetchFileMQ msgBytes)
         {
-            var FileInfo = JsonConvert.DeserializeObject<FetchFileMQ>(msgBytes);
-            if (FileInfo == null)
+            if (msgBytes == null)
             {
                 return false;
             }
             else
             {
-                await FetchAndStoreObject(FileInfo.Url, _minioSettings, FileInfo.BucketName, FileInfo.Key);
+                await FetchAndStoreObject(msgBytes.Url, _minioSettings, msgBytes.BucketName, msgBytes.Key);
                 return true;
             }
         }

@@ -9,6 +9,7 @@ using BL.Models.Enums;
 using BL.Models.Tes;
 using TRE_API.Repositories.DbContexts;
 using BL.Services;
+using BL.Models.ViewModels;
 
 namespace TRE_API.Services
 {
@@ -33,7 +34,7 @@ namespace TRE_API.Services
             {
                 //Consume All Queue
                 var fetch = await _bus.Advanced.QueueDeclareAsync(QueueConstants.FetchExtarnalFile);
-                _bus.Advanced.Consume<string>(fetch, FetchProcess);
+                _bus.Advanced.Consume<FetchFileMQ>(fetch, Process);
             }
             catch (Exception e)
             {
@@ -42,7 +43,7 @@ namespace TRE_API.Services
             }
         }
 
-        private async Task FetchProcess(IMessage<string> message, MessageReceivedInfo info)
+        private async Task Process(IMessage<FetchFileMQ> message, MessageReceivedInfo info)
         {
             try
             {
