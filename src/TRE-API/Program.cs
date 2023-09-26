@@ -27,7 +27,7 @@ ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
 Log.Logger = CreateSerilogLogger(configuration, environment);
-Log.Information("API logging LastStatusUpdate.");
+Log.Information("TRE API logging LastStatusUpdate.");
 
 
 // Add services to the container.
