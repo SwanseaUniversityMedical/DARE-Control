@@ -115,7 +115,7 @@ namespace DARE_API.Controllers
 
         [AllowAnonymous]
         [HttpGet("TestSubRabbitSendRemoveBeforeDeploy")]
-        public List<Submission> TestSubRabbitSendRemoveBeforeDeploy(int id)
+        public void TestSubRabbitSendRemoveBeforeDeploy(int id)
         {
 
             var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
