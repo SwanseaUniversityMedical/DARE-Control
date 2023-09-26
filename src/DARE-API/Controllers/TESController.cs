@@ -32,7 +32,6 @@ namespace DARE_API.Controllers
 
         private readonly ApplicationDbContext _DbContext;
         private readonly IBus _rabbit;
-        private readonly IDareClientHelper _clientHelper;
         protected readonly IHttpContextAccessor _httpContextAccessor;
         private static readonly Dictionary<TesView, JsonSerializerSettings> TesJsonSerializerSettings = new()
         {
@@ -49,11 +48,10 @@ namespace DARE_API.Controllers
         /// </summary>
         /// <param name="repository">The main <see cref="ApplicationDbContext"/> database repository</param>
         /// <param name="rabbit">The main <see cref="IBus"/> easynet q sender</param>
-        public TaskServiceApiController(ApplicationDbContext repository, IBus rabbit, IDareClientHelper client, IHttpContextAccessor httpContextAccessor)
+        public TaskServiceApiController(ApplicationDbContext repository, IBus rabbit, IHttpContextAccessor httpContextAccessor)
         {
             _DbContext = repository;
             _rabbit = rabbit;
-            _clientHelper = client;
             _httpContextAccessor = httpContextAccessor;
 
         }
@@ -413,6 +411,9 @@ namespace DARE_API.Controllers
             var teststring = JsonConvert.SerializeObject(test);
             return StatusCode(200, teststring);
         }
+
+
+
 
        
 
