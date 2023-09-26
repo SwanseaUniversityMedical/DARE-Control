@@ -10,6 +10,8 @@ using DARE_API.Services;
 using EasyNetQ;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using BL.Rabbit;
+using Microsoft.AspNetCore.SignalR;
 
 namespace DARE_API.Controllers
 {
@@ -25,12 +27,13 @@ namespace DARE_API.Controllers
     public class SubmissionController : Controller
     {
         private readonly ApplicationDbContext _DbContext;
-
+        private readonly IBus _rabbit;
 
 
         public SubmissionController(ApplicationDbContext repository, IBus rabbit)
         {
             _DbContext = repository;
+            _rabbit = rabbit;
 
 
         }
@@ -108,6 +111,17 @@ namespace DARE_API.Controllers
                 Log.Error(ex, "{Function} Crashed", "GetAllSubmissions");
                 throw;
             }
+        }
+
+        [AllowAnonymous]
+        [HttpGet("TestSubRabbitSendRemoveBeforeDeploy")]
+        public void TestSubRabbitSendRemoveBeforeDeploy(int id)
+        {
+
+            var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
+
+            _rabbit.Advanced.Publish(exch, RoutingConstants.Subs, false, new Message<int>(id));
+            
         }
 
         [AllowAnonymous]
