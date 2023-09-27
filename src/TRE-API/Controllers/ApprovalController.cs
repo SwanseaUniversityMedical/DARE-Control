@@ -17,7 +17,8 @@ using System.Threading;
 namespace TRE_API.Controllers
 {
 
-    [Authorize(Roles = "dare-tre-admin")]
+    // [Authorize(Roles = "dare-tre-admin")]
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
 
