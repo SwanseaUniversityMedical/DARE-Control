@@ -163,7 +163,7 @@ namespace TRE_API.Controllers
         }
 
 
-        [HttpGet("SendFileResultsToHUTCH")]
+        [HttpPost("SendFileResultsToHUTCH")]
         public IActionResult SendFileResultsToHUTCH(int submissionId, List<DataEgressFiles> EgressFileList)
         {
             //Update status of submission to "Sending to hutch for final packaging"
@@ -175,7 +175,7 @@ namespace TRE_API.Controllers
                                     };
             var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams);
 
-            //Send this is the submission, this is the list of files that have been approved and rejected
+            //Send the submission, this is the list of files that have been approved and rejected
             var fileListString = JsonConvert.SerializeObject(EgressFileList);
 
             var HUTCHParams = new Dictionary<string, string>() 
@@ -188,5 +188,8 @@ namespace TRE_API.Controllers
 
             return StatusCode(200);
         }
+
+
+
     }
 }
