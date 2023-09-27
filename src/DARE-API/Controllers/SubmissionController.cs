@@ -232,24 +232,24 @@ namespace DARE_API.Controllers
 
         }
 
-        [AllowAnonymous]
-        [HttpGet("DifferentStages")]
-        public Dictionary<int, StageInfo> DifferentStages()
-        {
+        //[AllowAnonymous]
+        //[HttpGet("DifferentStages")]
+        //public Dictionary<int, StageInfo> DifferentStages()
+        //{
 
-            var stage1List = new StageInfo();
-            stage1List.stageName = "Submission Layer Validation";
-            stage1List.stageNumber = 1;
-            stage1List.statusTypeList = new List<StatusType>
-            {
-                StatusType.InvalidUser,
-                StatusType.UserNotOnProject,
-                StatusType.InvalidSubmission,
-                StatusType.WaitingForCrateFormatCheck
-            };
-            return null;
+        //    var stage1List = new StageInfo();
+        //    stage1List.stageName = "Submission Layer Validation";
+        //    stage1List.stageNumber = 1;
+        //    stage1List.statusTypeList = new List<StatusType>
+        //    {
+        //        StatusType.InvalidUser,
+        //        StatusType.UserNotOnProject,
+        //        StatusType.InvalidSubmission,
+        //        StatusType.WaitingForCrateFormatCheck
+        //    };
+        //    return null;
 
-        }
+        //}
 
         [HttpPost("SaveSubmissionFiles")]
         public IActionResult SaveSubmissionFiles(int submissionId, List<SubmissionFile> submissionFiles)
