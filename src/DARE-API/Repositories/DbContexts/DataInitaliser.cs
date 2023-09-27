@@ -10,6 +10,7 @@ using BL.Models.ViewModels;
 using BL.Services;
 using EasyNetQ.Management.Client.Model;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace DARE_API.Repositories.DbContexts
 {
@@ -20,7 +21,7 @@ namespace DARE_API.Repositories.DbContexts
         private readonly ApplicationDbContext _dbContext;
         private readonly IKeyclockTokenAPIHelper _keyclockTokenAPIHelper;
         private readonly IKeycloakMinioUserService _userService;
-        public DataInitaliser(MinioSettings minioSettings, IMinioHelper minioHelper, ApplicationDbContext dbContext, IKeyclockTokenAPIHelper keyclockTokenAPIHelper,IKeycloakMinioUserService userService)
+        public DataInitaliser(MinioSettings minioSettings, IMinioHelper minioHelper, ApplicationDbContext dbContext, IKeyclockTokenAPIHelper keyclockTokenAPIHelper, IKeycloakMinioUserService userService)
         {
             _minioSettings = minioSettings;
             _minioHelper = minioHelper;
@@ -85,6 +86,25 @@ namespace DARE_API.Repositories.DbContexts
                 AddSubmission("Sub3", "Shoulders", "luke.young", "MSRegister");
                 AddSubmission("Sub4", "Knees", "jaybee", "");
 
+                CreateHistoricStatus1(2);
+                CreateHistoricStatus2(2);
+                CreateHistoricStatus3(2);
+                CreateHistoricStatus4(2);
+                CreateHistoricStatus5(2);
+                CreateHistoricStatus6(2);
+                CreateHistoricStatus7(2);
+                CreateHistoricStatus8(2);
+
+                CreateHistoricStatus5(3);
+                CreateHistoricStatus6(3);
+                CreateHistoricStatus7(3);
+                CreateHistoricStatus8(3);
+
+                CreateHistoricStatus1(4);
+                CreateHistoricStatus2(4);
+                CreateHistoricStatus4(4);
+                CreateHistoricStatus8(4);
+                CreateHistoricStatus7(4);
             }
             catch (Exception e)
             {
@@ -100,7 +120,7 @@ namespace DARE_API.Repositories.DbContexts
         private Project CreateProject(string name)
         {
             var proj = _dbContext.Projects.FirstOrDefault(x => x.Name.ToLower() == name.ToLower());
-            
+
             if (proj == null)
             {
                 var submission = GenerateRandomName(name.ToLower()) + "submission";
@@ -182,7 +202,7 @@ namespace DARE_API.Repositories.DbContexts
                 var accessToken = _keyclockTokenAPIHelper.GetTokenForUser("minioadmin", "password123", "").Result;
                 var attributeName = _minioSettings.AttributeName;
 
-                var submissionUserAttribute= _userService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.SubmissionBucket.ToLower() + "_policy").Result;
+                var submissionUserAttribute = _userService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.SubmissionBucket.ToLower() + "_policy").Result;
                 var outputUserAttribute = _userService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.OutputBucket.ToLower() + "_policy").Result;
                 project.Users.Add(user);
             }
@@ -271,12 +291,13 @@ namespace DARE_API.Repositories.DbContexts
                         dbTres.Add(dbProject.Tres.First(x => x.Name.ToLower() == tre.ToLower()));
                     }
                 }
-                UpdateSubmissionStatus.UpdateStatus(sub, StatusType.WaitingForChildSubsToComplete, "");
+               // UpdateSubmissionStatus.UpdateStatus(sub, StatusType.WaitingForChildSubsToComplete, "");
 
                 foreach (var tre in dbTres)
                 {
                     _dbContext.Add(new Submission()
                     {
+
                         DockerInputLocation = tesTask.Executors.First().Image,
                         Project = dbProject,
                         Status = StatusType.WaitingForAgentToTransfer,
@@ -302,7 +323,249 @@ namespace DARE_API.Repositories.DbContexts
                 throw;
             }
         }
+        private bool CreateHistoricStatus1(int subID)
+        {
+            var subcheck = _dbContext.HistoricStatuses.Count();
+            if (subcheck > 16)
+            {
+                return false;
+            }
+            else
+            {
+                var sub = _dbContext.Submissions.FirstOrDefault(x => x.Id == subID);
+                var status = new HistoricStatus()
+                {
+                    Start = DateTime.Now.ToUniversalTime(),
+                    End = DateTime.Now.ToUniversalTime(),
+                    Status = StatusType.InvalidUser,
+                    Submission = sub,
+                    StatusDescription = ""
+                };
 
+                if (sub != null)
+                {
+                    _dbContext.HistoricStatuses.Add(status);
+                    _dbContext.SaveChanges();
+                }
+
+                return true;
+            }
+
+
+        }
+        private bool CreateHistoricStatus2(int subID)
+        {
+            var subcheck = _dbContext.HistoricStatuses.Count();
+            if (subcheck > 16)
+            {
+                return false;
+            }
+            else
+            {
+                var sub = _dbContext.Submissions.FirstOrDefault(x => x.Id == subID);
+                var status = new HistoricStatus()
+                {
+                    Start = DateTime.Now.ToUniversalTime(),
+                    End = DateTime.Now.ToUniversalTime(),
+                    Status = StatusType.UserNotOnProject,
+                    Submission = sub,
+                    StatusDescription = ""
+                };
+
+                if (sub != null)
+                {
+                    _dbContext.HistoricStatuses.Add(status);
+                    _dbContext.SaveChanges();
+                }
+
+                return true;
+            }
+            
+
+        }
+        private bool CreateHistoricStatus3(int subID)
+        {
+            var subcheck = _dbContext.HistoricStatuses.Count();
+            if (subcheck > 16)
+            {
+                return false;
+            }
+            else
+            {
+                var sub = _dbContext.Submissions.FirstOrDefault(x => x.Id == subID);
+                var status = new HistoricStatus()
+                {
+                    Start = DateTime.Now.ToUniversalTime(),
+                    End = DateTime.Now.ToUniversalTime(),
+                    Status = StatusType.Completed,
+                    Submission = sub,
+                    StatusDescription = ""
+                };
+
+                if (sub != null)
+                {
+                    _dbContext.HistoricStatuses.Add(status);
+                    _dbContext.SaveChanges();
+                }
+
+                return true;
+            }
+
+
+        }
+        private bool CreateHistoricStatus4(int subID)
+        {
+            var subcheck = _dbContext.HistoricStatuses.Count();
+            if (subcheck > 16)
+            {
+                return false;
+            }
+            else
+            {
+                var sub = _dbContext.Submissions.FirstOrDefault(x => x.Id == subID);
+                var status = new HistoricStatus()
+                {
+                    Start = DateTime.Now.ToUniversalTime(),
+                    End = DateTime.Now.ToUniversalTime(),
+                    Status = StatusType.DataOutApproved,
+                    Submission = sub,
+                    StatusDescription = ""
+                };
+
+                if (sub != null)
+                {
+                    _dbContext.HistoricStatuses.Add(status);
+                    _dbContext.SaveChanges();
+                }
+
+                return true;
+            }
+
+
+        }
+        private bool CreateHistoricStatus5(int subID)
+        {
+            var subcheck = _dbContext.HistoricStatuses.Count();
+            if (subcheck > 16)
+            {
+                return false;
+            }
+            else
+            {
+                var sub = _dbContext.Submissions.FirstOrDefault(x => x.Id == subID);
+                var status = new HistoricStatus()
+                {
+                    Start = DateTime.Now.ToUniversalTime(),
+                    End = DateTime.Now.ToUniversalTime(),
+                    Status = StatusType.PodProcessingComplete,
+                    Submission = sub,
+                    StatusDescription = ""
+                };
+
+                if (sub != null)
+                {
+                    _dbContext.HistoricStatuses.Add(status);
+                    _dbContext.SaveChanges();
+                }
+
+                return true;
+            }
+
+
+        }
+
+        private bool CreateHistoricStatus6(int subID)
+        {
+            var subcheck = _dbContext.HistoricStatuses.Count();
+            if (subcheck > 16)
+            {
+                return false;
+            }
+            else
+            {
+                var sub = _dbContext.Submissions.FirstOrDefault(x => x.Id == subID);
+                var status = new HistoricStatus()
+                {
+                    Start = DateTime.Now.ToUniversalTime(),
+                    End = DateTime.Now.ToUniversalTime(),
+                    Status = StatusType.TransferredToPod,
+                    Submission = sub,
+                    StatusDescription = ""
+                };
+
+                if (sub != null)
+                {
+                    _dbContext.HistoricStatuses.Add(status);
+                    _dbContext.SaveChanges();
+                }
+
+                return true;
+            }
+
+
+        }
+
+        private bool CreateHistoricStatus7(int subID)
+        {
+            var subcheck = _dbContext.HistoricStatuses.Count();
+            if (subcheck > 16)
+            {
+                return false;
+            }
+            else
+            {
+                var sub = _dbContext.Submissions.FirstOrDefault(x => x.Id == subID);
+                var status = new HistoricStatus()
+                {
+                    Start = DateTime.Now.ToUniversalTime(),
+                    End = DateTime.Now.ToUniversalTime(),
+                    Status = StatusType.PodProcessing,
+                    Submission = sub,
+                    StatusDescription = ""
+                };
+
+                if (sub != null)
+                {
+                    _dbContext.HistoricStatuses.Add(status);
+                    _dbContext.SaveChanges();
+                }
+
+                return true;
+            }
+
+
+        }
+
+        private bool CreateHistoricStatus8(int subID)
+        {
+            var subcheck = _dbContext.HistoricStatuses.Count();
+            if (subcheck > 16)
+            {
+                return false;
+            }
+            else
+            {
+                var sub = _dbContext.Submissions.FirstOrDefault(x => x.Id == subID);
+                var status = new HistoricStatus()
+                {
+                    Start = DateTime.Now.ToUniversalTime(),
+                    End = DateTime.Now.ToUniversalTime(),
+                    Status = StatusType.CancellingChildren,
+                    Submission = sub,
+                    StatusDescription = ""
+                };
+
+                if (sub != null)
+                {
+                    _dbContext.HistoricStatuses.Add(status);
+                    _dbContext.SaveChanges();
+                }
+
+                return true;
+            }
+
+
+        }
         private string GenerateRandomName(string prefix)
         {
             Random random = new Random();

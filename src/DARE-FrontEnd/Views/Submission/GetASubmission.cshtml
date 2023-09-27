@@ -177,7 +177,7 @@
                             {
                                 var stageNum = stage.stageNumber;
                                 <tr>
-                                    <td><strong>@stage.stageName @stage.stageNumber</strong></td>
+                                    <th><strong>@stage.stageName @stage.stageNumber</strong></th>
                                     @{
                                         foreach (var child in Model.Submission.Children)
 
@@ -198,16 +198,19 @@
 
                                             }
 
+                                            <td><table>
 
-
-                                            foreach (var status in validstats)
+                                            @foreach (var status in validstats)
                                             {
-
+                                                <tr>
                                                 <td>
                                                     @status.Status
                                                 </td>
+                                                    </tr>
 
                                             }
+                                                </table>
+                                            </td>
                                         }
                                     }
                                 </tr>
