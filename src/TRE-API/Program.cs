@@ -20,6 +20,9 @@ using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using TRE_API;
 using BL.Models.ViewModels;
+using BL.Rabbit;
+using Microsoft.Extensions.Options;
+using EasyNetQ;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +50,12 @@ AddServices(builder);
 //Add Dependancies
 AddDependencies(builder, configuration);
 
+builder.Services.Configure<RabbitMQSetting>(configuration.GetSection("RabbitMQ"));
+builder.Services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);
+var bus =
+builder.Services.AddSingleton(RabbitHutch.CreateBus($"host={configuration["RabbitMQ:HostAddress"]}:{int.Parse(configuration["RabbitMQ:PortNumber"])};virtualHost={configuration["RabbitMQ:VirtualHost"]};username={configuration["RabbitMQ:Username"]};password={configuration["RabbitMQ:Password"]}"));
+Task task = SetUpRabbitMQ.DoItAsync(configuration["RabbitMQ:HostAddress"], configuration["RabbitMQ:PortNumber"], configuration["RabbitMQ:VirtualHost"], configuration["RabbitMQ:Username"], configuration["RabbitMQ:Password"]);
+
 var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
 builder.Services.AddSingleton(treKeyCloakSettings);
@@ -54,6 +63,8 @@ builder.Services.AddSingleton(treKeyCloakSettings);
 var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
+
+builder.Services.AddHostedService<ConsumeInternalMessageService>();
 
 var submissionKeyCloakSettings = new BaseKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
