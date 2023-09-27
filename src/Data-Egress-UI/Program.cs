@@ -1,24 +1,23 @@
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using System.Net;
+using Microsoft.IdentityModel.Logging;
+using BL.Services;
 using BL.Models.Services;
 using BL.Models.Settings;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.IdentityModel.Logging;
 using Serilog;
-using BL.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using System.Net;
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
-using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
-IdentityModelEventSource.ShowPII = true;
-var builder = WebApplication.CreateBuilder(args);
+ var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+IdentityModelEventSource.ShowPII = true;
+
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(options => {
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
     options.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
@@ -28,38 +27,257 @@ ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
 Log.Logger = CreateSerilogLogger(configuration, environment);
-Log.Information("Data Egress logging LastStatusUpdate.");
+Log.Information("Data-Egress-UI logging LastStatusUpdate.");
+
+
 
 // -- authentication here
-var treKeyCloakSettings = new TreKeyCloakSettings();
-configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
-builder.Services.AddSingleton(treKeyCloakSettings);
+var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
+configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
+builder.Services.AddSingleton(dataEgressKeyCloakSettings);
 
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
+
+
+//add services here
+builder.Services.AddScoped<CustomCookieEvent>();
+
+builder.Services.AddScoped<IDataEgressClientHelper, DataEgressClientHelper>();
+
+
+builder.Services.AddMvc().AddViewComponentsAsServices();
+
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+    options.OnAppendCookie = cookieContext =>
+        CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
+    options.OnDeleteCookie = cookieContext =>
+        CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
+});
+
+
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins(configuration["DataEgressAPISettings:Address"])
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        });
+});
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
+
+builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+
+    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+})
+
+             .AddCookie(o =>
+             {
+                 o.SessionStore = new MemoryCacheTicketStore();
+                 o.EventsType = typeof(CustomCookieEvent);
+             })
+            .AddOpenIdConnect(options =>
+            {
+                if (dataEgressKeyCloakSettings.Proxy)
+                {
+                    options.BackchannelHttpHandler = new HttpClientHandler
+                    {
+                        UseProxy = true,
+                        UseDefaultCredentials = true,
+                        Proxy = new WebProxy()
+                        {
+                            Address = new Uri(dataEgressKeyCloakSettings.ProxyAddresURL),
+                            BypassList = new[] { dataEgressKeyCloakSettings.BypassProxy }
+                        }
+                    };
+                }
+
+
+                // URL of the Keycloak server
+                options.Authority = dataEgressKeyCloakSettings.Authority;
+                //// Client configured in the Keycloak
+                options.ClientId = dataEgressKeyCloakSettings.ClientId;
+                //// Client secret shared with Keycloak
+                options.ClientSecret = dataEgressKeyCloakSettings.ClientSecret;
+                options.MetadataAddress = dataEgressKeyCloakSettings.MetadataAddress;
+
+                options.SaveTokens = true;
+
+                options.ResponseType = OpenIdConnectResponseType.Code; //Configuration["Oidc:ResponseType"];
+                                                                       // For testing we disable https (should be true for production)
+                options.RemoteSignOutPath = dataEgressKeyCloakSettings.RemoteSignOutPath;
+                options.SignedOutRedirectUri = dataEgressKeyCloakSettings.SignedOutRedirectUri;
+                options.RequireHttpsMetadata = false;
+                options.GetClaimsFromUserInfoEndpoint = true;
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
+                options.Scope.Add("email");
+
+                options.SaveTokens = true;
+                options.ResponseType = OpenIdConnectResponseType.Code;
+                options.Events = new OpenIdConnectEvents
+                {
+                    OnAccessDenied = context =>
+                    {
+                        Log.Error("{Function}: {ex}", "OnAccessDenied", context.AccessDeniedPath);
+                        context.HandleResponse();
+                        return context.Response.CompleteAsync();
+
+                    },
+                    OnAuthenticationFailed = context =>
+                    {
+                        Log.Error("{Function}: {ex}", "OnAuthFailed", context.Exception.Message);
+                        context.HandleResponse();
+                        return context.Response.CompleteAsync();
+                    },
+                    OnRemoteFailure = context =>
+                    {
+                        Log.Error("OnRemoteFailure: {ex}", context.Failure);
+                        if (context.Failure.Message.Contains("Correlation failed"))
+                        {
+                            Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", dataEgressKeyCloakSettings.TokenExpiredAddress);
+                            context.Response.Redirect(dataEgressKeyCloakSettings.TokenExpiredAddress);
+                        }
+                        else
+                        {
+                            Log.Warning("call /Error/500");
+                            context.Response.Redirect("/Error/500");
+                        }
+
+                        context.HandleResponse();
+
+                        return context.Response.CompleteAsync();
+                    },
+                    OnMessageReceived = context =>
+                    {
+                        string accessToken = context.Request.Query["access_token"];
+                        PathString path = context.HttpContext.Request.Path;
+
+                        if (
+                            !string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/api/SignalRHub")
+                        )
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    },
+                    OnRedirectToIdentityProvider = async context =>
+                    {
+                        Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}", context.HttpContext.Connection.RemoteIpAddress);
+                        Log.Information("HttpContext.Connection.RemotePort : {RemotePort}", context.HttpContext.Connection.RemotePort);
+                        Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
+                        Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
+
+                        foreach (var header in context.HttpContext.Request.Headers)
+                        {
+                            Log.Information("Request Header {key} - {value}", header.Key, header.Value);
+                        }
+
+                        foreach (var header in context.HttpContext.Response.Headers)
+                        {
+                            Log.Information("Response Header {key} - {value}", header.Key, header.Value);
+                        }
+
+                        if (dataEgressKeyCloakSettings.UseRedirectURL)
+                        {
+                            context.ProtocolMessage.RedirectUri = dataEgressKeyCloakSettings.RedirectURL;
+                        }
+                        Log.Information(context.ProtocolMessage.RedirectUri);
+
+                        await Task.FromResult(0);
+                    }
+                };
+
+                options.NonceCookie.SameSite = SameSiteMode.None;
+                options.CorrelationCookie.SameSite = SameSiteMode.None;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    NameClaimType = "name",
+                    RoleClaimType = ClaimTypes.Role,
+                    ValidateIssuer = true
+                };
+            });
+
+
 var app = builder.Build();
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto
+});
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    //app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHostEnvironment environment)
+{
+    var seqServerUrl = configuration["Serilog:SeqServerUrl"];
+    var seqApiKey = configuration["Serilog:SeqApiKey"];
+
+
+
+    return new LoggerConfiguration()
+    .MinimumLevel.Verbose()
+    .Enrich.WithProperty("ApplicationContext", environment.ApplicationName)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.Seq(seqServerUrl, apiKey: seqApiKey)
+    .ReadFrom.Configuration(configuration)
+    .CreateLogger();
+
+}
+
+//removed to stop redirection
+//app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 
-app.UseRouting();
+// ST: try removing to stop https redirect
+//app.UseCookiePolicy(new CookiePolicyOptions
+//{
+//    Secure = CookieSecurePolicy.Always
+//});
 
+app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+app.UseCors();
+
 app.Run();
+
 
 #region SameSite Cookie Issue - https://community.auth0.com/t/correlation-failed-unknown-location-error-on-chrome-but-not-in-safari/40013/7
 

@@ -9,6 +9,7 @@ using BL.Services;
 
 namespace Data_Egress_UI.Controllers
 {
+    //[Authorize(Roles = "data-egress-admin")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -31,6 +32,18 @@ namespace Data_Egress_UI.Controllers
                 RedirectUri = Url.Action("Login", "Home")
             });
         }
+        public IActionResult Index()
+        {
+            return View();
+        }
+        public IActionResult Allfiles()
+        {
+            return View();
+        }
+        public IActionResult Unprocessedfiles()
+        {
+            return View();
+        }
 
         public IActionResult Login()
         {
@@ -39,6 +52,7 @@ namespace Data_Egress_UI.Controllers
                 return Challenge(OpenIdConnectDefaults.AuthenticationScheme);
             }
             return RedirectToAction("Login", "Home");
+           
         }
         [Authorize]
         public IActionResult Logout()

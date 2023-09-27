@@ -46,16 +46,6 @@ var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
 configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
 builder.Services.AddSingleton(dataEgressKeyCloakSettings);
 
-var treKeyCloakSettings = new TreKeyCloakSettings();
-configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
-builder.Services.AddSingleton(treKeyCloakSettings);
-
-var encryptionSettings = new EncryptionSettings();
-configuration.Bind(nameof(encryptionSettings), encryptionSettings);
-builder.Services.AddSingleton(encryptionSettings);
-builder.Services.AddScoped<IKeycloakTokenHelper, KeycloakTokenHelper>();
-builder.Services.AddScoped<IEncDecHelper, EncDecHelper>();
-
 var TVP = new TokenValidationParameters
 {
     ValidateAudience = true,
@@ -82,7 +72,7 @@ builder.Services.AddAuthentication(options =>
 })
     .AddJwtBearer(options =>
     {
-        if (treKeyCloakSettings.Proxy)
+        if (dataEgressKeyCloakSettings.Proxy)
         {
             options.BackchannelHttpHandler = new HttpClientHandler
             {
