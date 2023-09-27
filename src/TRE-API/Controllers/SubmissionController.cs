@@ -14,6 +14,7 @@ using System.Data;
 using BL.Models.APISimpleTypeReturns;
 using TRE_API.Repositories.DbContexts;
 using EasyNetQ.Management.Client.Model;
+using Newtonsoft.Json;
 
 namespace TRE_API.Controllers
 {
@@ -174,9 +175,18 @@ namespace TRE_API.Controllers
                                     };
             var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams);
 
+            //Send this is the submission, this is the list of files that have been approved and rejected
+            var fileListString = JsonConvert.SerializeObject(EgressFileList);
 
-            //RabbitMQ message to send files to hutch
-            return null;
+            var HUTCHParams = new Dictionary<string, string>() 
+            {
+                { "submissionId", submissionId.ToString() },
+                { "fileList", fileListString}
+            };
+
+            var HUTCHres = _dareHelper.CallAPIWithoutModel<APIReturn>("URl for hutch", HUTCHParams);
+
+            return StatusCode(200);
         }
     }
 }
