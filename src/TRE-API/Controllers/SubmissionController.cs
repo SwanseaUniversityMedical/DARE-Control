@@ -160,5 +160,23 @@ namespace TRE_API.Controllers
                     paramlist).Result;
             return StatusCode(200, submission);
         }
+
+
+        [HttpGet("SendFileResultsToHUTCH")]
+        public IActionResult SendFileResultsToHUTCH(int submissionId, List<DataEgressFiles> EgressFileList)
+        {
+            //Update status of submission to "Sending to hutch for final packaging"
+            var statusParams = new Dictionary<string, string>()
+                                    {
+                                        { "tesId", submissionId.ToString() },
+                                        { "statusType", StatusType.SendingToHUTCHForFinalPackaging.ToString() },
+                                        { "description", "" }
+                                    };
+            var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams);
+
+
+            //RabbitMQ message to send files to hutch
+            return null;
+        }
     }
 }
