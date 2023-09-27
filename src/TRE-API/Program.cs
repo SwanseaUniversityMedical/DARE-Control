@@ -185,7 +185,10 @@ if (!app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var encDec = scope.ServiceProvider.GetRequiredService<IEncDecHelper>();
     db.Database.Migrate();
+    var initialiser = new DataInitaliser(db, encDec);
+    initialiser.SeedData();
 
 }
 
