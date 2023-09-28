@@ -1,5 +1,62 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "GetAllFiles";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
+<hr />
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-success alert-dismissible" style="margin-top:20px">
+        @ViewBag.Message
+    </div>
+}
+@*<form method="post" enctype="multipart/form-data">
+    <input type="file" name="files" multiple required />
+    <input type="text" autocomplete="off" placeholder="Enter File Description" name="description" required />
+    <button type="submit" class="btn btn-primary" asp-controller="File" asp-action="UploadToFileSystem">Upload to File System</button>
+    <button class="btn btn-success" type="submit" asp-controller="File" asp-action="UploadToDatabase">Upload to Database</button>
+</form>*@
+<h4>File System</h4>
+@*@if (Model.FilesOnFileSystem.Count == 0)
+{
+    <caption>No Records Found</caption>
+}
+else
+{*@
+    <caption>List of Files on File System</caption>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+            <th>Sub Id</th>
+                <th>File Size</th>
+                <th>File Type</th>
+            <th>File Name</th>
+                <th>Last Update</th>
+            <th>Actions</th>
+            <th>Reviewer</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @*@foreach (var file in Model.FilesOnFileSystem)
+            {*@
+                <tr>
+                   <th>Id</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+                    <td>
+                <a type="button" class="btn btn-success" asp-controller="File" asp-action="DownloadFileFromFileSystem" asp-route-id="">Approve</a>
+                        <a type="button" class="btn btn-primary" asp-controller="File" asp-action="DownloadFileFromFileSystem" asp-route-id="">Download</a>
+                        <a type="button" class="btn btn-danger" asp-controller="File" asp-action="DeleteFileFromFileSystem" asp-route-id="">Delete</a>
+                    </td>
+                </tr>
+            @*}*@
+        </tbody>
+    </table>
+@*}*@
