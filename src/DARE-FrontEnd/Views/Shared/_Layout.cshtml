@@ -58,8 +58,8 @@
                         <li class="mobile-account-nav">
                             <hr class="mobile-account-nav dropdown-divider" />
                         </li>
-                        <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="#">Account</a></li>
-                        <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="#">Helpdesk</a></li>
+                        <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="http://keycloak-dev:8080/auth/">Account</a></li>
+                        <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="https://jira.hiru.swan.ac.uk/servicedesk/customer/portal/6">Helpdesk</a></li>
                         <li class="mobile-account-nav nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
                         </li>
@@ -79,8 +79,8 @@
                                 @User?.FindFirst("name")?.Value
                             </a>
                             <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="#">Account</a></li>
-                                <li><a class="dropdown-item" href="#">Helpdesk</a></li>
+                                <li><a class="dropdown-item" href="http://keycloak-dev:8080/auth/">Account</a></li>
+                                <li><a class="dropdown-item" href="https://jira.hiru.swan.ac.uk/servicedesk/customer/portal/6">Helpdesk</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a></li>
                             </ul>
@@ -128,9 +128,6 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="PrivacyPolicy">Privacy Policy</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-light" href="#">Cookie Notice</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-light" href="https://dareuk.org.uk/about/" target="_blank">About DARE UK</a>
