@@ -79,28 +79,48 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        @{
+            //var Date1 = DateTime.Now.AddDays(-3).AddHours(-2).AddMinutes(-33);
+            var startTime = Model.Submission.StartTime;
+            
+
+            var currTime = DateTime.Now;
+            var endTime = Model.Submission.EndTime;
+            TimeSpan result1 = endTime.Subtract(startTime);
+                int days = result1.Days;
+                int hours = result1.Hours;
+                int minutes = result1.Minutes;
+
+                //var progressTimer = "Total Elapsed Time:";
+                ////var lastStatusUpdate = tre.LastStatusUpdate;
+                //TimeSpan result2 = currTime.Subtract(lastStatusUpdate);
+                //int days1 = result2.Days;
+                //int hours1 = result2.Hours;
+                //int minutes1 = result2.Minutes;
+                ////var endpointName = @tre.EndPoint?.Name.ToString();
+                //if (endpointName == null)
+                //{
+                //    endpointName = "None";
+                //}
+                //switch (tre.Status)
+                //{
+
+                //    case BL.Models.Enums.StatusType.DataOutApproved:
+                //        <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span>End Time: @Model.EndTime</h6>
+                //        break;
+
+                //    default:
+                //        <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span> Elapsed Time: @days days, @hours hours, @minutes minutes</h6>
+                //        break;
+                //}
+            }
+            
+            <div class="col-md-4">
             <div class="card-header bg-white shadow-sm border-1 p-4">
                 <h5 class="mb-0">Timeline</h5>
             </div>
             <div class="bg-white shadow-sm border-1 p-4">
                 <ul class="timeline list-unstyled">
-                    <li class="position-relative">
-                        <span class="position-absolute bg-grey h-100 timeline-line"></span>
-                        <span class="position-relative d-inline-flex">
-                            <span class="icon-wrap">
-                                <i class="fa-solid fa-circle-plus fs-3 text-primary me-3"></i>
-                            </span>
-                            <span class="d-flex flex-column">
-                                <span class="text-muted">
-                                    Created
-                                </span>
-                                <span class="text-dark" data-bs-toggle="tooltip" data-bs-title="xx/xx/xxxx 00:00:00">
-                                    1 day, 6 hours ago
-                                </span>
-                            </span>
-                        </span>
-                    </li>
                     <li class="position-relative">
                         <span class="position-absolute bg-grey h-100 timeline-line"></span>
                         <span class="position-relative d-inline-flex">
@@ -112,7 +132,7 @@
                                     Started
                                 </span>
                                 <span class="text-dark" data-bs-toggle="tooltip" data-bs-title="xx/xx/xxxx 00:00:00">
-                                    1 day, 6 hours ago
+                                    @startTime
                                 </span>
                             </span>
                         </span>
@@ -128,7 +148,7 @@
                                     Finished
                                 </span>
                                 <span class="text-dark" data-bs-toggle="tooltip" data-bs-title="xx/xx/xxxx 00:00:00">
-                                    1 day, 6 hours ago
+                                    @endTime
                                 </span>
                             </span>
                         </span>
@@ -144,7 +164,7 @@
                                     Runtime
                                 </span>
                                 <span class="text-dark" data-bs-toggle="tooltip" data-bs-title="xx/xx/xxxx 00:00:00">
-                                    1 day, 6 hours ago
+                                    @days days, @hours hours, @minutes minutes
                                 </span>
                             </span>
                         </span>
