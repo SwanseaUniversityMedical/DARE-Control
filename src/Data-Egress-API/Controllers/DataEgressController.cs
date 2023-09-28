@@ -23,8 +23,7 @@ namespace Data_Egress_API.Controllers
             _DbContext = repository;
 
         }
-
-        [HttpPost(Name = "AddNewDataEgress")]
+        [HttpPost("AddNewDataEgress")]
         public async Task<BoolReturn> AddNewDataEgress(int submissionId, List<IFormFile> files)
         {
             var existingSubmission = _DbContext.DataEgressFile
@@ -41,7 +40,7 @@ namespace Data_Egress_API.Controllers
                     var fileName = Path.GetFileNameWithoutExtension(file.FileName);
                     var filePath = Path.Combine(basePath, file.FileName);
                     var extension = Path.GetExtension(file.FileName);
-               
+
                     var dataEgressFile = new DataEgressFiles()
                     {
 
@@ -49,7 +48,7 @@ namespace Data_Egress_API.Controllers
                         Reviewer = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
                         FileSize = file.Length.ToString(),
                         FileName = fileName,
-                        FileType= extension,
+                        FileType = extension,
                         LastUpdate = DateTime.Now.ToUniversalTime()
 
                     };
@@ -60,7 +59,7 @@ namespace Data_Egress_API.Controllers
                     }
 
                     _DbContext.DataEgressFile.Add(dataEgressFile);
-                  
+
                 }
                 await _DbContext.SaveChangesAsync();
                 return new BoolReturn() { Result = true };
@@ -69,10 +68,10 @@ namespace Data_Egress_API.Controllers
             {
                 return new BoolReturn() { Result = false };
             }
-       
+
         }
-       
-        [HttpGet(Name = "GetAllFiles")]
+
+        [HttpGet("GetAllFiles")]
         public List<DataEgressFiles> GetAllFiles()
         {
             try
@@ -89,13 +88,13 @@ namespace Data_Egress_API.Controllers
             }
         }
 
-        [HttpGet(Name = "GetAllUnprocessedFiles")]
+        [HttpGet("GetAllUnprocessedFiles")]
         public List<DataEgressFiles> GetAllUnprocessedFiles()
-        {      
+        {
             try
             {
-                var allUnprocessedFiles = _DbContext.DataEgressFile.Where(x =>x.FileStatus !="Approved").ToList();
-  
+                var allUnprocessedFiles = _DbContext.DataEgressFile.Where(x => x.FileStatus != "Approved").ToList();
+
                 Log.Information("{Function} Files retrieved successfully", "GetAllUnprocessedFiles");
                 return allUnprocessedFiles;
             }
@@ -105,6 +104,8 @@ namespace Data_Egress_API.Controllers
                 throw;
             }
         }
+
+
 
     }
 

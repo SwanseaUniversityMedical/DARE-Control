@@ -7,6 +7,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using BL.Services;
 using BL.Models;
+using EasyNetQ.Management.Client.Model;
 
 namespace Data_Egress_UI.Controllers
 {
@@ -40,6 +41,16 @@ namespace Data_Egress_UI.Controllers
 
 
         }
-       
+        public IActionResult DownloadFileFromDatabase(int id)
+        { 
+            var file = _dataClientHelper.CallAPIWithoutModel<List<DataEgressFiles>>("/api/DataEgress/DeleteFileFromDatabase/").Result;
+            return View(file);
+        }
+        public IActionResult DeleteFileFromDatabase(int id)
+        {
+            var file = _dataClientHelper.CallAPIWithoutModel<List<DataEgressFiles>>("/api/DataEgress/DownloadFileFromDatabase/").Result;
+            return View(file);
+        }
+
     }
-}
+    }
