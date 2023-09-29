@@ -489,7 +489,7 @@ namespace DARE_API.Controllers
 
             var minioEndPoint = new MinioEndpoint()
             {
-                Url = _minioSettings.Url,
+                Url = _minioSettings.AdminConsole,
             };  
 
             return minioEndPoint;
