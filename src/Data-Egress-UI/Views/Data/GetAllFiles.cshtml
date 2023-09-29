@@ -1,8 +1,15 @@
-﻿@{
-    ViewData["Title"] = "GetAllFiles";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
+﻿
+@model List<BL.Models.DataEgressFiles>
 
+@{
+    ViewData["Title"] = "GetAllFiles";
+    var filesCount = Model.Count;
+}
+@*<form method="post" enctype="multipart/form-data">
+    <input type="file" name="files" multiple required />
+    <input type="text" autocomplete="off" placeholder="Enter File Description" name="description" required />
+    <button class="btn btn-success" type="submit" asp-controller="Data" asp-action="UploadToDatabase">Upload to Database</button>
+</form>*@
 <hr />
 @if (ViewBag.Message != null)
 {
@@ -10,24 +17,19 @@
         @ViewBag.Message
     </div>
 }
-@*<form method="post" enctype="multipart/form-data">
-    <input type="file" name="files" multiple required />
-    <input type="text" autocomplete="off" placeholder="Enter File Description" name="description" required />
-    <button type="submit" class="btn btn-primary" asp-controller="File" asp-action="UploadToFileSystem">Upload to File System</button>
-    <button class="btn btn-success" type="submit" asp-controller="File" asp-action="UploadToDatabase">Upload to Database</button>
-</form>*@
+
 <h4>File System</h4>
-@*@if (Model.FilesOnFileSystem.Count == 0)
+@if (Model.Count == 0)
 {
     <caption>No Records Found</caption>
 }
 else
-{*@
+{
     <caption>List of Files on File System</caption>
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>#</th>
+                <th>Id</th>
             <th>Sub Id</th>
                 <th>File Size</th>
                 <th>File Type</th>
@@ -39,24 +41,26 @@ else
             </tr>
         </thead>
         <tbody>
-            @*@foreach (var file in Model.FilesOnFileSystem)
-            {*@
+            @foreach (var file in Model)
+            {
                 <tr>
-                   <th>Id</th>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
+                   <th>file.Id</th>
+                    <td>file.submissionId</td>
+                    <td>file.FileSize</td>
+                    <td>file.FileType</td>
+                    <td>file.FileName</td>
+                    <td>file.LastUpdate</td>
+            <td>file.FileStatus</td>
+         
+            <td>file.Reviewer</td>
                     <td>
-                <a type="button" class="btn btn-success" asp-controller="File" asp-action="DownloadFileFromFileSystem" asp-route-id="">Approve</a>
+                <a type="button" class="btn btn" asp-controller="File" asp-action="UpdateFileSystem" asp-route-id="">Approve</a>
+                        <a type="button" class="btn btn-danger" asp-controller="File" asp-action="UpdateFileSystem" asp-route-id="Reject"></a>
                         <a type="button" class="btn btn-primary" asp-controller="File" asp-action="DownloadFileFromFileSystem" asp-route-id="">Download</a>
-                        <a type="button" class="btn btn-danger" asp-controller="File" asp-action="DeleteFileFromFileSystem" asp-route-id="">Delete</a>
+                    
                     </td>
                 </tr>
-            @*}*@
+            }
         </tbody>
     </table>
-@*}*@
+}

@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using BL.Services;
 using BL.Models;
 using EasyNetQ.Management.Client.Model;
+using System.Collections.Generic;
+using BL.Models.APISimpleTypeReturns;
 
 namespace Data_Egress_UI.Controllers
 {
@@ -31,7 +33,10 @@ namespace Data_Egress_UI.Controllers
 
 
         }
+        [HttpPost]
 
+                   
+       
         [HttpGet]
         public IActionResult GetAllUnprocessedFiles()
         {
@@ -41,16 +46,16 @@ namespace Data_Egress_UI.Controllers
 
 
         }
-        public IActionResult DownloadFileFromDatabase(int id)
-        { 
-            var file = _dataClientHelper.CallAPIWithoutModel<List<DataEgressFiles>>("/api/DataEgress/DeleteFileFromDatabase/").Result;
-            return View(file);
-        }
-        public IActionResult DeleteFileFromDatabase(int id)
-        {
-            var file = _dataClientHelper.CallAPIWithoutModel<List<DataEgressFiles>>("/api/DataEgress/DownloadFileFromDatabase/").Result;
-            return View(file);
-        }
+        //public IActionResult DownloadFileFromDatabase(int id)
+        //{ 
+        //    var file = _dataClientHelper.CallAPIWithoutModel<List<DataEgressFiles>>("/api/DataEgress/DeleteFileFromDatabase/").Result;
+        //    return View(file);
+        //}
+        //public IActionResult DeleteFileFromDatabase(int id)
+        //{
+        //    var file = _dataClientHelper.CallAPIWithoutModel<List<DataEgressFiles>>("/api/DataEgress/DownloadFileFromDatabase/").Result;
+        //    return View(file);
+        //}
 
     }
     }

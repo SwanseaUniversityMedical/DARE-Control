@@ -63,17 +63,17 @@ JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(name: MyAllowSpecificOrigins,
-        policy =>
-        {
-            policy.WithOrigins(configuration["DataEgressAPISettings:Address"])
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials();
-        });
-});
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy(name: MyAllowSpecificOrigins,
+//        policy =>
+//        {
+//            policy.WithOrigins(configuration["DataEgressAPISettings:Address"])
+//                .AllowAnyMethod()
+//                .AllowAnyHeader()
+//                .AllowCredentials();
+//        });
+//});
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {

@@ -8,6 +8,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using Microsoft.AspNetCore.Authorization;
 using Serilog;
 using BL.Models.Enums;
+using EasyNetQ.Management.Client.Model;
 
 namespace Data_Egress_API.Controllers
 {
@@ -46,7 +47,7 @@ namespace Data_Egress_API.Controllers
 
                         submissionId = submissionId,
                         Reviewer = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
-                        FileSize = file.Length.ToString(),
+                        FileSize = file.ContentType,
                         FileName = fileName,
                         FileType = extension,
                         LastUpdate = DateTime.Now.ToUniversalTime()
@@ -70,6 +71,7 @@ namespace Data_Egress_API.Controllers
             }
 
         }
+
 
         [HttpGet("GetAllFiles")]
         public List<DataEgressFiles> GetAllFiles()

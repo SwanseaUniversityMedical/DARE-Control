@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BL.Models
 {
-    public class DataEgressFiles
+    public class DataEgressFiles : BaseModel
     {
         public int Id { get; set; }
         public int submissionId { get; set; }

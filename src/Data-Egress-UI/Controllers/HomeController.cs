@@ -34,15 +34,12 @@ namespace Data_Egress_UI.Controllers
         }
         public IActionResult Index()
         {
-            return View();
-        }
-        public IActionResult Allfiles()
-        {
-            return View();
-        }
-        public IActionResult Unprocessedfiles()
-        {
-            return View();
+            if (!HttpContext.User.Identity.IsAuthenticated)
+            {
+                return Challenge(OpenIdConnectDefaults.AuthenticationScheme);
+            }
+            return RedirectToAction("Login", "Home");
+
         }
 
         public IActionResult Login()
