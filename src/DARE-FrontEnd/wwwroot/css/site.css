@@ -39,6 +39,10 @@ body {
 .text-success {
     color: rgb(50, 146, 118) !important;
 }
+.text-black-15 {
+    --bs-text-opacity: 1;
+    color: rgba(0,0,0,.15) !important;
+}
 a {
     -webkit-text-decoration-skip: objects;
     background-color: transparent;
@@ -324,8 +328,15 @@ table.no-head thead  {
 table tr {
     vertical-align:middle;
 }
+.table-striped-columns > :not(caption) > tr > :nth-child(3n) {
+    --bs-table-accent-bg: var(--bs-table-striped-bg);
+    color: var(--bs-table-striped-color);
+}
 #submissionList tr td:last-child {
     text-align:center;
+}
+.crosstab td, .crosstab th {
+    padding: 0.5rem 1.5rem !important;
 }
 .crosstab td {
     vertical-align: top;
@@ -342,16 +353,12 @@ table tr {
 .crosstab th:last-child, .crosstab td:last-child {
     border-right: none !important;
 }
-    .crosstab tfoot td, .crosstab tfoot tr{
-        border: none !important;
-    }
     .crosstab tfoot tr {
         border-top: 5px solid !important;
         border-color: rgba(208, 211, 212, 0.75) !important;
         background-color: rgb(238, 238, 238);
     }
 .crosstab tbody tr td:first-child {
-    background-color: #f2f2f2;
     font-weight: bold;
 }
  
@@ -361,8 +368,24 @@ table tr {
 .crosstab ul, .crosstab li:last-child {
     margin-bottom: 0rem;
 }
+.crosstab .timeline li {
+    padding-bottom:1rem;
+    margin-bottom:0;
+}
+.crosstab .timeline-line {
+    width: 1px;
+    top: 7px;
+    left: 8px;
+}
+.crosstab .timeline .icon-wrap {
+    height: 16px;
+    margin-top: 2px;
+}
+.table-striped-columns > :not(caption) > tr > :nth-child(3n) .timeline .icon-wrap {
+    background-color: transparent;
+}
 .timeline li {
-    padding-bottom:2rem;
+    padding-bottom: 2rem;
 }
 .timeline li:last-child {
     padding-bottom: 0;
