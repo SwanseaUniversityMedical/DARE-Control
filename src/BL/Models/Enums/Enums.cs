@@ -21,7 +21,18 @@ namespace BL.Models.Enums
         RequestCancellation = 14,
         CancellationRequestSent = 15,
         Cancelled = 16,
-        WaitingForCrateFormatCheck = 17
+        WaitingForCrateFormatCheck = 17,
+        ValidatingUser = 18,
+        ValidatingSubmission = 19,
+        ValidationSuccessful = 20,
+        AgentTransferringToPod = 21,
+        TransferToPodFailed = 22,
+        TRERejectedProject = 23,
+        TREApprovedProject = 24,
+        PodProcessingFailed = 25,
+        Running = 26, 
+        Failed = 27
+
     }
 
     public enum Decision
