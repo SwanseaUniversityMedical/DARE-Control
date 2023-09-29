@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using BL.Services;
+using BL.Models.APISimpleTypeReturns;
 
 namespace Data_Egress_UI.Controllers
 {
@@ -14,11 +15,12 @@ namespace Data_Egress_UI.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IDataEgressClientHelper _dataClientHelper;
-
-        public HomeController(ILogger<HomeController> logger, IDataEgressClientHelper datahelper)
+        private readonly ITREClientHelper _treClientHelper;
+        public HomeController(ILogger<HomeController> logger, IDataEgressClientHelper datahelper, ITREClientHelper trehelper)
         {
             _logger = logger;
             _dataClientHelper = datahelper;
+            _treClientHelper = trehelper;
         }
 
         public IActionResult LoginAfterTokenExpired()
@@ -32,15 +34,19 @@ namespace Data_Egress_UI.Controllers
                 RedirectUri = Url.Action("Login", "Home")
             });
         }
-        public IActionResult Index()
-        {
-            if (!HttpContext.User.Identity.IsAuthenticated)
-            {
-                return Challenge(OpenIdConnectDefaults.AuthenticationScheme);
-            }
-            return RedirectToAction("Login", "Home");
 
+        public async Task<IActionResult> IndexAsync()
+        {
+
+            var alreadyset = await _treClientHelper.CallAPIWithoutModel<BoolReturn>("/api/SubmissionCredentials/CheckCredentialsAreValid");
+            if (!alreadyset.Result)
+            {
+
+                return RedirectToAction("UpdateCredentials", "SubmissionCredentials");
+            }
+            return View();
         }
+
 
         public IActionResult Login()
         {
