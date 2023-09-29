@@ -14,14 +14,37 @@ namespace TREAuthenticationAndManagement.Controllers
     [Microsoft.AspNetCore.Mvc.Route("api/[controller]")]
     public class AuthenticationController : ApiController
     {
-       
-        //public static Dictionary<string, string> TokenToRole 
+
+        //TODO save Tokens  To disk?
+        //TODO Easy way to grab all the generated roles , even if they had been generated already 
+
+        public static Dictionary<string, string> TokenToRole = new Dictionary<string, string>();
+
+        public static List<string> GenRoles = new List<string>()
+        {
+            "COOLSchemas2",
+            "COOLSchemas1"
+        };
 
 
         public HashSet<string> CoolCodes = new HashSet<string>()
         {
             "COOL", "COOL2"
         };
+
+        [HttpGet("GetNewToken")]
+        public string GetNewToken(string role)
+        {
+            if (GenRoles.Contains(role))
+            {
+                var Token = "AAAAAAAAAAAAA"; //TODO The have a better system for token 
+                TokenToRole[Token] = role;
+                return Token;
+            }
+
+            return "";
+        }
+
 
         [HttpGet("")]
         public string Index([FromHeader] string MYCOOLToken)
@@ -32,12 +55,12 @@ namespace TREAuthenticationAndManagement.Controllers
             }
 
 
-            if (CoolCodes.Contains(MYCOOLToken))
+            if (TokenToRole.ContainsKey(MYCOOLToken))
             {
                 var hasuraVariables = new Dictionary<string, string> {
-                        { "X-Hasura-Role", "COOLSchemas2" },
-                        { "X-Hasura-User-Ide", "1" },
-                 };
+                        { "X-Hasura-Role", TokenToRole[MYCOOLToken] },
+                        { "X-Hasura-User-Ide", "1" }, //TOOD ID
+                };
                 //cool.StatusCode = 200;
 
                 var _jsonSerializerOptions = new JsonSerializerOptions()
