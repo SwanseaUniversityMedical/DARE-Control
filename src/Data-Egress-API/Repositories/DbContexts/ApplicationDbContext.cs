@@ -16,7 +16,7 @@ namespace Data_Egress_API.Repositories.DbContexts
 
         }
 
-        public DbSet<DataEgressFiles> DataEgressFile{ get; set; }
+        public DbSet<DataFiles> DataEgressFiles{ get; set; }
 
     }
 }

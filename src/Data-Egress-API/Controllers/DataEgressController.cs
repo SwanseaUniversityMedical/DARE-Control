@@ -25,42 +25,30 @@ namespace Data_Egress_API.Controllers
 
         }
         [HttpPost("AddNewDataEgress")]
-        public async Task<BoolReturn> AddNewDataEgress(int submissionId, List<IFormFile> files)
+        public async Task<BoolReturn> AddNewDataEgress(int submissionId, List<SubmissionFile> files)
         {
-            var existingSubmission = _DbContext.DataEgressFile
-                .Include(d => d.files)
-               .FirstOrDefault(d => d.Id == submissionId);
+            var existingDataFiles = _DbContext.DataEgressFiles            
+                .FirstOrDefault(d => d.Id == submissionId);
 
-            if (existingSubmission != null)
+            var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+            if (existingDataFiles != null)
             {
                 foreach (var file in files)
                 {
-                    var basePath = Path.Combine(Directory.GetCurrentDirectory() + "\\Files\\");
-                    bool basePathExists = System.IO.Directory.Exists(basePath);
-                    if (!basePathExists) Directory.CreateDirectory(basePath);
-                    var fileName = Path.GetFileNameWithoutExtension(file.FileName);
-                    var filePath = Path.Combine(basePath, file.FileName);
-                    var extension = Path.GetExtension(file.FileName);
-
-                    var dataEgressFile = new DataEgressFiles()
+                   
+                    var dataFile = new DataFiles()
                     {
-
-                        submissionId = submissionId,
-                        Reviewer = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
-                        FileSize = file.ContentType,
-                        FileName = fileName,
-                        FileType = extension,
-                        LastUpdate = DateTime.Now.ToUniversalTime()
-
+                        Name = file.Name,
+                        TreBucketFullPath = file.TreBucketFullPath,
+                        SubmisionBucketFullPath = file.SubmisionBucketFullPath,
+                        Status = file.Status,
+                        Description = file.Description,
+                        LastUpdate = DateTime.Now.ToUniversalTime(),
+                        Reviewer = approvedBy,
+                        SubmissionId = file.Id
                     };
-                    using (var dataStream = new MemoryStream())
-                    {
-                        await file.CopyToAsync(dataStream);
-                        dataEgressFile.FileData = dataStream.ToArray();
-                    }
-
-                    _DbContext.DataEgressFile.Add(dataEgressFile);
-
+                    _DbContext.DataEgressFiles.Add(dataFile);
+                
                 }
                 await _DbContext.SaveChangesAsync();
                 return new BoolReturn() { Result = true };
@@ -74,11 +62,11 @@ namespace Data_Egress_API.Controllers
 
 
         [HttpGet("GetAllFiles")]
-        public List<DataEgressFiles> GetAllFiles()
+        public List<DataFiles> GetAllFiles()
         {
             try
             {
-                var allFiles = _DbContext.DataEgressFile.ToList();
+                var allFiles = _DbContext.DataEgressFiles.ToList();
 
                 Log.Information("{Function} Files retrieved successfully", "GetAllFiles");
                 return allFiles;
@@ -90,22 +78,22 @@ namespace Data_Egress_API.Controllers
             }
         }
 
-        [HttpGet("GetAllUnprocessedFiles")]
-        public List<DataEgressFiles> GetAllUnprocessedFiles()
-        {
-            try
-            {
-                var allUnprocessedFiles = _DbContext.DataEgressFile.Where(x => x.FileStatus != "Approved").ToList();
+        //[HttpGet("GetAllUnprocessedFiles")]
+        //public List<DataEgressFiles> GetAllUnprocessedFiles()
+        //{
+        //    try
+        //    {
+        //        var allUnprocessedFiles = _DbContext.DataEgressFile.Where(x => x.FileStatus != "Approved").ToList();
 
-                Log.Information("{Function} Files retrieved successfully", "GetAllUnprocessedFiles");
-                return allUnprocessedFiles;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crashed", "allUnprocessedFiles");
-                throw;
-            }
-        }
+        //        Log.Information("{Function} Files retrieved successfully", "GetAllUnprocessedFiles");
+        //        return allUnprocessedFiles;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Log.Error(ex, "{Function} Crashed", "allUnprocessedFiles");
+        //        throw;
+        //    }
+        //}
 
 
 

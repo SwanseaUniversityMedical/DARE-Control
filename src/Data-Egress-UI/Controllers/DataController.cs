@@ -28,7 +28,7 @@ namespace Data_Egress_UI.Controllers
         public IActionResult GetAllFiles()
         {
 
-            var files = _dataClientHelper.CallAPIWithoutModel<List<DataEgressFiles>>("/api/DataEgress/GetAllFiles/").Result;
+            var files = _dataClientHelper.CallAPIWithoutModel<List<DataFiles>>("/api/DataEgress/GetAllFiles/").Result;
             return View(files);
 
 
@@ -41,7 +41,7 @@ namespace Data_Egress_UI.Controllers
         public IActionResult GetAllUnprocessedFiles()
         {
 
-            var unprocessedfiles = _dataClientHelper.CallAPIWithoutModel<List<DataEgressFiles>>("/api/DataEgress/GetAllUnprocessedFiles/").Result;
+            var unprocessedfiles = _dataClientHelper.CallAPIWithoutModel<List<DataFiles>>("/api/DataEgress/GetAllUnprocessedFiles/").Result;
             return View(unprocessedfiles);
 
 
