@@ -28,7 +28,7 @@ namespace TREAuthenticationAndManagement.Controllers
         {
             if (string.IsNullOrEmpty(MYCOOLToken))
             {
-                return "";
+                return null;
             }
 
 
@@ -50,9 +50,7 @@ namespace TREAuthenticationAndManagement.Controllers
             }
             else
             {
-
-                //StatusCode = 401;
-                return "";
+                return null;
             }
         }
 
