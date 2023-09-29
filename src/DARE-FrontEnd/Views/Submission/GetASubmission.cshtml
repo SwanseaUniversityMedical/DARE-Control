@@ -64,11 +64,14 @@
             <div class="card-header bg-white shadow-sm border-1 p-4">
                 <h5 class="mb-0">Submission Details</h5>
             </div>
+            @{
+                var minio = @ViewBag.minioendpoint;
+            }
             <div class="bg-white shadow-sm border-1 p-4">
                 <p>
-                    Minio URL: <a href="http://@ViewBag.minioendpoint">@Model.Submission.Project.Name Buckets</a><br />
-                    Submission Bucket: <a href="#insertreallink">@Html.Raw(Model.Submission.Project.SubmissionBucket)</a><br />
-                    Output Bucket: <a href="#insertreallink">@Html.Raw(Model.Submission.Project.OutputBucket)</a>
+                    Minio URL: <a href="http://@minio">@Model.Submission.Project.Name Buckets</a><br />
+                    Submission Bucket: <a target="_blank" href="http://@minio/browser/@Model.Submission.Project.SubmissionBucket">@Html.Raw(Model.Submission.Project.SubmissionBucket)</a><br />
+                    Output Bucket: <a target="_blank" href="http://@minio/browser/@Model.Submission.Project.OutputBucket" + @Model.Submission.Project.OutputBucket">@Html.Raw(Model.Submission.Project.OutputBucket)</a>
                 </p>
                 <div class="">
                     <button id="showJsonButton" class="btn btn-sm btn-primary">
