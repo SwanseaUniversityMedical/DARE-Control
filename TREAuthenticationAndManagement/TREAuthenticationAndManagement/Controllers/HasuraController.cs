@@ -2,7 +2,7 @@
 using System.Web.Http;
 using TREAuthenticationAndManagement.Services;
 
-namespace TREAuthenticationAndManagement.Controllers
+namespace TRE_TESK.Controllers
 {
     [ApiController]
     [Microsoft.AspNetCore.Mvc.Route("api/[controller]")]

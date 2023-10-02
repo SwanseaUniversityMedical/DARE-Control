@@ -2,7 +2,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 
-namespace TREAuthenticationAndManagement.Services
+namespace TRE_TESK.Services
 {
 
     public interface IHasuraService

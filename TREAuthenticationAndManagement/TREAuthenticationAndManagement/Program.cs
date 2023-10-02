@@ -1,4 +1,4 @@
-using TREAuthenticationAndManagement.Services;
+using TRE_TESK.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -8,7 +8,7 @@ using HttpGetAttribute = Microsoft.AspNetCore.Mvc.HttpGetAttribute;
 using Microsoft.AspNetCore.Http;
 using System.Web.Http;
 
-namespace TREAuthenticationAndManagement.Controllers
+namespace TRE_TESK.Controllers
 {
     [ApiController]
     [Microsoft.AspNetCore.Mvc.Route("api/[controller]")]
