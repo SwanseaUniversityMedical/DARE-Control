@@ -1,6 +1,13 @@
+using Microsoft.Extensions.Configuration;
+using TRE_TESK.Models;
 using TRE_TESK.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+ConfigurationManager configuration = builder.Configuration;
+
+var AuthenticationSettings = new AuthenticationSettings();
+configuration.Bind(nameof(AuthenticationSettings), AuthenticationSettings);
+builder.Services.AddSingleton(AuthenticationSettings);
 
 // Add services to the container.
 builder.Services.AddRazorPages();

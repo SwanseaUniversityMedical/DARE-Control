@@ -9,14 +9,24 @@ using Microsoft.AspNetCore.Http;
 using System.Web.Http;
 using System;
 
+using TRE_TESK.Models;
+
 namespace TRE_TESK.Controllers
 {
     [ApiController]
     [Microsoft.AspNetCore.Mvc.Route("api/[controller]")]
     public class AuthenticationController : ApiController
     {
+        private readonly AuthenticationSettings _authenticationSettings;
 
-        public readonly int TokenExpireDays = 14;
+
+
+        public AuthenticationController(AuthenticationSettings AuthenticationSettings)
+        {
+            _authenticationSettings = AuthenticationSettings;
+
+        }
+
 
         public class RoleData { 
             public string Name { get; set; }
@@ -89,7 +99,7 @@ namespace TRE_TESK.Controllers
             if (TokenToRole.ContainsKey(MYCOOLToken))
             {
 
-                if ((DateTime.UtcNow - TokenToRole[MYCOOLToken].DateTime).Days > TokenExpireDays)
+                if ((DateTime.UtcNow - TokenToRole[MYCOOLToken].DateTime).Days > _authenticationSettings.TokenExpireDays)
                 {
                     TokenToRole.Remove(MYCOOLToken);
                     return null;
