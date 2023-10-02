@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
+using TRE_TESK.Controllers;
 
 namespace TRE_TESK.Services
 {
@@ -283,6 +284,8 @@ namespace TRE_TESK.Services
                 }
                 else
                 {
+                    var araa = await data.Content.ReadAsStringAsync();
+
                     return false;
                 }
 
@@ -319,6 +322,7 @@ namespace TRE_TESK.Services
             }
           }
         }";
+            AuthenticationController.GenRoles.Add(Schema);
 
             try
             {

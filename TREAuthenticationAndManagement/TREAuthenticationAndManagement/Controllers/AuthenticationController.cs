@@ -7,6 +7,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using HttpGetAttribute = Microsoft.AspNetCore.Mvc.HttpGetAttribute;
 using Microsoft.AspNetCore.Http;
 using System.Web.Http;
+using System;
 
 namespace TRE_TESK.Controllers
 {
@@ -15,10 +16,13 @@ namespace TRE_TESK.Controllers
     public class AuthenticationController : ApiController
     {
 
+        public readonly int TokenExpireDays = 14;
+
         public class RoleData { 
             public string Name { get; set; }
             public int ID { get; set; }
 
+            public DateTime DateTime { get; set; } = DateTime.UtcNow;
         }
 
 
@@ -29,7 +33,7 @@ namespace TRE_TESK.Controllers
 
         public static int freeRoleID = 0;
 
-        public static List<string> GenRoles = new List<string>()
+        public static HashSet<string> GenRoles = new HashSet<string>()
         {
             "COOLSchemas2",
             "COOLSchemas1"
@@ -60,7 +64,17 @@ namespace TRE_TESK.Controllers
             return "";
         }
 
+        [Microsoft.AspNetCore.Mvc.HttpPost("ExpirerToken/{Token}")]
+        public bool ExpirerToken(string Token)
+        {
+            if (TokenToRole.ContainsKey(Token))
+            {
+                TokenToRole.Remove(Token);
+                return true;
+            }
 
+            return false;
+        }
 
 
         [HttpGet("")]
@@ -74,6 +88,13 @@ namespace TRE_TESK.Controllers
 
             if (TokenToRole.ContainsKey(MYCOOLToken))
             {
+
+                if ((DateTime.UtcNow - TokenToRole[MYCOOLToken].DateTime).Days > TokenExpireDays)
+                {
+                    TokenToRole.Remove(MYCOOLToken);
+                    return null;
+                }
+
                 var hasuraVariables = new Dictionary<string, string> {
                         { "X-Hasura-Role", TokenToRole[MYCOOLToken].Name },
                         { "X-Hasura-User-Ide", TokenToRole[MYCOOLToken].ID.ToString() },
