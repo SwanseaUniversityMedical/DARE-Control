@@ -15,12 +15,12 @@ namespace Data_Egress_UI.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IDataEgressClientHelper _dataClientHelper;
-        private readonly ITREClientHelper _treClientHelper;
-        public HomeController(ILogger<HomeController> logger, IDataEgressClientHelper datahelper, ITREClientHelper trehelper)
+        //private readonly ITREClientHelper _treClientHelper;
+        public HomeController(ILogger<HomeController> logger, IDataEgressClientHelper datahelper)
         {
             _logger = logger;
             _dataClientHelper = datahelper;
-            _treClientHelper = trehelper;
+            //_treClientHelper = trehelper;
         }
 
         public IActionResult LoginAfterTokenExpired()
@@ -35,18 +35,26 @@ namespace Data_Egress_UI.Controllers
             });
         }
 
-        public async Task<IActionResult> IndexAsync()
+        //public async Task<IActionResult> Index()
+        //{
+
+        //    var alreadyset = await _treClientHelper.CallAPIWithoutModel<BoolReturn>("/api/SubmissionCredentials/CheckCredentialsAreValid");
+        //    if (!alreadyset.Result)
+        //    {
+
+        //        return RedirectToAction("UpdateCredentials", "SubmissionCredentials");
+        //    }
+        //    return View();
+        //}
+        public IActionResult Index()
         {
-
-            var alreadyset = await _treClientHelper.CallAPIWithoutModel<BoolReturn>("/api/SubmissionCredentials/CheckCredentialsAreValid");
-            if (!alreadyset.Result)
+            if (!HttpContext.User.Identity.IsAuthenticated)
             {
-
-                return RedirectToAction("UpdateCredentials", "SubmissionCredentials");
+                return Challenge(OpenIdConnectDefaults.AuthenticationScheme);
             }
             return View();
-        }
 
+        }
 
         public IActionResult Login()
         {

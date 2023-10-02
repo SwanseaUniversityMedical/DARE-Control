@@ -73,6 +73,7 @@ builder.Services.AddCors(options =>
                 .AllowAnyHeader()
                 .AllowCredentials();
         });
+  
 });
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>

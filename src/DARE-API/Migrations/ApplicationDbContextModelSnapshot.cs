@@ -59,7 +59,7 @@ namespace DARE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AuditLogs");
+                    b.ToTable("AuditLogs", (string)null);
                 });
 
             modelBuilder.Entity("BL.Models.HistoricStatus", b =>
@@ -89,7 +89,7 @@ namespace DARE_API.Migrations
 
                     b.HasIndex("SubmissionId");
 
-                    b.ToTable("HistoricStatuses");
+                    b.ToTable("HistoricStatuses", (string)null);
                 });
 
             modelBuilder.Entity("BL.Models.Project", b =>
@@ -133,7 +133,7 @@ namespace DARE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Projects");
+                    b.ToTable("Projects", (string)null);
                 });
 
             modelBuilder.Entity("BL.Models.Submission", b =>
@@ -202,7 +202,7 @@ namespace DARE_API.Migrations
 
                     b.HasIndex("TreId");
 
-                    b.ToTable("Submissions");
+                    b.ToTable("Submissions", (string)null);
                 });
 
             modelBuilder.Entity("BL.Models.SubmissionFile", b =>
@@ -239,7 +239,7 @@ namespace DARE_API.Migrations
 
                     b.HasIndex("SubmissionId");
 
-                    b.ToTable("SubmissionFiles");
+                    b.ToTable("SubmissionFiles", (string)null);
                 });
 
             modelBuilder.Entity("BL.Models.Tre", b =>
@@ -271,7 +271,7 @@ namespace DARE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tres");
+                    b.ToTable("Tres", (string)null);
                 });
 
             modelBuilder.Entity("BL.Models.User", b =>
@@ -296,7 +296,7 @@ namespace DARE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("ProjectTre", b =>
@@ -311,7 +311,7 @@ namespace DARE_API.Migrations
 
                     b.HasIndex("TresId");
 
-                    b.ToTable("ProjectTre");
+                    b.ToTable("ProjectTre", (string)null);
                 });
 
             modelBuilder.Entity("ProjectUser", b =>
@@ -326,7 +326,7 @@ namespace DARE_API.Migrations
 
                     b.HasIndex("UsersId");
 
-                    b.ToTable("ProjectUser");
+                    b.ToTable("ProjectUser", (string)null);
                 });
 
             modelBuilder.Entity("BL.Models.HistoricStatus", b =>
