@@ -54,10 +54,7 @@ else
                                     </a>
                                         <p class="text-muted small mb-0">SubmissionId:@file.SubmissionId</p>
                                 </div>
-                                   @* <a type="button" class="btn btn-Secondary" asp-controller="File" asp-action="UpdateFileSystem" asp-route-id="">Approve</a>
-                                    <a type="button" class="btn btn-Info" asp-controller="File" asp-action="UpdateFileSystem" asp-route-id="Reject"></a>
-                                    <a type="button" class="btn btn-primary" asp-controller="File" asp-action="DownloadFileFromFileSystem" asp-route-id="">Download</a>
-                            *@     <div class="">
+                                      <div class="">
                                     <a href="@Url.Action("UpdateFileSystem", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Approve</span></a>
 
                                     <a href="@Url.Action("UpdateFileSystem", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-danger"><span class="small">Reject</span></a>
@@ -66,11 +63,7 @@ else
                                     </div>
                                 </div>
                        
-                              
-                           
-@*                            <p class="my-4">
-                                @Html.Raw(project.Display?.Replace("\n","<br/>"))
-                            </p>*@
+              
                             <p class="text-muted fs-7 mt-4 mb-0">
                                 Last Updated: @file.LastUpdate<span class="mx-2"></span>Reviewer: @file.Reviewer
                             </p>
