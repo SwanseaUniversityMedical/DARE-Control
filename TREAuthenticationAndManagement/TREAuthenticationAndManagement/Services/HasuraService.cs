@@ -2,6 +2,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using TRE_TESK.Controllers;
+using TRE_TESK.Models;
 
 namespace TRE_TESK.Services
 {
@@ -13,15 +14,21 @@ namespace TRE_TESK.Services
 
     public class HasuraService : IHasuraService
     {
+        public readonly HasuraSettings _hasuraSettings;
+
+        public HasuraService(HasuraSettings HasuraSettings)
+        {
+            _hasuraSettings = HasuraSettings;
+        }
+
+        
 
         public async Task Run()
         {
          
-            string dbName = "COOLDB";
-            string EnvironmentVariable = "POSTGRSS_LOGIN";
+            string dbName = _hasuraSettings.DbName;
 
-    
-            await SetUpDb(dbName, EnvironmentVariable);
+            await SetUpDb(dbName, _hasuraSettings.EnvironmentVariableForDB);
             var Schemas = await this.Schemas(dbName);
 
             foreach (var schema in Schemas)
@@ -50,7 +57,7 @@ namespace TRE_TESK.Services
         public async Task SetUpDb(string DbName, string EnvironmentVariable)
         {
             // Set the endpoint URL
-            string endpointUrl = "http://localhost:8080/v1/metadata";
+            string endpointUrl = _hasuraSettings.HasuraURL + "/v1/metadata";
             /*
             // Create the JSON payload
             string payload = @"
@@ -145,7 +152,7 @@ namespace TRE_TESK.Services
         {
 
             // Set the endpoint URL
-            string endpointUrl = "http://localhost:8080/v2/query";
+            string endpointUrl = _hasuraSettings.HasuraURL + "/v2/query";
 
             // Create the JSON payload
             string payload = @"
@@ -181,7 +188,7 @@ namespace TRE_TESK.Services
         {
 
             // Set the endpoint URL
-            string endpointUrl = "http://localhost:8080/v2/query";
+            string endpointUrl = _hasuraSettings.HasuraURL + "/v2/query";
 
             // Create the JSON payload
             string payload = @"
@@ -192,8 +199,6 @@ namespace TRE_TESK.Services
         ""sql"": ""SELECT schema_name FROM information_schema.schemata;""
     }
 }";
-
-            //pg1 == Db
 
             try
             {
@@ -218,7 +223,7 @@ namespace TRE_TESK.Services
         public async Task<bool> TrackData(string Db, string Schema, string table)
         {
             // Set the endpoint URL
-            string endpointUrl = "http://localhost:8080/v1/metadata";
+            string endpointUrl = _hasuraSettings.HasuraURL + "/v1/metadata";
             /*
             // Create the JSON payload
             string payload = @"
@@ -307,7 +312,7 @@ namespace TRE_TESK.Services
         public async Task SetPermission(string Db, string Schema, string table)
         {
             // Set the endpoint URL
-            string endpointUrl = "http://localhost:8080/v1/metadata";
+            string endpointUrl = _hasuraSettings.HasuraURL + "/v1/metadata";
 
             // Create the JSON payload
             string payload = @"
@@ -348,7 +353,7 @@ namespace TRE_TESK.Services
             {
                 // Set the request headers
                 HttpRequestMessage re = new HttpRequestMessage(HttpMethod.Post, endpointUrl);
-                re.Headers.Add("x-hasura-admin-secret", "ohCOOl");
+                re.Headers.Add("x-hasura-admin-secret", _hasuraSettings.HasuraAdminSecret);
                 re.Content = new StringContent(payload, Encoding.UTF8, "application/json");
                 re.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 // Send the POST request to add the role and permission

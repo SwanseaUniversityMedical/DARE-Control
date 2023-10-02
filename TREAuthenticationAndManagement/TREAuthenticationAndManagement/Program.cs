@@ -9,6 +9,10 @@ var AuthenticationSettings = new AuthenticationSettings();
 configuration.Bind(nameof(AuthenticationSettings), AuthenticationSettings);
 builder.Services.AddSingleton(AuthenticationSettings);
 
+var HasuraSettings = new HasuraSettings();
+configuration.Bind(nameof(HasuraSettings), HasuraSettings);
+builder.Services.AddSingleton(HasuraSettings);
+
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
