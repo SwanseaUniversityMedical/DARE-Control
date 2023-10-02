@@ -1,16 +1,9 @@
 ﻿
 @model List<BL.Models.DataFiles>
-
 @{
-    ViewData["Title"] = "GetAllFiles";
+    ViewData["Title"] = "File System";
     var filesCount = Model.Count;
 }
-@*<form method="post" enctype="multipart/form-data">
-    <input type="file" name="files" multiple required />
-    <input type="text" autocomplete="off" placeholder="Enter File Description" name="description" required />
-    <button class="btn btn-success" type="submit" asp-controller="Data" asp-action="UploadToDatabase">Upload to Database</button>
-</form>*@
-<hr />
 @if (ViewBag.Message != null)
 {
     <div class="alert alert-success alert-dismissible" style="margin-top:20px">
@@ -18,50 +11,75 @@
     </div>
 }
 
-<h4>File System</h4>
+
 @if (Model.Count == 0)
 {
-    <caption>No Records Found</caption>
+    <h3 class="fs-3 mb-0">No records found!</h3>
 }
+
 else
 {
-    <caption>List of Files on File System</caption>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Id</th>
-            <th>Sub Id</th>
-                <th>File Size</th>
-                <th>File Type</th>
-            <th>File Name</th>
-                <th>Last Update</th>
-            <th>Actions</th>
-            <th>Reviewer</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var file in Model)
-            {
-                <tr>
-                   <th>file.Id</th>
-                    <td>file.submissionId</td>
-                    <td>file.FileSize</td>
-                    <td>file.FileType</td>
-                    <td>file.FileName</td>
-                    <td>file.LastUpdate</td>
-            <td>file.FileStatus</td>
-         
-            <td>file.Reviewer</td>
-                    <td>
-                <a type="button" class="btn btn" asp-controller="File" asp-action="UpdateFileSystem" asp-route-id="">Approve</a>
-                        <a type="button" class="btn btn-danger" asp-controller="File" asp-action="UpdateFileSystem" asp-route-id="Reject"></a>
-                        <a type="button" class="btn btn-primary" asp-controller="File" asp-action="DownloadFileFromFileSystem" asp-route-id="">Download</a>
-                    
-                    </td>
-                </tr>
-            }
-            <a type="button" class="btn btn-info" asp-controller="File" asp-action="PostDataOut" asp-route-id="">Complete</a>
-        </tbody>
-    </table>
+<div class="container-lg p-4">
+    <div class="d-flex align-items-center justify-content-between">
+        <h1 class="fs-3 mb-0">File System</h1>
+                          
+        <a asp-controller="Data" asp-action="PostDataOut" class="btn btn-primary btn-sm d-flex align-items-center">
+            <i class="fa fa-plus align-middle me-2"></i>
+            <span>Complete</span>
+        </a>
+                               
+    </div>
+    <hr class="d-flex my-4">
+    <div class="table-responsive">
+        <table id="fileList" class="table table-bordered table-striped no-head" caption="List of Files">
+            <thead><tr><td>Project</td></tr></thead>
+            <tbody>
+                @foreach (var file in Model)
+                {
+                    <tr>
+                        <td class="card mb-2 p-3 bg-white shadow-sm border-1">
+
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div>
+                                    <a href="@Url.Action("GetFile", "Data", new {id = file.Id })">
+                                        <h2 class="mb-0 fw-bold hover-underline fs-5">
+                                                FileName: @file.Name
+                                        </h2>
+                                        <p class="my-4">
+                                                FileSize: @file.SubmisionBucketFullPath
+                                        </p>
+                                        <p class="my-4">
+                                            Actions: @file.Status
+                                        </p>
+                                    </a>
+                                        <p class="text-muted small mb-0">SubmissionId:@file.SubmissionId</p>
+                                </div>
+                                   @* <a type="button" class="btn btn-Secondary" asp-controller="File" asp-action="UpdateFileSystem" asp-route-id="">Approve</a>
+                                    <a type="button" class="btn btn-Info" asp-controller="File" asp-action="UpdateFileSystem" asp-route-id="Reject"></a>
+                                    <a type="button" class="btn btn-primary" asp-controller="File" asp-action="DownloadFileFromFileSystem" asp-route-id="">Download</a>
+                            *@     <div class="">
+                                    <a href="@Url.Action("UpdateFileSystem", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Approve</span></a>
+
+                                    <a href="@Url.Action("UpdateFileSystem", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-danger"><span class="small">Reject</span></a>
+
+                                    <a href="@Url.Action("DownloadFileFromFileSystem", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-info"><span class="small">Download</span></a>
+                                    </div>
+                                </div>
+                       
+                              
+                           
+@*                            <p class="my-4">
+                                @Html.Raw(project.Display?.Replace("\n","<br/>"))
+                            </p>*@
+                            <p class="text-muted fs-7 mt-4 mb-0">
+                                Last Updated: @file.LastUpdate<span class="mx-2"></span>Reviewer: @file.Reviewer
+                            </p>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
 }
