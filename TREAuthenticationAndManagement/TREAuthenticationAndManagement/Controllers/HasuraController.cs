@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Web.Http;
-using TREAuthenticationAndManagement.Services;
+using TRE_TESK.Services;
 
 namespace TRE_TESK.Controllers
 {

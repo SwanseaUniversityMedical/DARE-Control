@@ -32,7 +32,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data-Egress-API", "src\Data
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data-Egress-UI", "src\Data-Egress-UI\Data-Egress-UI.csproj", "{80C9C407-D56A-4FD1-9FE3-58B046729ADC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TREAuthenticationAndManagement", "TREAuthenticationAndManagement\TREAuthenticationAndManagement\TREAuthenticationAndManagement.csproj", "{DA8A2669-F686-49AE-AC3D-9585C68FBB70}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TRE_TESK", "TREAuthenticationAndManagement\TREAuthenticationAndManagement\TRE_TESK.csproj", "{DA8A2669-F686-49AE-AC3D-9585C68FBB70}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
