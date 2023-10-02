@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Serilog;
 using BL.Models.Enums;
 using EasyNetQ.Management.Client.Model;
+using System.IO;
 
 namespace Data_Egress_API.Controllers
 {
@@ -92,6 +93,52 @@ namespace Data_Egress_API.Controllers
             {
                 Log.Error(ex, "{Function} Crashed", "allUnprocessedFiles");
                 throw;
+            }
+        }
+
+        [HttpPost("UpdateFileData")]
+        public async Task<List<DataFiles>> UpdateFileData(List<DataFiles> dataFiles)
+        {
+            var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+            if (string.IsNullOrWhiteSpace(approvedBy))
+            {
+                approvedBy = "[Unknown]";
+            }
+            var resultList = new List<DataFiles>();
+            var approvedDate = DateTime.Now.ToUniversalTime();
+            foreach (var file in dataFiles)
+            {
+                var dbFile = _DbContext.DataEgressFiles.First(x => x.Id == file.Id);
+            
+                if (file.Status != dbFile.Status)
+                {
+                    dbFile.Status = file.Status;
+                    dbFile.Reviewer = approvedBy;
+                    dbFile.LastUpdate = approvedDate;
+                }
+                resultList.Add(dbFile);
+          Log.Information("{Function}:", "UpdateFileData", "FileData Status:" + file.Status.ToString(), "ApprovedBy:" + approvedBy);
+            }
+            await _DbContext.SaveChangesAsync();
+            return resultList;
+
+            [HttpGet("DownloadFile")]
+             DataFiles DownloadFile(int FileId)
+            {
+                var file = _DbContext.DataEgressFiles.First(x => x.Id == FileId);
+                if (file == null) 
+                 return null;
+                var memory = new MemoryStream();
+                using (var stream = new FileStream(file.SubmisionBucketFullPath, FileMode.Open))
+                {
+                    stream.CopyToAsync(memory);
+                }
+              
+                memory.Position = 0;         
+            
+                //get value from SubmissionBucketfullpath
+                //return File(memory, file.FileType, file.Name + file.Extension);
+                return file;
             }
         }
 

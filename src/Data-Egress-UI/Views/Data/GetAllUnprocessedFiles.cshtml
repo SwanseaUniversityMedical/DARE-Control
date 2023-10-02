@@ -54,11 +54,11 @@ else
                                         <p class="text-muted small mb-0">SubmissionId:@file.SubmissionId</p>
                                     </div>
                                     <div class="">
-                                        <a href="@Url.Action("UpdateFileSystem", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Approve</span></a>
+                                        <a href="@Url.Action("EditFileSystem", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Approve</span></a>
 
-                                        <a href="@Url.Action("UpdateFileSystem", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-danger"><span class="small">Reject</span></a>
+                                        <a href="@Url.Action("EditFileSystem", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-danger"><span class="small">Reject</span></a>
 
-                                        <a href="@Url.Action("DownloadFileFromFileSystem", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-info"><span class="small">Download</span></a>
+                                        <a href="@Url.Action("DownloadFile", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-info"><span class="small">Download</span></a>
                                     </div>
                                 </div>
 

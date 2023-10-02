@@ -10,6 +10,8 @@ using BL.Models;
 using EasyNetQ.Management.Client.Model;
 using System.Collections.Generic;
 using BL.Models.APISimpleTypeReturns;
+using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace Data_Egress_UI.Controllers
 {
@@ -33,8 +35,6 @@ namespace Data_Egress_UI.Controllers
 
 
         }
-        [HttpPost]
-
                    
        
         [HttpGet]
@@ -46,16 +46,25 @@ namespace Data_Egress_UI.Controllers
 
 
         }
-        //public IActionResult DownloadFileFromDatabase(int id)
-        //{ 
-        //    var file = _dataClientHelper.CallAPIWithoutModel<List<DataEgressFiles>>("/api/DataEgress/DeleteFileFromDatabase/").Result;
-        //    return View(file);
-        //}
-        //public IActionResult DeleteFileFromDatabase(int id)
-        //{
-        //    var file = _dataClientHelper.CallAPIWithoutModel<List<DataEgressFiles>>("/api/DataEgress/DownloadFileFromDatabase/").Result;
-        //    return View(file);
-        //}
+        [HttpPost]
+        public async Task<IActionResult> EditFileData(DataFiles model)
+        {
+            var result =
+                await _dataClientHelper.CallAPI<List<DataFiles>, List<DataFiles>>("/api/DataEgress/UpdateFileData", new List<DataFiles>() { model });
+
+            return View(result.First());
+        }
+
+        [HttpGet]
+        public IActionResult DownloadFile(int? FileId)
+        {
+          
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("FileId", FileId.ToString());
+            var file = _dataClientHelper.CallAPIWithoutModel<DataFiles>(
+                "/api/DataEgress/DownloadFile/", paramlist).Result;
+            return View(file);
+        }
 
     }
-    }
+}
