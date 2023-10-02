@@ -284,8 +284,13 @@ namespace TRE_TESK.Services
                 }
                 else
                 {
-                    var araa = await data.Content.ReadAsStringAsync();
-
+                    var error = await data.Content.ReadAsStringAsync();
+                    
+                    if (error.Contains("already-tracked"))
+                    {
+                        AuthenticationController.GenRoles.Add(Schema);
+                    }
+                   
                     return false;
                 }
 
