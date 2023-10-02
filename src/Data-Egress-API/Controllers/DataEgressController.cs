@@ -123,7 +123,7 @@ namespace Data_Egress_API.Controllers
             return resultList;
 
             [HttpGet("DownloadFile")]
-             DataFiles DownloadFile(int FileId)
+            public DataFiles DownloadFile(int FileId)
             {
                 var file = _DbContext.DataEgressFiles.First(x => x.Id == FileId);
                 if (file == null) 
