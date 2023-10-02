@@ -109,7 +109,7 @@ namespace Data_Egress_API.Controllers
             foreach (var file in dataFiles)
             {
                 var dbFile = _DbContext.DataEgressFiles.First(x => x.Id == file.Id);
-            
+
                 if (file.Status != dbFile.Status)
                 {
                     dbFile.Status = file.Status;
@@ -117,11 +117,11 @@ namespace Data_Egress_API.Controllers
                     dbFile.LastUpdate = approvedDate;
                 }
                 resultList.Add(dbFile);
-          Log.Information("{Function}:", "UpdateFileData", "FileData Status:" + file.Status.ToString(), "ApprovedBy:" + approvedBy);
+                Log.Information("{Function}:", "UpdateFileData", "FileData Status:" + file.Status.ToString(), "ApprovedBy:" + approvedBy);
             }
             await _DbContext.SaveChangesAsync();
             return resultList;
-
+        }
             [HttpGet("DownloadFile")]
             public DataFiles DownloadFile(int FileId)
             {
@@ -144,4 +144,3 @@ namespace Data_Egress_API.Controllers
 
     }
 
-}
