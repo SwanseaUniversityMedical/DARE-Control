@@ -15,10 +15,19 @@ namespace TRE_TESK.Controllers
     public class AuthenticationController : ApiController
     {
 
+        public class RoleData { 
+            public string Name { get; set; }
+            public int ID { get; set; }
+
+        }
+
+
         //TODO save Tokens  To disk?
         //TODO Easy way to grab all the generated roles , even if they had been generated already 
 
-        public static Dictionary<string, string> TokenToRole = new Dictionary<string, string>();
+        public static Dictionary<string, RoleData> TokenToRole = new Dictionary<string, RoleData>();
+
+        public static int freeRoleID = 0;
 
         public static List<string> GenRoles = new List<string>()
         {
@@ -32,18 +41,26 @@ namespace TRE_TESK.Controllers
             "COOL", "COOL2"
         };
 
-        [HttpGet("GetNewToken")]
+        [HttpGet("GetNewToken/{role}")]
         public string GetNewToken(string role)
         {
             if (GenRoles.Contains(role))
             {
-                var Token = "AAAAAAAAAAAAA"; //TODO The have a better system for token 
-                TokenToRole[Token] = role;
+                var Token = GenToken();
+
+                TokenToRole[Token] = new RoleData()
+                {
+                    Name = role,
+                    ID = freeRoleID,
+                };
+                freeRoleID++;
                 return Token;
             }
 
             return "";
         }
+
+
 
 
         [HttpGet("")]
@@ -58,8 +75,8 @@ namespace TRE_TESK.Controllers
             if (TokenToRole.ContainsKey(MYCOOLToken))
             {
                 var hasuraVariables = new Dictionary<string, string> {
-                        { "X-Hasura-Role", TokenToRole[MYCOOLToken] },
-                        { "X-Hasura-User-Ide", "1" }, //TOOD ID
+                        { "X-Hasura-Role", TokenToRole[MYCOOLToken].Name },
+                        { "X-Hasura-User-Ide", TokenToRole[MYCOOLToken].ID.ToString() },
                 };
                 //cool.StatusCode = 200;
 
@@ -77,20 +94,30 @@ namespace TRE_TESK.Controllers
             }
         }
 
-        private StringContent GetStringContent<T>(T datasetObj) where T : class
+        private string GenToken()
         {
-            var  _jsonSerializerOptions = new JsonSerializerOptions()
+            string code = "";
+
+            Random RNG = new Random();
+            bool Duplicate = true;
+            for (int i = 0; i < 100; i++)
             {
-                //AllowTrailingCommas = true,
-                PropertyNameCaseInsensitive = true,
-            };
-            var jsonString = new StringContent(
-                System.Text.Json.JsonSerializer.Serialize(datasetObj, _jsonSerializerOptions),
-                Encoding.UTF8,
-                "application/json");
-            return jsonString;
+                string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+
+                code = new string(Enumerable.Repeat(chars, 128).Select(s => s[RNG.Next(s.Length)]).ToArray());
+
+                if (TokenToRole.ContainsKey(code) == false)
+                {
+                    Duplicate = false;
+                    break;
+                }
+            }
+
+            if (Duplicate)
+            {
+                throw new Exception("Was unable to generate unique code");
+            }
+            return code;
         }
     }
-
-   
 }
