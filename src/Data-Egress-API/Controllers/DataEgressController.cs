@@ -78,24 +78,22 @@ namespace Data_Egress_API.Controllers
             }
         }
 
-        //[HttpGet("GetAllUnprocessedFiles")]
-        //public List<DataEgressFiles> GetAllUnprocessedFiles()
-        //{
-        //    try
-        //    {
-        //        var allUnprocessedFiles = _DbContext.DataEgressFile.Where(x => x.FileStatus != "Approved").ToList();
+        [HttpGet("GetAllUnprocessedFiles")]
+        public List<DataFiles> GetAllUnprocessedFiles()
+        {
+            try
+            {
+                var allUnprocessedFiles = _DbContext.DataEgressFiles.Where(x => x.Status != FileStatus.Approved).ToList();
 
-        //        Log.Information("{Function} Files retrieved successfully", "GetAllUnprocessedFiles");
-        //        return allUnprocessedFiles;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Log.Error(ex, "{Function} Crashed", "allUnprocessedFiles");
-        //        throw;
-        //    }
-        //}
-
-
+                Log.Information("{Function} Files retrieved successfully", "GetAllUnprocessedFiles");
+                return allUnprocessedFiles;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "allUnprocessedFiles");
+                throw;
+            }
+        }
 
     }
 
