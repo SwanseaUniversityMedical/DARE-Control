@@ -14,6 +14,7 @@ using System.Data;
 using BL.Models.APISimpleTypeReturns;
 using TRE_API.Repositories.DbContexts;
 using EasyNetQ.Management.Client.Model;
+using Newtonsoft.Json;
 
 namespace TRE_API.Controllers
 {
@@ -157,8 +158,38 @@ namespace TRE_API.Controllers
             paramlist.Add("submissionId", submissionId.ToString());
             var submission = _dareHelper
                 .CallAPI<List<SubmissionFile>, Submission>("/api/Submission/SubmissionFiles/", submissionFiles,
-                    paramlist).Result;
+                    paramlist).Result; //This needs to be updated to go to data egress
             return StatusCode(200, submission);
         }
+
+
+        [HttpPost("SendFileResultsToHUTCH")]
+        public IActionResult SendFileResultsToHUTCH(int submissionId, List<DataFiles> EgressFileList)
+        {
+            //Update status of submission to "Sending to hutch for final packaging"
+            var statusParams = new Dictionary<string, string>()
+                                    {
+                                        { "tesId", submissionId.ToString() },
+                                        { "statusType", StatusType.SendingToHUTCHForFinalPackaging.ToString() },
+                                        { "description", "" }
+                                    };
+            var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams);
+
+            //Send the submission, this is the list of files that have been approved and rejected
+            var fileListString = JsonConvert.SerializeObject(EgressFileList);
+
+            var HUTCHParams = new Dictionary<string, string>() 
+            {
+                { "submissionId", submissionId.ToString() },
+                { "fileList", fileListString}
+            };
+
+            var HUTCHres = _dareHelper.CallAPIWithoutModel<APIReturn>("URl for hutch", HUTCHParams);
+
+            return StatusCode(200);
+        }
+
+
+
     }
 }
