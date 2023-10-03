@@ -8,15 +8,15 @@ namespace Data_Egress_API.Repositories.DbContexts
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
         //    optionsBuilder.UseNpgsql("DefaultConnection")
-        //    .UseUtcDateTime();
+        //    //.UseUtcDateTime();
         //}
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
           : base(options)
         {
 
         }
-
-        public DbSet<DataEgressFiles> DataEgressFile{ get; set; }
+        public DbSet<SubmissionCredentials> SubmissionCredentials { get; set; }
+        public DbSet<DataFiles> DataEgressFiles{ get; set; }
 
     }
 }

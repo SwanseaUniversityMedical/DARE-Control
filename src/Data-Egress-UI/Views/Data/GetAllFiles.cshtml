@@ -1,0 +1,81 @@
+﻿
+@model List<BL.Models.DataFiles>
+@{
+    ViewData["Title"] = "File System";
+    var filecount = ViewBag.Filecount;
+   
+}
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-success alert-dismissible" style="margin-top:20px">
+        @ViewBag.Message
+    </div>
+}
+
+
+@if (Model.Count == 0)
+{
+    <h3 class="fs-3 mb-0">No records found!</h3>
+}
+
+else
+{
+<div class="container-lg p-4">
+    <div class="d-flex align-items-center justify-content-between">
+        <h1 class="fs-3 mb-0">File System</h1>
+                          
+       @* <a asp-controller="Data" asp-action="PostDataOut" class="btn btn-primary btn-sm d-flex align-items-center">
+            <i class="fa fa-plus align-middle me-2"></i>
+            <span>Complete</span>
+        </a>*@
+                               
+    </div>
+    <hr class="d-flex my-4">
+    <div class="table-responsive">
+        <table id="fileList" class="table table-bordered table-striped no-head" caption="List of Files">
+            <thead><tr><td>Project</td></tr></thead>
+            <tbody>
+                @foreach (var file in Model)
+                {
+                    <tr>
+                        <td class="card mb-2 p-3 bg-white shadow-sm border-1">
+
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div>
+                                  <a href="@Url.Action("GetFiles", "Data", new {id = file.SubmissionId })">
+                                        <h2 class="mb-0 fw-bold hover-underline fs-5">
+                                                Submission Id: @file.SubmissionId
+                                        </h2>
+                                        <p class="my-4">
+                                               
+                                                FileCount:   @filecount
+
+                                        </p> 
+                                     @* <p class="my-4">
+                                            Actions: @file.Status
+                                        </p>
+                                </a>*@
+                                       @* <p class="text-muted small mb-0">SubmissionId:@file.</p>*@
+                                </div>
+                                     @* <div class="">*@
+                                   @* <a href="@Url.Action("UpdateFileSystem", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Approve</span></a>
+
+                                    <a href="@Url.Action("UpdateFileSystem", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-danger"><span class="small">Reject</span></a>
+
+                                    <a href="@Url.Action("DownloadFileFromFileSystem", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-info"><span class="small">Download</span></a>
+           *@                        @* </div>*@
+                                </div>
+                       
+              
+                           @* <p class="text-muted fs-7 mt-4 mb-0">
+                                Last Updated: @file.LastUpdate<span class="mx-2"></span>Reviewer: @file.Reviewer
+                            </p>*@
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+}

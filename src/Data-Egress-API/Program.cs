@@ -12,7 +12,10 @@ using BL.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using BL.Models.ViewModels;
-
+using Data_Egress_API.Services.SignalR;
+using Microsoft.AspNetCore.Http.Connections;
+using Data_Egress_API.Services.Contract;
+using Data_Egress_API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
@@ -45,6 +48,27 @@ AddDependencies(builder, configuration);
 var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
 configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
 builder.Services.AddSingleton(dataEgressKeyCloakSettings);
+
+var minioSettings = new MinioSettings();
+configuration.Bind(nameof(MinioSettings), minioSettings);
+builder.Services.AddSingleton(minioSettings);
+builder.Services.AddScoped<ISignalRService, SignalRService>();
+
+
+var submissionKeyCloakSettings = new BaseKeyCloakSettings();
+configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
+builder.Services.AddSingleton(submissionKeyCloakSettings);
+builder.Services.AddScoped<IDataClientWithoutTokenHelper, DataClientWithoutTokenHelper>();
+
+var treKeyCloakSettings = new TreKeyCloakSettings();
+configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
+builder.Services.AddSingleton(treKeyCloakSettings);
+
+var encryptionSettings = new EncryptionSettings();
+configuration.Bind(nameof(encryptionSettings), encryptionSettings);
+builder.Services.AddSingleton(encryptionSettings);
+builder.Services.AddScoped<IKeycloakTokenHelper, KeycloakTokenHelper>();
+builder.Services.AddScoped<IEncDecHelper, EncDecHelper>();
 
 var TVP = new TokenValidationParameters
 {
@@ -213,7 +237,7 @@ void AddServices(WebApplicationBuilder builder)
     builder.Services.AddHttpClient();
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
-
+    builder.Services.AddSignalR();
 
     //TODO
     builder.Services.AddSwaggerGen(c =>
@@ -245,8 +269,13 @@ void AddServices(WebApplicationBuilder builder)
       ));
     }
 }
-
-
+//for SignalR
+app.UseCors();
+app.MapHub<SignalRService>("/signalRHub", options =>
+{
+    options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
+}).RequireCors(MyAllowSpecificOrigins);
 app.Run();
+
 
 
