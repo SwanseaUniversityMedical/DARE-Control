@@ -158,7 +158,7 @@ namespace TRE_API.Controllers
             paramlist.Add("submissionId", submissionId.ToString());
             var submission = _dareHelper
                 .CallAPI<List<SubmissionFile>, Submission>("/api/Submission/SubmissionFiles/", submissionFiles,
-                    paramlist).Result;
+                    paramlist).Result; //This needs to be updated to go to data egress
             return StatusCode(200, submission);
         }
 
