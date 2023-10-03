@@ -8,7 +8,7 @@ namespace Data_Egress_API.Repositories.DbContexts
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
         //    optionsBuilder.UseNpgsql("DefaultConnection")
-        //    .UseUtcDateTime();
+        //    //.UseUtcDateTime();
         //}
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
           : base(options)

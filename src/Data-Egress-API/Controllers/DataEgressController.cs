@@ -73,7 +73,6 @@ namespace Data_Egress_API.Controllers
             try
             {
                 var allFiles = _DbContext.DataEgressFiles.ToList();
-
                 Log.Information("{Function} Files retrieved successfully", "GetAllFiles");
                 return allFiles;
             }
@@ -82,6 +81,28 @@ namespace Data_Egress_API.Controllers
                 Log.Error(ex, "{Function} Crashed", "GetAllFiles");
                 throw;
             }
+        }
+          [HttpGet("GetFilesBySubmissionId")]
+        public List<DataFiles> GetFilesBySubmissionId(int id)
+        {
+            try
+            {
+                var returned = _DbContext.DataEgressFiles.Where(x => x.SubmissionId == id).ToList();
+                if (returned == null)
+                {
+                    return null;
+                }
+
+                Log.Information("{Function} Files retrieved successfully", "GetFilesBySubmissionId");
+                return returned.ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetProject");
+                throw;
+            }
+
+
         }
 
         [HttpGet("GetAllUnprocessedFiles")]
@@ -172,6 +193,7 @@ namespace Data_Egress_API.Controllers
             }
 
         }
+        [HttpGet("CheckObjectExists")]
         public async Task<bool> CheckObjectExists(MinioSettings minioSettings, string bucketName, string objectKey)
         {
             var request = new GetObjectMetadataRequest
@@ -201,6 +223,7 @@ namespace Data_Egress_API.Controllers
                 }
             }
         }
+
         #region PrivateHelpers
         private AmazonS3Config GenerateAmazonS3Config(MinioSettings minioSettings)
         {
