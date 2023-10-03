@@ -15,13 +15,13 @@ namespace TRE_TESK.Services
     public class HasuraService : IHasuraService
     {
         public readonly HasuraSettings _hasuraSettings;
+        private readonly ApplicationDbContext _applicationDbContext;
 
-        public HasuraService(HasuraSettings HasuraSettings)
+        public HasuraService(HasuraSettings HasuraSettings, ApplicationDbContext applicationDbContext)
         {
             _hasuraSettings = HasuraSettings;
+            _applicationDbContext = applicationDbContext;
         }
-
-        
 
         public async Task Run()
         {
@@ -293,7 +293,13 @@ namespace TRE_TESK.Services
                     
                     if (error.Contains("already-tracked"))
                     {
-                        AuthenticationController.GenRoles.Add(Schema);
+                        if (_applicationDbContext.GeneratedRole.Any(x => x.RoleName == Schema) == false)
+                        {
+                            _applicationDbContext.GeneratedRole.Add(new GeneratedRole()
+                            {
+                                RoleName = Schema,
+                            });
+                        } 
                     }
                    
                     return false;
@@ -332,7 +338,13 @@ namespace TRE_TESK.Services
             }
           }
         }";
-            AuthenticationController.GenRoles.Add(Schema);
+            if (_applicationDbContext.GeneratedRole.Any(x => x.RoleName == Schema) == false)
+            {
+                _applicationDbContext.GeneratedRole.Add(new GeneratedRole()
+                {
+                    RoleName = Schema,
+                });
+            }
 
             try
             {
