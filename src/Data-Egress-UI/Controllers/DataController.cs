@@ -57,59 +57,16 @@ namespace Data_Egress_UI.Controllers
             return View(result.First());
         }
 
-        //[HttpGet]
-        //public IActionResult DownloadFile(int? FileId)
-        //{
-          
-        //    var paramlist = new Dictionary<string, string>();
-        //    paramlist.Add("FileId", FileId.ToString());
-        //    var file = _dataClientHelper.CallAPIWithoutModel<DataFiles>(
-        //        "/api/DataEgress//", paramlist).Result;
-        //    return View(file);
-        //}
-        //public async IActionResult DownloadFile(MinioSettings minioSettings, string bucketName = "", string objectName = "")
-        //{
-        //    var request = new GetObjectRequest
-        //    {
-        //        BucketName = bucketName,
-        //        Key = objectName,
-        //    };
+        [HttpGet]
+        public IActionResult DownloadFile(int? FileId)
+        {
 
-        //    var amazonS3Client = GenerateAmazonS3Client(minioSettings);
-
-        //    var objectExists = await CheckObjectExists(_minioSettings, request.BucketName, request.Key);
-
-        //    if (objectExists)
-        //    {
-        //        var response = await amazonS3Client.GetObjectAsync(request);
-
-        //        using (var responseStream = response.ResponseStream)
-        //        {
-        //            string saveFilePath = "C:/Path/To/Save/File.txt";
-
-        //            using (var fileStream = new FileStream(saveFilePath, FileMode.Create))
-        //            {
-        //                await responseStream.CopyToAsync(fileStream);
-        //            }
-        //        }
-
-        //        if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
-        //        {
-        //            Log.Warning($"Successfully uploaded {objectName} to {bucketName}.");
-        //            return true;
-        //        }
-        //        else
-        //        {
-        //            Log.Warning($"Could not upload {objectName} to {bucketName}.");
-        //            return false;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        return false;
-        //    }
-
-
-        //}
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("FileId", FileId.ToString());
+            var file = _dataClientHelper.CallAPIWithoutModel<DataFiles>(
+                "/api/DataEgress//", paramlist).Result;
+            return View(file);
+        }
+      
     }
 }

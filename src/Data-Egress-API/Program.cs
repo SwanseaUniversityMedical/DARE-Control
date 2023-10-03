@@ -46,6 +46,11 @@ var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
 configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
 builder.Services.AddSingleton(dataEgressKeyCloakSettings);
 
+var minioSettings = new MinioSettings();
+configuration.Bind(nameof(MinioSettings), minioSettings);
+builder.Services.AddSingleton(minioSettings);
+
+
 var TVP = new TokenValidationParameters
 {
     ValidateAudience = true,

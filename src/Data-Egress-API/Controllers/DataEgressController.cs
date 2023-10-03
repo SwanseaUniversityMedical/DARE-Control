@@ -10,6 +10,11 @@ using Serilog;
 using BL.Models.Enums;
 using EasyNetQ.Management.Client.Model;
 using System.IO;
+using BL.Models.ViewModels;
+using Amazon.S3.Model;
+using Amazon.S3;
+using Amazon;
+using System.Net;
 
 namespace Data_Egress_API.Controllers
 {
@@ -19,11 +24,11 @@ namespace Data_Egress_API.Controllers
     {
 
         private readonly ApplicationDbContext _DbContext;
-
-        public DataEgressController(ApplicationDbContext repository)
+        private readonly MinioSettings _minioSettings;
+        public DataEgressController(ApplicationDbContext repository, MinioSettings minioSettings)
         {
             _DbContext = repository;
-
+            _minioSettings = minioSettings;
         }
         [HttpPost("AddNewDataEgress")]
         public async Task<BoolReturn> AddNewDataEgress(int submissionId, List<SubmissionFile> files)
@@ -122,8 +127,8 @@ namespace Data_Egress_API.Controllers
             await _DbContext.SaveChangesAsync();
             return resultList;
         }
-            [HttpGet("DownloadFile")]
-            public DataFiles DownloadFile(int FileId)
+            [HttpGet("DownloadFiles")]
+            public DataFiles DownloadFiles(int FileId)
             {
                 var file = _DbContext.DataEgressFiles.First(x => x.Id == FileId);
                 if (file == null) 
@@ -140,7 +145,100 @@ namespace Data_Egress_API.Controllers
                 //return File(memory, file.FileType, file.Name + file.Extension);
                 return file;
             }
+       
+
+
+        [HttpGet("DownloadFile")]
+        public async Task<bool> DownloadFileAsync(MinioSettings minioSettings, string bucketName = "", string objectName = "")
+        {
+            var request = new GetObjectRequest
+            {
+                BucketName = bucketName,
+                Key = objectName,
+            };
+
+            var amazonS3Client = GenerateAmazonS3Client(minioSettings);
+
+            var objectExists = await CheckObjectExists(_minioSettings, request.BucketName, request.Key);
+
+            if (objectExists)
+            {
+                var response = await amazonS3Client.GetObjectAsync(request);
+
+                using (var responseStream = response.ResponseStream)
+                {
+                    string saveFilePath = "C:/Path/To/Save/File.txt";
+
+                    using (var fileStream = new FileStream(saveFilePath, FileMode.Create))
+                    {
+                        await responseStream.CopyToAsync(fileStream);
+                    }
+                }
+
+                if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    Log.Warning($"Successfully uploaded {objectName} to {bucketName}.");
+                    return true;
+                }
+                else
+                {
+                    Log.Warning($"Could not upload {objectName} to {bucketName}.");
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+        public async Task<bool> CheckObjectExists(MinioSettings minioSettings, string bucketName, string objectKey)
+        {
+            var request = new GetObjectMetadataRequest
+            {
+                BucketName = bucketName,
+                Key = objectKey
+            };
+
+            var amazonS3Client = GenerateAmazonS3Client(minioSettings);
+
+            try
+            {
+                await amazonS3Client.GetObjectMetadataAsync(request);
+                Log.Warning($"{request.Key} Exists on {bucketName}.");
+                return true;
+            }
+            catch (AmazonS3Exception ex)
+            {
+                if (ex.StatusCode == HttpStatusCode.NotFound)
+                {
+                    Log.Warning($"{request.Key} Not Exists on {bucketName}.");
+                    return false;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+        #region PrivateHelpers
+        private AmazonS3Config GenerateAmazonS3Config(MinioSettings minioSettings)
+        {
+            return new AmazonS3Config
+            {
+                RegionEndpoint = RegionEndpoint.USEast1, // MUST set this before setting ServiceURL and it should match the `MINIO_REGION` environment variable.
+                ServiceURL = $"http://{minioSettings.Url}", // replace http://localhost:9000 with URL of your MinIO server
+                ForcePathStyle = true, // MUST be true to work correctly with MinIO server
+            };
         }
 
+        private AmazonS3Client GenerateAmazonS3Client(MinioSettings minioSettings)
+        {
+            var config = GenerateAmazonS3Config(minioSettings);
+            return new AmazonS3Client(minioSettings.AccessKey, minioSettings.SecretKey, config);
+        }
+        #endregion
     }
+
+}
 
