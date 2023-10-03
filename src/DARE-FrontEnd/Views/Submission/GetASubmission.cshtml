@@ -202,10 +202,45 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @{
-                                foreach (var stage in Model.StageInfo)
-                                {
-                                    var stageNum = stage.stageNumber;
+                    @{
+                        foreach (var stage in Model.StageInfo)
+                        {
+                            if (stage.stageNumber == 5)
+                            {
+                                <tfoot>
+                                    <tr class="row">
+                                            <td scope="col" class="col-2">
+                                            @{
+                                                foreach (var child in Model.Submission.Children)
+                                                {
+                                                    var validstats = child.HistoricStatuses.Where(x => stage.statusTypeList.Contains(x.Status)).ToList();
+                                                    if (stage.stagesDict.ContainsKey(5) && stage.stageNumber == 5 && stage.statusTypeList.Contains(child.Status))
+                                                    {
+                                                        validstats.Add(new BL.Models.HistoricStatus() { Start = child.StartTime, Status = child.Status });
+                                                        validstats = validstats.OrderBy(x => x.Start).ToList();
+                                                    }
+
+                                                    <td class="col">
+                                                        <ul class="list-unstyled">
+
+                                                            @foreach (var status in validstats)
+                                                            {
+                                                                <li>
+                                                                    <span data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00 Runtime: 0m">
+                                                                        @status.Status
+                                                                    </span>
+                                                                </li>
+                                                            }
+                                                        </ul>
+                                                    </td>
+                                                }
+                                            } 
+                                    </tr>
+                                </tfoot>
+                            }
+                            else{
+                            var stageNum = stage.stageNumber;
+                                    
                                     <tr class="row">
                                         <td class="col-2">@stage.stageName @stage.stageNumber</td>
                                         @{
@@ -243,7 +278,10 @@
                                                     </ul>
                                                 </td>
                                             }
+
+                                            
                                         }
+                                        
                                     </tr>
                                     //if (stage.stagesDict.ContainsKey(stageNum) && stage.stageNumber == stageNum)
                                     //{
@@ -255,10 +293,10 @@
                                     //        }
                                     //    }
                                     //}
-                                }
+                                }}
                             }
                         </tbody>
-                        <tfoot>
+@*                        <tfoot>
                             <tr class="row">
                                 <td scope="col" class="col-2"></td>
                                 <td scope="col" class="col">
@@ -268,7 +306,7 @@
                                 <td scope="col" class="col">
                                 </td>
                             </tr>
-                        </tfoot>
+                        </tfoot>*@
                     </table>
                 </div>
             </div>

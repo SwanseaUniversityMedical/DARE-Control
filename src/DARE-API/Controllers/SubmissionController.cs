@@ -155,7 +155,10 @@ namespace DARE_API.Controllers
                 StatusType.InvalidUser,
                 StatusType.UserNotOnProject,
                 StatusType.InvalidSubmission,
-                StatusType.WaitingForCrateFormatCheck
+                StatusType.WaitingForCrateFormatCheck,
+                StatusType.ValidatingUser,
+                StatusType.ValidatingSubmission,
+                StatusType.ValidationSuccessful
             };
             Dictionary<int, List<StatusType>> stage1Dict = new Dictionary<int, List<StatusType>>();
             stage1Dict.Add(1, stage1List.statusTypeList);
@@ -168,8 +171,11 @@ namespace DARE_API.Controllers
             {
                 StatusType.WaitingForAgentToTransfer,
                 StatusType.TransferredToPod,
-                StatusType.TRENotAuthorisedForProject
-
+                StatusType.TRENotAuthorisedForProject,
+                StatusType.AgentTransferringToPod,
+                StatusType.TransferToPodFailed,
+                StatusType.TRERejectedProject,
+                StatusType.TREApprovedProject
 
 
 
@@ -185,7 +191,12 @@ namespace DARE_API.Controllers
             {
                 StatusType.WaitingForChildSubsToComplete,
                 StatusType.PodProcessing,
-                StatusType.RequestCancellation
+                StatusType.PodProcessingComplete,
+                StatusType.RequestCancellation,
+                StatusType.CancellationRequestSent,
+                StatusType.CancellingChildren,
+                StatusType.Cancelled,
+                StatusType.PodProcessingFailed
 
             };
             Dictionary<int, List<StatusType>> stage3Dict = new Dictionary<int, List<StatusType>>();
@@ -198,8 +209,8 @@ namespace DARE_API.Controllers
             stage4List.statusTypeList = new List<StatusType>
             {
                 StatusType.DataOutApprovalBegun,
-                StatusType.CancellationRequestSent,
-                StatusType.CancellingChildren
+                StatusType.DataOutApprovalRejected,
+                StatusType.DataOutApproved
             };
             Dictionary<int, List<StatusType>> stage4Dict = new Dictionary<int, List<StatusType>>();
             stage4Dict.Add(4, stage4List.statusTypeList);
@@ -210,11 +221,10 @@ namespace DARE_API.Controllers
             stage5List.stageNumber = 5;
             stage5List.statusTypeList = new List<StatusType>
             {
-                StatusType.PodProcessingComplete,
-                StatusType.DataOutApprovalRejected,
-                StatusType.DataOutApproved,
+                StatusType.Cancelled,
                 StatusType.Completed,
-                StatusType.Cancelled
+                StatusType.Running,
+                StatusType.Failed
             };
             Dictionary<int, List<StatusType>> stage5Dict = new Dictionary<int, List<StatusType>>();
             stage5Dict.Add(5, stage5List.statusTypeList);
