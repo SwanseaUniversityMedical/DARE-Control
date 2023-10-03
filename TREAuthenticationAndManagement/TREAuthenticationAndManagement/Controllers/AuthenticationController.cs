@@ -10,6 +10,7 @@ using System.Web.Http;
 using System;
 
 using TRE_TESK.Models;
+using Newtonsoft.Json.Linq;
 
 namespace TRE_TESK.Controllers
 {
@@ -18,56 +19,31 @@ namespace TRE_TESK.Controllers
     public class AuthenticationController : ApiController
     {
         private readonly AuthenticationSettings _authenticationSettings;
+        private readonly ApplicationDbContext _applicationDbContext;
+        
 
-
-
-        public AuthenticationController(AuthenticationSettings AuthenticationSettings)
+        public AuthenticationController(AuthenticationSettings AuthenticationSettings, ApplicationDbContext applicationDbContext)
         {
             _authenticationSettings = AuthenticationSettings;
-
+            _applicationDbContext = applicationDbContext;
         }
 
 
-        public class RoleData { 
-            public string Name { get; set; }
-            public int ID { get; set; }
-
-            public DateTime DateTime { get; set; } = DateTime.UtcNow;
-        }
-
-
-        //TODO save Tokens  To disk?
         //TODO Easy way to grab all the generated roles , even if they had been generated already 
-
-        public static Dictionary<string, RoleData> TokenToRole = new Dictionary<string, RoleData>();
-
-        public static int freeRoleID = 0;
-
-        public static HashSet<string> GenRoles = new HashSet<string>()
-        {
-            "COOLSchemas2",
-            "COOLSchemas1"
-        };
-
-
-        public HashSet<string> CoolCodes = new HashSet<string>()
-        {
-            "COOL", "COOL2"
-        };
 
         [HttpGet("GetNewToken/{role}")]
         public string GetNewToken(string role)
         {
-            if (GenRoles.Contains(role))
+            if (_applicationDbContext.GeneratedRole.Any(x => x.RoleName == role))
             {
                 var Token = GenToken();
 
-                TokenToRole[Token] = new RoleData()
+                _applicationDbContext.DataToRoles.Add(new RoleData()
                 {
+                    Token = Token,
                     Name = role,
-                    ID = freeRoleID,
-                };
-                freeRoleID++;
+                });
+                _applicationDbContext.SaveChanges();
                 return Token;
             }
 
@@ -77,13 +53,14 @@ namespace TRE_TESK.Controllers
         [Microsoft.AspNetCore.Mvc.HttpPost("ExpirerToken/{Token}")]
         public bool ExpirerToken(string Token)
         {
-            if (TokenToRole.ContainsKey(Token))
-            {
-                TokenToRole.Remove(Token);
-                return true;
-            }
+            var role = _applicationDbContext.DataToRoles.FirstOrDefault(x => x.Token == Token);
+            if (role == null) return false;
 
-            return false;
+
+            _applicationDbContext.DataToRoles.Remove(role);
+            _applicationDbContext.SaveChanges();
+            return true;
+
         }
 
 
@@ -95,34 +72,31 @@ namespace TRE_TESK.Controllers
                 return null;
             }
 
+            var role = _applicationDbContext.DataToRoles.FirstOrDefault(x => x.Token == MYCOOLToken);
+            if (role == null) return null;
 
-            if (TokenToRole.ContainsKey(MYCOOLToken))
+
+            if ((DateTime.UtcNow - role.DateTime).Days > _authenticationSettings.TokenExpireDays)
             {
-
-                if ((DateTime.UtcNow - TokenToRole[MYCOOLToken].DateTime).Days > _authenticationSettings.TokenExpireDays)
-                {
-                    TokenToRole.Remove(MYCOOLToken);
-                    return null;
-                }
-
-                var hasuraVariables = new Dictionary<string, string> {
-                        { "X-Hasura-Role", TokenToRole[MYCOOLToken].Name },
-                        { "X-Hasura-User-Ide", TokenToRole[MYCOOLToken].ID.ToString() },
-                };
-                //cool.StatusCode = 200;
-
-                var _jsonSerializerOptions = new JsonSerializerOptions()
-                {
-                    PropertyNameCaseInsensitive = true,
-                };
-
-                var dta = System.Text.Json.JsonSerializer.Serialize(hasuraVariables, _jsonSerializerOptions);
-                return dta;
-            }
-            else
-            {
+                _applicationDbContext.DataToRoles.Remove(role);
+                _applicationDbContext.SaveChanges();
                 return null;
             }
+
+            var hasuraVariables = new Dictionary<string, string> {
+                        { "X-Hasura-Role", role.Name },
+                        { "X-Hasura-User-Ide", role.Id.ToString() },
+                };
+            //cool.StatusCode = 200;
+
+            var _jsonSerializerOptions = new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+
+            var dta = System.Text.Json.JsonSerializer.Serialize(hasuraVariables, _jsonSerializerOptions);
+            return dta;
+
         }
 
         private string GenToken()
@@ -131,13 +105,13 @@ namespace TRE_TESK.Controllers
 
             Random RNG = new Random();
             bool Duplicate = true;
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 3; i++)
             {
                 string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
 
                 code = new string(Enumerable.Repeat(chars, 128).Select(s => s[RNG.Next(s.Length)]).ToArray());
 
-                if (TokenToRole.ContainsKey(code) == false)
+                if (_applicationDbContext.DataToRoles.Any(x => x.Token == code) == false)
                 {
                     Duplicate = false;
                     break;
