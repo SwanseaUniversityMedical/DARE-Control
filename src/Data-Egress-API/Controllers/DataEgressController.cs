@@ -15,6 +15,7 @@ using Amazon.S3.Model;
 using Amazon.S3;
 using Amazon;
 using System.Net;
+using System.Collections.Generic;
 
 namespace Data_Egress_API.Controllers
 {
@@ -73,7 +74,9 @@ namespace Data_Egress_API.Controllers
             try
             {
                 var allFiles = _DbContext.DataEgressFiles.ToList();
+          
                 Log.Information("{Function} Files retrieved successfully", "GetAllFiles");
+                //allFiles = new List<DataFiles>();
                 return allFiles;
             }
             catch (Exception ex)
