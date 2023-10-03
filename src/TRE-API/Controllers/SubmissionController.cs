@@ -164,7 +164,7 @@ namespace TRE_API.Controllers
 
 
         [HttpPost("SendFileResultsToHUTCH")]
-        public IActionResult SendFileResultsToHUTCH(int submissionId, List<DataEgressFiles> EgressFileList)
+        public IActionResult SendFileResultsToHUTCH(int submissionId, List<DataFiles> EgressFileList)
         {
             //Update status of submission to "Sending to hutch for final packaging"
             var statusParams = new Dictionary<string, string>()
