@@ -1,5 +1,8 @@
 ﻿
 
+using System.ComponentModel.DataAnnotations;
+using System.Xml.Linq;
+
 namespace BL.Models.Enums
 {
     public enum StatusType
@@ -12,6 +15,7 @@ namespace BL.Models.Enums
         DataOutApprovalBegun = 5,
         DataOutApprovalRejected = 6,
         DataOutApproved = 7,
+        [Display(Name = "USER NOT ON PROJECT TEST")]
         UserNotOnProject = 8,
         InvalidUser = 9,
         TRENotAuthorisedForProject = 10,
