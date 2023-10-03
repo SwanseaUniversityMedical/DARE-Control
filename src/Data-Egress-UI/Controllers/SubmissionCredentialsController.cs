@@ -6,11 +6,11 @@ using BL.Models.APISimpleTypeReturns;
 
 namespace Data_Egress_UI.Controllers
 {
-    [Authorize(Roles = "dare-tre-admin")]
+    //[Authorize(Roles = "data-egress-admin")]
     public class SubmissionCredentialsController : Controller
     {
-        private readonly ITREClientHelper _clientHelper;
-        public SubmissionCredentialsController(ITREClientHelper client)
+        private readonly IDataEgressClientHelper _clientHelper;
+        public SubmissionCredentialsController(IDataEgressClientHelper client)
         {
             _clientHelper = client;
         }

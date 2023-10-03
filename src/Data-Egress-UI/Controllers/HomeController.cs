@@ -15,7 +15,6 @@ namespace Data_Egress_UI.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IDataEgressClientHelper _dataClientHelper;
-        //private readonly ITREClientHelper _treClientHelper;
         public HomeController(ILogger<HomeController> logger, IDataEgressClientHelper datahelper)
         {
             _logger = logger;

@@ -48,12 +48,21 @@ AddDependencies(builder, configuration);
 var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
 configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
 builder.Services.AddSingleton(dataEgressKeyCloakSettings);
-builder.Services.AddScoped<IDataClientWithoutTokenHelper, DataClientWithoutTokenHelper>();
 
 var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
 builder.Services.AddScoped<ISignalRService, SignalRService>();
+
+
+var submissionKeyCloakSettings = new BaseKeyCloakSettings();
+configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
+builder.Services.AddSingleton(submissionKeyCloakSettings);
+builder.Services.AddScoped<IDataClientWithoutTokenHelper, DataClientWithoutTokenHelper>();
+
+var treKeyCloakSettings = new TreKeyCloakSettings();
+configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
+builder.Services.AddSingleton(treKeyCloakSettings);
 
 var encryptionSettings = new EncryptionSettings();
 configuration.Bind(nameof(encryptionSettings), encryptionSettings);
