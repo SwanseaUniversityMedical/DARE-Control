@@ -28,7 +28,7 @@ namespace Data_Egress_API.Controllers
         public DataEgressController(ApplicationDbContext repository, MinioSettings minioSettings)
         {
             _DbContext = repository;
-            _minioSettings = minioSettings;
+                 _minioSettings = minioSettings;
         }
         [HttpPost("AddNewDataEgress")]
         public async Task<BoolReturn> AddNewDataEgress(int submissionId, List<SubmissionFile> files)
@@ -127,27 +127,7 @@ namespace Data_Egress_API.Controllers
             await _DbContext.SaveChangesAsync();
             return resultList;
         }
-            [HttpGet("DownloadFiles")]
-            public DataFiles DownloadFiles(int FileId)
-            {
-                var file = _DbContext.DataEgressFiles.First(x => x.Id == FileId);
-                if (file == null) 
-                 return null;
-                var memory = new MemoryStream();
-                using (var stream = new FileStream(file.SubmisionBucketFullPath, FileMode.Open))
-                {
-                    stream.CopyToAsync(memory);
-                }
-              
-                memory.Position = 0;         
-            
-                //get value from SubmissionBucketfullpath
-                //return File(memory, file.FileType, file.Name + file.Extension);
-                return file;
-            }
-       
-
-
+          
         [HttpGet("DownloadFile")]
         public async Task<bool> DownloadFileAsync(MinioSettings minioSettings, string bucketName = "", string objectName = "")
         {
