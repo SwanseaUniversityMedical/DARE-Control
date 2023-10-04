@@ -21,7 +21,9 @@ namespace TREAgent.Repositories.DbContexts
         public DbSet<TeskAudit> TESK_Audit { get; set; }
 
         public DbSet<TokenToExpire> TokensToExpire { get; set; }
-        
+
+        public DbSet<GeneratedRole> GeneratedRole { get; set; }
+
 
     }
 }

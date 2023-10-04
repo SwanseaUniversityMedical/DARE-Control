@@ -11,7 +11,7 @@ namespace TRE_TESK.Models
         }
 
         public DbSet<RoleData> DataToRoles { get; set; }
-        public DbSet<GeneratedRole> GeneratedRole { get; set; }
+
         
     }
 }

@@ -31,20 +31,16 @@ namespace TRE_TESK.Controllers
         [HttpGet("GetNewToken/{role}")]
         public string GetNewToken(string role)
         {
-            if (_applicationDbContext.GeneratedRole.Any(x => x.RoleName == role))
+            var Token = GenToken();
+
+            _applicationDbContext.DataToRoles.Add(new RoleData()
             {
-                var Token = GenToken();
+                Token = Token,
+                Name = role,
+            });
+            _applicationDbContext.SaveChanges();
+            return Token;
 
-                _applicationDbContext.DataToRoles.Add(new RoleData()
-                {
-                    Token = Token,
-                    Name = role,
-                });
-                _applicationDbContext.SaveChanges();
-                return Token;
-            }
-
-            return "";
         }
 
         [Microsoft.AspNetCore.Mvc.HttpPost("ExpirerToken/{Token}")]

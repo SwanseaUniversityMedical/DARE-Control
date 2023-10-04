@@ -1,10 +1,11 @@
 ﻿using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
-using TRE_TESK.Controllers;
-using TRE_TESK.Models;
+using TREAgent.Models;
+using TREAgent.Repositories;
+using TREAgent.Repositories.DbContexts;
 
-namespace TRE_TESK.Services
+namespace TREAgent.Services
 {
 
     public interface IHasuraService

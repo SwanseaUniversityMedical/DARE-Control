@@ -3,6 +3,7 @@
 using BL.Models.Settings;
 using BL.Rabbit;
 using BL.Services;
+using Castle.Core.Configuration;
 using EasyNetQ;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -19,9 +20,14 @@ using System;
 using TREAgent;
 using TREAgent.Repositories.DbContexts;
 using TREAgent.Services;
+using TREAgent.Models;
+
 
 Console.WriteLine("loading ..");
 Console.WriteLine("");
+
+
+;
 
 
 var hostBuilder = new HostBuilder()
@@ -32,6 +38,10 @@ var hostBuilder = new HostBuilder()
     })
     .ConfigureServices((hostContext, services) =>
     {
+        var HasuraSettings = new HasuraSettings();
+        hostContext.Configuration.Bind(nameof(HasuraSettings), HasuraSettings);
+        services.AddSingleton(HasuraSettings);
+
         var treKeyCloakSettings = new BaseKeyCloakSettings();
         hostContext.Configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
         services.AddSingleton(treKeyCloakSettings);
@@ -46,6 +56,7 @@ var hostBuilder = new HostBuilder()
         services.AddSingleton(storedKeycloakLogin);
         services.AddScoped<IEncDecHelper, EncDecHelper>();
         services.AddScoped<IKeycloakTokenHelper, KeycloakTokenHelper>();
+        services.AddScoped<IHasuraService, HasuraService>();
         services.AddHttpContextAccessor();
         services.AddHttpClient();
         services.AddHttpContextAccessor();
@@ -85,9 +96,9 @@ await host.RunAsync();
 
 public class Startup
 {
-    public IConfiguration Configuration { get; }
+    public Microsoft.Extensions.Configuration.IConfiguration Configuration { get; }
 
-    public Startup(IConfiguration configuration)
+    public Startup(Microsoft.Extensions.Configuration.IConfiguration configuration)
     {
         Configuration = configuration;
     }

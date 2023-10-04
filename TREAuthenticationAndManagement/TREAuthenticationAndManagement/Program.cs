@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore.SqlServer;
 using TRE_TESK.Models;
-using TRE_TESK.Services;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -12,9 +11,6 @@ var AuthenticationSettings = new AuthenticationSettings();
 configuration.Bind(nameof(AuthenticationSettings), AuthenticationSettings);
 builder.Services.AddSingleton(AuthenticationSettings);
 
-var HasuraSettings = new HasuraSettings();
-configuration.Bind(nameof(HasuraSettings), HasuraSettings);
-builder.Services.AddSingleton(HasuraSettings);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options
     .UseLazyLoadingProxies(true)
@@ -26,7 +22,7 @@ builder.Services.AddDbContext<ApplicationDbContext>();
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
-builder.Services.AddScoped<IHasuraService, HasuraService>();
+
 var app = builder.Build();
 
 

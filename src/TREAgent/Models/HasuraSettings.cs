@@ -1,4 +1,4 @@
-﻿namespace TRE_TESK.Models
+﻿namespace TREAgent.Models
 {
     public class HasuraSettings
     {
