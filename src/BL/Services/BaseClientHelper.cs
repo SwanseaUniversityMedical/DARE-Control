@@ -250,6 +250,7 @@ namespace BL.Services
                     Name = fileParameterName, // Match the property name in your API's FileInfo class
                     FileName = file.FileName
                 };
+                formData.Headers.ContentType = new MediaTypeHeaderValue("multipart/form-data");
                 formData.Add(streamContent);
                 
                 
