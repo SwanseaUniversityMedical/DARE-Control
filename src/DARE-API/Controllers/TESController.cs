@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Authorization;
 using System.Threading;
 using BL.Services;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json.Linq;
+using System.Net.Http.Json;
 
 namespace DARE_API.Controllers
 {
@@ -409,7 +411,18 @@ namespace DARE_API.Controllers
             };
 
             var teststring = JsonConvert.SerializeObject(test);
-            return StatusCode(200, teststring);
+
+            var ob = JObject.Parse(teststring);
+
+            JObject NewOb = new JObject();
+            //todo Token 
+            string Token = "AAAAAAAAAAAAAA";
+
+            NewOb.Add("HASURAAuthenticationToken", Token);
+
+            ob.Add("env", NewOb);
+
+            return StatusCode(200, ob.ToString());
         }
 
 

@@ -19,6 +19,7 @@ using Microsoft.EntityFrameworkCore;
 using TREAgent.Repositories;
 using TREAgent.Repositories.DbContexts;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace TREAgent
 {
@@ -27,7 +28,7 @@ namespace TREAgent
         void Execute();
         void CheckTESK(string taskID, string TesId);
         void ClearJob(string jobname);
-        void testing();
+        Task testing();
     }
 
     // TESK : http://172.16.34.31:8080/    https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks
@@ -43,13 +44,33 @@ namespace TREAgent
             _dbContext = dbContext;
         }
 
-        public void testing()
+        public async Task testing()
         {
 
             Console.WriteLine("Testing");
             string jsonContent = "{ \"name\": \"Hello World\", \"description\": \"Hello World, inspired by Funnel's most basic example\",\r\n\"executors\": [\r\n{ \"image\": \"alpine\", \"command\": [ \"sleep\", \"5m\" ] },\r\n{ \"image\": \"alpine\", \"command\": [ \"echo\", \"TESK says:   Hello World\" ]    }\r\n  ]\r\n}";
 
-            CreateTESK(jsonContent,"99");
+            
+       
+
+            var arr = new HttpClient();
+
+            var role = "COOLSchemas2";
+
+            var data = await arr.GetAsync($"http://localhost:8090/api/Authentication/GetNewToken/{role}");
+
+
+            var Token = await data.Content.ReadAsStringAsync();
+
+            var ob = JObject.Parse(jsonContent);
+
+            JObject NewOb = new JObject();
+
+            ob.Add("tags", NewOb);
+
+            NewOb.Add("HASURAAuthenticationToken", Token);
+
+            CreateTESK(ob.ToString(), "99");
         }
 
         public string CreateTESK(string jsonContent, string TesId)
