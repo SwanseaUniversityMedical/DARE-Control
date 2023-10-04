@@ -9,11 +9,11 @@
 
 }
 <div class="container-lg mt-4 p-4">
-    <div class="d-flex align-items-center justify-content-between mb-5">
+    <div class="d-flex align-items-center justify-content-between mb-2">
         <div>
             <h1 class="fs-3 mb-0">@Model.Submission.TesName</h1>
             <p class="font-monospace text-muted small mb-0">Submission ID: @Model.Submission.Id</p>
-            <div class="mt-3 d-flex gap-4">
+            <div class="mt-3 mb-3 d-flex gap-4">
                 <div><i class="fa-solid fa-folder-open text-muted me-1"></i> <a href="@Url.Action("GetProject", "Project", new { id = Model.Submission.Project.Id })">@Model.Submission.Project.Name</a></div>
                 <div><i class="fa-solid fa-user text-muted me-1"></i> <a href="@Url.Action("GetUser", "User", new { id = @Model.Submission.SubmittedBy.Id })">@Model.Submission.SubmittedBy.Name</a></div>
                 <div><i class="fa-solid fa-calendar text-muted me-1"></i> @Model.Submission.StartTime</div>
@@ -39,90 +39,75 @@
                         <span>Running</span>
                     </span>
                 </h6>
-                @*@{
-                    switch (Model.Submission.Status)
-                    {
-                        case BL.Models.Enums.StatusType.DataOutApproved:
-                            <h6 class="mb-0">
-                                <span class="badge bg-primary rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Failed: error message">
-                                    <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
-                                    <span>@Model.Submission.Status @Model.Submission.EndTime</span>
-                                </span>
-                            </h6>
-                            break;
-                        default:
-                            <h6 class="mb-0">
-                                <span class="badge bg-primary rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Running">
-                                    <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
-                                    <span>@Model.Submission.Status</span>
-                                </span>
-                            </h6>
-                            <span class="small">Total Elapsed Time: @days days, @hours hours, @minutes minute</span>
-                            break;
-                    }
+            @*@{
+                switch (Model.Submission.Status)
+                {
+                case BL.Models.Enums.StatusType.DataOutApproved:
+                <h6 class="mb-0">
+                <span class="badge bg-primary rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Failed: error message">
+                <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
+                <span>@Model.Submission.Status @Model.Submission.EndTime</span>
+                </span>
+                </h6>
+                break;
+                default:
+                <h6 class="mb-0">
+                <span class="badge bg-primary rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Running">
+                <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
+                <span>@Model.Submission.Status</span>
+                </span>
+                </h6>
+                <span class="small">Total Elapsed Time: @days days, @hours hours, @minutes minute</span>
+                break;
+                }
                 }*@
             </div>
         </div>
     </div>
-
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card-header bg-white shadow-sm border-1 p-4">
-                <h5 class="mb-0">Submission Details</h5>
-            </div>
-            @{
-                var minio = @ViewBag.minioendpoint;
-            }
-            <div class="bg-white shadow-sm border-1 p-4">
-                <p>
-                    Minio URL: <a href="http://@minio">@Model.Submission.Project.Name Buckets</a><br />
-                    Submission Bucket: <a target="_blank" href="http://@minio/browser/@Model.Submission.Project.SubmissionBucket">@Html.Raw(Model.Submission.Project.SubmissionBucket)</a><br />
-                    Output Bucket: <a target="_blank" href="http://@minio/browser/@Model.Submission.Project.OutputBucket" + @Model.Submission.Project.OutputBucket">@Html.Raw(Model.Submission.Project.OutputBucket)</a>
-                </p>
-                <div class="">
-                    <button id="showJsonButton" class="btn btn-sm btn-primary">
-                        <i class="fa fa-code me-1"></i>
-                        <small>View Query</small>
-                    </button>
-                    <pre style="white-space:break-spaces;"><code class="json-viewer card card-body mt-2" id="jsonViewer" style="display:none;"></code></pre>
-                </div>
-            </div>
-        </div>
+    <div class="mb-5">
         @{
-            //var Date1 = DateTime.Now.AddDays(-3).AddHours(-2).AddMinutes(-33);
-            var startTime = Model.Submission.StartTime;
-
-
-            var currTime = DateTime.Now;
-            var endTime = Model.Submission.EndTime;
-            TimeSpan result1 = endTime.Subtract(startTime);
-            int days = result1.Days;
-            int hours = result1.Hours;
-            int minutes = result1.Minutes;
-
-            //var progressTimer = "Total Elapsed Time:";
-            ////var lastStatusUpdate = tre.LastStatusUpdate;
-            //TimeSpan result2 = currTime.Subtract(lastStatusUpdate);
-            //int days1 = result2.Days;
-            //int hours1 = result2.Hours;
-            //int minutes1 = result2.Minutes;
-            ////var endpointName = @tre.EndPoint?.Name.ToString();
-            //if (endpointName == null)
-            //{
-            //    endpointName = "None";
-            //}
-            //switch (tre.Status)
-            //{
-
-            //    case BL.Models.Enums.StatusType.DataOutApproved:
-            //        <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span>End Time: @Model.EndTime</h6>
-            //        break;
-
-            //    default:
-            //        <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span> Elapsed Time: @days days, @hours hours, @minutes minutes</h6>
-            //        break;
-            //}
+            var minio = @ViewBag.minioendpoint;
         }
+        <a class="btn btn-sm btn-primary me-2" target="_blank" href="http://@minio/browser/@Model.Submission.Project.SubmissionBucket">Submission Bucket<i class="fa fa-external-link ms-2"></i></a>
+        <a class="btn btn-sm btn-outline-secondary" target="_blank" href="http://@minio/browser/@Model.Submission.Project.OutputBucket" + @Model.Submission.Project.OutputBucket">Output Bucket<i class="fa fa-external-link ms-2"></i></a>
+    </div>
+    <div class="row">
+
+            @{
+                //var Date1 = DateTime.Now.AddDays(-3).AddHours(-2).AddMinutes(-33);
+                var startTime = Model.Submission.StartTime;
+
+
+                var currTime = DateTime.Now;
+                var endTime = Model.Submission.EndTime;
+                TimeSpan result1 = endTime.Subtract(startTime);
+                int days = result1.Days;
+                int hours = result1.Hours;
+                int minutes = result1.Minutes;
+
+                //var progressTimer = "Total Elapsed Time:";
+                ////var lastStatusUpdate = tre.LastStatusUpdate;
+                //TimeSpan result2 = currTime.Subtract(lastStatusUpdate);
+                //int days1 = result2.Days;
+                //int hours1 = result2.Hours;
+                //int minutes1 = result2.Minutes;
+                ////var endpointName = @tre.EndPoint?.Name.ToString();
+                //if (endpointName == null)
+                //{
+                //    endpointName = "None";
+                //}
+                //switch (tre.Status)
+                //{
+
+                //    case BL.Models.Enums.StatusType.DataOutApproved:
+                //        <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span>End Time: @Model.EndTime</h6>
+                //        break;
+
+                //    default:
+                //        <h6><span class="badge bg-dark-blue rounded-pill">@tre.Status</span> Elapsed Time: @days days, @hours hours, @minutes minutes</h6>
+                //        break;
+                //}
+            }
 
         <div class="col-md-4">
             <div class="card-header bg-white shadow-sm border-1 p-4">
@@ -141,7 +126,7 @@
                                     Started
                                 </span>
                                 <span class="text-dark" data-bs-toggle="tooltip" data-bs-title="@startTime">
-                                    @startTime
+            @startTime
                                 </span>
                             </span>
                         </span>
@@ -157,7 +142,7 @@
                                     Finished
                                 </span>
                                 <span class="text-dark" data-bs-toggle="tooltip" data-bs-title="@endTime">
-                                    @endTime
+            @endTime
                                 </span>
                             </span>
                         </span>
@@ -173,12 +158,27 @@
                                     Runtime
                                 </span>
                                 <span class="text-dark">
-                                    @days days, @hours hours, @minutes minutes
+            @days days, @hours hours, @minutes minutes
                                 </span>
                             </span>
                         </span>
                     </li>
                 </ul>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card-header bg-white shadow-sm border-1 p-4">
+                <h5 class="mb-0">Submission Query</h5>
+            </div>
+
+            <div class="bg-white shadow-sm border-1 p-4">
+                <div class="">
+            @*<button id="showJsonButton" class="btn btn-sm btn-primary">
+                    <i class="fa fa-code me-1"></i>
+                    <small>View Query</small>
+                    </button>*@
+                    <pre style="white-space:break-spaces;"><code class="json-viewer card card-body mt-2" id="jsonViewer" @*style="display:none;"*@></code></pre>
+                </div>
             </div>
         </div>
     </div>
@@ -193,70 +193,70 @@
                         <thead>
                             <tr class="row">
                                 <th class="col-2"></th>
-                                @{
-                                    foreach (var child in Model.Submission.Children)
-                                    {
+            @{
+                foreach (var child in Model.Submission.Children)
+                {
                                         <th class="col">@child.Tre?.Name.ToString()</th>
-                                    }
-                                }
+                }
+            }
                             </tr>
                         </thead>
                         <tbody>
-                            @{
-                                foreach (var stage in Model.StageInfo)
-                                {
-                                    var stageNum = stage.stageNumber;
+            @{
+                foreach (var stage in Model.StageInfo)
+                {
+                    var stageNum = stage.stageNumber;
                                     <tr class="row">
                                         <td class="col-2">@stage.stageName @stage.stageNumber</td>
-                                        @{
-                                            foreach (var child in Model.Submission.Children)
+                        @{
+                            foreach (var child in Model.Submission.Children)
 
-                                            {
-                                                //get all histroical statuses and current stat that is  listed in current stage stat
-
-
-                                                var validstats = child.HistoricStatuses.Where(x => stage.statusTypeList.Contains(x.Status)).ToList();
-                                                //just for testing for now
-                                                // validstats.Add(new BL.Models.HistoricStatus() { Start = child.StartTime, Status = BL.Models.Enums.StatusType.Completed });
-
-                                                //if (stage.statusTypeList.Contains(child.Status))
-                                                if (stage.stagesDict.ContainsKey(stageNum) && stage.stageNumber == stageNum && stage.statusTypeList.Contains(child.Status))
-                                                {
-                                                    validstats.Add(new BL.Models.HistoricStatus() { Start = child.StartTime, Status = child.Status });
-                                                    validstats = validstats.OrderBy(x => x.Start).ToList();
+                            {
+                                //get all histroical statuses and current stat that is  listed in current stage stat
 
 
-                                                }
+                                var validstats = child.HistoricStatuses.Where(x => stage.statusTypeList.Contains(x.Status)).ToList();
+                                //just for testing for now
+                                // validstats.Add(new BL.Models.HistoricStatus() { Start = child.StartTime, Status = BL.Models.Enums.StatusType.Completed });
+
+                                //if (stage.statusTypeList.Contains(child.Status))
+                                if (stage.stagesDict.ContainsKey(stageNum) && stage.stageNumber == stageNum && stage.statusTypeList.Contains(child.Status))
+                                {
+                                    validstats.Add(new BL.Models.HistoricStatus() { Start = child.StartTime, Status = child.Status });
+                                    validstats = validstats.OrderBy(x => x.Start).ToList();
+
+
+                                }
 
                                                 <td class="col">
                                                     <ul class="list-unstyled">
 
-                                                        @foreach (var status in validstats)
-                                                        {
+                                        @foreach (var status in validstats)
+                                        {
                                                             <li>
                                                                 <span data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00 Runtime: 0m">
-                                                                    @status.Status
+                                                    @status.Status
                                                                 </span>
                                                             </li>
 
-                                                        }
+                                        }
                                                     </ul>
                                                 </td>
-                                            }
-                                        }
-                                    </tr>
-                                    //if (stage.stagesDict.ContainsKey(stageNum) && stage.stageNumber == stageNum)
-                                    //{
-                                    //    foreach (var key in stage.stagesDict.Keys)
-                                    //    {
-                                    //        foreach (var item in stage.stagesDict[key])
-                                    //        {
-                                    //        <td><h6>@item</h6></td>
-                                    //        }
-                                    //    }
-                                    //}
-                                }
                             }
+                        }
+                                    </tr>
+                    //if (stage.stagesDict.ContainsKey(stageNum) && stage.stageNumber == stageNum)
+                    //{
+                    //    foreach (var key in stage.stagesDict.Keys)
+                    //    {
+                    //        foreach (var item in stage.stagesDict[key])
+                    //        {
+                    //        <td><h6>@item</h6></td>
+                    //        }
+                    //    }
+                    //}
+                }
+            }
                         </tbody>
                         <tfoot>
                             <tr class="row">
@@ -306,7 +306,7 @@
                                                         Validating User
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -322,7 +322,7 @@
                                                         User Validated
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                                @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -338,7 +338,7 @@
                                                         Waiting For Crate Format Check
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                                @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -354,7 +354,7 @@
                                                         Validation Successful
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                                @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -374,7 +374,7 @@
                                                         Validating User
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                                        @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -390,7 +390,7 @@
                                                         Invalid User
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                                        @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -410,7 +410,7 @@
                                                         Validating User
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                                        @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -426,7 +426,7 @@
                                                         User Validated
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                                        @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -442,7 +442,7 @@
                                                         Waiting For Crate Format Check
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                                        @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -458,7 +458,7 @@
                                                         Validation Successful
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00 ">
-                                                        @days days, @hours hours, @minutes minutes
+                                        @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -482,7 +482,7 @@
                                                         Waiting For Agent To Transfer To Pod
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                                            @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -498,7 +498,7 @@
                                                         Agent Transferring To Pod
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                                            @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -514,7 +514,7 @@
                                                         Transferred To Pod
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                                            @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -536,7 +536,7 @@
                                                         Waiting For Agent To Transfer To Pod
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                                            @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -552,7 +552,7 @@
                                                         Agent Transferring To Pod
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                                            @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -568,7 +568,7 @@
                                                         Transferred To Pod
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                                            @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -591,7 +591,7 @@
                                                         Pod Processing
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                                            @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -607,7 +607,7 @@
                                                         Pod Processing Complete
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                                            @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -628,7 +628,7 @@
                                                         Pod Processing
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 ">
-                                                        @days days, @hours hours, @minutes minutes
+                                            @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -651,7 +651,7 @@
                                                         Data Out Approval Begun
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                                            @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
@@ -667,7 +667,7 @@
                                                         Data Out Approved
                                                     </span>
                                                     <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00">
-                                                        @days days, @hours hours, @minutes minutes
+                                            @days days, @hours hours, @minutes minutes
                                                     </span>
                                                 </span>
                                             </span>
