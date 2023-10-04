@@ -85,6 +85,7 @@ namespace Data_Egress_API.Controllers
                 throw;
             }
         }
+
           [HttpGet("GetFilesBySubmissionId")]
         public List<DataFiles> GetFilesBySubmissionId(int id)
         {
@@ -126,6 +127,7 @@ namespace Data_Egress_API.Controllers
         }
 
         [HttpPost("UpdateFileData")]
+
         public async Task<List<DataFiles>> UpdateFileData(List<DataFiles> dataFiles)
         {
             var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();

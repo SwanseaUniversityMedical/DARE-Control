@@ -1,9 +1,12 @@
-﻿@model List<BL.Models.DataFiles>
+﻿
+@model List<BL.Models.DataFiles>
+
 @{
     ViewData["Title"] = "File System";
     var filecount = ViewBag.Filecount;
 
 }
+
 @if (ViewBag.Message != null)
 {
     <div class="alert alert-success alert-dismissible" style="margin-top:20px">
@@ -27,8 +30,11 @@ else
         <i class="fa fa-plus align-middle me-2"></i>
         <span>Complete</span>
         </a>
-
+        
         </div>
+         @*   @using (Html.BeginForm("EditFileData", "Data", FormMethod.Post, new { id = "frmMain" }))
+            {
+                @Html.AntiForgeryToken()*@
         <hr class="d-flex my-4">
         <div class="table-responsive">
             <table id="fileList" class="table table-bordered table-striped no-head" caption="List of Files">
@@ -41,28 +47,33 @@ else
 
                                 <div class="d-flex align-items-center justify-content-between mb-3">
                                     <div>
+
                                         <a href="@Url.Action("GetFiles", "Data", new {id = file.SubmissionId })">
                                             <h2 class="mb-0 fw-bold hover-underline fs-5">
                                                 Submission Id: @file.SubmissionId
                                             </h2>
-                                            <p class="my-4">
-
-                                                FileCount:   @filecount
-
-                                            </p>
+                           
                                              <p class="my-4">
                                     Actions: @file.Status
                                     </p>
                                     </a>
-                                            <p class="text-muted small mb-0">SubmissionId:@file.SubmissionId</p>
+                                            <p class="text-muted small mb-0">File Size:@file.SubmisionBucketFullPath</p>
                                     </div>
-                                     <div class="">
-                                     <a href="@Url.Action("EditFileData", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Approve</span></a>
 
-                            <a href="@Url.Action("EditFileData", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-danger"><span class="small">Reject</span></a>
+                                        @*  //highlight button if approved
+                                      @if (file.Status == BL.Models.Enums.FileStatus.Approved)
+                            {     
+                            }*@
+                                     <div class="">
+                                            <a href="@Url.Action("EditFileData", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Approve</span></a>
+
+                            <a href="@Url.Action("EditFileData", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-danger"><span class="small">Deny</span></a>
 
                             <a href="@Url.Action("DownloadFile", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-info"><span class="small">Download</span></a>
-                                                   </div>
+                        @*                <div class="hero-block-1">*@
+                                            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i>Complete</button>
+                                       @* </div>*@
+                                    </div>
                                 </div>
 
 
@@ -78,3 +89,4 @@ else
         </div>
     </div>
 }
+     
