@@ -35,11 +35,33 @@ namespace Data_Egress_UI.Controllers
         [HttpGet]
         public IActionResult GetAllUnprocessedFiles()
         {
-
             var unprocessedfiles = _dataClientHelper.CallAPIWithoutModel<List<DataFiles>>("/api/DataEgress/GetAllUnprocessedFiles/").Result;
+            var filecount = 0;
+            var submissionIDCounts = unprocessedfiles
+            .GroupBy(file => file.SubmissionId)
+            .Select(group => new { submissionId = group.Key, Count = group.Count() })
+            .ToList();
+            foreach (var count in submissionIDCounts)
+            {
+                filecount = count.Count;
+            }
+
+            ViewBag.Filecount = filecount;
             return View(unprocessedfiles);
 
         }
+
+        [HttpGet]
+        public IActionResult GetFiles(int id)
+        {
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("id", id.ToString());
+
+            var files = _dataClientHelper.CallAPIWithoutModel<List<DataFiles>>("/api/DataEgress/GetFilesBySubmissionId/", paramlist).Result;
+
+            return View(files);
+        }
+
         [HttpPost]
         public async Task<IActionResult> EditFileData(DataFiles model)
         {
@@ -79,26 +101,6 @@ namespace Data_Egress_UI.Controllers
             return View(files);
         }
 
-        [HttpGet]
-        public IActionResult GetFiles(int id)
-        {
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("id", id.ToString());
-
-            var files = _dataClientHelper.CallAPIWithoutModel<List<DataFiles>>("/api/DataEgress/GetFilesBySubmissionId/", paramlist).Result;
-
-            var filecount = 0;
-            var submissionIDCounts = files
-           .GroupBy(file => file.SubmissionId)
-           .Select(group => new { submissionId = group.Key, Count = group.Count() })
-           .ToList();
-            foreach (var count in submissionIDCounts)
-            {
-                filecount = count.Count;
-            }
-
-            return View(files);
-        }
 
 
     }
