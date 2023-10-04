@@ -58,7 +58,10 @@ builder.Services.AddSingleton(minioSettings);
 var submissionKeyCloakSettings = new BaseKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
 builder.Services.AddSingleton(submissionKeyCloakSettings);
+
 builder.Services.AddScoped<IDareClientWithoutTokenHelper, DareClientWithoutTokenHelper>();
+builder.Services.AddScoped<IDataEgressClientHelper, DataEgressClientHelper>();
+
 string hangfireConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddHangfire(config => { config.UsePostgreSqlStorage(hangfireConnectionString); });
 

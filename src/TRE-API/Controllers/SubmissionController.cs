@@ -25,13 +25,15 @@ namespace TRE_API.Controllers
     {
         private readonly ISignalRService _signalRService;
         private readonly IDareClientWithoutTokenHelper _dareHelper;
+        private readonly IDataEgressClientHelper  _dataEgressHelper;
         private readonly ApplicationDbContext _dbContext;
 
-        public SubmissionController(ISignalRService signalRService, IDareClientWithoutTokenHelper helper,
+        public SubmissionController(ISignalRService signalRService, IDareClientWithoutTokenHelper helper, IDataEgressClientHelper egressHelper,
             ApplicationDbContext dbContext)
         {
             _signalRService = signalRService;
             _dareHelper = helper;
+            _dataEgressHelper = egressHelper;
             _dbContext = dbContext;
 
         }
@@ -156,9 +158,8 @@ namespace TRE_API.Controllers
         {
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("submissionId", submissionId.ToString());
-            var submission = _dareHelper
-                .CallAPI<List<SubmissionFile>, Submission>("/api/Submission/SubmissionFiles/", submissionFiles,
-                    paramlist).Result; //This needs to be updated to go to data egress
+            var submission = _dataEgressHelper.CallAPI<List<SubmissionFile>, Submission>("/api/DataEgress/AddNewDataEgress/", submissionFiles,
+                    paramlist).Result; 
             return StatusCode(200, submission);
         }
 
@@ -189,7 +190,22 @@ namespace TRE_API.Controllers
             return StatusCode(200);
         }
 
+        [HttpPost("SendSubmissionToHUTCH")]
+        public IActionResult SendSubmissionToHUTCH(int submissionId, Dictionary<string, string> SubmissionData)
+        {
+            //Update status of submission to "Sending to hutch"
+            var statusParams = new Dictionary<string, string>()
+                                    {
+                                        { "tesId", submissionId.ToString() },
+                                        { "statusType", StatusType.SendingFileToHUTCH.ToString() },
+                                        { "description", "" }
+                                    };
+            var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams);
 
+            var res = _dareHelper.CallAPIWithoutModel<APIReturn>("URL for hutch", SubmissionData); //Need to update this when parameters are known
+
+            return StatusCode(200);
+        }
 
     }
 }

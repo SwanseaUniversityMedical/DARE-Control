@@ -22,7 +22,8 @@ namespace BL.Models.Enums
         CancellationRequestSent = 15,
         Cancelled = 16,
         WaitingForCrateFormatCheck = 17,
-        SendingToHUTCHForFinalPackaging = 18
+        SendingFileToHUTCH = 18,
+        SendingToHUTCHForFinalPackaging = 19
     }
 
     public enum Decision
