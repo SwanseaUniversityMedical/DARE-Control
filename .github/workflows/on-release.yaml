@@ -33,36 +33,36 @@ jobs:
       github-app-id: ${{ vars.APP_ID }}
       filters: |
         api-container:
-          - './.github/workflows/release.yaml'
+          - './.github/workflows/on-release.yaml'
           - 'containers/api/**'
           - 'src/DARE-API/**'
           - 'src/BL/**'
         ui-container:
-          - './.github/workflows/release.yaml'
+          - './.github/workflows/on-release.yaml'
           - 'src/DARE-FrontEnd/**'
           - 'src/BL/**'
         egress-api-container:
-          - './.github/workflows/release.yaml'
+          - './.github/workflows/on-release.yaml'
           - 'src/Data-Egress-API/**'
           - 'src/BL/**'
         egress-ui-container:
-          - './.github/workflows/release.yaml'
+          - './.github/workflows/on-release.yaml'
           - 'src/Data-Egress-UI/**'
           - 'src/BL/**'
         tre-api-container:
-          - './.github/workflows/release.yaml'
+          - './.github/workflows/on-release.yaml'
           - 'src/TRE-API/**'
           - 'src/BL/**'
         tre-ui-container:
-          - './.github/workflows/release.yaml'
+          - './.github/workflows/on-release.yaml'
           - 'src/TRE-UI/**'
           - 'src/BL/**'
         tre-agent-container:
-          - './.github/workflows/release.yaml'
+          - './.github/workflows/on-release.yaml'
           - 'src/TREAgent/**'
           - 'src/BL/**'
         chart:
-          - './.github/workflows/release.yaml'
+          - './.github/workflows/on-release.yaml'
           - 'charts/**'
 
     secrets:
