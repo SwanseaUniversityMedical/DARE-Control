@@ -293,14 +293,13 @@ namespace TREAgent
                             try
                             {
                                 //call hutch method in treAPI here
-                                //StringContent x = new StringContent("abc");
                                 Dictionary<string, string> HUTCHVars = new Dictionary<string, string>() 
                                 {
                                     { "SubmissionId", aSubmission.Id.ToString()},
                                     { "ContainerURL", aSubmission.SourceCrate}
                                 };
 
-                                var callHUTCH = treApi.CallAPI("/api/Submission/SendSubmissionToHUTCH", null, HUTCHVars, false);
+                                var callHUTCH = treApi.CallAPI($"/api/Submission/SendSubmissionToHUTCH", null, HUTCHVars, false);
                               
                             }
                             catch (Exception e)

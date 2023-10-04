@@ -193,12 +193,12 @@ namespace TRE_API.Controllers
         }
 
         [HttpPost("SendSubmissionToHUTCH")]
-        public IActionResult SendSubmissionToHUTCH(int submissionId, Dictionary<string, string> SubmissionData)
+        public IActionResult SendSubmissionToHUTCH(Dictionary<string, string> SubmissionData)
         {
             //Update status of submission to "Sending to hutch"
             var statusParams = new Dictionary<string, string>()
                                     {
-                                        { "tesId", submissionId.ToString() },
+                                        { "tesId", SubmissionData["SubmissionId"] },
                                         { "statusType", StatusType.SendingFileToHUTCH.ToString() },
                                         { "description", "" }
                                     };
