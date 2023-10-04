@@ -290,7 +290,7 @@
                         foreach (var child in Model.Submission.Children)
                         {
                                         <th class="col">@child.Tre?.Name.ToString()</th>
-                        }
+                        }   
                     }
                             </tr>
                         </thead>
@@ -319,8 +319,11 @@
                                                             @foreach (var status in validstats)
                                                             {
                                                                 <li>
-                                                                    <span data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00 Runtime: 0m">
-                                                                        @status.Status
+                                                                    @{var runtime = status.End - status.Start;}
+                                                                    <span data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 @status.Start Ended: xx/xx/xxxx 00:00:00 @status.End Runtime: @runtime.Minutes">
+
+                                                                        @Helpers.PrettyStatus(status.Status)
+                                                                        
                                                                     </span>
                                                                 </li>
                                                             }
@@ -362,8 +365,12 @@
 
                                                     @foreach (var status in validstats)
                                                     {
-                                                            <li>
-                                                                <span data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00 Runtime: 0m">
+                                                        <li>
+                                                            @{
+                                                                var runtime = status.End - status.Start;
+
+}
+                                                                <span data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 @status.Start Ended: xx/xx/xxxx 00:00:00 @status.End Runtime: @runtime.Minutes">
                                                                 
                                                                 @Helpers.PrettyStatus(status.Status)
 
