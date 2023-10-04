@@ -15,6 +15,7 @@ using Amazon.S3.Model;
 using Amazon.S3;
 using Amazon;
 using System.Net;
+using System.Collections.Generic;
 
 namespace Data_Egress_API.Controllers
 {
@@ -73,7 +74,9 @@ namespace Data_Egress_API.Controllers
             try
             {
                 var allFiles = _DbContext.DataEgressFiles.ToList();
+          
                 Log.Information("{Function} Files retrieved successfully", "GetAllFiles");
+                
                 return allFiles;
             }
             catch (Exception ex)
@@ -82,6 +85,7 @@ namespace Data_Egress_API.Controllers
                 throw;
             }
         }
+
           [HttpGet("GetFilesBySubmissionId")]
         public List<DataFiles> GetFilesBySubmissionId(int id)
         {
@@ -123,6 +127,7 @@ namespace Data_Egress_API.Controllers
         }
 
         [HttpPost("UpdateFileData")]
+
         public async Task<List<DataFiles>> UpdateFileData(List<DataFiles> dataFiles)
         {
             var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();

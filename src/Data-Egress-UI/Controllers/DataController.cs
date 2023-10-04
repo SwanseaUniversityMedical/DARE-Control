@@ -15,6 +15,8 @@ using Serilog;
 using Amazon.S3.Model;
 using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Xml.Linq;
+using System.Text.RegularExpressions;
 
 namespace Data_Egress_UI.Controllers
 {
@@ -29,56 +31,37 @@ namespace Data_Egress_UI.Controllers
             _logger = logger;
             _dataClientHelper = datahelper;
         }
-        [HttpGet]
-        public IActionResult GetAllFiles()
-        {
-            var files = _dataClientHelper.CallAPIWithoutModel<List<DataFiles>>("/api/DataEgress/GetAllFiles/").Result;
-            var filecount = 0;
-            foreach (var file in files){
-
-                filecount = files.Select(d => d.SubmissionId).Distinct().Count();
-
-            }
-          
-            ViewBag.Filecount  = filecount;
-            return View(files);
-
-
-        }
-       
-        [HttpGet]
-        public IActionResult GetFiles(int id)
-        { 
-        var paramlist = new Dictionary<string, string>();
-        paramlist.Add("id", id.ToString());
-            
-        var files = _dataClientHelper.CallAPIWithoutModel<List<DataFiles>>("/api/DataEgress/GetFilesBySubmissionId/",paramlist).Result;
-    
-
-            //    foreach (var file in files)
-            //    {
-            //        var dataFiles = new DataFiles()
-            //    {
-            //        Name = files.,
-            //        Description = files.Description,
-            //        Reviewer = files.Reviewer,
-            //    Status= files.Status,
-            //    LastUpdate = files.LastUpdate,
-            //};
-
-            return View(files);
-            //}
-        }
-
-
+   
         [HttpGet]
         public IActionResult GetAllUnprocessedFiles()
         {
-
             var unprocessedfiles = _dataClientHelper.CallAPIWithoutModel<List<DataFiles>>("/api/DataEgress/GetAllUnprocessedFiles/").Result;
+            var filecount = 0;
+            var submissionIDCounts = unprocessedfiles
+            .GroupBy(file => file.SubmissionId)
+            .Select(group => new { submissionId = group.Key, Count = group.Count() })
+            .ToList();
+            foreach (var count in submissionIDCounts)
+            {
+                filecount = count.Count;
+            }
+
+            ViewBag.Filecount = filecount;
             return View(unprocessedfiles);
 
         }
+
+        [HttpGet]
+        public IActionResult GetFiles(int id)
+        {
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("id", id.ToString());
+
+            var files = _dataClientHelper.CallAPIWithoutModel<List<DataFiles>>("/api/DataEgress/GetFilesBySubmissionId/", paramlist).Result;
+
+            return View(files);
+        }
+
         [HttpPost]
         public async Task<IActionResult> EditFileData(DataFiles model)
         {
@@ -87,7 +70,7 @@ namespace Data_Egress_UI.Controllers
 
             return View(result.First());
         }
-
+        
         [HttpGet]
         public IActionResult DownloadFile(int? FileId)
         {
@@ -95,9 +78,30 @@ namespace Data_Egress_UI.Controllers
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("FileId", FileId.ToString());
             var file = _dataClientHelper.CallAPIWithoutModel<DataFiles>(
-                "/api/DataEgress/", paramlist).Result;
+                "/api/DataEgress/DownloadFileAsync", paramlist).Result;
             return View(file);
         }
-      
+
+        [HttpGet]
+        public IActionResult GetAllFiles()
+        {
+            var files = _dataClientHelper.CallAPIWithoutModel<List<DataFiles>>("/api/DataEgress/GetAllFiles/").Result;
+
+            var filecount = 0;
+            var submissionIDCounts = files
+            .GroupBy(file => file.SubmissionId)
+            .Select(group => new { submissionId = group.Key, Count = group.Count() })
+            .ToList();
+            foreach (var count in submissionIDCounts)
+            {
+                filecount = count.Count;
+            }
+
+            ViewBag.Filecount = filecount;
+            return View(files);
+        }
+
+
+
     }
 }
