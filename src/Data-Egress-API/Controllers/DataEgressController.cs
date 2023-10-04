@@ -76,7 +76,7 @@ namespace Data_Egress_API.Controllers
                 var allFiles = _DbContext.DataEgressFiles.ToList();
           
                 Log.Information("{Function} Files retrieved successfully", "GetAllFiles");
-                //allFiles = new List<DataFiles>();
+                
                 return allFiles;
             }
             catch (Exception ex)

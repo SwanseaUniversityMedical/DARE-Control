@@ -42,8 +42,8 @@ else
 
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <div>
-                                  <a href="@Url.Action("GetFiles", "Data", new {id = file.SubmissionId })">
-                                        <h2 class="mb-0 fw-bold hover-underline fs-5">
+                                  @*<a href="@Url.Action("GetFiles", "Data", new {id = file.SubmissionId })">
+                                  *@      <h2 class="mb-0 fw-bold hover-underline fs-5">
                                                 Submission Id: @file.SubmissionId
                                         </h2>
                                         <p class="my-4">
@@ -64,6 +64,8 @@ else
 
                                     <a href="@Url.Action("DownloadFileFromFileSystem", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-info"><span class="small">Download</span></a>
            *@                        @* </div>*@
+                                    <a href="@Url.Action("GetFiles", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Review</span></a>
+                                 
                                 </div>
                        
               

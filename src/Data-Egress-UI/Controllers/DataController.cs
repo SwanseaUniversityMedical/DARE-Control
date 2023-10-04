@@ -62,7 +62,7 @@ namespace Data_Egress_UI.Controllers
         paramlist.Add("id", id.ToString());
             
         var files = _dataClientHelper.CallAPIWithoutModel<List<DataFiles>>("/api/DataEgress/GetFilesBySubmissionId/",paramlist).Result;
-    
+
 
             //    foreach (var file in files)
             //    {
@@ -74,6 +74,16 @@ namespace Data_Egress_UI.Controllers
             //    Status= files.Status,
             //    LastUpdate = files.LastUpdate,
             //};
+
+            var filecount = 0;
+            var submissionIDCounts = files
+           .GroupBy(file => file.SubmissionId)
+           .Select(group => new { submissionId = group.Key, Count = group.Count() })
+           .ToList();
+            foreach (var count in submissionIDCounts)
+            {
+                filecount = count.Count;
+            }
 
             return View(files);
             //}
