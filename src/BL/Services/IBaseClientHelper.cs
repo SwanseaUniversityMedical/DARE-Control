@@ -1,4 +1,6 @@
 ﻿
+using Microsoft.AspNetCore.Http;
+
 namespace BL.Services
 {
     public interface IBaseClientHelper
@@ -15,6 +17,8 @@ namespace BL.Services
 
         Task<TOutput?> CallAPIWithoutModel<TOutput>(string endPoint, Dictionary<string, string>? paramList = null)
             where TOutput : class?, new();
+
+        Task<TOutput?> CallAPIToSendFile<TOutput>(string endPoint, string fileParamaterName, IFormFile file, Dictionary<string, string>? paramList = null) where TOutput : class?, new();
 
 
     }

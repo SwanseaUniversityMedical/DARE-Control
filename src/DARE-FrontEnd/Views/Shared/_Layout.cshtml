@@ -193,6 +193,12 @@
 
         })
 
+        $('#addSubmission').on('click', function () {
+
+            $('#submissionModal').modal('show');
+
+        })
+
     </script>
 
     <script>
@@ -292,6 +298,73 @@
             }
 
         }
+    </script>
+
+    <script>
+        $("input[name='Option']").change(function () {
+
+            var selectedValue = $(this).val();
+
+            $("#inputField1, #inputField2").hide();
+
+            if (selectedValue === "url") {
+                $("#externalUrl").show();
+            } else if (selectedValue === "file") {
+                $("#uploadedFile").show();
+            }
+        });
+    </script>
+    <script>
+        $("#submitButton").click(function () {
+            debugger;
+            var selectedOptions = [];
+            $("#treDropdown option:selected").each(function () {
+                selectedOptions.push($(this).val());
+            });
+            var ProjectId = $("#projectId").val();
+            var Name = $("#name").val();
+            var SubmissionBucket = $("#submissionBucket").val();
+            var Project = $("#projectName").val();
+            var Option = $("input[name='Option']:checked").val();
+            var Url = $("#url").val();
+            var File = $("#file")[0].files[0];
+
+            //var formData = {
+            //    ProjectId:$("#projectId").val(),
+            //    Name: $("#name").val(),
+            //    SubmissionBucket: $("#submissionBucket").val(),
+            //    Project: $("#projectName").val(),
+            //    Tre: selectedOptions,
+            //    Option: $("input[name='Option']:checked").val(),
+            //    Url: $("#url").val(),
+            //    File: $("#file").val()
+            //};
+
+            var formData = new FormData();
+            formData.append("ProjectId", projectId);
+            formData.append("Name", Name);
+            formData.append("SubmissionBucket", SubmissionBucket);
+            formData.append("Project", Project);
+            formData.append("Tre", selectedOptions);
+            formData.append("Option", Option);
+            formData.append("Url", Url);
+            formData.append("File", File);
+
+            $.ajax({
+                url: '/Project/SubmissionWizerd',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (result) {
+                    // Handle the response from the controller
+                    // You can update the UI or perform further actions here
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        });
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

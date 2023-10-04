@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using BL.Models.Settings;
 using Microsoft.AspNetCore.Http;
 using static System.Runtime.InteropServices.JavaScript.JSType;
-
+using BL.Models.Tes;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -15,14 +15,13 @@ namespace DARE_FrontEnd.Controllers
     public class ProjectController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
-        
+
         private readonly FormIOSettings _formIOSettings;
         public ProjectController(IDareClientHelper client, FormIOSettings formIo)
         {
             _clientHelper = client;
             
             _formIOSettings = formIo;
-
         }
 
         [AllowAnonymous]
@@ -308,6 +307,70 @@ namespace DARE_FrontEnd.Controllers
                 UserId = userId
             };
             var result = _clientHelper.CallAPI<ProjectUser, ProjectUser?>("api/Project/IsUserOnProject", model);
+        }
+
+        [HttpPost]
+        public IActionResult SubmissionWizerd(SubmissionTes model)
+        {
+            var listOfTre = "";
+            var imageUrl = "";
+            if (model.Tre == null)
+            {
+                var paramList = new Dictionary<string, string>();
+                paramList.Add("projectId", model.ProjectId.ToString());
+                var tre = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList).Result;
+                List<string> namesList = tre.Select(test => test.Name).ToList();
+                listOfTre = string.Join("|", namesList);
+            }
+            else
+            {
+                listOfTre = string.Join("|", model.Tre);
+            }
+            if(model.Option == "url")
+            {
+                imageUrl = model.Url;
+            }
+            else
+            {
+                //var paramList = new Dictionary<string, string>();
+                //paramList.Add("path", model.File.ToString());
+                //paramList.Add("bucketName", model.SubmissionBucket.ToString());
+                //var fileUpload = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/UploadToMinio/", paramList).Result;
+                var data = new UploadFileInfo()
+                {
+                    BucketName = model.SubmissionBucket,
+                    File = model.File,
+                };
+                var paramss = new Dictionary<string, string>();
+
+                paramss.Add("bucketName", model.SubmissionBucket);
+
+                // var uplodaResult = _clientHelper.CallAPI<UploadFileInfo, UploadFileInfo?>("/api/Project/UploadToMinio", data).Result;
+                var uplodaResult = _clientHelper.CallAPIToSendFile<UploadFileInfo?>("/api/Project/UploadToMinio", "file", model.File/*, paramss*/).Result;
+            }
+            var test = new TesTask()
+            {
+
+                Name = model.Name,
+                Executors = new List<TesExecutor>()
+                {
+                    new TesExecutor()
+                    {
+                        Image = model.Url,
+
+                    }
+                },
+                Tags = new Dictionary<string, string>()
+                {
+                    { "project", model.Project },
+                    { "tres", listOfTre }
+                }
+
+            };
+
+            var result = _clientHelper.CallAPI<TesTask, TesTask?>("api/Project/CreateTask", test);
+
+            return Json(new { success = true, message = "Data received successfully." });
         }
 
     }

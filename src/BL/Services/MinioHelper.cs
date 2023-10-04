@@ -4,10 +4,12 @@ using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using Aws4RequestSigner;
 using BL.Models.ViewModels;
+using Microsoft.AspNetCore.Http;
 using Minio.Exceptions;
 using Newtonsoft.Json;
 using Serilog;
 using System.Net;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace BL.Services
 {
@@ -68,28 +70,57 @@ namespace BL.Services
             return false;
         }
 
-        public async Task<bool> UploadFileAsync(MinioSettings minioSettings, string bucketName = "", string objectName = "", string filePath = "")
+        public async Task<bool> UploadFileAsync(MinioSettings minioSettings, IFormFile? filePath, string bucketName = "", string objectName = "")
         {
-            var request = new PutObjectRequest
-            {
-                BucketName = bucketName,
-                Key = objectName,
-                FilePath = filePath,
-            };
-
             var amazonS3Client = GenerateAmazonS3Client(minioSettings);
+            if (filePath != null)
+            {
+                using (var stream = new MemoryStream())
+                {
+                    await filePath.CopyToAsync(stream);
+                    var uploadRequest = new PutObjectRequest
+                    {
+                        BucketName = bucketName,
+                        Key = filePath.FileName,
+                        InputStream = stream,
+                        ContentType = filePath.ContentType
+                    };
 
-            var response = await amazonS3Client.PutObjectAsync(request);
-            if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
-            {
-                Log.Warning($"Successfully uploaded {objectName} to {bucketName}.");
-                return true;
+
+                    var response = await amazonS3Client.PutObjectAsync(uploadRequest);
+                    if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        Log.Warning($"Successfully uploaded {objectName} to {bucketName}.");
+                        return true;
+                    }
+                    else
+                    {
+                        Log.Warning($"Could not upload {objectName} to {bucketName}.");
+                        return false;
+                    }
+                }
             }
-            else
-            {
-                Log.Warning($"Could not upload {objectName} to {bucketName}.");
-                return false;
-            }
+            return true;
+            //var request = new PutObjectRequest
+            //{
+            //    BucketName = bucketName,
+            //    Key = objectName,
+            //    FilePath = filePath,
+            //};
+
+            //var amazonS3Client = GenerateAmazonS3Client(minioSettings);
+
+            //var response = await amazonS3Client.PutObjectAsync(request);
+            //if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
+            //{
+            //    Log.Warning($"Successfully uploaded {objectName} to {bucketName}.");
+            //    return true;
+            //}
+            //else
+            //{
+            //    Log.Warning($"Could not upload {objectName} to {bucketName}.");
+            //    return false;
+            //}
         }
 
         public async Task<bool> DownloadFileAsync(MinioSettings minioSettings, string bucketName = "", string objectName = "")
@@ -134,7 +165,7 @@ namespace BL.Services
                 return false;
             }
 
-            
+
         }
 
         public async Task<bool> CheckObjectExists(MinioSettings minioSettings, string bucketName, string objectKey)
@@ -221,6 +252,23 @@ namespace BL.Services
             {
                 return false;
             }
+
+            return true;
+        }
+
+        public async Task<bool> CopyObject(MinioSettings minioSettings, string sourceBucketName, string destinationBucketName, string sourceObjectKey, string destinationObjectKey)
+        {
+            var amazonS3Client = GenerateAmazonS3Client(minioSettings);
+
+            var request = new CopyObjectRequest
+            {
+                SourceBucket = sourceBucketName,
+                DestinationBucket = destinationBucketName,
+                SourceKey = sourceObjectKey,
+                DestinationKey = destinationObjectKey
+            };
+
+            var result = await amazonS3Client.CopyObjectAsync(request);
 
             return true;
         }

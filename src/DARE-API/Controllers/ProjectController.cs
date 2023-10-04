@@ -14,6 +14,7 @@ using BL.Models.Tes;
 using EasyNetQ.Management.Client.Model;
 using System.Threading;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using BL.Models.APISimpleTypeReturns;
 
 namespace DARE_API.Controllers
 {
@@ -493,6 +494,16 @@ namespace DARE_API.Controllers
             };  
 
             return minioEndPoint;
+        }
+
+        [HttpPost("UploadToMinio")]
+        [AllowAnonymous]
+        public async Task<UploadFileInfo?> UploadToMinio([FromBody]IFormFile file)
+        {
+            string bucketName = "dsfsdfs";
+            var submissionBucket = await _minioHelper.UploadFileAsync(_minioSettings, file, bucketName, file.FileName);
+            var uploadFile = new UploadFileInfo();
+            return uploadFile;
         }
 
 

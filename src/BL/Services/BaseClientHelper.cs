@@ -6,6 +6,9 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Serilog;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using Microsoft.Extensions.FileProviders;
 
 namespace BL.Services
 {
@@ -39,22 +42,22 @@ namespace BL.Services
         }
 
 
-        private async Task<T> CallAPIWithReturnType<T>(string endPoint, StringContent? jsonString = null, Dictionary<string, string>? paramlist = null, bool usePut = false) where T : class?, new()
+        private async Task<T> CallAPIWithReturnType<T>(string endPoint, StringContent? jsonString = null, Dictionary<string, string>? paramlist = null, bool usePut = false, string? fileParameterName = null, IFormFile? file = null) where T : class?, new()
         {
 
             HttpResponseMessage response = null;
 
-            if (jsonString == null)
+            if (jsonString == null && file == null)
             {
-                response = await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Get, jsonString, paramlist);
+                response = await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Get, jsonString, paramlist, fileParameterName, file);
             }
             else if (usePut)
             {
-                response = await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Put, jsonString, paramlist);
+                response = await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Put, jsonString, paramlist, fileParameterName, file);
             }
             else
             {
-                response = await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Post, jsonString, paramlist);
+                response = await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Post, jsonString, paramlist, fileParameterName, file);
             }
 
 
@@ -85,7 +88,7 @@ namespace BL.Services
        
 
 
-        protected async Task<HttpResponseMessage> ClientHelperRequestAsync(string endPoint, HttpMethod method, StringContent? jsonString = null, Dictionary<string, string>? paramlist = null)
+        protected async Task<HttpResponseMessage> ClientHelperRequestAsync(string endPoint, HttpMethod method, StringContent? jsonString, Dictionary<string, string>? paramlist, string? fileParameterName, IFormFile? fileInfo)
         {
             try
             {
@@ -112,12 +115,18 @@ namespace BL.Services
                 {
                     StatusCode = System.Net.HttpStatusCode.BadRequest
                 };
-                
 
-                if (method == HttpMethod.Get) res = await apiClient.GetAsync(endPoint);
-                if (method == HttpMethod.Post) res = await apiClient.PostAsync(endPoint, jsonString);
-                if (method == HttpMethod.Put) res = await apiClient.PutAsync(endPoint, jsonString);
-                if (method == HttpMethod.Delete) res = await apiClient.DeleteAsync(endPoint);
+                if (fileInfo != null && fileParameterName != null)
+                {
+                    res = await UploadFileAsync(fileInfo, apiClient, fileParameterName, endPoint);
+                }
+                else
+                {
+                    if (method == HttpMethod.Get) res = await apiClient.GetAsync(endPoint);
+                    if (method == HttpMethod.Post) res = await apiClient.PostAsync(endPoint, jsonString);
+                    if (method == HttpMethod.Put) res = await apiClient.PutAsync(endPoint, jsonString);
+                    if (method == HttpMethod.Delete) res = await apiClient.DeleteAsync(endPoint);
+                }
                 if (!res.IsSuccessStatusCode)
                 {
                    throw new Exception("API Call Failure: " + res.StatusCode + ": " + res.ReasonPhrase);
@@ -205,7 +214,7 @@ namespace BL.Services
 
         public async Task<HttpResponseMessage> CallAPI(string endPoint, StringContent? jsonString, Dictionary<string, string>? paramList = null, bool usePut = false)
         {
-            return  await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Post, jsonString, paramList);
+            return  await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Post, jsonString, paramList, null, null);
         }
 
         public async Task<TOutput?> CallAPI<TInput, TOutput>(string endPoint,TInput model, Dictionary<string, string>? paramList = null, bool usePut = false) where TInput : class? where TOutput : class?, new()
@@ -222,6 +231,34 @@ namespace BL.Services
         public async Task<TOutput?> CallAPIWithoutModel<TOutput>(string endPoint, Dictionary<string, string>? paramList = null) where TOutput : class?, new()
         {
             return await CallAPIWithReturnType<TOutput>(endPoint, null, paramList);
+        }
+
+
+        public async Task<TOutput?> CallAPIToSendFile<TOutput>(string endPoint, string fileParamaterName, IFormFile file, Dictionary<string, string>? paramList = null) where TOutput : class?, new()
+        {
+            return await CallAPIWithReturnType<TOutput>(endPoint, null, paramList, false, fileParamaterName, file);
+        }
+
+        public async Task<HttpResponseMessage> UploadFileAsync(IFormFile file, HttpClient apiClient, string fileParameterName, string endPoint)
+        {
+            using (var formData = new MultipartFormDataContent())
+            {
+                // Create a StreamContent from the IFormFile
+                var streamContent = new StreamContent(file.OpenReadStream());
+                streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+                {
+                    Name = fileParameterName, // Match the property name in your API's FileInfo class
+                    FileName = file.FileName
+                };
+                formData.Add(streamContent);
+                
+                
+               
+                    var response = await apiClient.PostAsync(endPoint, formData);
+                    return response;
+                   
+               
+            }
         }
 
         #endregion

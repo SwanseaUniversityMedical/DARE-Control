@@ -73,17 +73,17 @@
                 @if (User.IsInRole("dare-control-admin"))
                 {
                     <div class="d-flex align-items-center mb-3">
-                    <a asp-controller="Submission" asp-action="Instructions" class="btn btn-primary btn-sm d-flex align-items-center mb-3 me-2">
-                        <i class="fa fa-info-circle align-middle me-2"></i>
-                        <span>Submit with API</span>
-                    </a>
-                    <a href="#" class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none">
-                        <i class="fa fa-table-columns align-middle me-2"></i>
-                        <span>Submit with Wizard</span>
-                    </a>
+                        <a asp-controller="Submission" asp-action="Instructions" class="btn btn-primary btn-sm d-flex align-items-center mb-3 me-2">
+                            <i class="fa fa-info-circle align-middle me-2"></i>
+                            <span>Submit with API</span>
+                        </a>
+                        <a href="#" class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" id="addSubmission">
+                            <i class="fa fa-table-columns align-middle me-2"></i>
+                            <span>Submit with Wizard</span>
+                        </a>
                     </div>
                 }
-                
+
                 <div class="row">
                     <div class="col-lg-5 col-md-6">
                         <ul class="list-group">
@@ -205,6 +205,61 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" onclick="SaveTreList(@Model.Id)">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bd-tre-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="submissionModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Add Submission</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                
+                <form class="row g-3" id="submissionForm">
+                    <input type="hidden" id="projectId" name="projectId" value="@Model.Id" />
+                    <input type="hidden" id="projectName" name="projectName" value="@Model.Name" />
+                    <input type="hidden" id="submissionBucket" name="submissionBucket" value="@Model.SubmissionBucket" />
+                    <div class="col-12">
+                        <label for="name" class="form-label">Name</label>
+                        <input  type="text" class="form-control" id="name" placeholder="">
+                    </div>
+                    <div class="col-md-12">
+                        <select id="treDropdown" name="treDropdown" class="form-select" multiple>
+                            @foreach (var p in Model.Tres)
+                            {
+                                <option value="@p.Name">@p.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Choose an option:</label>
+                        <div class="form-check">
+                            <input type="radio" name="Option" value="url" class="form-check-input" />
+                            <label class="form-check-label">External Url</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="radio" name="Option" value="file" class="form-check-input" />
+                            <label class="form-check-label">File Upload</label>
+                        </div>
+                    </div>
+                    <div id="externalUrl"class="form-group" style="display:none;">
+                        <label for="Url">External Url</label>
+                        <input class="form-control" id="url" name="url" />
+                    </div>
+
+                    <div id="uploadedFile" class="form-group" style="display:none;">
+                        <label for="File">Image</label>
+                        <input class="form-control" type="file" id="file" name="file" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="submitButton">Submit</button>
             </div>
         </div>
     </div>
