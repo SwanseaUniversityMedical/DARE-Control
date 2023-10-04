@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using BL.Rabbit;
 using Microsoft.AspNetCore.SignalR;
+using System.Reflection;
+using System.ComponentModel.DataAnnotations;
 
 namespace DARE_API.Controllers
 {
@@ -150,6 +152,7 @@ namespace DARE_API.Controllers
             var stage1List = new StageInfo();
             stage1List.stageName = "Submission Layer Validation";
             stage1List.stageNumber = 1;
+
             stage1List.statusTypeList = new List<StatusType>
             {
                 StatusType.InvalidUser,
