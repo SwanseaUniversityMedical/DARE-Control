@@ -20,6 +20,7 @@ using TREAgent.Repositories;
 using TREAgent.Repositories.DbContexts;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using System.Data;
 
 namespace TREAgent
 {
@@ -50,15 +51,11 @@ namespace TREAgent
             Console.WriteLine("Testing");
             string jsonContent = "{ \"name\": \"Hello World\", \"description\": \"Hello World, inspired by Funnel's most basic example\",\r\n\"executors\": [\r\n{ \"image\": \"alpine\", \"command\": [ \"sleep\", \"5m\" ] },\r\n{ \"image\": \"alpine\", \"command\": [ \"echo\", \"TESK says:   Hello World\" ]    }\r\n  ]\r\n}";
 
-            
-       
-
             var arr = new HttpClient();
 
             var role = "COOLSchemas2";
 
             var data = await arr.GetAsync($"http://localhost:8090/api/Authentication/GetNewToken/{role}");
-
 
             var Token = await data.Content.ReadAsStringAsync();
 
@@ -69,6 +66,12 @@ namespace TREAgent
             ob.Add("tags", NewOb);
 
             NewOb.Add("HASURAAuthenticationToken", Token);
+
+            _dbContext.TokensToExpire.Add(new TokenToExpire()
+            {
+                TesId = "99",
+                Token = Token
+            });
 
             CreateTESK(ob.ToString(), "99");
         }
@@ -126,19 +129,19 @@ namespace TREAgent
         }
         public void CheckTESK(string taskID, string TesId)
         {
-            Console.WriteLine("Check TESK : "+taskID + ",  TES : "+TesId);
+            Console.WriteLine("Check TESK : " + taskID + ",  TES : " + TesId);
 
-            string url = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks/"+taskID+"?view=basic";
+            string url = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks/" + taskID + "?view=basic";
             using (HttpClient client = new HttpClient())
             {
-                HttpResponseMessage response =  client.GetAsync(url).Result;
+                HttpResponseMessage response = client.GetAsync(url).Result;
 
                 Console.WriteLine(response.StatusCode);
 
                 if (response.IsSuccessStatusCode)
                 {
                     string content = response.Content.ReadAsStringAsync().Result;
-//                    Console.WriteLine(content);
+                    //                    Console.WriteLine(content);
 
                     TESKstatus status = JsonConvert.DeserializeObject<TESKstatus>(content);
 
@@ -164,29 +167,47 @@ namespace TREAgent
 
                     _dbContext.SaveChanges();
 
-                        if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR"))
-                        {
-                            Console.WriteLine("*** status change *** " + status.state);
+                    if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR"))
+                    {
+                        Console.WriteLine("*** status change *** " + status.state);
 
-                            // send update
-                            using (var scope = _serviceProvider.CreateScope())
+                        // send update
+                        using (var scope = _serviceProvider.CreateScope())
+                        {
+                            TokenToExpire Token = null;
+
+                            var statusMessage = StatusType.TransferredToPod.ToString();
+                            switch (status.state)
                             {
-                                var statusMessage = StatusType.TransferredToPod.ToString();
-                                switch (status.state)
-                                {
-                                    case "QUEUED":
-                                        statusMessage = StatusType.TransferredToPod.ToString();
-                                        break;
-                                    case "RUNNING":
-                                        statusMessage = StatusType.PodProcessing.ToString();
-                                        break;
-                                    case "COMPLETE":
-                                        statusMessage = StatusType.PodProcessingComplete.ToString();
-                                        break;
-                                    case "EXECUTOR_ERROR":
-                                        statusMessage = StatusType.Cancelled.ToString();
-                                        break;
-                                }
+                                case "QUEUED":
+                                    statusMessage = StatusType.TransferredToPod.ToString();
+                                    break;
+                                case "RUNNING":
+                                    statusMessage = StatusType.PodProcessing.ToString();
+                                    break;
+                                case "COMPLETE":
+                                    statusMessage = StatusType.PodProcessingComplete.ToString();
+                                    Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.TesId == TesId);
+                                    if (Token != null)
+                                    {
+                                        _dbContext.TokensToExpire.Remove(Token);
+                                        var arr = new HttpClient();
+                                        arr.PostAsync($"http://localhost:8090/api/Authentication/ExpirerToken/{Token.Token}", null);
+                                    }
+                                    _dbContext.SaveChanges();
+                                    break;
+                                case "EXECUTOR_ERROR":
+                                    statusMessage = StatusType.Cancelled.ToString();
+                                    Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.TesId == TesId);
+                                    if (Token != null)
+                                    {
+                                        _dbContext.TokensToExpire.Remove(Token);
+                                        var arr = new HttpClient();
+                                        arr.PostAsync($"http://localhost:8090/api/Authentication/ExpirerToken/{Token.Token}", null);
+                                    }
+                                    _dbContext.SaveChanges();
+                                    break;
+                            }
 
                             var treApi =
                                 scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
@@ -202,24 +223,20 @@ namespace TREAgent
 
                         // are we done ?
                         if (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR")
-                            {
-                                // Do this to avoid db locking issues
-                                BackgroundJob.Enqueue(() => ClearJob(taskID));
-                                // RecurringJob.RemoveIfExists(taskID);
-                            }
+                        {
+                            // Do this to avoid db locking issues
+                            BackgroundJob.Enqueue(() => ClearJob(taskID));
+                            // RecurringJob.RemoveIfExists(taskID);
                         }
-                        else
-                            Console.WriteLine("NO CHANGE " + status.state);
-                  
-
+                    }
+                    else
+                        Console.WriteLine("NO CHANGE " + status.state);
                 }
                 else
                 {
                     Console.WriteLine($"HTTP Request {url} failed with status code: {response.StatusCode}");
                 }
             }
-
-           
         }
 
 

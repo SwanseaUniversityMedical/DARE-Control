@@ -28,9 +28,6 @@ namespace TRE_TESK.Controllers
             _applicationDbContext = applicationDbContext;
         }
 
-
-        //TODO Easy way to grab all the generated roles , even if they had been generated already 
-
         [HttpGet("GetNewToken/{role}")]
         public string GetNewToken(string role)
         {
