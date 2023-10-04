@@ -26,14 +26,16 @@ namespace TRE_API.Controllers
         private readonly ISignalRService _signalRService;
         private readonly IDareClientWithoutTokenHelper _dareHelper;
         private readonly IDataEgressClientHelper  _dataEgressHelper;
+        private readonly IHutchClientHelper _hutchHelper;
         private readonly ApplicationDbContext _dbContext;
 
         public SubmissionController(ISignalRService signalRService, IDareClientWithoutTokenHelper helper, IDataEgressClientHelper egressHelper,
-            ApplicationDbContext dbContext)
+            IHutchClientHelper hutchClientHelper, ApplicationDbContext dbContext)
         {
             _signalRService = signalRService;
             _dareHelper = helper;
             _dataEgressHelper = egressHelper;
+            _hutchHelper = hutchClientHelper;
             _dbContext = dbContext;
 
         }
@@ -185,7 +187,7 @@ namespace TRE_API.Controllers
                 { "fileList", fileListString}
             };
 
-            var HUTCHres = _dareHelper.CallAPIWithoutModel<APIReturn>("URl for hutch", HUTCHParams);
+            var HUTCHres = _hutchHelper.CallAPIWithoutModel<APIReturn>("URl for hutch", HUTCHParams);
 
             return StatusCode(200);
         }
@@ -202,7 +204,7 @@ namespace TRE_API.Controllers
                                     };
             var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams);
 
-            var res = _dareHelper.CallAPIWithoutModel<APIReturn>("URL for hutch", SubmissionData); //Need to update this when parameters are known
+            var res = _hutchHelper.CallAPIWithoutModel<APIReturn>("URL for hutch", SubmissionData); //Need to update this when parameters are known
 
             return StatusCode(200);
         }

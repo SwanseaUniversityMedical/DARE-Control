@@ -61,6 +61,7 @@ builder.Services.AddSingleton(submissionKeyCloakSettings);
 
 builder.Services.AddScoped<IDareClientWithoutTokenHelper, DareClientWithoutTokenHelper>();
 builder.Services.AddScoped<IDataEgressClientHelper, DataEgressClientHelper>();
+builder.Services.AddScoped<IHutchClientHelper, HutchClientHelper>();
 
 string hangfireConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddHangfire(config => { config.UsePostgreSqlStorage(hangfireConnectionString); });
