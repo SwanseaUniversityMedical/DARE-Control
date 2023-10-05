@@ -8,14 +8,14 @@
     <div class="d-flex align-items-center justify-content-between">
         <div>
             <h1 class="fs-3 mb-0">@Model.Name</h1>
-            <p class="text-muted small mb-0">Organisation Name</p>
+            <p class="text-muted small mb-0">Model.Organisation</p>
         </div>
-@*        <a href="#" class="btn btn-primary btn-sm d-flex align-items-center">
-            <i class="fa fa-edit align-middle me-2"></i>*@
-            @if (User.IsInRole("dare-control-admin"))
-            {
-                <a href="@Url.Action("SaveUserForm", "User",new{userId=@Model.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
-            }
+        @*        <a href="#" class="btn btn-primary btn-sm d-flex align-items-center">
+        <i class="fa fa-edit align-middle me-2"></i>*@
+        @if (User.IsInRole("dare-control-admin"))
+        {
+            <a href="@Url.Action("SaveUserForm", "User",new{userId=@Model.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+        }
         </a>
     </div>
     <div class="mt-4">
@@ -77,11 +77,11 @@
                                                                 </h2>
                                                             </a>
 
-                                                            <p class="text-muted small mb-0">#@submission.Id</p>
+                                                            <p class="text-muted font-monospace small mb-0">#@submission.Id</p>
                                                         </div>
-                                                       
+
                                                     </div>
-                                                   
+
                                                 </td>
                                             </tr>
                                         }
@@ -90,64 +90,64 @@
                             </div>
                         </div>
                     </div>
-                    </div>
-                    </div>
+                </div>
+            </div>
             <div class="tab-pane fade" id="projects-tab" role="tabpanel" aria-labelledby="projects">
                 <div class="mt-2 mb-2 align-items-md-end">
-                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addProject">Add Project</button>
+                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addProject"><i class="fa fa-plus me-2"></i>Add User To A Project</button>
                 </div>
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-xl-8 col-lg-10">
                         <div class="table-responsive">
-                            <div class="table-responsive">
-                                <table id="projectList" class="table table-bordered table-striped no-head" caption="List of Projects">
-                                    <thead><tr><td>Project</td></tr></thead>
-                                    <tbody>
-                                        @foreach (var project in Model.Projects)
-                                        {
-                                            <tr>
-                                                <td class="card mb-2 p-3 bg-white shadow-sm border-1">
+                            <table id="projectList" class="table table-striped no-head" caption="List of Projects">
+                                <thead><tr><td>Project</td></tr></thead>
+                                <tbody>
+                                    @foreach (var project in Model.Projects)
+                                    {
+                                        <tr>
+                                            <td class="card mb-2 p-3 bg-white shadow-sm border-1">
 
-                                                    <div class="d-flex align-items-center justify-content-between mb-3">
-                                                        <div>
-                                                            <a href="@Url.Action("GetProject", "Project", new { id = project.Id })">
-                                                                <h2 class="mb-0 fw-bold hover-underline fs-5">
-                                                                    @project.Name
-                                                                </h2>
-                                                            </a>
-                                                            <a href="@Url.Action("RemoveProjectfromUser", "User",new{UserId=Model.Id,ProjectId=@project.Id})">
-                                                                <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove user from project"></span>
-                                                            </a>
-                                                            <p class="text-muted small mb-0">#@project.Id</p>
-                                                        </div>
+                                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                                    <div>
+                                                        <a href="@Url.Action("GetProject", "Project", new { id = project.Id })">
+                                                            <h2 class="mb-0 fw-bold hover-underline fs-5">
+                                                                @project.Name
+                                                            </h2>
+                                                        </a>
+                                                        <p class="text-muted font-monospace small mb-0">#@project.Id</p>
+                                                    </div>
+                                                    <div>
                                                         @if (User.IsInRole("dare-control-admin"))
                                                         {
-                                                            <a href="@Url.Action("SaveProjectForm", "Project",new{ProjectId=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+                                                            <a href="@Url.Action("RemoveProjectfromUser", "User",new{UserId=Model.Id,ProjectId=@project.Id})" class="btn btn-sm btn-outline-primary">
+                                                                <span class="small"><i class="fa fa-user-alt-slash me-2"></i>Remove user from project</span>
+                                                            </a>
+                                                            <a href="@Url.Action("SaveProjectForm", "Project",new{ProjectId=@project.Id})" class="btn btn-sm btn-outline-primary ms-2"><span class="small">Edit</span></a>
                                                         }
                                                     </div>
-                                                    <div class="">
-                                                        <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#submissions" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                                            @project.Submissions.Count Submissions
-                                                        </a>
-                                                        <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#people" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                                            @project.Users.Count People
-                                                        </a>
-                                                        <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#tre" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                                            @project.Tres.Count TREs
-                                                        </a>
-                                                    </div>
-                                                    <p class="my-4">
-                                                        @project.ProjectDescription
-                                                    </p>
-                                                    <p class="text-muted fs-7 mb-0">
-                                                        LastStatusUpdate Date: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate
-                                                    </p>
-                                                </td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
+                                                </div>
+                                                <div class="">
+                                                    <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#submissions" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                                        @project.Submissions.Count Submissions
+                                                    </a>
+                                                    <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#people" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                                        @project.Users.Count People
+                                                    </a>
+                                                    <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#tre" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                                        @project.Tres.Count TREs
+                                                    </a>
+                                                </div>
+                                                <p class="my-4">
+                                                    @project.ProjectDescription
+                                                </p>
+                                                <p class="text-muted fs-7 mb-0">
+                                                    Last Updated: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -157,22 +157,22 @@
 </div>
 
 <div class="modal fade bd-user-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="projectModal">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Add Project</h1>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Add @Model.Name to a project</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
                     <div class="col-12">
-                        <div class="table-responsive">
-                            <table class="table table-bordered" id="ProjectList">
+                        <div class="table-responsive my-2">
+                            <table class="table" id="ProjectList">
                                 @foreach (var project in ViewBag.ProjectItems)
                                 {
                                     <tr>
-                                        <td><input type="checkbox" value="@project.Value" id="@project.Value" name="selectedProject" /></td>
-                                        <td>@project.Text</td>
+                                        <td class="text-center"><input type="checkbox" value="@project.Value" id="@project.Value" name="selectedProject" /></td>
+                                        <td class="fw-bold">@project.Text</td>
                                     </tr>
                                 }
                             </table>
@@ -181,8 +181,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="SaveProjectList(@Model.Id)">Add</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-sm btn-primary" onclick="SaveProjectList(@Model.Id)">Add</button>
             </div>
         </div>
     </div>

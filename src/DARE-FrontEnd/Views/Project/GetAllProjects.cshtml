@@ -7,66 +7,71 @@
 <div class="container-lg p-4">
     <div class="d-flex align-items-center justify-content-between">
         <h1 class="fs-3 mb-0">Projects</h1>
-                                        @if (User.IsInRole("dare-control-admin"))
-                                {
-        <a asp-controller="Project" asp-action="SaveProjectForm" class="btn btn-primary btn-sm d-flex align-items-center">
-            <i class="fa fa-plus align-middle me-2"></i>
-            <span>Create Project</span>
-        </a>
-                                }
+        @if (User.IsInRole("dare-control-admin"))
+        {
+            <a asp-controller="Project" asp-action="SaveProjectForm" class="btn btn-primary btn-sm d-flex align-items-center">
+                <i class="fa fa-plus align-middle me-2"></i>
+                <span>Create Project</span>
+            </a>
+        }
     </div>
     <hr class="d-flex my-4">
-    <div class="table-responsive">
-        <table id="projectList" class="table table-bordered table-striped no-head" caption="List of Projects">
-            <thead><tr><td>Project</td></tr></thead>
-            <tbody>
-                @foreach (var project in Model)
-                {
-                    <tr>
-                        <td class="card mb-2 p-3 bg-white shadow-sm border-1">
+    <div class="row">
+        <div class="col-xl-8 offset-xl-2 col-lg-10 offset-lg-1">
+            <div class="table-responsive">
+                <table id="projectList" class="table table-bordered table-striped no-head" caption="List of Projects">
+                    <thead><tr><td>Project</td></tr></thead>
+                    <tbody>
+                        @foreach (var project in Model)
+                        {
+                            <tr>
+                                <td class="card mb-2 p-3 bg-white shadow-sm border-1">
 
-                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                <div>
-                                    <a href="@Url.Action("GetProject", "Project", new {id = project.Id })">
-                                        <h2 class="mb-0 fw-bold hover-underline fs-5">
-                                            @project.Name
-                                        </h2>
-                                        <p class="my-4">
-                                            @project.ProjectDescription
-                                        </p>
-                                        <p class="my-4">
-                                            Embargoed Project: @project.MarkAsEmbargoed
-                                        </p>
-                                    </a>
-                                    <p class="text-muted small mb-0">#@project.Id</p>
-                                </div>
-                                @if (User.IsInRole("dare-control-admin"))
-                                {
-                                    <a href="@Url.Action("SaveProjectForm", "Project",new{ProjectId=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
-                                }
-                            </div>
-                            <div class="">
-                                <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#submissions" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                    @project.Submissions.Count Submissions
-                                </a>
-                                <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#people" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                    @project.Users.Count People
-                                </a>
-                                <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#tre" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                    @project.Tres.Count TREs
-                                </a>
-                            </div>
-@*                            <p class="my-4">
+                                    <div class="d-flex align-items-center justify-content-between mb-3">
+                                        <div>
+                                            <a href="@Url.Action("GetProject", "Project", new {id = project.Id })">
+                                                <h2 class="mb-0 fw-bold hover-underline fs-5">
+                                                    @project.Name
+                                                </h2>
+                                            </a>
+                                            <p class="text-muted font-monospace small mb-0">#@project.Id</p>
+                                        </div>
+                                        <div>
+                                            @*<p class="badge py-2 px-3 badge-lg bg-warning text-dark rounded-pill m-0">
+                                                <i class="fa-solid fa-flag me-2"></i>Embargoed: @project.MarkAsEmbargoed
+                                            </p>*@
+                                            @if (User.IsInRole("dare-control-admin"))
+                                            {
+                                                <a href="@Url.Action("SaveProjectForm", "Project",new{ProjectId=@project.Id})" class="btn btn-sm btn-outline-primary ms-2"><span class="small">Edit</span></a>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="">
+                                        <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#submissions" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                            @project.Submissions.Count Submissions
+                                        </a>
+                                        <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#people" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                            @project.Users.Count People
+                                        </a>
+                                        <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#tre" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                            @project.Tres.Count TREs
+                                        </a>
+                                    </div>
+                                    @*                            <p class="my-4">
                                 @Html.Raw(project.Display?.Replace("\n","<br/>"))
-                            </p>*@
-                            <p class="text-muted fs-7 mt-4 mb-0">
-                                Last Updated: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate
-                            </p>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-
+                                </p>*@
+                                    <p class="my-4">
+                                        @project.ProjectDescription
+                                    </p>
+                                    <p class="text-muted fs-7 mb-0">
+                                        Last Updated: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate
+                                    </p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
