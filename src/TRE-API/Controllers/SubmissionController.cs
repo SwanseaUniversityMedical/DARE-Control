@@ -16,6 +16,7 @@ using TRE_API.Repositories.DbContexts;
 using EasyNetQ.Management.Client.Model;
 using BL.Rabbit;
 using EasyNetQ;
+using Newtonsoft.Json;
 
 namespace TRE_API.Controllers
 {

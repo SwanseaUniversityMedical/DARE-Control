@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace BL.Models.ViewModels
 {
-    public class fetchFileMQ
+    public class FetchFileMQ
     {
         public string Url { get; set; }
         public string BucketName { get; set; }
-        public string Key { get; set; }
+        public string? Key { get; set; }
     }
 }
