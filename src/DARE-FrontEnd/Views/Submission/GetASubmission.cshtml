@@ -290,7 +290,7 @@
                         foreach (var child in Model.Submission.Children)
                         {
                                         <th class="col">@child.Tre?.Name.ToString()</th>
-                        }
+                        }   
                     }
                             </tr>
                         </thead>
@@ -319,8 +319,11 @@
                                                             @foreach (var status in validstats)
                                                             {
                                                                 <li>
-                                                                    <span data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00 Runtime: 0m">
-                                                                        @status.Status
+                                                                    @{var runtime = status.End - status.Start;}
+                                                                    <span data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 @status.Start Ended: xx/xx/xxxx 00:00:00 @status.End Runtime: @runtime.Minutes">
+
+                                                                        @Helpers.PrettyStatus(status.Status)
+                                                                        
                                                                     </span>
                                                                 </li>
                                                             }
@@ -362,8 +365,122 @@
 
                                                     @foreach (var status in validstats)
                                                     {
-                                                            <li>
-                                                                <span data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 Ended: xx/xx/xxxx 00:00:00 Runtime: 0m">
+                                                        <li>
+                                                            @{
+                                                                var runtime = status.End - status.Start;
+                                                                var displayRuntime = "";
+                                                                var displaySec = " seconds";
+                                                                var displayMin = " minutes";
+                                                                var displayHour = " hours";
+                                                                var displayDay = " days";
+
+                                                                if (runtime.TotalSeconds < 60)
+                                                                {
+                                                                    if (runtime.Seconds == 1)
+                                                                    {
+                                                                        displaySec = " Second ";
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        displaySec = " Seconds ";
+                                                                    }
+
+                                                                    displayRuntime = @runtime.Seconds + displaySec;
+
+
+                                                                }
+                                                                else if (runtime.TotalMinutes < 60)
+                                                                {
+                                                                    if (runtime.Minutes == 1)
+                                                                    {
+                                                                        displayMin = " Minute ";
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        displayMin = " Minutes ";
+                                                                    }
+                                                                    if (runtime.Seconds == 1)
+                                                                    {
+                                                                        displaySec = " Second ";
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        displaySec = " Seconds ";
+                                                                    }
+                                                                    displayRuntime = @runtime.Minutes + displayMin + @runtime.Seconds + " and " + displaySec  ;
+
+                                                                }
+                                                                else if (runtime.TotalHours < 24)
+                                                                {
+                                                                    if (runtime.Hours == 1)
+                                                                    {
+                                                                        displayHour = " Hour ";
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        displayHour = " Hours ";
+                                                                    }
+                                                                    if (runtime.Minutes == 1)
+                                                                    {
+                                                                        displayMin = " Minute ";
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        displayMin = " Minutes ";
+                                                                    }
+                                                                    if (runtime.Seconds == 1)
+                                                                    {
+                                                                        displaySec = " Second ";
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        displaySec = " Seconds ";    
+                                                                    }
+
+
+                                                                    displayRuntime = runtime.Hours + displayHour + @runtime.Minutes + displayMin + " and " + @runtime.Seconds + displaySec;
+                                                                }
+                                                                else
+                                                                {
+                                                                    if (runtime.Days == 1)
+                                                                    {
+                                                                        displayDay = " Day ";
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        displayDay = " Days ";
+                                                                    }
+                                                                    if (runtime.Hours == 1)
+                                                                    {
+                                                                        displayHour = " Hour ";
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        displayHour = " Hours ";
+                                                                    }
+                                                                    if (runtime.Minutes == 1)
+                                                                    {
+                                                                        displayMin = " Minute ";
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        displayMin = " Minutes ";
+                                                                    }
+                                                                    if (runtime.Seconds == 1)
+                                                                    {
+                                                                        displaySec = " Second ";
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        displaySec = " Seconds ";    
+                                                                    }
+
+                                                                    displayRuntime = runtime.Days + displayDay + runtime.Hours + displayHour + @runtime.Minutes + displayMin + " and " + @runtime.Seconds + displaySec;
+
+                                                                    
+                                                                }
+                                                            }
+                                                                <span data-bs-toggle="tooltip" data-bs-title="Started: @status.Start Ended:@status.End Runtime: @displayRuntime">
                                                                 
                                                                 @Helpers.PrettyStatus(status.Status)
 
