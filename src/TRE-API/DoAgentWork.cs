@@ -54,19 +54,59 @@ namespace TRE_API
         {
 
             Console.WriteLine("Testing");
-            string jsonContent = "{ \"name\": \"Hello World\", \"description\": \"Hello World, inspired by Funnel's most basic example\",\r\n\"executors\": [\r\n{ \"image\": \"alpine\", \"command\": [ \"sleep\", \"5m\" ] },\r\n{ \"image\": \"alpine\", \"command\": [ \"echo\", \"TESK says:   Hello World\" ]    }\r\n  ]\r\n}";
-
+            string jsonContent = @"{
+    ""name"": ""Hello World"",
+    ""description"": ""Hello World, inspired by Funnel's most basic example"",
+    ""executors"": [{
+            ""image"": ""alpine"",
+            ""command"": [""sleep"", ""5m""]
+        }, {
+            ""image"": ""alpine"",
+            ""command"": [""echo"", ""TESK says:   Hello World""]
+        }
+    ],
+	""outputs"" : [
+		{
+          ""path"": ""/data/outfile"",
+          ""url"": ""s3://my-object-store/outfile-1"",
+          ""type"": ""FILE""
+        },
+		{
+          ""path"": ""/data/outfile2"",
+          ""url"": ""s3://my-object-store/outfile-2"",
+          ""type"": ""FILE""
+        },
+	]
+}
+";
             var arr = new HttpClient();
 
             var role = "COOLSchemas2";
 
-            var data = await arr.GetAsync($"http://localhost:8090/api/Authentication/GetNewToken/{role}");
+            var Token = _hasuraAuthenticationService.GetNewToken(role);
 
-            var Token = await data.Content.ReadAsStringAsync();
 
             var ob = JObject.Parse(jsonContent);
 
+
+            foreach (var output in ob["outputs"])
+            {
+               //xzczxcfdszzzz []
+               // var aaa = output.ToString();
+            }
+           
+
             JObject NewOb = new JObject();
+
+            /*
+      "outputs": [
+        {
+          "path": "/data/outfile",
+          "url": "s3://my-object-store/outfile-1",
+          "type": "FILE"
+        }
+      ],
+            */
 
             ob.Add("tags", NewOb);
 

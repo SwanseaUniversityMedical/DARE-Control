@@ -97,7 +97,7 @@ builder.Services.AddScoped<ISubmissionHelper, SubmissionHelper>();
 builder.Services.AddScoped<IDoSyncWork, DoSyncWork>();
 builder.Services.AddScoped<IDoAgentWork, DoAgentWork>();
 builder.Services.AddScoped<IHasuraService, HasuraService>();
-builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IHasuraAuthenticationService, HasuraAuthenticationService>();
 
 
 var TVP = new TokenValidationParameters
@@ -320,7 +320,7 @@ app.MapHub<SignalRService>("/signalRHub", options =>
 }).RequireCors(MyAllowSpecificOrigins);
 app.UseHangfireDashboard();
 RecurringJob.AddOrUpdate<IDoSyncWork>(a => a.Execute(), Cron.MinuteInterval(10));
-RecurringJob.AddOrUpdate<IDoAgentWork>("Scan Submissions", a => a.Execute(), Cron.MinuteInterval(10));
+RecurringJob.AddOrUpdate<IDoAgentWork>("Scan Submissions", a => a.testing(), Cron.MinuteInterval(1));
 
 var port = app.Environment.WebRootPath;
 
