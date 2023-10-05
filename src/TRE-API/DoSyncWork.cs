@@ -14,19 +14,19 @@ using TRE_API.Services;
 
 namespace TRE_API
 {
-    public interface IDoWork
+    public interface IDoSyncWork
     {
         void Execute();
     }
 
-    public class DoWork : IDoWork
+    public class DoSyncWork : IDoSyncWork
     {
         private readonly IServiceProvider _serviceProvider;
 
         
 
 
-        public DoWork(IServiceProvider serviceProvider)
+        public DoSyncWork(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         

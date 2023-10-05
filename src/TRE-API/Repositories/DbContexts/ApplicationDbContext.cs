@@ -24,6 +24,9 @@ namespace TRE_API.Repositories.DbContexts
         public DbSet<SubmissionCredentials> SubmissionCredentials { get; set; }
         public DbSet<TreAuditLog> TreAuditLogs { get; set; }
 
+        public DbSet<TESKstatus> TESK_Status { get; set; }
+        public DbSet<TeskAudit> TESK_Audit { get; set; }
+
 
     }
 }

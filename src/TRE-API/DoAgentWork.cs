@@ -9,72 +9,50 @@ using Microsoft.Extensions.DependencyInjection;
 using EasyNetQ;
 using Newtonsoft.Json;
 using Serilog;
-using TREAgent.Services;
+
 using Microsoft.Extensions.Hosting;
 using Hangfire;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Security.Policy;
 using Microsoft.EntityFrameworkCore;
-using TREAgent.Repositories;
-using TREAgent.Repositories.DbContexts;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-using System.Data;
-using TESKstatus = TREAgent.Repositories.TESKstatus;
 
-namespace TREAgent
+using System.Threading.Tasks;
+using TRE_API.Repositories.DbContexts;
+using TRE_API.Services;
+
+namespace TRE_API
 {
-    public interface IDoWork
+    public interface IDoAgentWork
     {
         void Execute();
         void CheckTESK(string taskID, string TesId);
         void ClearJob(string jobname);
-        Task testing();
+        void testing();
     }
 
     // TESK : http://172.16.34.31:8080/    https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks
 
 
-    public class DoWork : IDoWork
+    public class DoAgentWork : IDoAgentWork
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ApplicationDbContext _dbContext;
-        public DoWork(IServiceProvider serviceProvider, ApplicationDbContext dbContext)
+        private readonly ISubmissionHelper _subHelper;
+        public DoAgentWork(IServiceProvider serviceProvider, ApplicationDbContext dbContext, ISubmissionHelper subHelper)
         {
             _serviceProvider = serviceProvider;
             _dbContext = dbContext;
+            _subHelper = subHelper;
         }
 
-        public async Task testing()
+        public void testing()
         {
 
             Console.WriteLine("Testing");
             string jsonContent = "{ \"name\": \"Hello World\", \"description\": \"Hello World, inspired by Funnel's most basic example\",\r\n\"executors\": [\r\n{ \"image\": \"alpine\", \"command\": [ \"sleep\", \"5m\" ] },\r\n{ \"image\": \"alpine\", \"command\": [ \"echo\", \"TESK says:   Hello World\" ]    }\r\n  ]\r\n}";
 
-            var arr = new HttpClient();
-
-            var role = "COOLSchemas2";
-
-            var data = await arr.GetAsync($"http://localhost:8090/api/Authentication/GetNewToken/{role}");
-
-            var Token = await data.Content.ReadAsStringAsync();
-
-            var ob = JObject.Parse(jsonContent);
-
-            JObject NewOb = new JObject();
-
-            ob.Add("tags", NewOb);
-
-            NewOb.Add("HASURAAuthenticationToken", Token);
-
-            _dbContext.TokensToExpire.Add(new TokenToExpire()
-            {
-                TesId = "99",
-                Token = Token
-            });
-
-            CreateTESK(ob.ToString(), "99");
+            CreateTESK(jsonContent,"99");
         }
 
         public string CreateTESK(string jsonContent, string TesId)
@@ -109,9 +87,9 @@ namespace TREAgent
                     var responseObj = JsonConvert.DeserializeObject<ResponseModel>(responseBody);
                     string id = responseObj.id;
 
-                    RecurringJob.AddOrUpdate<IDoWork>(id, a => a.CheckTESK(id,TesId), Cron.MinuteInterval(1));
+                    RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTESK(id,TesId), Cron.MinuteInterval(1));
 
-                    _dbContext.Add(new Repositories.TeskAudit(){message = jsonContent, teskid = id});
+                    _dbContext.Add(new TeskAudit(){message = jsonContent, teskid = id});
                     _dbContext.SaveChanges();
 
                     return id;
@@ -130,19 +108,19 @@ namespace TREAgent
         }
         public void CheckTESK(string taskID, string TesId)
         {
-            Console.WriteLine("Check TESK : " + taskID + ",  TES : " + TesId);
+            Console.WriteLine("Check TESK : "+taskID + ",  TES : "+TesId);
 
-            string url = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks/" + taskID + "?view=basic";
+            string url = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks/"+taskID+"?view=basic";
             using (HttpClient client = new HttpClient())
             {
-                HttpResponseMessage response = client.GetAsync(url).Result;
+                HttpResponseMessage response =  client.GetAsync(url).Result;
 
                 Console.WriteLine(response.StatusCode);
 
                 if (response.IsSuccessStatusCode)
                 {
                     string content = response.Content.ReadAsStringAsync().Result;
-                    //                    Console.WriteLine(content);
+//                    Console.WriteLine(content);
 
                     TESKstatus status = JsonConvert.DeserializeObject<TESKstatus>(content);
 
@@ -168,76 +146,54 @@ namespace TREAgent
 
                     _dbContext.SaveChanges();
 
-                    if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR"))
-                    {
-                        Console.WriteLine("*** status change *** " + status.state);
-
-                        // send update
-                        using (var scope = _serviceProvider.CreateScope())
+                        if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR"))
                         {
-                            TokenToExpire Token = null;
+                            Console.WriteLine("*** status change *** " + status.state);
 
-                            var statusMessage = StatusType.TransferredToPod.ToString();
-                            switch (status.state)
+                            // send update
+                            using (var scope = _serviceProvider.CreateScope())
                             {
-                                case "QUEUED":
-                                    statusMessage = StatusType.TransferredToPod.ToString();
-                                    break;
-                                case "RUNNING":
-                                    statusMessage = StatusType.PodProcessing.ToString();
-                                    break;
-                                case "COMPLETE":
-                                    statusMessage = StatusType.PodProcessingComplete.ToString();
-                                    Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.TesId == TesId);
-                                    if (Token != null)
-                                    {
-                                        _dbContext.TokensToExpire.Remove(Token);
-                                        var arr = new HttpClient();
-                                        arr.PostAsync($"http://localhost:8090/api/Authentication/ExpirerToken/{Token.Token}", null);
-                                    }
-                                    _dbContext.SaveChanges();
-                                    break;
-                                case "EXECUTOR_ERROR":
-                                    statusMessage = StatusType.Cancelled.ToString();
-                                    Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.TesId == TesId);
-                                    if (Token != null)
-                                    {
-                                        _dbContext.TokensToExpire.Remove(Token);
-                                        var arr = new HttpClient();
-                                        arr.PostAsync($"http://localhost:8090/api/Authentication/ExpirerToken/{Token.Token}", null);
-                                    }
-                                    _dbContext.SaveChanges();
-                                    break;
-                            }
-
-                            var treApi =
-                                scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
-                            var result = treApi.CallAPIWithoutModel<APIReturn>(
-                                "/api/Submission/UpdateStatusForTre",
-                                new Dictionary<string, string>()
+                                var statusMessage = StatusType.TransferredToPod;
+                                switch (status.state)
                                 {
-                                    { "tesId", TesId },
-                                    { "statusType", statusMessage },
-                                    { "description", "" }
-                                }).Result;
+                                    case "QUEUED":
+                                        statusMessage = StatusType.TransferredToPod;
+                                        break;
+                                    case "RUNNING":
+                                        statusMessage = StatusType.PodProcessing;
+                                        break;
+                                    case "COMPLETE":
+                                        statusMessage = StatusType.PodProcessingComplete;
+                                        break;
+                                    case "EXECUTOR_ERROR":
+                                        statusMessage = StatusType.Cancelled;
+                                        break;
+                                }
+
+
+                                var result = _subHelper.UpdateStatusForTre(TesId, statusMessage, "");
                         }
 
                         // are we done ?
                         if (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR")
-                        {
-                            // Do this to avoid db locking issues
-                            BackgroundJob.Enqueue(() => ClearJob(taskID));
-                            // RecurringJob.RemoveIfExists(taskID);
+                            {
+                                // Do this to avoid db locking issues
+                                BackgroundJob.Enqueue(() => ClearJob(taskID));
+                                // RecurringJob.RemoveIfExists(taskID);
+                            }
                         }
-                    }
-                    else
-                        Console.WriteLine("NO CHANGE " + status.state);
+                        else
+                            Console.WriteLine("NO CHANGE " + status.state);
+                  
+
                 }
                 else
                 {
                     Console.WriteLine($"HTTP Request {url} failed with status code: {response.StatusCode}");
                 }
             }
+
+           
         }
 
 
@@ -245,6 +201,7 @@ namespace TREAgent
         // Method executed upon hangfire job
         public void Execute()
         {
+            
             // control use of dependency injection
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -261,10 +218,10 @@ namespace TREAgent
 
                 // Get list of submissions
                 List<Submission> listOfSubmissions;
-                var treApi = scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
+               // var treApi = scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
                 try
                 {
-                    listOfSubmissions = treApi.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre").Result;
+                    listOfSubmissions = _subHelper.GetWaitingSubmissionForTre();
                 }
                 catch (Exception e)
                 {
@@ -279,28 +236,14 @@ namespace TREAgent
                 {
                     Log.Information("Submission: {submission}", aSubmission);
 
-                    var paramlist = new Dictionary<string, string>();
-                    try
-                    {
-                        paramlist.Add("projectId", aSubmission.Project.Id.ToString());
-                        paramlist.Add("userId", aSubmission.SubmittedBy.Id.ToString());
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Error("Submission does not have project and/or user");
-                    }
+                    
                     
                     // Check user is allowed ont he project
-                    if ( paramlist.Count==2 && !treApi.CallAPIWithoutModel<BoolReturn>("/api/Submission/IsUserApprovedOnProject", paramlist).Result.Result)
+                    if ( ! _subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
                     {
-                        Log.Error("User/project {details} is not value for this submission {submission}", paramlist, aSubmission);
+                        Log.Error("User {UserID}/project {ProjectId} is not value for this submission {submission}", aSubmission.SubmittedBy.Id, aSubmission.Project.Id, aSubmission);
                         // record error with submission layer
-                        var result = treApi.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-                            new Dictionary<string, string>()
-                            {
-                                { "tesId", aSubmission.TesId }, { "statusType", StatusType.InvalidUser.ToString() },
-                                { "description", "" }
-                            }).Result;
+                        var result = _subHelper.UpdateStatusForTre(aSubmission.TesId, StatusType.InvalidUser, "");
                     }
                     else
                     {
@@ -333,7 +276,7 @@ namespace TREAgent
                             {
                                 StringContent x = new StringContent("abc");
 
-                                var callHUTCH = treApi.CallAPI("url", x, null,false);
+                               // var callHUTCH = treApi.CallAPI("url", x, null,false);
                               
                             }
                             catch (Exception e)
@@ -355,13 +298,7 @@ namespace TREAgent
                         {
                             try
                             {
-                                var result = treApi.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-                                    new Dictionary<string, string>()
-                                    {
-                                        { "tesId", aSubmission.TesId },
-                                        { "statusType", StatusType.TransferredToPod.ToString() },
-                                        { "description", "" }
-                                    }).Result;
+                                var result = _subHelper.UpdateStatusForTre(aSubmission.TesId, StatusType.TransferredToPod, "");
                             }
                             catch (Exception e)
                             {
