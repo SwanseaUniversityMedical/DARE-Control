@@ -8,6 +8,9 @@ using BL.Models.Settings;
 using Microsoft.AspNetCore.Http;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using BL.Models.Tes;
+using Newtonsoft.Json;
+using Amazon.Runtime.Internal.Transform;
+using System.Text.Json;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -336,17 +339,25 @@ namespace DARE_FrontEnd.Controllers
                 //paramList.Add("path", model.File.ToString());
                 //paramList.Add("bucketName", model.SubmissionBucket.ToString());
                 //var fileUpload = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/UploadToMinio/", paramList).Result;
+
+                var filestring = ConvertIFormFileToJson(model.File);
+
                 var data = new UploadFileInfo()
                 {
                     BucketName = model.SubmissionBucket,
                     File = model.File,
                 };
+                //var data2 = JsonConvert.SerializeObject(data); 
+
                 var paramss = new Dictionary<string, string>();
 
                 paramss.Add("bucketName", model.SubmissionBucket);
+                paramss.Add("file", filestring);
 
-                // var uplodaResult = _clientHelper.CallAPI<UploadFileInfo, UploadFileInfo?>("/api/Project/UploadToMinio", data).Result;
-                var uplodaResult = _clientHelper.CallAPIToSendFile<UploadFileInfo?>("/api/Project/UploadToMinio", "file", model.File/*, paramss*/).Result;
+                var uplodaResult = _clientHelper.CallAPIWithoutModel<APIReturn>("/api/Project/UploadToMinio2", paramss).Result;
+
+                //var uplodaResult = _clientHelper.CallAPI<UploadFileInfo, UploadFileInfo?>("/api/Project/UploadToMinio", data).Result;
+                //var uplodaResult = _clientHelper.CallAPIToSendFile<UploadFileInfo?>("/api/Project/UploadToMinio", "file", model.File/*, paramss*/).Result;
             }
             var test = new TesTask()
             {
@@ -372,6 +383,42 @@ namespace DARE_FrontEnd.Controllers
 
             return Json(new { success = true, message = "Data received successfully." });
         }
+
+        public class FileData
+        {
+            public string FileName { get; set; }
+            public string ContentType { get; set; }
+            public string Content { get; set; }
+        }
+
+        public string ConvertIFormFileToJson(IFormFile formFile)
+        {
+            if (formFile == null)
+                return null;
+
+            
+            using (var stream = new MemoryStream())
+            {
+                formFile.CopyTo(stream);
+                var bytes = stream.ToArray();
+
+                var base64String = Convert.ToBase64String(bytes);
+
+                var fileData = new FileData
+                {
+                    FileName = formFile.FileName,
+                    ContentType = formFile.ContentType,
+                    Content = base64String
+                };
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    System.Text.Json.JsonSerializer.SerializeAsync(memoryStream, fileData).Wait();
+                    return System.Text.Encoding.UTF8.GetString(memoryStream.ToArray());
+                }
+            }
+        }
+
 
     }
 }

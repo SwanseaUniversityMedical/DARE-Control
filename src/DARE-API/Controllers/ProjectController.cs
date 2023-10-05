@@ -506,6 +506,43 @@ namespace DARE_API.Controllers
             return uploadFile;
         }
 
+        [HttpGet("UploadToMinio2")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UploadToMinio2(string bucketName, string file)
+        {
+            //var data = JsonConvert.DeserializeObject<UploadFileInfo>(file);
+            //string bucketName = "dsfsdfs";
+            IFormFile test = ConvertJsonToIFormFile(file);
+            var submissionBucket = await _minioHelper.UploadFileAsync(_minioSettings, test, bucketName, test.Name);
+            //var uploadFile = new UploadFileInfo();
+            return Ok();
+        }
+
+        private IFormFile ConvertJsonToIFormFile(string json)
+        {
+            if (string.IsNullOrEmpty(json))
+                return null;
+            var fileData = System.Text.Json.JsonSerializer.Deserialize<FileData>(json);
+
+            var bytes = Convert.FromBase64String(fileData.Content);
+
+            var fileName = fileData.FileName;
+            var contentType = fileData.ContentType;
+
+            var formFile = new FormFile(new MemoryStream(bytes), 0, bytes.Length, null, fileName)
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = contentType
+            };
+
+            return formFile;
+        }
+        private class FileData
+        {
+            public string FileName { get; set; }
+            public string ContentType { get; set; }
+            public string Content { get; set; }
+        }
 
         //End
 
