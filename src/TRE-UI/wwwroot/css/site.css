@@ -134,12 +134,27 @@ a.bg-grey:hover {
     box-shadow: 1px 1px 3px 0 rgba(0,0,0,.09);
 }
 
-.form-group {
-    margin-bottom: 20px;
-}
-
 input, .form-control, .form-select {
     border-color: rgb(208, 211, 212);
+    border-width: 2px;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.input-group .form-control {
+    border-radius: 0.25rem 0 0 0.25rem !important;
+}
+
+.input-group-append .input-group-text {
+    border: 2px solid #ced4da;
+    border-radius: 0 0.25rem 0.25rem 0;
+    height: 100%;
+    margin-left: -1px;
+}
+
+.form-check-input {
     border-width: 2px;
 }
 
@@ -272,6 +287,10 @@ header .navbar-collapse .nav-link {
 
 .nav-underline .nav-link.active, .nav-underline .show > .nav-link {
     border-bottom: 3px solid #3db28c;
+}
+
+.nav .nav-link {
+    font-weight: bold;
 }
 
 .footer-top {
