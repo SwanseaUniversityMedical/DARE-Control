@@ -41,11 +41,13 @@ namespace TRE_API
         private readonly IServiceProvider _serviceProvider;
         private readonly ApplicationDbContext _dbContext;
         private readonly ISubmissionHelper _subHelper;
-        public DoAgentWork(IServiceProvider serviceProvider, ApplicationDbContext dbContext, ISubmissionHelper subHelper)
+        private readonly IHasuraAuthenticationService _hasuraAuthenticationService;
+        public DoAgentWork(IServiceProvider serviceProvider, ApplicationDbContext dbContext, ISubmissionHelper subHelper, IHasuraAuthenticationService hasuraAuthenticationService)
         {
             _serviceProvider = serviceProvider;
             _dbContext = dbContext;
             _subHelper = subHelper;
+            _hasuraAuthenticationService = hasuraAuthenticationService;
         }
 
         public async Task testing()
