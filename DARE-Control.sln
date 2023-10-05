@@ -32,7 +32,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data-Egress-API", "src\Data
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data-Egress-UI", "src\Data-Egress-UI\Data-Egress-UI.csproj", "{80C9C407-D56A-4FD1-9FE3-58B046729ADC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tre-Hasura", "..\Tre-Hasura\Tre-Hasura.csproj", "{3BAD3B69-2B08-4E09-BB8A-2611A0990062}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tre-Hasura", "src\Tre-Hasura\Tre-Hasura.csproj", "{3BAD3B69-2B08-4E09-BB8A-2611A0990062}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
