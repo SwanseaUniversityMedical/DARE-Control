@@ -6,7 +6,15 @@ using System.Threading.Tasks;
 
 namespace Tre_Hasura
 {
-    internal class HasuraQuery
+    public interface IHasuraQuery
     {
+        void RunQuery(string token, string role, string Query);
+    }
+    public class HasuraQuery : IHasuraQuery    
+    {
+        public void RunQuery(string token, string role, string Query)
+        {
+
+        }
     }
 }
