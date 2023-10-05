@@ -1,6 +1,7 @@
 ﻿
 using BL.Models;
 using Microsoft.EntityFrameworkCore;
+using TREAgent.Repositories;
 
 namespace TRE_API.Repositories.DbContexts
 {
@@ -27,6 +28,9 @@ namespace TRE_API.Repositories.DbContexts
         public DbSet<TESKstatus> TESK_Status { get; set; }
         public DbSet<TeskAudit> TESK_Audit { get; set; }
 
+        public DbSet<TokenToExpire> TokensToExpire { get; set; }
+
+        public DbSet<GeneratedRole> GeneratedRole { get; set; }
 
     }
 }

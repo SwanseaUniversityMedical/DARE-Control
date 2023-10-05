@@ -20,6 +20,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
+using Newtonsoft.Json.Linq;
+using TREAgent.Repositories;
 
 namespace TRE_API
 {
@@ -28,7 +30,7 @@ namespace TRE_API
         void Execute();
         void CheckTESK(string taskID, string TesId);
         void ClearJob(string jobname);
-        void testing();
+        Task testing();
     }
 
     // TESK : http://172.16.34.31:8080/    https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks
@@ -46,13 +48,35 @@ namespace TRE_API
             _subHelper = subHelper;
         }
 
-        public void testing()
+        public async Task testing()
         {
 
             Console.WriteLine("Testing");
             string jsonContent = "{ \"name\": \"Hello World\", \"description\": \"Hello World, inspired by Funnel's most basic example\",\r\n\"executors\": [\r\n{ \"image\": \"alpine\", \"command\": [ \"sleep\", \"5m\" ] },\r\n{ \"image\": \"alpine\", \"command\": [ \"echo\", \"TESK says:   Hello World\" ]    }\r\n  ]\r\n}";
 
-            CreateTESK(jsonContent,"99");
+            var arr = new HttpClient();
+
+            var role = "COOLSchemas2";
+
+            var data = await arr.GetAsync($"http://localhost:8090/api/Authentication/GetNewToken/{role}");
+
+            var Token = await data.Content.ReadAsStringAsync();
+
+            var ob = JObject.Parse(jsonContent);
+
+            JObject NewOb = new JObject();
+
+            ob.Add("tags", NewOb);
+
+            NewOb.Add("HASURAAuthenticationToken", Token);
+
+            _dbContext.TokensToExpire.Add(new TokenToExpire()
+            {
+                TesId = "99",
+                Token = Token
+            });
+
+            CreateTESK(ob.ToString(), "99");
         }
 
         public string CreateTESK(string jsonContent, string TesId)
@@ -153,7 +177,8 @@ namespace TRE_API
                             // send update
                             using (var scope = _serviceProvider.CreateScope())
                             {
-                                var statusMessage = StatusType.TransferredToPod;
+                            TokenToExpire Token = null;
+                            var statusMessage = StatusType.TransferredToPod;
                                 switch (status.state)
                                 {
                                     case "QUEUED":
@@ -164,9 +189,25 @@ namespace TRE_API
                                         break;
                                     case "COMPLETE":
                                         statusMessage = StatusType.PodProcessingComplete;
+                                        Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.TesId == TesId);
+                                        if (Token != null)
+                                        {
+                                            _dbContext.TokensToExpire.Remove(Token);
+                                            var arr = new HttpClient();
+                                            arr.PostAsync($"http://localhost:8090/api/Authentication/ExpirerToken/{Token.Token}", null);
+                                        }
+                                        _dbContext.SaveChanges();
                                         break;
                                     case "EXECUTOR_ERROR":
                                         statusMessage = StatusType.Cancelled;
+                                        Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.TesId == TesId);
+                                        if (Token != null)
+                                        {
+                                            _dbContext.TokensToExpire.Remove(Token);
+                                            var arr = new HttpClient();
+                                            arr.PostAsync($"http://localhost:8090/api/Authentication/ExpirerToken/{Token.Token}", null);
+                                        }
+                                        _dbContext.SaveChanges();
                                         break;
                                 }
 

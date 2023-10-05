@@ -23,6 +23,8 @@ using BL.Models.ViewModels;
 using BL.Rabbit;
 using Microsoft.Extensions.Options;
 using EasyNetQ;
+using TRE_API.Models;
+using TREAgent.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +62,10 @@ var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
 builder.Services.AddSingleton(treKeyCloakSettings);
 
+var HasuraSettings = new HasuraSettings();
+configuration.Bind(nameof(HasuraSettings), HasuraSettings);
+builder.Services.AddSingleton(HasuraSettings);
+
 var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
@@ -83,7 +89,7 @@ builder.Services.AddScoped<IDareSyncHelper, DareSyncHelper>();
 builder.Services.AddScoped<ISubmissionHelper, SubmissionHelper>();
 builder.Services.AddScoped<IDoSyncWork, DoSyncWork>();
 builder.Services.AddScoped<IDoAgentWork, DoAgentWork>();
-
+builder.Services.AddScoped<IHasuraService, HasuraService>();
 
 var TVP = new TokenValidationParameters
 {
