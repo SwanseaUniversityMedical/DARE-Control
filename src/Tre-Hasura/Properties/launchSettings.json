@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Tre-Hasura": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}
