@@ -12,6 +12,8 @@ namespace BL.Services
         Task<bool> FetchAndStoreObject(string url, MinioSettings minioSettings, string bucketName, string key);
         Task<bool> RabbitExternalObject(FetchFileMQ msgBytes);
         Task<bool> CreateBucketPolicy(string bucketName);
+        Task<bool> CopyObject(MinioSettings minioSettings, string sourceBucketName, string destinationBucketName, string sourceObjectKey, string destinationObjectKey);
+        Task<string> ShareMinioObject(MinioSettings minioSettings, string bucketName, string objectKey);
 
     }
 }
