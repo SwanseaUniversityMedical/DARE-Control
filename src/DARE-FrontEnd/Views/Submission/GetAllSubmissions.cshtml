@@ -45,10 +45,157 @@
                                         break;
                                 }
                             }*@
+                            @{
+                                var overallStatus = submission.Status;
+                                if (overallStatus == BL.Models.Enums.StatusType.Completed)
+                                {
+
+                                    <h6 class="mb-0">
+                                        <span class="badge bg-success rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Completed: @submission.EndTime">
+                                            <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
+                                            <span>Completed</span>
+                                        </span>
+                                    </h6>
+                                }
+                                else if (overallStatus == BL.Models.Enums.StatusType.Failed)
+                                {
+                                    <h6 class="mb-0">
+                                        <span class="badge bg-danger rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Failed: @submission.EndTime">
+                                            <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
+                                            <span>Failed</span>
+                                        </span>
+                                    </h6>
+                                }
+                                else
+                                {
+                                    var runtime = DateTime.UtcNow - submission.StartTime;
+                                    var displayRuntime = "";
+                                    var displaySec = " seconds";
+                                    var displayMin = " minutes";
+                                    var displayHour = " hours";
+                                    var displayDay = " days";
+
+                                    if (runtime.TotalSeconds < 60)
+                                    {
+                                        if (runtime.Seconds == 1)
+                                        {
+                                            displaySec = " Second ";
+                                        }
+                                        else
+                                        {
+                                            displaySec = " Seconds ";
+                                        }
+
+                                        displayRuntime = @runtime.Seconds + displaySec;
+
+
+                                    }
+                                    else if (runtime.TotalMinutes < 60)
+                                    {
+                                        if (runtime.Minutes == 1)
+                                        {
+                                            displayMin = " Minute ";
+                                        }
+                                        else
+                                        {
+                                            displayMin = " Minutes ";
+                                        }
+                                        if (runtime.Seconds == 1)
+                                        {
+                                            displaySec = " Second ";
+                                        }
+                                        else
+                                        {
+                                            displaySec = " Seconds ";
+                                        }
+                                        displayRuntime = @runtime.Minutes + displayMin + @runtime.Seconds + " and " + displaySec;
+
+                                    }
+                                    else if (runtime.TotalHours < 24)
+                                    {
+                                        if (runtime.Hours == 1)
+                                        {
+                                            displayHour = " Hour ";
+                                        }
+                                        else
+                                        {
+                                            displayHour = " Hours ";
+                                        }
+                                        if (runtime.Minutes == 1)
+                                        {
+                                            displayMin = " Minute ";
+                                        }
+                                        else
+                                        {
+                                            displayMin = " Minutes ";
+                                        }
+                                        if (runtime.Seconds == 1)
+                                        {
+                                            displaySec = " Second ";
+                                        }
+                                        else
+                                        {
+                                            displaySec = " Seconds ";
+                                        }
+
+
+                                        displayRuntime = runtime.Hours + displayHour + @runtime.Minutes + displayMin + " and " + @runtime.Seconds + displaySec;
+                                    }
+                                    else
+                                    {
+                                        if (runtime.Days == 1)
+                                        {
+                                            displayDay = " Day ";
+                                        }
+                                        else
+                                        {
+                                            displayDay = " Days ";
+                                        }
+                                        if (runtime.Hours == 1)
+                                        {
+                                            displayHour = " Hour ";
+                                        }
+                                        else
+                                        {
+                                            displayHour = " Hours ";
+                                        }
+                                        if (runtime.Minutes == 1)
+                                        {
+                                            displayMin = " Minute ";
+                                        }
+                                        else
+                                        {
+                                            displayMin = " Minutes ";
+                                        }
+                                        if (runtime.Seconds == 1)
+                                        {
+                                            displaySec = " Second ";
+                                        }
+                                        else
+                                        {
+                                            displaySec = " Seconds ";
+                                        }
+
+                                        displayRuntime = runtime.Days + displayDay + runtime.Hours + displayHour + @runtime.Minutes + displayMin + " and " + @runtime.Seconds + displaySec;
+
+
+                                    }
+                                    <h6 class="mb-0">
+                                        <span class="badge bg-primary rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Runtime: @displayRuntime">
+                                            <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
+                                            <span>Running</span>
+                                        </span>
+                                    </h6>
+
+
+                                }
+
+                            }
+@*
                             <i class="fa-solid fa-circle-check fs-5 text-success" data-bs-toggle="tooltip" data-bs-title="Completed: xx/xx/xxxx"></i>
                             <i class="fa-solid fa-triangle-exclamation fs-5 text-danger" data-bs-toggle="tooltip" data-bs-title="Failed: error message"></i>
                             <i class="fa-solid fa-circle-notch fa-spin fs-5 text-primary" data-bs-toggle="tooltip" data-bs-title="@submission.Status"></i>
-                        </td>
+                   *@     </td>
                         <td>
                             <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })">
                                 <h2 class="mb-0 fw-bold hover-underline fs-6">
