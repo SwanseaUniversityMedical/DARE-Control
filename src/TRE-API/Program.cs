@@ -97,6 +97,8 @@ builder.Services.AddScoped<ISubmissionHelper, SubmissionHelper>();
 builder.Services.AddScoped<IDoSyncWork, DoSyncWork>();
 builder.Services.AddScoped<IDoAgentWork, DoAgentWork>();
 builder.Services.AddScoped<IHasuraService, HasuraService>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+
 
 var TVP = new TokenValidationParameters
 {

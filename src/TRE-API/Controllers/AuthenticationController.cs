@@ -13,6 +13,7 @@ using TRE_TESK.Models;
 using Newtonsoft.Json.Linq;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Models;
+using TRE_API.Services;
 
 namespace TRE_TESK.Controllers
 {
@@ -22,39 +23,26 @@ namespace TRE_TESK.Controllers
     {
         private readonly AuthenticationSettings _authenticationSettings;
         private readonly ApplicationDbContext _applicationDbContext;
-        
+        private readonly IHasuraAuthenticationService _hasuraAuthenticationService;
 
-        public AuthenticationController(AuthenticationSettings AuthenticationSettings, ApplicationDbContext applicationDbContext)
+        public AuthenticationController(AuthenticationSettings AuthenticationSettings, ApplicationDbContext applicationDbContext, IHasuraAuthenticationService hasuraAuthenticationService)
         {
             _authenticationSettings = AuthenticationSettings;
             _applicationDbContext = applicationDbContext;
+            _hasuraAuthenticationService = hasuraAuthenticationService;
         }
 
         [HttpGet("GetNewToken/{role}")]
         public string GetNewToken(string role)
         {
-            var Token = GenToken();
-
-            _applicationDbContext.DataToRoles.Add(new RoleData()
-            {
-                Token = Token,
-                Name = role,
-            });
-            _applicationDbContext.SaveChanges();
-            return Token;
+            return _hasuraAuthenticationService.GetNewToken(role);
 
         }
 
         [Microsoft.AspNetCore.Mvc.HttpPost("ExpirerToken/{Token}")]
         public bool ExpirerToken(string Token)
         {
-            var role = _applicationDbContext.DataToRoles.FirstOrDefault(x => x.Token == Token);
-            if (role == null) return false;
-
-
-            _applicationDbContext.DataToRoles.Remove(role);
-            _applicationDbContext.SaveChanges();
-            return true;
+            return _hasuraAuthenticationService.ExpirerToken(Token);
 
         }
 
@@ -62,62 +50,7 @@ namespace TRE_TESK.Controllers
         [HttpGet("")]
         public string Index([FromHeader] string MYCOOLToken)
         {
-            if (string.IsNullOrEmpty(MYCOOLToken))
-            {
-                return null;
-            }
-
-            var role = _applicationDbContext.DataToRoles.FirstOrDefault(x => x.Token == MYCOOLToken);
-            if (role == null) return null;
-
-
-            if ((DateTime.UtcNow - role.DateTime).Days > _authenticationSettings.TokenExpireDays)
-            {
-                _applicationDbContext.DataToRoles.Remove(role);
-                _applicationDbContext.SaveChanges();
-                return null;
-            }
-
-            var hasuraVariables = new Dictionary<string, string> {
-                        { "X-Hasura-Role", role.Name },
-                        { "X-Hasura-User-Ide", role.Id.ToString() },
-                };
-            //cool.StatusCode = 200;
-
-            var _jsonSerializerOptions = new JsonSerializerOptions()
-            {
-                PropertyNameCaseInsensitive = true,
-            };
-
-            var dta = System.Text.Json.JsonSerializer.Serialize(hasuraVariables, _jsonSerializerOptions);
-            return dta;
-
-        }
-
-        private string GenToken()
-        {
-            string code = "";
-
-            Random RNG = new Random();
-            bool Duplicate = true;
-            for (int i = 0; i < 3; i++)
-            {
-                string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
-
-                code = new string(Enumerable.Repeat(chars, 128).Select(s => s[RNG.Next(s.Length)]).ToArray());
-
-                if (_applicationDbContext.DataToRoles.Any(x => x.Token == code) == false)
-                {
-                    Duplicate = false;
-                    break;
-                }
-            }
-
-            if (Duplicate)
-            {
-                throw new Exception("Was unable to generate unique code");
-            }
-            return code;
+            return _hasuraAuthenticationService.CheckeTokenAndGetRoles(MYCOOLToken);
         }
     }
 }
