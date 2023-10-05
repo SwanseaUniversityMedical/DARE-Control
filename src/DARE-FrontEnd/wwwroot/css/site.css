@@ -113,9 +113,6 @@ a.bg-grey:hover {
     box-shadow: 1px 1px 3px 0 rgba(0,0,0,.09);
 }
 
-.form-group {
-    margin-bottom:20px;
-}
 input, .form-control, .form-select {
     border-color: rgb(208, 211, 212);
     border-width:2px;
