@@ -10,7 +10,7 @@ var configuration = GetConfiguration();
 string AppName = typeof(Program).Module.Name.Replace(".dll", "");
 
 Log.Logger = CreateSerilogLogger(configuration);
-Log.Information("Camunda logging Start.");
+Log.Information("Hasura Query starting");
 
 /// <summary>
 /// CreateSerilogLogger
