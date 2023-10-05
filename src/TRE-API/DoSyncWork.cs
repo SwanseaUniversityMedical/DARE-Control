@@ -40,8 +40,8 @@ namespace TRE_API
             {
                
                
-                var dareSyncHelper = scope.ServiceProvider.GetRequiredService<IDareSyncHelper>();
-                var result = dareSyncHelper.SyncSubmissionWithTre().Result;
+                //var dareSyncHelper = scope.ServiceProvider.GetRequiredService<IDareSyncHelper>();
+                //var result = dareSyncHelper.SyncSubmissionWithTre().Result;
                 
                 
                 

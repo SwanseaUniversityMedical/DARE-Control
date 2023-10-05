@@ -44,9 +44,8 @@ namespace TRE_API.Services
 
         public List<Submission>? GetWaitingSubmissionForTre()
         {
-            var result =
-                _dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre").Result;
-            return result;
+            //var result =_dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre").Result;
+            return null;
         }
     }
 }

@@ -263,6 +263,7 @@ namespace TRE_API
                 try
                 {
                     listOfSubmissions = _subHelper.GetWaitingSubmissionForTre();
+                    if (listOfSubmissions == null) return;
                 }
                 catch (Exception e)
                 {

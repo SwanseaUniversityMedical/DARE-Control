@@ -70,6 +70,13 @@ var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
 
+
+var AuthenticationSetting = new AuthenticationSettings();
+configuration.Bind(nameof(AuthenticationSetting), AuthenticationSetting);
+builder.Services.AddSingleton(AuthenticationSetting);
+
+
+
 builder.Services.AddHostedService<ConsumeInternalMessageService>();
 
 var submissionKeyCloakSettings = new BaseKeyCloakSettings();
