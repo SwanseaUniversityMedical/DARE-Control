@@ -7,13 +7,15 @@
     unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
 body {
-    font-family: 'museo-sans-rounded', -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif;
+    font-family: 'Roboto',Helvetica Neue,Arial,sans-serif;
     background-color: #f6f7f8;
     height: 100vh;
     color: #3c3c3b;
     font-size: 14px;
 }
-
+.h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+}
 .autohide {
     position: fixed;
     top: 0;
@@ -36,6 +38,10 @@ body {
 }
 .text-success {
     color: rgb(50, 146, 118) !important;
+}
+.text-black-15 {
+    --bs-text-opacity: 1;
+    color: rgba(0,0,0,.15) !important;
 }
 a {
     -webkit-text-decoration-skip: objects;
@@ -99,6 +105,9 @@ hr {
         border-color: rgb(61, 178, 140);
         color: rgb(255, 255, 255);
     }
+.btn-sm {
+    padding: 6px 10px;
+}
 a.bg-grey:hover {
     background-color: rgb(208, 208, 208);
     box-shadow: 1px 1px 3px 0 rgba(0,0,0,.09);
@@ -290,14 +299,109 @@ footer img:hover {
 table {
     width:100% !important;
 }
+tbody, td, tfoot, th, thead, tr {
+    border-color: rgba(208, 211, 212, 0.75) !important;
+}
+th {
+    border-bottom-width: 2px !important;
+    border-color: rgba(208, 211, 212) !important;
+    padding: 0.875rem 0.5rem !important;
+}
+    th:before, th:after {
+        color: rgb(71, 93, 167);
+    }
+tbody {
+    color: #3c3c3b;
+}
     table.dataTable {
         margin: 2rem 0 !important;
+    }
+    .sorting_disabled:before, .sorting_disabled:after {
+        content:none !important;
     }
 table.no-head thead  {
    display:none;
 }
 .dataTables_filter, .dataTables_length {
     padding: 0.25rem !important;
+}
+table tr {
+    vertical-align:middle;
+}
+.table-striped-columns > :not(caption) > tr > :nth-child(3n) {
+    --bs-table-accent-bg: var(--bs-table-striped-bg);
+    color: var(--bs-table-striped-color);
+}
+#submissionList tr td:last-child {
+    text-align:center;
+}
+.crosstab td, .crosstab th {
+    padding: 0.5rem 1.5rem !important;
+}
+.crosstab td {
+    vertical-align: top;
+}
+.crosstab th {
+    font-size:1rem;
+}
+.crosstab thead tr {
+    border-top: none !important;
+}
+.crosstab th:first-child, .crosstab td:first-child {
+    border-left: none !important;
+}
+.crosstab th:last-child, .crosstab td:last-child {
+    border-right: none !important;
+}
+    .crosstab tfoot tr {
+        border-top: 5px solid !important;
+        border-color: rgba(208, 211, 212, 0.75) !important;
+        background-color: rgb(238, 238, 238);
+    }
+.crosstab tbody tr td:first-child {
+    font-weight: bold;
+}
+ 
+.crosstab li {
+    margin-bottom:1rem;
+}
+.crosstab ul, .crosstab li:last-child {
+    margin-bottom: 0rem;
+}
+.crosstab .timeline li {
+    padding-bottom:1rem;
+    margin-bottom:0;
+}
+.crosstab .timeline-line {
+    width: 1px;
+    top: 7px;
+    left: 8px;
+}
+.crosstab .timeline .icon-wrap {
+    height: 16px;
+    margin-top: 2px;
+}
+.table-striped-columns > :not(caption) > tr > :nth-child(3n) .timeline .icon-wrap {
+    background-color: transparent;
+}
+.timeline li {
+    padding-bottom: 2rem;
+}
+.timeline li:last-child {
+    padding-bottom: 0;
+}
+    .timeline li:last-child .timeline-line {
+        display:none;
+    }
+.timeline-line {
+    width:2px;
+    top:13px;
+    left:13px;
+}
+.timeline .icon-wrap {
+    display:flex;
+    height:28px;
+    background-color:#fff;
 }
 @media (min-width: 768px) {
     .navbar-expand-md .navbar-toggler {

@@ -14,11 +14,13 @@ using System.Data;
 using BL.Models.APISimpleTypeReturns;
 using TRE_API.Repositories.DbContexts;
 using EasyNetQ.Management.Client.Model;
-using Newtonsoft.Json;
+using BL.Rabbit;
+using EasyNetQ;
 
 namespace TRE_API.Controllers
 {
     [Authorize(Roles = "dare-tre-agent")]
+    //[AllowAnonymous]
     [ApiController]
     [Route("api/[controller]")]
     public class SubmissionController : Controller
@@ -28,16 +30,20 @@ namespace TRE_API.Controllers
         private readonly IDataEgressClientHelper  _dataEgressHelper;
         private readonly IHutchClientHelper _hutchHelper;
         private readonly ApplicationDbContext _dbContext;
+        private readonly IBus _rabbit;
+        private readonly ISubmissionHelper _subHelper;
 
-        public SubmissionController(ISignalRService signalRService, IDareClientWithoutTokenHelper helper, IDataEgressClientHelper egressHelper,
-            IHutchClientHelper hutchClientHelper, ApplicationDbContext dbContext)
+
+        public SubmissionController(ISignalRService signalRService, IDareClientWithoutTokenHelper helper,
+            ApplicationDbContext dbContext, IBus rabbit, ISubmissionHelper subHelper, IDataEgressClientHelper egressHelper, IHutchClientHelper hutchClientHelper)
         {
             _signalRService = signalRService;
             _dareHelper = helper;
             _dataEgressHelper = egressHelper;
             _hutchHelper = hutchClientHelper;
             _dbContext = dbContext;
-
+            _rabbit = rabbit;
+            _subHelper = subHelper; 
         }
 
 
@@ -56,11 +62,7 @@ namespace TRE_API.Controllers
 
             return new BoolReturn()
             {
-                Result = _dbContext.MembershipDecisions.Any(x =>
-                    x.Project != null && x.Project.SubmissionProjectId == projectId && x.User != null &&
-                    x.User.SubmissionUserId == userId &&
-                    !x.Project.Archived && x.Project.Decision == Decision.Approved && !x.Archived &&
-                    x.Decision == Decision.Approved)
+                Result = _subHelper.IsUserApprovedOnProject(projectId,userId)
             };
         }
 
@@ -71,27 +73,64 @@ namespace TRE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(List<Submission>), description: "")]
         public virtual IActionResult GetWaitingSubmissionsForTre()
         {
-            var result =
-                _dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre").Result;
+            var result =_subHelper.GetWaitingSubmissionForTre();
 
 
             return StatusCode(200, result);
         }
 
+       
 
 
-        [HttpGet]
+        [HttpPost]
         [Route("UpdateStatusForTre")]
         [ValidateModelState]
         [SwaggerOperation("UpdateStatusForTre")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public IActionResult UpdateStatusForTre(string tesId, StatusType statusType, string? description)
+        public IActionResult UpdateStatusForTre([FromBody] SubmissionDetails subDetails)
         {
-            var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-                    new Dictionary<string, string>()
-                        { { "tesId", tesId }, { "statusType", statusType.ToString() }, { "description", description } })
-                .Result;
+            APIReturn? result = _subHelper.UpdateStatusForTre(subDetails.subId, subDetails.statusType, subDetails.description);
             return StatusCode(200, result);
+        }
+
+        [HttpGet]
+        [Route("GetOutputBucketInfo")]
+        [ValidateModelState]
+        [SwaggerOperation("GetOutputBucketInfo")]
+        [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
+        public IActionResult GetOutputBucketInfo(string subId)
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpPost]
+        [Route("FilesReadyForReview")]
+        [ValidateModelState]
+        [SwaggerOperation("FilesReadyForReview")]
+        [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
+        public IActionResult FilesReadyForReview([FromBody] ReviewFiles review)
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpPost]
+        [Route("EgressResults")]
+        [ValidateModelState]
+        [SwaggerOperation("EgressResults")]
+        [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
+        public IActionResult EgressResults([FromBody] EgressReview review)
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpPost]
+        [Route("FinalOutcome")]
+        [ValidateModelState]
+        [SwaggerOperation("FinalOutcome")]
+        [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
+        public IActionResult FinalOutcome([FromBody] FinalOutcome outcome)
+        {
+            throw new NotImplementedException();
         }
 
         [HttpGet]

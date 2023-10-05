@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TRE_API.Repositories.DbContexts;
@@ -11,9 +12,11 @@ using TRE_API.Repositories.DbContexts;
 namespace TRE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230927095637_nulltrepassword")]
+    partial class nulltrepassword
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,53 +47,6 @@ namespace TRE_API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SubmissionCredentials");
-                });
-
-            modelBuilder.Entity("BL.Models.TESKstatus", b =>
-                {
-                    b.Property<string>("id")
-                        .HasColumnType("text");
-
-                    b.Property<string>("description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("state")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("id");
-
-                    b.ToTable("TESK_Status");
-                });
-
-            modelBuilder.Entity("BL.Models.TeskAudit", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
-
-                    b.Property<string>("dated")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("message")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("teskid")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("id");
-
-                    b.ToTable("TESK_Audit");
                 });
 
             modelBuilder.Entity("BL.Models.TreAuditLog", b =>
@@ -180,12 +136,14 @@ namespace TRE_API.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("OutputBucketTre")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Password")
                         .HasColumnType("text");
 
                     b.Property<string>("SubmissionBucketTre")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("SubmissionProjectId")

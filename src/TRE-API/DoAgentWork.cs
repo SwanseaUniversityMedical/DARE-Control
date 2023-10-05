@@ -9,21 +9,21 @@ using Microsoft.Extensions.DependencyInjection;
 using EasyNetQ;
 using Newtonsoft.Json;
 using Serilog;
-using TREAgent.Services;
+
 using Microsoft.Extensions.Hosting;
 using Hangfire;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Security.Policy;
 using Microsoft.EntityFrameworkCore;
-using TREAgent.Repositories;
-using TREAgent.Repositories.DbContexts;
-using System.Threading.Tasks;
-using TESKstatus = TREAgent.Repositories.TESKstatus;
 
-namespace TREAgent
+using System.Threading.Tasks;
+using TRE_API.Repositories.DbContexts;
+using TRE_API.Services;
+
+namespace TRE_API
 {
-    public interface IDoWork
+    public interface IDoAgentWork
     {
         void Execute();
         void CheckTESK(string taskID, string TesId);
@@ -34,14 +34,16 @@ namespace TREAgent
     // TESK : http://172.16.34.31:8080/    https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks
 
 
-    public class DoWork : IDoWork
+    public class DoAgentWork : IDoAgentWork
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ApplicationDbContext _dbContext;
-        public DoWork(IServiceProvider serviceProvider, ApplicationDbContext dbContext)
+        private readonly ISubmissionHelper _subHelper;
+        public DoAgentWork(IServiceProvider serviceProvider, ApplicationDbContext dbContext, ISubmissionHelper subHelper)
         {
             _serviceProvider = serviceProvider;
             _dbContext = dbContext;
+            _subHelper = subHelper;
         }
 
         public void testing()
@@ -85,9 +87,9 @@ namespace TREAgent
                     var responseObj = JsonConvert.DeserializeObject<ResponseModel>(responseBody);
                     string id = responseObj.id;
 
-                    RecurringJob.AddOrUpdate<IDoWork>(id, a => a.CheckTESK(id,TesId), Cron.MinuteInterval(1));
+                    RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTESK(id,TesId), Cron.MinuteInterval(1));
 
-                    _dbContext.Add(new Repositories.TeskAudit(){message = jsonContent, teskid = id});
+                    _dbContext.Add(new TeskAudit(){message = jsonContent, teskid = id});
                     _dbContext.SaveChanges();
 
                     return id;
@@ -151,33 +153,25 @@ namespace TREAgent
                             // send update
                             using (var scope = _serviceProvider.CreateScope())
                             {
-                                var statusMessage = StatusType.TransferredToPod.ToString();
+                                var statusMessage = StatusType.TransferredToPod;
                                 switch (status.state)
                                 {
                                     case "QUEUED":
-                                        statusMessage = StatusType.TransferredToPod.ToString();
+                                        statusMessage = StatusType.TransferredToPod;
                                         break;
                                     case "RUNNING":
-                                        statusMessage = StatusType.PodProcessing.ToString();
+                                        statusMessage = StatusType.PodProcessing;
                                         break;
                                     case "COMPLETE":
-                                        statusMessage = StatusType.PodProcessingComplete.ToString();
+                                        statusMessage = StatusType.PodProcessingComplete;
                                         break;
                                     case "EXECUTOR_ERROR":
-                                        statusMessage = StatusType.Cancelled.ToString();
+                                        statusMessage = StatusType.Cancelled;
                                         break;
                                 }
 
-                            var treApi =
-                                scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
-                            var result = treApi.CallAPIWithoutModel<APIReturn>(
-                                "/api/Submission/UpdateStatusForTre",
-                                new Dictionary<string, string>()
-                                {
-                                    { "tesId", TesId },
-                                    { "statusType", statusMessage },
-                                    { "description", "" }
-                                }).Result;
+
+                                var result = _subHelper.UpdateStatusForTre(TesId, statusMessage, "");
                         }
 
                         // are we done ?
@@ -207,6 +201,7 @@ namespace TREAgent
         // Method executed upon hangfire job
         public void Execute()
         {
+            
             // control use of dependency injection
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -223,10 +218,10 @@ namespace TREAgent
 
                 // Get list of submissions
                 List<Submission> listOfSubmissions;
-                var treApi = scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
+               // var treApi = scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
                 try
                 {
-                    listOfSubmissions = treApi.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre").Result;
+                    listOfSubmissions = _subHelper.GetWaitingSubmissionForTre();
                 }
                 catch (Exception e)
                 {
@@ -241,28 +236,14 @@ namespace TREAgent
                 {
                     Log.Information("Submission: {submission}", aSubmission);
 
-                    var paramlist = new Dictionary<string, string>();
-                    try
-                    {
-                        paramlist.Add("projectId", aSubmission.Project.Id.ToString());
-                        paramlist.Add("userId", aSubmission.SubmittedBy.Id.ToString());
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Error("Submission does not have project and/or user");
-                    }
+                    
                     
                     // Check user is allowed ont he project
-                    if ( paramlist.Count==2 && !treApi.CallAPIWithoutModel<BoolReturn>("/api/Submission/IsUserApprovedOnProject", paramlist).Result.Result)
+                    if ( ! _subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
                     {
-                        Log.Error("User/project {details} is not value for this submission {submission}", paramlist, aSubmission);
+                        Log.Error("User {UserID}/project {ProjectId} is not value for this submission {submission}", aSubmission.SubmittedBy.Id, aSubmission.Project.Id, aSubmission);
                         // record error with submission layer
-                        var result = treApi.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-                            new Dictionary<string, string>()
-                            {
-                                { "tesId", aSubmission.TesId }, { "statusType", StatusType.InvalidUser.ToString() },
-                                { "description", "" }
-                            }).Result;
+                        var result = _subHelper.UpdateStatusForTre(aSubmission.TesId, StatusType.InvalidUser, "");
                     }
                     else
                     {
@@ -293,14 +274,9 @@ namespace TREAgent
                             // TODO for rest API
                             try
                             {
-                                //call hutch method in treAPI here
-                                Dictionary<string, string> HUTCHVars = new Dictionary<string, string>() 
-                                {
-                                    { "SubmissionId", aSubmission.Id.ToString()},
-                                    { "ContainerURL", aSubmission.SourceCrate}
-                                };
+                                StringContent x = new StringContent("abc");
 
-                                var callHUTCH = treApi.CallAPI($"/api/Submission/SendSubmissionToHUTCH", null, HUTCHVars, false);
+                               // var callHUTCH = treApi.CallAPI("url", x, null,false);
                               
                             }
                             catch (Exception e)
@@ -322,13 +298,7 @@ namespace TREAgent
                         {
                             try
                             {
-                                var result = treApi.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-                                    new Dictionary<string, string>()
-                                    {
-                                        { "tesId", aSubmission.TesId },
-                                        { "statusType", StatusType.TransferredToPod.ToString() },
-                                        { "description", "" }
-                                    }).Result;
+                                var result = _subHelper.UpdateStatusForTre(aSubmission.TesId, StatusType.TransferredToPod, "");
                             }
                             catch (Exception e)
                             {
