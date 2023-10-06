@@ -319,13 +319,184 @@
                                                             @foreach (var status in validstats)
                                                             {
                                                                 <li>
-                                                                    @{var runtime = status.End - status.Start;}
-                                                                    <span data-bs-toggle="tooltip" data-bs-title="Started: xx/xx/xxxx 00:00:00 @status.Start Ended: xx/xx/xxxx 00:00:00 @status.End Runtime: @runtime.Minutes">
+                                                                    @{
+                                                                        var runtime = status.End - status.Start;
+                                                                        var displayRuntime = "";
+                                                                        var displaySec = " seconds";
+                                                                        var displayMin = " minutes";
+                                                                        var displayHour = " hours";
+                                                                        var displayDay = " days";
 
-                                                                        @Helpers.PrettyStatus(status.Status)
-                                                                        
+                                                                        if (runtime.TotalSeconds < 60)
+                                                                        {
+                                                                            if (runtime.Seconds == 1)
+                                                                            {
+                                                                                displaySec = " Second ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displaySec = " Seconds ";
+                                                                            }
+
+                                                                            displayRuntime = @runtime.Seconds + displaySec;
+
+
+                                                                        }
+                                                                        else if (runtime.TotalMinutes < 60)
+                                                                        {
+                                                                            if (runtime.Minutes == 1)
+                                                                            {
+                                                                                displayMin = " Minute ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displayMin = " Minutes ";
+                                                                            }
+                                                                            if (runtime.Seconds == 1)
+                                                                            {
+                                                                                displaySec = " Second ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displaySec = " Seconds ";
+                                                                            }
+                                                                            displayRuntime = @runtime.Minutes + displayMin + @runtime.Seconds + " and " + displaySec;
+
+                                                                        }
+                                                                        else if (runtime.TotalHours < 24)
+                                                                        {
+                                                                            if (runtime.Hours == 1)
+                                                                            {
+                                                                                displayHour = " Hour ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displayHour = " Hours ";
+                                                                            }
+                                                                            if (runtime.Minutes == 1)
+                                                                            {
+                                                                                displayMin = " Minute ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displayMin = " Minutes ";
+                                                                            }
+                                                                            if (runtime.Seconds == 1)
+                                                                            {
+                                                                                displaySec = " Second ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displaySec = " Seconds ";
+                                                                            }
+
+
+                                                                            displayRuntime = runtime.Hours + displayHour + @runtime.Minutes + displayMin + " and " + @runtime.Seconds + displaySec;
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            if (runtime.Days == 1)
+                                                                            {
+                                                                                displayDay = " Day ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displayDay = " Days ";
+                                                                            }
+                                                                            if (runtime.Hours == 1)
+                                                                            {
+                                                                                displayHour = " Hour ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displayHour = " Hours ";
+                                                                            }
+                                                                            if (runtime.Minutes == 1)
+                                                                            {
+                                                                                displayMin = " Minute ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displayMin = " Minutes ";
+                                                                            }
+                                                                            if (runtime.Seconds == 1)
+                                                                            {
+                                                                                displaySec = " Second ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displaySec = " Seconds ";
+                                                                            }
+
+                                                                            displayRuntime = runtime.Days + displayDay + runtime.Hours + displayHour + @runtime.Minutes + displayMin + " and " + @runtime.Seconds + displaySec;
+
+
+                                                                        }
+                                                                    }
+
+
+
+                                                                <li class="position-relative">
+                                                                    <span class="position-absolute bg-grey h-100 timeline-line"></span>
+                                                                    <span class="position-relative d-inline-flex">
+                                                                            @{
+
+                                                                                if (status.Status == BL.Models.Enums.StatusType.ValidationSuccessful
+                                                                                || status.Status == BL.Models.Enums.StatusType.TransferredToPod
+                                                                                || status.Status == BL.Models.Enums.StatusType.DataOutApproved
+                                                                                || status.Status == BL.Models.Enums.StatusType.PodProcessingComplete
+                                                                                || status.Status == BL.Models.Enums.StatusType.TREApprovedProject
+                                                                                || status.Status == BL.Models.Enums.StatusType.Completed)
+                                                                                {
+                                                                                <span class="icon-wrap">
+                                                                                    <i class="fa-solid fa-check-circle fs-6 text-success me-3"></i>
+                                                                                </span>
+                                                                                }
+                                                                                else if (status.Status == BL.Models.Enums.StatusType.InvalidUser
+                                                                                || status.Status == BL.Models.Enums.StatusType.UserNotOnProject
+                                                                                || status.Status == BL.Models.Enums.StatusType.InvalidSubmission
+                                                                                || status.Status == BL.Models.Enums.StatusType.TRENotAuthorisedForProject
+                                                                                || status.Status == BL.Models.Enums.StatusType.DataOutApprovalRejected
+                                                                                || status.Status == BL.Models.Enums.StatusType.TRERejectedProject
+                                                                                || status.Status == BL.Models.Enums.StatusType.TransferToPodFailed
+                                                                                || status.Status == BL.Models.Enums.StatusType.PodProcessingFailed
+                                                                                || status.Status == BL.Models.Enums.StatusType.Failed)
+                                                                                {
+                                                                                <span class="icon-wrap">
+                                                                                    <i class="fa-solid fa-warning fs-6 text-danger me-3"></i>
+                                                                                </span>
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                <span class="icon-wrap">
+                                                                                    <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
+                                                                                </span>
+                                                                                }
+                                                                            }
+                                                                        <span class="d-flex flex-column">
+                                                                            <span class="text-dark">
+                                                                                    @Helpers.PrettyStatus(status.Status)
+                                                                            </span>
+                                                                            <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: @status.Start Ended:@status.End Runtime: @displayRuntime">
+                                                                                    @displayRuntime
+                                                                            </span>
+                                                                        </span>
                                                                     </span>
                                                                 </li>
+
+
+
+                                                                    @*  <span class="text-dark">
+                                        @Helpers.PrettyStatus(status.Status)
+                                        </span>
+
+
+                                        <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: @status.Start Ended:@status.End Runtime: @displayRuntime">
+                                        @displayRuntime
+                                        </span>
+                                        *@
+                                                                </li>
+
                                                             }
                                                         </ul>
                                                     </td>
@@ -354,8 +525,8 @@
                                             //if (stage.statusTypeList.Contains(child.Status))
                                             if (stage.stagesDict.ContainsKey(stageNum) && stage.stageNumber == stageNum && stage.statusTypeList.Contains(child.Status))
                                             {
-                                                validstats.Add(new BL.Models.HistoricStatus() { Start = child.StartTime, Status = child.Status });
-                                                validstats = validstats.OrderBy(x => x.Start).ToList();
+                                                validstats.Add(new BL.Models.HistoricStatus() { Start = child.LastStatusUpdate, Status = child.Status, End = child.EndTime == DateTime.MinValue ? DateTime.Now : child.EndTime });
+                                            validstats = validstats.OrderBy(x => x.Start).ToList();
 
 
                                             }
@@ -477,14 +648,71 @@
 
                                                                     displayRuntime = runtime.Days + displayDay + runtime.Hours + displayHour + @runtime.Minutes + displayMin + " and " + @runtime.Seconds + displaySec;
 
-                                                                    
+
                                                                 }
                                                             }
-                                                                <span data-bs-toggle="tooltip" data-bs-title="Started: @status.Start Ended:@status.End Runtime: @displayRuntime">
-                                                                
-                                                                @Helpers.PrettyStatus(status.Status)
 
+
+
+                                                            <li class="position-relative">
+                                                                <span class="position-absolute bg-grey h-100 timeline-line"></span>
+                                                                <span class="position-relative d-inline-flex">
+                                                                    @{
+                                                                        
+                                                                        if (status.Status == BL.Models.Enums.StatusType.ValidationSuccessful
+                                                                        || status.Status == BL.Models.Enums.StatusType.TransferredToPod
+                                                                        || status.Status == BL.Models.Enums.StatusType.DataOutApproved
+                                                                        || status.Status == BL.Models.Enums.StatusType.PodProcessingComplete
+                                                                        || status.Status == BL.Models.Enums.StatusType.TREApprovedProject
+                                                                        || status.Status == BL.Models.Enums.StatusType.Completed)
+                                                                        {
+                                                                            <span class="icon-wrap">
+                                                                                <i class="fa-solid fa-check-circle fs-6 text-success me-3"></i>
+                                                                            </span>
+                                                                        }
+                                                                        else if (status.Status == BL.Models.Enums.StatusType.InvalidUser
+                                                                        || status.Status == BL.Models.Enums.StatusType.UserNotOnProject
+                                                                        || status.Status == BL.Models.Enums.StatusType.InvalidSubmission
+                                                                        || status.Status == BL.Models.Enums.StatusType.TRENotAuthorisedForProject
+                                                                        || status.Status == BL.Models.Enums.StatusType.DataOutApprovalRejected
+                                                                        || status.Status == BL.Models.Enums.StatusType.TRERejectedProject
+                                                                        || status.Status == BL.Models.Enums.StatusType.TransferToPodFailed
+                                                                        || status.Status == BL.Models.Enums.StatusType.PodProcessingFailed
+                                                                        || status.Status == BL.Models.Enums.StatusType.Failed)
+                                                                        {
+                                                                            <span class="icon-wrap">
+                                                                                <i class="fa-solid fa-warning fs-6 text-danger me-3"></i>
+                                                                            </span>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <span class="icon-wrap">
+                                                                                <i class="fa-solid fa-circle fs-6 text-black-15 me-3"></i>
+                                                                            </span>
+                                                                        }
+                                                                    }
+                                                                    <span class="d-flex flex-column">
+                                                                        <span class="text-dark">
+                                                                            @Helpers.PrettyStatus(status.Status)
+                                                                        </span>
+                                                                        <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: @status.Start Ended:@status.End Runtime: @displayRuntime">
+                                                                            @displayRuntime
+                                                                        </span>
+                                                                    </span>
                                                                 </span>
+                                                            </li>
+
+
+
+                                                              @*  <span class="text-dark">
+                                                                @Helpers.PrettyStatus(status.Status)
+                                                                </span>
+                                                                
+
+                                                                    <span class="text-muted small" data-bs-toggle="tooltip" data-bs-title="Started: @status.Start Ended:@status.End Runtime: @displayRuntime">
+                                                                    @displayRuntime
+                                                                </span>
+                                                                *@
                                                             </li>
 
                                                     }
