@@ -448,151 +448,168 @@
                                                                                 var displaytimeUpdateDay = " days";
 
 
-                                                                        if (timeUpdate.TotalSeconds < 60)
-                                                                        {
-                                                                            if (timeUpdate.Seconds == 1)
-                                                                            {
-                                                                                displaytimeUpdateSec = " Second ";
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                displaytimeUpdateSec = " Seconds ";
-                                                                            }
+                                                                                if (timeUpdate.TotalSeconds < 60)
+                                                                                {
+                                                                                    if (timeUpdate.Seconds == 1)
+                                                                                    {
+                                                                                        displaytimeUpdateSec = " Second ";
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        displaytimeUpdateSec = " Seconds ";
+                                                                                    }
 
-                                                                            displaytimeUpdate = @timeUpdate.Seconds + displaytimeUpdateSec;
-
-
-                                                                        }
-                                                                        else if (timeUpdate.TotalMinutes < 60)
-                                                                        {
-                                                                            if (timeUpdate.Minutes == 1)
-                                                                            {
-                                                                                displaytimeUpdateMin = " Minute ";
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                displaytimeUpdateMin = " Minutes ";
-                                                                            }
-                                                                            if (timeUpdate.Seconds == 1)
-                                                                            {
-                                                                                displaytimeUpdateSec = " Second ";
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                displaytimeUpdateSec = " Seconds ";
-                                                                            }
-                                                                            displaytimeUpdate = @timeUpdate.Minutes + displaytimeUpdateMin + @timeUpdate.Seconds + " and " + displaytimeUpdateSec;
-
-                                                                        }
-                                                                        else if (timeUpdate.TotalHours < 24)
-                                                                        {
-                                                                            if (timeUpdate.Hours == 1)
-                                                                            {
-                                                                                displaytimeUpdateHour = " Hour ";
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                displaytimeUpdateHour = " Hours ";
-                                                                            }
-                                                                            if (timeUpdate.Minutes == 1)
-                                                                            {
-                                                                                displaytimeUpdateMin = " Minute ";
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                displaytimeUpdateMin = " Minutes ";
-                                                                            }
-                                                                            if (timeUpdate.Seconds == 1)
-                                                                            {
-                                                                                displaytimeUpdateSec = " Second ";
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                displaytimeUpdateSec = " Seconds ";
-                                                                            }
+                                                                                    displaytimeUpdate = @timeUpdate.Seconds + displaytimeUpdateSec;
 
 
-                                                                            displaytimeUpdate = timeUpdate.Hours + displaytimeUpdateHour + @timeUpdate.Minutes + displaytimeUpdateMin + " and " + @timeUpdate.Seconds + displaytimeUpdateSec;
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                            if (timeUpdate.Days == 1)
-                                                                            {
-                                                                                displaytimeUpdateDay = " Day ";
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                displaytimeUpdateDay = " Days ";
-                                                                            }
-                                                                            if (timeUpdate.Hours == 1)
-                                                                            {
-                                                                                displaytimeUpdateHour = " Hour ";
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                displaytimeUpdateHour = " Hours ";
-                                                                            }
-                                                                            if (timeUpdate.Minutes == 1)
-                                                                            {
-                                                                                displaytimeUpdateMin = " Minute ";
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                displaytimeUpdateMin = " Minutes ";
-                                                                            }
-                                                                            if (timeUpdate.Seconds == 1)
-                                                                            {
-                                                                                displaytimeUpdateSec = " Second ";
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                displaytimeUpdateSec = " Seconds ";
-                                                                            }
+                                                                                }
+                                                                                else if (timeUpdate.TotalMinutes < 60)
+                                                                                {
+                                                                                    if (timeUpdate.Minutes == 1)
+                                                                                    {
+                                                                                        displaytimeUpdateMin = " Minute ";
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        displaytimeUpdateMin = " Minutes ";
+                                                                                    }
+                                                                                    if (timeUpdate.Seconds == 1)
+                                                                                    {
+                                                                                        displaytimeUpdateSec = " Second ";
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        displaytimeUpdateSec = " Seconds ";
+                                                                                    }
+                                                                                    displaytimeUpdate = @timeUpdate.Minutes + displaytimeUpdateMin + @timeUpdate.Seconds + " and " + displaytimeUpdateSec;
+
+                                                                                }
+                                                                                else if (timeUpdate.TotalHours < 24)
+                                                                                {
+                                                                                    if (timeUpdate.Hours == 1)
+                                                                                    {
+                                                                                        displaytimeUpdateHour = " Hour ";
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        displaytimeUpdateHour = " Hours ";
+                                                                                    }
+                                                                                    if (timeUpdate.Minutes == 1)
+                                                                                    {
+                                                                                        displaytimeUpdateMin = " Minute ";
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        displaytimeUpdateMin = " Minutes ";
+                                                                                    }
+                                                                                    if (timeUpdate.Seconds == 1)
+                                                                                    {
+                                                                                        displaytimeUpdateSec = " Second ";
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        displaytimeUpdateSec = " Seconds ";
+                                                                                    }
+
+
+                                                                                    displaytimeUpdate = timeUpdate.Hours + displaytimeUpdateHour + @timeUpdate.Minutes + displaytimeUpdateMin + " and " + @timeUpdate.Seconds + displaytimeUpdateSec;
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    if (timeUpdate.Days == 1)
+                                                                                    {
+                                                                                        displaytimeUpdateDay = " Day ";
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        displaytimeUpdateDay = " Days ";
+                                                                                    }
+                                                                                    if (timeUpdate.Hours == 1)
+                                                                                    {
+                                                                                        displaytimeUpdateHour = " Hour ";
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        displaytimeUpdateHour = " Hours ";
+                                                                                    }
+                                                                                    if (timeUpdate.Minutes == 1)
+                                                                                    {
+                                                                                        displaytimeUpdateMin = " Minute ";
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        displaytimeUpdateMin = " Minutes ";
+                                                                                    }
+                                                                                    if (timeUpdate.Seconds == 1)
+                                                                                    {
+                                                                                        displaytimeUpdateSec = " Second ";
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        displaytimeUpdateSec = " Seconds ";
+                                                                                    }
 
                                                                                     displaytimeUpdate = timeUpdate.Days + displaytimeUpdateDay + timeUpdate.Hours + displaytimeUpdateHour + @timeUpdate.Minutes + displaytimeUpdateMin + " and " + @timeUpdate.Seconds + displaytimeUpdateSec;
 
 
-                                                                        }
+                                                                                }
 
 
-                                                                                if (status.Status == BL.Models.Enums.StatusType.Completed) 
+                                                                                if (status.Status == BL.Models.Enums.StatusType.Completed)
 
                                                                                 {
                                                                                     <h6 class="mb-0">
-                                                                                <span class="badge bg-success rounded-pill d-inline-flex align-items-center pe-3" data-bs-toggle="tooltip" data-bs-title="Completed: @Model.Submission.EndTime">
-                                                                                    <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
-                                                                                    <span class="text-start">
-                                                                                        <span class="mb-1">Completed</span>
-                                                                                            <span class="font-monospace small d-block">@displaytimeUpdate</span>
-                                                                                    </span>
-                                                                                </span>
-                                                                                </h6>
+                                                                                        <span class="badge bg-success rounded-pill d-inline-flex align-items-center pe-3" data-bs-toggle="tooltip" data-bs-title="Completed: @Model.Submission.EndTime">
+                                                                                            <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
+                                                                                            <span class="text-start">
+                                                                                                <span class="mb-1">Completed</span>
+                                                                                                <span class="font-monospace small d-block">@displaytimeUpdate</span>
+                                                                                            </span>
+                                                                                        </span>
+                                                                                    </h6>
                                                                                 }
                                                                                 else if (status.Status == BL.Models.Enums.StatusType.Failed)
 
                                                                                 {
-                                                                    <h6 class="mb-0">
-                                                                        <span class="badge bg-danger rounded-pill d-inline-flex align-items-center pe-3" data-bs-toggle="tooltip" data-bs-title="Failed: error message">
-                                                                            <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
-                                                                            <span class="text-start">
-                                                                                <span class="mb-1">Failed</span>
-                                                                                <span class="font-monospace small d-block">@displaytimeUpdate</span>
-                                                                            </span>
-                                                                        </span>
-                                                                    </h6>
-                                                                
+
+                                                                                    <h6 class="mb-0">
+                                                                                        <span class="badge bg-danger rounded-pill d-inline-flex align-items-center pe-3" data-bs-toggle="tooltip" data-bs-title="Failed: error message">
+                                                                                            <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
+                                                                                            <span class="text-start">
+                                                                                            <span class="mb-1">Failed</span>
+                                                                                                <span class="font-monospace small d-block">@displaytimeUpdate</span>
+                                                                                            </span>
+                                                                                        </span>
+                                                                                    </h6>
+
+                                                                                }
+                                                                                else if (
+                                                                                status.Status == BL.Models.Enums.StatusType.Cancelled)
+                                                                                
+                                                                                {
+
+                                                                                    <h6 class="mb-0">
+                                                                                        <span class="badge bg-danger rounded-pill d-inline-flex align-items-center pe-3" data-bs-toggle="tooltip" data-bs-title="Cancelled: error message">
+                                                                                            <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
+                                                                                            <span class="text-start">
+                                                                                            <span class="mb-1">Cancelled</span>
+                                                                                                <span class="font-monospace small d-block">@displaytimeUpdate</span>
+                                                                                            </span>
+                                                                                        </span>
+                                                                                    </h6>
+
                                                                                 }
                                                                                 else
                                                                                 {
-                                                                               <h6 class="mb-0">
-                                        <span class="badge bg-primary rounded-pill d-inline-flex align-items-center pe-3">
-                                            <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
-                                            <span class="text-start">
-                                                <span class="mb-1">Running</span>
-                                                                                            <span class="font-monospace small d-block">@displaytimeUpdate</span>
-                                            </span>
-                                        </span>
-                                        </h6>
+                                                                                    <h6 class="mb-0">
+                                                                                        <span class="badge bg-primary rounded-pill d-inline-flex align-items-center pe-3">
+                                                                                            <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
+                                                                                            <span class="text-start">
+                                                                                                <span class="mb-1">Running</span>
+                                                                                                <span class="font-monospace small d-block">@displaytimeUpdate</span>
+                                                                                            </span>
+                                                                                        </span>
+                                                                                    </h6>
                                                                                 }
                                                                             }
                                                                             @*
