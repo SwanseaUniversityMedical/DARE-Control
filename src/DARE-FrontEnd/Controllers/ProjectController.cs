@@ -7,7 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using BL.Models.Settings;
 using Microsoft.AspNetCore.Http;
 using static System.Runtime.InteropServices.JavaScript.JSType;
-
+using BL.Models.APISimpleTypeReturns;
+using BL.Models.Tes;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -15,12 +16,12 @@ namespace DARE_FrontEnd.Controllers
     public class ProjectController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
-        
+
         private readonly FormIOSettings _formIOSettings;
         public ProjectController(IDareClientHelper client, FormIOSettings formIo)
         {
             _clientHelper = client;
-            
+
             _formIOSettings = formIo;
 
         }
@@ -62,7 +63,7 @@ namespace DARE_FrontEnd.Controllers
                 SubmissionBucket = project.SubmissionBucket,
                 OutputBucket = project.OutputBucket,
                 MinioEndpoint = minioEndpoint.Url,
-                Submissions=project.Submissions,
+                Submissions = project.Submissions,
                 UserItemList = userItems,
                 TreItemList = treItems
             };
@@ -74,8 +75,8 @@ namespace DARE_FrontEnd.Controllers
         [AllowAnonymous]
         public IActionResult GetAllProjects()
         {
-           
-            
+
+
             var projects = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
             return View(projects);
 
@@ -172,7 +173,7 @@ namespace DARE_FrontEnd.Controllers
             {
                 FormIoUrl = _formIOSettings.ProjectForm,
                 FormIoString = @"{""id"":0}",
-            
+
             };
 
             if (projectId > 0)
@@ -224,9 +225,9 @@ namespace DARE_FrontEnd.Controllers
             {
                 var data = System.Text.Json.JsonSerializer.Deserialize<FormData>(str);
                 data.FormIoString = str;
-                  
+
                 var result = await _clientHelper.CallAPI<FormData, Project?>("/api/Project/SaveProject", data);
-               
+
                 if (result.Id == 0)
                     return BadRequest();
 
@@ -235,7 +236,7 @@ namespace DARE_FrontEnd.Controllers
             return BadRequest();
         }
 
-       
+
         public async Task<IActionResult> RemoveUserFromProject(int projectId, int userId)
         {
             var model = new ProjectUser()
@@ -259,7 +260,7 @@ namespace DARE_FrontEnd.Controllers
             };
             var result =
                 await _clientHelper.CallAPI<ProjectTre, ProjectTre?>("/api/Project/RemoveTreMembership", model);
-          
+
             return RedirectToAction("GetProject", new { id = projectId });
         }
 
@@ -277,7 +278,7 @@ namespace DARE_FrontEnd.Controllers
                 var result =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
             }
-            return RedirectToAction("GetProject", new {  id = ProjectId });
+            return RedirectToAction("GetProject", new { id = ProjectId });
         }
 
         [HttpPost]
@@ -308,6 +309,100 @@ namespace DARE_FrontEnd.Controllers
                 UserId = userId
             };
             var result = _clientHelper.CallAPI<ProjectUser, ProjectUser?>("api/Project/IsUserOnProject", model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SubmissionWizerd(SubmissionTes model)
+        {
+            var listOfTre = "";
+            var imageUrl = "";
+
+            if (model.Tre == null)
+            {
+                var paramList = new Dictionary<string, string>();
+                paramList.Add("projectId", model.ProjectId.ToString());
+                var tre = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList).Result;
+                List<string> namesList = tre.Select(test => test.Name).ToList();
+                listOfTre = string.Join("|", namesList);
+            }
+            else
+            {
+                listOfTre = string.Join("|", model.Tre);
+            }
+
+            if (model.Option == "url")
+            {
+                imageUrl = model.Url;
+            }
+            else
+            {
+
+                var filestring = ConvertIFormFileToJson(model.File);
+
+                var paramss = new Dictionary<string, string>();
+
+                paramss.Add("bucketName", model.SubmissionBucket);
+                paramss.Add("fileJson", filestring);
+
+                var uplodaResult = await _clientHelper.CallAPIWithoutModel<BoolReturn>("/api/Project/UploadToMinio", paramss);
+
+                var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
+
+                imageUrl = "http://" + minioEndpoint + "/browser/" + model.SubmissionBucket + "/" + model.File.Name;
+
+            }
+
+            var test = new TesTask()
+            {
+
+                Name = model.Name,
+                Executors = new List<TesExecutor>()
+                {
+                    new TesExecutor()
+                    {
+                        Image = imageUrl,
+
+                    }
+                },
+                Tags = new Dictionary<string, string>()
+                {
+                    { "project", model.Project },
+                    { "tres", listOfTre }
+                }
+
+            };
+
+            var result = _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test).Result;
+
+            return Json(new { success = true, message = "Data received successfully." });
+        }
+
+        public string ConvertIFormFileToJson(IFormFile formFile)
+        {
+            if (formFile == null)
+                return null;
+
+
+            using (var stream = new MemoryStream())
+            {
+                formFile.CopyTo(stream);
+                var bytes = stream.ToArray();
+
+                var base64String = Convert.ToBase64String(bytes);
+
+                var fileData = new IFileData
+                {
+                    FileName = formFile.FileName,
+                    ContentType = formFile.ContentType,
+                    Content = base64String
+                };
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    System.Text.Json.JsonSerializer.SerializeAsync(memoryStream, fileData).Wait();
+                    return System.Text.Encoding.UTF8.GetString(memoryStream.ToArray());
+                }
+            }
         }
 
     }
