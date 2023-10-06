@@ -45,6 +45,8 @@ namespace DARE_API.Services
             {
                 var sub = _dbContext.Submissions.First(s => s.Id == message.Body);
 
+                //TODO: Mahadi copy crate from external to local submission (if in external)
+
                 //TODO: Validate format of Crate
 
                 var dbproj = sub.Project;
