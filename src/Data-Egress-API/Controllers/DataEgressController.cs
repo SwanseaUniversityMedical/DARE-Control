@@ -170,32 +170,33 @@ namespace Data_Egress_API.Controllers
             }
 
         }
-
-        [HttpGet("DataOut")]
-        public async Task<BoolReturn> DataOutApproval(int submissionId)
-        { try
-            { 
-            var returned = _DbContext.DataEgressFiles.Where(x => x.SubmissionId == submissionId).ToList();
+       
+        //[HttpGet("DataOut")]
+        //public async Task<BoolReturn> DataOutApproval(int submissionId)
+        //{ 
+        //    try
+        //    { 
+        //    var returned = _DbContext.DataEgressFiles.Where(x => x.SubmissionId == submissionId).ToList();
     
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("submissionId", submissionId.ToString());
-            var submission = await _treClientHelper.CallAPI<List<SubmissionFile>, Submission>("/api/SendFileResultsToHUTCH/Submission/", returned,
-                    paramlist).Result;
-            if (submission!= null)
-            {
-                return new BoolReturn() { Result = true };
-            }
-            else
-            {
-                return new BoolReturn() { Result = false };
-            }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crashed", "DataOutApproval");
-                throw;
-            }
-        }
+        //    var paramlist = new Dictionary<string, string>();
+        //    paramlist.Add("submissionId", submissionId.ToString());
+        //        var submission = await _treClientHelper.CallAPI<List<SubmissionFile>, Submission>("/api/SendFileResultsToHUTCH/Submission/", returned,
+        //                paramlist).Result;
+        //        if (submission!= null)
+        //    {
+        //        return new BoolReturn() { Result = true };
+        //    }
+        //    else
+        //    {
+        //        return new BoolReturn() { Result = false };
+        //    }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Log.Error(ex, "{Function} Crashed", "DataOutApproval");
+        //        throw;
+        //    }
+        //}
 
         [HttpGet("DownloadFile")]
         public async Task<bool> DownloadFileAsync(MinioSettings minioSettings, string bucketName = "", string objectName = "")
