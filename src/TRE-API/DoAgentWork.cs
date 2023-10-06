@@ -365,7 +365,6 @@ namespace TRE_API
                             var Token = _hasuraAuthenticationService.GetNewToken(role);
 
 
-                            var paramlist = new Dictionary<string, string>();
                             var projectId = aSubmission.Project.Id;
                             var TREBucket = "S3://" + _dbContext.Projects.First(x => x.Id == projectId).SubmissionBucketTre; //TODO Check
                             //it need the file name?? (key-name)
@@ -380,11 +379,19 @@ namespace TRE_API
 
                             foreach (var Executor in tesMessage.Executors)
                             {
-                                if (Executor.Env == null)
+                                if (Executor.Image == "CustomerImages") //TODO
                                 {
-                                    Executor.Env = new Dictionary<string, string>();
+                                    for (int i = 0; i < Executor.Command.Count; i++)
+                                    {
+                                        Executor.Command[i] += "--" + Token;
+                                    }
                                 }
-                                Executor.Env["HASURAAuthenticationToken"] = Token;
+
+                                //if (Executor.Env == null)
+                                //{
+                                //    Executor.Env = new Dictionary<string, string>();
+                                //}
+                                //Executor.Env["HASURAAuthenticationToken"] = Token;
                             }
 
                             _dbContext.TokensToExpire.Add(new TokenToExpire()
@@ -394,7 +401,21 @@ namespace TRE_API
                             });
 
 
-
+                            var sta = @" {
+      ""image"": ""ubuntu:20.04"",
+      ""command"": [
+        ""/bin/md5"",
+        ""/data/file1""
+      ],
+      ""workdir"": ""/data/"",
+      ""stdin"": ""/data/file1"",
+      ""stdout"": ""/tmp/stdout.log"",
+      ""stderr"": ""/tmp/stderr.log"",
+      ""env"": {
+        ""BLASTDB"": ""/data/GRC38"",
+        ""HMMERDB"": ""/data/hmmer""
+      }
+    }"
 
                             if (tesMessage is not null)
                                 CreateTESK(JsonConvert.SerializeObject(tesMessage), aSubmission.TesId);
