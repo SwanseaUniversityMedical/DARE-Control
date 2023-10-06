@@ -436,43 +436,166 @@
 
 
 
-                                                                <li class="position-relative">
-                                                                    <span class="position-absolute bg-grey h-100 timeline-line"></span>
-                                                                    <span class="position-relative d-inline-flex">
+                                                                    <li class="position-relative">
+                                                                        <span class="position-absolute bg-grey h-100 timeline-line"></span>
+                                                                        <span class="position-relative d-inline-flex">
                                                                             @{
+                                                                                var timeUpdate = DateTime.Now - status.End;
+                                                                                var displaytimeUpdate = "";
+                                                                                var displaytimeUpdateSec = " seconds";
+                                                                                var displaytimeUpdateMin = " minutes";
+                                                                                var displaytimeUpdateHour = " hours";
+                                                                                var displaytimeUpdateDay = " days";
 
-                                                                                if (status.Status == BL.Models.Enums.StatusType.ValidationSuccessful
-                                                                                || status.Status == BL.Models.Enums.StatusType.TransferredToPod
-                                                                                || status.Status == BL.Models.Enums.StatusType.DataOutApproved
-                                                                                || status.Status == BL.Models.Enums.StatusType.PodProcessingComplete
-                                                                                || status.Status == BL.Models.Enums.StatusType.TREApprovedProject
-                                                                                || status.Status == BL.Models.Enums.StatusType.Completed)
+
+                                                                        if (timeUpdate.TotalSeconds < 60)
+                                                                        {
+                                                                            if (timeUpdate.Seconds == 1)
+                                                                            {
+                                                                                displaytimeUpdateSec = " Second ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displaytimeUpdateSec = " Seconds ";
+                                                                            }
+
+                                                                            displaytimeUpdate = @timeUpdate.Seconds + displaytimeUpdateSec;
+
+
+                                                                        }
+                                                                        else if (timeUpdate.TotalMinutes < 60)
+                                                                        {
+                                                                            if (timeUpdate.Minutes == 1)
+                                                                            {
+                                                                                displaytimeUpdateMin = " Minute ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displaytimeUpdateMin = " Minutes ";
+                                                                            }
+                                                                            if (timeUpdate.Seconds == 1)
+                                                                            {
+                                                                                displaytimeUpdateSec = " Second ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displaytimeUpdateSec = " Seconds ";
+                                                                            }
+                                                                            displaytimeUpdate = @timeUpdate.Minutes + displaytimeUpdateMin + @timeUpdate.Seconds + " and " + displaytimeUpdateSec;
+
+                                                                        }
+                                                                        else if (timeUpdate.TotalHours < 24)
+                                                                        {
+                                                                            if (timeUpdate.Hours == 1)
+                                                                            {
+                                                                                displaytimeUpdateHour = " Hour ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displaytimeUpdateHour = " Hours ";
+                                                                            }
+                                                                            if (timeUpdate.Minutes == 1)
+                                                                            {
+                                                                                displaytimeUpdateMin = " Minute ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displaytimeUpdateMin = " Minutes ";
+                                                                            }
+                                                                            if (timeUpdate.Seconds == 1)
+                                                                            {
+                                                                                displaytimeUpdateSec = " Second ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displaytimeUpdateSec = " Seconds ";
+                                                                            }
+
+
+                                                                            displaytimeUpdate = timeUpdate.Hours + displaytimeUpdateHour + @timeUpdate.Minutes + displaytimeUpdateMin + " and " + @timeUpdate.Seconds + displaytimeUpdateSec;
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            if (timeUpdate.Days == 1)
+                                                                            {
+                                                                                displaytimeUpdateDay = " Day ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displaytimeUpdateDay = " Days ";
+                                                                            }
+                                                                            if (timeUpdate.Hours == 1)
+                                                                            {
+                                                                                displaytimeUpdateHour = " Hour ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displaytimeUpdateHour = " Hours ";
+                                                                            }
+                                                                            if (timeUpdate.Minutes == 1)
+                                                                            {
+                                                                                displaytimeUpdateMin = " Minute ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displaytimeUpdateMin = " Minutes ";
+                                                                            }
+                                                                            if (timeUpdate.Seconds == 1)
+                                                                            {
+                                                                                displaytimeUpdateSec = " Second ";
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                displaytimeUpdateSec = " Seconds ";
+                                                                            }
+
+                                                                                    displaytimeUpdate = timeUpdate.Days + displaytimeUpdateDay + timeUpdate.Hours + displaytimeUpdateHour + @timeUpdate.Minutes + displaytimeUpdateMin + " and " + @timeUpdate.Seconds + displaytimeUpdateSec;
+
+
+                                                                        }
+
+
+                                                                                if (status.Status == BL.Models.Enums.StatusType.Completed) 
+
                                                                                 {
-                                                                                <span class="icon-wrap">
-                                                                                    <i class="fa-solid fa-check-circle fs-6 text-success me-3"></i>
+                                                                                    <h6 class="mb-0">
+                                                                                <span class="badge bg-success rounded-pill d-inline-flex align-items-center pe-3" data-bs-toggle="tooltip" data-bs-title="Completed: @Model.Submission.EndTime">
+                                                                                    <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
+                                                                                    <span class="text-start">
+                                                                                        <span class="mb-1">Completed</span>
+                                                                                            <span class="font-monospace small d-block">@displaytimeUpdate</span>
+                                                                                    </span>
                                                                                 </span>
+                                                                                </h6>
                                                                                 }
-                                                                                else if (status.Status == BL.Models.Enums.StatusType.InvalidUser
-                                                                                || status.Status == BL.Models.Enums.StatusType.UserNotOnProject
-                                                                                || status.Status == BL.Models.Enums.StatusType.InvalidSubmission
-                                                                                || status.Status == BL.Models.Enums.StatusType.TRENotAuthorisedForProject
-                                                                                || status.Status == BL.Models.Enums.StatusType.DataOutApprovalRejected
-                                                                                || status.Status == BL.Models.Enums.StatusType.TRERejectedProject
-                                                                                || status.Status == BL.Models.Enums.StatusType.TransferToPodFailed
-                                                                                || status.Status == BL.Models.Enums.StatusType.PodProcessingFailed
-                                                                                || status.Status == BL.Models.Enums.StatusType.Failed)
+                                                                                else if (status.Status == BL.Models.Enums.StatusType.Failed)
+
                                                                                 {
-                                                                                <span class="icon-wrap">
-                                                                                    <i class="fa-solid fa-warning fs-6 text-danger me-3"></i>
-                                                                                </span>
+                                                                    <h6 class="mb-0">
+                                                                        <span class="badge bg-danger rounded-pill d-inline-flex align-items-center pe-3" data-bs-toggle="tooltip" data-bs-title="Failed: error message">
+                                                                            <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
+                                                                            <span class="text-start">
+                                                                                <span class="mb-1">Failed</span>
+                                                                                <span class="font-monospace small d-block">@displaytimeUpdate</span>
+                                                                            </span>
+                                                                        </span>
+                                                                    </h6>
+                                                                
                                                                                 }
                                                                                 else
                                                                                 {
-                                                                                <span class="icon-wrap">
-                                                                                    <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
-                                                                                </span>
+                                                                               <h6 class="mb-0">
+                                        <span class="badge bg-primary rounded-pill d-inline-flex align-items-center pe-3">
+                                            <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
+                                            <span class="text-start">
+                                                <span class="mb-1">Running</span>
+                                                                                            <span class="font-monospace small d-block">@displaytimeUpdate</span>
+                                            </span>
+                                        </span>
+                                        </h6>
                                                                                 }
                                                                             }
+                                                                            @*
                                                                         <span class="d-flex flex-column">
                                                                             <span class="text-dark">
                                                                                     @Helpers.PrettyStatus(status.Status)
@@ -481,6 +604,7 @@
                                                                                     @displayRuntime
                                                                             </span>
                                                                         </span>
+                                                                        *@
                                                                     </span>
                                                                 </li>
 
@@ -525,7 +649,7 @@
                                             //if (stage.statusTypeList.Contains(child.Status))
                                             if (stage.stagesDict.ContainsKey(stageNum) && stage.stageNumber == stageNum && stage.statusTypeList.Contains(child.Status))
                                             {
-                                                validstats.Add(new BL.Models.HistoricStatus() { Start = child.LastStatusUpdate, Status = child.Status, End = child.EndTime == DateTime.MinValue ? DateTime.Now : child.EndTime });
+                                            validstats.Add(new BL.Models.HistoricStatus() { Start = child.LastStatusUpdate, Status = child.Status, End = child.EndTime == DateTime.MinValue ? DateTime.Now : child.EndTime });
                                             validstats = validstats.OrderBy(x => x.Start).ToList();
 
 
