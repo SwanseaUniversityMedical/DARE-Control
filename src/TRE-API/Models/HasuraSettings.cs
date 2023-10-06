@@ -8,5 +8,7 @@
         public string EnvironmentVariableForDB { get; set; }
 
         public string DbName { get; set; }
+
+        public bool IsEnabled { get; set; }
     }
 }

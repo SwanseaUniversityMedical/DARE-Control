@@ -53,6 +53,9 @@ namespace TRE_API
         public async Task testing()
         {
 
+
+            //TesId
+
             Console.WriteLine("Testing");
             string jsonContent = @"{
     ""name"": ""Hello World"",
@@ -76,7 +79,14 @@ namespace TRE_API
           ""url"": ""s3://my-object-store/outfile-2"",
           ""type"": ""FILE""
         },
-	]
+	],
+    ""volumes"":null,
+    ""tags"":{
+        ""project"":""Head"",
+        ""tres"":""SAIL|DPUK""
+     },
+    ""logs"":null,
+    ""creation_time"":null
 }
 ";
             var arr = new HttpClient();
@@ -91,8 +101,7 @@ namespace TRE_API
 
             foreach (var output in ob["outputs"])
             {
-               //xzczxcfdszzzz []
-               // var aaa = output.ToString();
+                 output["url"] = "AAAAAAAAAAAAAAAAAAAAA";
             }
            
 
@@ -108,6 +117,8 @@ namespace TRE_API
       ],
             */
 
+
+            //
             ob.Add("tags", NewOb);
 
             NewOb.Add("HASURAAuthenticationToken", Token);
@@ -235,8 +246,7 @@ namespace TRE_API
                                         if (Token != null)
                                         {
                                             _dbContext.TokensToExpire.Remove(Token);
-                                            var arr = new HttpClient();
-                                            arr.PostAsync($"http://localhost:8090/api/Authentication/ExpirerToken/{Token.Token}", null);
+                                            _hasuraAuthenticationService.ExpirerToken(Token.Token);
                                         }
                                         _dbContext.SaveChanges();
                                         break;
@@ -246,8 +256,7 @@ namespace TRE_API
                                         if (Token != null)
                                         {
                                             _dbContext.TokensToExpire.Remove(Token);
-                                            var arr = new HttpClient();
-                                            arr.PostAsync($"http://localhost:8090/api/Authentication/ExpirerToken/{Token.Token}", null);
+                                            _hasuraAuthenticationService.ExpirerToken(Token.Token);
                                         }
                                         _dbContext.SaveChanges();
                                         break;

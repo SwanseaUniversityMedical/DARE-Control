@@ -319,8 +319,18 @@ app.MapHub<SignalRService>("/signalRHub", options =>
     options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
 }).RequireCors(MyAllowSpecificOrigins);
 app.UseHangfireDashboard();
+
+
+
 RecurringJob.AddOrUpdate<IDoSyncWork>(a => a.Execute(), Cron.MinuteInterval(10));
 RecurringJob.AddOrUpdate<IDoAgentWork>("Scan Submissions", a => a.testing(), Cron.MinuteInterval(1));
+
+if (HasuraSettings.IsEnabled)
+{
+    RecurringJob.AddOrUpdate<IHasuraService>(a => a.Run(), Cron.HourInterval(4));
+}
+
+
 
 var port = app.Environment.WebRootPath;
 
