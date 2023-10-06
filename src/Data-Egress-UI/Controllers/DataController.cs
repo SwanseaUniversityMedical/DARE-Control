@@ -72,8 +72,18 @@ namespace Data_Egress_UI.Controllers
             var files = _dataClientHelper.CallAPIWithoutModel<DataFiles>("/api/DataEgress/UpdateFileData/", paramlist).Result;
             return RedirectToAction("GetFiles", new { Id = Id });
         }
-    
-        
+        [HttpGet]
+        public IActionResult DataOut(int id)
+        {
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("submissionId", id.ToString());
+
+            var files = _dataClientHelper.CallAPIWithoutModel<List<DataFiles>>("/api/DataEgress/DataOutApproval/", paramlist).Result;
+
+            return View(files);
+        }
+
+
         [HttpGet]
         public IActionResult DownloadFile(int? FileId)
         {
