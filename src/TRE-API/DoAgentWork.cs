@@ -22,12 +22,13 @@ using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
 using Newtonsoft.Json.Linq;
 using TREAgent.Repositories;
+using System.Net.Http.Json;
 
 namespace TRE_API
 {
     public interface IDoAgentWork
     {
-        void Execute();
+        Task Execute();
         void CheckTESK(string taskID, string TesId);
         void ClearJob(string jobname);
         Task testing();
@@ -42,12 +43,22 @@ namespace TRE_API
         private readonly ApplicationDbContext _dbContext;
         private readonly ISubmissionHelper _subHelper;
         private readonly IHasuraAuthenticationService _hasuraAuthenticationService;
-        public DoAgentWork(IServiceProvider serviceProvider, ApplicationDbContext dbContext, ISubmissionHelper subHelper, IHasuraAuthenticationService hasuraAuthenticationService)
+        private readonly IDareClientWithoutTokenHelper _dareHelper;
+
+
+        public DoAgentWork(IServiceProvider serviceProvider,
+            ApplicationDbContext dbContext,
+            ISubmissionHelper subHelper,
+            IHasuraAuthenticationService hasuraAuthenticationService,
+            IDareClientWithoutTokenHelper dareHelper
+            )
         {
             _serviceProvider = serviceProvider;
             _dbContext = dbContext;
             _subHelper = subHelper;
             _hasuraAuthenticationService = hasuraAuthenticationService;
+            _dareHelper = dareHelper;
+
         }
 
         public async Task testing()
@@ -89,47 +100,9 @@ namespace TRE_API
     ""creation_time"":null
 }
 ";
-            var arr = new HttpClient();
-
-            var role = "COOLSchemas2";
-
-            var Token = _hasuraAuthenticationService.GetNewToken(role);
 
 
-            var ob = JObject.Parse(jsonContent);
-
-
-            foreach (var output in ob["outputs"])
-            {
-                 output["url"] = "AAAAAAAAAAAAAAAAAAAAA";
-            }
-           
-
-            JObject NewOb = new JObject();
-
-            /*
-      "outputs": [
-        {
-          "path": "/data/outfile",
-          "url": "s3://my-object-store/outfile-1",
-          "type": "FILE"
-        }
-      ],
-            */
-
-
-            //
-            ob.Add("tags", NewOb);
-
-            NewOb.Add("HASURAAuthenticationToken", Token);
-
-            _dbContext.TokensToExpire.Add(new TokenToExpire()
-            {
-                TesId = "99",
-                Token = Token
-            });
-
-            CreateTESK(ob.ToString(), "99");
+            CreateTESK(jsonContent, "99");
         }
 
         public string CreateTESK(string jsonContent, string TesId)
@@ -291,7 +264,7 @@ namespace TRE_API
 
 
         // Method executed upon hangfire job
-        public void Execute()
+        public async Task Execute()
         {
             
             // control use of dependency injection
@@ -384,8 +357,43 @@ namespace TRE_API
                         // **************  SEND TO TESK
                         if (useTESK)
                         {
+
+                            var arr = new HttpClient();
+
+                            var role = aSubmission.Project.Name; //TODO Check
+
+                            var Token = _hasuraAuthenticationService.GetNewToken(role);
+
+
+                            var paramlist = new Dictionary<string, string>();
+                            var projectId = aSubmission.Project.Id;
+                            var TREBucket = "S3://" + _dbContext.Projects.First(x => x.Id == projectId).SubmissionBucketTre; //TODO Check
+                            //it need the file name?? (key-name)
+
+
+                            //S3://bucket-name/key-name
+
+                            foreach (var output in tesMessage.Outputs)
+                            {
+                                output.Url = TREBucket;
+                            }
+
+                            if (tesMessage.Tags == null)
+                            {
+                                tesMessage.Tags = new Dictionary<string, string>();
+                            }
+
+                            tesMessage.Tags["HASURAAuthenticationToken"] = Token;
+
+
+                            _dbContext.TokensToExpire.Add(new TokenToExpire()
+                            {
+                                TesId = aSubmission.TesId,
+                                Token = Token
+                            });
+
                             if (tesMessage is not null)
-                                CreateTESK(aSubmission.TesJson, aSubmission.TesId);
+                                CreateTESK(JsonConvert.SerializeObject(tesMessage), aSubmission.TesId);
                         }
 
                         // **************  TELL SUBMISSION LAYER WE DONE
