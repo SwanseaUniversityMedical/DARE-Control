@@ -23,6 +23,7 @@ using TRE_API.Services;
 using Newtonsoft.Json.Linq;
 using TREAgent.Repositories;
 using System.Net.Http.Json;
+using TRE_API.Models;
 
 namespace TRE_API
 {
@@ -44,13 +45,17 @@ namespace TRE_API
         private readonly ISubmissionHelper _subHelper;
         private readonly IHasuraAuthenticationService _hasuraAuthenticationService;
         private readonly IDareClientWithoutTokenHelper _dareHelper;
+        private readonly AgentSettings _AgentSettings;
+
+
 
 
         public DoAgentWork(IServiceProvider serviceProvider,
             ApplicationDbContext dbContext,
             ISubmissionHelper subHelper,
             IHasuraAuthenticationService hasuraAuthenticationService,
-            IDareClientWithoutTokenHelper dareHelper
+            IDareClientWithoutTokenHelper dareHelper,
+            AgentSettings AgentSettings
             )
         {
             _serviceProvider = serviceProvider;
@@ -58,7 +63,7 @@ namespace TRE_API
             _subHelper = subHelper;
             _hasuraAuthenticationService = hasuraAuthenticationService;
             _dareHelper = dareHelper;
-
+            _AgentSettings = AgentSettings;
         }
 
         public async Task testing()
@@ -203,8 +208,8 @@ namespace TRE_API
                             // send update
                             using (var scope = _serviceProvider.CreateScope())
                             {
-                            TokenToExpire Token = null;
-                            var statusMessage = StatusType.TransferredToPod;
+                                TokenToExpire Token = null;
+                                var statusMessage = StatusType.TransferredToPod;
                                 switch (status.state)
                                 {
                                     case "QUEUED":
@@ -274,10 +279,9 @@ namespace TRE_API
                 
                 // OPTIONS
                 // TODO get these from somewhere
-
-                var useRabbit = true;
-                var useHutch = false;
-                var useTESK = true;
+                var useRabbit = _AgentSettings.UseRabbit;
+                var useHutch = _AgentSettings.UseHutch;
+                var useTESK = _AgentSettings.UseTESK;
 
                 Console.WriteLine("Getting list of submissions");
 
@@ -399,23 +403,6 @@ namespace TRE_API
                                 TesId = aSubmission.TesId,
                                 Token = Token
                             });
-
-
-                            var sta = @" {
-      ""image"": ""ubuntu:20.04"",
-      ""command"": [
-        ""/bin/md5"",
-        ""/data/file1""
-      ],
-      ""workdir"": ""/data/"",
-      ""stdin"": ""/data/file1"",
-      ""stdout"": ""/tmp/stdout.log"",
-      ""stderr"": ""/tmp/stderr.log"",
-      ""env"": {
-        ""BLASTDB"": ""/data/GRC38"",
-        ""HMMERDB"": ""/data/hmmer""
-      }
-    }"
 
                             if (tesMessage is not null)
                                 CreateTESK(JsonConvert.SerializeObject(tesMessage), aSubmission.TesId);

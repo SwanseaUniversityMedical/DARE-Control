@@ -75,6 +75,11 @@ var AuthenticationSetting = new AuthenticationSettings();
 configuration.Bind(nameof(AuthenticationSetting), AuthenticationSetting);
 builder.Services.AddSingleton(AuthenticationSetting);
 
+var AgentSettings = new AgentSettings();
+configuration.Bind(nameof(AgentSettings), AgentSettings);
+builder.Services.AddSingleton(AgentSettings);
+
+
 
 
 builder.Services.AddHostedService<ConsumeInternalMessageService>();
