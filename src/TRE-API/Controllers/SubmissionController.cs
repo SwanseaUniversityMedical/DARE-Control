@@ -35,7 +35,7 @@ namespace TRE_API.Controllers
 
 
         public SubmissionController(ISignalRService signalRService, IDareClientWithoutTokenHelper helper,
-            ApplicationDbContext dbContext, IBus rabbit, ISubmissionHelper subHelper)
+            ApplicationDbContext dbContext, IBus rabbit, ISubmissionHelper subHelper, IDataEgressClientHelper egressHelper, IHutchClientHelper hutchClientHelper)
         {
             _signalRService = signalRService;
             _dareHelper = helper;
@@ -212,7 +212,7 @@ namespace TRE_API.Controllers
 
             var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
 
-            _rabbit.Advanced.Publish(exch, RoutingConstants.FetchFile, false, new Message<FetchFileMQ>(message));
+            _rabbit.Advanced.Publish(exch, RoutingConstants.FetchFiel, false, new Message<FetchFileMQ>(message));
 
         }
     }
