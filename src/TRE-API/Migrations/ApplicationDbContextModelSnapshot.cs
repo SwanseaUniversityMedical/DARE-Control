@@ -46,6 +46,53 @@ namespace TRE_API.Migrations
                     b.ToTable("SubmissionCredentials");
                 });
 
+            modelBuilder.Entity("BL.Models.TESKstatus", b =>
+                {
+                    b.Property<string>("id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("state")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("id");
+
+                    b.ToTable("TESK_Status");
+                });
+
+            modelBuilder.Entity("BL.Models.TeskAudit", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
+
+                    b.Property<string>("dated")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("teskid")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("id");
+
+                    b.ToTable("TESK_Audit");
+                });
+
             modelBuilder.Entity("BL.Models.TreAuditLog", b =>
                 {
                     b.Property<int>("Id")
@@ -133,17 +180,21 @@ namespace TRE_API.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("OutputBucketTre")
-                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Password")
                         .HasColumnType("text");
 
                     b.Property<string>("SubmissionBucketTre")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("SubmissionProjectId")
                         .HasColumnType("integer");
 
                     b.Property<string>("SubmissionProjectName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserName")
                         .HasColumnType("text");
 
                     b.HasKey("Id");

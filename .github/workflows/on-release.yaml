@@ -5,235 +5,207 @@ on:
     branches:
       - main
 
+permissions:
+  # read needed for changes detection
+  # write needed to author a Github release
+  contents: write
+  
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-
-  ######################################################################################################################
-  # Pre-Tasks 
-  ######################################################################################################################
-
-  slack:
-    # Open a new PR thread on Slack for this CI run
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/slack-release-thread.yaml@v2.3.0
-    with:
-      slack-channel: ${{ vars.SLACK_CHANNEL }}
-    secrets:
-      slack-token: ${{ secrets.SLACK_TOKEN }}
-
   changes:
     # Detect which files have been changed on this PR's full history
-    needs: slack
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/changes.yaml@v2.3.0
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/changes-release.yaml@v4.0.0
     with:
       slack-channel: ${{ vars.SLACK_CHANNEL }}
-      slack-thread: ${{ needs.slack.outputs.thread }}
-      github-app-id: ${{ vars.APP_ID }}
       filters: |
         api-container:
-          - './.github/workflows/release.yaml'
+          - './.github/workflows/on-release.yaml'
           - 'containers/api/**'
           - 'src/DARE-API/**'
           - 'src/BL/**'
         ui-container:
-          - './.github/workflows/release.yaml'
+          - './.github/workflows/on-release.yaml'
           - 'src/DARE-FrontEnd/**'
           - 'src/BL/**'
+        egress-api-container:
+          - './.github/workflows/on-release.yaml'
+          - 'src/Data-Egress-API/**'
+          - 'src/BL/**'
+        egress-ui-container:
+          - './.github/workflows/on-release.yaml'
+          - 'src/Data-Egress-UI/**'
+          - 'src/BL/**'
         tre-api-container:
-          - './.github/workflows/release.yaml'
+          - './.github/workflows/on-release.yaml'
           - 'src/TRE-API/**'
           - 'src/BL/**'
         tre-ui-container:
-          - './.github/workflows/release.yaml'
+          - './.github/workflows/on-release.yaml'
           - 'src/TRE-UI/**'
           - 'src/BL/**'
         tre-agent-container:
-          - './.github/workflows/release.yaml'
+          - './.github/workflows/on-release.yaml'
           - 'src/TREAgent/**'
           - 'src/BL/**'
         chart:
-          - './.github/workflows/release.yaml'
+          - './.github/workflows/on-release.yaml'
           - 'charts/**'
 
     secrets:
       slack-token: ${{ secrets.SLACK_TOKEN }}
-      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
-
-  ######################################################################################################################
-  # Container Tasks
-  ######################################################################################################################
 
   api-container:
     # Build the DARE api container and push it as :rc-1.0.0
-    needs:
-      - slack
-      - changes
+    needs: changes
     if: fromJSON(needs.changes.outputs.changes).api-container == 'true'
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.3.0
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v4.0.0
     with:
-      job-name: container-api
+      job-name: api-container
       container-registry: ${{ vars.HARBOR_REGISTRY }}
-      github-app-id: ${{ vars.APP_ID }}
       container-registry-user: ${{ vars.HARBOR_USER }}
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: ${{ vars.HARBOR_REPO }}-main-api
       release-tag-format: 'DARE-Control-API-Container-${version}'
       slack-channel: ${{ vars.SLACK_CHANNEL }}
-      slack-thread: ${{ needs.slack.outputs.thread }}
       build-command: |
         docker build -t $IMAGE -f src/DARE-API/Dockerfile src/
     secrets:
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
-      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
   ui-container:
     # Build the DARE ui container and push it as :rc-1.0.0
-    needs:
-      - slack
-      - changes
+    needs: changes
     if: fromJSON(needs.changes.outputs.changes).ui-container == 'true'
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.3.0
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v4.0.0
     with:
-      job-name: container-ui
+      job-name: ui-container
       container-registry: ${{ vars.HARBOR_REGISTRY }}
-      github-app-id: ${{ vars.APP_ID }}
       container-registry-user: ${{ vars.HARBOR_USER }}
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: ${{ vars.HARBOR_REPO }}-main-ui
       release-tag-format: 'DARE-Control-UI-Container-${version}'
       slack-channel: ${{ vars.SLACK_CHANNEL }}
-      slack-thread: ${{ needs.slack.outputs.thread }}
       build-command: |
         docker build -t $IMAGE -f src/DARE-FrontEnd/Dockerfile src/
     secrets:
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
-      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+  egress-api-container:
+    # Build the egress api container and push it as :rc-1.0.0
+    needs: changes
+    if: fromJSON(needs.changes.outputs.changes).egress-api-container == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v4.0.0
+    with:
+      job-name: egress-api-container
+      container-registry: ${{ vars.HARBOR_REGISTRY }}
+      container-registry-user: ${{ vars.HARBOR_USER }}
+      container-registry-project: ${{ vars.HARBOR_PROJECT }}
+      container-registry-repo: ${{ vars.HARBOR_REPO }}-egress-api
+      release-tag-format: 'DARE-Egress-API-Container-${version}'
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      build-command: |
+        docker build -t $IMAGE -f src/Data-Egress-API/Dockerfile src/
+    secrets:
+      container-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+
+  egress-ui-container:
+    # Build the egress ui container and push it as :rc-1.0.0
+    needs: changes
+    if: fromJSON(needs.changes.outputs.changes).egress-ui-container == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v4.0.0
+    with:
+      job-name: egress-ui-container
+      container-registry: ${{ vars.HARBOR_REGISTRY }}
+      container-registry-user: ${{ vars.HARBOR_USER }}
+      container-registry-project: ${{ vars.HARBOR_PROJECT }}
+      container-registry-repo: ${{ vars.HARBOR_REPO }}-egress-ui
+      release-tag-format: 'DARE-Egress-UI-Container-${version}'
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      build-command: |
+        docker build -t $IMAGE -f src/Data-Egress-UI/Dockerfile src/
+    secrets:
+      container-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
 
   tre-api-container:
     # Build the tre api container and push it as :rc-1.0.0
-    needs:
-      - slack
-      - changes
+    needs: changes
     if: fromJSON(needs.changes.outputs.changes).tre-api-container == 'true'
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.3.0
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v4.0.0
     with:
-      job-name: container-tre-api
+      job-name: tre-api-container
       container-registry: ${{ vars.HARBOR_REGISTRY }}
-      github-app-id: ${{ vars.APP_ID }}
       container-registry-user: ${{ vars.HARBOR_USER }}
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: ${{ vars.HARBOR_REPO }}-tre-api
       release-tag-format: 'DARE-TRE-API-Container-${version}'
       slack-channel: ${{ vars.SLACK_CHANNEL }}
-      slack-thread: ${{ needs.slack.outputs.thread }}
       build-command: |
         docker build -t $IMAGE -f src/TRE-API/Dockerfile src/
     secrets:
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
-      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
   tre-ui-container:
     # Build the tre ui container and push it as :rc-1.0.0
-    needs:
-      - slack
-      - changes
+    needs: changes
     if: fromJSON(needs.changes.outputs.changes).tre-ui-container == 'true'
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.3.0
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v4.0.0
     with:
-      job-name: container-tre-ui
+      job-name: tre-ui-container
       container-registry: ${{ vars.HARBOR_REGISTRY }}
-      github-app-id: ${{ vars.APP_ID }}
       container-registry-user: ${{ vars.HARBOR_USER }}
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: ${{ vars.HARBOR_REPO }}-tre-ui
       release-tag-format: 'DARE-TRE-UI-Container-${version}'
       slack-channel: ${{ vars.SLACK_CHANNEL }}
-      slack-thread: ${{ needs.slack.outputs.thread }}
       build-command: |
         docker build -t $IMAGE -f src/TRE-UI/Dockerfile src/
     secrets:
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
-      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
   tre-agent-container:
     # Build the tre agent container and push it as :rc-1.0.0
-    needs:
-      - slack
-      - changes
+    needs: changes
     if: fromJSON(needs.changes.outputs.changes).tre-agent-container == 'true'
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v2.3.0
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v4.0.0
     with:
-      job-name: container-tre-agent
+      job-name: tre-agent-container
       container-registry: ${{ vars.HARBOR_REGISTRY }}
-      github-app-id: ${{ vars.APP_ID }}
       container-registry-user: ${{ vars.HARBOR_USER }}
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: ${{ vars.HARBOR_REPO }}-tre-agent
       release-tag-format: 'DARE-Agent-Container-${version}'
       slack-channel: ${{ vars.SLACK_CHANNEL }}
-      slack-thread: ${{ needs.slack.outputs.thread }}
       build-command: |
         docker build -t $IMAGE -f src/TREAgent/Dockerfile src/
     secrets:
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
-      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
-
-
-
-  ######################################################################################################################
-  # Chart Tasks
-  ######################################################################################################################
 
   chart:
     # Build the chart and push it as x.y.z-rc
-    needs:
-      - slack
-      - changes
+    needs: changes
     if: fromJSON(needs.changes.outputs.changes).chart == 'true'
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-chart.yaml@v2.3.0
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-chart.yaml@v4.0.0
     with:
       job-name: chart
+      chart: charts/control
       chart-registry: ${{ vars.HARBOR_REGISTRY }}
       chart-registry-user: ${{ vars.HARBOR_USER }}
       chart-registry-project: ${{ vars.HARBOR_PROJECT }}
       chart-registry-repo: ${{ vars.HARBOR_REPO }}
       release-tag-format: 'DARE-Control-Helm-${version}'
-      github-app-id: ${{ vars.APP_ID }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
-      slack-thread: ${{ needs.slack.outputs.thread }}
-      chart: charts/**
       test-command: |
         helm template $CHART --values charts/control/values.yaml
     secrets:
       chart-registry-token: ${{ secrets.HARBOR_TOKEN }}
-      github-app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
-      slack-token: ${{ secrets.SLACK_TOKEN }}
-
-  ######################################################################################################################
-  # Post-Tasks
-  ######################################################################################################################
-
-  slack-update:
-    # Update the original Slack message with the final workflow status
-    # WARNING! ALL UPSTREAM JOBS MUST BE DECLARED HERE TO REPORT FAILURES CORRECTLY!
-    needs:
-      - slack
-      - changes
-      - api-container
-      - ui-container
-      - tre-api-container
-      - tre-ui-container
-      - tre-agent-container
-      - chart
-
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/slack-release-thread.yaml@v2.3.0
-    if: always()
-    with:
-      slack-channel: ${{ vars.SLACK_CHANNEL }}
-      slack-thread: ${{ needs.slack.outputs.thread }}
-      status: ${{ contains(join(needs.*.result, ','), 'failure') && ':no_entry:' || ':white_check_mark:' }}
-    secrets:
       slack-token: ${{ secrets.SLACK_TOKEN }}

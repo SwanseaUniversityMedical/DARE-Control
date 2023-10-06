@@ -7,10 +7,13 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["src/Data-Egress-API/Data-Egress-API.csproj", "src/Data-Egress-API/"]
-RUN dotnet restore "src/Data-Egress-API/Data-Egress-API.csproj"
+COPY ["Data-Egress-API/Data-Egress-API.csproj", "Data-Egress-API/"]
+COPY ["BL/BL.csproj", "BL/"]
+RUN dotnet restore "Data-Egress-API/Data-Egress-API.csproj"
+
 COPY . .
-WORKDIR "/src/src/Data-Egress-API"
+
+WORKDIR "/src/Data-Egress-API"
 RUN dotnet build "Data-Egress-API.csproj" -c Release -o /app/build
 
 FROM build AS publish

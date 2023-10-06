@@ -32,10 +32,9 @@ namespace BL.Rabbit
                 var subs = await initial.GetQueueAsync(vhost, QueueConstants.Submissions);
                 await initial.CreateQueueBindingAsync(exchange, subs, new BindingInfo(RoutingConstants.Subs));
 
-                // create a queue users
                 await initial.CreateQueueAsync(new QueueInfo(QueueConstants.FetchExtarnalFile), vhost);
                 var fetchFile = await initial.GetQueueAsync(vhost, QueueConstants.FetchExtarnalFile);
-                await initial.CreateQueueBindingAsync(exchange, fetchFile, new BindingInfo(RoutingConstants.FetchFiel));
+                await initial.CreateQueueBindingAsync(exchange, fetchFile, new BindingInfo(RoutingConstants.FetchFile));
 
 
 

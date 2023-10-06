@@ -19,6 +19,7 @@ using Microsoft.EntityFrameworkCore;
 using TREAgent.Repositories;
 using TREAgent.Repositories.DbContexts;
 using System.Threading.Tasks;
+using TESKstatus = TREAgent.Repositories.TESKstatus;
 
 namespace TREAgent
 {
@@ -86,7 +87,7 @@ namespace TREAgent
 
                     RecurringJob.AddOrUpdate<IDoWork>(id, a => a.CheckTESK(id,TesId), Cron.MinuteInterval(1));
 
-                    _dbContext.Add(new TeskAudit(){message = jsonContent, teskid = id});
+                    _dbContext.Add(new Repositories.TeskAudit(){message = jsonContent, teskid = id});
                     _dbContext.SaveChanges();
 
                     return id;

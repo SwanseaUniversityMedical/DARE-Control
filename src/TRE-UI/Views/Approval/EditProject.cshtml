@@ -58,6 +58,14 @@
                         @Html.LabelFor(x => x.LocalProjectName)
                         @Html.TextBoxFor(x => x.LocalProjectName)
                     </div>
+                        <div class="form-group mb-4">
+                            @Html.LabelFor(x => x.UserName)
+                            @Html.TextBoxFor(x => x.UserName)
+                        </div>
+                        <div class="form-group mb-4">
+                            @Html.LabelFor(x => x.Password)
+                            @Html.PasswordFor(x => x.Password)
+                        </div>
                     <div class="form-group mb-4">
                         @Html.HiddenFor(x => x.Id)/
                         @Html.RadioButtonFor(x => x.Decision, Decision.Approved)
