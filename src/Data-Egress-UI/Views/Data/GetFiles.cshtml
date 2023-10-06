@@ -59,12 +59,21 @@
 
 
                                 <div class="">
-                                   
-                                    <a href="@Url.Action("EditFileData", "Data",new{Id=@file.Id,Status = 1})" class="btn btn-sm btn-outline-primary" ><span class="small">Approve</span></a>
-                                    <a href="@Url.Action("EditFileData", "Data",new{Id=@file.Id,Status = 2})" class="btn btn-sm btn-outline-danger"><span class="small">Deny</span></a>
-                            <a href="@Url.Action("DownloadFile", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-info"><span class="small">Download</span></a>
+                                    @if (file.Status == BL.Models.Enums.FileStatus.Approved)
+
+                                    {
+
+                                        <a href="@Url.Action("EditFileData", "Data",new{Id=@file.Id,Status = 2})" class="btn btn-sm btn-outline-danger"><span class="small">Deny</span></a>
+                                    }
+                                    else if (file.Status == BL.Models.Enums.FileStatus.Rejected)
+                                    {
+                                        <a href="@Url.Action("EditFileData", "Data",new{Id=@file.Id,Status = 1})" class="btn btn-sm btn-outline-success"><span class="small">Approve</span></a>
+
+                                    }
+                                           <a href="@Url.Action("DownloadFile", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-info"><span class="small">Download</span></a>
                        
                                     </div>
+                             
                                 </div>
 
 

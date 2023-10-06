@@ -65,18 +65,11 @@ namespace Data_Egress_UI.Controllers
 
         [HttpGet]
         public IActionResult EditFileData(int Id , int Status)
-        {
-            //var result =
-            //    await _dataClientHelper.CallAPI<List<DataFiles>, List<DataFiles>>("/api/DataEgress/UpdateFileData", new List<DataFiles>() { model });
-            //var result = _dataClientHelper.CallAPIWithoutModel<DataFiles>("/api/DataEgress/UpdateFileData",
-            //      new Dictionary<string, string>()
-            //          { { "Id", Id.ToString() }, { "Status", Status.ToString() } })
-            //  .Result;
+        {          
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("id", Id.ToString());
             paramlist.Add("Status", Status.ToString());
             var files = _dataClientHelper.CallAPIWithoutModel<DataFiles>("/api/DataEgress/UpdateFileData/", paramlist).Result;
-
             return RedirectToAction("GetFiles", new { Id = Id });
         }
     
