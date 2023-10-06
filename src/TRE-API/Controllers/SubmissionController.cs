@@ -126,6 +126,7 @@ namespace TRE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
         public IActionResult FinalOutcome([FromBody] FinalOutcome outcome)
         {
+            //TODO: Mahadi copy FinalOutcome file from tre output bucket to submission output bucket
             throw new NotImplementedException();
         }
 

@@ -247,6 +247,8 @@ namespace TRE_API
                     }
                     else
                     {
+
+                        //TODO: Mahadi copy from submission input bucket to tre input bucket
                         // The TES message
                         var tesMessage = JsonConvert.DeserializeObject<TesTask>(aSubmission.TesJson);
                         var processedOK = true;
