@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using BL.Models.APISimpleTypeReturns;
 using BL.Models.Tes;
+using Newtonsoft.Json;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -339,6 +340,8 @@ namespace DARE_FrontEnd.Controllers
 
                 var filestring = ConvertIFormFileToJson(model.File);
 
+                var jsonObject=JsonConvert.DeserializeObject<IFileData>(filestring);
+
                 var paramss = new Dictionary<string, string>();
 
                 paramss.Add("bucketName", model.SubmissionBucket);
@@ -348,7 +351,7 @@ namespace DARE_FrontEnd.Controllers
 
                 var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
 
-                imageUrl = "http://" + minioEndpoint + "/browser/" + model.SubmissionBucket + "/" + model.File.Name;
+                imageUrl = "http://" + minioEndpoint.Url + "/browser/" + model.SubmissionBucket + "/" + jsonObject.FileName;
 
             }
 
