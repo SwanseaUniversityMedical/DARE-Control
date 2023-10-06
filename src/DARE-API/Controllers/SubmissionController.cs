@@ -1,4 +1,5 @@
 ﻿using BL.Models;
+using BL.Models.APISimpleTypeReturns;
 using BL.Models.Enums;
 using DARE_API.Repositories.DbContexts;
 using DARE_API.Attributes;
@@ -29,11 +30,13 @@ namespace DARE_API.Controllers
         private readonly ApplicationDbContext _DbContext;
         private readonly IBus _rabbit;
 
-
-        public SubmissionController(ApplicationDbContext repository, IBus rabbit)
+        private readonly IWebHostEnvironment _environment;
+        public SubmissionController(ApplicationDbContext repository, IBus rabbit, IWebHostEnvironment environment)
         {
             _DbContext = repository;
             _rabbit = rabbit;
+            _environment = environment;
+
 
 
         }
@@ -140,6 +143,33 @@ namespace DARE_API.Controllers
             {
                 Log.Error(ex, "{Function} Crashed", "GetASubmission");
                 throw;
+            }
+        }
+
+        [HttpPost("UploadFile")]
+        public BoolReturn UploadFile(IFormFile file, string bucketName)
+        {
+            if (file == null || file.Length == 0)
+                return new BoolReturn() { Result = false };
+
+            try
+            {
+                //var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
+                //Directory.CreateDirectory(uploadsFolder);
+
+                //var uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+                //var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                //using (var stream = new FileStream(filePath, FileMode.Create))
+                //{
+                //    file.CopyTo(stream);
+                //}
+
+                return new BoolReturn() { Result = true };
+            }
+            catch (Exception ex)
+            {
+                return new BoolReturn() { Result = false };
             }
         }
 

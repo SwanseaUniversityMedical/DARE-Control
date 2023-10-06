@@ -243,23 +243,16 @@ namespace BL.Services
         {
             using (var formData = new MultipartFormDataContent())
             {
-                // Create a StreamContent from the IFormFile
-                var streamContent = new StreamContent(file.OpenReadStream());
-                streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
-                {
-                    Name = fileParameterName, // Match the property name in your API's FileInfo class
-                    FileName = file.FileName
-                };
-                formData.Headers.ContentType = new MediaTypeHeaderValue("multipart/form-data");
-                formData.Add(streamContent);
+                // Attach the IFormFile to the request
+                formData.Add(new StreamContent(file.OpenReadStream()), fileParameterName, file.FileName);
+
+                // Send the POST request to the API
+                HttpResponseMessage response = await apiClient.PostAsync(endPoint, formData);
+                return response;
                 
-                
-               
-                    var response = await apiClient.PostAsync(endPoint, formData);
-                    return response;
-                   
-               
             }
+
+            
         }
 
         #endregion

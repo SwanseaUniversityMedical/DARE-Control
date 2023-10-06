@@ -339,7 +339,9 @@ namespace DARE_FrontEnd.Controllers
                 //paramList.Add("path", model.File.ToString());
                 //paramList.Add("bucketName", model.SubmissionBucket.ToString());
                 //var fileUpload = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/UploadToMinio/", paramList).Result;
-
+                var testparam = new Dictionary<string, string>();
+                testparam.Add("bucketName", "bungle");
+                var uplodaResultTest = _clientHelper.CallAPIToSendFile<APIReturn>("/api/Submission/UploadFile", "file", model.File, testparam).Result;
                 var filestring = ConvertIFormFileToJson(model.File);
 
                 var data = new UploadFileInfo()
