@@ -130,12 +130,26 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
         new DataTable('#projectList');
+        new DataTable('#memberList');
         $('#launch-button').on('click', function () {
 
             $('#welcomeModal').modal('show');
 
         })
-
+        $(document).ready(function () {
+            if (window.location.href.indexOf("GetAllProjects?showOnlyUnprocessed=False") > -1) {
+                $('.projects-menu li:first-child .nav-link').addClass('active');
+            }
+            if (window.location.href.indexOf("GetAllProjects?showOnlyUnprocessed=True") > -1) {
+                $('.projects-menu li:last-child .nav-link').addClass('active');
+            }
+            if (window.location.href.indexOf("showOnlyUnprocessed=False") > -1) {
+                $('.memberships-menu li:first-child .nav-link').addClass('active');
+            }
+            if (window.location.href.indexOf("showOnlyUnprocessed=True") > -1) {
+                $('.memberships-menu li:last-child .nav-link').addClass('active');
+            }
+        });
 
     </script>
     @await RenderSectionAsync("Scripts", required: false)

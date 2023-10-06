@@ -47,7 +47,7 @@
         </ul>
 
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
                     @using (Html.BeginForm("EditProject", "Approval", FormMethod.Post, new { id = "frmMain" }))
                 {
                     <div class="form-group mb-4">
@@ -55,16 +55,16 @@
                     </div>
 
                     <div class="form-group mb-4">
-                        @Html.LabelFor(x => x.LocalProjectName)
-                        @Html.TextBoxFor(x => x.LocalProjectName)
+                            @Html.LabelFor(x => x.LocalProjectName, new { @class = "form-label"})
+                        @Html.TextBoxFor(x => x.LocalProjectName, new { @class = "form-control"})
                     </div>
                         <div class="form-group mb-4">
-                            @Html.LabelFor(x => x.UserName)
-                            @Html.TextBoxFor(x => x.UserName)
+                            @Html.LabelFor(x => x.UserName, new { @class = "form-label"})
+                            @Html.TextBoxFor(x => x.UserName, new { @class = "form-control"})
                         </div>
                         <div class="form-group mb-4">
-                            @Html.LabelFor(x => x.Password)
-                            @Html.PasswordFor(x => x.Password)
+                            @Html.LabelFor(x => x.Password, new { @class = "form-label"})
+                            @Html.PasswordFor(x => x.Password, new { @class = "form-control"})
                         </div>
                     <div class="form-group mb-4">
                         @Html.HiddenFor(x => x.Id)
