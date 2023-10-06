@@ -15,18 +15,13 @@
 }
 
 
-@if (Model.Count == 0)
-{
-    <h3 class="fs-3 mb-0">No records found!</h3>
-}
-
-else
+@foreach (var file in Model)
 {
     <div class="container-lg p-4">
         <div class="d-flex align-items-center justify-content-between">
             <h1 class="fs-3 mb-0">File System</h1>
 
-             <a asp-controller="Data" asp-action="PostDataOut" class="btn btn-primary btn-sm d-flex align-items-center">
+            <a asp-controller="Data" asp-action="DataOut" asp-route-id=@file.SubmissionId class="btn btn-primary btn-sm d-flex align-items-center">
         <i class="fa fa-plus align-middle me-2"></i>
         <span>Complete</span>
         </a>
@@ -38,40 +33,47 @@ else
             <table id="fileList" class="table table-bordered table-striped no-head" caption="List of Files">
                 <thead><tr><td>Project</td></tr></thead>
                 <tbody>
-                    @foreach (var file in Model)
-                    {
+                   
                         <tr>
                             <td class="card mb-2 p-3 bg-white shadow-sm border-1">
 
                                 <div class="d-flex align-items-center justify-content-between mb-3">
-                                    <div>
-
-                                        <a href="@Url.Action("GetFiles", "Data", new {id = file.SubmissionId })">
-                                            <h2 class="mb-0 fw-bold hover-underline fs-5">
+                                    <div>         
+                                       <h2 class="mb-0 fw-bold hover-underline fs-5">
                                                 Submission Id: @file.SubmissionId
                                             </h2>
-                           
-                                             <p class="my-4">
-                                    Actions: @file.Status
-                                       
+
+                                        <p class="my-4">
+                                            Actions:
+                                            @if (file.Status == BL.Models.Enums.FileStatus.ReadyToProcess)
+                                            {
+                                                @:This project hasn't been processed yet
+                                            }
+                                            else{
+                                    @file.Status
+                                                                    }
                                     </p>
-                                    </a>
+                               
                                         <p class="text-muted small mb-0">File Size:@file.SubmisionBucketFullPath<span class="mx-2"></span>Filename: @file.Name</p>
                                     </div>
 
-                                        @*  //highlight button if approved
-                                      @if (file.Status == BL.Models.Enums.FileStatus.Approved)
-                            {     
-                            }*@
-                                   
-                                     <div class="">
-                                            <a href="@Url.Action("EditFileData", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Approve</span></a>
 
-                            <a href="@Url.Action("EditFileData", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-danger"><span class="small">Deny</span></a>
+                                <div class="">
+                                    @if (file.Status == BL.Models.Enums.FileStatus.Approved)
 
-                            <a href="@Url.Action("DownloadFile", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-info"><span class="small">Download</span></a>
+                                    {
+
+                                        <a href="@Url.Action("EditFileData", "Data",new{Id=@file.Id,Status = 2})" class="btn btn-sm btn-outline-danger"><span class="small">Deny</span></a>
+                                    }
+                                    else if (file.Status == BL.Models.Enums.FileStatus.Rejected)
+                                    {
+                                        <a href="@Url.Action("EditFileData", "Data",new{Id=@file.Id,Status = 1})" class="btn btn-sm btn-outline-success"><span class="small">Approve</span></a>
+
+                                    }
+                                           <a href="@Url.Action("DownloadFile", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-info"><span class="small">Download</span></a>
                        
                                     </div>
+                             
                                 </div>
 
 
@@ -80,7 +82,7 @@ else
                         </p>
                             </td>
                         </tr>
-                    }
+                  
                 </tbody>
             </table>
 

@@ -16,6 +16,7 @@ using Amazon.S3;
 using Amazon;
 using System.Net;
 using System.Collections.Generic;
+using BL.Services;
 
 namespace Data_Egress_API.Controllers
 {
@@ -23,48 +24,56 @@ namespace Data_Egress_API.Controllers
     [Route("api/[controller]")]
     public class DataEgressController : ControllerBase
     {
-
         private readonly ApplicationDbContext _DbContext;
         private readonly MinioSettings _minioSettings;
-        public DataEgressController(ApplicationDbContext repository, MinioSettings minioSettings)
+        //private readonly ITREClientHelper _treClientHelper;
+        public DataEgressController(ApplicationDbContext repository, MinioSettings minioSettings)            
         {
             _DbContext = repository;
-                 _minioSettings = minioSettings;
+            _minioSettings = minioSettings;
+            //_treClientHelper = treclienthelper;
         }
         [HttpPost("AddNewDataEgress")]
         public async Task<BoolReturn> AddNewDataEgress(int submissionId, List<SubmissionFile> files)
         {
-            var existingDataFiles = _DbContext.DataEgressFiles            
+            try
+            {
+                var existingDataFiles = _DbContext.DataEgressFiles
                 .FirstOrDefault(d => d.Id == submissionId);
 
-            var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-            if (existingDataFiles != null)
-            {
-                foreach (var file in files)
+                var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+                if (existingDataFiles != null)
                 {
-                   
-                    var dataFile = new DataFiles()
+                    foreach (var file in files)
                     {
-                        Name = file.Name,
-                        TreBucketFullPath = file.TreBucketFullPath,
-                        SubmisionBucketFullPath = file.SubmisionBucketFullPath,
-                        Status = file.Status,
-                        Description = file.Description,
-                        LastUpdate = DateTime.Now.ToUniversalTime(),
-                        Reviewer = approvedBy,
-                        SubmissionId = file.Id
-                    };
-                    _DbContext.DataEgressFiles.Add(dataFile);
-                
-                }
-                await _DbContext.SaveChangesAsync();
-                return new BoolReturn() { Result = true };
-            }
-            else
-            {
-                return new BoolReturn() { Result = false };
-            }
 
+                        var dataFile = new DataFiles()
+                        {
+                            Name = file.Name,
+                            TreBucketFullPath = file.TreBucketFullPath,
+                            SubmisionBucketFullPath = file.SubmisionBucketFullPath,
+                            Status = file.Status,
+                            Description = file.Description,
+                            LastUpdate = DateTime.Now.ToUniversalTime(),
+                            Reviewer = approvedBy,
+                            SubmissionId = file.Id
+                        };
+                        _DbContext.DataEgressFiles.Add(dataFile);
+
+                    }
+                    await _DbContext.SaveChangesAsync();
+                    return new BoolReturn() { Result = true };
+                }
+                else
+                {
+                    return new BoolReturn() { Result = false };
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "AddNewDataEgress");
+                throw;
+            }
         }
 
 
@@ -74,9 +83,9 @@ namespace Data_Egress_API.Controllers
             try
             {
                 var allFiles = _DbContext.DataEgressFiles.ToList();
-          
+
                 Log.Information("{Function} Files retrieved successfully", "GetAllFiles");
-                
+
                 return allFiles;
             }
             catch (Exception ex)
@@ -86,7 +95,7 @@ namespace Data_Egress_API.Controllers
             }
         }
 
-          [HttpGet("GetFilesBySubmissionId")]
+        [HttpGet("GetFilesBySubmissionId")]
         public List<DataFiles> GetFilesBySubmissionId(int id)
         {
             try
@@ -102,7 +111,7 @@ namespace Data_Egress_API.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} Crashed", "GetProject");
+                Log.Error(ex, "{Function} Crashed", "GetFilesBySubmissionId");
                 throw;
             }
 
@@ -126,34 +135,69 @@ namespace Data_Egress_API.Controllers
             }
         }
 
-        [HttpPost("UpdateFileData")]
-
-        public async Task<List<DataFiles>> UpdateFileData(List<DataFiles> dataFiles)
+        [HttpGet("UpdateFileData")]
+        public DataFiles UpdateFileData(int id, int Status)
         {
-            var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-            if (string.IsNullOrWhiteSpace(approvedBy))
+            try
             {
-                approvedBy = "[Unknown]";
-            }
-            var resultList = new List<DataFiles>();
-            var approvedDate = DateTime.Now.ToUniversalTime();
-            foreach (var file in dataFiles)
-            {
-                var dbFile = _DbContext.DataEgressFiles.First(x => x.Id == file.Id);
+                //var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+                //if (string.IsNullOrWhiteSpace(approvedBy))
+                //{
+                //    approvedBy = "[Unknown]";
+                //}
+                var approvedDate = DateTime.Now.ToUniversalTime();
 
-                if (file.Status != dbFile.Status)
+                var returned = _DbContext.DataEgressFiles.First(x => x.Id == id);
+                if (returned == null)
                 {
-                    dbFile.Status = file.Status;
-                    dbFile.Reviewer = approvedBy;
-                    dbFile.LastUpdate = approvedDate;
+                    return null;
                 }
-                resultList.Add(dbFile);
-                Log.Information("{Function}:", "UpdateFileData", "FileData Status:" + file.Status.ToString(), "ApprovedBy:" + approvedBy);
+                else
+                {
+                    returned.Status = (FileStatus)Status;
+                    returned.Reviewer = @User?.FindFirst("name")?.Value;
+                    returned.LastUpdate = approvedDate;
+                }
+                _DbContext.Update(returned);
+                _DbContext.SaveChangesAsync();
+                Log.Information("{Function} Files retrieved successfully", "GetFilesBySubmissionId");
+                return returned;
             }
-            await _DbContext.SaveChangesAsync();
-            return resultList;
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetProject");
+                throw;
+            }
+
         }
-          
+       
+        //[HttpGet("DataOut")]
+        //public async Task<BoolReturn> DataOutApproval(int submissionId)
+        //{ 
+        //    try
+        //    { 
+        //    var returned = _DbContext.DataEgressFiles.Where(x => x.SubmissionId == submissionId).ToList();
+    
+        //    var paramlist = new Dictionary<string, string>();
+        //    paramlist.Add("submissionId", submissionId.ToString());
+        //        var submission = await _treClientHelper.CallAPI<List<SubmissionFile>, Submission>("/api/SendFileResultsToHUTCH/Submission/", returned,
+        //                paramlist).Result;
+        //        if (submission!= null)
+        //    {
+        //        return new BoolReturn() { Result = true };
+        //    }
+        //    else
+        //    {
+        //        return new BoolReturn() { Result = false };
+        //    }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Log.Error(ex, "{Function} Crashed", "DataOutApproval");
+        //        throw;
+        //    }
+        //}
+
         [HttpGet("DownloadFile")]
         public async Task<bool> DownloadFileAsync(MinioSettings minioSettings, string bucketName = "", string objectName = "")
         {

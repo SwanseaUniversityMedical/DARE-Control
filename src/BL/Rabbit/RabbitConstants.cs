@@ -15,7 +15,7 @@ namespace BL.Rabbit
     public static class RoutingConstants
     {
         public const string Subs = "sub";
-        public const string FetchFiel = "FetchFiel";
+        public const string FetchFile = "FetchFile";
     }
 
 

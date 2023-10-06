@@ -19,7 +19,7 @@ namespace Data_Egress_UI.Controllers
         {
             _logger = logger;
             _dataClientHelper = datahelper;
-            //_treClientHelper = trehelper;
+           
         }
 
         public IActionResult LoginAfterTokenExpired()
@@ -37,7 +37,7 @@ namespace Data_Egress_UI.Controllers
         //public async Task<IActionResult> Index()
         //{
 
-        //    var alreadyset = await _treClientHelper.CallAPIWithoutModel<BoolReturn>("/api/SubmissionCredentials/CheckCredentialsAreValid");
+        //    var alreadyset = await _dataClientHelper.CallAPIWithoutModel<BoolReturn>("/api/SubmissionCredentials/CheckCredentialsAreValid");
         //    if (!alreadyset.Result)
         //    {
 

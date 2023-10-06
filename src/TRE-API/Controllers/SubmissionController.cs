@@ -260,7 +260,15 @@ namespace TRE_API.Controllers
         //            paramlist).Result; 
         //    return StatusCode(200, submission);
         //}
+        [AllowAnonymous]
+        [HttpPost("TestFetchAndStore")]
+        public void TestFetchAndStore([FromBody] FetchFileMQ message)
+        {
 
+            var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
+
+            _rabbit.Advanced.Publish(exch, RoutingConstants.FetchFiel, false, new Message<FetchFileMQ>(message));
+        }
 
         //[HttpPost("SendFileResultsToHUTCH")]
         //public IActionResult SendFileResultsToHUTCH(int submissionId, List<DataFiles> EgressFileList)
