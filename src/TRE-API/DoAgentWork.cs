@@ -403,6 +403,7 @@ namespace TRE_API
                                 TesId = aSubmission.TesId,
                                 Token = Token
                             });
+                            _dbContext.SaveChanges();
 
                             if (tesMessage is not null)
                                 CreateTESK(JsonConvert.SerializeObject(tesMessage), aSubmission.TesId);
