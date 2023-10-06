@@ -378,19 +378,23 @@ namespace TRE_API
                                 output.Url = TREBucket;
                             }
 
-                            if (tesMessage.Tags == null)
+                            foreach (var Executor in tesMessage.Executors)
                             {
-                                tesMessage.Tags = new Dictionary<string, string>();
+                                if (Executor.Env == null)
+                                {
+                                    Executor.Env = new Dictionary<string, string>();
+                                }
+                                Executor.Env["HASURAAuthenticationToken"] = Token;
                             }
-
-                            tesMessage.Tags["HASURAAuthenticationToken"] = Token;
-
 
                             _dbContext.TokensToExpire.Add(new TokenToExpire()
                             {
                                 TesId = aSubmission.TesId,
                                 Token = Token
                             });
+
+
+
 
                             if (tesMessage is not null)
                                 CreateTESK(JsonConvert.SerializeObject(tesMessage), aSubmission.TesId);
