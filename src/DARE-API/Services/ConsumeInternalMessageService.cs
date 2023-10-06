@@ -9,6 +9,7 @@ using BL.Models.Enums;
 using DARE_API.Repositories.DbContexts;
 using BL.Models.Tes;
 using BL.Services;
+using BL.Models.ViewModels;
 
 namespace DARE_API.Services
 {
@@ -117,7 +118,7 @@ namespace DARE_API.Services
             try
             {
                 var message = Encoding.UTF8.GetString(msgBytes.Body);
-                await  _minioHelper.RabbitExternalObject(message);
+                await _minioHelper.RabbitExternalObject(JsonConvert.DeserializeObject<FetchFileMQ>(message));
             }
             catch (Exception e)
             {
