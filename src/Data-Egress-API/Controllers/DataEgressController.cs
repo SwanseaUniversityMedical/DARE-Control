@@ -102,7 +102,7 @@ namespace Data_Egress_API.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} Crashed", "GetProject");
+                Log.Error(ex, "{Function} Crashed", "GetFilesBySubmissionId");
                 throw;
             }
 
@@ -126,9 +126,45 @@ namespace Data_Egress_API.Controllers
             }
         }
 
-        [HttpPost("UpdateFileData")]
+        [HttpGet("UpdateFileData")]
+        public DataFiles UpdateFileData(int id,int Status)
+       {
+            try
+            {
+                //var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+                //if (string.IsNullOrWhiteSpace(approvedBy))
+                //{
+                //    approvedBy = "[Unknown]";
+                //}           
+                var approvedDate = DateTime.Now.ToUniversalTime();
 
-        public async Task<List<DataFiles>> UpdateFileData(List<DataFiles> dataFiles)
+                var returned = _DbContext.DataEgressFiles.First(x => x.Id == id);
+                if (returned == null)
+                {
+                    return null;
+                }               
+                else
+                {
+                    returned.Status = (FileStatus)Status;
+                    returned.Reviewer = "pat";
+                    returned.LastUpdate = approvedDate;
+                }
+                _DbContext.Update(returned);
+                _DbContext.SaveChangesAsync();
+                Log.Information("{Function} Files retrieved successfully", "GetFilesBySubmissionId");
+                return returned;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetProject");
+                throw;
+            }
+     
+        }
+
+        [HttpPost("DataOut")]
+      
+        public async Task<List<DataFiles>> DataOut(List<DataFiles> dataFiles)
         {
             var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
             if (string.IsNullOrWhiteSpace(approvedBy))
@@ -153,7 +189,7 @@ namespace Data_Egress_API.Controllers
             await _DbContext.SaveChangesAsync();
             return resultList;
         }
-          
+
         [HttpGet("DownloadFile")]
         public async Task<bool> DownloadFileAsync(MinioSettings minioSettings, string bucketName = "", string objectName = "")
         {
