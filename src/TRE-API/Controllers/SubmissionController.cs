@@ -78,13 +78,10 @@ namespace TRE_API.Controllers
         public virtual IActionResult GetWaitingSubmissionsForTre()
         {
             var result =_subHelper.GetWaitingSubmissionForTre();
-
-
             return StatusCode(200, result);
         }
 
-       
-
+     
 
         [HttpPost]
         [Route("UpdateStatusForTre")]
@@ -151,20 +148,11 @@ namespace TRE_API.Controllers
                                         { "description", "" }
                                     };
             var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams);
+
+            //Not sure what the return type is
             var HUTCHres = _hutchHelper.CallAPI<EgressReview, APIReturn>("HUTCH URL", review);
 
-            //Send the submission, this is the list of files that have been approved and rejected
-            //var fileListString = JsonConvert.SerializeObject(EgressFileList);
-
-            //var HUTCHParams = new Dictionary<string, string>()
-            //{
-            //    { "submissionId", submissionId.ToString() },
-            //    { "fileList", fileListString}
-            //};
-
-            //var HUTCHres = _hutchHelper.CallAPIWithoutModel<APIReturn>("URl for hutch", HUTCHParams);
-
-            return StatusCode(200);
+            return StatusCode(200, HUTCHres);
         }
 
         [HttpPost]
@@ -174,6 +162,10 @@ namespace TRE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
         public IActionResult FinalOutcome([FromBody] FinalOutcome outcome)
         {
+            //Need to figure out these
+            var sourceBucket = "";
+            var destinationBucket = "";
+
             //For me to code
             var statusParams = new Dictionary<string, string>()
                                     {
@@ -185,38 +177,10 @@ namespace TRE_API.Controllers
             var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams);
 
             //Copy file to output bucket
-            //var copyResult = _minioHelper.CopyObject(_minioSettings, sourceBucket, destinationBucket, fileName, fileName);
+            var copyResult = _minioHelper.CopyObject(_minioSettings, sourceBucket, destinationBucket, outcome.file, outcome.file);
 
-            throw new NotImplementedException();
+            return StatusCode(200, copyResult);
         }
-
-        //[HttpGet]
-        //[Route("GetBucketInfo")]
-        //[ValidateModelState]
-        //[SwaggerOperation("GetBucketInfo")]
-        //[SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
-        //public IActionResult GetBucketInfo(string submissionId)
-        //{
-        //    var paramlist = new Dictionary<string, string>();
-        //    paramlist.Add("submissionId", submissionId.ToString());
-        //    var submission = _dareHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist)
-        //        .Result;
-
-        //    var bucket = _dbContext.Projects
-        //        .Where(x => x.SubmissionProjectId == submission.Project.Id)
-        //        .Select(x => new { x.OutputBucketTre });
-
-        //    var outputBucket = bucket.FirstOrDefault();
-
-        //    var status = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-        //        new Dictionary<string, string>()
-        //        {
-        //            { "tesId", submission.TesId }, { "statusType", StatusType.PodProcessingComplete.ToString() },
-        //            { "description", "" }
-        //        }).Result;
-
-        //    return StatusCode(200, outputBucket);
-        //}
 
         [HttpGet]
         [Route("DataOutApproval")]
@@ -247,19 +211,6 @@ namespace TRE_API.Controllers
             return StatusCode(200, result);
         }
 
-        //[HttpPost]
-        //[Route("SaveHutchFiles")]
-        //[ValidateModelState]
-        //[SwaggerOperation("SaveHutchFiles")]
-        //[SwaggerResponse(statusCode: 200, type: typeof(Submission), description: "")]
-        //public IActionResult SaveHutchFiles(string submissionId, List<SubmissionFile> submissionFiles)
-        //{
-        //    var paramlist = new Dictionary<string, string>();
-        //    paramlist.Add("submissionId", submissionId.ToString());
-        //    var submission = _dataEgressHelper.CallAPI<List<SubmissionFile>, Submission>("/api/DataEgress/AddNewDataEgress/", submissionFiles,
-        //            paramlist).Result; 
-        //    return StatusCode(200, submission);
-        //}
         [AllowAnonymous]
         [HttpPost("TestFetchAndStore")]
         public void TestFetchAndStore([FromBody] FetchFileMQ message)
@@ -267,34 +218,8 @@ namespace TRE_API.Controllers
 
             var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
 
-            _rabbit.Advanced.Publish(exch, RoutingConstants.FetchFiel, false, new Message<FetchFileMQ>(message));
+            _rabbit.Advanced.Publish(exch, RoutingConstants.FetchFile, false, new Message<FetchFileMQ>(message));
         }
-
-        //[HttpPost("SendFileResultsToHUTCH")]
-        //public IActionResult SendFileResultsToHUTCH(int submissionId, List<DataFiles> EgressFileList)
-        //{
-        //    //Update status of submission to "Sending to hutch for final packaging"
-        //    var statusParams = new Dictionary<string, string>()
-        //                            {
-        //                                { "tesId", submissionId.ToString() },
-        //                                { "statusType", StatusType.SendingToHUTCHForFinalPackaging.ToString() },
-        //                                { "description", "" }
-        //                            };
-        //    var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams);
-
-        //    //Send the submission, this is the list of files that have been approved and rejected
-        //    var fileListString = JsonConvert.SerializeObject(EgressFileList);
-
-        //    var HUTCHParams = new Dictionary<string, string>() 
-        //    {
-        //        { "submissionId", submissionId.ToString() },
-        //        { "fileList", fileListString}
-        //    };
-
-        //    var HUTCHres = _hutchHelper.CallAPIWithoutModel<APIReturn>("URl for hutch", HUTCHParams);
-
-        //    return StatusCode(200);
-        //}
 
         [HttpPost("SendSubmissionToHUTCH")]
         public IActionResult SendSubmissionToHUTCH(Dictionary<string, string> SubmissionData)

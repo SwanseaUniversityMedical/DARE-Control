@@ -48,7 +48,7 @@ namespace TRE_API.Services
             try
             {
                 var messageMQ = message.Body;
-                await _minioHelper.RabbitExternalObject(messageMQ.ToString());
+                await _minioHelper.RabbitExternalObject(messageMQ);
             }
             catch (Exception e)
             {
