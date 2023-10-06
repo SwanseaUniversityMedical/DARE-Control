@@ -225,6 +225,40 @@ namespace BL.Services
             return true;
         }
 
+        public async Task<bool> CopyObject(MinioSettings minioSettings, string sourceBucketName, string destinationBucketName, string sourceObjectKey, string destinationObjectKey)
+        {
+            var amazonS3Client = GenerateAmazonS3Client(minioSettings);
+
+            var request = new CopyObjectRequest
+            {
+                SourceBucket = sourceBucketName,
+                DestinationBucket = destinationBucketName,
+                SourceKey = sourceObjectKey,
+                DestinationKey = destinationObjectKey
+            };
+
+            var result = await amazonS3Client.CopyObjectAsync(request);
+
+            return true;
+        }
+
+        public async Task<string> ShareMinioObject(MinioSettings minioSettings, string bucketName, string objectKey)
+        {
+            var amazonS3Client = GenerateAmazonS3Client(minioSettings);
+
+            var expiration = DateTime.Now.AddHours(1);
+
+            
+            var url = amazonS3Client.GetPreSignedURL(new GetPreSignedUrlRequest
+            {
+                BucketName = bucketName,
+                Key = objectKey,
+                Expires = expiration,
+            });
+
+            return url;
+        }
+
         #region PrivateHelpers
         private AmazonS3Config GenerateAmazonS3Config(MinioSettings minioSettings)
         {
