@@ -26,12 +26,12 @@ namespace Data_Egress_API.Controllers
     {
         private readonly ApplicationDbContext _DbContext;
         private readonly MinioSettings _minioSettings;
-        private readonly ITREClientHelper _treClientHelper;
-        public DataEgressController(ApplicationDbContext repository, MinioSettings minioSettings, ITREClientHelper treclienthelper)
+        //private readonly ITREClientHelper _treClientHelper;
+        public DataEgressController(ApplicationDbContext repository, MinioSettings minioSettings)            
         {
             _DbContext = repository;
             _minioSettings = minioSettings;
-            _treClientHelper = treclienthelper;
+            //_treClientHelper = treclienthelper;
         }
         [HttpPost("AddNewDataEgress")]
         public async Task<BoolReturn> AddNewDataEgress(int submissionId, List<SubmissionFile> files)
@@ -174,16 +174,16 @@ namespace Data_Egress_API.Controllers
         [HttpPost("DataOut")]
         public async Task<BoolReturn> DataOutApproval(int submissionId, List<SubmissionFile> files)
         {
-            var returned = _DbContext.DataEgressFiles.Where(x => x.SubmissionId == submissionId).ToList();
-            returned = new List<SubmissionFile>();
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("submissionId", submissionId.ToString());
-            var submission = _treClientHelper.CallAPI<List<SubmissionFile>, Submission>("/api/SendFileResultsToHUTCH/Submission/", files,
-                    paramlist).Result;
+            //var returned = _DbContext.DataEgressFiles.Where(x => x.SubmissionId == submissionId).ToList();
+            //returned = new List<SubmissionFile>();
+            //var paramlist = new Dictionary<string, string>();
+            //paramlist.Add("submissionId", submissionId.ToString());
+            //var submission = _treClientHelper.CallAPI<List<SubmissionFile>, Submission>("/api/SendFileResultsToHUTCH/Submission/", files,
+            //        paramlist).Result;
 
             return new BoolReturn() { Result = true };
-       
-    }
+     
+        }
 
         [HttpGet("DownloadFile")]
         public async Task<bool> DownloadFileAsync(MinioSettings minioSettings, string bucketName = "", string objectName = "")
