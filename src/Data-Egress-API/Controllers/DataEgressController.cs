@@ -140,11 +140,11 @@ namespace Data_Egress_API.Controllers
         {
             try
             {
-                var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-                if (string.IsNullOrWhiteSpace(approvedBy))
-                {
-                    approvedBy = "[Unknown]";
-                }
+                //var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+                //if (string.IsNullOrWhiteSpace(approvedBy))
+                //{
+                //    approvedBy = "[Unknown]";
+                //}
                 var approvedDate = DateTime.Now.ToUniversalTime();
 
                 var returned = _DbContext.DataEgressFiles.First(x => x.Id == id);
@@ -155,7 +155,7 @@ namespace Data_Egress_API.Controllers
                 else
                 {
                     returned.Status = (FileStatus)Status;
-                    returned.Reviewer = approvedBy;
+                    returned.Reviewer = @User?.FindFirst("name")?.Value;
                     returned.LastUpdate = approvedDate;
                 }
                 _DbContext.Update(returned);
@@ -171,18 +171,30 @@ namespace Data_Egress_API.Controllers
 
         }
 
-        [HttpPost("DataOut")]
-        public async Task<BoolReturn> DataOutApproval(int submissionId, List<SubmissionFile> files)
-        {
-            //var returned = _DbContext.DataEgressFiles.Where(x => x.SubmissionId == submissionId).ToList();
-            //returned = new List<SubmissionFile>();
-            //var paramlist = new Dictionary<string, string>();
-            //paramlist.Add("submissionId", submissionId.ToString());
-            //var submission = _treClientHelper.CallAPI<List<SubmissionFile>, Submission>("/api/SendFileResultsToHUTCH/Submission/", files,
-            //        paramlist).Result;
-
-            return new BoolReturn() { Result = true };
-     
+        [HttpGet("DataOut")]
+        public async Task<BoolReturn> DataOutApproval(int submissionId)
+        { try
+            { 
+            var returned = _DbContext.DataEgressFiles.Where(x => x.SubmissionId == submissionId).ToList();
+    
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("submissionId", submissionId.ToString());
+            var submission = await _treClientHelper.CallAPI<List<SubmissionFile>, Submission>("/api/SendFileResultsToHUTCH/Submission/", returned,
+                    paramlist).Result;
+            if (submission!= null)
+            {
+                return new BoolReturn() { Result = true };
+            }
+            else
+            {
+                return new BoolReturn() { Result = false };
+            }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "DataOutApproval");
+                throw;
+            }
         }
 
         [HttpGet("DownloadFile")]

@@ -21,7 +21,7 @@
         <div class="d-flex align-items-center justify-content-between">
             <h1 class="fs-3 mb-0">File System</h1>
 
-            <a asp-controller="Data" asp-action="DataOut" Id=@file.Id class="btn btn-primary btn-sm d-flex align-items-center">
+            <a asp-controller="Data" asp-action="DataOut" asp-route-id=@file.SubmissionId class="btn btn-primary btn-sm d-flex align-items-center">
         <i class="fa fa-plus align-middle me-2"></i>
         <span>Complete</span>
         </a>
@@ -82,7 +82,7 @@
                         </p>
                             </td>
                         </tr>
-                    }
+                  
                 </tbody>
             </table>
 

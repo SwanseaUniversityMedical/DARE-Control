@@ -16,9 +16,7 @@ namespace Data_Egress_UI.Controllers
         }
 
 
-
         [HttpGet]
-
         public async Task<IActionResult> UpdateCredentialsAsync()
         {
             var valid = await _clientHelper.CallAPIWithoutModel<BoolReturn>("/api/SubmissionCredentials/CheckCredentialsAreValid");
@@ -56,11 +54,6 @@ namespace Data_Egress_UI.Controllers
             }
 
         }
-
-
-
-
-
 
     }
 }

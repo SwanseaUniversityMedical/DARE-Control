@@ -11,7 +11,7 @@ using Data_Egress_API.Repositories.DbContexts;
 namespace Data_Egress_API.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(Roles = "data-egress-admin")]
+    //[Authorize(Roles = "data-egress-admin")]
     [ApiController]
     public class SubmissionCredentialsController : Controller
     {
