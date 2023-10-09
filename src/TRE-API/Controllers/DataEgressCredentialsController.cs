@@ -13,14 +13,14 @@ namespace TRE_API.Controllers
     [Route("api/[controller]")]
     [Authorize(Roles = "dare-tre-admin")]
     [ApiController]
-    public class SubmissionCredentialsController : Controller
+    public class DataEgressCredentialsController : Controller
     {
 
         private readonly ApplicationDbContext _DbContext;
         private readonly IEncDecHelper _encDecHelper;
         private readonly IKeycloakTokenHelper _keycloakTokenHelper;
 
-        public SubmissionCredentialsController(ApplicationDbContext applicationDbContext, IEncDecHelper encDec, IKeycloakTokenHelper keycloakTokenHelper)
+        public DataEgressCredentialsController(ApplicationDbContext applicationDbContext, IEncDecHelper encDec, IKeycloakTokenHelper keycloakTokenHelper)
         {
             _encDecHelper = encDec;
             _DbContext = applicationDbContext;
@@ -32,7 +32,7 @@ namespace TRE_API.Controllers
         public async Task<BoolReturn> CheckCredentialsAreValidAsync()
         {
             var result = new BoolReturn(){Result = false};
-            var creds = _DbContext.SubmissionCredentials.FirstOrDefault();
+            var creds = _DbContext.DataEgressCredentials.FirstOrDefault();
             if (creds != null)
             {
                 var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
@@ -45,7 +45,7 @@ namespace TRE_API.Controllers
         }
 
         [HttpPost("UpdateCredentials")]
-        public async Task<SubmissionCredentials> UpdateCredentials(SubmissionCredentials creds)
+        public async Task<KeycloakCredentials> UpdateCredentials(KeycloakCredentials creds)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace TRE_API.Controllers
                 }
                 
                 var add = true;
-                var dbcred = _DbContext.SubmissionCredentials.FirstOrDefault();
+                var dbcred = _DbContext.DataEgressCredentials.FirstOrDefault();
                 if (dbcred != null)
                 {
                     creds.Id = dbcred.Id;
@@ -69,12 +69,12 @@ namespace TRE_API.Controllers
                 creds.PasswordEnc = _encDecHelper.Encrypt(creds.PasswordEnc);
                 if (add)
                 {
-                    _DbContext.SubmissionCredentials.Add(creds);
+                    _DbContext.DataEgressCredentials.Add(creds);
                     
                 }
                 else
                 {
-                    _DbContext.SubmissionCredentials.Update(creds);
+                    _DbContext.DataEgressCredentials.Update(creds);
                 }
                 
                 await _DbContext.SaveChangesAsync();

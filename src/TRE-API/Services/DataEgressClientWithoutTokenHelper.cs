@@ -3,11 +3,11 @@ using TRE_API.Repositories.DbContexts;
 
 namespace TRE_API.Services
 {
-    public class DareClientWithoutTokenHelper : BaseClientHelper, IDareClientWithoutTokenHelper
+    public class DataEgressClientWithoutTokenHelper : BaseClientHelper, IDataEgressClientHelper
     {
         public ApplicationDbContext CredDb { get; set; }
 
-        public DareClientWithoutTokenHelper(IHttpClientFactory httpClientFactory,
+        public DataEgressClientWithoutTokenHelper(IHttpClientFactory httpClientFactory,
             IHttpContextAccessor httpContextAccessor, IConfiguration config, ApplicationDbContext db,
             IKeycloakTokenHelper keycloak, IEncDecHelper encDec) : base(httpClientFactory, httpContextAccessor,
             config["DareAPISettings:Address"], keycloak)

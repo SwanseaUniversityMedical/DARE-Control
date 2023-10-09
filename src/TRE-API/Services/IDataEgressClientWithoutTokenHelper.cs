@@ -2,7 +2,7 @@
 
 namespace TRE_API.Services
 {
-    public interface IDareClientWithoutTokenHelper: IBaseClientHelper
+    public interface IDataEgressClientWithoutTokenHelper: IBaseClientHelper
     {
 
         bool CheckCredsAreAvailable();

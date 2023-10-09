@@ -6,7 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace BL.Services
 {
-    public class KeycloakTokenHelper : IKeycloakTokenHelper
+    public class BaseKeycloakTokenHelper : IKeycloakTokenHelper
     {
 
         public BaseKeyCloakSettings _settings { get; set; }

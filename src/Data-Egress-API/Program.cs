@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using BL.Models.ViewModels;
 
 using Microsoft.AspNetCore.Http.Connections;
-using TRE_API.Services;
+using Data_Egress_API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;

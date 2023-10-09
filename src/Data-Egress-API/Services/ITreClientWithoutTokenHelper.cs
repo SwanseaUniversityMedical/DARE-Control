@@ -1,6 +1,6 @@
 ﻿using BL.Services;
 
-namespace TRE_API.Services
+namespace Data_Egress_API.Services
 {
     public interface ITreClientWithoutTokenHelper: IBaseClientHelper
     {

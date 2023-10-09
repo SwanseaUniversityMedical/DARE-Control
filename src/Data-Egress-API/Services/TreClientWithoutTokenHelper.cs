@@ -2,7 +2,7 @@
 using Data_Egress_API.Repositories.DbContexts;
 
 
-namespace TRE_API.Services
+namespace Data_Egress_API.Services
 {
     public class TreClientWithoutTokenHelper : BaseClientHelper, ITreClientWithoutTokenHelper
     {

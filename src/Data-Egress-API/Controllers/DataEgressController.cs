@@ -201,7 +201,7 @@ namespace Data_Egress_API.Controllers
                     {
                         fileName = file.Name,
                         approved = file.Status == FileStatus.Approved,
-                    })
+                    });
                 }
 
                 var result =
