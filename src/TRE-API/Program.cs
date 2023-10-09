@@ -30,7 +30,7 @@ ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
 Log.Logger = CreateSerilogLogger(configuration, environment);
-Log.Information("API logging LastStatusUpdate.");
+Log.Information("TRE API logging LastStatusUpdate.");
 
 
 // Add services to the container.
@@ -69,7 +69,11 @@ builder.Services.AddHostedService<ConsumeInternalMessageService>();
 var submissionKeyCloakSettings = new BaseKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
 builder.Services.AddSingleton(submissionKeyCloakSettings);
+
 builder.Services.AddScoped<IDareClientWithoutTokenHelper, DareClientWithoutTokenHelper>();
+builder.Services.AddScoped<IDataEgressClientHelper, DataEgressClientHelper>();
+builder.Services.AddScoped<IHutchClientHelper, HutchClientHelper>();
+
 string hangfireConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddHangfire(config => { config.UsePostgreSqlStorage(hangfireConnectionString); });
 
