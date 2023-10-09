@@ -17,25 +17,30 @@ namespace BL.Services
         protected readonly IHttpContextAccessor _httpContextAccessor;
         protected readonly string _address;
         protected readonly JsonSerializerOptions _jsonSerializerOptions;
-        protected readonly IKeycloakTokenHelper? __keycloakTokenHelper;
+        public KeycloakTokenHelper? _keycloakTokenHelper { get; set; }
         public string _requiredRole { get; set; }
         public string _password { get; set; }
         public string _username { get; set; }
         
 
-        public BaseClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, string address, IKeycloakTokenHelper? keycloakTokenHelper)
+        public BaseClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, string address)
         {
             _httpClientFactory = httpClientFactory;
             _httpContextAccessor = httpContextAccessor;
             _address = address;
             
-            __keycloakTokenHelper = keycloakTokenHelper;
+            
             _jsonSerializerOptions = new JsonSerializerOptions()
             {
                 
                 PropertyNameCaseInsensitive = true,
             };
             
+        }
+
+        public async Task<string> GetTokenForUser(string username, string password, string requiredRole)
+        {
+            return await _keycloakTokenHelper.GetTokenForUser(username, password, requiredRole);
         }
 
 
@@ -168,9 +173,9 @@ namespace BL.Services
         protected async Task<HttpClient> CreateClientWithKeycloak()
         {
             var accessToken = "";
-            if (__keycloakTokenHelper != null)
+            if (_keycloakTokenHelper != null)
             {
-                accessToken = await  __keycloakTokenHelper.GetTokenForUser(_username, _password, _requiredRole);
+                accessToken = await  _keycloakTokenHelper.GetTokenForUser(_username, _password, _requiredRole);
             }
             else
             {

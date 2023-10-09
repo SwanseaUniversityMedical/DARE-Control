@@ -1,4 +1,5 @@
-﻿using BL.Services;
+﻿using BL.Models.Settings;
+using BL.Services;
 using Data_Egress_API.Repositories.DbContexts;
 
 
@@ -10,11 +11,11 @@ namespace Data_Egress_API.Services
 
         public TreClientWithoutTokenHelper(IHttpClientFactory httpClientFactory,
             IHttpContextAccessor httpContextAccessor, IConfiguration config, ApplicationDbContext db,
-            IKeycloakTokenHelper keycloak, IEncDecHelper encDec) : base(httpClientFactory, httpContextAccessor,
-            config["TreAPISettings:Address"], keycloak)
+             IEncDecHelper encDec, TreKeyCloakSettings settings) : base(httpClientFactory, httpContextAccessor,
+            config["TreAPISettings:Address"])
         {
             CredDb = db;
-            
+            _keycloakTokenHelper = new KeycloakTokenHelper(settings.BaseUrl, settings.ClientId, settings.ClientSecret);
             var creds = db.SubmissionCredentials.FirstOrDefault();
             if (creds != null)
             {

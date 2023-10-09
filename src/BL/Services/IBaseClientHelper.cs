@@ -5,7 +5,7 @@ namespace BL.Services
     {
 
 
-
+        Task<string> GetTokenForUser(string username, string password, string requiredRole);
         Task<TOutput?> CallAPI<TInput, TOutput>(string endPoint, TInput model,
             Dictionary<string, string>? paramList = null, bool usePut = false) where TInput : class? where TOutput : class?, new();
 

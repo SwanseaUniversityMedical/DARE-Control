@@ -1,6 +1,7 @@
 ﻿
 using BL.Models;
 using BL.Models.APISimpleTypeReturns;
+using BL.Models.Settings;
 using BL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,18 +14,22 @@ namespace Data_Egress_API.Controllers
     [Route("api/[controller]")]
     [Authorize(Roles = "data-egress-admin")]
     [ApiController]
-    public class SubmissionCredentialsController : Controller
+    public class TreCredentialsController : Controller
     {
 
         private readonly ApplicationDbContext _DbContext;
         private readonly IEncDecHelper _encDecHelper;
-        private readonly IKeycloakTokenHelper _keycloakTokenHelper;
+        private readonly ITREClientHelper _treClientHelper;
+        public KeycloakTokenHelper _keycloakTokenHelper { get; set; }
 
-        public SubmissionCredentialsController(ApplicationDbContext applicationDbContext, IEncDecHelper encDec, IKeycloakTokenHelper keycloakTokenHelper)
+
+        public TreCredentialsController(ApplicationDbContext applicationDbContext, IEncDecHelper encDec, TreKeyCloakSettings keycloakSettings)
         {
             _encDecHelper = encDec;
             _DbContext = applicationDbContext;
-            _keycloakTokenHelper = keycloakTokenHelper;
+            _keycloakTokenHelper = new KeycloakTokenHelper(keycloakSettings.BaseUrl, keycloakSettings.ClientId,
+                keycloakSettings.ClientSecret);
+
         }
 
 

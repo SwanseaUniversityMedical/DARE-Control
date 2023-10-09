@@ -1,6 +1,7 @@
 ﻿
 using BL.Models;
 using BL.Models.APISimpleTypeReturns;
+using BL.Models.Settings;
 using BL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,13 +19,15 @@ namespace TRE_API.Controllers
 
         private readonly ApplicationDbContext _DbContext;
         private readonly IEncDecHelper _encDecHelper;
-        private readonly IKeycloakTokenHelper _keycloakTokenHelper;
+        private readonly KeycloakTokenHelper _keycloakTokenHelper;
 
-        public SubmissionCredentialsController(ApplicationDbContext applicationDbContext, IEncDecHelper encDec, IKeycloakTokenHelper keycloakTokenHelper)
+        public SubmissionCredentialsController(ApplicationDbContext applicationDbContext, IEncDecHelper encDec, SubmissionKeyCloakSettings keycloakSettings)
         {
             _encDecHelper = encDec;
             _DbContext = applicationDbContext;
-            _keycloakTokenHelper = keycloakTokenHelper;
+            _keycloakTokenHelper = new KeycloakTokenHelper(keycloakSettings.BaseUrl, keycloakSettings.ClientId,
+                keycloakSettings.ClientSecret);
+            
         }
 
         

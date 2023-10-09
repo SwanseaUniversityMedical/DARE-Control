@@ -6,14 +6,19 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace BL.Services
 {
-    public class KeycloakTokenHelper : IKeycloakTokenHelper
+    public class KeycloakTokenHelper
     {
 
-        public BaseKeyCloakSettings _settings { get; set; }
+        
+        public string _keycloakBaseUrl { get; set; }
+        public string _clientId { get; set; }
+        public string _clientSecret { get; set; }
 
-        public KeycloakTokenHelper(BaseKeyCloakSettings settings)
+        public KeycloakTokenHelper(string keycloakBaseUrl, string clientId, string clientSecret)
         {
-            _settings = settings;
+            _keycloakBaseUrl = keycloakBaseUrl;
+            _clientId = clientId;
+            _clientSecret = clientSecret;
         }
 
         public async Task<string> GetTokenForUser(string username, string password, string requiredRole)
@@ -21,9 +26,9 @@ namespace BL.Services
 
 
 
-            string keycloakBaseUrl = _settings.BaseUrl;
-            string clientId = _settings.ClientId;
-            string clientSecret = _settings.ClientSecret;
+            string keycloakBaseUrl = _keycloakBaseUrl;
+            string clientId = _clientId;
+            string clientSecret = _clientSecret;
 
 
 

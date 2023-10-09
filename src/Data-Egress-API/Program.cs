@@ -54,7 +54,7 @@ builder.Services.AddSingleton(minioSettings);
 
 
 
-var treKeyCloakSettings = new BaseKeyCloakSettings();
+var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
 builder.Services.AddSingleton(treKeyCloakSettings);
 builder.Services.AddScoped<ITreClientWithoutTokenHelper, TreClientWithoutTokenHelper>();
@@ -64,7 +64,7 @@ builder.Services.AddScoped<ITreClientWithoutTokenHelper, TreClientWithoutTokenHe
 var encryptionSettings = new EncryptionSettings();
 configuration.Bind(nameof(encryptionSettings), encryptionSettings);
 builder.Services.AddSingleton(encryptionSettings);
-builder.Services.AddScoped<IKeycloakTokenHelper, KeycloakTokenHelper>();
+
 builder.Services.AddScoped<IEncDecHelper, EncDecHelper>();
 
 var TVP = new TokenValidationParameters
