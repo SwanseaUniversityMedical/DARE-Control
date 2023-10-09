@@ -242,10 +242,10 @@ namespace TRE_API
                 {
                     Log.Information("Submission: {submission}", aSubmission);
 
-                    //TODO: Put user approval check
+                    
 
                     // Check user is allowed ont he project
-                    if (false && ! _subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
+                    if (_subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
                     {
                         Log.Error("User {UserID}/project {ProjectId} is not value for this submission {submission}", aSubmission.SubmittedBy.Id, aSubmission.Project.Id, aSubmission);
                         // record error with submission layer
@@ -255,7 +255,7 @@ namespace TRE_API
                     {
 
 
-                        //TODO: Mahadi copy from submission input bucket to tre input bucket
+                        
                         try
                         {
                             Uri uri = new Uri(aSubmission.DockerInputLocation);
