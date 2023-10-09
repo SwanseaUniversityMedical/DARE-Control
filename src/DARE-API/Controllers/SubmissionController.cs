@@ -198,7 +198,7 @@ namespace DARE_API.Controllers
                 StatusType.RequestCancellation,
                 StatusType.CancellationRequestSent,
                 StatusType.CancellingChildren,
-                StatusType.Cancelled,
+                //StatusType.Cancelled,
                 StatusType.PodProcessingFailed
 
             };
