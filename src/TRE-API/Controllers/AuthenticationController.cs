@@ -6,8 +6,6 @@ using System.Text;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using HttpGetAttribute = Microsoft.AspNetCore.Mvc.HttpGetAttribute;
 using Microsoft.AspNetCore.Http;
-using System.Web.Http;
-using System;
 
 using TRE_TESK.Models;
 using Newtonsoft.Json.Linq;
@@ -18,8 +16,8 @@ using TRE_API.Services;
 namespace TRE_TESK.Controllers
 {
     [ApiController]
-    [Microsoft.AspNetCore.Mvc.Route("api/[controller]")]
-    public class AuthenticationController : ApiController
+    [Route("api/[controller]")]
+    public class AuthenticationController 
     {
         private readonly AuthenticationSettings _authenticationSettings;
         private readonly ApplicationDbContext _applicationDbContext;
@@ -39,7 +37,7 @@ namespace TRE_TESK.Controllers
 
         }
 
-        [Microsoft.AspNetCore.Mvc.HttpPost("ExpirerToken/{Token}")]
+        [HttpPost("ExpirerToken/{Token}")]
         public bool ExpirerToken(string Token)
         {
             return _hasuraAuthenticationService.ExpirerToken(Token);
