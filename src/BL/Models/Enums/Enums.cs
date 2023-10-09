@@ -164,5 +164,13 @@ namespace BL.Models.Enums
         Rejected = 2
     }
 
+    public enum EgressStatus
+    {
+        NotCompleted = 0,
+        FullyApproved = 1,
+        FullyRejected = 2,
+        PartiallyApproved = 3
+    }
+
 
 }

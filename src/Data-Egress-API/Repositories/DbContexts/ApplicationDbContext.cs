@@ -16,7 +16,9 @@ namespace Data_Egress_API.Repositories.DbContexts
 
         }
         public DbSet<SubmissionCredentials> SubmissionCredentials { get; set; }
-        public DbSet<DataFiles> DataEgressFiles{ get; set; }
+        public DbSet<EgressSubmission> EgressSubmissions{ get; set; }
+        public DbSet<EgressFile> EgressFiles { get; set; }
+
 
     }
 }

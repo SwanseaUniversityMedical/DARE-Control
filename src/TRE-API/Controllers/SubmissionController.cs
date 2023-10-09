@@ -101,6 +101,18 @@ namespace TRE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
         public IActionResult GetOutputBucketInfo(string subId)
         {
+            var outputBucket = GetOutputBucketGuts(subId);
+            var status = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
+                new Dictionary<string, string>()
+                {
+                    { "tesId", outputBucket.TesId }, { "statusType", StatusType.PodProcessingComplete.ToString() },
+                    { "description", "" }
+                }).Result;
+            return StatusCode(200, outputBucket.OutputBucket);
+        }
+
+        private OutputBucketInfo GetOutputBucketGuts(string subId)
+        {
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("submissionId", subId.ToString());
             var submission = _dareHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist)
@@ -108,18 +120,22 @@ namespace TRE_API.Controllers
 
             var bucket = _dbContext.Projects
                 .Where(x => x.SubmissionProjectId == submission.Project.Id)
-                .Select(x => new { x.OutputBucketTre });
+                .Select(x =>  x.OutputBucketTre );
 
-            var outputBucket = bucket.FirstOrDefault();
+            return new OutputBucketInfo()
+            {
+                OutputBucket = bucket.FirstOrDefault(),
+                TesId = submission.TesId
+            };
 
-            var status = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-                new Dictionary<string, string>()
-                {
-                    { "tesId", submission.TesId }, { "statusType", StatusType.PodProcessingComplete.ToString() },
-                    { "description", "" }
-                }).Result;
 
-            return StatusCode(200, outputBucket);
+
+        }
+
+        private class OutputBucketInfo
+        {
+            public string TesId { get; set; }
+            public string OutputBucket { get; set; }
         }
 
         [HttpPost]
@@ -129,8 +145,24 @@ namespace TRE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
         public IActionResult FilesReadyForReview([FromBody] ReviewFiles review)
         {
-            var submission = _dataEgressHelper.CallAPI<ReviewFiles, Submission>("/api/DataEgress/AddNewDataEgress/", review).Result;
-            return StatusCode(200, submission);
+
+            var egsub = new EgressSubmission()
+            {
+                SubmissionId = review.subId,
+                OutputBucket = GetOutputBucketGuts(review.subId).OutputBucket,
+                Files = new List<EgressFile>()
+            };
+
+            foreach (var reviewFile in review.files)
+            {
+                egsub.Files.Add(new EgressFile()
+                {
+                    Name = reviewFile,
+                    Status = FileStatus.ReadyToProcess
+                });
+            }
+            var boolResult = _dataEgressHelper.CallAPI<EgressSubmission, BoolReturn>("/api/DataEgress/AddNewDataEgress/", egsub).Result;
+            return StatusCode(200, boolResult);
         }
 
         [HttpPost]
