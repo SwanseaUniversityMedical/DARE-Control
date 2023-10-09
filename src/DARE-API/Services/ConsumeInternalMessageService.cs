@@ -8,6 +8,12 @@ using System;
 using BL.Models.Enums;
 using DARE_API.Repositories.DbContexts;
 using BL.Models.Tes;
+using BL.Models.ViewModels;
+using BL.Services;
+using EasyNetQ.Management.Client.Model;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Text.Json.Nodes;
 
 namespace DARE_API.Services
 {
@@ -15,13 +21,19 @@ namespace DARE_API.Services
     {
         private readonly IBus _bus;
         private readonly ApplicationDbContext _dbContext;
+        private readonly MinioSettings _minioSettings;
+        private readonly IMinioHelper _minioHelper;
+        
 
 
-        public ConsumeInternalMessageService(IBus bus , IServiceProvider serviceProvider)
+        public ConsumeInternalMessageService(IBus bus, IServiceProvider serviceProvider)
         {
             _bus = bus;
-            _dbContext = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<ApplicationDbContext>(); ;
-        
+            _dbContext = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            _minioSettings = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<MinioSettings>();
+            _minioHelper = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IMinioHelper>();
+            
+
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -31,11 +43,14 @@ namespace DARE_API.Services
                 //Consume All Queue
                 var subs = await _bus.Advanced.QueueDeclareAsync(QueueConstants.Submissions);
                 _bus.Advanced.Consume<int>(subs, Process);
+
+                var fetch = await _bus.Advanced.QueueDeclareAsync(QueueConstants.FetchExtarnalFile);
+                _bus.Advanced.Consume<byte[]>(fetch, ProcessFetchExternal);
             }
             catch (Exception e)
             {
-                Log.Error("{Function} ConsumeProcessForm:- Failed to subscribe due to error: {e}","ExecuteAsync", e.Message);
-                
+                Log.Error("{Function} ConsumeProcessForm:- Failed to subscribe due to error: {e}", "ExecuteAsync", e.Message);
+
             }
         }
 
@@ -44,6 +59,28 @@ namespace DARE_API.Services
             try
             {
                 var sub = _dbContext.Submissions.First(s => s.Id == message.Body);
+
+                //TODO: Mahadi copy crate from external to local submission (if in external)
+
+                Uri uri = new Uri(sub.DockerInputLocation);
+                string fileName = Path.GetFileName(uri.LocalPath);
+
+                var messageMQ = new FetchFileMQ();
+                messageMQ.Url = sub.SourceCrate;
+                messageMQ.BucketName = sub.Project.SubmissionBucket;
+                messageMQ.Key = fileName;
+
+                if (uri.Host + ":" + uri.Port != _minioSettings.Url)
+                {
+                    _minioHelper.RabbitExternalObject(messageMQ);
+
+                    
+                    var minioEndpoint = new MinioEndpoint()
+                    {
+                        Url = _minioSettings.AdminConsole,
+                    };
+                    messageMQ.Url = "http://" + minioEndpoint.Url + "/browser/" + messageMQ.BucketName + "/" + messageMQ.Key;
+                }
 
                 //TODO: Validate format of Crate
 
@@ -57,7 +94,7 @@ namespace DARE_API.Services
                     tres = trestr.Split('|').Select(x => x.ToLower()).ToList();
                 }
 
-                
+
 
                 var dbtres = new List<BL.Models.Tre>();
 
@@ -73,12 +110,12 @@ namespace DARE_API.Services
                     }
                 }
                 UpdateSubmissionStatus.UpdateStatus(sub, StatusType.WaitingForChildSubsToComplete, "");
-                
+
                 foreach (var tre in dbtres)
                 {
                     _dbContext.Add(new Submission()
                     {
-                        DockerInputLocation = tesTask.Executors.First().Image,
+                        DockerInputLocation = messageMQ.Url,
                         Project = dbproj,
                         StartTime = DateTime.Now.ToUniversalTime(),
                         Status = StatusType.WaitingForAgentToTransfer,
@@ -97,7 +134,7 @@ namespace DARE_API.Services
                 _dbContext.SaveChanges();
                 Log.Information("{Function} Processed sub for {id}", "Process", message.Body);
 
-                
+
             }
             catch (Exception ex)
             {
@@ -106,7 +143,22 @@ namespace DARE_API.Services
             }
         }
 
-       
+        private async Task ProcessFetchExternal(IMessage<byte[]> msgBytes,   MessageReceivedInfo info )
+        {
+            try
+            {
+                var message = Encoding.UTF8.GetString(msgBytes.Body);
+                await _minioHelper.RabbitExternalObject(JsonConvert.DeserializeObject<FetchFileMQ>(message));
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+        }
+
+
+
 
         private T ConvertByteArrayToType<T>(byte[] byteArray)
         {

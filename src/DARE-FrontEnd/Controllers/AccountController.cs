@@ -75,8 +75,7 @@ namespace DARE_FrontEnd.Controllers
         }
 
 
-
-       
+     
         public class TokenRoles
         {
             public List<string> roles { get; set; }

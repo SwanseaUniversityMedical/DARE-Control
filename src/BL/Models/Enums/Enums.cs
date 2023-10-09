@@ -62,7 +62,91 @@ namespace BL.Models.Enums
         [Display(Name = "Running")]
         Running = 26,
         [Display(Name = "Failed")]
-        Failed = 27
+        Failed = 27,
+        //Remove these later
+        SendingFileToHUTCH = 28,
+        SendingToHUTCHForFinalPackaging = 29,
+
+        //Internal Hutch Statuses
+        /// <summary>
+        /// Waiting for a Crate payload or Crate URL to be submitted to Hutch.
+        /// </summary>
+        [Display(Name = "Waiting for a Crate")]
+        WaitingForCrate = 30,
+
+        /// <summary>
+        /// A Crate has been submitted via URL; Hutch is fetching it.
+        /// </summary>
+        [Display(Name = "Fetching Crate")]
+        FetchingCrate = 31,
+
+        /// <summary>
+        /// Hutch has queued the Crate to be executed.
+        /// </summary>
+        [Display(Name = "Create queued")]
+        Queued = 32,
+
+        /// <summary>
+        /// Hutch is validating the Job Crate metadata prior to execution.
+        /// </summary>
+        [Display(Name = "Validating Crate")]
+        ValidatingCrate = 33,
+
+        /// <summary>
+        /// Hutch is fetching the remote workflow referenced by the crate.
+        /// </summary>
+        [Display(Name = "Fetching workflow")]
+        FetchingWorkflow=34,
+
+        /// <summary>
+        /// Hutch is preparing the workflow for the Workflow Executor (e.g. WfExS)
+        /// using a combination of the Job Crate, the Workflow Crate and Executor configuration.
+        /// </summary>
+        [Display(Name = "Preparing workflow")]
+        StagingWorkflow=35,
+
+        /// <summary>
+        /// Hutch has triggered the Workflow Executor to run the Worflow.
+        /// </summary>
+        [Display(Name = "Executing workflow")]
+        ExecutingWorkflow = 36,
+
+        /// <summary>
+        /// Following successful Workflow Execution, Hutch is preparing outputs
+        /// for an Egress request (e.g. disclosure checks etc.)
+        /// </summary>
+        [Display(Name = "Preparing outputs")]
+        PreparingOutputs = 37,
+
+        /// <summary>
+        /// Hutch has requested Egress and/or is providing outputs for Egress checking
+        /// </summary>
+        [Display(Name = "Requested Egress")]
+        DataOutRequested=38,
+
+        /// <summary>
+        /// Hutch has provided outputs for Egress and is awaiting the results of checks
+        /// </summary>
+        [Display(Name = "Waiting for Egress results")]
+        TransferredForDataOut = 39,
+
+        /// <summary>
+        /// Egress checks have approved some or all outputs; Hutch is finalising the approved results RO-Crate package.
+        /// </summary>
+        [Display(Name = "Finalising approved results")]
+        PackagingApprovedResults=40,
+
+        /// <summary>
+        /// Hutch has transferred the results RO-Crate package to the Intermediary Store.
+        /// </summary>
+        [Display(Name = "Completed")]
+        Complete=41,
+
+        /// <summary>
+        /// Hutch was unable to get the job to a complete status; it failed during the previous status stage.
+        /// </summary>
+        [Display(Name = "Failed")]
+        Failure = 42
 
     }
 
