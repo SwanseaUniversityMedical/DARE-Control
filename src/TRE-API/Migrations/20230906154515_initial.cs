@@ -33,7 +33,7 @@ namespace TRE_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SubmissionCredentials",
+                name: "KeycloakCredentials",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -130,7 +130,7 @@ namespace TRE_API.Migrations
                 name: "MembershipDecisions");
 
             migrationBuilder.DropTable(
-                name: "SubmissionCredentials");
+                name: "KeycloakCredentials");
 
             migrationBuilder.DropTable(
                 name: "Projects");

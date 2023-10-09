@@ -150,6 +150,7 @@ namespace TRE_API.Controllers
             {
                 SubmissionId = review.subId,
                 OutputBucket = GetOutputBucketGuts(review.subId).OutputBucket,
+                Status = EgressStatus.NotCompleted, 
                 Files = new List<EgressFile>()
             };
 

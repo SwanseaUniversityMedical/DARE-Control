@@ -32,7 +32,7 @@ namespace TRE_API.Repositories.DbContexts
                 {
 
 
-                    _dbContext.SubmissionCredentials.Add(new SubmissionCredentials()
+                    _dbContext.SubmissionCredentials.Add(new KeycloakCredentials()
                     {
                         UserName = "sailtreapi",
                         PasswordEnc = _encDecHelper.Encrypt("password123")

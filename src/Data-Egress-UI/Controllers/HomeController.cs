@@ -37,11 +37,11 @@ namespace Data_Egress_UI.Controllers
         //public async Task<IActionResult> Index()
         //{
 
-        //    var alreadyset = await _dataClientHelper.CallAPIWithoutModel<BoolReturn>("/api/SubmissionCredentials/CheckCredentialsAreValid");
+        //    var alreadyset = await _dataClientHelper.CallAPIWithoutModel<BoolReturn>("/api/KeycloakCredentials/CheckCredentialsAreValid");
         //    if (!alreadyset.Result)
         //    {
 
-        //        return RedirectToAction("UpdateCredentials", "SubmissionCredentials");
+        //        return RedirectToAction("UpdateCredentials", "KeycloakCredentials");
         //    }
         //    return View();
         //}

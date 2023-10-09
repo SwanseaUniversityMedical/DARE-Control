@@ -24,16 +24,18 @@ namespace Data_Egress_API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "data-egress-admin")]
     public class DataEgressController : ControllerBase
     {
         private readonly ApplicationDbContext _DbContext;
         private readonly MinioSettings _minioSettings;
-        //private readonly ITREClientHelper _treClientHelper;
-        public DataEgressController(ApplicationDbContext repository, MinioSettings minioSettings)            
+        private readonly ITREClientHelper _treClientHelper;
+        public DataEgressController(ApplicationDbContext repository, MinioSettings minioSettings, ITREClientHelper treClientHelper)            
         {
             _DbContext = repository;
             _minioSettings = minioSettings;
-            //_treClientHelper = treclienthelper;
+            _treClientHelper = treClientHelper;
+            
         }
         [HttpPost("AddNewDataEgress")]
         public async Task<BoolReturn> AddNewDataEgress(EgressSubmission submission)
@@ -111,7 +113,7 @@ namespace Data_Egress_API.Controllers
         {
             try
             {
-                var allUnprocessedFiles = _DbContext.EgressSubmissions.Where(x => !x.Processed).ToList();
+                var allUnprocessedFiles = _DbContext.EgressSubmissions.Where(x => x.Status == EgressStatus.NotCompleted).ToList();
 
                 Log.Information("{Function} Files retrieved successfully", "GetAllUnprocessedEgresses");
                 return allUnprocessedFiles;
@@ -123,7 +125,7 @@ namespace Data_Egress_API.Controllers
             }
         }
 
-        [HttpGet("UpdateFileData")]
+        [HttpPost("UpdateFileData")]
         public EgressFile UpdateFileData(int fileId, FileStatus status)
         {
             try
@@ -143,12 +145,72 @@ namespace Data_Egress_API.Controllers
                 
                 
                 _DbContext.SaveChangesAsync();
-                Log.Information("{Function} Files retrieved successfully", "UpdateFileData");
+                Log.Information("{Function} File updated", "UpdateFileData");
                 return returned;
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "{Function} Crashed", "UpdateFileData");
+                throw;
+            }
+
+        }
+
+        [HttpPost("MarkEgressAsComplete")]
+        public async Task<EgressSubmission> MarkEgressAsCompleteAsync(int id)
+        {
+            try
+            {
+                var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).FirstOrDefault();
+                if (string.IsNullOrWhiteSpace(approvedBy))
+                {
+                    approvedBy = "[Unknown]";
+                }
+                var approvedDate = DateTime.Now.ToUniversalTime();
+
+                var returned = _DbContext.EgressSubmissions.First(x => x.Id == id);
+                if (returned.Files.Any(x => x.Status == FileStatus.ReadyToProcess))
+                {
+                    throw new Exception("Not all files reviewed");
+                }else if (returned.Files.All(x => x.Status == FileStatus.Rejected))
+                {
+                    returned.Status = EgressStatus.FullyRejected;
+                }
+                else if (returned.Files.All(x => x.Status == FileStatus.Approved))
+                {
+                    returned.Status = EgressStatus.FullyApproved;
+                }
+                else
+                {
+                    returned.Status = EgressStatus.PartiallyApproved;
+                }
+
+                returned.Reviewer = approvedBy;
+                returned.Completed = approvedDate;
+
+
+                await _DbContext.SaveChangesAsync();
+                var backtotre = new EgressReview()
+                {
+                    subId = returned.SubmissionId,
+                    fileResults = new List<EgressResult>()
+                };
+                foreach (var file in returned.Files)
+                {
+                    backtotre.fileResults.Add(new EgressResult()
+                    {
+                        fileName = file.Name,
+                        approved = file.Status == FileStatus.Approved,
+                    })
+                }
+
+                var result =
+                    await _treClientHelper.CallAPI<EgressReview, Submission>("/api/Submission/EgressReview", backtotre);
+                return returned;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "MarkEgressAsComplete");
                 throw;
             }
 
@@ -221,13 +283,7 @@ namespace Data_Egress_API.Controllers
 
                     // Create a FileContentResult and return it as the response
                     return File(fileBytes, GetContentType(egressFile.Name), egressFile.Name);
-
-
-                    
                 }
-
-               
-               
             }
             else
             {

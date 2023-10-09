@@ -19,17 +19,17 @@ namespace Data_Egress_UI.Controllers
         [HttpGet]
         public async Task<IActionResult> UpdateCredentialsAsync()
         {
-            var valid = await _clientHelper.CallAPIWithoutModel<BoolReturn>("/api/SubmissionCredentials/CheckCredentialsAreValid");
+            var valid = await _clientHelper.CallAPIWithoutModel<BoolReturn>("/api/KeycloakCredentials/CheckCredentialsAreValid");
 
 
-            return View(new SubmissionCredentials()
+            return View(new KeycloakCredentials()
             { Valid = valid.Result })
                 ;
         }
 
         [HttpPost]
 
-        public async Task<IActionResult> UpdateCredentials(SubmissionCredentials credentials)
+        public async Task<IActionResult> UpdateCredentials(KeycloakCredentials credentials)
         {
 
             if (ModelState.IsValid)
@@ -37,8 +37,8 @@ namespace Data_Egress_UI.Controllers
 
 
                 var result =
-                    await _clientHelper.CallAPI<SubmissionCredentials, SubmissionCredentials>(
-                        "/api/SubmissionCredentials/UpdateCredentials", credentials);
+                    await _clientHelper.CallAPI<KeycloakCredentials, KeycloakCredentials>(
+                        "/api/KeycloakCredentials/UpdateCredentials", credentials);
                 if (result.Valid)
                 {
                     return RedirectToAction("Index", "Home");

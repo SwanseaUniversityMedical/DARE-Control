@@ -1,25 +1,25 @@
 ﻿using BL.Services;
-using Data_Egress_API.Repositories.DbContexts;
+using TRE_API.Repositories.DbContexts;
 
-namespace Data_Egress_API.Services
+namespace TRE_API.Services
 {
-    public class DataClientWithoutTokenHelper : BaseClientHelper, IDataClientWithoutTokenHelper
+    public class DareClientWithoutTokenHelper : BaseClientHelper, IDareClientWithoutTokenHelper
     {
         public ApplicationDbContext CredDb { get; set; }
 
-        public DataClientWithoutTokenHelper(IHttpClientFactory httpClientFactory,
+        public DareClientWithoutTokenHelper(IHttpClientFactory httpClientFactory,
             IHttpContextAccessor httpContextAccessor, IConfiguration config, ApplicationDbContext db,
             IKeycloakTokenHelper keycloak, IEncDecHelper encDec) : base(httpClientFactory, httpContextAccessor,
-            config["DataEgressAPISettings"], keycloak)
+            config["DareAPISettings:Address"], keycloak)
         {
             CredDb = db;
-
+            
             var creds = db.SubmissionCredentials.FirstOrDefault();
             if (creds != null)
             {
                 _username = creds.UserName;
                 _password = encDec.Decrypt(creds.PasswordEnc);
-                _requiredRole = "data-egress-admin";
+                _requiredRole = "dare-tre-admin";
             }
 
 

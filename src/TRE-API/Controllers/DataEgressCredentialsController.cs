@@ -5,13 +5,13 @@ using BL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
-using Data_Egress_API.Repositories.DbContexts;
+using TRE_API.Repositories.DbContexts;
 
 
-namespace Data_Egress_API.Controllers
+namespace TRE_API.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(Roles = "data-egress-admin")]
+    [Authorize(Roles = "dare-tre-admin")]
     [ApiController]
     public class SubmissionCredentialsController : Controller
     {
@@ -27,18 +27,18 @@ namespace Data_Egress_API.Controllers
             _keycloakTokenHelper = keycloakTokenHelper;
         }
 
-
+        
         [HttpGet("CheckCredentialsAreValid")]
         public async Task<BoolReturn> CheckCredentialsAreValidAsync()
         {
-            var result = new BoolReturn() { Result = false };
+            var result = new BoolReturn(){Result = false};
             var creds = _DbContext.SubmissionCredentials.FirstOrDefault();
             if (creds != null)
             {
                 var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
-                    _encDecHelper.Decrypt(creds.PasswordEnc), "data-egress-admin");
+                    _encDecHelper.Decrypt(creds.PasswordEnc), "dare-tre-admin");
                 result.Result = !string.IsNullOrWhiteSpace(token);
-
+                    
             }
 
             return result;
@@ -51,13 +51,13 @@ namespace Data_Egress_API.Controllers
             {
                 creds.Valid = true;
                 var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
-                    creds.PasswordEnc, "data-egress-admin");
+                    creds.PasswordEnc, "dare-tre-admin");
                 if (string.IsNullOrWhiteSpace(token))
                 {
                     creds.Valid = false;
                     return creds;
                 }
-
+                
                 var add = true;
                 var dbcred = _DbContext.SubmissionCredentials.FirstOrDefault();
                 if (dbcred != null)
@@ -70,13 +70,13 @@ namespace Data_Egress_API.Controllers
                 if (add)
                 {
                     _DbContext.SubmissionCredentials.Add(creds);
-
+                    
                 }
                 else
                 {
                     _DbContext.SubmissionCredentials.Update(creds);
                 }
-
+                
                 await _DbContext.SaveChangesAsync();
 
                 Log.Information("{Function} Credentials Successfully update", "UpdateCredentials");

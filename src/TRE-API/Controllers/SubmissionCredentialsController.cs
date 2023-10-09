@@ -45,7 +45,7 @@ namespace TRE_API.Controllers
         }
 
         [HttpPost("UpdateCredentials")]
-        public async Task<SubmissionCredentials> UpdateCredentials(SubmissionCredentials creds)
+        public async Task<KeycloakCredentials> UpdateCredentials(KeycloakCredentials creds)
         {
             try
             {
