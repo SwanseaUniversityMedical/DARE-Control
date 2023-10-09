@@ -23,7 +23,7 @@ namespace DARE_API.Services
         private readonly ApplicationDbContext _dbContext;
         private readonly MinioSettings _minioSettings;
         private readonly IMinioHelper _minioHelper;
-        private readonly IDareClientHelper _clientHelper;
+        
 
 
         public ConsumeInternalMessageService(IBus bus, IServiceProvider serviceProvider)
@@ -32,7 +32,7 @@ namespace DARE_API.Services
             _dbContext = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<ApplicationDbContext>();
             _minioSettings = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<MinioSettings>();
             _minioHelper = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IMinioHelper>();
-            _clientHelper = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IDareClientHelper>();
+            
 
         }
 
@@ -74,8 +74,11 @@ namespace DARE_API.Services
                 {
                     _minioHelper.RabbitExternalObject(messageMQ);
 
-                    var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
-
+                    
+                    var minioEndpoint = new MinioEndpoint()
+                    {
+                        Url = _minioSettings.AdminConsole,
+                    };
                     messageMQ.Url = "http://" + minioEndpoint.Url + "/browser/" + messageMQ.BucketName + "/" + messageMQ.Key;
                 }
 
