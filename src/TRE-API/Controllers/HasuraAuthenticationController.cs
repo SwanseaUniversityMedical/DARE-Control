@@ -17,13 +17,13 @@ namespace TRE_TESK.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthenticationController 
+    public class HasuraAuthenticationController : Controller
     {
         private readonly AuthenticationSettings _authenticationSettings;
         private readonly ApplicationDbContext _applicationDbContext;
         private readonly IHasuraAuthenticationService _hasuraAuthenticationService;
 
-        public AuthenticationController(AuthenticationSettings AuthenticationSettings, ApplicationDbContext applicationDbContext, IHasuraAuthenticationService hasuraAuthenticationService)
+        public HasuraAuthenticationController(AuthenticationSettings AuthenticationSettings, ApplicationDbContext applicationDbContext, IHasuraAuthenticationService hasuraAuthenticationService)
         {
             _authenticationSettings = AuthenticationSettings;
             _applicationDbContext = applicationDbContext;
