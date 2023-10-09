@@ -7,13 +7,15 @@
     unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
 body {
-    font-family: 'museo-sans-rounded', -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif;
+    font-family: 'Roboto',Helvetica Neue,Arial,sans-serif;
     background-color: #f6f7f8;
     height: 100vh;
     color: #3c3c3b;
     font-size: 14px;
 }
-
+.h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+}
 .autohide {
     position: fixed;
     top: 0;
@@ -36,6 +38,10 @@ body {
 }
 .text-success {
     color: rgb(50, 146, 118) !important;
+}
+.text-black-15 {
+    --bs-text-opacity: 1;
+    color: rgba(0,0,0,.15) !important;
 }
 a {
     -webkit-text-decoration-skip: objects;
@@ -111,7 +117,21 @@ input, .form-control, .form-select {
     border-color: rgb(208, 211, 212);
     border-width:2px;
 }
-
+.form-group {
+    margin-bottom:1rem;
+}
+.input-group .form-control {
+    border-radius: 0.25rem 0 0 0.25rem !important;
+}
+.input-group-append .input-group-text {
+    border: 2px solid #ced4da;
+    border-radius: 0 0.25rem 0.25rem 0;
+    height: 100%;
+    margin-left: -1px;
+}
+.form-check-input {
+    border-width:2px;
+}
 .navbar {
     box-shadow: 1px 1px 3px 0 rgba(0,0,0,.09);
     min-height: 80px;
@@ -231,6 +251,9 @@ header .navbar-collapse .nav-link {
 .nav-underline .nav-link.active, .nav-underline .show > .nav-link {
     border-bottom: 3px solid #3db28c;
 }
+.nav .nav-link {
+    font-weight:bold;
+}
 .footer-top {
     background-color: rgb(238, 238, 238);
 }
@@ -322,11 +345,64 @@ table.no-head thead  {
 table tr {
     vertical-align:middle;
 }
+.table-striped-columns > :not(caption) > tr > :nth-child(3n) {
+    --bs-table-accent-bg: var(--bs-table-striped-bg);
+    color: var(--bs-table-striped-color);
+}
 #submissionList tr td:last-child {
     text-align:center;
 }
+.crosstab td, .crosstab th {
+    padding: 0.5rem 1.5rem !important;
+}
+.crosstab td {
+    vertical-align: top;
+}
+.crosstab th {
+    font-size:1rem;
+}
+.crosstab thead tr {
+    border-top: none !important;
+}
+.crosstab th:first-child, .crosstab td:first-child {
+    border-left: none !important;
+}
+.crosstab th:last-child, .crosstab td:last-child {
+    border-right: none !important;
+}
+    .crosstab tfoot tr {
+        border-top: 5px solid !important;
+        border-color: rgba(208, 211, 212, 0.75) !important;
+        background-color: rgb(238, 238, 238);
+    }
+.crosstab tbody tr td:first-child {
+    font-weight: bold;
+}
+ 
+.crosstab li {
+    margin-bottom:1rem;
+}
+.crosstab ul, .crosstab li:last-child {
+    margin-bottom: 0rem;
+}
+.crosstab .timeline li {
+    padding-bottom:1rem;
+    margin-bottom:0;
+}
+.crosstab .timeline-line {
+    width: 1px;
+    top: 7px;
+    left: 8px;
+}
+.crosstab .timeline .icon-wrap {
+    height: 16px;
+    margin-top: 2px;
+}
+.table-striped-columns > :not(caption) > tr > :nth-child(3n) .timeline .icon-wrap {
+    background-color: transparent;
+}
 .timeline li {
-    padding-bottom:2rem;
+    padding-bottom: 2rem;
 }
 .timeline li:last-child {
     padding-bottom: 0;

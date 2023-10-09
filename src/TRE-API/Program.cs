@@ -20,6 +20,9 @@ using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using TRE_API;
 using BL.Models.ViewModels;
+using BL.Rabbit;
+using Microsoft.Extensions.Options;
+using EasyNetQ;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +30,7 @@ ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
 Log.Logger = CreateSerilogLogger(configuration, environment);
-Log.Information("API logging LastStatusUpdate.");
+Log.Information("TRE API logging LastStatusUpdate.");
 
 
 // Add services to the container.
@@ -47,6 +50,12 @@ AddServices(builder);
 //Add Dependancies
 AddDependencies(builder, configuration);
 
+builder.Services.Configure<RabbitMQSetting>(configuration.GetSection("RabbitMQ"));
+builder.Services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);
+var bus =
+builder.Services.AddSingleton(RabbitHutch.CreateBus($"host={configuration["RabbitMQ:HostAddress"]}:{int.Parse(configuration["RabbitMQ:PortNumber"])};virtualHost={configuration["RabbitMQ:VirtualHost"]};username={configuration["RabbitMQ:Username"]};password={configuration["RabbitMQ:Password"]}"));
+Task task = SetUpRabbitMQ.DoItAsync(configuration["RabbitMQ:HostAddress"], configuration["RabbitMQ:PortNumber"], configuration["RabbitMQ:VirtualHost"], configuration["RabbitMQ:Username"], configuration["RabbitMQ:Password"]);
+
 var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
 builder.Services.AddSingleton(treKeyCloakSettings);
@@ -55,10 +64,16 @@ var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
 
+builder.Services.AddHostedService<ConsumeInternalMessageService>();
+
 var submissionKeyCloakSettings = new BaseKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
 builder.Services.AddSingleton(submissionKeyCloakSettings);
+
 builder.Services.AddScoped<IDareClientWithoutTokenHelper, DareClientWithoutTokenHelper>();
+builder.Services.AddScoped<IDataEgressClientHelper, DataEgressClientHelper>();
+builder.Services.AddScoped<IHutchClientHelper, HutchClientHelper>();
+
 string hangfireConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddHangfire(config => { config.UsePostgreSqlStorage(hangfireConnectionString); });
 
@@ -69,7 +84,9 @@ builder.Services.AddSingleton(encryptionSettings);
 builder.Services.AddScoped<IKeycloakTokenHelper, KeycloakTokenHelper>();
 builder.Services.AddScoped<IEncDecHelper, EncDecHelper>();
 builder.Services.AddScoped<IDareSyncHelper, DareSyncHelper>();
-builder.Services.AddScoped<IDoWork, DoWork>();
+builder.Services.AddScoped<ISubmissionHelper, SubmissionHelper>();
+builder.Services.AddScoped<IDoSyncWork, DoSyncWork>();
+builder.Services.AddScoped<IDoAgentWork, DoAgentWork>();
 
 
 var TVP = new TokenValidationParameters
@@ -185,7 +202,10 @@ if (!app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var encDec = scope.ServiceProvider.GetRequiredService<IEncDecHelper>();
     db.Database.Migrate();
+    var initialiser = new DataInitaliser(db, encDec);
+    initialiser.SeedData();
 
 }
 
@@ -288,7 +308,8 @@ app.MapHub<SignalRService>("/signalRHub", options =>
     options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
 }).RequireCors(MyAllowSpecificOrigins);
 app.UseHangfireDashboard();
-RecurringJob.AddOrUpdate<IDoWork>(a => a.Execute(), Cron.MinuteInterval(10));
+RecurringJob.AddOrUpdate<IDoSyncWork>(a => a.Execute(), Cron.MinuteInterval(10));
+RecurringJob.AddOrUpdate<IDoAgentWork>("Scan Submissions", a => a.Execute(), Cron.MinuteInterval(10));
 
 var port = app.Environment.WebRootPath;
 

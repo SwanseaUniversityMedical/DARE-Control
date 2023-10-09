@@ -14,6 +14,7 @@ using BL.Models.Tes;
 using EasyNetQ.Management.Client.Model;
 using System.Threading;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using BL.Models.APISimpleTypeReturns;
 
 namespace DARE_API.Controllers
 {
@@ -489,10 +490,41 @@ namespace DARE_API.Controllers
 
             var minioEndPoint = new MinioEndpoint()
             {
-                Url = _minioSettings.Url,
+                Url = _minioSettings.AdminConsole,
             };  
 
             return minioEndPoint;
+        }
+
+        [HttpGet("UploadToMinio")]
+        [AllowAnonymous]
+        public async Task<BoolReturn> UploadToMinio(string bucketName, string fileJson)
+        {
+            IFormFile iFile = ConvertJsonToIFormFile(fileJson);
+
+            var submissionBucket = await _minioHelper.UploadFileAsync(_minioSettings, iFile, bucketName, iFile.Name);
+
+            return new BoolReturn();
+        }
+
+        private IFormFile ConvertJsonToIFormFile(string fileJson)
+        {
+            if (string.IsNullOrEmpty(fileJson))
+                return null;
+            var fileData = System.Text.Json.JsonSerializer.Deserialize<IFileData>(fileJson);
+
+            var bytes = Convert.FromBase64String(fileData.Content);
+
+            var fileName = fileData.FileName;
+            var contentType = fileData.ContentType;
+
+            var formFile = new FormFile(new MemoryStream(bytes), 0, bytes.Length, null, fileName)
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = contentType
+            };
+
+            return formFile;
         }
 
 

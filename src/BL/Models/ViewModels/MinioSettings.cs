@@ -10,5 +10,6 @@ namespace BL.Models.ViewModels
         public string AWSRegion { get; set; }
         public string AWSService { get; set; }
         public string AttributeName { get; set; }
+        public string AdminConsole { get; set; }
     }
 }

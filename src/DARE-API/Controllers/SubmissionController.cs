@@ -10,14 +10,18 @@ using DARE_API.Services;
 using EasyNetQ;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using BL.Rabbit;
+using Microsoft.AspNetCore.SignalR;
+using System.Reflection;
+using System.ComponentModel.DataAnnotations;
 
 namespace DARE_API.Controllers
 {
 
     [Route("api/[controller]")]
-    [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
+    //[Authorize(Roles = "dare-control-admin,dare-tre-admin")]
     [ApiController]
-
+    [AllowAnonymous]
 
     /// <summary>
     /// API endpoints for <see cref="Submission"/>s.
@@ -25,12 +29,13 @@ namespace DARE_API.Controllers
     public class SubmissionController : Controller
     {
         private readonly ApplicationDbContext _DbContext;
-
+        private readonly IBus _rabbit;
 
 
         public SubmissionController(ApplicationDbContext repository, IBus rabbit)
         {
             _DbContext = repository;
+            _rabbit = rabbit;
 
 
         }
@@ -111,6 +116,17 @@ namespace DARE_API.Controllers
         }
 
         [AllowAnonymous]
+        [HttpGet("TestSubRabbitSendRemoveBeforeDeploy")]
+        public void TestSubRabbitSendRemoveBeforeDeploy(int id)
+        {
+
+            var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
+
+            _rabbit.Advanced.Publish(exch, RoutingConstants.Subs, false, new Message<int>(id));
+            
+        }
+
+        [AllowAnonymous]
         [HttpGet("GetASubmission")]
         public Submission GetASubmission(int submissionId)
         {
@@ -136,12 +152,16 @@ namespace DARE_API.Controllers
             var stage1List = new StageInfo();
             stage1List.stageName = "Submission Layer Validation";
             stage1List.stageNumber = 1;
+
             stage1List.statusTypeList = new List<StatusType>
             {
                 StatusType.InvalidUser,
                 StatusType.UserNotOnProject,
                 StatusType.InvalidSubmission,
-                StatusType.WaitingForCrateFormatCheck
+                StatusType.WaitingForCrateFormatCheck,
+                StatusType.ValidatingUser,
+                StatusType.ValidatingSubmission,
+                StatusType.ValidationSuccessful
             };
             Dictionary<int, List<StatusType>> stage1Dict = new Dictionary<int, List<StatusType>>();
             stage1Dict.Add(1, stage1List.statusTypeList);
@@ -154,8 +174,11 @@ namespace DARE_API.Controllers
             {
                 StatusType.WaitingForAgentToTransfer,
                 StatusType.TransferredToPod,
-                StatusType.TRENotAuthorisedForProject
-
+                StatusType.TRENotAuthorisedForProject,
+                StatusType.AgentTransferringToPod,
+                StatusType.TransferToPodFailed,
+                StatusType.TRERejectedProject,
+                StatusType.TREApprovedProject
 
 
 
@@ -171,7 +194,12 @@ namespace DARE_API.Controllers
             {
                 StatusType.WaitingForChildSubsToComplete,
                 StatusType.PodProcessing,
-                StatusType.RequestCancellation
+                StatusType.PodProcessingComplete,
+                StatusType.RequestCancellation,
+                StatusType.CancellationRequestSent,
+                StatusType.CancellingChildren,
+                //StatusType.Cancelled,
+                StatusType.PodProcessingFailed
 
             };
             Dictionary<int, List<StatusType>> stage3Dict = new Dictionary<int, List<StatusType>>();
@@ -184,8 +212,8 @@ namespace DARE_API.Controllers
             stage4List.statusTypeList = new List<StatusType>
             {
                 StatusType.DataOutApprovalBegun,
-                StatusType.CancellationRequestSent,
-                StatusType.CancellingChildren
+                StatusType.DataOutApprovalRejected,
+                StatusType.DataOutApproved
             };
             Dictionary<int, List<StatusType>> stage4Dict = new Dictionary<int, List<StatusType>>();
             stage4Dict.Add(4, stage4List.statusTypeList);
@@ -196,11 +224,10 @@ namespace DARE_API.Controllers
             stage5List.stageNumber = 5;
             stage5List.statusTypeList = new List<StatusType>
             {
-                StatusType.PodProcessingComplete,
-                StatusType.DataOutApprovalRejected,
-                StatusType.DataOutApproved,
+                StatusType.Cancelled,
                 StatusType.Completed,
-                StatusType.Cancelled
+                StatusType.Running,
+                StatusType.Failed
             };
             Dictionary<int, List<StatusType>> stage5Dict = new Dictionary<int, List<StatusType>>();
             stage5Dict.Add(5, stage5List.statusTypeList);
@@ -218,24 +245,24 @@ namespace DARE_API.Controllers
 
         }
 
-        [AllowAnonymous]
-        [HttpGet("DifferentStages")]
-        public Dictionary<int, StageInfo> DifferentStages()
-        {
+        //[AllowAnonymous]
+        //[HttpGet("DifferentStages")]
+        //public Dictionary<int, StageInfo> DifferentStages()
+        //{
 
-            var stage1List = new StageInfo();
-            stage1List.stageName = "Submission Layer Validation";
-            stage1List.stageNumber = 1;
-            stage1List.statusTypeList = new List<StatusType>
-            {
-                StatusType.InvalidUser,
-                StatusType.UserNotOnProject,
-                StatusType.InvalidSubmission,
-                StatusType.WaitingForCrateFormatCheck
-            };
-            return null;
+        //    var stage1List = new StageInfo();
+        //    stage1List.stageName = "Submission Layer Validation";
+        //    stage1List.stageNumber = 1;
+        //    stage1List.statusTypeList = new List<StatusType>
+        //    {
+        //        StatusType.InvalidUser,
+        //        StatusType.UserNotOnProject,
+        //        StatusType.InvalidSubmission,
+        //        StatusType.WaitingForCrateFormatCheck
+        //    };
+        //    return null;
 
-        }
+        //}
 
         [HttpPost("SaveSubmissionFiles")]
         public IActionResult SaveSubmissionFiles(int submissionId, List<SubmissionFile> submissionFiles)

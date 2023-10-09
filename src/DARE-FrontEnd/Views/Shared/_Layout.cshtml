@@ -58,8 +58,8 @@
                         <li class="mobile-account-nav">
                             <hr class="mobile-account-nav dropdown-divider" />
                         </li>
-                        <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="#">Account</a></li>
-                        <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="#">Helpdesk</a></li>
+                        <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="http://keycloak-dev:8080/auth/">Account</a></li>
+                        <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="https://jira.hiru.swan.ac.uk/servicedesk/customer/portal/6">Helpdesk</a></li>
                         <li class="mobile-account-nav nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
                         </li>
@@ -79,8 +79,8 @@
                                 @User?.FindFirst("name")?.Value
                             </a>
                             <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="#">Account</a></li>
-                                <li><a class="dropdown-item" href="#">Helpdesk</a></li>
+                                <li><a class="dropdown-item" href="http://keycloak-dev:8080/auth/">Account</a></li>
+                                <li><a class="dropdown-item" href="https://jira.hiru.swan.ac.uk/servicedesk/customer/portal/6">Helpdesk</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a></li>
                             </ul>
@@ -128,9 +128,6 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="PrivacyPolicy">Privacy Policy</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-light" href="#">Cookie Notice</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-light" href="https://dareuk.org.uk/about/" target="_blank">About DARE UK</a>
@@ -193,6 +190,12 @@
         $('#addProject').on('click', function () {
 
             $('#projectModal').modal('show');
+
+        })
+
+        $('#addSubmission').on('click', function () {
+
+            $('#submissionModal').modal('show');
 
         })
 
@@ -295,6 +298,65 @@
             }
 
         }
+    </script>
+
+    <script>
+        $("input[name='Option']").change(function () {
+
+            var selectedValue = $(this).val();
+
+            $("#externalUrl, #uploadedFile").hide();
+
+            if (selectedValue === "url") {
+                $("#externalUrl").show();
+            } else if (selectedValue === "file") {
+                $("#uploadedFile").show();
+            }
+        });
+    </script>
+
+    <script>
+        $("#submitButton").click(function () {
+            debugger;
+            var selectedOptions = [];
+            $("#treDropdown option:selected").each(function () {
+                selectedOptions.push($(this).val());
+            });
+
+            var dropdownValue = selectedOptions.join("|");
+            var ProjectId = $("#projectId").val();
+            var Name = $("#name").val();
+            var SubmissionBucket = $("#submissionBucket").val();
+            var Project = $("#projectName").val();
+            var Option = $("input[name='Option']:checked").val();
+            var Url = $("#url").val();
+            var File = $("#file")[0].files[0];
+
+
+            var formData = new FormData();
+            formData.append("ProjectId", ProjectId);
+            formData.append("Name", Name);
+            formData.append("SubmissionBucket", SubmissionBucket);
+            formData.append("Project", Project);
+            formData.append("Tre", dropdownValue);
+            formData.append("Option", Option);
+            formData.append("Url", Url);
+            formData.append("File", File);
+
+            $.ajax({
+                url: '/Project/SubmissionWizerd',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (result) {
+                    window.location.href = "/Project/GetProject/" + ProjectId;
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        });
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
