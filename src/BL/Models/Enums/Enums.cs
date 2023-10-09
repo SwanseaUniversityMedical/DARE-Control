@@ -62,8 +62,10 @@ namespace BL.Models.Enums
         [Display(Name = "Running")]
         Running = 26,
         [Display(Name = "Failed")]
-        Failed = 27
-
+        Failed = 27,
+            //Remove these later
+            SendingFileToHUTCH = 28,
+        SendingToHUTCHForFinalPackaging = 29
     }
 
     public enum Decision
