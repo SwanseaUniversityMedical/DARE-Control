@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
 using BL.Models.Enums;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace Data_Egress_UI.Controllers
 {
@@ -62,27 +63,43 @@ namespace Data_Egress_UI.Controllers
             var files = _dataClientHelper.CallAPIWithoutModel<DataFiles>("/api/DataEgress/UpdateFileData/", paramlist).Result;
             return RedirectToAction("GetFiles", new { Id = Id });
         }
-        [HttpGet]
-        public IActionResult DataOut(int id)
+        [HttpPost]
+        public IActionResult GetEgress(EgressSubmission model)
         {
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("submissionId", id.ToString());
+            
+            var egress = _dataClientHelper.CallAPI<EgressSubmission, EgressSubmission>("/api/DataEgress/DataOutApproval/", model).Result;
 
-            var files = _dataClientHelper.CallAPIWithoutModel<List<DataFiles>>("/api/DataEgress/DataOutApproval/", paramlist).Result;
-
-            return View(files);
+            return RedirectToAction("GetAllUnprocessedEgresses");
+            
         }
+        public static string GetContentType(string fileName)
+        {
+            // Create a new FileExtensionContentTypeProvider
+            var provider = new FileExtensionContentTypeProvider();
 
+            // Try to get the content type based on the file name's extension
+            if (provider.TryGetContentType(fileName, out var contentType))
+            {
+                return contentType;
+            }
+
+            // If the content type cannot be determined, provide a default value
+            return "application/octet-stream"; // This is a common default for unknown file types
+        }
 
         [HttpGet]
         public IActionResult DownloadFile(int? FileId)
         {
 
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("FileId", FileId.ToString());
-            var file = _dataClientHelper.CallAPIWithoutModel<DataFiles>(
+            var paramlist = new Dictionary<string, string>
+            {
+                { "id", FileId.ToString() }
+            };
+
+            var egressFile = _dataClientHelper.CallAPIWithoutModel<EgressFile>("/api/DataEgress/DownloadFile", paramlist).Result;
+            var file = _dataClientHelper.CallAPIToGetFile(
                 "/api/DataEgress/DownloadFile", paramlist).Result;
-            return View(file);
+            return  File(file, GetContentType(egressFile.Name), egressFile.Name);
         }
 
         [HttpGet]

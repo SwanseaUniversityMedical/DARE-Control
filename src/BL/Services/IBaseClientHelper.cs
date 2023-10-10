@@ -16,6 +16,8 @@ namespace BL.Services
         Task<TOutput?> CallAPIWithoutModel<TOutput>(string endPoint, Dictionary<string, string>? paramList = null)
             where TOutput : class?, new();
 
+        Task<byte[]> CallAPIToGetFile(string endPoint, Dictionary<string, string>? paramList = null);
+
 
     }
 }

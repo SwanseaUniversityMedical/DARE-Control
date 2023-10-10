@@ -213,6 +213,12 @@ namespace BL.Services
             return  await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Post, jsonString, paramList);
         }
 
+        public async Task<byte[]> CallAPIToGetFile(string endPoint, Dictionary<string, string>? paramList = null)
+        {
+            var response = await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Post, null, paramList);
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+
         public async Task<TOutput?> CallAPI<TInput, TOutput>(string endPoint,TInput model, Dictionary<string, string>? paramList = null, bool usePut = false) where TInput : class? where TOutput : class?, new()
         {
             StringContent? modelString = null;
@@ -223,6 +229,7 @@ namespace BL.Services
             
             return await CallAPIWithReturnType<TOutput>(endPoint, modelString, paramList, usePut);
         }
+
 
         public async Task<TOutput?> CallAPIWithoutModel<TOutput>(string endPoint, Dictionary<string, string>? paramList = null) where TOutput : class?, new()
         {

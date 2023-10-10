@@ -161,7 +161,7 @@ namespace TRE_API.Controllers
                 egsub.Files.Add(new EgressFile()
                 {
                     Name = reviewFile,
-                    Status = FileStatus.ReadyToProcess
+                    Status = FileStatus.Undecided
                 });
             }
             var boolResult = _dataEgressHelper.CallAPI<EgressSubmission, BoolReturn>("/api/DataEgress/AddNewDataEgress/", egsub).Result;

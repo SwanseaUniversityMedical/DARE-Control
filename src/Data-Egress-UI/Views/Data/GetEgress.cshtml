@@ -1,4 +1,5 @@
 ﻿
+@using BL.Models.Enums
 @model BL.Models.EgressSubmission
 
 @{
@@ -8,106 +9,81 @@
 }
 
 
-@foreach (var file in Model)
-{
-    <div class="container-lg p-4">
-        <div class="d-flex align-items-center justify-content-between">
-            <h1 class="fs-3 mb-0">Egress Request</h1>
+
+<div class="container-lg p-4">
+    <div class="d-flex align-items-center justify-content-between">
+        <h1 class="fs-3 mb-0">Egress Request</h1>
 
             
-        </div>
-        
-        <div class="d-flex align-items-center justify-content-between">
-            <h2 class="mb-0 fw-bold hover-underline fs-5">
-                Submission Id: @Model.SubmissionId
-            </h2>
-            <div>
-                <p class="text-muted small mb-0">File(s) Minio Bucket Location: @Model.OutputBucket</p>
-                <h1 class="fs-3 mb-0">@Model.SubmissionProjectName</h1>
-                <p class="text-muted small mb-0">#@Model.SubmissionProjectId</p>
-                @if (Model.Archived)
-                {
-                    <p class="text-muted small mb-0">Archived</p>
-                }
-
-
-            </div>
-            <div class="form-group mb-4">
-                @Model.Description
-            </div>
-            <div class="form-group mb-4">
-                @if (Model.Decision == Decision.Undecided)
-                {
-                    @:This project hasn't been processed yet
-                }
-                else
-                {
-                    @:Last Updated: @Model.LastDecisionDate by @Model.ApprovedBy
-                }
-
-            </div>
-            
-        </div>
-  
-        <hr class="d-flex my-4">
-        <div class="table-responsive">
-            <table id="fileList" class="table table-bordered table-striped no-head" caption="List of Files">
-                <thead><tr><td>Project</td></tr></thead>
-                <tbody>
-                   
-                        <tr>
-                            <td class="card mb-2 p-3 bg-white shadow-sm border-1">
-
-                                <div class="d-flex align-items-center justify-content-between mb-3">
-                                    <div>         
-                                       <h2 class="mb-0 fw-bold hover-underline fs-5">
-                                                Submission Id: @file.SubmissionId
-                                            </h2>
-
-                                        <p class="my-4">
-                                            Actions:
-                                            @if (file.Status == BL.Models.Enums.FileStatus.ReadyToProcess)
-                                            {
-                                                @:This project hasn't been processed yet
-                                            }
-                                            else{
-                                    @file.Status
-                                                                    }
-                                    </p>
-                               
-                                        <p class="text-muted small mb-0">File Size:@file.SubmisionBucketFullPath<span class="mx-2"></span>Filename: @file.Name</p>
-                                    </div>
-
-
-                                <div class="">
-                                    @if (file.Status == BL.Models.Enums.FileStatus.Approved)
-
-                                    {
-
-                                        <a href="@Url.Action("EditFileData", "Data",new{Id=@file.Id,Status = 2})" class="btn btn-sm btn-outline-danger"><span class="small">Deny</span></a>
-                                    }
-                                    else if (file.Status == BL.Models.Enums.FileStatus.Rejected)
-                                    {
-                                        <a href="@Url.Action("EditFileData", "Data",new{Id=@file.Id,Status = 1})" class="btn btn-sm btn-outline-success"><span class="small">Approve</span></a>
-
-                                    }
-                                           <a href="@Url.Action("DownloadFile", "Data",new{FileId=@file.Id})" class="btn btn-sm btn-outline-info"><span class="small">Download</span></a>
-                       
-                                    </div>
-                             
-                                </div>
-
-
-                                <p class="text-muted fs-7 mt-4 mb-0">
-                        Last Updated: @file.LastUpdate<span class="mx-2"></span>Reviewer: @file.Reviewer
-                        </p>
-                            </td>
-                        </tr>
-                  
-                </tbody>
-            </table>
-
-        </div>
     </div>
-}
+        
+    <div class="d-flex align-items-center justify-content-between">
+        <h2 class="mb-0 fw-bold hover-underline fs-5">
+            Submission Id: @Model.SubmissionId
+        </h2>
+        <div>
+            <p class="text-muted small mb-0">File(s) Minio Bucket Location: @Model.OutputBucket</p>
+            <p class="my-4">
+
+                Status:  @Model.EgressStatusDisplay
+
+            </p>
+            @if (Model.Status != EgressStatus.NotCompleted)
+            {
+                <p class="text-muted fs-7 mt-4 mb-0">
+                    Completed: @Model.Completed<span class="mx-2"></span>Reviewer: @Model.Reviewer
+                </p>    
+            }
+            
+                
+
+
+        </div>
+            
+           
+            
+    </div>
+    @using (Html.BeginForm("GetEgress", "Data", FormMethod.Post, new { id = "frmMain" }))
+    {
+        @Html.HiddenFor(x => x.Id);
+        <div class="form-group mb-4">
+            @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+        </div>
+        @for (int i = 0; i < Model.Files.Count; i++)
+        {
+
+            <div class="form-group mb-4">
+                @Html.HiddenFor(x => x.Files[i].Id)
+                @Html.LabelFor(x => x.Files[i].Name, new { @class = "form-label" })
+                @Html.DisplayFor(x => x.Files[i].Name, new { @class = "form-control" })
+                <a href="@Url.Action("DownloadFile", "Data",new{FileId=@Model.Files[i].Id})" class="btn btn-sm btn-outline-info"><span class="small">Download</span></a>
+            </div>
+            <div>
+                @Html.LabelFor(x => x.Files[i].Status, new { @class = "form-label" })
+                @Html.RadioButtonFor(x => x.Files[i].Status, FileStatus.Approved)
+                @Html.Label(FileStatus.Approved.ToString())
+                @Html.RadioButtonFor(x => x.Files[i].Status, FileStatus.Rejected)
+                @Html.Label(FileStatus.Rejected.ToString())
+                @if (Model.Files[i].Status == FileStatus.Undecided)
+                {
+                    @Html.RadioButtonFor(x => x.Files[i].Status, FileStatus.Undecided)
+                    @Html.Label(FileStatus.Undecided.ToString())
+                }
+
+            </div>
+        }
+        <div class="hero-block-1">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i>Complete</button>
+        </div>
+    }
+</div>
+
+           
+   
+
+
+    
+    
+        
+        
      

@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using BL.Services;
 using System.Net.Mime;
 using Microsoft.AspNetCore.StaticFiles;
+using Sentry.PlatformAbstractions;
 
 namespace Data_Egress_API.Controllers
 {
@@ -54,7 +55,7 @@ namespace Data_Egress_API.Controllers
                     _DbContext.EgressSubmissions.Add(submission);
                     foreach (var submissionFile in submission.Files)
                     {
-                        submissionFile.Status = FileStatus.ReadyToProcess;
+                        submissionFile.Status = FileStatus.Undecided;
                     }
                     
                     await _DbContext.SaveChangesAsync();
@@ -111,6 +112,26 @@ namespace Data_Egress_API.Controllers
 
         }
 
+        [HttpGet("GetEgressFile")]
+        public EgressFile GetEgressFile(int id)
+        {
+            try
+            {
+                var returned = _DbContext.EgressFiles.First(x => x.Id == id);
+
+
+                Log.Information("{Function} File retrieved successfully", "GetEgressFile");
+                return returned;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetEgressFile");
+                throw;
+            }
+
+
+        }
+
         [HttpGet("GetAllUnprocessedEgresses")]
         public List<EgressSubmission> GetAllUnprocessedEgresses()
         {
@@ -127,6 +148,81 @@ namespace Data_Egress_API.Controllers
                 throw;
             }
         }
+
+        [HttpPost("CompleteEgress")]
+        public async Task<EgressSubmission> CompleteEgressAsync([FromBody] EgressSubmission egress)
+        {
+            try
+            {
+                var dbegress = _DbContext.EgressSubmissions.First(x => x.Id == egress.Id);
+                if (dbegress.Status != EgressStatus.NotCompleted)
+                {
+                    throw new Exception("Egress has already been completed");
+                }
+                var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).FirstOrDefault();
+                if (string.IsNullOrWhiteSpace(approvedBy))
+                {
+                    approvedBy = "[Unknown]";
+                }
+                var approvedDate = DateTime.Now.ToUniversalTime();
+                if (egress.Files.Any(x => x.Status == FileStatus.Undecided))
+                {
+                    throw new Exception("Not all files reviewed");
+                }
+                else if (egress.Files.All(x => x.Status == FileStatus.Rejected))
+                {
+                    dbegress.Status = EgressStatus.FullyRejected;
+                }
+                else if (egress.Files.All(x => x.Status == FileStatus.Approved))
+                {
+                    dbegress.Status = EgressStatus.FullyApproved;
+                }
+                else
+                {
+                    dbegress.Status = EgressStatus.PartiallyApproved;
+                }
+                dbegress.Reviewer = approvedBy;
+                dbegress.Completed = approvedDate;
+
+                var backtotre = new EgressReview()
+                {
+                    subId = dbegress.SubmissionId,
+                    fileResults = new List<EgressResult>()
+                };
+                foreach (var file in egress.Files)
+                {
+                    backtotre.fileResults.Add(new EgressResult()
+                    {
+                        fileName = file.Name,
+                        approved = file.Status == FileStatus.Approved,
+                    });
+                    var egfile = dbegress.Files.First(x => x.Id == file.Id);
+                    egfile.Status = file.Status;
+                    egfile.LastUpdate = approvedDate;
+                    egfile.Reviewer = approvedBy;
+
+                }
+                await _DbContext.SaveChangesAsync();
+                
+
+                var result =
+                    await _treClientHelper.CallAPI<EgressReview, Submission>("/api/Submission/EgressReview", backtotre);
+                
+
+               
+
+
+                Log.Information("{Function} Egress Completed for Submission {SubId}", "CompleteEgress", dbegress.SubmissionId);
+                return dbegress;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "CompleteEgress");
+                throw;
+            }
+
+        }
+
 
         [HttpPost("UpdateFileData")]
         public EgressFile UpdateFileData(int fileId, FileStatus status)
@@ -172,7 +268,7 @@ namespace Data_Egress_API.Controllers
                 var approvedDate = DateTime.Now.ToUniversalTime();
 
                 var returned = _DbContext.EgressSubmissions.First(x => x.Id == id);
-                if (returned.Files.Any(x => x.Status == FileStatus.ReadyToProcess))
+                if (returned.Files.Any(x => x.Status == FileStatus.Undecided))
                 {
                     throw new Exception("Not all files reviewed");
                 }else if (returned.Files.All(x => x.Status == FileStatus.Rejected))
@@ -264,6 +360,22 @@ namespace Data_Egress_API.Controllers
         [HttpGet("DownloadFile")]
         public async Task<IActionResult> DownloadFileAsync(int fileId)
         {
+            //TODO: Remove once finished testing
+            string filePath = @"c:\test\test.txt";
+            
+            byte[] fileContent = System.IO.File.ReadAllBytes(filePath);
+
+            // Provide the file content along with the content type and a file name
+            var contentResult = new FileContentResult(fileContent, "application/octet-stream")
+            {
+                FileDownloadName = "example.txt" // Specify the file name you want the client to see
+            };
+            return File(fileContent, GetContentType("test.txt"), "test.txt");
+            
+       
+            // Replace with actual file retrieval logic
+            
+
             var egressFile = _DbContext.EgressFiles.First(x => x.Id == fileId);
             var request = new GetObjectRequest
             {
