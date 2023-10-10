@@ -14,7 +14,7 @@ namespace TRE_API.Services
             config["DareAPISettings:Address"])
         {
             CredDb = db;
-            _keycloakTokenHelper = new KeycloakTokenHelper(settings.BaseUrl, settings.ClientId, settings.ClientSecret);
+            _keycloakTokenHelper = new KeycloakTokenHelper(settings.BaseUrl, settings.ClientId, settings.ClientSecret, settings.Proxy, settings.ProxyAddresURL);
             var creds = db.SubmissionCredentials.FirstOrDefault();
             if (creds != null)
             {
