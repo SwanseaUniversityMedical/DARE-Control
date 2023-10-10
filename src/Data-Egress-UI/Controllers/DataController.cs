@@ -34,20 +34,10 @@ namespace Data_Egress_UI.Controllers
         }
    
         [HttpGet]
-        public IActionResult GetAllUnprocessedFiles()
+        public IActionResult GetAllUnprocessedEgresses()
         {
-            var unprocessedfiles = _dataClientHelper.CallAPIWithoutModel<List<DataFiles>>("/api/DataEgress/GetAllUnprocessedFiles/").Result;
-            var filecount = 0;
-            var submissionIDCounts = unprocessedfiles
-            .GroupBy(file => file.SubmissionId)
-            .Select(group => new { submissionId = group.Key, Count = group.Count() })
-            .ToList();
-            foreach (var count in submissionIDCounts)
-            {
-                filecount = count.Count;
-            }
-
-            ViewBag.Filecount = filecount;
+            var unprocessedfiles = _dataClientHelper.CallAPIWithoutModel<List<EgressSubmission>>("/api/DataEgress/GetAllUnprocessedEgresses/").Result;
+           
             return View(unprocessedfiles);
 
         }
@@ -96,22 +86,14 @@ namespace Data_Egress_UI.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllFiles()
+        public IActionResult GetAllEgresses()
         {
-            var files = _dataClientHelper.CallAPIWithoutModel<List<DataFiles>>("/api/DataEgress/GetAllFiles/").Result;
+            var egresses = _dataClientHelper.CallAPIWithoutModel<List<EgressSubmission>>("/api/DataEgress/GetAllEgresses/").Result;
 
-            var filecount = 0;
-            var submissionIDCounts = files
-            .GroupBy(file => file.SubmissionId)
-            .Select(group => new { submissionId = group.Key, Count = group.Count() })
-            .ToList();
-            foreach (var count in submissionIDCounts)
-            {
-                filecount = count.Count;
-            }
+           
 
-            ViewBag.Filecount = filecount;
-            return View(files);
+           
+            return View(egresses);
         }
 
 

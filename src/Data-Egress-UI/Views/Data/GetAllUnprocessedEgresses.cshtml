@@ -1,16 +1,11 @@
-﻿@Html.AntiForgeryToken()
-@model List<BL.Models.DataFiles>
+﻿
+@model List<BL.Models.EgressSubmission>
 @{
-    ViewData["Title"] = "Unprocessed File(s)";
-    var filecount = ViewBag.Filecount;
+    ViewData["Title"] = "Unprocessed Egress requests";
+    
 
 }
-@if (ViewBag.Message != null)
-{
-    <div class="alert alert-success alert-dismissible" style="margin-top:20px">
-        @ViewBag.Message
-    </div>
-}
+
 
 
 @if (Model.Count == 0)
@@ -22,7 +17,7 @@ else
 {
     <div class="container-lg p-4">
         <div class="d-flex align-items-center justify-content-between">
-            <h1 class="fs-3 mb-0">File System</h1>
+            <h1 class="fs-3 mb-0">Egress Requests</h1>
 
      
         </div>
@@ -31,20 +26,20 @@ else
             <table id="fileList" class="table table-bordered table-striped no-head" caption="List of Files">
                 <thead><tr><td>Project</td></tr></thead>
                 <tbody>
-                    @foreach (var file in Model)
+                    @foreach (var egressSubmission in Model)
                     {
                         <tr>
                             <td class="card mb-2 p-3 bg-white shadow-sm border-1">
 
                                 <div class="d-flex align-items-center justify-content-between mb-3">
                                     <div>
-                                        <a href="@Url.Action("GetFiles", "Data", new {id = file.SubmissionId })">
+                                        <a href="@Url.Action("GetEgress", "Data", new {id = egressSubmission.Id })">
                                             <h2 class="mb-0 fw-bold hover-underline fs-5">
-                                                Submission Id: @file.SubmissionId
+                                                Submission Id: @egressSubmission.SubmissionId
                                             </h2>
                                             <p class="my-4">
 
-                                                FileCount:   @filecount
+                                                FileCount:  @egressSubmission.Files.Count
 
                                             </p>
                                      
@@ -52,7 +47,7 @@ else
                                   
                                     </div>
                                      <div class="">
-                                        <a href="@Url.Action("GetFiles", "Data",new{id=@file.SubmissionId})" class="btn btn-sm btn-outline-primary"><span class="small">Review</span></a>
+                                        <a href="@Url.Action("GetFiles", "Data",new{id=egressSubmission.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Review</span></a>
                                     </div>
                                 </div>
 
