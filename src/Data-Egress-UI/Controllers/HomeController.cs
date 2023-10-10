@@ -10,7 +10,7 @@ using BL.Models.APISimpleTypeReturns;
 
 namespace Data_Egress_UI.Controllers
 {
-    //[Authorize(Roles = "data-egress-admin")]
+    [Authorize(Roles = "data-egress-admin")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;

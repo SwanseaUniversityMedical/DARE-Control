@@ -6,7 +6,7 @@ using BL.Models.APISimpleTypeReturns;
 
 namespace Data_Egress_UI.Controllers
 {
-    //[Authorize(Roles = "data-egress-admin")]
+    [Authorize(Roles = "data-egress-admin")]
     public class TreCredentialsController : Controller
     {
         private readonly IDataEgressClientHelper _clientHelper;

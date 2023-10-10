@@ -22,7 +22,7 @@ using Microsoft.AspNetCore.StaticFiles;
 
 namespace Data_Egress_UI.Controllers
 {
-    //[Authorize(Roles = "data-egress-admin")]
+    [Authorize(Roles = "data-egress-admin")]
     public class DataController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -96,7 +96,7 @@ namespace Data_Egress_UI.Controllers
                 { "id", FileId.ToString() }
             };
 
-            var egressFile = _dataClientHelper.CallAPIWithoutModel<EgressFile>("/api/DataEgress/DownloadFile", paramlist).Result;
+            var egressFile = _dataClientHelper.CallAPIWithoutModel<EgressFile>("/api/DataEgress/GetEgressFile", paramlist).Result;
             var file = _dataClientHelper.CallAPIToGetFile(
                 "/api/DataEgress/DownloadFile", paramlist).Result;
             return  File(file, GetContentType(egressFile.Name), egressFile.Name);

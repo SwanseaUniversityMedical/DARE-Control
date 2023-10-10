@@ -13,13 +13,14 @@ namespace Data_Egress_API.Controllers
 {
     [Route("api/[controller]")]
     [Authorize(Roles = "data-egress-admin")]
+    //[Authorize]
     [ApiController]
     public class TreCredentialsController : Controller
     {
 
         private readonly ApplicationDbContext _DbContext;
         private readonly IEncDecHelper _encDecHelper;
-        private readonly ITREClientHelper _treClientHelper;
+        
         public KeycloakTokenHelper _keycloakTokenHelper { get; set; }
 
 
@@ -37,7 +38,7 @@ namespace Data_Egress_API.Controllers
         public async Task<BoolReturn> CheckCredentialsAreValidAsync()
         {
             var result = new BoolReturn() { Result = false };
-            var creds = _DbContext.SubmissionCredentials.FirstOrDefault();
+            var creds = _DbContext.TreCredentials.FirstOrDefault();
             if (creds != null)
             {
                 var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
@@ -64,7 +65,7 @@ namespace Data_Egress_API.Controllers
                 }
 
                 var add = true;
-                var dbcred = _DbContext.SubmissionCredentials.FirstOrDefault();
+                var dbcred = _DbContext.TreCredentials.FirstOrDefault();
                 if (dbcred != null)
                 {
                     creds.Id = dbcred.Id;
@@ -74,12 +75,12 @@ namespace Data_Egress_API.Controllers
                 creds.PasswordEnc = _encDecHelper.Encrypt(creds.PasswordEnc);
                 if (add)
                 {
-                    _DbContext.SubmissionCredentials.Add(creds);
+                    _DbContext.TreCredentials.Add(creds);
 
                 }
                 else
                 {
-                    _DbContext.SubmissionCredentials.Update(creds);
+                    _DbContext.TreCredentials.Update(creds);
                 }
 
                 await _DbContext.SaveChangesAsync();

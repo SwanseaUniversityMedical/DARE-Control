@@ -15,7 +15,7 @@ namespace Data_Egress_API.Repositories.DbContexts
         {
 
         }
-        public DbSet<KeycloakCredentials> SubmissionCredentials { get; set; }
+        public DbSet<KeycloakCredentials> TreCredentials { get; set; }
         public DbSet<EgressSubmission> EgressSubmissions { get; set; }
         public DbSet<EgressFile> EgressFiles { get; set; }
 

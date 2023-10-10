@@ -16,7 +16,7 @@ namespace Data_Egress_API.Services
         {
             CredDb = db;
             _keycloakTokenHelper = new KeycloakTokenHelper(settings.BaseUrl, settings.ClientId, settings.ClientSecret, settings.Proxy, settings.ProxyAddresURL);
-            var creds = db.SubmissionCredentials.FirstOrDefault();
+            var creds = db.TreCredentials.FirstOrDefault();
             if (creds != null)
             {
                 _username = creds.UserName;
@@ -29,7 +29,7 @@ namespace Data_Egress_API.Services
 
         public bool CheckCredsAreAvailable()
         {
-            return CredDb.SubmissionCredentials.Any();
+            return CredDb.TreCredentials.Any();
         }
     }
 }

@@ -142,6 +142,17 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var encDec = scope.ServiceProvider.GetRequiredService<IEncDecHelper>();
+    db.Database.Migrate();
+    var initialiser = new DataInitaliser(db, encDec);
+    initialiser.SeedData();
+
+}
+
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedProto
@@ -255,6 +266,11 @@ void AddServices(WebApplicationBuilder builder)
                 Type = ReferenceType.SecurityScheme
             }
         };
+        c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            { securityScheme, new string[] { } }
+        });
 
     }
     );

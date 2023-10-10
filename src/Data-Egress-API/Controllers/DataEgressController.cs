@@ -18,6 +18,7 @@ using System.Net;
 using System.Collections.Generic;
 using BL.Services;
 using System.Net.Mime;
+using Data_Egress_API.Services;
 using Microsoft.AspNetCore.StaticFiles;
 using Sentry.PlatformAbstractions;
 
@@ -31,8 +32,8 @@ namespace Data_Egress_API.Controllers
     {
         private readonly ApplicationDbContext _DbContext;
         private readonly MinioSettings _minioSettings;
-        private readonly ITREClientHelper _treClientHelper;
-        public DataEgressController(ApplicationDbContext repository, MinioSettings minioSettings, ITREClientHelper treClientHelper)            
+        private readonly ITreClientWithoutTokenHelper _treClientHelper;
+        public DataEgressController(ApplicationDbContext repository, MinioSettings minioSettings, ITreClientWithoutTokenHelper treClientHelper)            
         {
             _DbContext = repository;
             _minioSettings = minioSettings;
@@ -75,11 +76,11 @@ namespace Data_Egress_API.Controllers
 
 
         [HttpGet("GetAllEgresses")]
-        public List<EgressFile> GetAllEgresses()
+        public List<EgressSubmission> GetAllEgresses()
         {
             try
             {
-                var allFiles = _DbContext.EgressFiles.ToList();
+                var allFiles = _DbContext.EgressSubmissions.ToList();
 
                 Log.Information("{Function} Files retrieved successfully", "GetAllEgresses");
 
@@ -202,14 +203,17 @@ namespace Data_Egress_API.Controllers
                     egfile.Reviewer = approvedBy;
 
                 }
-                await _DbContext.SaveChangesAsync();
-                
 
                 var result =
                     await _treClientHelper.CallAPI<EgressReview, Submission>("/api/Submission/EgressReview", backtotre);
+                await _DbContext.SaveChangesAsync();
+
+                
+                
+               
                 
 
-               
+
 
 
                 Log.Information("{Function} Egress Completed for Submission {SubId}", "CompleteEgress", dbegress.SubmissionId);

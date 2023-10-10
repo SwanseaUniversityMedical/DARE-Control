@@ -28,7 +28,7 @@ namespace TRE_API.Controllers
     {
         private readonly ISignalRService _signalRService;
         private readonly IDareClientWithoutTokenHelper _dareHelper;
-        private readonly IDataEgressClientHelper  _dataEgressHelper;
+        private readonly IDataEgressClientWithoutTokenHelper  _dataEgressHelper;
         private readonly IHutchClientHelper _hutchHelper;
         private readonly ApplicationDbContext _dbContext;
         private readonly IBus _rabbit;
@@ -37,7 +37,7 @@ namespace TRE_API.Controllers
         private readonly MinioSettings _minioSettings;
 
         public SubmissionController(ISignalRService signalRService, IDareClientWithoutTokenHelper helper,
-            ApplicationDbContext dbContext, IBus rabbit, ISubmissionHelper subHelper, IDataEgressClientHelper egressHelper, IHutchClientHelper hutchClientHelper, IMinioHelper minioHelper, MinioSettings minioSettings)
+            ApplicationDbContext dbContext, IBus rabbit, ISubmissionHelper subHelper, IDataEgressClientWithoutTokenHelper egressHelper, IHutchClientHelper hutchClientHelper, IMinioHelper minioHelper, MinioSettings minioSettings)
         {
             _signalRService = signalRService;
             _dareHelper = helper;

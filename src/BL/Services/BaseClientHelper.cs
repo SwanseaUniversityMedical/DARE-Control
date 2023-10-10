@@ -215,7 +215,7 @@ namespace BL.Services
 
         public async Task<byte[]> CallAPIToGetFile(string endPoint, Dictionary<string, string>? paramList = null)
         {
-            var response = await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Post, null, paramList);
+            var response = await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Get, null, paramList);
             return await response.Content.ReadAsByteArrayAsync();
         }
 
