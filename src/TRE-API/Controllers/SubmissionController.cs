@@ -186,7 +186,7 @@ namespace TRE_API.Controllers
             var sourceBucket = bucket.FirstOrDefault().OutputBucketTre;
 
             var paramlist2 = new Dictionary<string, string>();
-            paramlist.Add("projectId", submission.Project.Id.ToString());
+            paramlist2.Add("projectId", submission.Project.Id.ToString());
             var project = _dareHelper.CallAPIWithoutModel<Project?>(
                 "/api/Project/GetProject/", paramlist2).Result;
 
