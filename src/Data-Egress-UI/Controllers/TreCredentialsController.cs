@@ -7,10 +7,10 @@ using BL.Models.APISimpleTypeReturns;
 namespace Data_Egress_UI.Controllers
 {
     //[Authorize(Roles = "data-egress-admin")]
-    public class SubmissionCredentialsController : Controller
+    public class TreCredentialsController : Controller
     {
         private readonly IDataEgressClientHelper _clientHelper;
-        public SubmissionCredentialsController(IDataEgressClientHelper client)
+        public TreCredentialsController(IDataEgressClientHelper client)
         {
             _clientHelper = client;
         }
@@ -19,7 +19,7 @@ namespace Data_Egress_UI.Controllers
         [HttpGet]
         public async Task<IActionResult> UpdateCredentialsAsync()
         {
-            var valid = await _clientHelper.CallAPIWithoutModel<BoolReturn>("/api/KeycloakCredentials/CheckCredentialsAreValid");
+            var valid = await _clientHelper.CallAPIWithoutModel<BoolReturn>("/api/TreCredentials/CheckCredentialsAreValid");
 
 
             return View(new KeycloakCredentials()
@@ -38,7 +38,7 @@ namespace Data_Egress_UI.Controllers
 
                 var result =
                     await _clientHelper.CallAPI<KeycloakCredentials, KeycloakCredentials>(
-                        "/api/KeycloakCredentials/UpdateCredentials", credentials);
+                        "/api/TreCredentials/UpdateCredentials", credentials);
                 if (result.Valid)
                 {
                     return RedirectToAction("Index", "Home");
