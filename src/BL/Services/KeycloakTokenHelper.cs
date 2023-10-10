@@ -3,6 +3,7 @@ using IdentityModel.Client;
 using Newtonsoft.Json;
 using Serilog;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 
 namespace BL.Services
 {
@@ -24,10 +25,18 @@ namespace BL.Services
             string keycloakBaseUrl = _settings.BaseUrl;
             string clientId = _settings.ClientId;
             string clientSecret = _settings.ClientSecret;
+            HttpClient client = null;
+            // Create an HttpClientHandler with proxy settings
+            HttpClientHandler handler = new HttpClientHandler
+            {
+                Proxy = new WebProxy(_settings.ProxyAddresURL), // Replace with your proxy server URL
+                UseProxy = _settings.Proxy
 
+            };
 
-
-            var client = new HttpClient();
+            // Create an HttpClient with the handler
+            client = new HttpClient(handler);
+            
 
             var disco = await client.GetDiscoveryDocumentAsync(new DiscoveryDocumentRequest
             {
