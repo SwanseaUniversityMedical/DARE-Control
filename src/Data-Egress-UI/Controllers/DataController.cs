@@ -43,12 +43,12 @@ namespace Data_Egress_UI.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetFiles(int id)
+        public IActionResult GetEgress(int id)
         {
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("id", id.ToString());
 
-            var files = _dataClientHelper.CallAPIWithoutModel<List<DataFiles>>("/api/DataEgress/GetFilesBySubmissionId/", paramlist).Result;
+            var files = _dataClientHelper.CallAPIWithoutModel<EgressSubmission>("/api/DataEgress/GetEgress/", paramlist).Result;
 
             return View(files);
         }
