@@ -20,13 +20,12 @@ namespace TRE_TESK.Controllers
     public class HasuraAuthenticationController : Controller
     {
         private readonly AuthenticationSettings _authenticationSettings;
-        private readonly ApplicationDbContext _applicationDbContext;
+    
         private readonly IHasuraAuthenticationService _hasuraAuthenticationService;
 
-        public HasuraAuthenticationController(AuthenticationSettings AuthenticationSettings, ApplicationDbContext applicationDbContext, IHasuraAuthenticationService hasuraAuthenticationService)
+        public HasuraAuthenticationController(AuthenticationSettings AuthenticationSettings, IHasuraAuthenticationService hasuraAuthenticationService)
         {
-            _authenticationSettings = AuthenticationSettings;
-            _applicationDbContext = applicationDbContext;
+            _authenticationSettings = AuthenticationSettings;          
             _hasuraAuthenticationService = hasuraAuthenticationService;
         }
 
@@ -36,6 +35,7 @@ namespace TRE_TESK.Controllers
             return _hasuraAuthenticationService.GetNewToken(role);
 
         }
+
 
         [HttpPost("ExpirerToken/{Token}")]
         public bool ExpirerToken(string Token)

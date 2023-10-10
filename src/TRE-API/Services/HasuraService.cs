@@ -11,6 +11,7 @@ namespace TREAgent.Services
     public interface IHasuraService
     {
         public Task Run();
+        public Task<string> QueryData(string token);
     }
 
     public class HasuraService : IHasuraService
@@ -392,6 +393,11 @@ namespace TREAgent.Services
 
             }
             return response;
+        }
+
+        Task<string> QueryData(string token)
+        {
+            return "";
         }
 
     }
