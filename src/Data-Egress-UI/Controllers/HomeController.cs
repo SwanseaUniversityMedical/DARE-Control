@@ -37,21 +37,28 @@ namespace Data_Egress_UI.Controllers
         //public async Task<IActionResult> Index()
         //{
 
-        //    var alreadyset = await _dataClientHelper.CallAPIWithoutModel<BoolReturn>("/api/KeycloakCredentials/CheckCredentialsAreValid");
+        //    var alreadyset = await _dataClientHelper.CallAPIWithoutModel<BoolReturn>("/api/TreCredentials/CheckCredentialsAreValid");
         //    if (!alreadyset.Result)
         //    {
 
-        //        return RedirectToAction("UpdateCredentials", "KeycloakCredentials");
+        //        return RedirectToAction("UpdateCredentials", "TreCredentials");
         //    }
         //    return View();
         //}
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             if (!HttpContext.User.Identity.IsAuthenticated)
             {
                 return Challenge(OpenIdConnectDefaults.AuthenticationScheme);
             }
+            var alreadyset = await _dataClientHelper.CallAPIWithoutModel<BoolReturn>("/api/TreCredentials/CheckCredentialsAreValid");
+            if (!alreadyset.Result)
+            {
+
+                return RedirectToAction("UpdateCredentials", "TreCredentials");
+            }
             return View();
+            
 
         }
 

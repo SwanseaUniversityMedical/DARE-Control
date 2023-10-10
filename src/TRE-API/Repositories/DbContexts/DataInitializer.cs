@@ -39,6 +39,18 @@ namespace TRE_API.Repositories.DbContexts
                     });
                     _dbContext.SaveChanges();
                 }
+
+                if (!_dbContext.DataEgressCredentials.Any())
+                {
+
+
+                    _dbContext.DataEgressCredentials.Add(new KeycloakCredentials()
+                    {
+                        UserName = "sailegressapi",
+                        PasswordEnc = _encDecHelper.Encrypt("password123")
+                    });
+                    _dbContext.SaveChanges();
+                }
             }
             catch (Exception e)
             {

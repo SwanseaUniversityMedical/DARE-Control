@@ -24,6 +24,7 @@ namespace Data_Egress_API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    
     [Authorize(Roles = "data-egress-admin")]
     public class DataEgressController : ControllerBase
     {
@@ -37,6 +38,8 @@ namespace Data_Egress_API.Controllers
             _treClientHelper = treClientHelper;
             
         }
+
+        [Authorize(Roles = "data-egress-admin,dare-tre-admin")]
         [HttpPost("AddNewDataEgress")]
         public async Task<BoolReturn> AddNewDataEgress(EgressSubmission submission)
         {

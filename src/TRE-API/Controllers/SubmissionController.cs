@@ -20,7 +20,7 @@ using Newtonsoft.Json;
 
 namespace TRE_API.Controllers
 {
-    [Authorize(Roles = "dare-tre-agent")]
+    [Authorize(Roles = "dare-tre-admin")]
     //[AllowAnonymous]
     [ApiController]
     [Route("api/[controller]")]
@@ -94,6 +94,7 @@ namespace TRE_API.Controllers
             return StatusCode(200, result);
         }
 
+        [Authorize(Roles = "dare-hutch-admin,dare-tre-admin")]
         [HttpGet]
         [Route("GetOutputBucketInfo")]
         [ValidateModelState]
@@ -138,6 +139,7 @@ namespace TRE_API.Controllers
             public string OutputBucket { get; set; }
         }
 
+        [Authorize(Roles = "dare-hutch-admin,dare-tre-admin")]
         [HttpPost]
         [Route("FilesReadyForReview")]
         [ValidateModelState]
@@ -165,7 +167,7 @@ namespace TRE_API.Controllers
             var boolResult = _dataEgressHelper.CallAPI<EgressSubmission, BoolReturn>("/api/DataEgress/AddNewDataEgress/", egsub).Result;
             return StatusCode(200, boolResult);
         }
-
+        [Authorize(Roles = "data-egress-admin,dare-tre-admin")]
         [HttpPost]
         [Route("EgressResults")]
         [ValidateModelState]
@@ -188,6 +190,7 @@ namespace TRE_API.Controllers
             return StatusCode(200, HUTCHres);
         }
 
+        [Authorize(Roles = "dare-hutch-admin,dare-tre-admin")]
         [HttpPost]
         [Route("FinalOutcome")]
         [ValidateModelState]

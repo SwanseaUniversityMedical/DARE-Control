@@ -21,7 +21,7 @@ namespace TRE_UI.Controllers
 
         public async Task<IActionResult> UpdateCredentialsAsync()
         {
-            var valid = await _clientHelper.CallAPIWithoutModel<BoolReturn>("/api/SubmissionCredentials/CheckCredentialsAreValid");
+            var valid = await _clientHelper.CallAPIWithoutModel<BoolReturn>("/api/KeycloakCredentials/CheckCredentialsAreValid");
 
 
             return View(new KeycloakCredentials()
@@ -39,7 +39,7 @@ namespace TRE_UI.Controllers
 
                 var result =
                     await _clientHelper.CallAPI<KeycloakCredentials, KeycloakCredentials>(
-                        "/api/SubmissionCredentials/UpdateCredentials", credentials);
+                        "/api/KeycloakCredentials/UpdateCredentials", credentials);
                 if (result.Valid)
                 {
                     return RedirectToAction("Index", "Home");

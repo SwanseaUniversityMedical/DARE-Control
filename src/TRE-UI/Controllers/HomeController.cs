@@ -25,11 +25,17 @@ namespace TRE_UI.Controllers
         public async Task<IActionResult> IndexAsync()
         {
            
-            var alreadyset =await  _treClientHelper.CallAPIWithoutModel<BoolReturn>("/api/KeycloakCredentials/CheckCredentialsAreValid");
+            var alreadyset =await  _treClientHelper.CallAPIWithoutModel<BoolReturn>("/api/SubmissionCredentials/CheckCredentialsAreValid");
             if (!alreadyset.Result)
             {
                
                 return RedirectToAction("UpdateCredentials", "SubmissionCredentials");
+            }
+            alreadyset = await _treClientHelper.CallAPIWithoutModel<BoolReturn>("/api/DataEgressCredentials/CheckCredentialsAreValid");
+            if (!alreadyset.Result)
+            {
+
+                return RedirectToAction("UpdateCredentials", "DataEgressCredentials");
             }
             return View();
         }

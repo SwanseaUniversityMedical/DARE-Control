@@ -33,6 +33,7 @@ namespace BL.Services
 
 
             var client = new HttpClient();
+            
 
             var disco = await client.GetDiscoveryDocumentAsync(new DiscoveryDocumentRequest
             {

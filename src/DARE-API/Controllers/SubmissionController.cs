@@ -21,9 +21,9 @@ namespace DARE_API.Controllers
 {
 
     [Route("api/[controller]")]
-    //[Authorize(Roles = "dare-control-admin,dare-tre-admin")]
+    [Authorize(Roles = "dare-control-admin")]
     [ApiController]
-    [AllowAnonymous]
+    
 
     /// <summary>
     /// API endpoints for <see cref="Submission"/>s.
@@ -43,7 +43,7 @@ namespace DARE_API.Controllers
         }
 
 
-
+        [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
         [HttpGet]
         [Route("GetWaitingSubmissionsForTre")]
         [ValidateModelState]
@@ -67,7 +67,7 @@ namespace DARE_API.Controllers
             return StatusCode(200, results);
         }
 
-
+        [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
         [HttpGet]
         [Route("UpdateStatusForTre")]
         [ValidateModelState]
