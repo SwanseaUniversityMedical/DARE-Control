@@ -120,8 +120,12 @@ builder.Services.AddAuthentication(options =>
 })
     .AddJwtBearer(options =>
     {
+        Console.WriteLine("TRE Keycloak use proxy = "+treKeyCloakSettings.Proxy.ToString());
+
         if (treKeyCloakSettings.Proxy)
         {
+            Console.WriteLine("TRE API Proxy = "+ treKeyCloakSettings.ProxyAddresURL);
+            Console.WriteLine("TRE API Proxy bypass = " + treKeyCloakSettings.BypassProxy);
             options.BackchannelHttpHandler = new HttpClientHandler
             {
                 UseProxy = true,

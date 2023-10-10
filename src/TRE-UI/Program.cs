@@ -102,6 +102,8 @@ builder.Services.AddAuthentication(options =>
             {
                 if (treKeyCloakSettings.Proxy)
                 {
+                    Console.WriteLine("TRE UI Proxy = " + treKeyCloakSettings.ProxyAddresURL);
+                    Console.WriteLine("TRE UI Proxy bypass = " + treKeyCloakSettings.BypassProxy);
                     options.BackchannelHttpHandler = new HttpClientHandler
                     {
                         UseProxy = true,
