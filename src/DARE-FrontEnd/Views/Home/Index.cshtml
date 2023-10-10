@@ -1,4 +1,10 @@
 ﻿@model BL.Models.User
+
+@{
+    var getAllProj = @ViewBag.getAllProj;
+    var getAllSubs = @ViewBag.getAllSubs;
+
+}
 @if (User.IsInRole("dare-control-admin"))
 {
     <div class="container-lg mt-4 p-4 bg-white border-1 shadow-sm">
@@ -7,19 +13,20 @@
                 <h1 class="fs-3 mb-0">Welcome back, @User?.FindFirst("name")?.Value</h1>
             </div>
         </div>
+
         <div class="mt-4">
             <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
                 <li class="nav-item" role="presentation">
                     <a href="#about" class="nav-link text-dark active" id="about" data-bs-toggle="tab" data-bs-target="#project" role="tab" aria-controls="Project" aria-selected="true">
                         <span>Projects</span>
-                        <span class="badge bg-dark-blue rounded-pill ms-2">Model.Projects.Count</span>
+                        <span class="badge bg-dark-blue rounded-pill ms-2">@getAllProj</span>
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
                     <a href="#submissions" class="nav-link text-dark" id="submissions" data-bs-toggle="tab" data-bs-target="#submissions-tab" role="tab" aria-controls="submissions" aria-selected="false">
                         <div class="d-flex justify-content-between align-items-center">
                             <span>Submissions</span>
-                            <span class="badge bg-dark-blue rounded-pill ms-2">Model.Submissions.Count</span>
+                            <span class="badge bg-dark-blue rounded-pill ms-2">@User?.FindAll("submissions").Count()</span>
                         </div>
                     </a>
                 </li>
@@ -126,7 +133,7 @@ else
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <h4 class="m-0 text-dark fs-5">Submissions</h4>
-                            <span class="badge bg-dark-blue rounded-pill">X</span>
+                            <span class="badge bg-dark-blue rounded-pill">@getAllSubs</span>
                         </div>
                     </div>
                 </a>
@@ -137,7 +144,7 @@ else
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <h4 class="m-0 text-dark fs-5">Projects</h4>
-                            <span class="badge bg-dark-blue rounded-pill">X</span>
+                            <span class="badge bg-dark-blue rounded-pill">@getAllProj</span>
                         </div>
                     </div>
                 </a>
