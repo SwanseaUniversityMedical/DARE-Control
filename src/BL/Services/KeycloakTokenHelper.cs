@@ -19,25 +19,20 @@ namespace BL.Services
 
         public async Task<string> GetTokenForUser(string username, string password, string requiredRole)
         {
-
-
-
             string keycloakBaseUrl = _settings.BaseUrl;
             string clientId = _settings.ClientId;
             string clientSecret = _settings.ClientSecret;
-            HttpClient client = null;
+            
             // Create an HttpClientHandler with proxy settings
             HttpClientHandler handler = new HttpClientHandler
             {
                 Proxy = new WebProxy(_settings.ProxyAddresURL), // Replace with your proxy server URL
                 UseProxy = _settings.Proxy
-
             };
 
             // Create an HttpClient with the handler
-            client = new HttpClient(handler);
+            var client = new HttpClient(handler);
             
-
             var disco = await client.GetDiscoveryDocumentAsync(new DiscoveryDocumentRequest
             {
                 Address = keycloakBaseUrl,
