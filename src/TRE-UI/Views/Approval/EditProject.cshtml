@@ -10,88 +10,88 @@
     <div class="d-flex align-items-center justify-content-between">
         <div>
             <h1 class="fs-3 mb-0">Approve Project</h1>
-
         </div>
-
     </div>
-
     <div class="mt-4">
         <div class="d-flex align-items-center justify-content-between">
             <div>
                 <h1 class="fs-3 mb-0">@Model.SubmissionProjectName</h1>
-                <p class="text-muted small mb-0">#@Model.SubmissionProjectId</p>
-                @if (Model.Archived)
-                {
-                    <p class="text-muted small mb-0">Archived</p>
-                }
-                
-                
+                <p class="text-muted small">#@Model.SubmissionProjectId</p>
+                <p class="text-muted mb-0">
+                    @if (Model.Decision == Decision.Undecided)
+                    {
+                        @:This project hasn't been processed yet
+                    }
+                    else
+                    {
+                        @:Last Updated: @Model.LastDecisionDate by @Model.ApprovedBy
+                    }
+                </p>
             </div>
-            <div class="form-group mb-4">
-                @Model.Description
-            </div>
-            <div class="form-group mb-4">
-                @if (Model.Decision == Decision.Undecided)
-                {
-                    @:This project hasn't been processed yet
-                }
-                else
-                {
-                    @:Last Updated: @Model.LastDecisionDate by @Model.ApprovedBy 
-                }
-                
-            </div>
+            @if (Model.Archived)
+            {
+                <span class="badge py-2 px-3 badge-lg bg-warning text-dark rounded-pill">
+                    Archived
+                </span>
+            }
         </div>
-        <div class="mt-4">
-        <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
-        </ul>
-
+        <hr class="d-flex my-4">
+        <div class="form-group mb-4">
+            <h2 class="fs-5">About</h2>
+            @Model.Description
+        </div>
         <div class="row">
             <div class="col-md-4">
-                    @using (Html.BeginForm("EditProject", "Approval", FormMethod.Post, new { id = "frmMain" }))
+                @using (Html.BeginForm("EditProject", "Approval", FormMethod.Post, new { id = "frmMain" }))
                 {
-                    <div class="form-group mb-4">
-                        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+                    <h2 class="fs-5 mt-5">Decision</h2>
+                    <div id="radio-decision" class="form-group">
+                        @Html.HiddenFor(x => x.Id)
+                        <div class="form-check form-check-inline">
+                            @Html.RadioButtonFor(x => x.Decision, Decision.Approved, new { @id = "Approved", @class = "radio-approved form-check-input", @checked = ""})
+                            @Html.Label(Decision.Approved.ToString())
+                        </div>
+                        <div class="form-check form-check-inline">
+                            @Html.RadioButtonFor(x => x.Decision, Decision.Rejected, new { @id = "Rejected", @class = "radio-rejected form-check-input", @checked = ""})
+                            @Html.Label(Decision.Rejected.ToString())
+                        </div>
+                        
+                        @if (Model.Decision == Decision.Undecided)
+                        {
+                            <div class="form-check form-check-inline">
+                                @Html.RadioButtonFor(x => x.Decision, Decision.Undecided, new { @id = "Undecided", @class = "radio-undecided form-check-input", @checked = ""})
+                                @Html.Label(Decision.Undecided.ToString())
+                            </div>
+                            
+                        }
                     </div>
-
-                    <div class="form-group mb-4">
+                    <div class="db-cred">
+                        <h2 class="fs-5 mt-5">Database Credentials</h2>
+                        <p>Please enter the credentials for the database you will allow queries for this project to run against.</p>
+                        <div class="form-group">
                             @Html.LabelFor(x => x.LocalProjectName, new { @class = "form-label"})
-                        @Html.TextBoxFor(x => x.LocalProjectName, new { @class = "form-control"})
-                    </div>
-                        <div class="form-group mb-4">
+                            @Html.TextBoxFor(x => x.LocalProjectName, new { @class = "form-control"})
+                        </div>
+                        <div class="form-group">
                             @Html.LabelFor(x => x.UserName, new { @class = "form-label"})
                             @Html.TextBoxFor(x => x.UserName, new { @class = "form-control"})
                         </div>
-                        <div class="form-group mb-4">
+                        <div class="form-group">
                             @Html.LabelFor(x => x.Password, new { @class = "form-label"})
                             @Html.PasswordFor(x => x.Password, new { @class = "form-control"})
                         </div>
-                    <div class="form-group mb-4">
-                        @Html.HiddenFor(x => x.Id)/
-                        @Html.RadioButtonFor(x => x.Decision, Decision.Approved)
-                        @Html.Label(Decision.Approved.ToString())
-                        @Html.RadioButtonFor(x => x.Decision, Decision.Rejected)
-                        @Html.Label(Decision.Rejected.ToString())
-                        @if (Model.Decision == Decision.Undecided)
-                        {
-                            @Html.RadioButtonFor(x => x.Decision, Decision.Undecided)
-                            @Html.Label(Decision.Undecided.ToString())
-                        }
                     </div>
-
-                    <div class="hero-block-1">
-                        <button  type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i>Update</button>
+                    
+                    
+                    <div class="form-group mb-5">
+                        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="hero-block-1 mt-5">
+                        <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                        <a class="btn btn-sm btn-link" href="@Url.Action("GetAllProjects","Approval", new {  showOnlyUnprocessed = false })">Cancel</a>
                     </div>
                 }
-                    
-
-
-                
             </div>
         </div>
     </div>
-
-
 </div>
-</div>
-
