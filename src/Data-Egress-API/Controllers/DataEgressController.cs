@@ -364,20 +364,6 @@ namespace Data_Egress_API.Controllers
         [HttpGet("DownloadFile")]
         public async Task<IActionResult> DownloadFileAsync(int fileId)
         {
-            //TODO: Remove once finished testing
-            string filePath = @"c:\test\test.txt";
-            
-            byte[] fileContent = System.IO.File.ReadAllBytes(filePath);
-
-            // Provide the file content along with the content type and a file name
-            var contentResult = new FileContentResult(fileContent, "application/octet-stream")
-            {
-                FileDownloadName = "example.txt" // Specify the file name you want the client to see
-            };
-            return File(fileContent, GetContentType("test.txt"), "test.txt");
-            
-       
-            // Replace with actual file retrieval logic
             
 
             var egressFile = _DbContext.EgressFiles.First(x => x.Id == fileId);
