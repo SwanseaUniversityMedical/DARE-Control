@@ -20,8 +20,19 @@ namespace BL.Models
         [Compare("PasswordEnc", ErrorMessage = "Confirm password doesn't match, Type again!")]
         public string ConfirmPassword { get; set; }
 
+        public CredentialType CredentialType { get; set; }
+
         [NotMapped]
         
         public bool Valid { get; set; }
     }
+
+    public enum CredentialType
+    {
+        Submission =0,
+        Tre = 1,
+        Egress = 2
+    }
+
+    
 }

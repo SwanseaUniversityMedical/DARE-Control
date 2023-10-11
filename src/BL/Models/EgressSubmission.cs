@@ -12,9 +12,9 @@ namespace BL.Models
     public class EgressSubmission
     {
         public int Id { get; set; }
-        public string SubmissionId { get; set; }
+        public string? SubmissionId { get; set; }
         public EgressStatus Status { get; set; }
-        public string OutputBucket { get; set; }
+        public string? OutputBucket { get; set; }
 
         public DateTime? Completed { get; set; }
         public string? Reviewer { get; set; }

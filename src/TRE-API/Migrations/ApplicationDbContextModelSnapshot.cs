@@ -33,6 +33,9 @@ namespace TRE_API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CredentialType")
+                        .HasColumnType("integer");
+
                     b.Property<string>("PasswordEnc")
                         .IsRequired()
                         .HasColumnType("text");

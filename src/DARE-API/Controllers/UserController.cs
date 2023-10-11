@@ -11,9 +11,9 @@ using Microsoft.AspNetCore.Authentication;
 namespace DARE_API.Controllers
 {
 
-    [Authorize]
-    //[ApiController]
-    [Authorize(Roles = "dare-control-admin")]
+    
+    
+    
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
@@ -31,7 +31,7 @@ namespace DARE_API.Controllers
 
         }
 
-
+        [Authorize(Roles = "dare-control-admin")]
         [HttpPost("SaveUser")]
         public async Task<User> SaveUser([FromBody] FormData data) 
         {
@@ -133,7 +133,7 @@ namespace DARE_API.Controllers
 
             
         }
-      
+
         //[AllowAnonymous]
         //[HttpPost("UpdateUser")]
         //public User? UpdateUser([FromBody] FormData data)
@@ -161,7 +161,7 @@ namespace DARE_API.Controllers
         //    return user;
 
         //}
-
+        [Authorize(Roles = "dare-control-admin")]
         [HttpPost("AddProjectMembership")]
         public async Task<ProjectUser?> AddProjectMembership([FromBody]ProjectUser model)
         {
@@ -218,7 +218,7 @@ namespace DARE_API.Controllers
 
 
         }
-
+        [Authorize(Roles = "dare-control-admin")]
         [HttpPost("RemoveProjectMembership")]
         public async Task<ProjectUser?> RemoveProjectMembership([FromBody] ProjectUser model)
         {

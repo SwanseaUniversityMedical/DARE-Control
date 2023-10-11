@@ -12,7 +12,6 @@ using TRE_API.Repositories.DbContexts;
 namespace TRE_API.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(Roles = "dare-tre-admin")]
     [ApiController]
     public class DataEgressCredentialsController : Controller
     {
@@ -30,12 +29,12 @@ namespace TRE_API.Controllers
                 keycloakSettings.ClientSecret, keycloakSettings.Proxy, keycloakSettings.ProxyAddresURL);
         }
 
-        
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("CheckCredentialsAreValid")]
         public async Task<BoolReturn> CheckCredentialsAreValidAsync()
         {
             var result = new BoolReturn(){Result = false};
-            var creds = _DbContext.DataEgressCredentials.FirstOrDefault();
+            var creds = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Egress);
             if (creds != null)
             {
                 var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
@@ -47,6 +46,7 @@ namespace TRE_API.Controllers
             return result;
         }
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("UpdateCredentials")]
         public async Task<KeycloakCredentials> UpdateCredentials(KeycloakCredentials creds)
         {
@@ -62,22 +62,23 @@ namespace TRE_API.Controllers
                 }
                 
                 var add = true;
-                var dbcred = _DbContext.DataEgressCredentials.FirstOrDefault();
+                var dbcred = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Egress);
                 if (dbcred != null)
                 {
                     creds.Id = dbcred.Id;
+                    creds.CredentialType = CredentialType.Egress;
                     add = false;
                 }
 
                 creds.PasswordEnc = _encDecHelper.Encrypt(creds.PasswordEnc);
                 if (add)
                 {
-                    _DbContext.DataEgressCredentials.Add(creds);
+                    _DbContext.KeycloakCredentials.Add(creds);
                     
                 }
                 else
                 {
-                    _DbContext.DataEgressCredentials.Update(creds);
+                    _DbContext.KeycloakCredentials.Update(creds);
                 }
                 
                 await _DbContext.SaveChangesAsync();

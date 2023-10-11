@@ -67,7 +67,7 @@ namespace Data_Egress_UI.Controllers
         public IActionResult GetEgress(EgressSubmission model)
         {
             
-            var egress = _dataClientHelper.CallAPI<EgressSubmission, EgressSubmission>("/api/DataEgress/DataOutApproval/", model).Result;
+            var egress = _dataClientHelper.CallAPI<EgressSubmission, EgressSubmission>("/api/DataEgress/CompleteEgress/", model).Result;
 
             return RedirectToAction("GetAllUnprocessedEgresses");
             

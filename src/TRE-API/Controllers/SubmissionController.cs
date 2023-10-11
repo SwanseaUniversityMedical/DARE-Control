@@ -20,8 +20,8 @@ using Newtonsoft.Json;
 
 namespace TRE_API.Controllers
 {
-    [Authorize(Roles = "dare-tre-admin")]
-    //[AllowAnonymous]
+    
+    
     [ApiController]
     [Route("api/[controller]")]
     public class SubmissionController : Controller
@@ -50,7 +50,7 @@ namespace TRE_API.Controllers
             _minioSettings = minioSettings;
         }
 
-
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("DAREUpdateSubmission")]
         public async void DAREUpdateSubmission(string trename, string tesId, string submissionStatus)
         {
@@ -59,7 +59,7 @@ namespace TRE_API.Controllers
         }
 
 
-
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("IsUserApprovedOnProject")]
         public BoolReturn IsUserApprovedOnProject(int projectId, int userId)
         {
@@ -70,6 +70,7 @@ namespace TRE_API.Controllers
             };
         }
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpGet]
         [Route("GetWaitingSubmissionsForTre")]
         [ValidateModelState]
@@ -81,8 +82,8 @@ namespace TRE_API.Controllers
             return StatusCode(200, result);
         }
 
-     
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpPost]
         [Route("UpdateStatusForTre")]
         [ValidateModelState]
@@ -167,7 +168,8 @@ namespace TRE_API.Controllers
             var boolResult = _dataEgressHelper.CallAPI<EgressSubmission, BoolReturn>("/api/DataEgress/AddNewDataEgress/", egsub).Result;
             return StatusCode(200, boolResult);
         }
-        [Authorize(Roles = "data-egress-admin,dare-tre-admin")]
+        
+        [Authorize(Roles = "dare-tre-admin,data-egress-admin")]
         [HttpPost]
         [Route("EgressResults")]
         [ValidateModelState]
@@ -218,6 +220,7 @@ namespace TRE_API.Controllers
             return StatusCode(200, copyResult);
         }
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpGet]
         [Route("DataOutApproval")]
         [ValidateModelState]
@@ -257,6 +260,7 @@ namespace TRE_API.Controllers
             _rabbit.Advanced.Publish(exch, RoutingConstants.FetchFile, false, new Message<FetchFileMQ>(message));
         }
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("SendSubmissionToHUTCH")]
         public IActionResult SendSubmissionToHUTCH(Dictionary<string, string> SubmissionData)
         {

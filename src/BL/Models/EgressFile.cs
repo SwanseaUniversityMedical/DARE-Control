@@ -18,6 +18,6 @@ namespace BL.Models
         public DateTime? LastUpdate { get; set; }
         public string? Reviewer { get; set; }
 
-        public virtual EgressSubmission EgressSubmission { get; set; }
+        public virtual EgressSubmission? EgressSubmission { get; set; }
     }
 }

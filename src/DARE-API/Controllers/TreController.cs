@@ -9,7 +9,7 @@ using BL.Models;
 
 namespace DARE_API.Controllers
 {
-    [Authorize(Roles = "dare-control-admin")]
+    
     [ApiController]
     [Route("api/[controller]")]
     public class TreController : Controller
@@ -25,7 +25,7 @@ namespace DARE_API.Controllers
 
         }
 
-
+        [Authorize(Roles = "dare-control-admin")]
         [HttpPost("SaveTre")]
         public async Task<Tre> SaveTre([FromBody] FormData data)
         {           

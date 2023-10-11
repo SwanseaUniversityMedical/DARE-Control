@@ -21,7 +21,7 @@ namespace DARE_API.Controllers
 {
 
     [Route("api/[controller]")]
-    [Authorize(Roles = "dare-control-admin")]
+    
     [ApiController]
     
 
@@ -42,7 +42,7 @@ namespace DARE_API.Controllers
 
         }
 
-
+        
         [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
         [HttpGet]
         [Route("GetWaitingSubmissionsForTre")]
@@ -279,6 +279,7 @@ namespace DARE_API.Controllers
 
         //}
 
+        [Authorize(Roles = "dare-control-admin")]
         [HttpPost("SaveSubmissionFiles")]
         public IActionResult SaveSubmissionFiles(int submissionId, List<SubmissionFile> submissionFiles)
         {

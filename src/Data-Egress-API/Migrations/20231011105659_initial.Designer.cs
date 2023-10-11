@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Data_Egress_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231010152727_initial")]
+    [Migration("20231011105659_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -36,7 +36,7 @@ namespace Data_Egress_API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("EgressSubmissionId")
+                    b.Property<int?>("EgressSubmissionId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("LastUpdate")
@@ -70,7 +70,6 @@ namespace Data_Egress_API.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("OutputBucket")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Reviewer")
@@ -80,7 +79,6 @@ namespace Data_Egress_API.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("SubmissionId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -96,6 +94,9 @@ namespace Data_Egress_API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CredentialType")
+                        .HasColumnType("integer");
+
                     b.Property<string>("PasswordEnc")
                         .IsRequired()
                         .HasColumnType("text");
@@ -106,16 +107,14 @@ namespace Data_Egress_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TreCredentials");
+                    b.ToTable("KeycloakCredentials");
                 });
 
             modelBuilder.Entity("BL.Models.EgressFile", b =>
                 {
                     b.HasOne("BL.Models.EgressSubmission", "EgressSubmission")
                         .WithMany("Files")
-                        .HasForeignKey("EgressSubmissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EgressSubmissionId");
 
                     b.Navigation("EgressSubmission");
                 });

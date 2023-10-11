@@ -19,7 +19,8 @@ namespace TRE_API.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserName = table.Column<string>(type: "text", nullable: false),
-                    PasswordEnc = table.Column<string>(type: "text", nullable: false)
+                    PasswordEnc = table.Column<string>(type: "text", nullable: false),
+                    CredentialType = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

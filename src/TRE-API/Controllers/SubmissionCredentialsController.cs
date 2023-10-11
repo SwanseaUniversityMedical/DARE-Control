@@ -12,7 +12,7 @@ using TRE_API.Repositories.DbContexts;
 namespace TRE_API.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(Roles = "dare-tre-admin")]
+    
     [ApiController]
     public class SubmissionCredentialsController : Controller
     {
@@ -30,12 +30,12 @@ namespace TRE_API.Controllers
             
         }
 
-        
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("CheckCredentialsAreValid")]
         public async Task<BoolReturn> CheckCredentialsAreValidAsync()
         {
             var result = new BoolReturn(){Result = false};
-            var creds = _DbContext.SubmissionCredentials.FirstOrDefault();
+            var creds = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Submission);
             if (creds != null)
             {
                 var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
@@ -47,6 +47,7 @@ namespace TRE_API.Controllers
             return result;
         }
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("UpdateCredentials")]
         public async Task<KeycloakCredentials> UpdateCredentials(KeycloakCredentials creds)
         {
@@ -62,22 +63,23 @@ namespace TRE_API.Controllers
                 }
                 
                 var add = true;
-                var dbcred = _DbContext.SubmissionCredentials.FirstOrDefault();
+                var dbcred = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Submission);
                 if (dbcred != null)
                 {
                     creds.Id = dbcred.Id;
+                    creds.CredentialType = CredentialType.Submission;
                     add = false;
                 }
 
                 creds.PasswordEnc = _encDecHelper.Encrypt(creds.PasswordEnc);
                 if (add)
                 {
-                    _DbContext.SubmissionCredentials.Add(creds);
+                    _DbContext.KeycloakCredentials.Add(creds);
                     
                 }
                 else
                 {
-                    _DbContext.SubmissionCredentials.Update(creds);
+                    _DbContext.KeycloakCredentials.Update(creds);
                 }
                 
                 await _DbContext.SaveChangesAsync();

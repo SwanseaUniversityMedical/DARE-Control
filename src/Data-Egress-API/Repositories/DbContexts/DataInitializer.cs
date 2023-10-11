@@ -29,13 +29,14 @@ namespace Data_Egress_API.Repositories.DbContexts
 
             try
             {
-                if (!_dbContext.TreCredentials.Any())
+                if (!_dbContext.KeycloakCredentials.Any(x => x.CredentialType == CredentialType.Tre))
                 {
 
 
-                    _dbContext.TreCredentials.Add(new KeycloakCredentials()
+                    _dbContext.KeycloakCredentials.Add(new KeycloakCredentials()
                     {
                         UserName = "sailegressapi",
+                        CredentialType = CredentialType.Tre,
                         PasswordEnc = _encDecHelper.Encrypt("password123")
                     });
                     _dbContext.SaveChanges();

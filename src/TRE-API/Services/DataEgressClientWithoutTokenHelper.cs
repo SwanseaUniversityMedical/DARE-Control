@@ -1,4 +1,5 @@
-﻿using BL.Models.Settings;
+﻿using BL.Models;
+using BL.Models.Settings;
 using BL.Services;
 using TRE_API.Repositories.DbContexts;
 
@@ -16,7 +17,7 @@ namespace TRE_API.Services
             CredDb = db;
             _keycloakTokenHelper = new KeycloakTokenHelper(settings.BaseUrl, settings.ClientId, settings.ClientSecret, settings.Proxy, settings.ProxyAddresURL);
 
-            var creds = db.SubmissionCredentials.FirstOrDefault();
+            var creds = db.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Egress);
             if (creds != null)
             {
                 _username = creds.UserName;
@@ -29,7 +30,7 @@ namespace TRE_API.Services
 
         public bool CheckCredsAreAvailable()
         {
-            return CredDb.SubmissionCredentials.Any();
+            return CredDb.KeycloakCredentials.Any(x => x.CredentialType == CredentialType.Egress);
         }
     }
 }

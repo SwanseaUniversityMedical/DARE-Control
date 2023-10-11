@@ -18,9 +18,9 @@ namespace Data_Egress_API.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    SubmissionId = table.Column<string>(type: "text", nullable: false),
+                    SubmissionId = table.Column<string>(type: "text", nullable: true),
                     Status = table.Column<int>(type: "integer", nullable: false),
-                    OutputBucket = table.Column<string>(type: "text", nullable: false),
+                    OutputBucket = table.Column<string>(type: "text", nullable: true),
                     Completed = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     Reviewer = table.Column<string>(type: "text", nullable: true)
                 },
@@ -30,17 +30,18 @@ namespace Data_Egress_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TreCredentials",
+                name: "KeycloakCredentials",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserName = table.Column<string>(type: "text", nullable: false),
-                    PasswordEnc = table.Column<string>(type: "text", nullable: false)
+                    PasswordEnc = table.Column<string>(type: "text", nullable: false),
+                    CredentialType = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TreCredentials", x => x.Id);
+                    table.PrimaryKey("PK_KeycloakCredentials", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -53,7 +54,7 @@ namespace Data_Egress_API.Migrations
                     Status = table.Column<int>(type: "integer", nullable: false),
                     LastUpdate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     Reviewer = table.Column<string>(type: "text", nullable: true),
-                    EgressSubmissionId = table.Column<int>(type: "integer", nullable: false)
+                    EgressSubmissionId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -62,8 +63,7 @@ namespace Data_Egress_API.Migrations
                         name: "FK_EgressFiles_EgressSubmissions_EgressSubmissionId",
                         column: x => x.EgressSubmissionId,
                         principalTable: "EgressSubmissions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -79,7 +79,7 @@ namespace Data_Egress_API.Migrations
                 name: "EgressFiles");
 
             migrationBuilder.DropTable(
-                name: "TreCredentials");
+                name: "KeycloakCredentials");
 
             migrationBuilder.DropTable(
                 name: "EgressSubmissions");

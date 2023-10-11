@@ -125,7 +125,18 @@ namespace BL.Services
                 if (method == HttpMethod.Delete) res = await apiClient.DeleteAsync(endPoint);
                 if (!res.IsSuccessStatusCode)
                 {
-                   throw new Exception("API Call Failure: " + res.StatusCode + ": " + res.ReasonPhrase);
+                    var stream =res.Content.ReadAsStream();
+                    string content = "";
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        // Read the stream content into a string
+                        content = reader.ReadToEnd();
+
+                        // Output the string content
+                        
+                    }
+                    Log.Information("{Function} Api returned an error Response {Res} Error content {Content}", "ClientHelperRequestAsync", res, content);
+                    throw new Exception("API Call Failure: " + res.StatusCode + ": " + res.ReasonPhrase + " " + content);
                 }
                 Log.Information("{Function} The response {res}", "ClientHelperRequestAsync", res);
                

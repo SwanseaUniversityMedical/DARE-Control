@@ -28,25 +28,27 @@ namespace TRE_API.Repositories.DbContexts
 
             try
             {
-                if (!_dbContext.SubmissionCredentials.Any())
+                if (!_dbContext.KeycloakCredentials.Any(x => x.CredentialType == CredentialType.Submission))
                 {
 
 
-                    _dbContext.SubmissionCredentials.Add(new KeycloakCredentials()
+                    _dbContext.KeycloakCredentials.Add(new KeycloakCredentials()
                     {
                         UserName = "sailtreapi",
+                        CredentialType = CredentialType.Submission,
                         PasswordEnc = _encDecHelper.Encrypt("password123")
                     });
                     _dbContext.SaveChanges();
                 }
 
-                if (!_dbContext.DataEgressCredentials.Any())
+                if (!_dbContext.KeycloakCredentials.Any(x => x.CredentialType == CredentialType.Egress))
                 {
 
 
-                    _dbContext.DataEgressCredentials.Add(new KeycloakCredentials()
+                    _dbContext.KeycloakCredentials.Add(new KeycloakCredentials()
                     {
                         UserName = "sailegressapi",
+                        CredentialType = CredentialType.Egress,
                         PasswordEnc = _encDecHelper.Encrypt("password123")
                     });
                     _dbContext.SaveChanges();
