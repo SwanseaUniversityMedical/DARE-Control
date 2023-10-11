@@ -6,14 +6,15 @@ using System.Text;
 using System.Threading.Tasks;
 using BL.Models;
 using BL.Models.ViewModels;
+using Microsoft.Extensions.Hosting;
 
 namespace Tre_Hasura
 {
     public interface IHasuraQuery
     {
-        void RunQuery(string token, string role, string Query);
+        void RunQuery(string token,  string Query);
     }
-    public class HasuraQuery : IHasuraQuery    
+    public class HasuraQuery : IHasuraQuery
     {
         private readonly ITREClientHelper _treclientHelper;
         public HasuraQuery(ITREClientHelper treClient)
@@ -22,18 +23,35 @@ namespace Tre_Hasura
             _treclientHelper = treClient;
         }
 
-        public void RunQuery(string token, string role, string Query)
+        public class Response
+        {
+            public string result { get; set; }
+           
+        }
+
+        public void RunQuery(string token, string Query)
         {
             //dont need to check token as Hasura does this 
             //make query
-            var paramlist = new Dictionary<string, string>
+
+            var Tokenparamlist = new Dictionary<string, string>
             {
-               { "token", token}
+               { "role", "select"}
             };
 
-            //string result = _treclientHelper.CallAPIWithoutModel<string>("/api/Hasura/RunQuery/", paramlist).Result.ToString();
+            var t = _treclientHelper.CallAPIWithoutModel<Response>("/api/HasuraAuthentication/GetNewToken/", Tokenparamlist).Result;
+            token = t.result;
 
-         
+
+            var paramlist = new Dictionary<string, string>
+            {
+               { "token", token},
+               { "Query", Query}
+            };
+
+            var result = _treclientHelper.CallAPIWithoutModel<Response>("/api/Hasura/RunQuery/", paramlist).Result;
+
+            
 
         }
     }

@@ -13,7 +13,7 @@ using TRE_API.Repositories.DbContexts;
 using TRE_API.Models;
 using TRE_API.Services;
 
-namespace TRE_TESK.Controllers
+namespace TRE_API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

@@ -24,7 +24,7 @@ using BL.Rabbit;
 using Microsoft.Extensions.Options;
 using EasyNetQ;
 using TRE_API.Models;
-using TREAgent.Services;
+using TREAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

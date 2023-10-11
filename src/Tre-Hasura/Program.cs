@@ -4,6 +4,7 @@ using Serilog;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Tre_Hasura;
 
 Console.WriteLine("Hello, World!");
 var configuration = GetConfiguration();
@@ -40,7 +41,7 @@ Serilog.ILogger CreateSerilogLogger(IConfiguration configuration)
 await Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
-
+        services.AddScoped<IHasuraQuery, HasuraQuery>();
     })
     .Build()
     .RunAsync();
@@ -61,3 +62,7 @@ IConfiguration GetConfiguration()
     return builder.Build();
 }
 
+static void Main(string[] args)
+{
+    Console.WriteLine("Hello, World!");
+}

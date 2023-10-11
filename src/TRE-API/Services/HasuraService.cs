@@ -1,17 +1,18 @@
 ﻿using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 using TRE_API.Models;
 using TRE_API.Repositories.DbContexts;
 using TREAgent.Repositories;
 
-namespace TREAgent.Services
+namespace TREAPI.Services
 {
 
     public interface IHasuraService
     {
-        public Task Run();
-        public Task<string> QueryData(string token);
+        public Task Run();   
+        public Task<string> ExecuteQuery(string Token, string Query);
     }
 
     public class HasuraService : IHasuraService
@@ -206,9 +207,9 @@ namespace TREAgent.Services
             {
                 var Result = await HttpClient(endpointUrl, payload);
 
-                var strign = await Result.Content.ReadAsStringAsync();
+                var Content = await Result.Content.ReadAsStringAsync();
 
-                var data = JsonConvert.DeserializeObject<ReturnData>(strign);
+                var data = JsonConvert.DeserializeObject<ReturnData>(Content);
 
                 return data.result;
 
@@ -359,6 +360,33 @@ namespace TREAgent.Services
             }
         }
 
+        public async Task<string> ExecuteQuery(string Token, string Query)
+        {
+            
+            // Set the endpoint URL
+            string endpointUrl = _hasuraSettings.HasuraURL + "/v2/query";
+            try
+            {
+                var Result = await HttpClient(endpointUrl, Query);
+
+                var Content = await Result.Content.ReadAsStringAsync();
+
+                var data = JsonConvert.DeserializeObject<ReturnData>(Content);
+
+                return data.result.ToString();
+
+            }
+            catch (Exception ex)
+            {
+                //Log.Error(ex.Message);
+
+            }
+
+            return "";
+
+        }
+
+
         public async Task<HttpResponseMessage> HttpClient(string endpointUrl, string payload, bool doto = false)
         {
             HttpResponseMessage response = null;
@@ -395,10 +423,7 @@ namespace TREAgent.Services
             return response;
         }
 
-        public async Task<string> QueryData(string token)
-        {
-            return "";
-        }
+ 
 
     }
 }
