@@ -14,6 +14,8 @@ using BL.Rabbit;
 using Microsoft.AspNetCore.SignalR;
 using System.Reflection;
 using System.ComponentModel.DataAnnotations;
+using System.Numerics;
+using System.Xml.Linq;
 
 namespace DARE_API.Controllers
 {
@@ -198,8 +200,21 @@ namespace DARE_API.Controllers
                 StatusType.RequestCancellation,
                 StatusType.CancellationRequestSent,
                 StatusType.CancellingChildren,
-                StatusType.Cancelled,
-                StatusType.PodProcessingFailed
+                //StatusType.Cancelled,
+                StatusType.PodProcessingFailed,
+                StatusType.WaitingForCrate,
+                StatusType.FetchingCrate,
+                StatusType.Queued,
+                StatusType.ValidatingCrate,
+                StatusType.FetchingWorkflow,
+                StatusType.StagingWorkflow,
+                StatusType.ExecutingWorkflow,
+                StatusType.PreparingOutputs,
+                StatusType.DataOutRequested,
+                StatusType.TransferredForDataOut,
+                StatusType.PackagingApprovedResults,
+                StatusType.Complete,
+                StatusType.Failure
 
             };
             Dictionary<int, List<StatusType>> stage3Dict = new Dictionary<int, List<StatusType>>();

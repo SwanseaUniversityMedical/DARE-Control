@@ -20,6 +20,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
+using BL.Services;
+using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json.Linq;
 using TREAgent.Repositories;
 using System.Net.Http.Json;
@@ -64,6 +66,8 @@ namespace TRE_API
             _hasuraAuthenticationService = hasuraAuthenticationService;
             _dareHelper = dareHelper;
             _AgentSettings = AgentSettings;
+            _minioSettings = minioSettings;
+            _minioHelper = minioHelper;
         }
 
         public async Task testing()
@@ -307,9 +311,9 @@ namespace TRE_API
                     Log.Information("Submission: {submission}", aSubmission);
 
                     
-                    
+
                     // Check user is allowed ont he project
-                    if ( ! _subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
+                    if (_subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
                     {
                         Log.Error("User {UserID}/project {ProjectId} is not value for this submission {submission}", aSubmission.SubmittedBy.Id, aSubmission.Project.Id, aSubmission);
                         // record error with submission layer
@@ -318,7 +322,26 @@ namespace TRE_API
                     else
                     {
 
-                        //TODO: Mahadi copy from submission input bucket to tre input bucket
+
+                        
+                        try
+                        {
+                            Uri uri = new Uri(aSubmission.DockerInputLocation);
+                            string fileName = Path.GetFileName(uri.LocalPath);
+                            var sourceBucket = aSubmission.Project.SubmissionBucket;
+                            var subProj = _dbContext.Projects.Where(x => x.SubmissionProjectId == aSubmission.Project.Id);
+                            foreach (var proj in subProj)
+                            {
+                                var destinationBucket = proj.SubmissionBucketTre;
+                                var copyResult = _minioHelper.CopyObject(_minioSettings, sourceBucket, destinationBucket, fileName, fileName);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+
+                            throw;
+                        }
+                        
                         // The TES message
                         var tesMessage = JsonConvert.DeserializeObject<TesTask>(aSubmission.TesJson);
                         var processedOK = true;

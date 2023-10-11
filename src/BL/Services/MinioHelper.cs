@@ -209,6 +209,20 @@ namespace BL.Services
             }
         }
 
+        public async Task<bool> RabbitExternalObject(string msgBytes)
+        {
+            var FileInfo= JsonConvert.DeserializeObject<FetchFileMQ>(msgBytes);
+            if (FileInfo == null)
+            {
+                return false;
+            }
+            else
+            {
+                await FetchAndStoreObject(FileInfo.Url, _minioSettings, FileInfo.BucketName, FileInfo.Key);
+                return true;
+            }
+        }
+
         public async Task<bool> CreateBucketPolicy(string bucketName)
         {
 
