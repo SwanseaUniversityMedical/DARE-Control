@@ -44,6 +44,11 @@
             <div class="col-md-4">
                 @using (Html.BeginForm("EditProject", "Approval", FormMethod.Post, new { id = "frmMain" }))
                 {
+                    <h2 class="fs-5 mt-5">Local Name</h2>
+                    <p>The name of the project being used by your organisation.</p>
+                    <div class="form-group">
+                        @Html.TextBoxFor(x => x.LocalProjectName, new { @class = "form-control"})
+                    </div>
                     <h2 class="fs-5 mt-5">Decision</h2>
                     <div id="radio-decision" class="form-group">
                         @Html.HiddenFor(x => x.Id)
@@ -68,21 +73,16 @@
                     <div class="db-cred">
                         <h2 class="fs-5 mt-5">Database Credentials</h2>
                         <p>Please enter the credentials for the database you will allow queries for this project to run against.</p>
-                        <div class="form-group">
-                            @Html.LabelFor(x => x.LocalProjectName, new { @class = "form-label"})
-                            @Html.TextBoxFor(x => x.LocalProjectName, new { @class = "form-control"})
-                        </div>
+                        
                         <div class="form-group">
                             @Html.LabelFor(x => x.UserName, new { @class = "form-label"})
-                            @Html.TextBoxFor(x => x.UserName, new { @class = "form-control"})
+                            @Html.TextBoxFor(x => x.UserName, new { @class = "form-control", autofocus = "false"})
                         </div>
                         <div class="form-group">
                             @Html.LabelFor(x => x.Password, new { @class = "form-label"})
                             @Html.PasswordFor(x => x.Password, new { @class = "form-control"})
                         </div>
                     </div>
-                    
-                    
                     <div class="form-group mb-5">
                         @Html.ValidationSummary(false, "", new { @class = "text-danger" })
                     </div>
