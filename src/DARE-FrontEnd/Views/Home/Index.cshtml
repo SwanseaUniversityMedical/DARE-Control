@@ -3,6 +3,8 @@
 @{
     var getAllProj = @ViewBag.getAllProj;
     var getAllSubs = @ViewBag.getAllSubs;
+    var getAllUsers = @ViewBag.getAllUsers;
+    var getAllTres = @ViewBag.getAllTres;
 
 }
 @if (User.IsInRole("dare-control-admin"))
@@ -155,7 +157,7 @@ else
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <h4 class="m-0 text-dark fs-5">People</h4>
-                            <span class="badge bg-dark-blue rounded-pill">X</span>
+                            <span class="badge bg-dark-blue rounded-pill">@getAllUsers</span>
                         </div>
                     </div>
                 </a>
@@ -167,7 +169,7 @@ else
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <h4 class="m-0 text-dark fs-5">TREs</h4>
-                            <span class="badge bg-dark-blue rounded-pill">X</span>
+                            <span class="badge bg-dark-blue rounded-pill">@getAllTres</span>
                         </div>
                     </div>
                 </a>

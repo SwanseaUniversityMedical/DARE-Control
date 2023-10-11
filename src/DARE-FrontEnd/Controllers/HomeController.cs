@@ -28,8 +28,16 @@ namespace DARE_FrontEnd.Controllers
         {
             var getAllProj = _clientHelper.CallAPIWithoutModel< List<Project>>("/api/Project/GetAllProjects").Result;
             ViewBag.getAllProj = getAllProj.Count;
+
             var getAllSubs = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions").Result;
             ViewBag.getAllSubs = getAllSubs.Count;
+
+            var getAllUsers = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers").Result;
+            ViewBag.getAllUsers = getAllUsers.Count;
+
+            var getAllTres = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Tre/GetAllTres").Result;
+            ViewBag.getAllTres = getAllTres.Count;
+
             return View();
         }
         public IActionResult TermsAndConditions()
