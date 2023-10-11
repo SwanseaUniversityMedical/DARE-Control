@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using BL;
 using System.Reflection.Metadata.Ecma335;
 
 namespace TRE_API.Controllers
@@ -11,7 +12,7 @@ namespace TRE_API.Controllers
         public string RunQuery(string token)
         {
 
-            // return _hasuraAuthenticationService.GetNewToken(role);
+           
             return "";
 
         }
