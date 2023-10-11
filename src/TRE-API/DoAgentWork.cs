@@ -48,16 +48,17 @@ namespace TRE_API
         private readonly IHasuraAuthenticationService _hasuraAuthenticationService;
         private readonly IDareClientWithoutTokenHelper _dareHelper;
         private readonly AgentSettings _AgentSettings;
-
-
-
+        private readonly MinioSettings _minioSettings;
+        private readonly IMinioHelper _minioHelper;
 
         public DoAgentWork(IServiceProvider serviceProvider,
             ApplicationDbContext dbContext,
             ISubmissionHelper subHelper,
             IHasuraAuthenticationService hasuraAuthenticationService,
             IDareClientWithoutTokenHelper dareHelper,
-            AgentSettings AgentSettings
+            AgentSettings AgentSettings,
+            MinioSettings minioSettings,
+            IMinioHelper minioHelper
             )
         {
             _serviceProvider = serviceProvider;
