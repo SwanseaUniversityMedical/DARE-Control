@@ -1,7 +1,12 @@
 {
   "profiles": {
     "Tre-Hasura": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:51111;http://localhost:52222"
     },
     "Docker": {
       "commandName": "Docker"
