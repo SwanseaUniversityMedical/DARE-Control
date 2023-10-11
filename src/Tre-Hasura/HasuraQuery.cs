@@ -31,7 +31,7 @@ namespace Tre_Hasura
                { "token", token}
             };
 
-            string result = _treclientHelper.CallAPIWithoutModel<string>("/api/Hasura/RunQuery/", paramlist).Result.ToString();
+            //string result = _treclientHelper.CallAPIWithoutModel<string>("/api/Hasura/RunQuery/", paramlist).Result.ToString();
 
          
 

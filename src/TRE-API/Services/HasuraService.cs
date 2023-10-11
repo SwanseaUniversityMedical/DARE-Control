@@ -395,7 +395,7 @@ namespace TREAgent.Services
             return response;
         }
 
-        Task<string> QueryData(string token)
+        public async Task<string> QueryData(string token)
         {
             return "";
         }
