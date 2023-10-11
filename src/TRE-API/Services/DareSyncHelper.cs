@@ -1,10 +1,19 @@
 ﻿using BL.Models.APISimpleTypeReturns;
 using BL.Models;
+using BL.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using TRE_API.Repositories.DbContexts;
 using BL.Models.ViewModels;
 using BL.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using EasyNetQ.Management.Client.Model;
+using static Npgsql.PostgresTypes.PostgresCompositeType;
+using System.Runtime.Intrinsics.X86;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Sentry;
 
 namespace TRE_API.Services
 {
@@ -20,6 +29,7 @@ namespace TRE_API.Services
             _dareclientHelper = dareClient;
             _minioSettings = minioSettings;
             _minioHelper = minioHelper;
+
         }
 
         public async Task<BoolReturn> SyncSubmissionWithTre()
@@ -150,6 +160,115 @@ namespace TRE_API.Services
                 Result = true
             };
 
+        }
+
+        public async Task<ProjectTreDecision> ProcessSubmissionIdList()
+        {
+
+            var dbprojs = _DbContext.Projects.ToList();
+            var subprojs = await _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForTre");
+
+            //adds every projectid to a list
+            List<int> submissionProjectIdList = new List<int>();
+            foreach (var projs in dbprojs)
+            {
+                submissionProjectIdList.Add(projs.SubmissionProjectId);
+            }
+            //goes through each item in the id list and gets the user name of the person
+            //foreach (var item in submissionProjectIdList)
+            //{
+            //    var submissionLayerProj = subprojs.Where(x => item == x.Id);
+
+            //    var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+            //    var submissionTre = _DbContext.User.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
+            //    if (submissionTre == null)
+            //    {
+            //        return submissionTre == false;
+            //    }
+            //    return submissionTre;
+
+            //}
+            //sees if there is an existing record matching 
+            var projTreDecisionProj = _DbContext.ProjectTreDecisions.ToList();
+
+            //var submissionProjects = projTreDecisionProj.Select(x => x.Id).Distinct();
+
+            var submissionProjectsAdds = projTreDecisionProj.Where(x => !_DbContext.ProjectTreDecisions.Any(y => y.SubmissionProj.Id == x.Id));
+            var submissionProjectsAdds1 = projTreDecisionProj.Where(x => !_DbContext.ProjectTreDecisions.Any(y => y.Tre.Id == x.Id));
+
+            var treAndProj = submissionProjectsAdds.Intersect(submissionProjectsAdds1);
+
+            foreach (var projects in treAndProj)
+            {
+
+                _DbContext.ProjectTreDecisions.Add(new ProjectTreDecision()
+                {
+                    Id = projects.Id,
+                    Decision = projects.Decision
+                });
+            }
+
+            return null;
+
+        }
+
+        public async Task<ProjectTreDecision> ProcessTreMembershipDecision()
+        {
+            var subprojs = await _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForTre");
+            var dbmembers = _DbContext.MembershipDecisions.ToList();
+
+            //gets the submissionuserid
+            List<int> submissionUserIdList = new List<int>();
+            foreach (var users in dbmembers)
+            {
+                submissionUserIdList.Add(users.Id);
+            }
+            //gets the submissionprojectid
+            List<int> submissionProjectId = new List<int>();
+            foreach (var projs in dbmembers)
+            {
+                submissionProjectId.Add(projs.Id);
+            }
+
+            var projectUserPairs = subprojs
+                 .SelectMany(project => project.Users, (project, user) => new
+                 {
+                     ProjectId = project.Id,
+                     UserId = user.Id
+                 }).ToList();
+            var memberAdds = projectUserPairs.Where(x => !_DbContext.MembershipDecisions.Any(y =>
+                y.Project.SubmissionProjectId == x.ProjectId && y.User.SubmissionUserId == x.UserId));
+            var memberArchives = dbmembers.Where(x =>
+                !projectUserPairs.Any(y =>
+                    y.ProjectId == x.Project.SubmissionProjectId && y.UserId == x.User.SubmissionUserId));
+            var memberUnarchives = dbmembers.Where(x =>
+                x.Archived && projectUserPairs.Any(y =>
+                    y.ProjectId == x.Project.SubmissionProjectId && y.UserId == x.User.SubmissionUserId));
+
+            foreach (var memberAdd in memberAdds)
+            {
+                var project = _DbContext.Projects.First(x => x.SubmissionProjectId == memberAdd.ProjectId);
+                var user = _DbContext.Users.First(x => x.SubmissionUserId == memberAdd.UserId);
+                _DbContext.MembershipDecisions.Add(new TreMembershipDecision()
+                {
+                    User = user,
+                    Project = project
+                });
+            }
+
+            foreach (var treMembershipDecision in memberArchives)
+            {
+                treMembershipDecision.Archived = true;
+            }
+
+            foreach (var treMembershipDecision in memberUnarchives)
+            {
+                treMembershipDecision.Archived = false;
+            }
+
+            await _DbContext.SaveChangesAsync();
+
+            return null;
         }
     }
 }
