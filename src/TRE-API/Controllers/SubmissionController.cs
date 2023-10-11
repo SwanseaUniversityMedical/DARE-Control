@@ -17,6 +17,8 @@ using EasyNetQ.Management.Client.Model;
 using BL.Rabbit;
 using EasyNetQ;
 using Newtonsoft.Json;
+using System;
+using Amazon.Runtime.Internal.Transform;
 
 namespace TRE_API.Controllers
 {
@@ -66,7 +68,7 @@ namespace TRE_API.Controllers
 
             return new BoolReturn()
             {
-                Result = _subHelper.IsUserApprovedOnProject(projectId,userId)
+                Result = _subHelper.IsUserApprovedOnProject(projectId, userId)
             };
         }
 
@@ -78,7 +80,7 @@ namespace TRE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(List<Submission>), description: "")]
         public virtual IActionResult GetWaitingSubmissionsForTre()
         {
-            var result =_subHelper.GetWaitingSubmissionForTre();
+            var result = _subHelper.GetWaitingSubmissionForTre();
             return StatusCode(200, result);
         }
 
@@ -103,18 +105,7 @@ namespace TRE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
         public IActionResult GetOutputBucketInfo(string subId)
         {
-            var outputBucket = GetOutputBucketGuts(subId);
-            var status = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-                new Dictionary<string, string>()
-                {
-                    { "tesId", outputBucket.TesId }, { "statusType", StatusType.PodProcessingComplete.ToString() },
-                    { "description", "" }
-                }).Result;
-            return StatusCode(200, outputBucket.OutputBucket);
-        }
-
-        private OutputBucketInfo GetOutputBucketGuts(string subId)
-        {
+            var outputFolder = "";
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("submissionId", subId.ToString());
             var submission = _dareHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist)
@@ -124,20 +115,24 @@ namespace TRE_API.Controllers
                 .Where(x => x.SubmissionProjectId == submission.Project.Id)
                 .Select(x =>  x.OutputBucketTre );
 
-            return new OutputBucketInfo()
+            var outputBucket = bucket.FirstOrDefault().OutputBucketTre;
+
+            var isFolderExists = _minioHelper.FolderExists(_minioSettings, outputBucket.ToString(), "sub" + subId).Result;
+            if (!isFolderExists)
             {
-                OutputBucket = bucket.FirstOrDefault(),
-                TesId = submission.TesId
-            };
+                var submissionFolder = _minioHelper.CreateFolder(_minioSettings, outputBucket.ToString(), "sub" + subId).Result;
+            }
 
+            outputFolder = outputBucket.ToString() + "/" + "sub" + subId;
 
+            var status = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
+                new Dictionary<string, string>()
+                {
+                    { "tesId", submission.TesId }, { "statusType", StatusType.PodProcessingComplete.ToString() },
+                    { "description", "" }
+                }).Result;
 
-        }
-
-        private class OutputBucketInfo
-        {
-            public string TesId { get; set; }
-            public string OutputBucket { get; set; }
+            return StatusCode(200, outputFolder);
         }
 
         [Authorize(Roles = "dare-hutch-admin,dare-tre-admin")]
@@ -200,9 +195,24 @@ namespace TRE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
         public IActionResult FinalOutcome([FromBody] FinalOutcome outcome)
         {
-            //Need to figure out these
-            var sourceBucket = "";
-            var destinationBucket = "";
+
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("submissionId", outcome.subId.ToString());
+            var submission = _dareHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist)
+                .Result;
+
+            var bucket = _dbContext.Projects
+                .Where(x => x.SubmissionProjectId == submission.Project.Id)
+                .Select(x => new { x.OutputBucketTre });
+
+            var sourceBucket = bucket.FirstOrDefault().OutputBucketTre;
+
+            var paramlist2 = new Dictionary<string, string>();
+            paramlist2.Add("projectId", submission.Project.Id.ToString());
+            var project = _dareHelper.CallAPIWithoutModel<Project?>(
+                "/api/Project/GetProject/", paramlist2).Result;
+
+            var destinationBucket = project.OutputBucket;
 
             //For me to code
             var statusParams = new Dictionary<string, string>()
@@ -215,7 +225,7 @@ namespace TRE_API.Controllers
             var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams);
 
             //Copy file to output bucket
-            var copyResult = _minioHelper.CopyObject(_minioSettings, sourceBucket, destinationBucket, outcome.file, outcome.file);
+            var copyResult = _minioHelper.CopyObject(_minioSettings, sourceBucket, destinationBucket, "sub" + outcome.subId+"/" + outcome.file, "sub" + outcome.subId + "/" + outcome.file);
 
             return StatusCode(200, copyResult);
         }
