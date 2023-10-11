@@ -105,6 +105,26 @@ namespace TRE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
         public IActionResult GetOutputBucketInfo(string subId)
         {
+            var outputFolder = GetOutputBucketGuts(subId);
+
+            var status = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
+                new Dictionary<string, string>()
+                {
+                    { "tesId", outputFolder.TesId }, { "statusType", StatusType.PodProcessingComplete.ToString() },
+                    { "description", "" }
+                }).Result;
+
+            return StatusCode(200, outputFolder);
+        }
+
+        private class OutputBucketInfo
+        {
+            public string TesId { get; set; }
+            public string OutputBucket { get; set; }
+        }
+
+        private OutputBucketInfo GetOutputBucketGuts(string subId)
+        {
             var outputFolder = "";
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("submissionId", subId.ToString());
@@ -113,9 +133,9 @@ namespace TRE_API.Controllers
 
             var bucket = _dbContext.Projects
                 .Where(x => x.SubmissionProjectId == submission.Project.Id)
-                .Select(x =>  x.OutputBucketTre );
+                .Select(x => x.OutputBucketTre);
 
-            var outputBucket = bucket.FirstOrDefault().OutputBucketTre;
+            var outputBucket = bucket.FirstOrDefault();
 
             var isFolderExists = _minioHelper.FolderExists(_minioSettings, outputBucket.ToString(), "sub" + subId).Result;
             if (!isFolderExists)
@@ -124,15 +144,11 @@ namespace TRE_API.Controllers
             }
 
             outputFolder = outputBucket.ToString() + "/" + "sub" + subId;
-
-            var status = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-                new Dictionary<string, string>()
-                {
-                    { "tesId", submission.TesId }, { "statusType", StatusType.PodProcessingComplete.ToString() },
-                    { "description", "" }
-                }).Result;
-
-            return StatusCode(200, outputFolder);
+            return new OutputBucketInfo()
+            {
+                OutputBucket = outputFolder,
+                TesId = submission.TesId
+            };
         }
 
         [Authorize(Roles = "dare-hutch-admin,dare-tre-admin")]
