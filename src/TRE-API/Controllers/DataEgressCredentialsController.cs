@@ -12,22 +12,21 @@ using TRE_API.Repositories.DbContexts;
 namespace TRE_API.Controllers
 {
     [Route("api/[controller]")]
-    
     [ApiController]
-    public class SubmissionCredentialsController : Controller
+    public class DataEgressCredentialsController : Controller
     {
 
         private readonly ApplicationDbContext _DbContext;
         private readonly IEncDecHelper _encDecHelper;
-        private readonly KeycloakTokenHelper _keycloakTokenHelper;
+        public KeycloakTokenHelper _keycloakTokenHelper { get; set; }
+        
 
-        public SubmissionCredentialsController(ApplicationDbContext applicationDbContext, IEncDecHelper encDec, SubmissionKeyCloakSettings keycloakSettings)
+        public DataEgressCredentialsController(ApplicationDbContext applicationDbContext, IEncDecHelper encDec, DataEgressKeyCloakSettings keycloakSettings)
         {
             _encDecHelper = encDec;
             _DbContext = applicationDbContext;
             _keycloakTokenHelper = new KeycloakTokenHelper(keycloakSettings.BaseUrl, keycloakSettings.ClientId,
                 keycloakSettings.ClientSecret, keycloakSettings.Proxy, keycloakSettings.ProxyAddresURL);
-            
         }
 
         [Authorize(Roles = "dare-tre-admin")]
@@ -35,7 +34,7 @@ namespace TRE_API.Controllers
         public async Task<BoolReturn> CheckCredentialsAreValidAsync()
         {
             var result = new BoolReturn(){Result = false};
-            var creds = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Submission);
+            var creds = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Egress);
             if (creds != null)
             {
                 var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
@@ -63,11 +62,11 @@ namespace TRE_API.Controllers
                 }
                 
                 var add = true;
-                var dbcred = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Submission);
+                var dbcred = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Egress);
                 if (dbcred != null)
                 {
                     creds.Id = dbcred.Id;
-                    creds.CredentialType = CredentialType.Submission;
+                    creds.CredentialType = CredentialType.Egress;
                     add = false;
                 }
 

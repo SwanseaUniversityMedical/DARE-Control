@@ -22,15 +22,15 @@ using Amazon.Runtime.Internal.Transform;
 
 namespace TRE_API.Controllers
 {
-    [Authorize(Roles = "dare-tre-agent")]
-    //[AllowAnonymous]
+    
+    
     [ApiController]
     [Route("api/[controller]")]
     public class SubmissionController : Controller
     {
         private readonly ISignalRService _signalRService;
         private readonly IDareClientWithoutTokenHelper _dareHelper;
-        private readonly IDataEgressClientHelper _dataEgressHelper;
+        private readonly IDataEgressClientWithoutTokenHelper  _dataEgressHelper;
         private readonly IHutchClientHelper _hutchHelper;
         private readonly ApplicationDbContext _dbContext;
         private readonly IBus _rabbit;
@@ -39,7 +39,7 @@ namespace TRE_API.Controllers
         private readonly MinioSettings _minioSettings;
 
         public SubmissionController(ISignalRService signalRService, IDareClientWithoutTokenHelper helper,
-            ApplicationDbContext dbContext, IBus rabbit, ISubmissionHelper subHelper, IDataEgressClientHelper egressHelper, IHutchClientHelper hutchClientHelper, IMinioHelper minioHelper, MinioSettings minioSettings)
+            ApplicationDbContext dbContext, IBus rabbit, ISubmissionHelper subHelper, IDataEgressClientWithoutTokenHelper egressHelper, IHutchClientHelper hutchClientHelper, IMinioHelper minioHelper, MinioSettings minioSettings)
         {
             _signalRService = signalRService;
             _dareHelper = helper;
@@ -52,7 +52,7 @@ namespace TRE_API.Controllers
             _minioSettings = minioSettings;
         }
 
-
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("DAREUpdateSubmission")]
         public async void DAREUpdateSubmission(string trename, string tesId, string submissionStatus)
         {
@@ -61,7 +61,7 @@ namespace TRE_API.Controllers
         }
 
 
-
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("IsUserApprovedOnProject")]
         public BoolReturn IsUserApprovedOnProject(int projectId, int userId)
         {
@@ -72,6 +72,7 @@ namespace TRE_API.Controllers
             };
         }
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpGet]
         [Route("GetWaitingSubmissionsForTre")]
         [ValidateModelState]
@@ -84,7 +85,7 @@ namespace TRE_API.Controllers
         }
 
 
-
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpPost]
         [Route("UpdateStatusForTre")]
         [ValidateModelState]
@@ -96,12 +97,33 @@ namespace TRE_API.Controllers
             return StatusCode(200, result);
         }
 
+        [Authorize(Roles = "dare-hutch-admin,dare-tre-admin")]
         [HttpGet]
         [Route("GetOutputBucketInfo")]
         [ValidateModelState]
         [SwaggerOperation("GetOutputBucketInfo")]
         [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
         public IActionResult GetOutputBucketInfo(string subId)
+        {
+            var outputFolder = GetOutputBucketGuts(subId);
+
+            var status = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
+                new Dictionary<string, string>()
+                {
+                    { "tesId", outputFolder.TesId }, { "statusType", StatusType.PodProcessingComplete.ToString() },
+                    { "description", "" }
+                }).Result;
+
+            return StatusCode(200, outputFolder);
+        }
+
+        private class OutputBucketInfo
+        {
+            public string TesId { get; set; }
+            public string OutputBucket { get; set; }
+        }
+
+        private OutputBucketInfo GetOutputBucketGuts(string subId)
         {
             var outputFolder = "";
             var paramlist = new Dictionary<string, string>();
@@ -111,9 +133,9 @@ namespace TRE_API.Controllers
 
             var bucket = _dbContext.Projects
                 .Where(x => x.SubmissionProjectId == submission.Project.Id)
-                .Select(x => new { x.OutputBucketTre });
+                .Select(x => x.OutputBucketTre);
 
-            var outputBucket = bucket.FirstOrDefault().OutputBucketTre;
+            var outputBucket = bucket.FirstOrDefault();
 
             var isFolderExists = _minioHelper.FolderExists(_minioSettings, outputBucket.ToString(), "sub" + subId).Result;
             if (!isFolderExists)
@@ -122,17 +144,14 @@ namespace TRE_API.Controllers
             }
 
             outputFolder = outputBucket.ToString() + "/" + "sub" + subId;
-
-            var status = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-                new Dictionary<string, string>()
-                {
-                    { "tesId", submission.TesId }, { "statusType", StatusType.PodProcessingComplete.ToString() },
-                    { "description", "" }
-                }).Result;
-
-            return StatusCode(200, outputFolder);
+            return new OutputBucketInfo()
+            {
+                OutputBucket = outputFolder,
+                TesId = submission.TesId
+            };
         }
 
+        [Authorize(Roles = "dare-hutch-admin,dare-tre-admin")]
         [HttpPost]
         [Route("FilesReadyForReview")]
         [ValidateModelState]
@@ -140,10 +159,28 @@ namespace TRE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
         public IActionResult FilesReadyForReview([FromBody] ReviewFiles review)
         {
-            var submission = _dataEgressHelper.CallAPI<ReviewFiles, Submission>("/api/DataEgress/AddNewDataEgress/", review).Result;
-            return StatusCode(200, submission);
-        }
 
+            var egsub = new EgressSubmission()
+            {
+                SubmissionId = review.subId,
+                OutputBucket = GetOutputBucketGuts(review.subId).OutputBucket,
+                Status = EgressStatus.NotCompleted, 
+                Files = new List<EgressFile>()
+            };
+
+            foreach (var reviewFile in review.files)
+            {
+                egsub.Files.Add(new EgressFile()
+                {
+                    Name = reviewFile,
+                    Status = FileStatus.Undecided
+                });
+            }
+            var boolResult = _dataEgressHelper.CallAPI<EgressSubmission, BoolReturn>("/api/DataEgress/AddNewDataEgress/", egsub).Result;
+            return StatusCode(200, boolResult);
+        }
+        
+        [Authorize(Roles = "dare-tre-admin,data-egress-admin")]
         [HttpPost]
         [Route("EgressResults")]
         [ValidateModelState]
@@ -166,6 +203,7 @@ namespace TRE_API.Controllers
             return StatusCode(200, HUTCHres);
         }
 
+        [Authorize(Roles = "dare-hutch-admin,dare-tre-admin")]
         [HttpPost]
         [Route("FinalOutcome")]
         [ValidateModelState]
@@ -208,6 +246,7 @@ namespace TRE_API.Controllers
             return StatusCode(200, copyResult);
         }
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpGet]
         [Route("DataOutApproval")]
         [ValidateModelState]
@@ -247,6 +286,7 @@ namespace TRE_API.Controllers
             _rabbit.Advanced.Publish(exch, RoutingConstants.FetchFile, false, new Message<FetchFileMQ>(message));
         }
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("SendSubmissionToHUTCH")]
         public IActionResult SendSubmissionToHUTCH(Dictionary<string, string> SubmissionData)
         {

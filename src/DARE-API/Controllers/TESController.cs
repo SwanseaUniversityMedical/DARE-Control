@@ -22,7 +22,7 @@ using Microsoft.AspNetCore.Http;
 namespace DARE_API.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize]
+    
     [ApiController]
     /// <summary>
     /// API endpoints for <see cref="TesTask"/>s.
@@ -63,6 +63,7 @@ namespace DARE_API.Controllers
         /// <param name="cancellationToken">A<see cref="CancellationToken"/> for controlling the lifetime of the asynchronous operation.</param>
         /// <response code="200"></response>
         [HttpPost]
+        [Authorize]
         [Route("/v1/tasks/{id}:cancel")]
         [ValidateModelState]
         [SwaggerOperation("CancelTask")]
@@ -132,6 +133,7 @@ namespace DARE_API.Controllers
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> for controlling the lifetime of the asynchronous operation.</param>
         /// <response code="200"></response>
         [HttpPost]
+        [Authorize]
         [Route("/v1/tasks")]
         [ValidateModelState]
         [SwaggerOperation("CreateTask")]

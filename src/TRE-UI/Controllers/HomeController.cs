@@ -31,6 +31,12 @@ namespace TRE_UI.Controllers
                
                 return RedirectToAction("UpdateCredentials", "SubmissionCredentials");
             }
+            alreadyset = await _treClientHelper.CallAPIWithoutModel<BoolReturn>("/api/DataEgressCredentials/CheckCredentialsAreValid");
+            if (!alreadyset.Result)
+            {
+
+                return RedirectToAction("UpdateCredentials", "DataEgressCredentials");
+            }
             return View();
         }
      

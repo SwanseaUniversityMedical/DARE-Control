@@ -4,14 +4,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BL.Models
 {
-    public class SubmissionCredentials: BaseModel
+    public class KeycloakCredentials: BaseModel
     {
         public int Id { get; set; }
 
-        [DisplayName("Enter Submission Keycloak username")]
+        [DisplayName("Enter Keycloak username")]
         [Required(ErrorMessage = "Username is required.")]
         public string UserName { get; set; }
-        [DisplayName("Enter Submission Keycloak password")]
+        [DisplayName("Enter Keycloak password")]
         [Required(ErrorMessage = "Password is required.")]
         public string PasswordEnc { get; set; }
 
@@ -20,8 +20,19 @@ namespace BL.Models
         [Compare("PasswordEnc", ErrorMessage = "Confirm password doesn't match, Type again!")]
         public string ConfirmPassword { get; set; }
 
+        public CredentialType CredentialType { get; set; }
+
         [NotMapped]
         
         public bool Valid { get; set; }
     }
+
+    public enum CredentialType
+    {
+        Submission =0,
+        Tre = 1,
+        Egress = 2
+    }
+
+    
 }
