@@ -10,7 +10,7 @@ using BL.Models.APISimpleTypeReturns;
 
 namespace Data_Egress_UI.Controllers
 {
-    //[Authorize(Roles = "data-egress-admin")]
+    [Authorize(Roles = "data-egress-admin")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -37,21 +37,28 @@ namespace Data_Egress_UI.Controllers
         //public async Task<IActionResult> Index()
         //{
 
-        //    var alreadyset = await _dataClientHelper.CallAPIWithoutModel<BoolReturn>("/api/SubmissionCredentials/CheckCredentialsAreValid");
+        //    var alreadyset = await _dataClientHelper.CallAPIWithoutModel<BoolReturn>("/api/TreCredentials/CheckCredentialsAreValid");
         //    if (!alreadyset.Result)
         //    {
 
-        //        return RedirectToAction("UpdateCredentials", "SubmissionCredentials");
+        //        return RedirectToAction("UpdateCredentials", "TreCredentials");
         //    }
         //    return View();
         //}
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             if (!HttpContext.User.Identity.IsAuthenticated)
             {
                 return Challenge(OpenIdConnectDefaults.AuthenticationScheme);
             }
+            var alreadyset = await _dataClientHelper.CallAPIWithoutModel<BoolReturn>("/api/TreCredentials/CheckCredentialsAreValid");
+            if (!alreadyset.Result)
+            {
+
+                return RedirectToAction("UpdateCredentials", "TreCredentials");
+            }
             return View();
+            
 
         }
 

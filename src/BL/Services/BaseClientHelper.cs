@@ -17,25 +17,30 @@ namespace BL.Services
         protected readonly IHttpContextAccessor _httpContextAccessor;
         protected readonly string _address;
         protected readonly JsonSerializerOptions _jsonSerializerOptions;
-        protected readonly IKeycloakTokenHelper? __keycloakTokenHelper;
+        public KeycloakTokenHelper? _keycloakTokenHelper { get; set; }
         public string _requiredRole { get; set; }
         public string _password { get; set; }
         public string _username { get; set; }
         
 
-        public BaseClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, string address, IKeycloakTokenHelper? keycloakTokenHelper)
+        public BaseClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, string address)
         {
             _httpClientFactory = httpClientFactory;
             _httpContextAccessor = httpContextAccessor;
             _address = address;
             
-            __keycloakTokenHelper = keycloakTokenHelper;
+            
             _jsonSerializerOptions = new JsonSerializerOptions()
             {
                 
                 PropertyNameCaseInsensitive = true,
             };
             
+        }
+
+        public async Task<string> GetTokenForUser(string username, string password, string requiredRole)
+        {
+            return await _keycloakTokenHelper.GetTokenForUser(username, password, requiredRole);
         }
 
 
@@ -120,7 +125,18 @@ namespace BL.Services
                 if (method == HttpMethod.Delete) res = await apiClient.DeleteAsync(endPoint);
                 if (!res.IsSuccessStatusCode)
                 {
-                   throw new Exception("API Call Failure: " + res.StatusCode + ": " + res.ReasonPhrase);
+                    var stream =res.Content.ReadAsStream();
+                    string content = "";
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        // Read the stream content into a string
+                        content = reader.ReadToEnd();
+
+                        // Output the string content
+                        
+                    }
+                    Log.Information("{Function} Api returned an error Response {Res} Error content {Content}", "ClientHelperRequestAsync", res, content);
+                    throw new Exception("API Call Failure: " + res.StatusCode + ": " + res.ReasonPhrase + " " + content);
                 }
                 Log.Information("{Function} The response {res}", "ClientHelperRequestAsync", res);
                
@@ -168,9 +184,9 @@ namespace BL.Services
         protected async Task<HttpClient> CreateClientWithKeycloak()
         {
             var accessToken = "";
-            if (__keycloakTokenHelper != null)
+            if (_keycloakTokenHelper != null)
             {
-                accessToken = await  __keycloakTokenHelper.GetTokenForUser(_username, _password, _requiredRole);
+                accessToken = await  _keycloakTokenHelper.GetTokenForUser(_username, _password, _requiredRole);
             }
             else
             {
@@ -208,6 +224,12 @@ namespace BL.Services
             return  await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Post, jsonString, paramList);
         }
 
+        public async Task<byte[]> CallAPIToGetFile(string endPoint, Dictionary<string, string>? paramList = null)
+        {
+            var response = await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Get, null, paramList);
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+
         public async Task<TOutput?> CallAPI<TInput, TOutput>(string endPoint,TInput model, Dictionary<string, string>? paramList = null, bool usePut = false) where TInput : class? where TOutput : class?, new()
         {
             StringContent? modelString = null;
@@ -218,6 +240,7 @@ namespace BL.Services
             
             return await CallAPIWithReturnType<TOutput>(endPoint, modelString, paramList, usePut);
         }
+
 
         public async Task<TOutput?> CallAPIWithoutModel<TOutput>(string endPoint, Dictionary<string, string>? paramList = null) where TOutput : class?, new()
         {

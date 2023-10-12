@@ -15,6 +15,8 @@ namespace BL.Services
         Task<bool> CreateBucketPolicy(string bucketName);
         Task<bool> CopyObject(MinioSettings minioSettings, string sourceBucketName, string destinationBucketName, string sourceObjectKey, string destinationObjectKey);
         Task<string> ShareMinioObject(MinioSettings minioSettings, string bucketName, string objectKey);
+        Task<bool> FolderExists(MinioSettings minioSettings, string bucketName, string folderName);
+        Task<bool> CreateFolder(MinioSettings minioSettings, string bucketName, string folderName);
 
     }
 }

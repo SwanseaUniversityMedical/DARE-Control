@@ -12,7 +12,11 @@ using TRE_API.Repositories.DbContexts;
 namespace TRE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
+<<<<<<<< HEAD:src/TRE-API/Migrations/20231012103014_initial.Designer.cs
     [Migration("20231012103014_initial")]
+========
+    [Migration("20231011105713_initial")]
+>>>>>>>> main:src/TRE-API/Migrations/20231011105713_initial.Designer.cs
     partial class initial
     {
         /// <inheritdoc />
@@ -28,13 +32,16 @@ namespace TRE_API.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("BL.Models.SubmissionCredentials", b =>
+            modelBuilder.Entity("BL.Models.KeycloakCredentials", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CredentialType")
+                        .HasColumnType("integer");
 
                     b.Property<string>("PasswordEnc")
                         .IsRequired()
@@ -46,7 +53,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SubmissionCredentials");
+                    b.ToTable("KeycloakCredentials");
                 });
 
             modelBuilder.Entity("BL.Models.TESKstatus", b =>

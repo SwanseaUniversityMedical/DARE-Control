@@ -2,7 +2,7 @@
 
 namespace Data_Egress_API.Services
 {
-    public interface IDataClientWithoutTokenHelper : IBaseClientHelper
+    public interface ITreClientWithoutTokenHelper: IBaseClientHelper
     {
 
         bool CheckCredsAreAvailable();

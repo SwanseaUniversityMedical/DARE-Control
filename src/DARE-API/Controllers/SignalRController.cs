@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 namespace DARE_API.Controllers
 {
     [ApiController]
-    [Authorize(Roles = "dare-tre,dare-control-admin")]
+    
     [Route("api/[controller]")]
     public class SignalRController : Controller
     {
@@ -20,6 +20,7 @@ namespace DARE_API.Controllers
             _APISettings = APISettings.Value;
         }
 
+        [Authorize(Roles = "dare-tre,dare-control-admin")]
         [HttpPost("Index")]
         public async Task<IActionResult> Index()
         {
@@ -43,6 +44,7 @@ namespace DARE_API.Controllers
             return View();
         }
 
+        [Authorize(Roles = "dare-tre,dare-control-admin")]
         [HttpGet("StartConnection")]
         public IActionResult StartConnection()
         {

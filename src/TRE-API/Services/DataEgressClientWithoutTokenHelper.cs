@@ -5,18 +5,19 @@ using TRE_API.Repositories.DbContexts;
 
 namespace TRE_API.Services
 {
-    public class DareClientWithoutTokenHelper : BaseClientHelper, IDareClientWithoutTokenHelper
+    public class DataEgressClientWithoutTokenHelper : BaseClientHelper, IDataEgressClientWithoutTokenHelper
     {
         public ApplicationDbContext CredDb { get; set; }
 
-        public DareClientWithoutTokenHelper(IHttpClientFactory httpClientFactory,
+        public DataEgressClientWithoutTokenHelper(IHttpClientFactory httpClientFactory,
             IHttpContextAccessor httpContextAccessor, IConfiguration config, ApplicationDbContext db,
-            IEncDecHelper encDec, SubmissionKeyCloakSettings settings) : base(httpClientFactory, httpContextAccessor,
+            IEncDecHelper encDec, DataEgressKeyCloakSettings settings) : base(httpClientFactory, httpContextAccessor,
             config["DareAPISettings:Address"])
         {
             CredDb = db;
             _keycloakTokenHelper = new KeycloakTokenHelper(settings.BaseUrl, settings.ClientId, settings.ClientSecret, settings.Proxy, settings.ProxyAddresURL);
-            var creds = db.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Submission);
+
+            var creds = db.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Egress);
             if (creds != null)
             {
                 _username = creds.UserName;
@@ -29,7 +30,7 @@ namespace TRE_API.Services
 
         public bool CheckCredsAreAvailable()
         {
-            return CredDb.KeycloakCredentials.Any(x => x.CredentialType == CredentialType.Submission);
+            return CredDb.KeycloakCredentials.Any(x => x.CredentialType == CredentialType.Egress);
         }
     }
 }

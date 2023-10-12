@@ -5,7 +5,7 @@ namespace BL.Services
     {
 
 
-
+        Task<string> GetTokenForUser(string username, string password, string requiredRole);
         Task<TOutput?> CallAPI<TInput, TOutput>(string endPoint, TInput model,
             Dictionary<string, string>? paramList = null, bool usePut = false) where TInput : class? where TOutput : class?, new();
 
@@ -15,6 +15,8 @@ namespace BL.Services
 
         Task<TOutput?> CallAPIWithoutModel<TOutput>(string endPoint, Dictionary<string, string>? paramList = null)
             where TOutput : class?, new();
+
+        Task<byte[]> CallAPIToGetFile(string endPoint, Dictionary<string, string>? paramList = null);
 
 
     }
