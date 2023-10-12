@@ -81,30 +81,30 @@ namespace DARE_API.Repositories.DbContexts
                 AddMissingUser(knees, simon);
                 AddMissingUser(knees, luke);
                 _dbContext.SaveChanges();
-                AddSubmission("Sub1", "Head", "jaybee", "");
-                AddSubmission("Sub2", "Head", "simon", "SAIL|DPUK");
-                AddSubmission("Sub3", "Shoulders", "luke.young", "MSRegister");
-                AddSubmission("Sub4", "Knees", "jaybee", "");
+                //AddSubmission("Sub1", "Head", "jaybee", "");
+                //AddSubmission("Sub2", "Head", "simon", "SAIL|DPUK");
+                //AddSubmission("Sub3", "Shoulders", "luke.young", "MSRegister");
+                //AddSubmission("Sub4", "Knees", "jaybee", "");
 
-                CreateHistoricStatus1(2);
-                CreateHistoricStatus2(2);
-                CreateHistoricStatus3(2);
-                CreateHistoricStatus4(2);
-                CreateHistoricStatus5(2);
-                CreateHistoricStatus6(2);
-                CreateHistoricStatus7(2);
-                CreateHistoricStatus8(2);
+                //CreateHistoricStatus1(2);
+                //CreateHistoricStatus2(2);
+                //CreateHistoricStatus3(2);
+                //CreateHistoricStatus4(2);
+                //CreateHistoricStatus5(2);
+                //CreateHistoricStatus6(2);
+                //CreateHistoricStatus7(2);
+                //CreateHistoricStatus8(2);
 
-                CreateHistoricStatus5(3);
-                CreateHistoricStatus6(3);
-                CreateHistoricStatus7(3);
-                CreateHistoricStatus8(3);
+                //CreateHistoricStatus5(3);
+                //CreateHistoricStatus6(3);
+                //CreateHistoricStatus7(3);
+                //CreateHistoricStatus8(3);
 
-                CreateHistoricStatus1(4);
-                CreateHistoricStatus2(4);
-                CreateHistoricStatus4(4);
-                CreateHistoricStatus8(4);
-                CreateHistoricStatus7(4);
+                //CreateHistoricStatus1(4);
+                //CreateHistoricStatus2(4);
+                //CreateHistoricStatus4(4);
+                //CreateHistoricStatus8(4);
+                //CreateHistoricStatus7(4);
             }
             catch (Exception e)
             {

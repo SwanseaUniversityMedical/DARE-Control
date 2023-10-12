@@ -52,13 +52,7 @@ namespace TRE_API.Controllers
             _minioSettings = minioSettings;
         }
 
-        [Authorize(Roles = "dare-tre-admin")]
-        [HttpPost("DAREUpdateSubmission")]
-        public async void DAREUpdateSubmission(string trename, string tesId, string submissionStatus)
-        {
-            List<string> StringList = new List<string> { trename, tesId, submissionStatus };
-            await _signalRService.SendUpdateMessage("TREUpdateStatus", StringList);
-        }
+       
 
 
         [Authorize(Roles = "dare-tre-admin")]
@@ -180,13 +174,14 @@ namespace TRE_API.Controllers
             return StatusCode(200, boolResult);
         }
         
-        [Authorize(Roles = "dare-tre-admin,data-egress-admin")]
+       
+
         [HttpPost]
         [Route("EgressResults")]
         [ValidateModelState]
         [SwaggerOperation("EgressResults")]
         [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
-        public IActionResult EgressResults([FromBody] EgressReview review)
+        public async Task<IActionResult> EgressResults([FromBody] EgressReview review)
         {
             //Update status of submission to "Sending to hutch for final packaging"
             var statusParams = new Dictionary<string, string>()
@@ -197,11 +192,49 @@ namespace TRE_API.Controllers
                                     };
             var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams);
 
+            Dictionary<string, bool> hutchRes = new Dictionary<string, bool>();
+            ApprovalTypeHUTCH approvalStatus;
+            var approvedCount = review.fileResults.Count(x => x.approved);
+            var rejectedCount = review.fileResults.Count(x => !x.approved);
+
+            if (approvedCount == review.fileResults.Count)
+            {
+                approvalStatus = ApprovalTypeHUTCH.FullyApproved;
+            }
+            else if (rejectedCount == review.fileResults.Count)
+            {
+                approvalStatus = ApprovalTypeHUTCH.NotApproved;
+            }
+            else
+            {
+                approvalStatus = ApprovalTypeHUTCH.PartiallyApproved;
+            }
+            foreach (var i in review.fileResults)
+            {
+                hutchRes.Add(i.fileName, i.approved);
+
+            }
+
+            ApprovalResult testvar = new ApprovalResult()
+            {
+                Status = approvalStatus,
+                FileResults = hutchRes
+            };
+
             //Not sure what the return type is
-            var HUTCHres = _hutchHelper.CallAPI<EgressReview, APIReturn>("HUTCH URL", review);
+            var HUTCHres = await _hutchHelper.CallAPI<ApprovalResult, APIReturn>($"/api/jobs/{review.subId}/approval", testvar);
 
             return StatusCode(200, HUTCHres);
         }
+
+        //TODO: Need to either update egressresult to be this or add as a new model in BL proj
+        public class ApprovalResult
+        {
+            public ApprovalTypeHUTCH Status { get; set; }
+
+            public Dictionary<string, bool> FileResults { get; set; } = new();
+        }
+
 
         [Authorize(Roles = "dare-hutch-admin,dare-tre-admin")]
         [HttpPost]
@@ -249,60 +282,21 @@ namespace TRE_API.Controllers
             return StatusCode(200, copyResult);
         }
 
-        [Authorize(Roles = "dare-tre-admin")]
-        [HttpGet]
-        [Route("DataOutApproval")]
-        [ValidateModelState]
-        [SwaggerOperation("DataOutApproval")]
-        [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public IActionResult DataOutApproval(string submissionId, bool isApproved)
-        {
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("submissionId", submissionId.ToString());
-            var submission = _dareHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist)
-                .Result;
 
-            var status = "";
-            if (isApproved)
-            {
-                status = StatusType.DataOutApproved.ToString();
-            }
-            else
-            {
-                status = StatusType.DataOutApprovalRejected.ToString();
-            }
 
-            var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-                new Dictionary<string, string>()
-                    { { "tesId", submission.TesId }, { "statusType", status }, { "description", "" } }).Result;
-
-            return StatusCode(200, result);
-        }
-
-        [AllowAnonymous]
-        [HttpPost("TestFetchAndStore")]
-        public void TestFetchAndStore([FromBody] MQFetchFile message)
-        {
-
-            var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
-
-            _rabbit.Advanced.Publish(exch, RoutingConstants.FetchFile, false, new Message<MQFetchFile>(message));
-        }
-
-        [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("SendSubmissionToHUTCH")]
         public IActionResult SendSubmissionToHUTCH(Dictionary<string, string> SubmissionData)
         {
             //Update status of submission to "Sending to hutch"
             var statusParams = new Dictionary<string, string>()
-                                    {
-                                        { "tesId", SubmissionData["SubmissionId"] },
-                                        { "statusType", StatusType.SendingFileToHUTCH.ToString() },
-                                        { "description", "" }
-                                    };
+            {
+                { "tesId", SubmissionData["SubmissionId"] },
+                { "statusType", StatusType.SendingFileToHUTCH.ToString() },
+                { "description", "" }
+            };
             var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams);
 
-            var res = _hutchHelper.CallAPIWithoutModel<APIReturn>("URL for hutch", SubmissionData); //Need to update this when parameters are known
+            var res = _hutchHelper.CallAPIWithoutModel<APIReturn>($"/api/jobs/{SubmissionData["SubmissionId"]}", SubmissionData); //Need to update this when parameters are known
 
             return StatusCode(200);
         }
