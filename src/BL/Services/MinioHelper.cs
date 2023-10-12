@@ -196,7 +196,7 @@ namespace BL.Services
             return true;
         }
 
-        public async Task<bool> RabbitExternalObject(FetchFileMQ msgBytes)
+        public async Task<bool> RabbitExternalObject(MQFetchFile msgBytes)
         {
             if (msgBytes == null)
             {
@@ -211,7 +211,7 @@ namespace BL.Services
 
         public async Task<bool> RabbitExternalObject(string msgBytes)
         {
-            var FileInfo= JsonConvert.DeserializeObject<FetchFileMQ>(msgBytes);
+            var FileInfo= JsonConvert.DeserializeObject<MQFetchFile>(msgBytes);
             if (FileInfo == null)
             {
                 return false;
