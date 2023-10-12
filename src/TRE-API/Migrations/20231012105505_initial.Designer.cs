@@ -12,11 +12,7 @@ using TRE_API.Repositories.DbContexts;
 namespace TRE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-<<<<<<<< HEAD:src/TRE-API/Migrations/20231012103014_initial.Designer.cs
-    [Migration("20231012103014_initial")]
-========
-    [Migration("20231011105713_initial")]
->>>>>>>> main:src/TRE-API/Migrations/20231011105713_initial.Designer.cs
+    [Migration("20231012105505_initial")]
     partial class initial
     {
         /// <inheritdoc />
