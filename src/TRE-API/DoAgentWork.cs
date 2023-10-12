@@ -43,6 +43,7 @@ namespace TRE_API
         private readonly ISubmissionHelper _subHelper;
         private readonly MinioSettings _minioSettings;
         private readonly IMinioHelper _minioHelper;
+        
         public DoAgentWork(IServiceProvider serviceProvider, ApplicationDbContext dbContext, ISubmissionHelper subHelper, MinioSettings minioSettings, IMinioHelper minioHelper)
         {
             _serviceProvider = serviceProvider;
@@ -50,6 +51,7 @@ namespace TRE_API
             _subHelper = subHelper;
             _minioSettings = minioSettings;
             _minioHelper = minioHelper;
+            
         }
 
         public void testing()
@@ -301,10 +303,13 @@ namespace TRE_API
                             // TODO for rest API
                             try
                             {
-                                StringContent x = new StringContent("abc");
+                                Dictionary<string, string> HUTCHVars = new Dictionary<string, string>()
+                                {
+                                    { "SubmissionId", aSubmission.Id.ToString()},
+                                    { "ContainerURL", aSubmission.SourceCrate}
+                                };
+                                _subHelper.SendSumissionToHUTCH(HUTCHVars);
 
-                               // var callHUTCH = treApi.CallAPI("url", x, null,false);
-                              
                             }
                             catch (Exception e)
                             {

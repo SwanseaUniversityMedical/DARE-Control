@@ -9,5 +9,6 @@ namespace TRE_API.Services
         APIReturn? UpdateStatusForTre(string tesId, StatusType statusType, string? description);
         bool IsUserApprovedOnProject(int projectId, int userId);
         List<Submission>? GetWaitingSubmissionForTre();
+        void SendSumissionToHUTCH(Dictionary<string, string> SubmissionData);
     }
 }

@@ -288,18 +288,11 @@ namespace TRE_API.Controllers
         public IActionResult SendSubmissionToHUTCH(Dictionary<string, string> SubmissionData)
         {
             //Update status of submission to "Sending to hutch"
-            var statusParams = new Dictionary<string, string>()
-            {
-                { "tesId", SubmissionData["SubmissionId"] },
-                { "statusType", StatusType.SendingFileToHUTCH.ToString() },
-                { "description", "" }
-            };
-            var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams);
-
-            var res = _hutchHelper.CallAPIWithoutModel<APIReturn>($"/api/jobs/{SubmissionData["SubmissionId"]}", SubmissionData); //Need to update this when parameters are known
+            _subHelper.SendSumissionToHUTCH(SubmissionData);
 
             return StatusCode(200);
         }
 
+        
     }
 }
