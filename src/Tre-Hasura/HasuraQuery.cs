@@ -7,12 +7,17 @@ using System.Threading.Tasks;
 using BL.Models;
 using BL.Models.ViewModels;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json.Linq;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Tre_Hasura
 {
     public interface IHasuraQuery
     {
         void RunQuery(string token,  string Query);
+        void Run(string[] args);
+
+
     }
     public class HasuraQuery : IHasuraQuery
     {
@@ -22,10 +27,23 @@ namespace Tre_Hasura
 
             _treclientHelper = treClient;
         }
+        public void Run(string[] args)
+        {
+
+            var Tokenparamlist = new Dictionary<string, string>
+            {
+               { "role", "select"}
+            };
+
+            var t = _treclientHelper.CallAPIWithoutModel<Response>("/api/HasuraAuthentication/GetNewToken/", Tokenparamlist).Result;          
+
+            RunQuery(t.result, "");
+        }
 
         public class Response
         {
             public string result { get; set; }
+
            
         }
 
@@ -34,13 +52,6 @@ namespace Tre_Hasura
             //dont need to check token as Hasura does this 
             //make query
 
-            var Tokenparamlist = new Dictionary<string, string>
-            {
-               { "role", "select"}
-            };
-
-            var t = _treclientHelper.CallAPIWithoutModel<Response>("/api/HasuraAuthentication/GetNewToken/", Tokenparamlist).Result;
-            token = t.result;
 
 
             var paramlist = new Dictionary<string, string>

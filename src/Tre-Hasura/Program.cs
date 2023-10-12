@@ -1,68 +1,38 @@
 ﻿// See https://aka.ms/new-console-template for more information
-
 using Serilog;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Tre_Hasura;
+using Microsoft.AspNetCore.Hosting;
+using static System.Formats.Asn1.AsnWriter;
+using BL.Services;
 
 Console.WriteLine("Hello, World!");
-var configuration = GetConfiguration();
-string AppName = typeof(Program).Module.Name.Replace(".dll", "");
 
-Log.Logger = CreateSerilogLogger(configuration);
-Log.Information("Hasura Query starting");
+using IHost host = CreateHostBuilder(args).Build();
+using var scope = host.Services.CreateScope();
 
-/// <summary>
-/// CreateSerilogLogger
-/// </summary>
-Serilog.ILogger CreateSerilogLogger(IConfiguration configuration)
+var services = scope.ServiceProvider;
+
+try
 {
-    var seqServerUrl = configuration["Serilog:SeqServerUrl"];
-    var seqApiKey = configuration["Serilog:SeqApiKey"];
-
-    if (seqServerUrl == null)
-    {
-        Log.Error("seqServerUrl is null");
-        seqServerUrl = "seqServerUrl == null";
-    }
-
-    return new LoggerConfiguration()
-    .MinimumLevel.Verbose()
-    .Enrich.WithProperty("ApplicationContext", AppName)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.Seq(seqServerUrl, apiKey: seqApiKey)
-    .ReadFrom.Configuration(configuration)
-    .CreateLogger();
-
+    services.GetRequiredService<IHasuraQuery>().Run(args);
+}
+catch (Exception e)
+{
+    Console.WriteLine(e.Message);
 }
 
-await Host.CreateDefaultBuilder(args)
-    .ConfigureServices(services =>
-    {
-        services.AddScoped<IHasuraQuery, HasuraQuery>();
-    })
-    .Build()
-    .RunAsync();
-
-
-/// <summary>
-/// GetConfiguration
-/// </summary>
-IConfiguration GetConfiguration()
+IHostBuilder CreateHostBuilder(string[] strings)
 {
-    var a = Directory.GetCurrentDirectory();
-
-    var builder = new ConfigurationBuilder()
-        .SetBasePath(Directory.GetCurrentDirectory())
-        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)       
-        .AddEnvironmentVariables();
-
-    return builder.Build();
-}
-
-static void Main(string[] args)
-{
-    Console.WriteLine("Hello, World!");
+    return Host.CreateDefaultBuilder()
+        .ConfigureServices((_, services) =>
+        {
+            services.AddSingleton<ITREClientHelper, TREClientHelper>();
+            services.AddSingleton<IHasuraQuery, HasuraQuery>();        
+         
+            services.AddHttpClient();
+            services.AddHttpContextAccessor();
+        });
 }
