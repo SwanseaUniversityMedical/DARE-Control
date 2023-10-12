@@ -60,18 +60,23 @@ var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
 builder.Services.AddSingleton(treKeyCloakSettings);
 
+var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
+configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
+builder.Services.AddSingleton(dataEgressKeyCloakSettings);
+
+
 var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
 
 builder.Services.AddHostedService<ConsumeInternalMessageService>();
 
-var submissionKeyCloakSettings = new BaseKeyCloakSettings();
+var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
 builder.Services.AddSingleton(submissionKeyCloakSettings);
 
 builder.Services.AddScoped<IDareClientWithoutTokenHelper, DareClientWithoutTokenHelper>();
-builder.Services.AddScoped<IDataEgressClientHelper, DataEgressClientHelper>();
+builder.Services.AddScoped<IDataEgressClientWithoutTokenHelper, DataEgressClientWithoutTokenHelper>();
 builder.Services.AddScoped<IHutchClientHelper, HutchClientHelper>();
 
 string hangfireConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -81,7 +86,6 @@ builder.Services.AddHangfireServer();
 var encryptionSettings = new EncryptionSettings();
 configuration.Bind(nameof(encryptionSettings), encryptionSettings);
 builder.Services.AddSingleton(encryptionSettings);
-builder.Services.AddScoped<IKeycloakTokenHelper, KeycloakTokenHelper>();
 builder.Services.AddScoped<IEncDecHelper, EncDecHelper>();
 builder.Services.AddScoped<IDareSyncHelper, DareSyncHelper>();
 builder.Services.AddScoped<ISubmissionHelper, SubmissionHelper>();
@@ -116,8 +120,12 @@ builder.Services.AddAuthentication(options =>
 })
     .AddJwtBearer(options =>
     {
+        Console.WriteLine("TRE Keycloak use proxy = "+treKeyCloakSettings.Proxy.ToString());
+
         if (treKeyCloakSettings.Proxy)
         {
+            Console.WriteLine("TRE API Proxy = "+ treKeyCloakSettings.ProxyAddresURL);
+            Console.WriteLine("TRE API Proxy bypass = " + treKeyCloakSettings.BypassProxy);
             options.BackchannelHttpHandler = new HttpClientHandler
             {
                 UseProxy = true,

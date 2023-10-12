@@ -17,8 +17,8 @@ using System.Threading;
 namespace TRE_API.Controllers
 {
 
-    // [Authorize(Roles = "dare-tre-admin")]
-    [AllowAnonymous]
+    // 
+    
     [Route("api/[controller]")]
     [ApiController]
 
@@ -36,7 +36,8 @@ namespace TRE_API.Controllers
             _DbContext = applicationDbContext;
             _httpContextAccessor = httpContextAccessor;
         }
-        
+
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetMemberships")]
         public List<TreMembershipDecision> GetMemberships(int projectId, bool showOnlyUnprocessed)
         {
@@ -45,53 +46,59 @@ namespace TRE_API.Controllers
                 (!showOnlyUnprocessed || x.Decision == Decision.Undecided)).ToList();
         }
 
-        
 
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllTreProjects")]
         public List<TreProject> GetAllTreProjects(bool showOnlyUnprocessed)
         {
             return _DbContext.Projects.Where(x => !showOnlyUnprocessed || x.Decision == Decision.Undecided).ToList();
         }
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetTreProject")]
         public TreProject GetTreProject(int projectId)
         {
             return _DbContext.Projects.First(x => x.Id == projectId);
         }
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllActiveTreProjects")]
         public List<TreProject> GetAllActiveTreProjects()
         {
             return _DbContext.Projects.Where(x => !x.Archived).ToList();
         }
 
-        
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllTreUsers")]
         public List<TreUser> GetAllTreUsers()
         {
             return _DbContext.Users.ToList();
         }
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllActiveTreUsers")]
         public List<TreUser> GetAllActiveTreUsers()
         {
             return _DbContext.Users.Where(x => !x.Archived).ToList();
         }
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllMembershipDecisions")]
         public List<TreMembershipDecision> GetAllMembershipDecisions()
         {
             return _DbContext.MembershipDecisions.ToList();
         }
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllActiveMembershipDecisions")]
         public List<TreMembershipDecision> GetAllActiveMembershipDecisions()
         {
             return _DbContext.MembershipDecisions.Where(x => !x.Archived).ToList();
         }
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllUndecidedMembershipDecisions")]
         public List<TreMembershipDecision> GetAllUndecidedActiveMembershipDecisions()
         {
@@ -99,6 +106,7 @@ namespace TRE_API.Controllers
                 .ToList();
         }
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("UpdateProjects")]
         public async Task<List<TreProject>> UpdateProjects(List<TreProject> projects)
         {
@@ -155,6 +163,7 @@ namespace TRE_API.Controllers
             return resultList;
         }
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("UpdateMembershipDecisions")]
         public async Task<List<TreMembershipDecision>> UpdateMembershipDecisions(List<TreMembershipDecision> membershipDecisions)
         {
@@ -195,6 +204,7 @@ namespace TRE_API.Controllers
 
         }
 
+        [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("SyncSubmissionWithTre")]
         public async Task<BoolReturn> SyncSubmissionWithTre()
         {

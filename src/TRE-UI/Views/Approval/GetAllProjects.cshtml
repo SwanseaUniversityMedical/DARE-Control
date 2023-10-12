@@ -10,70 +10,79 @@
         <h1 class="fs-3 mb-0">Projects</h1>
 
     </div>
-    <hr class="d-flex mt-4 mb-5">
+    <ul class="nav nav-underline border-bottom my-4 projects-menu">
+        <li class="nav-item" role="presentation">
+            <a href="@Url.Action("GetAllProjects","Approval", new {  showOnlyUnprocessed = false })" class="nav-link text-dark">All Projects</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a href="@Url.Action("GetAllProjects","Approval", new {  showOnlyUnprocessed = true })" class="nav-link text-dark">
+                Unprocessed Projects
+            </a>
+        </li>
+    </ul>
     <div class="table-responsive">
-        <table id="projectList" class="table table-bordered table-striped no-head" caption="List of Projects">
-            <thead><tr><td>Project</td></tr></thead>
+        <table id="projectList" class="table" caption="List of Projects">
+            <thead>
+                <tr>
+                    <th>Project</th>
+                    <th>Memberships</th>
+                    <th>Decision</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
             <tbody>
                 @foreach (var project in Model)
                 {
                     <tr>
-                        <td class="card mb-2 p-3 bg-white shadow-sm border-1">
-
-                            <div class="d-flex align-items-center justify-content-between mb-3">
+                        <td>
+                            <div class="d-flex align-items-center justify-content-between">
                                 <div>
                                     <a href="@Url.Action("EditProject", new { projectId = project.Id })">
                                         <h2 class="mb-0 fw-bold hover-underline fs-5">@project.SubmissionProjectName</h2>
                                     </a>
-                                    @if (project.Archived)
-                                    {
-                                        <p class="my-4">
-                                            Archived
-                                        </p>
-                                    }
-                                    <p class="my-4">
-                                        @project.Decision.ToString()
-                                    </p>
+                                    <p class="text-muted font-monospace small mb-0">ID: @project.SubmissionProjectId</p>
                                     @if (!string.IsNullOrWhiteSpace(project.LocalProjectName))
                                     {
-                                        <p class="my-4">
+                                        <p class="mt-2 mb-0">
                                             Local Name: @project.LocalProjectName
                                         </p>
                                     }
-                                    <p class="my-4">
-                                        @project.Description
-                                    </p>
-                                    <p class="text-muted small mb-0">#[Submission Project ID = @project.SubmissionProjectId]</p>
-                                    
                                 </div>
-                                <a href="@Url.Action("EditProject",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
-                            </div>
-                            <div class="">
-
-                                <a href="@Url.Action("EditMemberships", new { projectId = project.Id, showOnlyUnprocessed = false })#memberships" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                    @project.MemberDecisions.Count Memberships
-                                </a>
-                                
-
-                            </div>
-                            <p class="text-muted fs-7 mt-4 mb-0">
-                                @if (project.Decision == Decision.Undecided)
+                                @if (project.Archived)
                                 {
-                                    @:This project hasn't been processed yet
+                                    <span class="badge py-2 px-3 badge-lg bg-warning text-dark rounded-pill">
+                                        Archived
+                                    </span>
                                 }
-                                else
-                                {
-                                    @:Last Updated: @project.LastDecisionDate by @project.ApprovedBy 
-                                }
-                                
-                            </p>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="@Url.Action("EditMemberships", new { projectId = project.Id, showOnlyUnprocessed = false })#memberships" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                @project.MemberDecisions.Count Memberships
+                            </a>
+                        </td>
+                        <td>
                             
-
-
-
-
-
-
+                            <p class="my-4">
+                                @project.Decision.ToString()
+                            </p>
+                        </td>
+                        <td>
+                            @if (project.Decision == Decision.Undecided)
+                            {
+                                @:This project hasn't been processed yet
+                            }
+                            else
+                            {
+                                @:Last Updated: @project.LastDecisionDate by @project.ApprovedBy
+                            }
+                        </td>
+                        @*<td>
+                            @project.Description
+                        </td>*@
+                        <td>
+                            <a href="@Url.Action("EditProject",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Review</span></a>
                         </td>
                     </tr>
                 }

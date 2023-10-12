@@ -2,54 +2,55 @@
 @using BL.Models.Enums
 @model List<BL.Models.TreMembershipDecision>
 @{
-    ViewData["Title"] = "Membership Decisions";
-   
+    ViewData["Title"] = "Memberships";
+
 
 }
 <div class="container-lg p-4">
     <div class="d-flex align-items-center justify-content-between">
         <h1 class="fs-3 mb-0">Memberships</h1>
-                                         
+
     </div>
-    <hr class="d-flex my-4">
+    <ul class="nav nav-underline border-bottom my-4 memberships-menu">
+        <li class="nav-item" role="presentation">
+            <a href="@Url.Action("EditMemberships","Approval", new { projectId = 0, showOnlyUnprocessed = false })" class="nav-link text-dark">All Memberships</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a href="@Url.Action("EditMemberships","Approval", new { projectId = 0, showOnlyUnprocessed = true })" class="nav-link text-dark">
+                Unprocessed Memberships
+            </a>
+        </li>
+    </ul>
     <div class="table-responsive">
-        <table id="memberList" class="table table-bordered table-striped no-head" caption="List of Memberships">
-            <thead><tr><td>People</td></tr></thead>
+
+        <table @*id="memberList"*@ class="table" caption="List of Memberships">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Project</th>
+                    <th>Status</th>
+                    <th>Decision</th>
+                </tr>
+            </thead>
             <tbody>
                 @using (Html.BeginForm("EditMemberships", "Approval", FormMethod.Post, new { id = "frmMain" }))
-            {
-                @for (int i = 0; i < Model.Count; i++)
                 {
-                    <tr>
-                        <td class="card mb-2 p-3 bg-white shadow-sm border-1">
-
-                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                <div>
-                                    <h2 class="mb-0 fw-bold fs-5">@Model[i].User.Username on @Model[i].Project.SubmissionProjectName</h2>
-                                    @if (Model[i].Archived)
-                                    {
-                                        <p class="my-4">
-                                            Archived
-                                        </p>
-                                    }
-                                    <p class="my-4">
-                                        @Html.HiddenFor(x => x[i].Id)
-                                        @Html.RadioButtonFor(x => x[i].Decision, Decision.Approved)
-                                        @Html.Label(Decision.Approved.ToString())
-                                        @Html.RadioButtonFor(x => x[i].Decision, Decision.Rejected)
-                                        @Html.Label(Decision.Rejected.ToString())
-                                        @if (Model[i].Decision == Decision.Undecided)
-                                        {
-                                            @Html.RadioButtonFor(x => x[i].Decision, Decision.Undecided)
-                                            @Html.Label(Decision.Undecided.ToString())
-                                        }
-                                        
-                                    </p>
-                                </div>
-
-
-                            </div>
-                            <p class="text-muted fs-7 mt-4 mb-0">
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@Model[i].User.Username</strong>
+                            </td>
+                            <td>
+                                @Model[i].Project.SubmissionProjectName
+                                @if (Model[i].Archived)
+                                {
+                                    <span class="badge py-2 px-3 badge-lg bg-warning text-dark rounded-pill">
+                                        Archived
+                                    </span>
+                                }
+                            </td>
+                            <td>
                                 @if (Model[i].Decision == Decision.Undecided)
                                 {
                                     @:This membership hasn't been processed yet
@@ -58,16 +59,26 @@
                                 {
                                     @:Last Updated: @Model[i].LastDecisionDate by @Model[i].ApprovedBy
                                 }
-
-                            </p>
-                        </td>
-                    </tr>
-                       
+                            </td>
+                            <td>
+                                @Html.HiddenFor(x => x[i].Id)
+                                @Html.RadioButtonFor(x => x[i].Decision, Decision.Approved)
+                                @Html.Label(Decision.Approved.ToString())
+                                @Html.RadioButtonFor(x => x[i].Decision, Decision.Rejected)
+                                @Html.Label(Decision.Rejected.ToString())
+                                @if (Model[i].Decision == Decision.Undecided)
+                                {
+                                    @Html.RadioButtonFor(x => x[i].Decision, Decision.Undecided)
+                                    @Html.Label(Decision.Undecided.ToString())
+                                }
+                            </td>
+                        </tr>
+                        
+                    }
+                    <div class="hero-block-1">
+                        <button type="submit" class="btn btn-sm btn-primary mb-3"><i class="fa fa-save me-2"></i><span class="small">Save Changes</span></button>
+                    </div>
                 }
-                <div class="hero-block-1">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i>Update</button>
-                </div>
-            }
             </tbody>
         </table>
     </div>

@@ -144,7 +144,7 @@ namespace BL.Services
                 return false;
             }
 
-            
+
         }
 
         public async Task<bool> CheckObjectExists(MinioSettings minioSettings, string bucketName, string objectKey)
@@ -211,7 +211,7 @@ namespace BL.Services
 
         public async Task<bool> RabbitExternalObject(string msgBytes)
         {
-            var FileInfo= JsonConvert.DeserializeObject<FetchFileMQ>(msgBytes);
+            var FileInfo = JsonConvert.DeserializeObject<FetchFileMQ>(msgBytes);
             if (FileInfo == null)
             {
                 return false;
@@ -272,7 +272,7 @@ namespace BL.Services
 
             var expiration = DateTime.Now.AddHours(1);
 
-            
+
             var url = amazonS3Client.GetPreSignedURL(new GetPreSignedUrlRequest
             {
                 BucketName = bucketName,
@@ -281,6 +281,65 @@ namespace BL.Services
             });
 
             return url;
+        }
+        public async Task<bool> FolderExists(MinioSettings minioSettings, string bucketName, string folderName)
+        {
+            var amazonS3Client = GenerateAmazonS3Client(minioSettings);
+            try
+            {
+                var listReqest = new ListObjectsRequest
+                {
+                    BucketName = bucketName,
+                    Prefix = folderName
+                };
+
+                var listResponse = await amazonS3Client.ListObjectsAsync(listReqest);
+                if (!listResponse.S3Objects.Any())
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return true;
+            }
+
+        }
+        public async Task<bool> CreateFolder(MinioSettings minioSettings, string bucketName, string folderName)
+        {
+            var amazonS3Client = GenerateAmazonS3Client(minioSettings);
+            try
+            {
+                var putRequest = new PutObjectRequest
+                {
+                    BucketName = bucketName,
+                    Key = folderName + "/",
+                    ContentBody = string.Empty
+                };
+
+                var putResponse = await amazonS3Client.PutObjectAsync(putRequest);
+
+                if (putResponse.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return false;
+            }
+
+
         }
 
         #region PrivateHelpers

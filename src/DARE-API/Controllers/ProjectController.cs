@@ -21,7 +21,8 @@ namespace DARE_API.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "dare-control-admin")]
+    
+    
     public class ProjectController : Controller
     {
 
@@ -41,6 +42,7 @@ namespace DARE_API.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
+        [Authorize(Roles = "dare-control-admin")]
         [HttpPost("SaveProject")]
         public async Task<Project?> SaveProject([FromBody] FormData data)
         {
@@ -139,7 +141,7 @@ namespace DARE_API.Controllers
 
         }
 
-
+        [Authorize(Roles = "dare-control-admin")]
         [HttpPost("AddUserMembership")]
         public async Task<ProjectUser?> AddUserMembership(ProjectUser model)
         {
@@ -197,6 +199,7 @@ namespace DARE_API.Controllers
 
         }
 
+        [Authorize(Roles = "dare-control-admin")]
         [HttpPost("RemoveUserMembership")]
         public async Task<ProjectUser?> RemoveUserMembership(ProjectUser model)
         {
@@ -254,6 +257,7 @@ namespace DARE_API.Controllers
 
         }
 
+        [Authorize(Roles = "dare-control-admin")]
         [HttpPost("AddTreMembership")]
         public async Task<ProjectTre?> AddTreMembership(ProjectTre model)
         {
@@ -303,6 +307,7 @@ namespace DARE_API.Controllers
 
         }
 
+        [Authorize(Roles = "dare-control-admin")]
         [HttpPost("RemoveTreMembership")]
         public async Task<ProjectTre?> RemoveTreMembership(ProjectTre model)
         {
@@ -458,6 +463,7 @@ namespace DARE_API.Controllers
             public string key { get; set; }
         }
 
+        [Authorize(Roles = "dare-control-admin")]
         [HttpPost("TestFetchAndStoreObject")]
         public async Task<IActionResult> TestFetchAndStoreObject(testFetch testf)
         {

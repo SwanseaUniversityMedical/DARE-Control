@@ -1,4 +1,6 @@
-﻿using BL.Services;
+﻿using BL.Models;
+using BL.Models.Settings;
+using BL.Services;
 using TRE_API.Repositories.DbContexts;
 
 namespace TRE_API.Services
@@ -9,12 +11,12 @@ namespace TRE_API.Services
 
         public DareClientWithoutTokenHelper(IHttpClientFactory httpClientFactory,
             IHttpContextAccessor httpContextAccessor, IConfiguration config, ApplicationDbContext db,
-            IKeycloakTokenHelper keycloak, IEncDecHelper encDec) : base(httpClientFactory, httpContextAccessor,
-            config["DareAPISettings:Address"], keycloak)
+            IEncDecHelper encDec, SubmissionKeyCloakSettings settings) : base(httpClientFactory, httpContextAccessor,
+            config["DareAPISettings:Address"])
         {
             CredDb = db;
-            
-            var creds = db.SubmissionCredentials.FirstOrDefault();
+            _keycloakTokenHelper = new KeycloakTokenHelper(settings.BaseUrl, settings.ClientId, settings.ClientSecret, settings.Proxy, settings.ProxyAddresURL);
+            var creds = db.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Submission);
             if (creds != null)
             {
                 _username = creds.UserName;
@@ -27,7 +29,7 @@ namespace TRE_API.Services
 
         public bool CheckCredsAreAvailable()
         {
-            return CredDb.SubmissionCredentials.Any();
+            return CredDb.KeycloakCredentials.Any(x => x.CredentialType == CredentialType.Submission);
         }
     }
 }
