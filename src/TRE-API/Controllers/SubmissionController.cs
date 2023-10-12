@@ -114,7 +114,7 @@ namespace TRE_API.Controllers
                     { "description", "" }
                 }).Result;
 
-            return StatusCode(200, outputFolder);
+            return StatusCode(200, outputFolder.OutputBucket);
         }
 
         private class OutputBucketInfo
@@ -242,7 +242,10 @@ namespace TRE_API.Controllers
 
             //Copy file to output bucket
             var copyResult = _minioHelper.CopyObject(_minioSettings, sourceBucket, destinationBucket, "sub" + outcome.subId+"/" + outcome.file, "sub" + outcome.subId + "/" + outcome.file);
-
+            var boolresult = new BoolReturn()
+            {
+                Result = copyResult.Result
+            };
             return StatusCode(200, copyResult);
         }
 
@@ -278,12 +281,12 @@ namespace TRE_API.Controllers
 
         [AllowAnonymous]
         [HttpPost("TestFetchAndStore")]
-        public void TestFetchAndStore([FromBody] FetchFileMQ message)
+        public void TestFetchAndStore([FromBody] MQFetchFile message)
         {
 
             var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
 
-            _rabbit.Advanced.Publish(exch, RoutingConstants.FetchFile, false, new Message<FetchFileMQ>(message));
+            _rabbit.Advanced.Publish(exch, RoutingConstants.FetchFile, false, new Message<MQFetchFile>(message));
         }
 
         [Authorize(Roles = "dare-tre-admin")]
