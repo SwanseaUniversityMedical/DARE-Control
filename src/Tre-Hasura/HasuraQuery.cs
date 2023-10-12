@@ -35,9 +35,12 @@ namespace Tre_Hasura
                { "role", "select"}
             };
 
-            var t = _treclientHelper.CallAPIWithoutModel<Response>("/api/HasuraAuthentication/GetNewToken/", Tokenparamlist).Result;          
+            var t = _treclientHelper.CallAPIWithoutModel<Response>("/api/HasuraAuthentication/GetNewToken/", Tokenparamlist).Result;
 
-            RunQuery(t.result, "");
+
+            string Query = "query MyQuery {\r\n  test2 {\r\n    id\r\n    name\r\n  }\r\n}";
+
+            RunQuery(t.result, Query);
         }
 
         public class Response
@@ -51,7 +54,6 @@ namespace Tre_Hasura
         {
             //dont need to check token as Hasura does this 
             //make query
-
 
 
             var paramlist = new Dictionary<string, string>

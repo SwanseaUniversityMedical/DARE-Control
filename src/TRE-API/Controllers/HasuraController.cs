@@ -17,7 +17,7 @@ namespace TRE_API.Controllers
             _hasuraService = hasuraService;
         }
 
-        [HttpGet("RunQuery/{token}")]
+        [HttpGet("RunQuery/{token}/{Query}")]
         public string RunQuery(string token, string Query)
         {
 
