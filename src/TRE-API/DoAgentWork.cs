@@ -218,9 +218,9 @@ namespace TRE_API
                 // OPTIONS
                 // TODO get these from somewhere
 
-                var useRabbit = true;
-                var useHutch = false;
-                var useTESK = true;
+                var useRabbit = false;
+                var useHutch = true;
+                var useTESK = false;
 
                 Console.WriteLine("Getting list of submissions");
 
