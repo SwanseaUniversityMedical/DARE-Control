@@ -18,6 +18,8 @@ namespace BL.Models
 
         [Display(Name = "Membership Decisions")]
         public virtual List<TreMembershipDecision>? MemberDecisions { get; set; }
+        [Display(Name = "Submissions")]
+        public virtual List<Submission>? Submissions { get; set; }
 
         [Display(Name = "Local Name")]
         public string? LocalProjectName { get; set; }
