@@ -29,7 +29,8 @@ namespace DARE_API.Repositories.DbContexts
 
         public DbSet<ProjectTreDecision> ProjectTreDecisions { get; set; }
 
-        
+        public DbSet<MembershipTreDecision> MembershipTreDecisions { get; set; }
+
 
 
 

@@ -175,6 +175,20 @@ namespace TRE_API.Services
 
         }
 
-       
+        public async Task<bool> SyncMembershipDecisions()
+        {
+
+            var dbMemberships = _DbContext.MembershipDecisions.ToList();
+
+
+
+            var synclist = dbMemberships.Select(x => new MembershipTreDecisionDTO() { ProjectId = x.Project.SubmissionProjectId, UserId = x.User.SubmissionUserId, Decision = x.Decision }).ToList();
+            var result = await _dareclientHelper.CallAPI<List<MembershipTreDecisionDTO>, BoolReturn>("/api/Project/SyncTreMembershipDecisions", synclist);
+
+
+
+            return result.Result;
+
+        }
     }
 }
