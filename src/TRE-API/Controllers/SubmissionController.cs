@@ -281,12 +281,12 @@ namespace TRE_API.Controllers
 
         [AllowAnonymous]
         [HttpPost("TestFetchAndStore")]
-        public void TestFetchAndStore([FromBody] FetchFileMQ message)
+        public void TestFetchAndStore([FromBody] MQFetchFile message)
         {
 
             var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
 
-            _rabbit.Advanced.Publish(exch, RoutingConstants.FetchFile, false, new Message<FetchFileMQ>(message));
+            _rabbit.Advanced.Publish(exch, RoutingConstants.FetchFile, false, new Message<MQFetchFile>(message));
         }
 
         [Authorize(Roles = "dare-tre-admin")]

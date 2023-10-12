@@ -34,7 +34,7 @@ namespace TRE_API.Services
             {
                 //Consume All Queue
                 var fetch = await _bus.Advanced.QueueDeclareAsync(QueueConstants.FetchExtarnalFile);
-                _bus.Advanced.Consume<FetchFileMQ>(fetch, Process);
+                _bus.Advanced.Consume<MQFetchFile>(fetch, Process);
             }
             catch (Exception e)
             {
@@ -43,7 +43,7 @@ namespace TRE_API.Services
             }
         }
 
-        private async Task Process(IMessage<FetchFileMQ> message, MessageReceivedInfo info)
+        private async Task Process(IMessage<MQFetchFile> message, MessageReceivedInfo info)
         {
             try
             {
