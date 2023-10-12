@@ -25,149 +25,6 @@ namespace TRE_API.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("BL.Models.HistoricStatus", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("End")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("Start")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("StatusDescription")
-                        .HasColumnType("text");
-
-                    b.Property<int>("SubmissionId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SubmissionId");
-
-                    b.ToTable("HistoricStatus");
-                });
-
-            modelBuilder.Entity("BL.Models.Project", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Display")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("FormData")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("MarkAsEmbargoed")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("OutputBucket")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ProjectDescription")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("SubmissionBucket")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Project");
-                });
-
-            modelBuilder.Entity("BL.Models.Submission", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("DockerInputLocation")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("LastStatusUpdate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("ParentID")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("ParentId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("SourceCrate")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("StatusDescription")
-                        .HasColumnType("text");
-
-                    b.Property<int>("SubmittedById")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("TesId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("TesJson")
-                        .HasColumnType("text");
-
-                    b.Property<string>("TesName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("TreId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ParentID");
-
-                    b.HasIndex("ProjectId");
-
-                    b.HasIndex("SubmittedById");
-
-                    b.HasIndex("TreId");
-
-                    b.ToTable("Submission");
-                });
-
             modelBuilder.Entity("BL.Models.SubmissionCredentials", b =>
                 {
                     b.Property<int>("Id")
@@ -187,43 +44,6 @@ namespace TRE_API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SubmissionCredentials");
-                });
-
-            modelBuilder.Entity("BL.Models.SubmissionFile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("SubmisionBucketFullPath")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("SubmissionId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("TreBucketFullPath")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SubmissionId");
-
-                    b.ToTable("SubmissionFile");
                 });
 
             modelBuilder.Entity("BL.Models.TESKstatus", b =>
@@ -271,38 +91,6 @@ namespace TRE_API.Migrations
                     b.HasKey("id");
 
                     b.ToTable("TESK_Audit");
-                });
-
-            modelBuilder.Entity("BL.Models.Tre", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("About")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("AdminUsername")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("FormData")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("LastHeartBeatReceived")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Tre");
                 });
 
             modelBuilder.Entity("BL.Models.TreAuditLog", b =>
@@ -362,7 +150,7 @@ namespace TRE_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("TreMembershipDecision");
+                    b.ToTable("MembershipDecisions");
                 });
 
             modelBuilder.Entity("BL.Models.TreProject", b =>
@@ -439,140 +227,6 @@ namespace TRE_API.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("BL.Models.User", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("FormData")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("User");
-                });
-
-            modelBuilder.Entity("BL.Models.ViewModels.ProjectTreDecision", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Decision")
-                        .HasColumnType("boolean");
-
-                    b.Property<int?>("SubmissionProjId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("TreId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SubmissionProjId");
-
-                    b.HasIndex("TreId");
-
-                    b.ToTable("ProjectTreDecisions");
-                });
-
-            modelBuilder.Entity("ProjectTre", b =>
-                {
-                    b.Property<int>("ProjectsId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TresId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ProjectsId", "TresId");
-
-                    b.HasIndex("TresId");
-
-                    b.ToTable("ProjectTre");
-                });
-
-            modelBuilder.Entity("ProjectUser", b =>
-                {
-                    b.Property<int>("ProjectsId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UsersId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ProjectsId", "UsersId");
-
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("ProjectUser");
-                });
-
-            modelBuilder.Entity("BL.Models.HistoricStatus", b =>
-                {
-                    b.HasOne("BL.Models.Submission", "Submission")
-                        .WithMany("HistoricStatuses")
-                        .HasForeignKey("SubmissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Submission");
-                });
-
-            modelBuilder.Entity("BL.Models.Submission", b =>
-                {
-                    b.HasOne("BL.Models.Submission", "Parent")
-                        .WithMany("Children")
-                        .HasForeignKey("ParentID");
-
-                    b.HasOne("BL.Models.Project", "Project")
-                        .WithMany("Submissions")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BL.Models.User", "SubmittedBy")
-                        .WithMany("Submissions")
-                        .HasForeignKey("SubmittedById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BL.Models.Tre", "Tre")
-                        .WithMany("Submissions")
-                        .HasForeignKey("TreId");
-
-                    b.Navigation("Parent");
-
-                    b.Navigation("Project");
-
-                    b.Navigation("SubmittedBy");
-
-                    b.Navigation("Tre");
-                });
-
-            modelBuilder.Entity("BL.Models.SubmissionFile", b =>
-                {
-                    b.HasOne("BL.Models.Submission", "Submission")
-                        .WithMany("SubmissionFiles")
-                        .HasForeignKey("SubmissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Submission");
-                });
-
             modelBuilder.Entity("BL.Models.TreMembershipDecision", b =>
                 {
                     b.HasOne("BL.Models.TreProject", "Project")
@@ -588,70 +242,6 @@ namespace TRE_API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BL.Models.ViewModels.ProjectTreDecision", b =>
-                {
-                    b.HasOne("BL.Models.Project", "SubmissionProj")
-                        .WithMany()
-                        .HasForeignKey("SubmissionProjId");
-
-                    b.HasOne("BL.Models.Tre", "Tre")
-                        .WithMany()
-                        .HasForeignKey("TreId");
-
-                    b.Navigation("SubmissionProj");
-
-                    b.Navigation("Tre");
-                });
-
-            modelBuilder.Entity("ProjectTre", b =>
-                {
-                    b.HasOne("BL.Models.Project", null)
-                        .WithMany()
-                        .HasForeignKey("ProjectsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BL.Models.Tre", null)
-                        .WithMany()
-                        .HasForeignKey("TresId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ProjectUser", b =>
-                {
-                    b.HasOne("BL.Models.Project", null)
-                        .WithMany()
-                        .HasForeignKey("ProjectsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BL.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("BL.Models.Project", b =>
-                {
-                    b.Navigation("Submissions");
-                });
-
-            modelBuilder.Entity("BL.Models.Submission", b =>
-                {
-                    b.Navigation("Children");
-
-                    b.Navigation("HistoricStatuses");
-
-                    b.Navigation("SubmissionFiles");
-                });
-
-            modelBuilder.Entity("BL.Models.Tre", b =>
-                {
-                    b.Navigation("Submissions");
-                });
-
             modelBuilder.Entity("BL.Models.TreProject", b =>
                 {
                     b.Navigation("MemberDecisions");
@@ -660,11 +250,6 @@ namespace TRE_API.Migrations
             modelBuilder.Entity("BL.Models.TreUser", b =>
                 {
                     b.Navigation("MemberDecisions");
-                });
-
-            modelBuilder.Entity("BL.Models.User", b =>
-                {
-                    b.Navigation("Submissions");
                 });
 #pragma warning restore 612, 618
         }

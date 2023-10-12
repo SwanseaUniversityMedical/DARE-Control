@@ -1,6 +1,5 @@
 ﻿
 using BL.Models;
-using BL.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace TRE_API.Repositories.DbContexts
@@ -27,9 +26,7 @@ namespace TRE_API.Repositories.DbContexts
 
         public DbSet<TESKstatus> TESK_Status { get; set; }
         public DbSet<TeskAudit> TESK_Audit { get; set; }
-        public DbSet<ProjectTreDecision> ProjectTreDecisions { get; set; }
-
-        public DbSet<TreMembershipDecision> TreMembershipDecisions { get; set; }
+        
 
         
 

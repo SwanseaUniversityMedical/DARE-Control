@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+﻿using BL.Models.Enums;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BL.Models.ViewModels
+namespace BL.Models
 {
     public class ProjectTreDecision
     {
@@ -15,7 +16,7 @@ namespace BL.Models.ViewModels
 
         public virtual Tre? Tre { get; set; }
 
-        public bool Decision { get; set; } 
+        public Decision Decision { get; set; }
 
     }
 }
