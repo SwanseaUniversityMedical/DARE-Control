@@ -117,7 +117,7 @@ namespace TRE_API.Controllers
             public string OutputBucket { get; set; }
         }
 
-        public OutputBucketInfo GetOutputBucketGuts(string subId)
+        private OutputBucketInfo GetOutputBucketGuts(string subId)
         {
             var outputFolder = "";
             var paramlist = new Dictionary<string, string>();

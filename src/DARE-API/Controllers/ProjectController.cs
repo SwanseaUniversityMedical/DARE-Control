@@ -15,6 +15,7 @@ using EasyNetQ.Management.Client.Model;
 using System.Threading;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using BL.Models.APISimpleTypeReturns;
+using Amazon.Util.Internal;
 
 namespace DARE_API.Controllers
 {
@@ -502,16 +503,36 @@ namespace DARE_API.Controllers
             return minioEndPoint;
         }
 
-        [HttpGet("UploadToMinio")]
-        [AllowAnonymous]
-        public async Task<BoolReturn> UploadToMinio(string bucketName, string fileJson)
+        //[HttpGet("UploadToMinioOld")]
+        //[AllowAnonymous]
+        //public async Task<BoolReturn> UploadToMinioOld(string bucketName, string fileJson)
+        //{
+        //    IFormFile iFile = ConvertJsonToIFormFile(fileJson);
+
+        //    var submissionBucket = await _minioHelper.UploadFileAsync(_minioSettings, iFile, bucketName, iFile.Name);
+
+        //    return new BoolReturn();
+        //}
+
+        [HttpPost("UploadToMinio")]
+        public async Task<BoolReturn> UploadToMinio(string bucketName, IFormFile file)
         {
-            IFormFile iFile = ConvertJsonToIFormFile(fileJson);
+            if (file == null || file.Length == 0)
+                return new BoolReturn() { Result = false };
 
-            var submissionBucket = await _minioHelper.UploadFileAsync(_minioSettings, iFile, bucketName, iFile.Name);
+            try
+            {
+                var submissionBucket = await _minioHelper.UploadFileAsync(_minioSettings, file, bucketName, file.Name);
+                
 
-            return new BoolReturn();
+                return new BoolReturn() { Result = true };
+            }
+            catch (Exception ex)
+            {
+                return new BoolReturn() { Result = false };
+            }
         }
+
 
         private IFormFile ConvertJsonToIFormFile(string fileJson)
         {

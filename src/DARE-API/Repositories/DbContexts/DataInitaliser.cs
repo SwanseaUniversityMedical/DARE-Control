@@ -51,6 +51,7 @@ namespace DARE_API.Repositories.DbContexts
                 var patricia = CreateUser("Patricia", "Patricia@chi.swan.ac.uk");
                 var mahadi = CreateUser("mahadi", "mahadi@chi.swan.ac.uk");
                 var hazel = CreateUser("hazel", "hazel@chi.swan.ac.uk");
+                var testing = CreateUser("testing", "testing@chi.swan.ac.uk");
 
                 var sail = CreateTre("SAIL", "sailtreapi");
                 var dpuk = CreateTre("DPUK", "dpuktreapi");
@@ -69,6 +70,12 @@ namespace DARE_API.Repositories.DbContexts
                 AddMissingUser(head, gayathri);
                 AddMissingUser(head, patricia);
                 AddMissingUser(head, hazel);
+
+                AddMissingUser(head, testing);
+                AddMissingUser(shoulders, testing);
+                AddMissingUser(knees, testing);
+                AddMissingUser(toes, testing);
+
 
                 AddMissingTre(shoulders, sail);
                 AddMissingTre(shoulders, msregister);

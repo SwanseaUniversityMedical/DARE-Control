@@ -338,20 +338,16 @@ namespace DARE_FrontEnd.Controllers
             else
             {
 
-                var filestring = ConvertIFormFileToJson(model.File);
-
-                var jsonObject=JsonConvert.DeserializeObject<IFileData>(filestring);
-
                 var paramss = new Dictionary<string, string>();
 
                 paramss.Add("bucketName", model.SubmissionBucket);
-                paramss.Add("fileJson", filestring);
-
-                var uplodaResult = await _clientHelper.CallAPIWithoutModel<BoolReturn>("/api/Project/UploadToMinio", paramss);
-
+                
+                var uplodaResultTest = _clientHelper.CallAPIToSendFile<APIReturn>("/api/Project/UploadToMinio", "file", model.File, paramss).Result;
                 var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
 
-                imageUrl = "http://" + minioEndpoint.Url + "/browser/" + model.SubmissionBucket + "/" + jsonObject.FileName;
+                imageUrl = "http://" + minioEndpoint.Url + "/browser/" + model.SubmissionBucket + "/" + model.File.FileName;
+
+               
 
             }
 
