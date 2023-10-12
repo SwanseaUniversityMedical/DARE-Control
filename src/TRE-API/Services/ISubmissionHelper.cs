@@ -6,9 +6,9 @@ namespace TRE_API.Services
 {
     public interface ISubmissionHelper
     {
-        APIReturn? UpdateStatusForTre(string tesId, StatusType statusType, string? description);
+        APIReturn? UpdateStatusForTre(string subId, StatusType statusType, string? description);
         bool IsUserApprovedOnProject(int projectId, int userId);
         List<Submission>? GetWaitingSubmissionForTre();
-        void SendSumissionToHUTCH(Dictionary<string, string> SubmissionData);
+        void SendSumissionToHUTCH(Submission submission);
     }
 }

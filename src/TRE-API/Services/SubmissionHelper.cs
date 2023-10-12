@@ -13,38 +13,67 @@ namespace TRE_API.Services
         private readonly IHutchClientHelper _hutchHelper;
         private readonly IDareClientWithoutTokenHelper _dareHelper;
         private readonly ApplicationDbContext _dbContext;
+        private readonly MinioSettings _minioSettings;
         private readonly IBus _rabbit;
+        public string _hutchDbServer { get; set; }
+        public string _hutchDbPort { get; set; }
+        public string _hutchDbName { get; set; }
 
 
         public SubmissionHelper(ISignalRService signalRService, IDareClientWithoutTokenHelper helper,
-            ApplicationDbContext dbContext, IBus rabbit, IHutchClientHelper hutchHelper)
+            ApplicationDbContext dbContext, IBus rabbit, IHutchClientHelper hutchHelper, IConfiguration config, MinioSettings minioSettings)
         {
             
             _dareHelper = helper;
             _dbContext = dbContext;
             _rabbit = rabbit;
             _hutchHelper = hutchHelper;
+            _hutchDbName = config["Hutch:DbName"];
+            _hutchDbPort = config["Hutch:DbPort"];
+            _hutchDbServer = config["Hutch:DbServer"];
+            _minioSettings = minioSettings;
+
         }
 
-        public void SendSumissionToHUTCH(Dictionary<string, string> SubmissionData)
+        public void SendSumissionToHUTCH(Submission submission)
         {
+            Uri uri = new Uri(submission.DockerInputLocation);
+            string fileName = Path.GetFileName(uri.LocalPath);
+            var project = _dbContext.Projects.First(x => x.SubmissionProjectId == submission.Project.Id);
+            var job = new SubmitJobModel()
+            {
+                JobId = submission.Id.ToString(),
+                
+                DataAccess = new DatabaseConnectionDetails()
+                {
+                    Database = _hutchDbName,
+                    Hostname = _hutchDbServer,
+                    Port = int.Parse(_hutchDbPort)
+                },
+                CrateSource = new FileStorageDetails()
+                {
+                    Bucket = project.SubmissionBucketTre,
+                    Path = fileName,
+                    Host = _minioSettings.Url
+                }
+                
+            };
             var statusParams = new Dictionary<string, string>()
             {
-                { "tesId", SubmissionData["SubmissionId"] },
+                { "subId", submission.Id.ToString() },
                 { "statusType", StatusType.SendingFileToHUTCH.ToString() },
                 { "description", "" }
             };
             var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams);
 
-            var res = _hutchHelper.CallAPIWithoutModel<APIReturn>($"/api/jobs/{SubmissionData["SubmissionId"]}",
-                SubmissionData); //Need to update this when parameters are known
+            var res = _hutchHelper.CallAPI<SubmitJobModel, JobStatusModel>($"/api/jobs/", job); 
         }
 
-        public APIReturn? UpdateStatusForTre(string tesId, StatusType statusType, string? description)
+        public APIReturn? UpdateStatusForTre(string subId, StatusType statusType, string? description)
         {
             var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
                     new Dictionary<string, string>()
-                        { { "tesId", tesId }, { "statusType", statusType.ToString() }, { "description", description } })
+                        { { "subId", subId }, { "statusType", statusType.ToString() }, { "description", description } })
                 .Result;
             return result;
         }

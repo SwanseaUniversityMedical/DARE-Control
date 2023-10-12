@@ -251,7 +251,7 @@ namespace TRE_API
                     {
                         Log.Error("User {UserID}/project {ProjectId} is not value for this submission {submission}", aSubmission.SubmittedBy.Id, aSubmission.Project.Id, aSubmission);
                         // record error with submission layer
-                        var result = _subHelper.UpdateStatusForTre(aSubmission.TesId, StatusType.InvalidUser, "");
+                        var result = _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.InvalidUser, "");
                     }
                     else
                     {
@@ -303,12 +303,8 @@ namespace TRE_API
                             // TODO for rest API
                             try
                             {
-                                Dictionary<string, string> HUTCHVars = new Dictionary<string, string>()
-                                {
-                                    { "SubmissionId", aSubmission.Id.ToString()},
-                                    { "ContainerURL", aSubmission.SourceCrate}
-                                };
-                                _subHelper.SendSumissionToHUTCH(HUTCHVars);
+                                
+                                _subHelper.SendSumissionToHUTCH(aSubmission);
 
                             }
                             catch (Exception e)
@@ -330,7 +326,7 @@ namespace TRE_API
                         {
                             try
                             {
-                                var result = _subHelper.UpdateStatusForTre(aSubmission.TesId, StatusType.TransferredToPod, "");
+                                var result = _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.TransferredToPod, "");
                             }
                             catch (Exception e)
                             {

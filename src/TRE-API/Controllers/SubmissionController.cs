@@ -104,20 +104,20 @@ namespace TRE_API.Controllers
             var status = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
                 new Dictionary<string, string>()
                 {
-                    { "tesId", outputFolder.TesId }, { "statusType", StatusType.PodProcessingComplete.ToString() },
+                    { "subId", outputFolder.SubId }, { "statusType", StatusType.PodProcessingComplete.ToString() },
                     { "description", "" }
                 }).Result;
 
             return StatusCode(200, outputFolder.OutputBucket);
         }
 
-        private class OutputBucketInfo
+        public class OutputBucketInfo
         {
-            public string TesId { get; set; }
+            public string SubId { get; set; }
             public string OutputBucket { get; set; }
         }
 
-        private OutputBucketInfo GetOutputBucketGuts(string subId)
+        public OutputBucketInfo GetOutputBucketGuts(string subId)
         {
             var outputFolder = "";
             var paramlist = new Dictionary<string, string>();
@@ -141,7 +141,7 @@ namespace TRE_API.Controllers
             return new OutputBucketInfo()
             {
                 OutputBucket = outputFolder,
-                TesId = submission.TesId
+                SubId = submission.Id.ToString()
             };
         }
 
@@ -186,28 +186,28 @@ namespace TRE_API.Controllers
             //Update status of submission to "Sending to hutch for final packaging"
             var statusParams = new Dictionary<string, string>()
                                     {
-                                        { "tesId", review.subId.ToString() },
+                                        { "subId", review.subId.ToString() },
                                         { "statusType", StatusType.SendingToHUTCHForFinalPackaging.ToString() },
                                         { "description", "" }
                                     };
             var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams);
 
             Dictionary<string, bool> hutchRes = new Dictionary<string, bool>();
-            ApprovalTypeHUTCH approvalStatus;
+            ApprovalType approvalStatus;
             var approvedCount = review.fileResults.Count(x => x.approved);
             var rejectedCount = review.fileResults.Count(x => !x.approved);
 
             if (approvedCount == review.fileResults.Count)
             {
-                approvalStatus = ApprovalTypeHUTCH.FullyApproved;
+                approvalStatus = ApprovalType.FullyApproved;
             }
             else if (rejectedCount == review.fileResults.Count)
             {
-                approvalStatus = ApprovalTypeHUTCH.NotApproved;
+                approvalStatus = ApprovalType.NotApproved;
             }
             else
             {
-                approvalStatus = ApprovalTypeHUTCH.PartiallyApproved;
+                approvalStatus = ApprovalType.PartiallyApproved;
             }
             foreach (var i in review.fileResults)
             {
@@ -215,25 +215,19 @@ namespace TRE_API.Controllers
 
             }
 
-            ApprovalResult testvar = new ApprovalResult()
+            ApprovalResult hutchPayload = new ApprovalResult()
             {
                 Status = approvalStatus,
                 FileResults = hutchRes
             };
 
             //Not sure what the return type is
-            var HUTCHres = await _hutchHelper.CallAPI<ApprovalResult, APIReturn>($"/api/jobs/{review.subId}/approval", testvar);
+            var HUTCHres = await _hutchHelper.CallAPI<ApprovalResult, APIReturn>($"/api/jobs/{review.subId}/approval", hutchPayload);
 
             return StatusCode(200, HUTCHres);
         }
 
-        //TODO: Need to either update egressresult to be this or add as a new model in BL proj
-        public class ApprovalResult
-        {
-            public ApprovalTypeHUTCH Status { get; set; }
-
-            public Dictionary<string, bool> FileResults { get; set; } = new();
-        }
+        
 
 
         [Authorize(Roles = "dare-hutch-admin,dare-tre-admin")]
@@ -246,7 +240,7 @@ namespace TRE_API.Controllers
         {
 
             var paramlist = new Dictionary<string, string>();
-            paramlist.Add("submissionId", outcome.subId.ToString());
+            paramlist.Add("submissionId", outcome.subId);
             var submission = _dareHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist)
                 .Result;
 
@@ -266,7 +260,7 @@ namespace TRE_API.Controllers
             //For me to code
             var statusParams = new Dictionary<string, string>()
                                     {
-                                        { "tesId", outcome.subId.ToString() },
+                                        { "subId", outcome.subId.ToString() },
                                         { "statusType", StatusType.Completed.ToString() },
                                         { "description", "" }
                                     };
@@ -285,10 +279,10 @@ namespace TRE_API.Controllers
 
 
         [HttpPost("SendSubmissionToHUTCH")]
-        public IActionResult SendSubmissionToHUTCH(Dictionary<string, string> SubmissionData)
+        public IActionResult SendSubmissionToHUTCH(Submission sub)
         {
             //Update status of submission to "Sending to hutch"
-            _subHelper.SendSumissionToHUTCH(SubmissionData);
+            _subHelper.SendSumissionToHUTCH(sub);
 
             return StatusCode(200);
         }

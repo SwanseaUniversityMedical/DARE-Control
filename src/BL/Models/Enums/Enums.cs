@@ -165,13 +165,7 @@ namespace BL.Models.Enums
         Rejected = 2
     }
 
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum ApprovalTypeHUTCH
-    {
-        FullyApproved,
-        PartiallyApproved,
-        NotApproved
-    }
+    
 
     public enum EgressStatus
     {
