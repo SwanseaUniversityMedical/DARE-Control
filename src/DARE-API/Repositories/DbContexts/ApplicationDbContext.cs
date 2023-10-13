@@ -27,6 +27,11 @@ namespace DARE_API.Repositories.DbContexts
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<SubmissionFile> SubmissionFiles { get; set; }
 
+        public DbSet<ProjectTreDecision> ProjectTreDecisions { get; set; }
+
+        public DbSet<MembershipTreDecision> MembershipTreDecisions { get; set; }
+
+
 
 
     }

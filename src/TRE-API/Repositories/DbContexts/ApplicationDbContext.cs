@@ -27,7 +27,9 @@ namespace TRE_API.Repositories.DbContexts
 
         public DbSet<TESKstatus> TESK_Status { get; set; }
         public DbSet<TeskAudit> TESK_Audit { get; set; }
+        
 
+        
 
     }
 }

@@ -440,6 +440,102 @@ namespace DARE_API.Controllers
 
         }
 
+
+
+        [HttpPost("SyncTreProjectDecisions")]
+        [Authorize(Roles = "dare-tre-admin")]
+        public BoolReturn SyncTreProjectDecisions([FromBody] List<ProjectTreDecisionsDTO> decisions)
+        {
+            try
+            {
+                var result = new BoolReturn();
+                var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+                var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
+                if (tre == null)
+                {
+                    throw new Exception("User " + usersName + " doesn't have a tre");
+
+                }
+
+                foreach (var item in decisions)
+                {
+                    var dbproj = _DbContext.Projects.First(x => x.Id == item.ProjectId);
+                    var tredecision = _DbContext.ProjectTreDecisions.FirstOrDefault(x => x.SubmissionProj == dbproj && x.Tre == tre);
+                    if (tredecision == null)
+                    {
+                        tredecision = new ProjectTreDecision()
+                        {
+                            SubmissionProj = dbproj,
+                            Tre = tre,
+                        };
+                        _DbContext.ProjectTreDecisions.Add(tredecision);
+                    }
+                    tredecision.Decision = item.Decision;
+                }
+                _DbContext.SaveChanges();
+
+                
+                result.Result = true;
+                Log.Information("{Function} Tre {TreName} decisions synched", "SyncTreProjectDecisions", tre.Name);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "SyncTreProjectDecisions");
+                throw;
+            }
+
+
+        }
+
+        [HttpPost("SyncTreMembershipDecisions")]
+        [Authorize(Roles = "dare-tre-admin")]
+        public BoolReturn SyncTreMembershipDecisions([FromBody] List<MembershipTreDecisionDTO> decisions)
+        {
+            try
+            {
+                var result = new BoolReturn();
+                var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+                var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
+                if (tre == null)
+                {
+                    throw new Exception("User " + usersName + " doesn't have a tre");
+
+                }
+
+                foreach (var item in decisions)
+                {
+                    var dbproj = _DbContext.Projects.First(x => x.Id == item.ProjectId);
+                    var dbuser = _DbContext.Users.First(x => x.Id == item.UserId);
+                    var tredecision = _DbContext.MembershipTreDecisions.FirstOrDefault(x => x.SubmissionProj == dbproj && x.User == dbuser && x.Tre == tre);
+                    if (tredecision == null)
+                    {
+                        tredecision = new MembershipTreDecision()
+                        {
+                            SubmissionProj = dbproj,
+                            User = dbuser,
+                            Tre = tre,
+                        };
+                        _DbContext.MembershipTreDecisions.Add(tredecision);
+                    }
+                    tredecision.Decision = item.Decision;
+                }
+                _DbContext.SaveChanges();
+
+
+                result.Result = true;
+                Log.Information("{Function} Tre {TreName} membership decisions synched", "SyncTreMembershipDecisions", tre.Name);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "SyncTreMembershipDecisions");
+                throw;
+            }
+
+
+        }
+
         [HttpGet("GetTresInProject")]
         [AllowAnonymous]
         public List<Tre> GetTresInProject(int projectId)
