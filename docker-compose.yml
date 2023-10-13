@@ -48,6 +48,25 @@ services:
     ports:
       - 9000:9000
       - 9001:9001
+  minio2:
+    image: quay.io/minio/minio
+    container_name: minio2
+    restart: always
+    command: server /data --console-address ":9002"
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
+      - MINIO_IDENTITY_OPENID_CONFIG_URL=https://auth2.ukserp.ac.uk/realms/Dare-TRE/.well-known/openid-configuration
+      - MINIO_IDENTITY_OPENID_CLIENT_ID=Dare-TRE-Minio
+      - MINIO_IDENTITY_OPENID_CLIENT_SECRET=dZx08fCXVjonxBqg54CFvFv9MteoaqAT
+      - MINIO_IDENTITY_OPENID_DISPLAY_NAME=SSO_IDENTIFIER
+      - MINIO_IDENTITY_OPENID_SCOPES=openid
+      - MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC=on
+    volumes:
+      - minio_data:/data
+    ports:
+      - 9002:9002
+      - 9003:9003
   seq:
     image: datalust/seq:latest
     container_name: seq
@@ -72,6 +91,8 @@ volumes:
     postgres:
       driver: local
     minio_data:
+      driver: local
+    minio2_data:
       driver: local
     seq_data:
       driver: local

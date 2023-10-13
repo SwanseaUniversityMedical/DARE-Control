@@ -65,9 +65,13 @@ configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSetting
 builder.Services.AddSingleton(dataEgressKeyCloakSettings);
 
 
-var minioSettings = new MinioSettings();
-configuration.Bind(nameof(MinioSettings), minioSettings);
-builder.Services.AddSingleton(minioSettings);
+var minioSubSettings = new MinioSubSettings();
+configuration.Bind(nameof(MinioSubSettings), minioSubSettings);
+builder.Services.AddSingleton(minioSubSettings);
+
+var minioTRESettings = new MinioTRESettings();
+configuration.Bind(nameof(MinioTRESettings), minioTRESettings);
+builder.Services.AddSingleton(minioTRESettings);
 
 builder.Services.AddHostedService<ConsumeInternalMessageService>();
 
@@ -255,7 +259,8 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
 
     builder.Services.AddHttpContextAccessor();
 
-    builder.Services.AddScoped<IMinioHelper, MinioHelper>();
+    builder.Services.AddScoped<IMinioTreHelper, MinioTreHelper>();
+    builder.Services.AddScoped<IMinioSubHelper, MinioSubHelper>();
     builder.Services.AddScoped<ISignalRService, SignalRService>();
     builder.Services.AddMvc().AddControllersAsServices();
 
