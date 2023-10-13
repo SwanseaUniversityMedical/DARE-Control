@@ -3,6 +3,7 @@ using System;
 using DARE_API.Repositories.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DARE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231012122240_MembershipTreDecisions")]
+    partial class MembershipTreDecisions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -400,15 +403,15 @@ namespace DARE_API.Migrations
             modelBuilder.Entity("BL.Models.MembershipTreDecision", b =>
                 {
                     b.HasOne("BL.Models.Project", "SubmissionProj")
-                        .WithMany("MembershipTreDecision")
+                        .WithMany()
                         .HasForeignKey("SubmissionProjId");
 
                     b.HasOne("BL.Models.Tre", "Tre")
-                        .WithMany("MembershipTreDecision")
+                        .WithMany()
                         .HasForeignKey("TreId");
 
                     b.HasOne("BL.Models.User", "User")
-                        .WithMany("MembershipTreDecision")
+                        .WithMany()
                         .HasForeignKey("UserId");
 
                     b.Navigation("SubmissionProj");
@@ -507,8 +510,6 @@ namespace DARE_API.Migrations
 
             modelBuilder.Entity("BL.Models.Project", b =>
                 {
-                    b.Navigation("MembershipTreDecision");
-
                     b.Navigation("ProjectTreDecisions");
 
                     b.Navigation("Submissions");
@@ -525,8 +526,6 @@ namespace DARE_API.Migrations
 
             modelBuilder.Entity("BL.Models.Tre", b =>
                 {
-                    b.Navigation("MembershipTreDecision");
-
                     b.Navigation("ProjectTreDecisions");
 
                     b.Navigation("Submissions");
@@ -534,8 +533,6 @@ namespace DARE_API.Migrations
 
             modelBuilder.Entity("BL.Models.User", b =>
                 {
-                    b.Navigation("MembershipTreDecision");
-
                     b.Navigation("Submissions");
                 });
 #pragma warning restore 612, 618
