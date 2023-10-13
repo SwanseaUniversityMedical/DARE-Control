@@ -58,6 +58,7 @@ var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
 builder.Services.AddSingleton(treKeyCloakSettings);
 builder.Services.AddScoped<ITreClientWithoutTokenHelper, TreClientWithoutTokenHelper>();
+builder.Services.AddScoped<IMinioHelper, MinioHelper>();
 
 
 
