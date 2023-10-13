@@ -175,7 +175,9 @@ using (var scope = app.Services.CreateScope())
 
     db.Database.Migrate();
     var initialiser = new DataInitaliser(miniosettings, miniohelper, db, keytoken, userService);
-    initialiser.SeedData();
+
+    if (configuration.GetValue<bool>("Testdata"))
+        initialiser.SeedData();
 }
 
 
