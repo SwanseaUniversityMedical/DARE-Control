@@ -163,7 +163,7 @@ namespace TRE_API.Controllers
             {
                 SubmissionId = review.subId,
                 OutputBucket = bucket.OutputBucket,
-                SubFolder = bucket.OutputFolder
+                SubFolder = bucket.OutputFolder,
                 Status = EgressStatus.NotCompleted, 
                 Files = new List<EgressFile>()
             };
