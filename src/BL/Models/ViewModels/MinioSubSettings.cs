@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace BL.Models.ViewModels
 {
-    public class FetchFileMQ
+    public class MinioSubSettings: MinioSettings
     {
-        public string Url { get; set; }
-        public string BucketName { get; set; }
-        public string? Key { get; set; }
+       
     }
 }

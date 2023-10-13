@@ -35,11 +35,12 @@ namespace TRE_API.Controllers
         private readonly ApplicationDbContext _dbContext;
         private readonly IBus _rabbit;
         private readonly ISubmissionHelper _subHelper;
-        private readonly IMinioHelper _minioHelper;
-        private readonly MinioSettings _minioSettings;
+        private readonly IMinioSubHelper _minioSubHelper;
+        private readonly IMinioTreHelper _minioTreHelper;
+
 
         public SubmissionController(ISignalRService signalRService, IDareClientWithoutTokenHelper helper,
-            ApplicationDbContext dbContext, IBus rabbit, ISubmissionHelper subHelper, IDataEgressClientWithoutTokenHelper egressHelper, IHutchClientHelper hutchClientHelper, IMinioHelper minioHelper, MinioSettings minioSettings)
+            ApplicationDbContext dbContext, IBus rabbit, ISubmissionHelper subHelper, IDataEgressClientWithoutTokenHelper egressHelper, IHutchClientHelper hutchClientHelper, IMinioSubHelper minioSubHelper, IMinioTreHelper minioTreHelper)
         {
             _signalRService = signalRService;
             _dareHelper = helper;
@@ -48,8 +49,9 @@ namespace TRE_API.Controllers
             _dbContext = dbContext;
             _rabbit = rabbit;
             _subHelper = subHelper;
-            _minioHelper = minioHelper;
-            _minioSettings = minioSettings;
+            _minioTreHelper = minioTreHelper;
+            _minioSubHelper = minioSubHelper;
+            
         }
 
         [Authorize(Roles = "dare-tre-admin")]
@@ -114,7 +116,7 @@ namespace TRE_API.Controllers
                     { "description", "" }
                 }).Result;
 
-            return StatusCode(200, outputFolder);
+            return StatusCode(200, outputFolder.OutputBucket);
         }
 
         private class OutputBucketInfo
@@ -137,10 +139,10 @@ namespace TRE_API.Controllers
 
             var outputBucket = bucket.FirstOrDefault();
 
-            var isFolderExists = _minioHelper.FolderExists(_minioSettings, outputBucket.ToString(), "sub" + subId).Result;
+            var isFolderExists = _minioTreHelper.FolderExists(outputBucket.ToString(), "sub" + subId).Result;
             if (!isFolderExists)
             {
-                var submissionFolder = _minioHelper.CreateFolder(_minioSettings, outputBucket.ToString(), "sub" + subId).Result;
+                var submissionFolder = _minioTreHelper.CreateFolder(outputBucket.ToString(), "sub" + subId).Result;
             }
 
             outputFolder = outputBucket.ToString() + "/" + "sub" + subId;
@@ -241,8 +243,13 @@ namespace TRE_API.Controllers
             var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams);
 
             //Copy file to output bucket
-            var copyResult = _minioHelper.CopyObject(_minioSettings, sourceBucket, destinationBucket, "sub" + outcome.subId+"/" + outcome.file, "sub" + outcome.subId + "/" + outcome.file);
-
+            var source = _minioTreHelper.GetCopyObject(sourceBucket, "sub" + outcome.subId + "/" + outcome.file);
+            var copyResult = _minioSubHelper.CopyObjectToDestination(destinationBucket, "sub" + outcome.subId + "/" + outcome.file, source.Result);
+            
+            var boolresult = new BoolReturn()
+            {
+                Result = copyResult.Result
+            };
             return StatusCode(200, copyResult);
         }
 
@@ -278,12 +285,12 @@ namespace TRE_API.Controllers
 
         [AllowAnonymous]
         [HttpPost("TestFetchAndStore")]
-        public void TestFetchAndStore([FromBody] FetchFileMQ message)
+        public void TestFetchAndStore([FromBody] MQFetchFile message)
         {
 
             var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
 
-            _rabbit.Advanced.Publish(exch, RoutingConstants.FetchFile, false, new Message<FetchFileMQ>(message));
+            _rabbit.Advanced.Publish(exch, RoutingConstants.FetchFile, false, new Message<MQFetchFile>(message));
         }
 
         [Authorize(Roles = "dare-tre-admin")]

@@ -65,7 +65,7 @@ namespace DARE_API.Services
                 Uri uri = new Uri(sub.DockerInputLocation);
                 string fileName = Path.GetFileName(uri.LocalPath);
 
-                var messageMQ = new FetchFileMQ();
+                var messageMQ = new MQFetchFile();
                 messageMQ.Url = sub.SourceCrate;
                 messageMQ.BucketName = sub.Project.SubmissionBucket;
                 messageMQ.Key = fileName;
@@ -148,7 +148,7 @@ namespace DARE_API.Services
             try
             {
                 var message = Encoding.UTF8.GetString(msgBytes.Body);
-                await _minioHelper.RabbitExternalObject(JsonConvert.DeserializeObject<FetchFileMQ>(message));
+                await _minioHelper.RabbitExternalObject(JsonConvert.DeserializeObject<MQFetchFile>(message));
             }
             catch (Exception e)
             {

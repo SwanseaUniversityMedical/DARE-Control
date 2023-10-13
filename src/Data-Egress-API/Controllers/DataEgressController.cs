@@ -31,12 +31,13 @@ namespace Data_Egress_API.Controllers
     public class DataEgressController : ControllerBase
     {
         private readonly ApplicationDbContext _DbContext;
-        private readonly MinioSettings _minioSettings;
+        
         private readonly ITreClientWithoutTokenHelper _treClientHelper;
-        public DataEgressController(ApplicationDbContext repository, MinioSettings minioSettings, ITreClientWithoutTokenHelper treClientHelper)            
+        private readonly IMinioHelper _minioHelper;
+        public DataEgressController(ApplicationDbContext repository, ITreClientWithoutTokenHelper treClientHelper, IMinioHelper minioHelper)            
         {
             _DbContext = repository;
-            _minioSettings = minioSettings;
+            _minioHelper = minioHelper;
             _treClientHelper = treClientHelper;
             
         }
@@ -367,19 +368,10 @@ namespace Data_Egress_API.Controllers
             
 
             var egressFile = _DbContext.EgressFiles.First(x => x.Id == fileId);
-            var request = new GetObjectRequest
-            {
-                BucketName = egressFile.EgressSubmission.OutputBucket,
-                Key = egressFile.Name,
-            };
+           
 
-            var amazonS3Client = GenerateAmazonS3Client(_minioSettings);
-
-            var objectExists = await CheckObjectExists(_minioSettings, request.BucketName, request.Key);
-
-            if (objectExists)
-            {
-                var response = await amazonS3Client.GetObjectAsync(request);
+            
+                var response = await _minioHelper.GetCopyObject(egressFile.EgressSubmission.OutputBucket, egressFile.Name);
 
                 using (var responseStream = response.ResponseStream)
                 {
@@ -389,11 +381,7 @@ namespace Data_Egress_API.Controllers
                     // Create a FileContentResult and return it as the response
                     return File(fileBytes, GetContentType(egressFile.Name), egressFile.Name);
                 }
-            }
-            else
-            {
-                return NotFound("File not found");
-            }
+           
 
         }
 
