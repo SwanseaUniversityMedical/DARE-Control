@@ -371,7 +371,7 @@ namespace Data_Egress_API.Controllers
            
 
             
-                var response = await _minioHelper.GetCopyObject(egressFile.EgressSubmission.OutputBucket, egressFile.Name);
+                var response = await _minioHelper.GetCopyObject(egressFile.EgressSubmission.OutputBucket, egressFile.EgressSubmission.SubFolder + egressFile.Name);
 
                 using (var responseStream = response.ResponseStream)
                 {

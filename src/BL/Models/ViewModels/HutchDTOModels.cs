@@ -136,6 +136,9 @@ namespace BL.Models.ViewModels
 
     public class ApprovalResult
     {
+        public string OutputBucket  { get; set; }
+
+        public string SubFolder { get; set; }
         public ApprovalType Status { get; set; }
 
         public Dictionary<string, bool> FileResults { get; set; } = new();
