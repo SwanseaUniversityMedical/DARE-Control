@@ -155,6 +155,9 @@ namespace TRE_API.Services
             }
 
             await _DbContext.SaveChangesAsync();
+            await SyncProjectDecisions();
+            await SyncMembershipDecisions();
+
             return new BoolReturn()
             {
                 Result = true
@@ -162,7 +165,7 @@ namespace TRE_API.Services
 
         }
 
-        public async Task<bool> SyncDecisions()
+        public async Task<bool> SyncProjectDecisions()
         {
 
             var dbprojs = _DbContext.Projects.ToList();            
