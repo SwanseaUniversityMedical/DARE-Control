@@ -17,14 +17,14 @@ namespace TRE_API.Services
     {
         private readonly IBus _bus;
         private readonly ApplicationDbContext _dbContext;
-        private readonly IMinioHelper _minioHelper;
+        private readonly IMinioSubHelper _minioSubHelper;
 
 
         public ConsumeInternalMessageService(IBus bus , IServiceProvider serviceProvider)
         {
             _bus = bus;
             _dbContext = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            _minioHelper = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IMinioHelper>();
+            _minioSubHelper = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IMinioSubHelper>();
 
         }
 
@@ -48,7 +48,7 @@ namespace TRE_API.Services
             try
             {
                 var messageMQ = message.Body;
-                await _minioHelper.RabbitExternalObject(messageMQ);
+                await _minioSubHelper.RabbitExternalObject(messageMQ);
             }
             catch (Exception e)
             {
