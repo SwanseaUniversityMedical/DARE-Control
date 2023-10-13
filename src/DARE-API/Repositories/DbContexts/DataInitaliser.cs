@@ -42,35 +42,37 @@ namespace DARE_API.Repositories.DbContexts
                 var knees = CreateProject("Knees");
                 var toes = CreateProject("Toes");
 
-                var jaybee = CreateUser("jaybee", "justin@chi.swan.ac.uk");
-                var simon = CreateUser("simon", "simon@chi.swan.ac.uk");
-                var luke = CreateUser("luke.young", "luke.young@chi.swan.ac.uk");
-                var mikeb = CreateUser("michael", "michael@chi.swan.ac.uk");
-                var mikew = CreateUser("mikew", "mikew@chi.swan.ac.uk");
-                var gayathri = CreateUser("gayathri.menon", "gayathri.menon@chi.swan.ac.uk");
-                var patricia = CreateUser("Patricia", "Patricia@chi.swan.ac.uk");
-                var mahadi = CreateUser("mahadi", "mahadi@chi.swan.ac.uk");
-                var hazel = CreateUser("hazel", "hazel@chi.swan.ac.uk");
+                //var jaybee = CreateUser("jaybee", "justin@chi.swan.ac.uk");
+                //var simon = CreateUser("simon", "simon@chi.swan.ac.uk");
+                //var luke = CreateUser("luke.young", "luke.young@chi.swan.ac.uk");
+                //var mikeb = CreateUser("michael", "michael@chi.swan.ac.uk");
+                //var mikew = CreateUser("mikew", "mikew@chi.swan.ac.uk");
+                //var gayathri = CreateUser("gayathri.menon", "gayathri.menon@chi.swan.ac.uk");
+                //var patricia = CreateUser("Patricia", "Patricia@chi.swan.ac.uk");
+                //var mahadi = CreateUser("mahadi", "mahadi@chi.swan.ac.uk");
+                //var hazel = CreateUser("hazel", "hazel@chi.swan.ac.uk");
                 var testing = CreateUser("testing", "testing@chi.swan.ac.uk");
+                var noadtestinguser = CreateUser("noadtestinguser", "noadtestinguser@yahoo.co.uk");
 
                 var sail = CreateTre("SAIL", "sailtreapi");
                 var dpuk = CreateTre("DPUK", "dpuktreapi");
                 var alspac = CreateTre("ALSPAC", "alspactreapi");
                 var msregister = CreateTre("MSRegister", "msregistertreapi");
-
+                //noadtestinguser
                 AddMissingTre(head, sail);
                 AddMissingTre(head, dpuk);
                 AddMissingTre(head, alspac);
-                AddMissingUser(head, mahadi);
-                AddMissingUser(head, jaybee);
-                AddMissingUser(head, mikeb);
-                AddMissingUser(head, mikew);
-                AddMissingUser(head, simon);
-                AddMissingUser(head, luke);
-                AddMissingUser(head, gayathri);
-                AddMissingUser(head, patricia);
-                AddMissingUser(head, hazel);
+                //AddMissingUser(head, mahadi);
+                //AddMissingUser(head, jaybee);
+                //AddMissingUser(head, mikeb);
+                //AddMissingUser(head, mikew);
+                //AddMissingUser(head, simon);
+                //AddMissingUser(head, luke);
+                //AddMissingUser(head, gayathri);
+                //AddMissingUser(head, patricia);
+                //AddMissingUser(head, hazel);
 
+                AddMissingUser(head, noadtestinguser);
                 AddMissingUser(head, testing);
                 AddMissingUser(shoulders, testing);
                 AddMissingUser(knees, testing);
@@ -79,14 +81,14 @@ namespace DARE_API.Repositories.DbContexts
 
                 AddMissingTre(shoulders, sail);
                 AddMissingTre(shoulders, msregister);
-                AddMissingUser(shoulders, jaybee);
-                AddMissingUser(shoulders, simon);
-                AddMissingUser(shoulders, luke);
+                //AddMissingUser(shoulders, jaybee);
+                //AddMissingUser(shoulders, simon);
+                //AddMissingUser(shoulders, luke);
 
                 AddMissingTre(knees, dpuk);
-                AddMissingUser(knees, jaybee);
-                AddMissingUser(knees, simon);
-                AddMissingUser(knees, luke);
+                //AddMissingUser(knees, jaybee);
+                //AddMissingUser(knees, simon);
+                //AddMissingUser(knees, luke);
                 _dbContext.SaveChanges();
                 //AddSubmission("Sub1", "Head", "jaybee", "");
                 //AddSubmission("Sub2", "Head", "simon", "SAIL|DPUK");

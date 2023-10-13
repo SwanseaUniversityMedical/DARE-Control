@@ -4,6 +4,7 @@ using DARE_API.Services.Contract;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
+using System.IO;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -193,7 +194,16 @@ namespace DARE_API.Services
 
                 var content = new StringContent(updatedUserData, System.Text.Encoding.UTF8, "application/json");
                 var response = await httpClient.PutAsync("", content);
+                var stream = response.Content.ReadAsStream();
+                string content2 = "";
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    // Read the stream content into a string
+                    content2 = reader.ReadToEnd();
 
+                    // Output the string content
+
+                }
                 return response.IsSuccessStatusCode;
             }
         }

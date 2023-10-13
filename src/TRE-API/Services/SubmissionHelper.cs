@@ -13,7 +13,7 @@ namespace TRE_API.Services
         private readonly IHutchClientHelper _hutchHelper;
         private readonly IDareClientWithoutTokenHelper _dareHelper;
         private readonly ApplicationDbContext _dbContext;
-        private readonly MinioSettings _minioSettings;
+        private readonly MinioTRESettings _minioTreSettings;
         private readonly IBus _rabbit;
         public string _hutchDbServer { get; set; }
         public string _hutchDbPort { get; set; }
@@ -21,7 +21,7 @@ namespace TRE_API.Services
 
 
         public SubmissionHelper(ISignalRService signalRService, IDareClientWithoutTokenHelper helper,
-            ApplicationDbContext dbContext, IBus rabbit, IHutchClientHelper hutchHelper, IConfiguration config, MinioSettings minioSettings)
+            ApplicationDbContext dbContext, IBus rabbit, IHutchClientHelper hutchHelper, IConfiguration config, MinioTRESettings minioTreSettings)
         {
             
             _dareHelper = helper;
@@ -31,7 +31,7 @@ namespace TRE_API.Services
             _hutchDbName = config["Hutch:DbName"];
             _hutchDbPort = config["Hutch:DbPort"];
             _hutchDbServer = config["Hutch:DbServer"];
-            _minioSettings = minioSettings;
+            _minioTreSettings = minioTreSettings;
 
         }
 
@@ -54,7 +54,7 @@ namespace TRE_API.Services
                 {
                     Bucket = project.SubmissionBucketTre,
                     Path = fileName,
-                    Host = _minioSettings.Url
+                    Host = _minioTreSettings.Url
                 }
                 
             };

@@ -17,14 +17,14 @@ namespace TRE_API.Services
     {
         private readonly IBus _bus;
         private readonly ApplicationDbContext _dbContext;
-        private readonly IMinioHelper _minioHelper;
+        private readonly IMinioTreHelper _minioHelper;
 
 
         public ConsumeInternalMessageService(IBus bus , IServiceProvider serviceProvider)
         {
             _bus = bus;
             _dbContext = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            _minioHelper = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IMinioHelper>();
+            _minioHelper = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IMinioTreHelper>();
 
         }
 
