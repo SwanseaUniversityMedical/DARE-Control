@@ -32,6 +32,10 @@ namespace DARE_API.Services
 
                     JObject user = JObject.Parse(userAttributesJson);
 
+                    if (user["attributes"] == null)
+                    {
+                        user.Add("attributes", null);
+                    }
                     if (user["attributes"][attributeKey] != null)
                     {
                         var existingValues = user["attributes"][attributeKey].ToObject<JArray>();
@@ -150,11 +154,18 @@ namespace DARE_API.Services
             var jsonString = await response.Content.ReadAsStringAsync();
             try
             {
+                
                 JArray jsonObject = JsonConvert.DeserializeObject<JArray>(jsonString);
+                foreach (var item in jsonObject)
+                {
+                    if (item["username"].ToString().ToLower() == userName.ToLower())
+                    {
+                        return item["id"].ToString();
+                    }
+                }
 
-                var userId = jsonObject[0]["id"].ToString();
 
-                return userId;
+                throw new Exception("User not found");
             }
             catch (Exception ex)
             {

@@ -96,20 +96,12 @@ namespace BL.Services
             {
                 var usetoken = true;
                 if (string.IsNullOrEmpty(endPoint)) return new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.BadRequest };
-                if (_httpContextAccessor.HttpContext == null)
-                {
-                    usetoken = false;
-                };
-                usetoken = true;
+                
+                
                 HttpClient? apiClient;
-                if (usetoken)
-                {
+                
                     apiClient = await CreateClientWithKeycloak();
-                }
-                else
-                {
-                    apiClient = await CreateClientWithOutKeycloak();
-                }
+                
                     
                 endPoint = ConstructEndPoint(endPoint, paramlist);
 
@@ -197,22 +189,29 @@ namespace BL.Services
             }
             else
             {
-                accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    accessToken = "";
+                }
+                else
+                {
+                    accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
+                }
             }
             
             var apiClient = _httpClientFactory.CreateClient();
-            apiClient.SetBearerToken(accessToken);
+            if (!string.IsNullOrWhiteSpace(accessToken))
+            {
+
+
+                apiClient.SetBearerToken(accessToken);
+            }
+
             apiClient.DefaultRequestHeaders.Add("Accept", "application/json");
             return apiClient;
         }
 
-        protected async Task<HttpClient> CreateClientWithOutKeycloak()
-        {
-            
-            var apiClient = _httpClientFactory.CreateClient();
-            apiClient.DefaultRequestHeaders.Add("Accept", "application/json");
-            return apiClient;
-        }
+        
 
         #region Helpers
 
