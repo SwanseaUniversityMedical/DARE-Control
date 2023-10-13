@@ -522,7 +522,7 @@ namespace DARE_API.Controllers
 
             try
             {
-                var submissionBucket = await _minioHelper.UploadFileAsync(_minioSettings, file, bucketName, file.Name);
+                var submissionBucket = await _minioHelper.UploadFileAsync(file, bucketName, file.Name);
                 
 
                 return new BoolReturn() { Result = true };
