@@ -46,9 +46,9 @@ namespace TRE_API.Controllers
 
 
         [HttpGet("")]
-        public string Index([FromHeader] string MYCOOLToken)
+        public string Index([FromHeader] string Token)
         {
-            return _hasuraAuthenticationService.CheckeTokenAndGetRoles(MYCOOLToken);
+            return _hasuraAuthenticationService.CheckeTokenAndGetRoles(Token);
         }
     }
 }

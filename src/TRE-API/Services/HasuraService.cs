@@ -1,9 +1,11 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using TRE_API.Models;
 using TRE_API.Repositories.DbContexts;
+using TRE_API.Services;
 using TREAgent.Repositories;
 
 namespace TREAPI.Services
@@ -19,11 +21,13 @@ namespace TREAPI.Services
     {
         public readonly HasuraSettings _hasuraSettings;
         private readonly ApplicationDbContext _applicationDbContext;
+        private readonly IHasuraAuthenticationService _ihasuraAuthenticationService;
 
-        public HasuraService(HasuraSettings HasuraSettings, ApplicationDbContext applicationDbContext)
+        public HasuraService(IHasuraAuthenticationService iHasuraAuthenticationService, HasuraSettings HasuraSettings, ApplicationDbContext applicationDbContext)
         {
             _hasuraSettings = HasuraSettings;
             _applicationDbContext = applicationDbContext;
+            _ihasuraAuthenticationService = iHasuraAuthenticationService;
         }
 
         public async Task Run()
@@ -362,12 +366,14 @@ namespace TREAPI.Services
 
         public async Task<string> ExecuteQuery(string Token, string Query)
         {
-            
+
             // Set the endpoint URL
-            string endpointUrl = _hasuraSettings.HasuraURL + "/v2/query";
+
+            //need to get the headers to send from the token userid
+            string endpointUrl = _hasuraSettings.HasuraURL + "/v1/query";
             try
             {
-                var Result = await HttpClient(endpointUrl, Query);
+                var Result = await HttpClient(endpointUrl, Query, false, Token);
 
                 var Content = await Result.Content.ReadAsStringAsync();
 
@@ -387,7 +393,7 @@ namespace TREAPI.Services
         }
 
 
-        public async Task<HttpResponseMessage> HttpClient(string endpointUrl, string payload, bool doto = false)
+        public async Task<HttpResponseMessage> HttpClient(string endpointUrl, string payload, bool doto = false, string token = "")
         {
             HttpResponseMessage response = null;
             // Create the HttpClient
@@ -396,12 +402,29 @@ namespace TREAPI.Services
                 // Set the request headers
                 HttpRequestMessage re = new HttpRequestMessage(HttpMethod.Post, endpointUrl);
                 re.Headers.Add("x-hasura-admin-secret", _hasuraSettings.HasuraAdminSecret);
+
+          
+                if (token != "")
+                {
+                    var headerInfo = _applicationDbContext.DataToRoles.Where(x => x.Token == token).FirstOrDefault();
+                    if (headerInfo != null)
+                    {
+                        re.Headers.Add("x-hasura-role", headerInfo.Name);
+                        re.Headers.Add("x-hasura-user_id", headerInfo.Id.ToString());
+                    }
+
+                }
+
+                //need to deseralise token not in db
+
                 re.Content = new StringContent(payload, Encoding.UTF8, "application/json");
                 re.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 // Send the POST request to add the role and permission
                 response = await client.SendAsync(re);
 
                 // Check if the request was successful
+
+                //What is doto John?
                 if (response.IsSuccessStatusCode)
                 {
                     if (doto)
