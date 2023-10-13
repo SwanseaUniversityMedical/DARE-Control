@@ -74,7 +74,7 @@ namespace DARE_API.Controllers
                 {
                     project.SubmissionBucket = GenerateRandomName(project.Name.ToLower()) + "submission";
                     project.OutputBucket = GenerateRandomName(project.Name.ToLower()) + "output";
-                    var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, project.SubmissionBucket);
+                    var submissionBucket = await _minioHelper.CreateBucket(project.SubmissionBucket);
                     if (!submissionBucket)
                     {
                         Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SaveProject", project.SubmissionBucket);
@@ -87,7 +87,7 @@ namespace DARE_API.Controllers
                             Log.Error("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.", "SaveProject", project.SubmissionBucket);
                         }
                     }
-                    var outputBucket = await _minioHelper.CreateBucket(_minioSettings, project.OutputBucket);
+                    var outputBucket = await _minioHelper.CreateBucket(project.OutputBucket);
                     if (!outputBucket)
                     {
                         Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SaveProject", project.OutputBucket);
@@ -563,7 +563,7 @@ namespace DARE_API.Controllers
         [HttpPost("TestFetchAndStoreObject")]
         public async Task<IActionResult> TestFetchAndStoreObject(testFetch testf)
         {
-            await _minioHelper.FetchAndStoreObject(testf.url, _minioSettings, testf.bucketName, testf.key);
+            await _minioHelper.FetchAndStoreObject(testf.url,testf.bucketName, testf.key);
 
             return Ok();
         }
@@ -604,7 +604,7 @@ namespace DARE_API.Controllers
         {
             IFormFile iFile = ConvertJsonToIFormFile(fileJson);
 
-            var submissionBucket = await _minioHelper.UploadFileAsync(_minioSettings, iFile, bucketName, iFile.Name);
+            var submissionBucket = await _minioHelper.UploadFileAsync(iFile, bucketName, iFile.Name);
 
             return new BoolReturn();
         }
