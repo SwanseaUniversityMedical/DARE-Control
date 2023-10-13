@@ -49,6 +49,19 @@ namespace TRE_UI.Controllers
             return View(members);
         }
 
+        [HttpGet]
+        public IActionResult EditSubmissions(int projectId)
+
+        {
+            var paramlist = new Dictionary<string, string>
+            {
+                { "projectId",projectId.ToString() }
+            };
+            var members = _treclientHelper.CallAPIWithoutModel<List<Submission>>(
+                "/api/Approval/GetSubmissions/", paramlist).Result;
+
+            return View(members);
+        }
 
         //UpdateMembershipDecisions
         [HttpPost]

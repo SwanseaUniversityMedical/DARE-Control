@@ -1,0 +1,43 @@
+﻿@using BL.Models.Enums
+@model List<BL.Models.TreProject>
+@if (Model.Count == 0)
+{
+    <h3 class="fs-3 mb-0">No records found!</h3>
+}
+
+else
+{
+
+<div class="container-lg mt-4 p-4 bg-white border-1 shadow-sm">
+
+  
+
+    <div class="mt-4">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="row">
+                <div class="col-lg-5 col-md-6">
+                    <ul class="list-group">
+                        @foreach (var submission in Model)
+                        {
+                            <li class="list-group-item justify-content-between d-flex">
+                               @* <a href="@Url.Action("GetASubmission", "Submission", new { id = submission. })">@submission.TesName</a>
+*@
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+     
+          
+        </div>
+        <div class="mt-4">
+            <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
+            </ul>
+
+        
+        </div>
+
+
+    </div>
+</div>
+}

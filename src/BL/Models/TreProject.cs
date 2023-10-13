@@ -9,6 +9,9 @@ namespace BL.Models
         public int Id { get; set; }
         [Display(Name = "Submission Id")]
         public int SubmissionProjectId { get; set; }
+
+        [Display(Name = "Submissions")]
+        public virtual List<Submission>? Submissions { get; set; }
         public string? UserName { get; set; }   
         public string? Password { get; set; }
 
@@ -18,8 +21,6 @@ namespace BL.Models
 
         [Display(Name = "Membership Decisions")]
         public virtual List<TreMembershipDecision>? MemberDecisions { get; set; }
-        [Display(Name = "Submissions")]
-        public virtual List<Submission>? Submissions { get; set; }
 
         [Display(Name = "Local Name")]
         public string? LocalProjectName { get; set; }

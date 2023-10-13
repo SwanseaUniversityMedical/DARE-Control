@@ -64,7 +64,7 @@
                             </a>
                         </td>
                         <td>
-                            <a href="@Url.Action("EditMemberships", new { submissionId = project.SubmissionProjectId, showOnlyUnprocessed = false })#submisions" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                            <a href="@Url.Action("EditSubmissions", new { projectId = project.Id})#submisions" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
                                 @project.Submissions.Count Submissions
                             </a>
                         </td>

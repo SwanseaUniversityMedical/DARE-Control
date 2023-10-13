@@ -16,7 +16,7 @@ namespace TRE_API.Repositories.DbContexts
         {
 
         }
-
+        public DbSet<Submission> Submissions { get; set; }
         public DbSet<TreUser> Users { get; set; }
         public DbSet<TreProject> Projects { get; set; }
         public DbSet<TreMembershipDecision> MembershipDecisions { get; set; }

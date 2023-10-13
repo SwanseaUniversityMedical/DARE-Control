@@ -12,7 +12,7 @@ using TRE_API.Repositories.DbContexts;
 namespace TRE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231012103654_initialMigration")]
+    [Migration("20231012111906_initialMigration")]
     partial class initialMigration
     {
         /// <inheritdoc />
@@ -197,7 +197,7 @@ namespace TRE_API.Migrations
 
                     b.HasIndex("TreProjectId");
 
-                    b.ToTable("Submission");
+                    b.ToTable("Submissions");
                 });
 
             modelBuilder.Entity("BL.Models.SubmissionFile", b =>

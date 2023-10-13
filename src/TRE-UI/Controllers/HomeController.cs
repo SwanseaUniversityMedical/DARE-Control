@@ -37,6 +37,7 @@ namespace TRE_UI.Controllers
 
                 return RedirectToAction("UpdateCredentials", "DataEgressCredentials");
             }
+
             return View();
         }
      

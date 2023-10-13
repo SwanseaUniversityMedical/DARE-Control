@@ -194,7 +194,7 @@ namespace TRE_API.Migrations
 
                     b.HasIndex("TreProjectId");
 
-                    b.ToTable("Submission");
+                    b.ToTable("Submissions");
                 });
 
             modelBuilder.Entity("BL.Models.SubmissionFile", b =>

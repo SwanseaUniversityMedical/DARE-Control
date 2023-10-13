@@ -46,7 +46,16 @@ namespace TRE_API.Controllers
                 (!showOnlyUnprocessed || x.Decision == Decision.Undecided)).ToList();
         }
 
+        //[Authorize(Roles = "dare-tre-admin")]
+        //[HttpGet("GetSubmissions")]
+        //public List<TreProject> GetSubmissions(int projectId, bool showOnlyUnprocessed)
+        //{
+        //    return _DbContext.Projects.Where(x =>
+        //        (projectId <= 0 || x.Id == projectId) &&
+        //        (!showOnlyUnprocessed || x.Decision == Decision.Undecided|| x.SubmissionProjectId == )).ToList();
+        //}
 
+       
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllTreProjects")]
