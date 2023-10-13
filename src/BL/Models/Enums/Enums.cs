@@ -83,7 +83,7 @@ namespace BL.Models.Enums
         /// <summary>
         /// Hutch has queued the Crate to be executed.
         /// </summary>
-        [Display(Name = "Create queued")]
+        [Display(Name = "Crate queued")]
         Queued = 32,
 
         /// <summary>

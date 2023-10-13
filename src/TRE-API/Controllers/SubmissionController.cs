@@ -114,7 +114,7 @@ namespace TRE_API.Controllers
                     { "description", "" }
                 }).Result;
 
-            return StatusCode(200, outputFolder);
+            return StatusCode(200, outputFolder.OutputBucket);
         }
 
         private class OutputBucketInfo
@@ -242,7 +242,10 @@ namespace TRE_API.Controllers
 
             //Copy file to output bucket
             var copyResult = _minioHelper.CopyObject(_minioSettings, sourceBucket, destinationBucket, "sub" + outcome.subId+"/" + outcome.file, "sub" + outcome.subId + "/" + outcome.file);
-
+            var boolresult = new BoolReturn()
+            {
+                Result = copyResult.Result
+            };
             return StatusCode(200, copyResult);
         }
 

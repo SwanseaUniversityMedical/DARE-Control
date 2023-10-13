@@ -211,7 +211,7 @@ namespace BL.Services
 
         public async Task<bool> RabbitExternalObject(string msgBytes)
         {
-            var FileInfo= JsonConvert.DeserializeObject<MQFetchFile>(msgBytes);
+            var FileInfo = JsonConvert.DeserializeObject<MQFetchFile>(msgBytes);
             if (FileInfo == null)
             {
                 return false;
