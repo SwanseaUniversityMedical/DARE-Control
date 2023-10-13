@@ -12,9 +12,8 @@ using BL.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using BL.Models.ViewModels;
-using Data_Egress_API.Services.SignalR;
+
 using Microsoft.AspNetCore.Http.Connections;
-using Data_Egress_API.Services.Contract;
 using Data_Egress_API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -52,22 +51,21 @@ builder.Services.AddSingleton(dataEgressKeyCloakSettings);
 var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
-builder.Services.AddScoped<ISignalRService, SignalRService>();
 
 
-var submissionKeyCloakSettings = new BaseKeyCloakSettings();
-configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
-builder.Services.AddSingleton(submissionKeyCloakSettings);
-builder.Services.AddScoped<IDataClientWithoutTokenHelper, DataClientWithoutTokenHelper>();
 
 var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
 builder.Services.AddSingleton(treKeyCloakSettings);
+builder.Services.AddScoped<ITreClientWithoutTokenHelper, TreClientWithoutTokenHelper>();
+builder.Services.AddScoped<IMinioHelper, MinioHelper>();
+
+
 
 var encryptionSettings = new EncryptionSettings();
 configuration.Bind(nameof(encryptionSettings), encryptionSettings);
 builder.Services.AddSingleton(encryptionSettings);
-builder.Services.AddScoped<IKeycloakTokenHelper, KeycloakTokenHelper>();
+
 builder.Services.AddScoped<IEncDecHelper, EncDecHelper>();
 
 var TVP = new TokenValidationParameters
@@ -145,6 +143,17 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var encDec = scope.ServiceProvider.GetRequiredService<IEncDecHelper>();
+    db.Database.Migrate();
+    var initialiser = new DataInitaliser(db, encDec);
+    initialiser.SeedData();
+
+}
+
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedProto
@@ -258,6 +267,11 @@ void AddServices(WebApplicationBuilder builder)
                 Type = ReferenceType.SecurityScheme
             }
         };
+        c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            { securityScheme, new string[] { } }
+        });
 
     }
     );
@@ -271,10 +285,7 @@ void AddServices(WebApplicationBuilder builder)
 }
 //for SignalR
 app.UseCors();
-app.MapHub<SignalRService>("/signalRHub", options =>
-{
-    options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
-}).RequireCors(MyAllowSpecificOrigins);
+
 app.Run();
 
 

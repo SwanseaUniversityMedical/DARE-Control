@@ -14,7 +14,7 @@ namespace BL.Models.ViewModels
 
     public class EgressResult
     {
-        public string fileName { get; set; }
+        public string? fileName { get; set; }
         public bool approved { get; set; } 
     }
 }

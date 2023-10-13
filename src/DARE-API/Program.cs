@@ -17,6 +17,7 @@ using BL.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using BL.Models.ViewModels;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -105,7 +106,7 @@ builder.Services.AddAuthentication(options =>
                 }
             };
         }
-
+        
         options.Authority = submissionKeyCloakSettings.Authority;
         options.Audience = submissionKeyCloakSettings.ClientId;          
         options.MetadataAddress = submissionKeyCloakSettings.MetadataAddress;
@@ -118,6 +119,8 @@ builder.Services.AddAuthentication(options =>
 
     });
 
+
+
 // - authorize here
 builder.Services.AddAuthorization(options =>
 {
@@ -127,6 +130,7 @@ builder.Services.AddAuthorization(options =>
 var app = builder.Build();
 
 var serviceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
@@ -213,7 +217,7 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
     builder.Services.AddHttpContextAccessor();
 
 
-    builder.Services.AddScoped<IMinioService, MinioService>();
+    
     builder.Services.AddScoped<IMinioHelper, MinioHelper>();
     builder.Services.AddScoped<IKeycloakMinioUserService, KeycloakMinioUserService>();
     builder.Services.AddScoped<IKeyclockTokenAPIHelper, KeyclockTokenAPIHelper>();

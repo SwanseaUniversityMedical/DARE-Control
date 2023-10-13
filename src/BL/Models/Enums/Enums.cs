@@ -83,7 +83,7 @@ namespace BL.Models.Enums
         /// <summary>
         /// Hutch has queued the Crate to be executed.
         /// </summary>
-        [Display(Name = "Create queued")]
+        [Display(Name = "Crate queued")]
         Queued = 32,
 
         /// <summary>
@@ -159,9 +159,21 @@ namespace BL.Models.Enums
 
     public enum FileStatus
     {
-        ReadyToProcess = 0,
+        Undecided = 0,
         Approved = 1,
         Rejected = 2
+    }
+
+    public enum EgressStatus
+    {
+        [Display(Name = "Not completed")]
+        NotCompleted = 0,
+        [Display(Name = "Fully Approved")]
+        FullyApproved = 1,
+        [Display(Name = "Fully Rejected")]
+        FullyRejected = 2,
+        [Display(Name = "Partially Approved")]
+        PartiallyApproved = 3
     }
 
 
