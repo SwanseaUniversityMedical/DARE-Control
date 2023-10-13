@@ -41,17 +41,17 @@ namespace TRE_API
         private readonly IServiceProvider _serviceProvider;
         private readonly ApplicationDbContext _dbContext;
         private readonly ISubmissionHelper _subHelper;
-        private readonly MinioSettings _minioSettings;
-        private readonly IMinioHelper _minioHelper;
         
-        public DoAgentWork(IServiceProvider serviceProvider, ApplicationDbContext dbContext, ISubmissionHelper subHelper, MinioSettings minioSettings, IMinioHelper minioHelper)
+        private readonly IMinioSubHelper _minioSubHelper;
+        private readonly IMinioTreHelper _minioTreHelper;
+        public DoAgentWork(IServiceProvider serviceProvider, ApplicationDbContext dbContext, ISubmissionHelper subHelper,  IMinioTreHelper minioTreHelper, IMinioSubHelper minioSubHelper)
         {
             _serviceProvider = serviceProvider;
             _dbContext = dbContext;
             _subHelper = subHelper;
-            _minioSettings = minioSettings;
-            _minioHelper = minioHelper;
             
+            _minioTreHelper = minioTreHelper;
+            _minioSubHelper = minioSubHelper;
         }
 
         public void testing()
@@ -267,7 +267,9 @@ namespace TRE_API
                             foreach (var proj in subProj)
                             {
                                 var destinationBucket = proj.SubmissionBucketTre;
-                                var copyResult = _minioHelper.CopyObject(_minioSettings, sourceBucket, destinationBucket, fileName, fileName);
+                                var source =  _minioSubHelper.GetCopyObject(sourceBucket, fileName);
+                                var result = _minioTreHelper.CopyObjectToDestination(destinationBucket, fileName, source.Result);
+
                             }
                         }
                         catch (Exception ex)

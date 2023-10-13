@@ -1,22 +1,24 @@
-﻿using BL.Models.ViewModels;
+﻿using Amazon.S3.Model;
+using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
 
 namespace BL.Services
 {
     public interface IMinioHelper
     {
-        Task<bool> CheckBucketExists(MinioSettings minioSettings, string bucketName = "");
-        Task<bool> CreateBucket(MinioSettings minioSettings, string bucketName = "");
-        Task<bool> UploadFileAsync(MinioSettings minioSettings, IFormFile? filePath, string bucketName = "", string objectName = "");
-        Task<bool> DownloadFileAsync(MinioSettings minioSettings, string bucketName = "", string objectName = "");
-        Task<bool> CheckObjectExists(MinioSettings minioSettings, string bucketName, string objectKey);
-        Task<bool> FetchAndStoreObject(string url, MinioSettings minioSettings, string bucketName, string key);
+        Task<bool> CheckBucketExists(string bucketName = "");
+        Task<bool> CreateBucket(string bucketName = "");
+        Task<bool> UploadFileAsync(IFormFile? filePath, string bucketName = "", string objectName = "");
+        Task<bool> DownloadFileAsync(string bucketName = "", string objectName = "");
+        Task<bool> CheckObjectExists(string bucketName, string objectKey);
+        Task<bool> FetchAndStoreObject(string url, string bucketName, string key);
         Task<bool> RabbitExternalObject(MQFetchFile msgBytes);
         Task<bool> CreateBucketPolicy(string bucketName);
-        Task<bool> CopyObject(MinioSettings minioSettings, string sourceBucketName, string destinationBucketName, string sourceObjectKey, string destinationObjectKey);
-        Task<string> ShareMinioObject(MinioSettings minioSettings, string bucketName, string objectKey);
-        Task<bool> FolderExists(MinioSettings minioSettings, string bucketName, string folderName);
-        Task<bool> CreateFolder(MinioSettings minioSettings, string bucketName, string folderName);
+        Task<bool> CopyObjectToDestination(string destinationBucketName, string destinationObjectKey, GetObjectResponse response);
+        Task<GetObjectResponse> GetCopyObject(string sourceBucketName, string sourceObjectKey);
+        Task<string> ShareMinioObject(string bucketName, string objectKey);
+        Task<bool> FolderExists(string bucketName, string folderName);
+        Task<bool> CreateFolder(string bucketName, string folderName);
 
     }
 }

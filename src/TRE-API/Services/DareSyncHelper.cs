@@ -12,9 +12,9 @@ namespace TRE_API.Services
     {
         public ApplicationDbContext _DbContext { get; set; }
         public IDareClientWithoutTokenHelper _dareclientHelper { get; set; }
-        private readonly MinioSettings _minioSettings;
-        private readonly IMinioHelper _minioHelper;
-        public DareSyncHelper(ApplicationDbContext dbContext, IDareClientWithoutTokenHelper dareClient, MinioSettings minioSettings, IMinioHelper minioHelper)
+        private readonly MinioTRESettings _minioSettings;
+        private readonly IMinioTreHelper _minioHelper;
+        public DareSyncHelper(ApplicationDbContext dbContext, IDareClientWithoutTokenHelper dareClient, MinioTRESettings minioSettings, IMinioTreHelper minioHelper)
         {
             _DbContext = dbContext;
             _dareclientHelper = dareClient;
@@ -43,13 +43,13 @@ namespace TRE_API.Services
             {
                 var submission = project.SubmissionBucket.ToLower() + "tre";
                 var output = project.OutputBucket.ToLower() + "tre";
-                var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, submission);
+                var submissionBucket = await _minioHelper.CreateBucket(submission);
                 if (!submissionBucket)
                 {
                     Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SyncSubmissionWithTre", submission);
                     submission = "";
                 }
-                var outputBucket = await _minioHelper.CreateBucket(_minioSettings, output);
+                var outputBucket = await _minioHelper.CreateBucket(output);
                 if (!outputBucket)
                 {
                     Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SyncSubmissionWithTre", output);

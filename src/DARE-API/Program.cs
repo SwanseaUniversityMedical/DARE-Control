@@ -221,7 +221,7 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
     builder.Services.AddHttpContextAccessor();
 
 
-    builder.Services.AddScoped<IMinioService, MinioService>();
+    
     builder.Services.AddScoped<IMinioHelper, MinioHelper>();
     builder.Services.AddScoped<IKeycloakMinioUserService, KeycloakMinioUserService>();
     builder.Services.AddScoped<IKeyclockTokenAPIHelper, KeyclockTokenAPIHelper>();
