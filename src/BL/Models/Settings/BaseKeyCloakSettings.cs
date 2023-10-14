@@ -20,7 +20,7 @@ namespace BL.Models.Settings
 
         public string ProxyAddresURL { get; set; }
         public string TokenRefreshSeconds { get; set; }
-        
+
 
         public string RedirectURL { get; set; }
 
@@ -31,13 +31,17 @@ namespace BL.Models.Settings
         public string Server { get; set; }
         public string Realm { get; set; }
 
-        public HttpClientHandler getProxyHandler()
-        {
-            return  new HttpClientHandler
+        public HttpClientHandler getProxyHandler {
+            get
             {
-                Proxy = new WebProxy(ProxyAddresURL), // Replace with your proxy server URL
-                UseProxy = Proxy
-            };
+                HttpClientHandler handler = new HttpClientHandler
+                {
+                    Proxy = new WebProxy(ProxyAddresURL), // Replace with your proxy server URL
+                    UseProxy = Proxy
+                };
+                return handler;
+            }
         }
+
     }
 }
