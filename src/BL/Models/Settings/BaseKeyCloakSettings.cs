@@ -1,4 +1,7 @@
-﻿namespace BL.Models.Settings
+﻿using System.Runtime;
+using System.Net;
+
+namespace BL.Models.Settings
 {
     public class BaseKeyCloakSettings
     {
@@ -27,5 +30,14 @@
         public string? ValidAudiences { get; set; }
         public string Server { get; set; }
         public string Realm { get; set; }
+
+        public HttpClientHandler getProxyHandler()
+        {
+            return  new HttpClientHandler
+            {
+                Proxy = new WebProxy(ProxyAddresURL), // Replace with your proxy server URL
+                UseProxy = Proxy
+            };
+        }
     }
 }

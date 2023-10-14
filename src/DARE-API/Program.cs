@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using BL.Models.ViewModels;
 using System.Security.Claims;
+using System.Runtime;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,10 +67,12 @@ var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
 builder.Services.AddSingleton(submissionKeyCloakSettings);
 
-
 var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
+
+
+
 
 builder.Services.AddHostedService<ConsumeInternalMessageService>();
 var TVP = new TokenValidationParameters
