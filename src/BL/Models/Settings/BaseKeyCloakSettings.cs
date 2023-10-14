@@ -36,7 +36,7 @@ namespace BL.Models.Settings
             {
                 HttpClientHandler handler = new HttpClientHandler
                 {
-                    Proxy = new WebProxy(ProxyAddresURL), // Replace with your proxy server URL
+                    Proxy = new WebProxy(ProxyAddresURL,true), // Replace with your proxy server URL
                     UseProxy = Proxy
                 };
                 return handler;
