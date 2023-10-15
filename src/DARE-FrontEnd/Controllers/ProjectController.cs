@@ -64,7 +64,7 @@ namespace DARE_FrontEnd.Controllers
                 SubmissionBucket = project.SubmissionBucket,
                 OutputBucket = project.OutputBucket,
                 MinioEndpoint = minioEndpoint.Url,
-                Submissions = project.Submissions,
+                Submissions = project.Submissions.Where(x => x.Parent == null).ToList(),
                 UserItemList = userItems,
                 TreItemList = treItems
             };

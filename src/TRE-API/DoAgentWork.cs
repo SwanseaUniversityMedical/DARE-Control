@@ -247,7 +247,7 @@ namespace TRE_API
                     
 
                     // Check user is allowed ont he project
-                    if (_subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
+                    if (!_subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
                     {
                         Log.Error("User {UserID}/project {ProjectId} is not value for this submission {submission}", aSubmission.SubmittedBy.Id, aSubmission.Project.Id, aSubmission);
                         // record error with submission layer
@@ -268,7 +268,7 @@ namespace TRE_API
                             {
                                 var destinationBucket = proj.SubmissionBucketTre;
                                 var source =  _minioSubHelper.GetCopyObject(sourceBucket, fileName);
-                                var result = _minioTreHelper.CopyObjectToDestination(destinationBucket, fileName, source.Result);
+                                var result =  _minioTreHelper.CopyObjectToDestination(destinationBucket, fileName, source.Result);
 
                             }
                         }

@@ -48,6 +48,8 @@ namespace TRE_API.Services
                 {
                     Database = _hutchDbName,
                     Hostname = _hutchDbServer,
+                    Username = project.UserName,
+                    Password = project.Password,
                     Port = int.Parse(_hutchDbPort)
                 },
                 CrateSource = new FileStorageDetails()
@@ -64,9 +66,11 @@ namespace TRE_API.Services
                 { "statusType", StatusType.SendingFileToHUTCH.ToString() },
                 { "description", "" }
             };
-            var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams);
+            
 
-            var res = _hutchHelper.CallAPI<SubmitJobModel, JobStatusModel>($"/api/jobs/", job); 
+            var res = _hutchHelper.CallAPI<SubmitJobModel, JobStatusModel>($"/api/jobs/", job).Result;
+
+            var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams).Result;
         }
 
         public APIReturn? UpdateStatusForTre(string subId, StatusType statusType, string? description)
