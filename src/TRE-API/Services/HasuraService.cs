@@ -40,6 +40,7 @@ namespace TREAPI.Services
 
             foreach (var schema in Schemas)
             {
+             
                 var data = await TablesInSchemas(dbName, schema[0]);
                 var tables = data.Where(x => x[0] != "table_name");
                 foreach (var table in tables)
@@ -424,8 +425,6 @@ namespace TREAPI.Services
                 re.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 // Send the POST request to add the role and permission
                 response = await client.SendAsync(re);
-
-                // Check if the request was successful
 
                 //What is doto John?
                 if (response.IsSuccessStatusCode)
