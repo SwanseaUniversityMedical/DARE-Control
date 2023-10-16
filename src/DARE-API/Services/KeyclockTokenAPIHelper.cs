@@ -22,14 +22,7 @@ namespace DARE_API.Services
             string clientId = _settings.ClientId;
             string clientSecret = _settings.ClientSecret;
 
-            // Create an HttpClientHandler with proxy settings
-            HttpClientHandler handler = new HttpClientHandler
-            {
-                Proxy = new WebProxy(_settings.ProxyAddresURL), // Replace with your proxy server URL
-                UseProxy = _settings.Proxy
-            };
-
-            var client = new HttpClient(handler);
+            var client = new HttpClient(_settings.getProxyHandler);
 
             var disco = await client.GetDiscoveryDocumentAsync(new DiscoveryDocumentRequest
             {

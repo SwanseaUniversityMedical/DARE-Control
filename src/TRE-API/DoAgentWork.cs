@@ -22,12 +22,13 @@ using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
 using BL.Services;
 using Microsoft.AspNetCore.SignalR;
+using Castle.Components.DictionaryAdapter.Xml;
 
 namespace TRE_API
 {
     public interface IDoAgentWork
     {
-        void Execute();
+        void Execute(bool useRabbit = true, bool useHutch = false, bool useTESK = true);
         void CheckTESK(string taskID, string TesId);
         void ClearJob(string jobname);
         void testing();
@@ -207,20 +208,12 @@ namespace TRE_API
 
 
         // Method executed upon hangfire job
-        public void Execute()
+        public void Execute(bool useRabbit = true, bool useHutch = false, bool useTESK = true)
         {
             
             // control use of dependency injection
             using (var scope = _serviceProvider.CreateScope())
             {
-
-                
-                // OPTIONS
-                // TODO get these from somewhere
-
-                var useRabbit = false;
-                var useHutch = true;
-                var useTESK = false;
 
                 Console.WriteLine("Getting list of submissions");
 

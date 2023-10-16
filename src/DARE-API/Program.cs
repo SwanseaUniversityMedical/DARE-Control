@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using BL.Models.ViewModels;
 using System.Security.Claims;
+using System.Runtime;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -74,6 +75,9 @@ builder.Services.Configure<KestrelServerOptions>(options =>
 var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
+
+
+
 
 builder.Services.AddHostedService<ConsumeInternalMessageService>();
 var TVP = new TokenValidationParameters
@@ -179,7 +183,9 @@ using (var scope = app.Services.CreateScope())
 
     db.Database.Migrate();
     var initialiser = new DataInitaliser(miniosettings, miniohelper, db, keytoken, userService);
-    initialiser.SeedData();
+
+    if (configuration.GetValue<bool>("Testdata"))
+        initialiser.SeedData();
 }
 
 
