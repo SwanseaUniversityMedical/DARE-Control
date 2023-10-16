@@ -313,7 +313,7 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SubmissionWizerd(SubmissionTes model)
+        public async Task<IActionResult> SubmissionWizard(SubmissionTes model)
         {
             var listOfTre = "";
             var imageUrl = "";
