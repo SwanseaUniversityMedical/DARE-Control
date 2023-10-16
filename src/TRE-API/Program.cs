@@ -368,7 +368,7 @@ if (jobSettings.scanSchedule == 0)
     RecurringJob.RemoveIfExists(scanJobName);
 else
     RecurringJob.AddOrUpdate<IDoAgentWork>(scanJobName,
-        x => x.Execute(jobSettings.useRabbit, jobSettings.useHutch, jobSettings.useTESK),
+        x => x.Execute(),
         Cron.MinuteInterval(jobSettings.scanSchedule));
 
 

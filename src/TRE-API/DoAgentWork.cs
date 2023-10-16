@@ -31,7 +31,6 @@ namespace TRE_API
     public interface IDoAgentWork
     {
         Task Execute();
-        void Execute(bool useRabbit = true, bool useHutch = false, bool useTESK = true);
         void CheckTESK(string taskID, string TesId);
         void ClearJob(string jobname);
         Task testing();
@@ -49,7 +48,6 @@ namespace TRE_API
         private readonly IDareClientWithoutTokenHelper _dareHelper;
         private readonly AgentSettings _AgentSettings;
         private readonly MinioSettings _minioSettings;
-        private readonly IMinioHelper _minioHelper;
         private readonly IMinioSubHelper _minioSubHelper;
         private readonly IMinioTreHelper _minioTreHelper;
 
@@ -61,7 +59,6 @@ namespace TRE_API
             IDareClientWithoutTokenHelper dareHelper,
             AgentSettings AgentSettings,
             MinioSettings minioSettings,
-            IMinioHelper minioHelper,
             IMinioTreHelper minioTreHelper,
             IMinioSubHelper minioSubHelper
             )
@@ -74,7 +71,6 @@ namespace TRE_API
             _dareHelper = dareHelper;
             _AgentSettings = AgentSettings;
             _minioSettings = minioSettings;
-            _minioHelper = minioHelper;
 
             _minioTreHelper = minioTreHelper;
             _minioSubHelper = minioSubHelper;
