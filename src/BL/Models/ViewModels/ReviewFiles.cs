@@ -9,6 +9,8 @@ namespace BL.Models.ViewModels
     public class ReviewFiles
     {
         public string subId { get; set; }
+
+        
         public List<string> files { get; set; }
 
     }

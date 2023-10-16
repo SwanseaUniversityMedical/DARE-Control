@@ -21,9 +21,9 @@ namespace DARE_API.Controllers
 {
 
     [Route("api/[controller]")]
-    //[Authorize(Roles = "dare-control-admin,dare-tre-admin")]
+    
     [ApiController]
-    [AllowAnonymous]
+    
 
     /// <summary>
     /// API endpoints for <see cref="Submission"/>s.
@@ -42,8 +42,8 @@ namespace DARE_API.Controllers
 
         }
 
-
-
+        
+        [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
         [HttpGet]
         [Route("GetWaitingSubmissionsForTre")]
         [ValidateModelState]
@@ -67,13 +67,13 @@ namespace DARE_API.Controllers
             return StatusCode(200, results);
         }
 
-
+        [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
         [HttpGet]
         [Route("UpdateStatusForTre")]
         [ValidateModelState]
         [SwaggerOperation("UpdateStatusForTre")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public IActionResult UpdateStatusForTre(string tesId, StatusType statusType, string? description)
+        public IActionResult UpdateStatusForTre(string subId, StatusType statusType, string? description)
         {
 
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
@@ -84,10 +84,10 @@ namespace DARE_API.Controllers
             }
 
 
-            var sub = _DbContext.Submissions.FirstOrDefault(x => x.TesId == tesId && x.Tre == tre);
+            var sub = _DbContext.Submissions.FirstOrDefault(x => x.Id == int.Parse(subId) && x.Tre == tre);
             if (sub == null)
             {
-                return BadRequest("Invalid tesid or tre not valid for tes");
+                return BadRequest("Invalid subid or tre not valid for tes");
             }
 
             UpdateSubmissionStatus.UpdateStatus(sub, statusType, description);
@@ -279,6 +279,7 @@ namespace DARE_API.Controllers
 
         //}
 
+        [Authorize(Roles = "dare-control-admin")]
         [HttpPost("SaveSubmissionFiles")]
         public IActionResult SaveSubmissionFiles(int submissionId, List<SubmissionFile> submissionFiles)
         {

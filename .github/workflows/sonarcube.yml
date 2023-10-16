@@ -3,7 +3,7 @@ name: Scan
 on:
   push:
     branches:
-      - 'fix/sonar-qube'
+      - main
 
 env:
   DAREUI: dare-control-ui
@@ -97,26 +97,6 @@ jobs:
               /d:sonar.login=${{ secrets.SONAR_TOKEN }} \
               && dotnet restore "TRE-API.csproj" \
               && dotnet build "TRE-API.csproj" -c Release \
-              && dotnet /sonar-scanner/SonarScanner.MSBuild.dll end \
-              /d:sonar.login=${{ secrets.SONAR_TOKEN }}"
-
-      - name: Sleep for 30 seconds to give the SQ server a chance to catch up
-        run: sleep 30s
-        shell: bash
-
-      - name: scan ${{ env.TREAGENT }} project
-        run: |
-          docker run --rm \
-          -v $(pwd):/source \
-          alleeex/dotnet-sonar:23.06.4-r2 \
-          bash -c \
-              "cd /source/src/TREAgent \
-              && dotnet /sonar-scanner/SonarScanner.MSBuild.dll begin \
-              /k:${{ env.TREAGENT }} /name:${{ env.TREAGENT }} \
-              /d:sonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-              /d:sonar.login=${{ secrets.SONAR_TOKEN }} \
-              && dotnet restore "TREAgent.csproj" \
-              && dotnet build "TREAgent.csproj" -c Release \
               && dotnet /sonar-scanner/SonarScanner.MSBuild.dll end \
               /d:sonar.login=${{ secrets.SONAR_TOKEN }}"
 

@@ -25,7 +25,7 @@ namespace Data_Egress_API.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("BL.Models.DataFiles", b =>
+            modelBuilder.Entity("BL.Models.EgressFile", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,8 +33,8 @@ namespace Data_Egress_API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
+                    b.Property<int?>("EgressSubmissionId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("LastUpdate")
                         .HasColumnType("timestamp with time zone");
@@ -48,27 +48,54 @@ namespace Data_Egress_API.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<string>("SubmisionBucketFullPath")
-                        .HasColumnType("text");
-
-                    b.Property<int?>("SubmissionId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("TreBucketFullPath")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
-                    b.ToTable("DataEgressFiles");
+                    b.HasIndex("EgressSubmissionId");
+
+                    b.ToTable("EgressFiles");
                 });
 
-            modelBuilder.Entity("BL.Models.SubmissionCredentials", b =>
+            modelBuilder.Entity("BL.Models.EgressSubmission", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("Completed")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("OutputBucket")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Reviewer")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SubFolder")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubmissionId")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EgressSubmissions");
+                });
+
+            modelBuilder.Entity("BL.Models.KeycloakCredentials", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CredentialType")
+                        .HasColumnType("integer");
 
                     b.Property<string>("PasswordEnc")
                         .IsRequired()
@@ -80,7 +107,21 @@ namespace Data_Egress_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SubmissionCredentials");
+                    b.ToTable("KeycloakCredentials");
+                });
+
+            modelBuilder.Entity("BL.Models.EgressFile", b =>
+                {
+                    b.HasOne("BL.Models.EgressSubmission", "EgressSubmission")
+                        .WithMany("Files")
+                        .HasForeignKey("EgressSubmissionId");
+
+                    b.Navigation("EgressSubmission");
+                });
+
+            modelBuilder.Entity("BL.Models.EgressSubmission", b =>
+                {
+                    b.Navigation("Files");
                 });
 #pragma warning restore 612, 618
         }

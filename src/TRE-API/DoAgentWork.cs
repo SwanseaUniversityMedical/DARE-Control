@@ -9,14 +9,12 @@ using Microsoft.Extensions.DependencyInjection;
 using EasyNetQ;
 using Newtonsoft.Json;
 using Serilog;
-
 using Microsoft.Extensions.Hosting;
 using Hangfire;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Security.Policy;
 using Microsoft.EntityFrameworkCore;
-
 using System.Threading.Tasks;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
@@ -26,12 +24,14 @@ using Newtonsoft.Json.Linq;
 using TREAgent.Repositories;
 using System.Net.Http.Json;
 using TRE_API.Models;
+using Castle.Components.DictionaryAdapter.Xml;
 
 namespace TRE_API
 {
     public interface IDoAgentWork
     {
         Task Execute();
+        void Execute(bool useRabbit = true, bool useHutch = false, bool useTESK = true);
         void CheckTESK(string taskID, string TesId);
         void ClearJob(string jobname);
         Task testing();
@@ -60,15 +60,25 @@ namespace TRE_API
             MinioSettings minioSettings,
             IMinioHelper minioHelper
             )
+
+        private readonly IMinioSubHelper _minioSubHelper;
+        private readonly IMinioTreHelper _minioTreHelper;
+        public DoAgentWork(IServiceProvider serviceProvider, ApplicationDbContext dbContext, ISubmissionHelper subHelper,  IMinioTreHelper minioTreHelper, IMinioSubHelper minioSubHelper)
+
         {
             _serviceProvider = serviceProvider;
             _dbContext = dbContext;
             _subHelper = subHelper;
+
             _hasuraAuthenticationService = hasuraAuthenticationService;
             _dareHelper = dareHelper;
             _AgentSettings = AgentSettings;
             _minioSettings = minioSettings;
             _minioHelper = minioHelper;
+    
+            _minioTreHelper = minioTreHelper;
+            _minioSubHelper = minioSubHelper;
+
         }
 
         public async Task testing()
@@ -314,11 +324,11 @@ namespace TRE_API
                     
 
                     // Check user is allowed ont he project
-                    if (_subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
+                    if (!_subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
                     {
                         Log.Error("User {UserID}/project {ProjectId} is not value for this submission {submission}", aSubmission.SubmittedBy.Id, aSubmission.Project.Id, aSubmission);
                         // record error with submission layer
-                        var result = _subHelper.UpdateStatusForTre(aSubmission.TesId, StatusType.InvalidUser, "");
+                        var result = _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.InvalidUser, "");
                     }
                     else
                     {
@@ -334,7 +344,9 @@ namespace TRE_API
                             foreach (var proj in subProj)
                             {
                                 var destinationBucket = proj.SubmissionBucketTre;
-                                var copyResult = _minioHelper.CopyObject(_minioSettings, sourceBucket, destinationBucket, fileName, fileName);
+                                var source =  _minioSubHelper.GetCopyObject(sourceBucket, fileName);
+                                var result =  _minioTreHelper.CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
+
                             }
                         }
                         catch (Exception ex)
@@ -370,10 +382,9 @@ namespace TRE_API
                             // TODO for rest API
                             try
                             {
-                                StringContent x = new StringContent("abc");
+                                
+                                _subHelper.SendSumissionToHUTCH(aSubmission);
 
-                               // var callHUTCH = treApi.CallAPI("url", x, null,false);
-                              
                             }
                             catch (Exception e)
                             {
@@ -438,7 +449,7 @@ namespace TRE_API
                         {
                             try
                             {
-                                var result = _subHelper.UpdateStatusForTre(aSubmission.TesId, StatusType.TransferredToPod, "");
+                                var result = _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.TransferredToPod, "");
                             }
                             catch (Exception e)
                             {

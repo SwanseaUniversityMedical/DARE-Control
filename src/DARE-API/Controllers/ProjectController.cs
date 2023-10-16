@@ -15,13 +15,15 @@ using EasyNetQ.Management.Client.Model;
 using System.Threading;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using BL.Models.APISimpleTypeReturns;
+using Amazon.Util.Internal;
 
 namespace DARE_API.Controllers
 {
 
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "dare-control-admin")]
+    
+    
     public class ProjectController : Controller
     {
 
@@ -41,6 +43,7 @@ namespace DARE_API.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
+        [Authorize(Roles = "dare-control-admin")]
         [HttpPost("SaveProject")]
         public async Task<Project?> SaveProject([FromBody] FormData data)
         {
@@ -72,7 +75,7 @@ namespace DARE_API.Controllers
                 {
                     project.SubmissionBucket = GenerateRandomName(project.Name.ToLower()) + "submission";
                     project.OutputBucket = GenerateRandomName(project.Name.ToLower()) + "output";
-                    var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, project.SubmissionBucket);
+                    var submissionBucket = await _minioHelper.CreateBucket(project.SubmissionBucket);
                     if (!submissionBucket)
                     {
                         Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SaveProject", project.SubmissionBucket);
@@ -85,7 +88,7 @@ namespace DARE_API.Controllers
                             Log.Error("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.", "SaveProject", project.SubmissionBucket);
                         }
                     }
-                    var outputBucket = await _minioHelper.CreateBucket(_minioSettings, project.OutputBucket);
+                    var outputBucket = await _minioHelper.CreateBucket(project.OutputBucket);
                     if (!outputBucket)
                     {
                         Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SaveProject", project.OutputBucket);
@@ -139,7 +142,7 @@ namespace DARE_API.Controllers
 
         }
 
-
+        [Authorize(Roles = "dare-control-admin")]
         [HttpPost("AddUserMembership")]
         public async Task<ProjectUser?> AddUserMembership(ProjectUser model)
         {
@@ -197,6 +200,7 @@ namespace DARE_API.Controllers
 
         }
 
+        [Authorize(Roles = "dare-control-admin")]
         [HttpPost("RemoveUserMembership")]
         public async Task<ProjectUser?> RemoveUserMembership(ProjectUser model)
         {
@@ -254,6 +258,7 @@ namespace DARE_API.Controllers
 
         }
 
+        [Authorize(Roles = "dare-control-admin")]
         [HttpPost("AddTreMembership")]
         public async Task<ProjectTre?> AddTreMembership(ProjectTre model)
         {
@@ -303,6 +308,7 @@ namespace DARE_API.Controllers
 
         }
 
+        [Authorize(Roles = "dare-control-admin")]
         [HttpPost("RemoveTreMembership")]
         public async Task<ProjectTre?> RemoveTreMembership(ProjectTre model)
         {
@@ -434,6 +440,102 @@ namespace DARE_API.Controllers
 
         }
 
+
+
+        [HttpPost("SyncTreProjectDecisions")]
+        [Authorize(Roles = "dare-tre-admin")]
+        public BoolReturn SyncTreProjectDecisions([FromBody] List<ProjectTreDecisionsDTO> decisions)
+        {
+            try
+            {
+                var result = new BoolReturn();
+                var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+                var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
+                if (tre == null)
+                {
+                    throw new Exception("User " + usersName + " doesn't have a tre");
+
+                }
+
+                foreach (var item in decisions)
+                {
+                    var dbproj = _DbContext.Projects.First(x => x.Id == item.ProjectId);
+                    var tredecision = _DbContext.ProjectTreDecisions.FirstOrDefault(x => x.SubmissionProj == dbproj && x.Tre == tre);
+                    if (tredecision == null)
+                    {
+                        tredecision = new ProjectTreDecision()
+                        {
+                            SubmissionProj = dbproj,
+                            Tre = tre,
+                        };
+                        _DbContext.ProjectTreDecisions.Add(tredecision);
+                    }
+                    tredecision.Decision = item.Decision;
+                }
+                _DbContext.SaveChanges();
+
+                
+                result.Result = true;
+                Log.Information("{Function} Tre {TreName} decisions synched", "SyncTreProjectDecisions", tre.Name);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "SyncTreProjectDecisions");
+                throw;
+            }
+
+
+        }
+
+        [HttpPost("SyncTreMembershipDecisions")]
+        [Authorize(Roles = "dare-tre-admin")]
+        public BoolReturn SyncTreMembershipDecisions([FromBody] List<MembershipTreDecisionDTO> decisions)
+        {
+            try
+            {
+                var result = new BoolReturn();
+                var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+                var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
+                if (tre == null)
+                {
+                    throw new Exception("User " + usersName + " doesn't have a tre");
+
+                }
+
+                foreach (var item in decisions)
+                {
+                    var dbproj = _DbContext.Projects.First(x => x.Id == item.ProjectId);
+                    var dbuser = _DbContext.Users.First(x => x.Id == item.UserId);
+                    var tredecision = _DbContext.MembershipTreDecisions.FirstOrDefault(x => x.SubmissionProj == dbproj && x.User == dbuser && x.Tre == tre);
+                    if (tredecision == null)
+                    {
+                        tredecision = new MembershipTreDecision()
+                        {
+                            SubmissionProj = dbproj,
+                            User = dbuser,
+                            Tre = tre,
+                        };
+                        _DbContext.MembershipTreDecisions.Add(tredecision);
+                    }
+                    tredecision.Decision = item.Decision;
+                }
+                _DbContext.SaveChanges();
+
+
+                result.Result = true;
+                Log.Information("{Function} Tre {TreName} membership decisions synched", "SyncTreMembershipDecisions", tre.Name);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "SyncTreMembershipDecisions");
+                throw;
+            }
+
+
+        }
+
         [HttpGet("GetTresInProject")]
         [AllowAnonymous]
         public List<Tre> GetTresInProject(int projectId)
@@ -458,10 +560,11 @@ namespace DARE_API.Controllers
             public string key { get; set; }
         }
 
+        [Authorize(Roles = "dare-control-admin")]
         [HttpPost("TestFetchAndStoreObject")]
         public async Task<IActionResult> TestFetchAndStoreObject(testFetch testf)
         {
-            await _minioHelper.FetchAndStoreObject(testf.url, _minioSettings, testf.bucketName, testf.key);
+            await _minioHelper.FetchAndStoreObject(testf.url,testf.bucketName, testf.key);
 
             return Ok();
         }
@@ -496,16 +599,36 @@ namespace DARE_API.Controllers
             return minioEndPoint;
         }
 
-        [HttpGet("UploadToMinio")]
-        [AllowAnonymous]
-        public async Task<BoolReturn> UploadToMinio(string bucketName, string fileJson)
+        //[HttpGet("UploadToMinioOld")]
+        //[AllowAnonymous]
+        //public async Task<BoolReturn> UploadToMinioOld(string bucketName, string fileJson)
+        //{
+        //    IFormFile iFile = ConvertJsonToIFormFile(fileJson);
+
+        //    var submissionBucket = await _minioHelper.UploadFileAsync(_minioSettings, iFile, bucketName, iFile.Name);
+
+        //    return new BoolReturn();
+        //}
+
+        [HttpPost("UploadToMinio")]
+        public async Task<BoolReturn> UploadToMinio(string bucketName, IFormFile file)
         {
-            IFormFile iFile = ConvertJsonToIFormFile(fileJson);
+            if (file == null || file.Length == 0)
+                return new BoolReturn() { Result = false };
 
-            var submissionBucket = await _minioHelper.UploadFileAsync(_minioSettings, iFile, bucketName, iFile.Name);
+            try
+            {
+                var submissionBucket = await _minioHelper.UploadFileAsync(file, bucketName, file.Name);
+                
 
-            return new BoolReturn();
+                return new BoolReturn() { Result = true };
+            }
+            catch (Exception ex)
+            {
+                return new BoolReturn() { Result = false };
+            }
         }
+
 
         private IFormFile ConvertJsonToIFormFile(string fileJson)
         {

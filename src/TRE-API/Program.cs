@@ -62,6 +62,7 @@ var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
 builder.Services.AddSingleton(treKeyCloakSettings);
 
+
 var HasuraSettings = new HasuraSettings();
 configuration.Bind(nameof(HasuraSettings), HasuraSettings);
 builder.Services.AddSingleton(HasuraSettings);
@@ -69,6 +70,20 @@ builder.Services.AddSingleton(HasuraSettings);
 var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
+
+var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
+configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
+builder.Services.AddSingleton(dataEgressKeyCloakSettings);
+
+
+var minioSubSettings = new MinioSubSettings();
+configuration.Bind(nameof(MinioSubSettings), minioSubSettings);
+builder.Services.AddSingleton(minioSubSettings);
+
+var minioTRESettings = new MinioTRESettings();
+configuration.Bind(nameof(MinioTRESettings), minioTRESettings);
+builder.Services.AddSingleton(minioTRESettings);
+
 
 
 var AuthenticationSetting = new AuthenticationSettings();
@@ -84,12 +99,12 @@ builder.Services.AddSingleton(AgentSettings);
 
 builder.Services.AddHostedService<ConsumeInternalMessageService>();
 
-var submissionKeyCloakSettings = new BaseKeyCloakSettings();
+var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
 builder.Services.AddSingleton(submissionKeyCloakSettings);
 
 builder.Services.AddScoped<IDareClientWithoutTokenHelper, DareClientWithoutTokenHelper>();
-builder.Services.AddScoped<IDataEgressClientHelper, DataEgressClientHelper>();
+builder.Services.AddScoped<IDataEgressClientWithoutTokenHelper, DataEgressClientWithoutTokenHelper>();
 builder.Services.AddScoped<IHutchClientHelper, HutchClientHelper>();
 
 string hangfireConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -99,7 +114,6 @@ builder.Services.AddHangfireServer();
 var encryptionSettings = new EncryptionSettings();
 configuration.Bind(nameof(encryptionSettings), encryptionSettings);
 builder.Services.AddSingleton(encryptionSettings);
-builder.Services.AddScoped<IKeycloakTokenHelper, KeycloakTokenHelper>();
 builder.Services.AddScoped<IEncDecHelper, EncDecHelper>();
 builder.Services.AddScoped<IDareSyncHelper, DareSyncHelper>();
 builder.Services.AddScoped<ISubmissionHelper, SubmissionHelper>();
@@ -271,7 +285,8 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
 
     builder.Services.AddHttpContextAccessor();
 
-    builder.Services.AddScoped<IMinioHelper, MinioHelper>();
+    builder.Services.AddScoped<IMinioTreHelper, MinioTreHelper>();
+    builder.Services.AddScoped<IMinioSubHelper, MinioSubHelper>();
     builder.Services.AddScoped<ISignalRService, SignalRService>();
     builder.Services.AddMvc().AddControllersAsServices();
 
@@ -331,8 +346,12 @@ app.MapHub<SignalRService>("/signalRHub", options =>
 {
     options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
 }).RequireCors(MyAllowSpecificOrigins);
-app.UseHangfireDashboard();
 
+//Hangfire
+var jobSettings = new JobSettings();
+configuration.Bind(nameof(JobSettings), jobSettings);
+
+app.UseHangfireDashboard();
 
 
 RecurringJob.AddOrUpdate<IDoSyncWork>(a => a.Execute(), Cron.MinuteInterval(10));
@@ -345,10 +364,21 @@ if (HasuraSettings.IsEnabled)
 
 
 
-var port = app.Environment.WebRootPath;
+const string syncJobName = "Sync";
+if (jobSettings.syncSchedule == 0)
+    RecurringJob.RemoveIfExists(syncJobName);
+else
+    RecurringJob.AddOrUpdate<IDoSyncWork>(syncJobName, x => x.Execute(), Cron.MinuteInterval(jobSettings.syncSchedule));
 
-// Print the port number
+const string scanJobName = "Scan Submissions";
+if (jobSettings.scanSchedule == 0)
+    RecurringJob.RemoveIfExists(scanJobName);
+else
+    RecurringJob.AddOrUpdate<IDoAgentWork>(scanJobName,
+        x => x.Execute(jobSettings.useRabbit, jobSettings.useHutch, jobSettings.useTESK),
+        Cron.MinuteInterval(jobSettings.scanSchedule));
+n
+
+var port = app.Environment.WebRootPath;
 Console.WriteLine("Application is running on port: " + port);
 app.Run();
-
-

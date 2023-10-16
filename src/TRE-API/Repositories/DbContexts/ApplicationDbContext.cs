@@ -23,11 +23,13 @@ namespace TRE_API.Repositories.DbContexts
         public DbSet<TreProject> Projects { get; set; }
         public DbSet<TreMembershipDecision> MembershipDecisions { get; set; }
         
-        public DbSet<SubmissionCredentials> SubmissionCredentials { get; set; }
+        public DbSet<KeycloakCredentials> KeycloakCredentials { get; set; }
+        
         public DbSet<TreAuditLog> TreAuditLogs { get; set; }
 
         public DbSet<TESKstatus> TESK_Status { get; set; }
         public DbSet<TeskAudit> TESK_Audit { get; set; }
+        
 
         public DbSet<TokenToExpire> TokensToExpire { get; set; }
 

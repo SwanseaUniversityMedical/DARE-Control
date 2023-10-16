@@ -24,21 +24,21 @@ namespace TRE_UI.Controllers
             var valid = await _clientHelper.CallAPIWithoutModel<BoolReturn>("/api/SubmissionCredentials/CheckCredentialsAreValid");
 
 
-            return View(new SubmissionCredentials()
+            return View(new KeycloakCredentials()
                 { Valid = valid.Result })
                 ;
         }
 
         [HttpPost]
         
-        public async Task<IActionResult> UpdateCredentials(SubmissionCredentials credentials) {
+        public async Task<IActionResult> UpdateCredentials(KeycloakCredentials credentials) {
 
             if (ModelState.IsValid)
             {
 
 
                 var result =
-                    await _clientHelper.CallAPI<SubmissionCredentials, SubmissionCredentials>(
+                    await _clientHelper.CallAPI<KeycloakCredentials, KeycloakCredentials>(
                         "/api/SubmissionCredentials/UpdateCredentials", credentials);
                 if (result.Valid)
                 {

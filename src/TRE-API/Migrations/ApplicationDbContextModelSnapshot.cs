@@ -25,13 +25,16 @@ namespace TRE_API.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("BL.Models.SubmissionCredentials", b =>
+            modelBuilder.Entity("BL.Models.KeycloakCredentials", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CredentialType")
+                        .HasColumnType("integer");
 
                     b.Property<string>("PasswordEnc")
                         .IsRequired()
@@ -43,7 +46,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SubmissionCredentials");
+                    b.ToTable("KeycloakCredentials");
                 });
 
             modelBuilder.Entity("BL.Models.TESKstatus", b =>

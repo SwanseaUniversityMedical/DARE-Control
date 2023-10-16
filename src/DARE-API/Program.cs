@@ -17,6 +17,9 @@ using BL.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using BL.Models.ViewModels;
+using System.Security.Claims;
+using System.Runtime;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,11 +67,17 @@ Task task = SetUpRabbitMQ.DoItAsync(configuration["RabbitMQ:HostAddress"], confi
 var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
 builder.Services.AddSingleton(submissionKeyCloakSettings);
-
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = int.MaxValue; // Adjust this as needed
+});
 
 var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
+
+
+
 
 builder.Services.AddHostedService<ConsumeInternalMessageService>();
 var TVP = new TokenValidationParameters
@@ -105,7 +114,7 @@ builder.Services.AddAuthentication(options =>
                 }
             };
         }
-
+        
         options.Authority = submissionKeyCloakSettings.Authority;
         options.Audience = submissionKeyCloakSettings.ClientId;          
         options.MetadataAddress = submissionKeyCloakSettings.MetadataAddress;
@@ -118,6 +127,8 @@ builder.Services.AddAuthentication(options =>
 
     });
 
+
+
 // - authorize here
 builder.Services.AddAuthorization(options =>
 {
@@ -127,6 +138,7 @@ builder.Services.AddAuthorization(options =>
 var app = builder.Build();
 
 var serviceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
@@ -171,7 +183,9 @@ using (var scope = app.Services.CreateScope())
 
     db.Database.Migrate();
     var initialiser = new DataInitaliser(miniosettings, miniohelper, db, keytoken, userService);
-    initialiser.SeedData();
+
+    if (configuration.GetValue<bool>("Testdata"))
+        initialiser.SeedData();
 }
 
 
@@ -213,7 +227,7 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
     builder.Services.AddHttpContextAccessor();
 
 
-    builder.Services.AddScoped<IMinioService, MinioService>();
+    
     builder.Services.AddScoped<IMinioHelper, MinioHelper>();
     builder.Services.AddScoped<IKeycloakMinioUserService, KeycloakMinioUserService>();
     builder.Services.AddScoped<IKeyclockTokenAPIHelper, KeyclockTokenAPIHelper>();
