@@ -81,7 +81,7 @@ namespace TRE_API.Controllers
         }
 
 
-        [Authorize(Roles = "dare-tre-admin")]
+        [Authorize(Roles = "dare-hutch-admin,dare-tre-admin")]
         [HttpPost]
         [Route("UpdateStatusForTre")]
         [ValidateModelState]
