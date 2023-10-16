@@ -50,6 +50,9 @@ namespace TRE_API
         private readonly AgentSettings _AgentSettings;
         private readonly MinioSettings _minioSettings;
         private readonly IMinioHelper _minioHelper;
+        private readonly IMinioSubHelper _minioSubHelper;
+        private readonly IMinioTreHelper _minioTreHelper;
+
 
         public DoAgentWork(IServiceProvider serviceProvider,
             ApplicationDbContext dbContext,
@@ -58,13 +61,10 @@ namespace TRE_API
             IDareClientWithoutTokenHelper dareHelper,
             AgentSettings AgentSettings,
             MinioSettings minioSettings,
-            IMinioHelper minioHelper
+            IMinioHelper minioHelper,
+            IMinioTreHelper minioTreHelper,
+            IMinioSubHelper minioSubHelper
             )
-
-        private readonly IMinioSubHelper _minioSubHelper;
-        private readonly IMinioTreHelper _minioTreHelper;
-        public DoAgentWork(IServiceProvider serviceProvider, ApplicationDbContext dbContext, ISubmissionHelper subHelper,  IMinioTreHelper minioTreHelper, IMinioSubHelper minioSubHelper)
-
         {
             _serviceProvider = serviceProvider;
             _dbContext = dbContext;
@@ -75,11 +75,12 @@ namespace TRE_API
             _AgentSettings = AgentSettings;
             _minioSettings = minioSettings;
             _minioHelper = minioHelper;
-    
+
             _minioTreHelper = minioTreHelper;
             _minioSubHelper = minioSubHelper;
-
         }
+
+   
 
         public async Task testing()
         {

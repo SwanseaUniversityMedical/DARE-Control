@@ -354,13 +354,6 @@ configuration.Bind(nameof(JobSettings), jobSettings);
 app.UseHangfireDashboard();
 
 
-RecurringJob.AddOrUpdate<IDoSyncWork>(a => a.Execute(), Cron.MinuteInterval(10));
-RecurringJob.AddOrUpdate<IDoAgentWork>("Scan Submissions", a => a.testing(), Cron.MinuteInterval(1));
-
-if (HasuraSettings.IsEnabled)
-{
-    RecurringJob.AddOrUpdate<IHasuraService>(a => a.Run(), Cron.HourInterval(4));
-}
 
 
 
@@ -377,7 +370,13 @@ else
     RecurringJob.AddOrUpdate<IDoAgentWork>(scanJobName,
         x => x.Execute(jobSettings.useRabbit, jobSettings.useHutch, jobSettings.useTESK),
         Cron.MinuteInterval(jobSettings.scanSchedule));
-n
+
+
+if (HasuraSettings.IsEnabled)
+{
+    RecurringJob.AddOrUpdate<IHasuraService>(a => a.Run(), Cron.HourInterval(4));
+}
+
 
 var port = app.Environment.WebRootPath;
 Console.WriteLine("Application is running on port: " + port);
