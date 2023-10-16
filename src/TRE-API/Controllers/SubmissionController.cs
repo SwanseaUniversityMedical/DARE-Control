@@ -262,6 +262,9 @@ namespace TRE_API.Controllers
 
             var destinationBucket = project.OutputBucket;
 
+            //Copy file to output bucket
+            var source = _minioTreHelper.GetCopyObject(sourceBucket.OutputBucket, sourceBucket.OutputFolder + outcome.file);
+            var copyResult = _minioSubHelper.CopyObjectToDestination(destinationBucket, sourceBucket.OutputFolder + outcome.file, source.Result);
             //For me to code
             var statusParams = new Dictionary<string, string>()
                                     {
@@ -272,9 +275,7 @@ namespace TRE_API.Controllers
 
             var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams);
 
-            //Copy file to output bucket
-            var source = _minioTreHelper.GetCopyObject(sourceBucket.OutputBucket, sourceBucket.OutputFolder + outcome.file);
-            var copyResult = _minioSubHelper.CopyObjectToDestination(destinationBucket, sourceBucket.OutputFolder + outcome.file, source.Result);
+           
             
             var boolresult = new BoolReturn()
             {
