@@ -261,7 +261,7 @@ namespace TRE_API
                             {
                                 var destinationBucket = proj.SubmissionBucketTre;
                                 var source =  _minioSubHelper.GetCopyObject(sourceBucket, fileName);
-                                var result =  _minioTreHelper.CopyObjectToDestination(destinationBucket, fileName, source.Result);
+                                var result =  _minioTreHelper.CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
 
                             }
                         }
