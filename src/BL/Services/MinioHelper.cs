@@ -266,21 +266,35 @@ namespace BL.Services
             var amazonS3Client = GenerateAmazonS3Client();
 
 
-            
 
-
-            PutObjectRequest putObjectRequest = new PutObjectRequest
+            long contentLength = response.Headers.ContentLength;
+            using (Stream responseStream = response.ResponseStream)
             {
-                BucketName = destinationBucketName,
-                Key = destinationObjectKey,
-                InputStream = response.ResponseStream,
-            };
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    await responseStream.CopyToAsync(memoryStream);
+                    string path = Path.Combine(@"c:\testing", destinationObjectKey);
+                    //using (FileStream outputFileStream = new FileStream(path, FileMode.Create))
+                    //{
+                    //    responseStream.CopyTo(outputFileStream);
+                    //}
+                    PutObjectRequest putObjectRequest = new PutObjectRequest
+                    {
+                        BucketName = destinationBucketName,
+                        Key = destinationObjectKey,
+                        InputStream = memoryStream,
+                        ContentType = response.Headers.ContentType
 
-            var putObjectResponse = amazonS3Client.PutObjectAsync(putObjectRequest).Result;
-           
+
+                    };
+
+                    var putObjectResponse = amazonS3Client.PutObjectAsync(putObjectRequest).Result;
 
 
-            return putObjectResponse.HttpStatusCode == HttpStatusCode.OK;
+
+                    return putObjectResponse.HttpStatusCode == HttpStatusCode.OK;
+                }
+            }
         }
 
         public async Task<GetObjectResponse> GetCopyObject(string sourceBucketName, string sourceObjectKey)

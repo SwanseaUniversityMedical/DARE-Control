@@ -327,13 +327,13 @@ configuration.Bind(nameof(JobSettings), jobSettings);
 
 app.UseHangfireDashboard();
 
-const string syncJobName = "Sync";
+const string syncJobName = "Sync Projects and Membership";
 if (jobSettings.syncSchedule == 0)
     RecurringJob.RemoveIfExists(syncJobName);
 else
     RecurringJob.AddOrUpdate<IDoSyncWork>(syncJobName, x => x.Execute(), Cron.MinuteInterval(jobSettings.syncSchedule));
 
-const string scanJobName = "Scan Submissions";
+const string scanJobName = "Sync Submissions";
 if (jobSettings.scanSchedule == 0)
     RecurringJob.RemoveIfExists(scanJobName);
 else
