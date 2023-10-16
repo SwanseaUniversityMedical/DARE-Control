@@ -22,12 +22,22 @@ namespace BL.Services
         }
         public async Task<bool> CheckBucketExists(string bucketName = "")
         {
+            try
+            {
+
+            
             if (string.IsNullOrEmpty(bucketName)) { bucketName = _minioSettings.BucketName; }
 
             var amazonS3Client = GenerateAmazonS3Client();
 
             var buckets = await amazonS3Client.ListBucketsAsync();
             return buckets.Buckets.Any(x => x.BucketName.Equals(bucketName));
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "{Function} Something went wrong", "CheckBucketExists");
+                throw;
+            }
         }
         public async Task<bool> CreateBucket(string bucketName = "")
         {
@@ -35,7 +45,7 @@ namespace BL.Services
 
             if (!string.IsNullOrEmpty(bucketName))
             {
-                var amazonS3Client = GenerateAmazonS3Client();
+                
 
                 try
                 {
@@ -49,6 +59,7 @@ namespace BL.Services
                     }
                     else
                     {
+                        var amazonS3Client = GenerateAmazonS3Client();
                         await amazonS3Client.PutBucketAsync(bucketName);
                         Log.Information("{bucketName} created successfully.", bucketName);
                         return true;
