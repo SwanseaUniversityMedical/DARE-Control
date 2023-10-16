@@ -73,7 +73,7 @@ namespace DARE_API.Controllers
         [ValidateModelState]
         [SwaggerOperation("UpdateStatusForTre")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public IActionResult UpdateStatusForTre(string tesId, StatusType statusType, string? description)
+        public IActionResult UpdateStatusForTre(string subId, StatusType statusType, string? description)
         {
 
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
@@ -84,10 +84,10 @@ namespace DARE_API.Controllers
             }
 
 
-            var sub = _DbContext.Submissions.FirstOrDefault(x => x.TesId == tesId && x.Tre == tre);
+            var sub = _DbContext.Submissions.FirstOrDefault(x => x.Id == int.Parse(subId) && x.Tre == tre);
             if (sub == null)
             {
-                return BadRequest("Invalid tesid or tre not valid for tes");
+                return BadRequest("Invalid subid or tre not valid for tes");
             }
 
             UpdateSubmissionStatus.UpdateStatus(sub, statusType, description);

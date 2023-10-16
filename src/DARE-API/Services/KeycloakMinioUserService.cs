@@ -4,6 +4,7 @@ using DARE_API.Services.Contract;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
+using System.IO;
 using System.Net.Http.Headers;
 using System.Runtime;
 using System.Text;
@@ -33,6 +34,10 @@ namespace DARE_API.Services
 
                     JObject user = JObject.Parse(userAttributesJson);
 
+                    if (user["attributes"] == null)
+                    {
+                        user.Add("attributes", null);
+                    }
                     if (user["attributes"][attributeKey] != null)
                     {
                         var existingValues = user["attributes"][attributeKey].ToObject<JArray>();
@@ -152,11 +157,18 @@ namespace DARE_API.Services
             var jsonString = await response.Content.ReadAsStringAsync();
             try
             {
+                
                 JArray jsonObject = JsonConvert.DeserializeObject<JArray>(jsonString);
+                foreach (var item in jsonObject)
+                {
+                    if (item["username"].ToString().ToLower() == userName.ToLower())
+                    {
+                        return item["id"].ToString();
+                    }
+                }
 
-                var userId = jsonObject[0]["id"].ToString();
 
-                return userId;
+                throw new Exception("User not found");
             }
             catch (Exception ex)
             {
@@ -196,7 +208,16 @@ namespace DARE_API.Services
 
                 var content = new StringContent(updatedUserData, System.Text.Encoding.UTF8, "application/json");
                 var response = await httpClient.PutAsync("", content);
+                var stream = response.Content.ReadAsStream();
+                string content2 = "";
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    // Read the stream content into a string
+                    content2 = reader.ReadToEnd();
 
+                    // Output the string content
+
+                }
                 return response.IsSuccessStatusCode;
             }
         }

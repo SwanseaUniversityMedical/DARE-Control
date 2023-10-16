@@ -42,88 +42,88 @@ namespace Data_Egress_API.Repositories.DbContexts
                     _dbContext.SaveChanges();
                 }
 
-                if (!_dbContext.EgressSubmissions.Any())
-                {
-                    var egress = new EgressSubmission()
-                    {
-                        SubmissionId = 1.ToString(),
-                        OutputBucket = "asdasdadasdasdas",
-                        Status = EgressStatus.NotCompleted,
-                        Files = new List<EgressFile>()
-                        {
-                            new EgressFile()
-                            {
-                                Name = "file1.txt",
-                                Status = FileStatus.Undecided
-                            },
-                            new EgressFile()
-                            {
-                                Name = "file2.txt",
-                                Status = FileStatus.Undecided
-                            },
-                            new EgressFile()
-                            {
-                                Name = "file3.txt",
-                                Status = FileStatus.Undecided
-                            },
+                //if (!_dbContext.EgressSubmissions.Any())
+                //{
+                //    var egress = new EgressSubmission()
+                //    {
+                //        SubmissionId = 1.ToString(),
+                //        OutputBucket = "asdasdadasdasdas",
+                //        Status = EgressStatus.NotCompleted,
+                //        Files = new List<EgressFile>()
+                //        {
+                //            new EgressFile()
+                //            {
+                //                Name = "file1.txt",
+                //                Status = FileStatus.Undecided
+                //            },
+                //            new EgressFile()
+                //            {
+                //                Name = "file2.txt",
+                //                Status = FileStatus.Undecided
+                //            },
+                //            new EgressFile()
+                //            {
+                //                Name = "file3.txt",
+                //                Status = FileStatus.Undecided
+                //            },
 
-                        }
-                    };
-                    _dbContext.EgressSubmissions.Add(egress);
-                    egress = new EgressSubmission()
-                    {
-                        SubmissionId = 2.ToString(),
-                        OutputBucket = "fgfasdasdadasdasdas",
-                        Status = EgressStatus.NotCompleted,
-                        Files = new List<EgressFile>()
-                        {
-                            new EgressFile()
-                            {
-                                Name = "file11.txt",
-                                Status = FileStatus.Undecided
-                            },
-                            new EgressFile()
-                            {
-                                Name = "file12.txt",
-                                Status = FileStatus.Undecided
-                            },
-                            new EgressFile()
-                            {
-                                Name = "file13.txt",
-                                Status = FileStatus.Undecided
-                            },
+                //        }
+                //    };
+                //    _dbContext.EgressSubmissions.Add(egress);
+                //    egress = new EgressSubmission()
+                //    {
+                //        SubmissionId = 2.ToString(),
+                //        OutputBucket = "fgfasdasdadasdasdas",
+                //        Status = EgressStatus.NotCompleted,
+                //        Files = new List<EgressFile>()
+                //        {
+                //            new EgressFile()
+                //            {
+                //                Name = "file11.txt",
+                //                Status = FileStatus.Undecided
+                //            },
+                //            new EgressFile()
+                //            {
+                //                Name = "file12.txt",
+                //                Status = FileStatus.Undecided
+                //            },
+                //            new EgressFile()
+                //            {
+                //                Name = "file13.txt",
+                //                Status = FileStatus.Undecided
+                //            },
 
-                        }
-                    };
-                    _dbContext.EgressSubmissions.Add(egress);
-                    egress = new EgressSubmission()
-                    {
-                        SubmissionId = 3.ToString(),
-                        OutputBucket = "hhasdasdadasdasfgfdas",
-                        Status = EgressStatus.NotCompleted,
-                        Files = new List<EgressFile>()
-                        {
-                            new EgressFile()
-                            {
-                                Name = "file21.txt",
-                                Status = FileStatus.Undecided
-                            },
-                            new EgressFile()
-                            {
-                                Name = "file22.txt",
-                                Status = FileStatus.Undecided
-                            },
-                            new EgressFile()
-                            {
-                                Name = "file23.txt",
-                                Status = FileStatus.Undecided
-                            },
+                //        }
+                //    };
+                //    _dbContext.EgressSubmissions.Add(egress);
+                //    egress = new EgressSubmission()
+                //    {
+                //        SubmissionId = 3.ToString(),
+                //        OutputBucket = "hhasdasdadasdasfgfdas",
+                //        Status = EgressStatus.NotCompleted,
+                //        Files = new List<EgressFile>()
+                //        {
+                //            new EgressFile()
+                //            {
+                //                Name = "file21.txt",
+                //                Status = FileStatus.Undecided
+                //            },
+                //            new EgressFile()
+                //            {
+                //                Name = "file22.txt",
+                //                Status = FileStatus.Undecided
+                //            },
+                //            new EgressFile()
+                //            {
+                //                Name = "file23.txt",
+                //                Status = FileStatus.Undecided
+                //            },
 
-                        }
-                    };
-                    _dbContext.EgressSubmissions.Add(egress);
-                    _dbContext.SaveChanges();
-                }
+                //        }
+                //    };
+                //    _dbContext.EgressSubmissions.Add(egress);
+                //    _dbContext.SaveChanges();
+                //}
 
                 
             }

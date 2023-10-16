@@ -240,11 +240,11 @@ namespace TRE_API
                     
 
                     // Check user is allowed ont he project
-                    if (_subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
+                    if (!_subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
                     {
                         Log.Error("User {UserID}/project {ProjectId} is not value for this submission {submission}", aSubmission.SubmittedBy.Id, aSubmission.Project.Id, aSubmission);
                         // record error with submission layer
-                        var result = _subHelper.UpdateStatusForTre(aSubmission.TesId, StatusType.InvalidUser, "");
+                        var result = _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.InvalidUser, "");
                     }
                     else
                     {
@@ -261,7 +261,7 @@ namespace TRE_API
                             {
                                 var destinationBucket = proj.SubmissionBucketTre;
                                 var source =  _minioSubHelper.GetCopyObject(sourceBucket, fileName);
-                                var result = _minioTreHelper.CopyObjectToDestination(destinationBucket, fileName, source.Result);
+                                var result =  _minioTreHelper.CopyObjectToDestination(destinationBucket, fileName, source.Result);
 
                             }
                         }
@@ -298,10 +298,9 @@ namespace TRE_API
                             // TODO for rest API
                             try
                             {
-                                StringContent x = new StringContent("abc");
+                                
+                                _subHelper.SendSumissionToHUTCH(aSubmission);
 
-                               // var callHUTCH = treApi.CallAPI("url", x, null,false);
-                              
                             }
                             catch (Exception e)
                             {
@@ -322,7 +321,7 @@ namespace TRE_API
                         {
                             try
                             {
-                                var result = _subHelper.UpdateStatusForTre(aSubmission.TesId, StatusType.TransferredToPod, "");
+                                var result = _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.TransferredToPod, "");
                             }
                             catch (Exception e)
                             {
