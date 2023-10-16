@@ -193,10 +193,12 @@ namespace Data_Egress_API.Controllers
                 };
                 foreach (var file in egress.Files)
                 {
+                    var dbegressfile = dbegress.Files.First(x => x.Id == file.Id);
+                    dbegressfile.Status = file.Status;
                     backtotre.fileResults.Add(new EgressResult()
                     {
-                        fileName = file.Name,
-                        approved = file.Status == FileStatus.Approved,
+                        fileName = dbegressfile.Name,
+                        approved = dbegressfile.Status == FileStatus.Approved,
                     });
                     var egfile = dbegress.Files.First(x => x.Id == file.Id);
                     egfile.Status = file.Status;
