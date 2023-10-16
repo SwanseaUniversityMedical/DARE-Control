@@ -1,13 +1,28 @@
 ﻿using BL.Models;
+using BL.Models.APISimpleTypeReturns;
 using BL.Models.Enums;
 using BL.Models.ViewModels;
 using BL.Services;
 using EasyNetQ;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services.SignalR;
+using static TRE_API.Controllers.SubmissionController;
 
 namespace TRE_API.Services
 {
+
+    public interface ISubmissionHelper
+    {
+        APIReturn? UpdateStatusForTre(string subId, StatusType statusType, string? description);
+        bool IsUserApprovedOnProject(int projectId, int userId);
+        List<Submission>? GetWaitingSubmissionForTre();
+        void SendSumissionToHUTCH(Submission submission);
+
+        BoolReturn FilesReadyForReview(ReviewFiles review);
+
+        OutputBucketInfo GetOutputBucketGuts(string subId);
+
+    }
     public class SubmissionHelper: ISubmissionHelper
     {
         private readonly IHutchClientHelper _hutchHelper;
@@ -15,13 +30,19 @@ namespace TRE_API.Services
         private readonly ApplicationDbContext _dbContext;
         private readonly MinioTRESettings _minioTreSettings;
         private readonly IBus _rabbit;
+        private readonly IDataEgressClientWithoutTokenHelper _dataEgressHelper;
+        private readonly IMinioTreHelper _minioTreHelper;
+
         public string _hutchDbServer { get; set; }
         public string _hutchDbPort { get; set; }
         public string _hutchDbName { get; set; }
 
 
         public SubmissionHelper(ISignalRService signalRService, IDareClientWithoutTokenHelper helper,
-            ApplicationDbContext dbContext, IBus rabbit, IHutchClientHelper hutchHelper, IConfiguration config, MinioTRESettings minioTreSettings)
+            ApplicationDbContext dbContext, IBus rabbit, IHutchClientHelper hutchHelper,
+            IConfiguration config, MinioTRESettings minioTreSettings,
+           IDataEgressClientWithoutTokenHelper dataEgressHelper,
+           IMinioTreHelper minioTreHelper)
         {
             
             _dareHelper = helper;
@@ -32,6 +53,8 @@ namespace TRE_API.Services
             _hutchDbPort = config["Hutch:DbPort"];
             _hutchDbServer = config["Hutch:DbServer"];
             _minioTreSettings = minioTreSettings;
+            _dataEgressHelper = dataEgressHelper;
+            _minioTreHelper = minioTreHelper;
 
         }
 
@@ -96,5 +119,59 @@ namespace TRE_API.Services
             //var result =_dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre").Result;
             return null;
         }
+        public BoolReturn FilesReadyForReview(ReviewFiles review)
+        {
+            var bucket = GetOutputBucketGuts(review.subId);
+            var egsub = new EgressSubmission()
+            {
+                SubmissionId = review.subId,
+                OutputBucket = bucket.OutputBucket,
+                SubFolder = bucket.OutputFolder,
+                Status = EgressStatus.NotCompleted,
+                Files = new List<EgressFile>()
+            };
+
+            foreach (var reviewFile in review.files)
+            {
+                egsub.Files.Add(new EgressFile()
+                {
+                    Name = reviewFile,
+                    Status = FileStatus.Undecided
+                });
+            }
+            var boolResult = _dataEgressHelper.CallAPI<EgressSubmission, BoolReturn>("/api/DataEgress/AddNewDataEgress/", egsub).Result;
+            return boolResult;
+        }
+
+        public OutputBucketInfo GetOutputBucketGuts(string subId)
+        {
+
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("submissionId", subId.ToString());
+            var submission = _dareHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist)
+                .Result;
+
+            var bucket = _dbContext.Projects
+                .Where(x => x.SubmissionProjectId == submission.Project.Id)
+                .Select(x => x.OutputBucketTre);
+
+            var outputBucket = bucket.FirstOrDefault();
+
+            var isFolderExists = _minioTreHelper.FolderExists(outputBucket.ToString(), "sub" + subId).Result;
+            if (!isFolderExists)
+            {
+                var submissionFolder = _minioTreHelper.CreateFolder(outputBucket.ToString(), "sub" + subId).Result;
+            }
+
+            outputBucket = outputBucket.ToString();
+            return new OutputBucketInfo()
+            {
+                OutputBucket = outputBucket,
+                SubId = submission.Id.ToString(),
+                OutputFolder = "/" + "sub" + subId + "/"
+            };
+        }
+
+
     }
 }
