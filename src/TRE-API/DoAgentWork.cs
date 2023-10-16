@@ -117,46 +117,6 @@ namespace TRE_API
     ""creation_time"":null
 }
 ";
-                 var arr = new HttpClient();
-
-            var role = "COOLSchemas2";
-
-            var Token = _hasuraAuthenticationService.GetNewToken(role);
-
-
-            var ob = JObject.Parse(jsonContent);
-
-
-            foreach (var output in ob["outputs"])
-            {
-                 output["url"] = "AAAAAAAAAAAAAAAAAAAAA";
-            }
-           
-
-            JObject NewOb = new JObject();
-
-            /*
-      "outputs": [
-        {
-          "path": "/data/outfile",
-          "url": "s3://my-object-store/outfile-1",
-          "type": "FILE"
-        }
-      ],
-            */
-
-
-            //
-            ob.Add("tags", NewOb);
-
-            NewOb.Add("HASURAAuthenticationToken", Token);
-
-            _dbContext.TokensToExpire.Add(new TokenToExpire()
-            {
-                TesId = "99",
-                Token = Token
-            });
-
             CreateTESK(jsonContent, "99", "AAA");
         }
 
@@ -211,7 +171,7 @@ namespace TRE_API
         {
             public string id { get; set; }
         }
-        public void CheckTESK(string taskID, string TesId, string TREBucket )
+        public async void CheckTESK(string taskID, string TesId, string TREBucket )
         {
             Console.WriteLine("Check TESK : " + taskID + ",  TES : " + TesId);
 
@@ -300,13 +260,22 @@ namespace TRE_API
                             // Do this to avoid db locking issues
                             BackgroundJob.Enqueue(() => ClearJob(taskID));
 
+                            var data = await _minioTreHelper.GetFilesInBucket(TREBucket);
+                            var files = new List<string>();
+
+                            foreach (var s3Object in data.S3Objects) //TODO is this right?
+                            {
+                                files.Add(s3Object.Key);
+                            }
+                                 
+
                             _subHelper.FilesReadyForReview(new ReviewFiles()
                             {
                                 subId = taskID, //TODO is this right  
-                                files = new List<string> { "??????" }
-                            }) ;
+                                files = files
+                            }) ; 
 
-                            //TREBucket
+                            //
 
                             // RecurringJob.RemoveIfExists(taskID);
                         }
