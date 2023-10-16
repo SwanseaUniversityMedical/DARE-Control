@@ -9,6 +9,7 @@ using Minio;
 using Minio.Exceptions;
 using Newtonsoft.Json;
 using Serilog;
+using System;
 using System.Net;
 
 namespace BL.Services
@@ -38,6 +39,34 @@ namespace BL.Services
                 Log.Error(e, "{Function} Something went wrong", "CheckBucketExists");
                 throw;
             }
+        }
+
+
+        public async Task<ListObjectsV2Response> GetFilesInBucket(string bucketName)
+        {
+            try
+            {
+
+                ListObjectsV2Request request = new ListObjectsV2Request
+                {
+                    BucketName = bucketName
+                };
+
+                var amazonS3Client = GenerateAmazonS3Client();
+                var data = await amazonS3Client.ListObjectsV2Async(request);
+                Log.Information("{bucketName} created successfully.", bucketName);
+                return data;
+            }
+            catch (MinioException e)
+            {
+                Log.Warning("Create bucket: {bucketName}, failed due to Minio exception: {message}", bucketName, e.Message);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning("Create bucket: {bucketName}, failed due to Exception: {message}", bucketName, ex.Message);
+            }
+
+            return null;
         }
         public async Task<bool> CreateBucket(string bucketName = "")
         {

@@ -31,7 +31,7 @@ namespace TRE_API
     public interface IDoAgentWork
     {
         Task Execute();
-        void CheckTESK(string taskID, string TesId);
+        void CheckTESK(string taskID, string TesId, string TREBucket);
         void ClearJob(string jobname);
         Task testing();
     }
@@ -76,7 +76,7 @@ namespace TRE_API
             _minioSubHelper = minioSubHelper;
         }
 
-   
+
 
         public async Task testing()
         {
@@ -117,12 +117,10 @@ namespace TRE_API
     ""creation_time"":null
 }
 ";
-
-
-            CreateTESK(jsonContent, "99");
+            CreateTESK(jsonContent, "99", "AAA");
         }
 
-        public string CreateTESK(string jsonContent, string TesId)
+        public string CreateTESK(string jsonContent, string TesId, string TREBucket)
         {
             using (var httpClient = new HttpClient())
             {
@@ -154,9 +152,9 @@ namespace TRE_API
                     var responseObj = JsonConvert.DeserializeObject<ResponseModel>(responseBody);
                     string id = responseObj.id;
 
-                    RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTESK(id,TesId), Cron.MinuteInterval(1));
+                    RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTESK(id, TesId, TREBucket), Cron.MinuteInterval(1));
 
-                    _dbContext.Add(new TeskAudit(){message = jsonContent, teskid = id});
+                    _dbContext.Add(new TeskAudit() { message = jsonContent, teskid = id });
                     _dbContext.SaveChanges();
 
                     return id;
@@ -173,21 +171,21 @@ namespace TRE_API
         {
             public string id { get; set; }
         }
-        public void CheckTESK(string taskID, string TesId)
+        public async void CheckTESK(string taskID, string TesId, string TREBucket )
         {
-            Console.WriteLine("Check TESK : "+taskID + ",  TES : "+TesId);
+            Console.WriteLine("Check TESK : " + taskID + ",  TES : " + TesId);
 
-            string url = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks/"+taskID+"?view=basic";
+            string url = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks/" + taskID + "?view=basic";
             using (HttpClient client = new HttpClient())
             {
-                HttpResponseMessage response =  client.GetAsync(url).Result;
+                HttpResponseMessage response = client.GetAsync(url).Result;
 
                 Console.WriteLine(response.StatusCode);
 
                 if (response.IsSuccessStatusCode)
                 {
                     string content = response.Content.ReadAsStringAsync().Result;
-//                    Console.WriteLine(content);
+                    //                    Console.WriteLine(content);
 
                     TESKstatus status = JsonConvert.DeserializeObject<TESKstatus>(content);
 
@@ -213,60 +211,78 @@ namespace TRE_API
 
                     _dbContext.SaveChanges();
 
-                        if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR"))
+                    if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR"))
+                    {
+                        Console.WriteLine("*** status change *** " + status.state);
+
+                        // send update
+                        using (var scope = _serviceProvider.CreateScope())
                         {
-                            Console.WriteLine("*** status change *** " + status.state);
-
-                            // send update
-                            using (var scope = _serviceProvider.CreateScope())
+                            TokenToExpire Token = null;
+                            var statusMessage = StatusType.TransferredToPod;
+                            switch (status.state)
                             {
-                                TokenToExpire Token = null;
-                                var statusMessage = StatusType.TransferredToPod;
-                                switch (status.state)
-                                {
-                                    case "QUEUED":
-                                        statusMessage = StatusType.TransferredToPod;
-                                        break;
-                                    case "RUNNING":
-                                        statusMessage = StatusType.PodProcessing;
-                                        break;
-                                    case "COMPLETE":
-                                        statusMessage = StatusType.PodProcessingComplete;
-                                        Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.TesId == TesId);
-                                        if (Token != null)
-                                        {
-                                            _dbContext.TokensToExpire.Remove(Token);
-                                            _hasuraAuthenticationService.ExpirerToken(Token.Token);
-                                        }
-                                        _dbContext.SaveChanges();
-                                        break;
-                                    case "EXECUTOR_ERROR":
-                                        statusMessage = StatusType.Cancelled;
-                                        Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.TesId == TesId);
-                                        if (Token != null)
-                                        {
-                                            _dbContext.TokensToExpire.Remove(Token);
-                                            _hasuraAuthenticationService.ExpirerToken(Token.Token);
-                                        }
-                                        _dbContext.SaveChanges();
-                                        break;
-                                }
+                                case "QUEUED":
+                                    statusMessage = StatusType.TransferredToPod;
+                                    break;
+                                case "RUNNING":
+                                    statusMessage = StatusType.PodProcessing;
+                                    break;
+                                case "COMPLETE":
+                                    statusMessage = StatusType.PodProcessingComplete;
+                                    Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.TesId == TesId);
+                                    if (Token != null)
+                                    {
+                                        _dbContext.TokensToExpire.Remove(Token);
+                                        _hasuraAuthenticationService.ExpirerToken(Token.Token);
+                                    }
+                                    _dbContext.SaveChanges();
+                                    break;
+                                case "EXECUTOR_ERROR":
+                                    statusMessage = StatusType.Cancelled;
+                                    Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.TesId == TesId);
+                                    if (Token != null)
+                                    {
+                                        _dbContext.TokensToExpire.Remove(Token);
+                                        _hasuraAuthenticationService.ExpirerToken(Token.Token);
+                                    }
+                                    _dbContext.SaveChanges();
+                                    break;
+                            }
 
 
-                                var result = _subHelper.UpdateStatusForTre(TesId, statusMessage, "");
+                            var result = _subHelper.UpdateStatusForTre(TesId, statusMessage, "");
                         }
 
                         // are we done ?
                         if (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR")
+                        {
+                            // Do this to avoid db locking issues
+                            BackgroundJob.Enqueue(() => ClearJob(taskID));
+
+                            var data = await _minioTreHelper.GetFilesInBucket(TREBucket);
+                            var files = new List<string>();
+
+                            foreach (var s3Object in data.S3Objects) //TODO is this right?
                             {
-                                // Do this to avoid db locking issues
-                                BackgroundJob.Enqueue(() => ClearJob(taskID));
-                                // RecurringJob.RemoveIfExists(taskID);
+                                files.Add(s3Object.Key);
                             }
+                                 
+
+                            _subHelper.FilesReadyForReview(new ReviewFiles()
+                            {
+                                subId = taskID, //TODO is this right  
+                                files = files
+                            }) ; 
+
+                            //
+
+                            // RecurringJob.RemoveIfExists(taskID);
                         }
-                        else
-                            Console.WriteLine("NO CHANGE " + status.state);
-                  
+                    }
+                    else
+                        Console.WriteLine("NO CHANGE " + status.state);
+
 
                 }
                 else
@@ -275,7 +291,7 @@ namespace TRE_API
                 }
             }
 
-           
+
         }
 
 
@@ -283,12 +299,12 @@ namespace TRE_API
         // Method executed upon hangfire job
         public async Task Execute()
         {
-            
+
             // control use of dependency injection
             using (var scope = _serviceProvider.CreateScope())
             {
 
-                
+
                 // OPTIONS
                 // TODO get these from somewhere
                 var useRabbit = _AgentSettings.UseRabbit;
@@ -299,7 +315,7 @@ namespace TRE_API
 
                 // Get list of submissions
                 List<Submission> listOfSubmissions;
-               // var treApi = scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
+                // var treApi = scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
                 try
                 {
                     listOfSubmissions = _subHelper.GetWaitingSubmissionForTre();
@@ -307,18 +323,18 @@ namespace TRE_API
                 }
                 catch (Exception e)
                 {
-                   Log.Error("Error getting submissions: {message}", e.Message);
-                   Console.WriteLine(e.Message);
-                   throw;
+                    Log.Error("Error getting submissions: {message}", e.Message);
+                    Console.WriteLine(e.Message);
+                    throw;
                 }
 
-                Console.WriteLine("Number of submission = "+listOfSubmissions.Count);
+                Console.WriteLine("Number of submission = " + listOfSubmissions.Count);
 
                 foreach (var aSubmission in listOfSubmissions)
                 {
                     Log.Information("Submission: {submission}", aSubmission);
 
-                    
+
 
                     // Check user is allowed ont he project
                     if (!_subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
@@ -331,7 +347,7 @@ namespace TRE_API
                     {
 
 
-                        
+
                         try
                         {
                             Uri uri = new Uri(aSubmission.DockerInputLocation);
@@ -341,8 +357,8 @@ namespace TRE_API
                             foreach (var proj in subProj)
                             {
                                 var destinationBucket = proj.SubmissionBucketTre;
-                                var source =  _minioSubHelper.GetCopyObject(sourceBucket, fileName);
-                                var result =  _minioTreHelper.CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
+                                var source = _minioSubHelper.GetCopyObject(sourceBucket, fileName);
+                                var result = _minioTreHelper.CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
 
                             }
                         }
@@ -351,7 +367,7 @@ namespace TRE_API
 
                             throw;
                         }
-                        
+
                         // The TES message
                         var tesMessage = JsonConvert.DeserializeObject<TesTask>(aSubmission.TesJson);
                         var processedOK = true;
@@ -368,8 +384,8 @@ namespace TRE_API
                             }
                             catch (Exception e)
                             {
-                               Log.Error("Send rabbit failed : {message}",e.Message);
-                               processedOK = false;
+                                Log.Error("Send rabbit failed : {message}", e.Message);
+                                processedOK = false;
                             }
                         }
 
@@ -379,7 +395,7 @@ namespace TRE_API
                             // TODO for rest API
                             try
                             {
-                                
+
                                 _subHelper.SendSumissionToHUTCH(aSubmission);
 
                             }
@@ -438,7 +454,7 @@ namespace TRE_API
                             _dbContext.SaveChanges();
 
                             if (tesMessage is not null)
-                                CreateTESK(JsonConvert.SerializeObject(tesMessage), aSubmission.TesId);
+                                CreateTESK(JsonConvert.SerializeObject(tesMessage), aSubmission.TesId, TREBucket);
                         }
 
                         // **************  TELL SUBMISSION LAYER WE DONE
@@ -453,18 +469,18 @@ namespace TRE_API
                                 Log.Error("Send record outcome to submission layer : {message}", e.Message);
                                 processedOK = false;
                             }
-                         
+
                         }
 
                     }
                 }
             }
-            
+
         }
 
         public void ClearJob(string jobname)
         {
-            Console.WriteLine("Hangfire clear job: "+jobname);
+            Console.WriteLine("Hangfire clear job: " + jobname);
             RecurringJob.RemoveIfExists(jobname);
         }
     }
