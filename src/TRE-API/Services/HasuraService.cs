@@ -407,12 +407,14 @@ namespace TREAPI.Services
           
                 if (token != "")
                 {
-                    var headerInfo = _applicationDbContext.DataToRoles.Where(x => x.Token == token).FirstOrDefault();
-                    if (headerInfo != null)
-                    {
-                        re.Headers.Add("x-hasura-role", headerInfo.Name);
-                        re.Headers.Add("x-hasura-user_id", headerInfo.Id.ToString());
-                    }
+                    //var headerInfo = _applicationDbContext.DataToRoles.Where(x => x.Token == token).FirstOrDefault();
+                    //if (headerInfo != null)
+                    //{
+                    //    re.Headers.Add("x-hasura-role", headerInfo.Name);
+                    //    re.Headers.Add("x-hasura-user_id", headerInfo.Id.ToString());
+                    //}
+
+                    re.Headers.Add("token", token);
 
                 }
 
