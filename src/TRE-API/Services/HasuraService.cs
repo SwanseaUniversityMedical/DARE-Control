@@ -373,6 +373,7 @@ namespace TREAPI.Services
             string endpointUrl = _hasuraSettings.HasuraURL + "/v1/query";
             try
             {
+                Query = System.Text.Json.JsonSerializer.Serialize(Query);
                 var Result = await HttpClient(endpointUrl, Query, false, Token);
 
                 var Content = await Result.Content.ReadAsStringAsync();
@@ -416,7 +417,7 @@ namespace TREAPI.Services
                 }
 
                 //need to deseralise token not in db
-                payload = System.Text.Json.JsonSerializer.Serialize(payload);
+               
                 re.Content = new StringContent(payload, Encoding.UTF8, "application/json");
                 re.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 // Send the POST request to add the role and permission
