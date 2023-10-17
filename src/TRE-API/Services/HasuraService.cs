@@ -7,6 +7,7 @@ using TRE_API.Models;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
 using TREAgent.Repositories;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace TREAPI.Services
 {
@@ -372,20 +373,18 @@ namespace TREAPI.Services
         public async Task<string> ExecuteQuery(string Token, string Query)
         {
 
+            //eg endpoint {   testHasura_testing {     id     name   } }
             // Set the endpoint URL
 
             //need to get the headers to send from the token userid
-            string endpointUrl = _hasuraSettings.HasuraURL + "/v1/query";
+            string endpointUrl = _hasuraSettings.HasuraURL + "/v1/graphql";
             try
             {
-                Query = System.Text.Json.JsonSerializer.Serialize(Query);
                 var Result = await HttpClient(endpointUrl, Query, false, Token);
 
                 var Content = await Result.Content.ReadAsStringAsync();
 
-                var data = JsonConvert.DeserializeObject<ReturnData>(Content);
-
-                return data.result.ToString();
+                return Content.ToString();
 
             }
             catch (Exception ex)
@@ -407,27 +406,29 @@ namespace TREAPI.Services
             {
                 // Set the request headers
                 HttpRequestMessage re = new HttpRequestMessage(HttpMethod.Post, endpointUrl);
-                re.Headers.Add("x-hasura-admin-secret", _hasuraSettings.HasuraAdminSecret);
+                //re.Headers.Add("x-hasura-admin-secret", _hasuraSettings.HasuraAdminSecret);
 
           
                 if (token != "")
                 {   
                     re.Headers.Add("token", token);
+                    re.Content = new StringContent($"{{ \"query\": \"{payload}\" }}", Encoding.UTF8, "application/json");
                 }
                 else
                 {
                     re.Headers.Add("x-hasura-admin-secret", _hasuraSettings.HasuraAdminSecret);
+                    re.Content = new StringContent(payload, Encoding.UTF8, "application/json");
                 }
 
                 //need to deseralise token not in db
                
-                re.Content = new StringContent(payload, Encoding.UTF8, "application/json");
+               
                 re.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 // Send the POST request to add the role and permission
                 response = await client.SendAsync(re);
 
-                //What is doto John?
-                if (response.IsSuccessStatusCode)
+              //What is doto John?
+              if (response.IsSuccessStatusCode)
                 {
                     if (doto)
                     {
