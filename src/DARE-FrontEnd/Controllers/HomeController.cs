@@ -60,6 +60,7 @@ namespace DARE_FrontEnd.Controllers
             ViewBag.getAllTres = getAllTres.Count;
 
             var userOnProjList = new List<User>();
+            var userOnProjListProj = new List<Project>();
             var projectList = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects").Result.ToList();
             foreach (var proj in projectList)
             {
@@ -67,9 +68,10 @@ namespace DARE_FrontEnd.Controllers
                 {
                     //(TODO : Make this not hardcoded)
                     if (user.Name == preferedUsername)
+                    {
+                        userOnProjListProj.Add(proj);
 
                         userOnProjList.Add(user);
-                    else { 
                     }
                 }
             }
@@ -77,27 +79,31 @@ namespace DARE_FrontEnd.Controllers
             ViewBag.userOnProjectCount = userOnProjectsCount;
 
             var userWroteSubList = new List<User>();
+            var userWroteSubListSub = new List<Submission>();
             var subList = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions").Result.ToList();
             foreach (var sub in subList)
             {
 
                     if (sub.SubmittedBy.Name == preferedUsername)
                 {
+                    userWroteSubListSub.Add(sub);
                     userWroteSubList.Add(sub.SubmittedBy);
                 
                 }
 
             }
             var userWroteSubCount = userWroteSubList.ToList().Count;
+            var distintProj = userOnProjListProj.Distinct();
+            var distinctSub = userWroteSubListSub.Distinct();
             ViewBag.userWroteSubCount = userWroteSubCount;
 
             var userModel = new User
             {
                 Name = User.Identity.Name,
-                
-                Projects = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects").Result,
 
-                Submissions = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions").Result,
+                Projects = distintProj.ToList(),
+
+                Submissions = distinctSub.ToList(),
         };
             
             return View(userModel);
