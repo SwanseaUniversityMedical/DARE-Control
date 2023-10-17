@@ -15,7 +15,7 @@ namespace TRE_API.Services
     {
         APIReturn? UpdateStatusForTre(string subId, StatusType statusType, string? description);
         bool IsUserApprovedOnProject(int projectId, int userId);
-        List<Submission>? GetWaitingSubmissionForTre();
+        Task<List<Submission>?> GetWaitingSubmissionForTre();
         void SendSumissionToHUTCH(Submission submission);
 
         BoolReturn FilesReadyForReview(ReviewFiles review);
@@ -114,10 +114,10 @@ namespace TRE_API.Services
                 x.Decision == Decision.Approved);
         }
 
-        public List<Submission>? GetWaitingSubmissionForTre()
+        public async Task<List<Submission>?> GetWaitingSubmissionForTre()
         {
-            //var result =_dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre").Result;
-            return null;
+            var result = await _dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre");
+            return result;
         }
         public BoolReturn FilesReadyForReview(ReviewFiles review)
         {

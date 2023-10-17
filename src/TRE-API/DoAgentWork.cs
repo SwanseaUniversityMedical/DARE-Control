@@ -318,7 +318,7 @@ namespace TRE_API
                 // var treApi = scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
                 try
                 {
-                    listOfSubmissions = _subHelper.GetWaitingSubmissionForTre();
+                    listOfSubmissions = await _subHelper.GetWaitingSubmissionForTre();
                     if (listOfSubmissions == null) return;
                 }
                 catch (Exception e)
@@ -412,6 +412,8 @@ namespace TRE_API
                         if (useTESK)
                         {
 
+                           
+
                             var arr = new HttpClient();
 
                             var role = aSubmission.Project.Name; //TODO Check
@@ -419,8 +421,10 @@ namespace TRE_API
                             var Token = _hasuraAuthenticationService.GetNewToken(role);
 
 
+                          
                             var projectId = aSubmission.Project.Id;
-                            var TREBucket = "S3://" + _dbContext.Projects.First(x => x.Id == projectId).SubmissionBucketTre; //TODO Check
+
+                            var TREBucket = "S3://" + _dbContext.Projects.First(x => x.Id == projectId).SubmissionBucketTre; //TODO Check, Projects not getting The synchronised Properly 
                             //it need the file name?? (key-name)
 
 
@@ -477,7 +481,6 @@ namespace TRE_API
                     }
                 }
             }
-
         }
 
         public void ClearJob(string jobname)
