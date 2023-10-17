@@ -26,14 +26,16 @@ namespace TRE_API.Services
             _applicationDbContext = applicationDbContext;
         }
 
-        public string GetNewToken(string role)
+
+        public string GetNewToken(string schemaName)
         {
+            //schema name becomes role
             var Token = GenToken();
 
             _applicationDbContext.DataToRoles.Add(new RoleData()
             {
                 Token = Token,
-                Name = role,
+                Name = schemaName,
             });
             _applicationDbContext.SaveChanges();
             return Token;
@@ -60,7 +62,7 @@ namespace TRE_API.Services
 
             var hasuraVariables = new Dictionary<string, string> {
                         { "X-Hasura-Role", role.Name },
-                        { "X-Hasura-User_Id", role.Id.ToString() },
+                        { "X-Hasura-User_ID", role.Id.ToString() },
                 };
             //cool.StatusCode = 200;
 
