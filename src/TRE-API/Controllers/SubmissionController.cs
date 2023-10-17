@@ -145,7 +145,7 @@ namespace TRE_API.Controllers
             {
                 OutputBucket = outputBucket,
                 SubId = submission.Id.ToString(),
-                OutputFolder = "/" + "sub" + subId + "/"
+                OutputFolder = "sub" + subId + "/"
         };
         }
 
@@ -263,8 +263,13 @@ namespace TRE_API.Controllers
             var destinationBucket = project.OutputBucket;
 
             //Copy file to output bucket
-            var source = _minioTreHelper.GetCopyObject(sourceBucket.OutputBucket, sourceBucket.OutputFolder + outcome.file);
-            var copyResult = _minioSubHelper.CopyObjectToDestination(destinationBucket, sourceBucket.OutputFolder + outcome.file, source.Result);
+            var source = _minioTreHelper.GetCopyObject(sourceBucket.OutputBucket, sourceBucket.OutputFolder + sourceBucket.OutputFolder + outcome.file);
+            var isFolderExists = _minioTreHelper.FolderExists(destinationBucket, "sub" + submission.Id).Result;
+            if (!isFolderExists)
+            {
+                var submissionFolder = _minioTreHelper.CreateFolder(destinationBucket, "sub" + submission.Id).Result;
+            }
+            var copyResult = _minioSubHelper.CopyObjectToDestination(destinationBucket, sourceBucket.OutputFolder + sourceBucket.OutputFolder + outcome.file, source.Result);
             //For me to code
             var statusParams = new Dictionary<string, string>()
                                     {

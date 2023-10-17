@@ -89,11 +89,21 @@ namespace BL.Services
                 using (var stream = new MemoryStream())
                 {
                     await filePath.CopyToAsync(stream);
+                    using (FileStream file = new FileStream(@"c:\testing\file.bin", FileMode.Create, System.IO.FileAccess.Write))
+                    {
+                        byte[] bytes = new byte[stream.Length];
+                        stream.Read(bytes, 0, (int)stream .Length);
+                        file.Write(bytes, 0, bytes.Length);
+                        stream.Close();
+                        stream.Position = 0;
+                    }
+
+                    var outstream = new  MemoryStream(File.ReadAllBytes(@"c:\testing.gif"));
                     var uploadRequest = new PutObjectRequest
                     {
                         BucketName = bucketName,
                         Key = filePath.FileName,
-                        InputStream = stream,
+                        InputStream = outstream,
                         ContentType = filePath.ContentType
                     };
 
