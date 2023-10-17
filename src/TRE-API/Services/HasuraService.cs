@@ -38,17 +38,21 @@ namespace TREAPI.Services
             await SetUpDb(dbName, _hasuraSettings.EnvironmentVariableForDB);
             var Schemas = await this.Schemas(dbName);
 
-            foreach (var schema in Schemas)
+            if (Schemas.Any())
             {
-             
-                var data = await TablesInSchemas(dbName, schema[0]);
-                var tables = data.Where(x => x[0] != "table_name");
-                foreach (var table in tables)
+
+                foreach (var schema in Schemas)
                 {
-                    var successful = await TrackData(dbName, schema[0], table[0]);
-                    if (successful)
+
+                    var data = await TablesInSchemas(dbName, schema[0]);
+                    var tables = data.Where(x => x[0] != "table_name");
+                    foreach (var table in tables)
                     {
-                        await SetPermission(dbName, schema[0], table[0]);
+                        var successful = await TrackData(dbName, schema[0], table[0]);
+                        if (successful)
+                        {
+                            await SetPermission(dbName, schema[0], table[0]);
+                        }
                     }
                 }
             }
@@ -407,16 +411,12 @@ namespace TREAPI.Services
 
           
                 if (token != "")
-                {
-                    //var headerInfo = _applicationDbContext.DataToRoles.Where(x => x.Token == token).FirstOrDefault();
-                    //if (headerInfo != null)
-                    //{
-                    //    re.Headers.Add("x-hasura-role", headerInfo.Name);
-                    //    re.Headers.Add("x-hasura-user_id", headerInfo.Id.ToString());
-                    //}
-
+                {   
                     re.Headers.Add("token", token);
-
+                }
+                else
+                {
+                    re.Headers.Add("x-hasura-admin-secret", _hasuraSettings.HasuraAdminSecret);
                 }
 
                 //need to deseralise token not in db
