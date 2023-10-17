@@ -6,6 +6,7 @@
     var getAllUsers = @ViewBag.getAllUsers;
     var getAllTres = @ViewBag.getAllTres;
     var userOnProjCount = @ViewBag.userOnProjectCount;
+    var userWroteSubCount = @ViewBag.userWroteSubCount;
 
 }
 @if (User.IsInRole("dare-control-admin"))
@@ -29,7 +30,7 @@
                     <a href="#submissions" class="nav-link text-dark" id="submissions" data-bs-toggle="tab" data-bs-target="#submissions-tab" role="tab" aria-controls="submissions" aria-selected="false">
                         <div class="d-flex justify-content-between align-items-center">
                             <span>Submissions</span>
-                            <span class="badge bg-dark-blue rounded-pill ms-2">@Model.Submissions.Count @*@ @User?.FindAll("submissions").Count() *@</span>
+                            <span class="badge bg-dark-blue rounded-pill ms-2">@userWroteSubCount @*@ @User?.FindAll("submissions").Count() *@</span>
                         </div>
                     </a>
                 </li>

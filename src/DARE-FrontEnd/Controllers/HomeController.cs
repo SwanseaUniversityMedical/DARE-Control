@@ -45,6 +45,8 @@ namespace DARE_FrontEnd.Controllers
         [Authorize]
         public IActionResult LoggedInUser()
         {
+            var preferedUsername = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+            
             var getAllProj = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects").Result;
             ViewBag.getAllProj = getAllProj;
 
@@ -56,23 +58,39 @@ namespace DARE_FrontEnd.Controllers
 
             var getAllTres = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Tre/GetAllTres").Result;
             ViewBag.getAllTres = getAllTres.Count;
+
             var userOnProjList = new List<User>();
             var projectList = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects").Result.ToList();
             foreach (var proj in projectList)
             {
                 foreach (var user in proj.Users)
                 {
-                    if (user.Name == "luke.young")
+                    //(TODO : Make this not hardcoded)
+                    if (user.Name == preferedUsername)
 
                         userOnProjList.Add(user);
                     else { 
                     }
                 }
-                
             }
             var userOnProjectsCount = userOnProjList.ToList().Count;
             ViewBag.userOnProjectCount = userOnProjectsCount;
+
+            var userWroteSubList = new List<User>();
+            var subList = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions").Result.ToList();
+            foreach (var sub in subList)
+            {
+
+                    if (sub.SubmittedBy.Name == preferedUsername)
+                {
+                    userWroteSubList.Add(sub.SubmittedBy);
                 
+                }
+
+            }
+            var userWroteSubCount = userWroteSubList.ToList().Count;
+            ViewBag.userWroteSubCount = userWroteSubCount;
+
             var userModel = new User
             {
                 Name = User.Identity.Name,
@@ -84,6 +102,9 @@ namespace DARE_FrontEnd.Controllers
             
             return View(userModel);
         }
+
+      
+
 
         public IActionResult TermsAndConditions()
         {
