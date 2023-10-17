@@ -120,6 +120,35 @@ namespace TRE_API.Controllers
             public string OutputFolder { get; set; }
         }
 
+        private OutputBucketInfo GetOutputBucketGuts(string subId)
+        {
+            
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("submissionId", subId.ToString());
+            var submission = _dareHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist)
+                .Result;
+
+            var bucket = _dbContext.Projects
+                .Where(x => x.SubmissionProjectId == submission.Project.Id)
+                .Select(x => x.OutputBucketTre);
+
+            var outputBucket = bucket.FirstOrDefault();
+
+            var isFolderExists = _minioTreHelper.FolderExists(outputBucket.ToString(), "sub" + subId).Result;
+            if (!isFolderExists)
+            {
+                var submissionFolder = _minioTreHelper.CreateFolder(outputBucket.ToString(), "sub" + subId).Result;
+            }
+
+            outputBucket = outputBucket.ToString();
+            return new OutputBucketInfo()
+            {
+                OutputBucket = outputBucket,
+                SubId = submission.Id.ToString(),
+                OutputFolder = "sub" + subId + "/"
+        };
+        }
+
         [Authorize(Roles = "dare-hutch-admin,dare-tre-admin")]
         [HttpPost]
         [Route("FilesReadyForReview")]
@@ -215,8 +244,13 @@ namespace TRE_API.Controllers
             var destinationBucket = project.OutputBucket;
 
             //Copy file to output bucket
-            var source = _minioTreHelper.GetCopyObject(sourceBucket.OutputBucket, sourceBucket.OutputFolder + outcome.file);
-            var copyResult = _minioSubHelper.CopyObjectToDestination(destinationBucket, sourceBucket.OutputFolder + outcome.file, source.Result);
+            var source = _minioTreHelper.GetCopyObject(sourceBucket.OutputBucket, sourceBucket.OutputFolder + sourceBucket.OutputFolder + outcome.file);
+            var isFolderExists = _minioTreHelper.FolderExists(destinationBucket, "sub" + submission.Id).Result;
+            if (!isFolderExists)
+            {
+                var submissionFolder = _minioTreHelper.CreateFolder(destinationBucket, "sub" + submission.Id).Result;
+            }
+            var copyResult = _minioSubHelper.CopyObjectToDestination(destinationBucket, sourceBucket.OutputFolder + sourceBucket.OutputFolder + outcome.file, source.Result);
             //For me to code
             var statusParams = new Dictionary<string, string>()
                                     {

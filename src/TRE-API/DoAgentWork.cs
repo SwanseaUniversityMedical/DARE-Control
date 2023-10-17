@@ -350,6 +350,7 @@ namespace TRE_API
 
                         try
                         {
+
                             Uri uri = new Uri(aSubmission.DockerInputLocation);
                             string fileName = Path.GetFileName(uri.LocalPath);
                             var sourceBucket = aSubmission.Project.SubmissionBucket;
@@ -367,6 +368,7 @@ namespace TRE_API
 
                             throw;
                         }
+
 
                         // The TES message
                         var tesMessage = JsonConvert.DeserializeObject<TesTask>(aSubmission.TesJson);
