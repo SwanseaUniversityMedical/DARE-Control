@@ -9,6 +9,7 @@ using BL.Models.ViewModels;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace Tre_Hasura
 {
@@ -29,18 +30,27 @@ namespace Tre_Hasura
         }
         public void Run(string[] args)
         {
+            Console.WriteLine("AAAAA");
 
-            var Tokenparamlist = new Dictionary<string, string>
-            {
-               { "role", "select"}
-            };
-
-            var t = _treclientHelper.CallAPIWithoutModel<Response>("/api/HasuraAuthentication/GetNewToken/", Tokenparamlist).Result;
-
-
+            var Token = "";
             string Query = "query MyQuery {\r\n  test2 {\r\n    id\r\n    name\r\n  }\r\n}";
 
-            RunQuery(t.result, Query);
+
+            foreach (var arg in args)
+            {
+                if (arg.StartsWith("--")) {
+                    Token = arg.Replace("--", "");
+                }
+
+                if (arg.StartsWith("@"))
+                {
+                    Query = arg.Replace("@", "");
+                }
+
+            }
+            Console.WriteLine("Query > " + Query);
+            Console.WriteLine("Token > " + Token);
+            RunQuery(Token, Query);
         }
 
         public class Response
