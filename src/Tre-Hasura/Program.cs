@@ -7,6 +7,8 @@ using Tre_Hasura;
 using Microsoft.AspNetCore.Hosting;
 using static System.Formats.Asn1.AsnWriter;
 using BL.Services;
+using Tre_Hasura.Models;
+
 
 Console.WriteLine("Hello, World!");
 
@@ -26,13 +28,18 @@ catch (Exception e)
 
 IHostBuilder CreateHostBuilder(string[] strings)
 {
-    return Host.CreateDefaultBuilder()
-        .ConfigureServices((_, services) =>
+    return Host.CreateDefaultBuilder().ConfigureServices((context, services) =>
         {
-            services.AddSingleton<ITREClientHelper, TREClientHelper>();
-            services.AddSingleton<IHasuraQuery, HasuraQuery>();        
-         
+            services.AddSingleton<IHasuraQuery, HasuraQuery>();
+
+
+            var HasuraSettings = new HasuraSettings();
+            context.Configuration.Bind(nameof(HasuraSettings), HasuraSettings);
+            services.AddSingleton(HasuraSettings);
             services.AddHttpClient();
             services.AddHttpContextAccessor();
-        });
+        })
+        
+    
+
 }

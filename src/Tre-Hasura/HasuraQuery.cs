@@ -10,28 +10,30 @@ using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Newtonsoft.Json;
+using Tre_Hasura.Models;
+using System.Net.Http.Headers;
 
 namespace Tre_Hasura
 {
     public interface IHasuraQuery
     {
-        void RunQuery(string token,  string Query);
-        void Run(string[] args);
+        Task<string> RunQuery(string token,  string Query);
+        Task Run(string[] args);
 
 
     }
     public class HasuraQuery : IHasuraQuery
     {
-        private readonly ITREClientHelper _treclientHelper;
-        public HasuraQuery(ITREClientHelper treClient)
+        private readonly HasuraSettings _hasuraSettings;
+        public HasuraQuery(HasuraSettings HasuraSettings)
         {
+            _hasuraSettings = HasuraSettings;
 
-            _treclientHelper = treClient;
         }
-        public void Run(string[] args)
-        {
-            Console.WriteLine("AAAAA");
 
+        public async Task Run(string[] args)
+        {
             var Token = "";
             string Query = "query MyQuery {\r\n  test2 {\r\n    id\r\n    name\r\n  }\r\n}";
 
@@ -50,21 +52,21 @@ namespace Tre_Hasura
             }
             Console.WriteLine("Query > " + Query);
             Console.WriteLine("Token > " + Token);
-            RunQuery(Token, Query);
+            var data = await RunQuery(Token, Query);
+
+            File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "data.json"), data);
         }
 
-        public class Response
+
+        public class ReturnData
         {
-            public string result { get; set; }
-
-           
+            public string result_type { get; set; }
+            public List<List<string>> result { get; set; }
         }
 
-        public void RunQuery(string token, string Query)
+        public async Task<string> RunQuery(string token, string Query)
         {
             //dont need to check token as Hasura does this 
-            //make query
-
 
             var paramlist = new Dictionary<string, string>
             {
@@ -72,10 +74,51 @@ namespace Tre_Hasura
                { "Query", Query}
             };
 
-            var result = _treclientHelper.CallAPIWithoutModel<Response>("/api/Hasura/RunQuery/", paramlist).Result;
+            // Set the endpoint URL
 
-            
+            //need to get the headers to send from the token userid
+            string endpointUrl = _hasuraSettings.HasuraURL + "/v1/query";
+            try
+            {
+                Query = System.Text.Json.JsonSerializer.Serialize(Query);
+                var Result = await HttpClient(endpointUrl, Query, false, token);
+
+                var Content = await Result.Content.ReadAsStringAsync();
+
+                var data = Content;
+
+                return data;
+
+            }
+            catch (Exception ex)
+            {
+               Console.WriteLine(ex.Message);
+            }
+
+            return null;
 
         }
+
+        public async Task<HttpResponseMessage> HttpClient(string endpointUrl, string payload, bool doto = false, string token = "")
+        {
+            HttpResponseMessage response = null;
+            // Create the HttpClient
+            using (HttpClient client = new HttpClient())
+            {
+                // Set the request headers
+                HttpRequestMessage re = new HttpRequestMessage(HttpMethod.Post, endpointUrl);
+   
+            
+                re.Headers.Add("token", token);
+            
+           
+                //need to deseralise token not in db
+                re.Content = new StringContent(payload, Encoding.UTF8, "application/json");
+                re.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                response = await client.SendAsync(re);
+            }
+            return response;
+        }
+
     }
 }
