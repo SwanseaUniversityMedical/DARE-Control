@@ -30,7 +30,7 @@
                     <a href="#submissions" class="nav-link text-dark" id="submissions" data-bs-toggle="tab" data-bs-target="#submissions-tab" role="tab" aria-controls="submissions" aria-selected="false">
                         <div class="d-flex justify-content-between align-items-center">
                             <span>Submissions</span>
-                            <span class="badge bg-dark-blue rounded-pill ms-2">@userWroteSubCount @*@ @User?.FindAll("submissions").Count() *@</span>
+                            <span class="badge bg-dark-blue rounded-pill ms-2">@userWroteSubCount</span>
                         </div>
                     </a>
                 </li>
@@ -132,17 +132,6 @@
                                 {
                                     <tr>
                                         <td>
-                                            @*@{
-                                    switch (submission.Status)
-                                    {
-                                    case BL.Models.Enums.StatusType.DataOutApproved:
-                                    <span class="badge bg-dark-blue rounded-pill">@submission.Status</span>
-                                    break;
-                                    default:
-                                    <span class="badge bg-dark-blue rounded-pill">@submission.Status</span>
-                                    break;
-                                    }
-                                    }*@
                                             @{
                                                 var overallStatus = submission.Status;
                                                 if (overallStatus == BL.Models.Enums.StatusType.Completed)
@@ -289,19 +278,12 @@
                                                 }
 
                                             }
-                                            @*
-                                    <i class="fa-solid fa-circle-check fs-5 text-success" data-bs-toggle="tooltip" data-bs-title="Completed: xx/xx/xxxx"></i>
-                                    <i class="fa-solid fa-triangle-exclamation fs-5 text-danger" data-bs-toggle="tooltip" data-bs-title="Failed: error message"></i>
-                                    <i class="fa-solid fa-circle-notch fa-spin fs-5 text-primary" data-bs-toggle="tooltip" data-bs-title="@submission.Status"></i>
-                                    *@
+
                                         </td>
                                         <td>
                                             <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })">
                                                 <h2 class="mb-0 fw-bold hover-underline fs-6">
                                                     @submission.TesName
-                                                    @*<span class="text-muted fw-normal fs-7 mb-0">
-                                            ID: @submission.Id<br>
-                                            </span>*@
                                                 </h2>
                                             </a>
 
@@ -320,25 +302,6 @@
                                                 <span class="small">View</span>
                                             </a>
                                         </td>
-                                        @*<td class="card mb-2 p-3 bg-white shadow-sm border-1">
-
-                                <div>
-                                <p>TRE's submitted to: </p>
-                                @{
-                                @foreach (var child in submission.Children)
-                                {
-
-                                var treName = @child.Tre?.Name.ToString();
-                                if (treName == null)
-                                {
-                                treName = "None";
-                                }
-                                <a href="@Url.Action("GetATre", "Tre", new { id = child.Tre.Id })" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">@treName</a>
-
-                                }
-                                }
-                                </div>
-                                </td>*@
                                     </tr>
                                 }
                             </tbody>
