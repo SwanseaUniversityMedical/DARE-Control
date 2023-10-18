@@ -4,14 +4,17 @@ using DARE_API.Services.Contract;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
+using System.IO;
 using System.Net.Http.Headers;
+using System.Runtime;
 using System.Text;
+using System.Net;
 
 namespace DARE_API.Services
 {
     public class KeycloakMinioUserService : IKeycloakMinioUserService
     {
-        private readonly SubmissionKeyCloakSettings _submissionKeyCloakSettings;
+        public  SubmissionKeyCloakSettings _submissionKeyCloakSettings;
         public KeycloakMinioUserService(SubmissionKeyCloakSettings submissionKeyCloakSettings)
         {
             _submissionKeyCloakSettings = submissionKeyCloakSettings;
@@ -31,6 +34,10 @@ namespace DARE_API.Services
 
                     JObject user = JObject.Parse(userAttributesJson);
 
+                    if (user["attributes"] == null)
+                    {
+                        user.Add("attributes", null);
+                    }
                     if (user["attributes"][attributeKey] != null)
                     {
                         var existingValues = user["attributes"][attributeKey].ToObject<JArray>();
@@ -137,9 +144,10 @@ namespace DARE_API.Services
                 throw;
             }
         }
-        static async Task<string> GetUserIDAsync(string baseUrl, string realm, string accessToken, string userName)
+        public async Task<string> GetUserIDAsync(string baseUrl, string realm, string accessToken, string userName)
         {
-            HttpClient httpClient = new HttpClient();
+
+            HttpClient httpClient = new HttpClient(_submissionKeyCloakSettings.getProxyHandler);
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             var apiUrl = $"https://{baseUrl}/admin/realms/{realm}/users?username={userName}";
@@ -149,11 +157,18 @@ namespace DARE_API.Services
             var jsonString = await response.Content.ReadAsStringAsync();
             try
             {
+                
                 JArray jsonObject = JsonConvert.DeserializeObject<JArray>(jsonString);
+                foreach (var item in jsonObject)
+                {
+                    if (item["username"].ToString().ToLower() == userName.ToLower())
+                    {
+                        return item["id"].ToString();
+                    }
+                }
 
-                var userId = jsonObject[0]["id"].ToString();
 
-                return userId;
+                throw new Exception("User not found");
             }
             catch (Exception ex)
             {
@@ -164,9 +179,9 @@ namespace DARE_API.Services
 
             return string.Empty;
         }
-        static async Task<string> GetUserAttributesAsync(string baseUrl, string realm, string accessToken, string userID)
+        public async Task<string> GetUserAttributesAsync(string baseUrl, string realm, string accessToken, string userID)
         {
-            using (var httpClient = new HttpClient())
+            using (var httpClient = new HttpClient(_submissionKeyCloakSettings.getProxyHandler))
             {
                 httpClient.BaseAddress = new Uri($"https://{baseUrl}/admin/realms/{realm}/users/{userID}");
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -183,9 +198,9 @@ namespace DARE_API.Services
                 }
             }
         }
-        static async Task<bool> UpdateUserAttributes(string keycloakBaseUrl, string realm, string userId, string accessToken, string updatedUserData)
+        public async Task<bool> UpdateUserAttributes(string keycloakBaseUrl, string realm, string userId, string accessToken, string updatedUserData)
         {
-            using (var httpClient = new HttpClient())
+            using (var httpClient = new HttpClient(_submissionKeyCloakSettings.getProxyHandler))
             {
                 httpClient.BaseAddress = new Uri($"https://{keycloakBaseUrl}/admin/realms/{realm}/users/{userId}");
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -193,7 +208,16 @@ namespace DARE_API.Services
 
                 var content = new StringContent(updatedUserData, System.Text.Encoding.UTF8, "application/json");
                 var response = await httpClient.PutAsync("", content);
+                var stream = response.Content.ReadAsStream();
+                string content2 = "";
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    // Read the stream content into a string
+                    content2 = reader.ReadToEnd();
 
+                    // Output the string content
+
+                }
                 return response.IsSuccessStatusCode;
             }
         }

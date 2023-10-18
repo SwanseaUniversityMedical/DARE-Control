@@ -16,6 +16,8 @@ namespace BL.Models
         public EgressStatus Status { get; set; }
         public string? OutputBucket { get; set; }
 
+        public string? SubFolder { get; set; }
+
         public DateTime? Completed { get; set; }
         public string? Reviewer { get; set; }
         public virtual List<EgressFile> Files { get; set; }

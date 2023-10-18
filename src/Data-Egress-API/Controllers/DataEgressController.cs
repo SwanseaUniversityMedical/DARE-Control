@@ -193,10 +193,12 @@ namespace Data_Egress_API.Controllers
                 };
                 foreach (var file in egress.Files)
                 {
+                    var dbegressfile = dbegress.Files.First(x => x.Id == file.Id);
+                    dbegressfile.Status = file.Status;
                     backtotre.fileResults.Add(new EgressResult()
                     {
-                        fileName = file.Name,
-                        approved = file.Status == FileStatus.Approved,
+                        fileName = dbegressfile.Name,
+                        approved = dbegressfile.Status == FileStatus.Approved,
                     });
                     var egfile = dbegress.Files.First(x => x.Id == file.Id);
                     egfile.Status = file.Status;
@@ -365,13 +367,13 @@ namespace Data_Egress_API.Controllers
         [HttpGet("DownloadFile")]
         public async Task<IActionResult> DownloadFileAsync(int fileId)
         {
-            
+            try { 
 
             var egressFile = _DbContext.EgressFiles.First(x => x.Id == fileId);
            
 
             
-                var response = await _minioHelper.GetCopyObject(egressFile.EgressSubmission.OutputBucket, egressFile.Name);
+                var response = await _minioHelper.GetCopyObject(egressFile.EgressSubmission.OutputBucket, egressFile.EgressSubmission.SubFolder + egressFile.Name);
 
                 using (var responseStream = response.ResponseStream)
                 {
@@ -381,7 +383,12 @@ namespace Data_Egress_API.Controllers
                     // Create a FileContentResult and return it as the response
                     return File(fileBytes, GetContentType(egressFile.Name), egressFile.Name);
                 }
-           
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "DownloadFiles");
+                throw;
+            }
 
         }
 

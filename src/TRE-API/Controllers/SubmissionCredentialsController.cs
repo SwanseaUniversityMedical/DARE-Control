@@ -34,6 +34,7 @@ namespace TRE_API.Controllers
         [HttpGet("CheckCredentialsAreValid")]
         public async Task<BoolReturn> CheckCredentialsAreValidAsync()
         {
+            try { 
             var result = new BoolReturn(){Result = false};
             var creds = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Submission);
             if (creds != null)
@@ -45,6 +46,12 @@ namespace TRE_API.Controllers
             }
 
             return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "CheckCredentialsAreValid");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-tre-admin")]
@@ -54,38 +61,35 @@ namespace TRE_API.Controllers
             try
             {
                 creds.Valid = true;
-                var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
-                    creds.PasswordEnc, "dare-tre-admin");
+                var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName, creds.PasswordEnc, "dare-tre-admin");
                 if (string.IsNullOrWhiteSpace(token))
                 {
                     creds.Valid = false;
                     return creds;
                 }
-                
-                var add = true;
-                var dbcred = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Submission);
-                if (dbcred != null)
-                {
-                    creds.Id = dbcred.Id;
-                    creds.CredentialType = CredentialType.Submission;
-                    add = false;
-                }
-
-                creds.PasswordEnc = _encDecHelper.Encrypt(creds.PasswordEnc);
-                if (add)
-                {
-                    _DbContext.KeycloakCredentials.Add(creds);
-                    
-                }
                 else
                 {
-                    _DbContext.KeycloakCredentials.Update(creds);
-                }
-                
-                await _DbContext.SaveChangesAsync();
 
-                Log.Information("{Function} Credentials Successfully update", "UpdateCredentials");
-                return creds;
+                    var dbcred =
+                        _DbContext.KeycloakCredentials.FirstOrDefault(
+                            x => x.CredentialType == CredentialType.Submission);
+                    if (dbcred == null)
+                        dbcred = new KeycloakCredentials();
+
+                    dbcred.CredentialType = CredentialType.Submission;
+                    dbcred.UserName = creds.UserName;
+                    dbcred.PasswordEnc = _encDecHelper.Encrypt(creds.PasswordEnc);
+
+                    if (dbcred.Id == 0)
+                        _DbContext.KeycloakCredentials.Add(dbcred);
+                    else
+                        _DbContext.KeycloakCredentials.Update(dbcred);
+
+                    await _DbContext.SaveChangesAsync();
+
+                    Log.Information("{Function} Credentials Successfully update", "UpdateCredentials");
+                    return creds;
+                }
             }
             catch (Exception ex)
             {

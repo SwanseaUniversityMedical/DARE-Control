@@ -1,6 +1,7 @@
 ﻿
 
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using System.Xml.Linq;
 
 namespace BL.Models.Enums
@@ -163,6 +164,8 @@ namespace BL.Models.Enums
         Approved = 1,
         Rejected = 2
     }
+
+    
 
     public enum EgressStatus
     {

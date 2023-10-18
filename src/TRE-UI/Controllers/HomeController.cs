@@ -37,7 +37,8 @@ namespace TRE_UI.Controllers
 
                 return RedirectToAction("UpdateCredentials", "DataEgressCredentials");
             }
-            return View();
+           return RedirectToAction("GetAllProjects", "Approval");
+            //return View();
         }
      
         public IActionResult LoginAfterTokenExpired()

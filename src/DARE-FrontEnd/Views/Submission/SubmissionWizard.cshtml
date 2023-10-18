@@ -1,0 +1,84 @@
+﻿@using BL.Models.ViewModels
+@using DARE_FrontEnd.Formatters
+@model BL.Models.ViewModels.SubmissionWizard
+@{
+    ViewData["Title"] = "Submission Wizard";
+}
+
+<div class="container-lg mt-4 p-4 bg-white border-1 shadow-sm">
+    <div class="d-flex align-items-center justify-content-between">
+        <div>
+            <h1 class="fs-3 mb-0">Submission Wizard</h1>
+        
+        </div>
+        @*<p class="badge py-2 px-3 badge-lg bg-warning text-dark rounded-pill m-0">
+            <i class="fa-solid fa-flag me-2"></i>Embargoed: @project.MarkAsEmbargoed
+        </p>*@
+    </div>
+    <div class="mt-4">
+
+
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="modal-body">
+                @using (Html.BeginForm("SubmissionWizard", "Submission", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain", @class="row g-3"  }))
+                {
+                    @Html.HiddenFor(x => x.ProjectId)
+                    {
+
+                        <div class="col-12">
+                            @Html.LabelFor(x => x.ProjectName,new {@class="form-label"})
+                            @Html.DisplayFor(x => x.ProjectName, new {@class="form-control"})
+                        </div>
+                        <div class="col-12">
+                            @Html.LabelFor(x => x.TESName,new {@class="form-label"})
+                            @Html.TextBoxFor(x => x.TESName, new {@class="form-control"})
+                        </div>
+                        <div class="col-md-12">
+                            @Html.LabelFor(x => x.Tres,new {@class="form-label"})
+                            @Html.ListBoxFor(x => x.Tres, Model.SelectTresOptions.Select(y => new SelectListItem(y, y)), new { @class = "form-select" })
+
+                        </div>
+                        <div class="form-group">
+                    
+                            @Html.LabelFor(x => x.OriginOption, new {@class="form-label"} )
+                            <div class="form-check">
+                                @Html.RadioButtonFor(x => x.OriginOption, CrateOrigin.FileUpload, new {@class="form-check-input"})
+                                @Html.Label(Helpers.PrettyCrateOrigin(CrateOrigin.FileUpload), Helpers.PrettyCrateOrigin(CrateOrigin.FileUpload), new {@class="form-check-label"})
+                            </div>
+                            <div class="form-check">
+                                @Html.RadioButtonFor(x => x.OriginOption, CrateOrigin.External, new {@class="form-check-input"})
+                                @Html.Label(Helpers.PrettyCrateOrigin(CrateOrigin.External), Helpers.PrettyCrateOrigin(CrateOrigin.External), new {@class="form-check-label"})
+                            </div>
+                       
+
+                   
+
+
+                        </div>
+                        <div id="externalUrlField" class="form-group" style="display:none;">
+                            @Html.LabelFor(x => x.ExternalURL,new {@class="form-label"})
+                            @Html.TextBoxFor(x => x.ExternalURL,new {@class="form-control"})
+
+                        </div>
+
+                        <div id="uploadedFileField" class="form-group">
+                            @Html.LabelFor(x => x.File, new {@class="form-label"})
+                            @Html.TextBoxFor(m => m.File, new { type = "file", @class="form-control" })
+
+                        </div>
+                        <div class="hero-block-1">
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit</button>
+                            <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Action("GetProject", "Project", new { id = Model.ProjectId })'">
+                                Cancel
+                            </button>
+
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

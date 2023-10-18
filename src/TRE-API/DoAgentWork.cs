@@ -22,12 +22,13 @@ using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
 using BL.Services;
 using Microsoft.AspNetCore.SignalR;
+using Castle.Components.DictionaryAdapter.Xml;
 
 namespace TRE_API
 {
     public interface IDoAgentWork
     {
-        void Execute();
+        void Execute(bool useRabbit = true, bool useHutch = false, bool useTESK = true);
         void CheckTESK(string taskID, string TesId);
         void ClearJob(string jobname);
         void testing();
@@ -207,20 +208,12 @@ namespace TRE_API
 
 
         // Method executed upon hangfire job
-        public void Execute()
+        public void Execute(bool useRabbit = true, bool useHutch = false, bool useTESK = true)
         {
             
             // control use of dependency injection
             using (var scope = _serviceProvider.CreateScope())
             {
-
-                
-                // OPTIONS
-                // TODO get these from somewhere
-
-                var useRabbit = true;
-                var useHutch = false;
-                var useTESK = true;
 
                 Console.WriteLine("Getting list of submissions");
 
@@ -247,19 +240,17 @@ namespace TRE_API
                     
 
                     // Check user is allowed ont he project
-                    if (_subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
+                    if (!_subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
                     {
                         Log.Error("User {UserID}/project {ProjectId} is not value for this submission {submission}", aSubmission.SubmittedBy.Id, aSubmission.Project.Id, aSubmission);
                         // record error with submission layer
-                        var result = _subHelper.UpdateStatusForTre(aSubmission.TesId, StatusType.InvalidUser, "");
+                        var result = _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.InvalidUser, "");
                     }
                     else
                     {
 
 
                         
-                        try
-                        {
                             Uri uri = new Uri(aSubmission.DockerInputLocation);
                             string fileName = Path.GetFileName(uri.LocalPath);
                             var sourceBucket = aSubmission.Project.SubmissionBucket;
@@ -268,15 +259,10 @@ namespace TRE_API
                             {
                                 var destinationBucket = proj.SubmissionBucketTre;
                                 var source =  _minioSubHelper.GetCopyObject(sourceBucket, fileName);
-                                var result = _minioTreHelper.CopyObjectToDestination(destinationBucket, fileName, source.Result);
+                                var result =  _minioTreHelper.CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
 
                             }
-                        }
-                        catch (Exception ex)
-                        {
-
-                            throw;
-                        }
+                       
                         
                         // The TES message
                         var tesMessage = JsonConvert.DeserializeObject<TesTask>(aSubmission.TesJson);
@@ -305,10 +291,9 @@ namespace TRE_API
                             // TODO for rest API
                             try
                             {
-                                StringContent x = new StringContent("abc");
+                                
+                                _subHelper.SendSumissionToHUTCH(aSubmission);
 
-                               // var callHUTCH = treApi.CallAPI("url", x, null,false);
-                              
                             }
                             catch (Exception e)
                             {
@@ -329,7 +314,7 @@ namespace TRE_API
                         {
                             try
                             {
-                                var result = _subHelper.UpdateStatusForTre(aSubmission.TesId, StatusType.TransferredToPod, "");
+                                var result = _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.TransferredToPod, "");
                             }
                             catch (Exception e)
                             {

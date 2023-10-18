@@ -320,14 +320,27 @@ app.MapHub<SignalRService>("/signalRHub", options =>
 {
     options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
 }).RequireCors(MyAllowSpecificOrigins);
+
+//Hangfire
+var jobSettings = new JobSettings();
+configuration.Bind(nameof(JobSettings), jobSettings);
+
 app.UseHangfireDashboard();
-RecurringJob.AddOrUpdate<IDoSyncWork>(a => a.Execute(), Cron.MinuteInterval(10));
-RecurringJob.AddOrUpdate<IDoAgentWork>("Scan Submissions", a => a.Execute(), Cron.MinuteInterval(10));
+
+const string syncJobName = "Sync Projects and Membership";
+if (jobSettings.syncSchedule == 0)
+    RecurringJob.RemoveIfExists(syncJobName);
+else
+    RecurringJob.AddOrUpdate<IDoSyncWork>(syncJobName, x => x.Execute(), Cron.MinuteInterval(jobSettings.syncSchedule));
+
+const string scanJobName = "Sync Submissions";
+if (jobSettings.scanSchedule == 0)
+    RecurringJob.RemoveIfExists(scanJobName);
+else
+    RecurringJob.AddOrUpdate<IDoAgentWork>(scanJobName,
+        x => x.Execute(jobSettings.useRabbit, jobSettings.useHutch, jobSettings.useTESK),
+        Cron.MinuteInterval(jobSettings.scanSchedule));
 
 var port = app.Environment.WebRootPath;
-
-// Print the port number
 Console.WriteLine("Application is running on port: " + port);
 app.Run();
-
-

@@ -73,7 +73,7 @@ namespace DARE_API.Controllers
         [ValidateModelState]
         [SwaggerOperation("UpdateStatusForTre")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public IActionResult UpdateStatusForTre(string tesId, StatusType statusType, string? description)
+        public IActionResult UpdateStatusForTre(string subId, StatusType statusType, string? description)
         {
 
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
@@ -84,10 +84,10 @@ namespace DARE_API.Controllers
             }
 
 
-            var sub = _DbContext.Submissions.FirstOrDefault(x => x.TesId == tesId && x.Tre == tre);
+            var sub = _DbContext.Submissions.FirstOrDefault(x => x.Id == int.Parse(subId) && x.Tre == tre);
             if (sub == null)
             {
-                return BadRequest("Invalid tesid or tre not valid for tes");
+                return BadRequest("Invalid subid or tre not valid for tes");
             }
 
             UpdateSubmissionStatus.UpdateStatus(sub, statusType, description);
@@ -121,11 +121,16 @@ namespace DARE_API.Controllers
         [HttpGet("TestSubRabbitSendRemoveBeforeDeploy")]
         public void TestSubRabbitSendRemoveBeforeDeploy(int id)
         {
-
+            try { 
             var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
 
             _rabbit.Advanced.Publish(exch, RoutingConstants.Subs, false, new Message<int>(id));
-            
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "TestSubRabbitSendBeforeDeploy");
+                throw;
+            }
         }
 
         [AllowAnonymous]
@@ -283,6 +288,7 @@ namespace DARE_API.Controllers
         [HttpPost("SaveSubmissionFiles")]
         public IActionResult SaveSubmissionFiles(int submissionId, List<SubmissionFile> submissionFiles)
         {
+            try { 
             var existingSubmission = _DbContext.Submissions
                 .Include(d => d.SubmissionFiles)
                 .FirstOrDefault(d => d.Id == submissionId);
@@ -315,7 +321,12 @@ namespace DARE_API.Controllers
             {
                 return BadRequest();
             }
-
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "SaveSubmissionFiles");
+                throw;
+            }
         }
     }
 }

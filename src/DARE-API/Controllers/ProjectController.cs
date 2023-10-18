@@ -15,6 +15,7 @@ using EasyNetQ.Management.Client.Model;
 using System.Threading;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using BL.Models.APISimpleTypeReturns;
+using Amazon.Util.Internal;
 
 namespace DARE_API.Controllers
 {
@@ -539,9 +540,17 @@ namespace DARE_API.Controllers
         [AllowAnonymous]
         public List<Tre> GetTresInProject(int projectId)
         {
-            List<Tre> tres = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Tres).ToList();
+            try
+            {
+                List<Tre> tres = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Tres).ToList();
 
-            return tres;
+                return tres;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetTresInProject");
+                throw;
+            }
         }
 
         private static string GenerateRandomName(string prefix)
@@ -563,9 +572,16 @@ namespace DARE_API.Controllers
         [HttpPost("TestFetchAndStoreObject")]
         public async Task<IActionResult> TestFetchAndStoreObject(testFetch testf)
         {
+            try { 
             await _minioHelper.FetchAndStoreObject(testf.url,testf.bucketName, testf.key);
 
             return Ok();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "TestFetchAandStoreObject");
+                throw;
+            }
         }
 
         [AllowAnonymous]
@@ -598,19 +614,40 @@ namespace DARE_API.Controllers
             return minioEndPoint;
         }
 
-        [HttpGet("UploadToMinio")]
-        [AllowAnonymous]
-        public async Task<BoolReturn> UploadToMinio(string bucketName, string fileJson)
+        //[HttpGet("UploadToMinioOld")]
+        //[AllowAnonymous]
+        //public async Task<BoolReturn> UploadToMinioOld(string bucketName, string fileJson)
+        //{
+        //    IFormFile iFile = ConvertJsonToIFormFile(fileJson);
+
+        //    var submissionBucket = await _minioHelper.UploadFileAsync(_minioSettings, iFile, bucketName, iFile.Name);
+
+        //    return new BoolReturn();
+        //}
+
+        [HttpPost("UploadToMinio")]
+        public async Task<BoolReturn> UploadToMinio(string bucketName, IFormFile file)
         {
-            IFormFile iFile = ConvertJsonToIFormFile(fileJson);
+            if (file == null || file.Length == 0)
+                return new BoolReturn() { Result = false };
 
-            var submissionBucket = await _minioHelper.UploadFileAsync(iFile, bucketName, iFile.Name);
+            try
+            {
+                var submissionBucket = await _minioHelper.UploadFileAsync(file, bucketName, file.Name);
+                
 
-            return new BoolReturn();
+                return new BoolReturn() { Result = true };
+            }
+            catch (Exception ex)
+            {
+                return new BoolReturn() { Result = false };
+            }
         }
+
 
         private IFormFile ConvertJsonToIFormFile(string fileJson)
         {
+            try { 
             if (string.IsNullOrEmpty(fileJson))
                 return null;
             var fileData = System.Text.Json.JsonSerializer.Deserialize<IFileData>(fileJson);
@@ -627,6 +664,12 @@ namespace DARE_API.Controllers
             };
 
             return formFile;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "ConvertJsonToIformFile");
+                throw;
+            }
         }
 
 
