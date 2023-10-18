@@ -66,7 +66,6 @@ namespace DARE_FrontEnd.Controllers
             {
                 foreach (var user in proj.Users)
                 {
-                    //(TODO : Make this not hardcoded)
                     if (user.Name == preferedUsername)
                     {
                         userOnProjListProj.Add(proj);
