@@ -16,6 +16,7 @@ using System.Net.Http.Headers;
 using System.Reflection.Metadata.Ecma335;
 using System.Text.Json;
 using System.Reflection.PortableExecutable;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace Tre_Hasura
@@ -56,13 +57,10 @@ namespace Tre_Hasura
                 }
         
 
-           Token = "G1CrUPkW1Rz28vQdJeuIjS4Ypm5x0bIx2KxJzw4W37xwAIpRTMdZwjb9PNubTPaUOGrDVOqsUwgh4jiqg5svUesQgqnT5rEwANMRswla8U59n9R1Jh9SfBJe0BJbKFK8";
-
             Console.WriteLine("Query > " + Query);
             Console.WriteLine("Token > " + Token);
             var data = await RunQuery(Token, Query);
-
-            File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "data.json"), data);
+            File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), $"data_{DateTime.Now}.json"), data);
         }
 
 
@@ -103,14 +101,7 @@ namespace Tre_Hasura
                Console.WriteLine(ex.Message);
             }
 
-       
-
-            if (result != null)
-            {
-                var jsonResult = JsonSerializer.Serialize(result.ToString());
-                System.IO.File.WriteAllText(@"~/output.json" + DateTime.Now, jsonResult);
-                //need to move to bucket
-            }
+      
 			return null;
 
         }

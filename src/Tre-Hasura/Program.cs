@@ -32,13 +32,12 @@ IHostBuilder CreateHostBuilder(string[] strings)
         {
             services.AddSingleton<IHasuraQuery, HasuraQuery>();
 
-
             var HasuraSettings = new HasuraSettings();
             context.Configuration.Bind(nameof(HasuraSettings), HasuraSettings);
             services.AddSingleton(HasuraSettings);
             services.AddHttpClient();
             services.AddHttpContextAccessor();
-        })
+        });
         
     
 
