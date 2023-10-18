@@ -10,6 +10,9 @@ using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Microsoft.AspNetCore.Mvc.Routing;
+using System.Reflection.Metadata.Ecma335;
+using System.Text.Json;
+using System.Reflection.PortableExecutable;
 
 namespace Tre_Hasura
 {
@@ -33,21 +36,25 @@ namespace Tre_Hasura
             Console.WriteLine("AAAAA");
 
             var Token = "";
-            string Query = "query MyQuery {\r\n  test2 {\r\n    id\r\n    name\r\n  }\r\n}";
+            string Query = "query {   testHasura_testing {     id     name   } }";
 
-
-            foreach (var arg in args)
-            {
-                if (arg.StartsWith("--")) {
-                    Token = arg.Replace("--", "");
-                }
-
-                if (arg.StartsWith("@"))
+            if (args is null)
+                foreach (var arg in args)
                 {
-                    Query = arg.Replace("@", "");
-                }
+                    if (arg.StartsWith("--")) {
+                        Token = arg.Replace("--", "");
+                    }
 
-            }
+                    if (arg.StartsWith("@"))
+                    {
+                        Query = arg.Replace("@", "");
+                    }
+
+                }
+        
+
+           Token = "G1CrUPkW1Rz28vQdJeuIjS4Ypm5x0bIx2KxJzw4W37xwAIpRTMdZwjb9PNubTPaUOGrDVOqsUwgh4jiqg5svUesQgqnT5rEwANMRswla8U59n9R1Jh9SfBJe0BJbKFK8";
+
             Console.WriteLine("Query > " + Query);
             Console.WriteLine("Token > " + Token);
             RunQuery(Token, Query);
@@ -74,7 +81,12 @@ namespace Tre_Hasura
 
             var result = _treclientHelper.CallAPIWithoutModel<Response>("/api/Hasura/RunQuery/", paramlist).Result;
 
-            
+            if (result != null)
+            {
+                var jsonResult = JsonSerializer.Serialize(result.ToString());
+                System.IO.File.WriteAllText(@"~/output.json" + DateTime.Now, jsonResult);
+                //need to move to bucket
+            }
 
         }
     }

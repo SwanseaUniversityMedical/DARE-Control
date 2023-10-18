@@ -406,8 +406,7 @@ namespace TREAPI.Services
             {
                 // Set the request headers
                 HttpRequestMessage re = new HttpRequestMessage(HttpMethod.Post, endpointUrl);
-                //re.Headers.Add("x-hasura-admin-secret", _hasuraSettings.HasuraAdminSecret);
-
+          
           
                 if (token != "")
                 {   
@@ -419,8 +418,6 @@ namespace TREAPI.Services
                     re.Headers.Add("x-hasura-admin-secret", _hasuraSettings.HasuraAdminSecret);
                     re.Content = new StringContent(payload, Encoding.UTF8, "application/json");
                 }
-
-                //need to deseralise token not in db
                
                
                 re.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
