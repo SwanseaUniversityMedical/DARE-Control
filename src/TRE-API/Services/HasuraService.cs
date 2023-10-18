@@ -373,8 +373,8 @@ namespace TREAPI.Services
         public async Task<string> ExecuteQuery(string Token, string Query)
         {
 
-            //eg endpoint {   testHasura_testing {     id     name   } }
-            // Set the endpoint URL
+            //eg query {   testHasura_testing {     id     name   } }
+          
 
             //need to get the headers to send from the token userid
             string endpointUrl = _hasuraSettings.HasuraURL + "/v1/graphql";
