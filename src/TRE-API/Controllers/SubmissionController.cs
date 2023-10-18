@@ -19,6 +19,7 @@ using EasyNetQ;
 using Newtonsoft.Json;
 using System;
 using Amazon.Runtime.Internal.Transform;
+using Serilog;
 
 namespace TRE_API.Controllers
 {
@@ -101,6 +102,7 @@ namespace TRE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
         public IActionResult GetOutputBucketInfo(string subId)
         {
+            try { 
             var outputInfo = GetOutputBucketGuts(subId);
 
             var status = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
@@ -111,6 +113,12 @@ namespace TRE_API.Controllers
                 }).Result;
 
             return StatusCode(200, outputInfo);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetOutputBucketInfo");
+                throw;
+            }
         }
 
         public class OutputBucketInfo
@@ -122,7 +130,7 @@ namespace TRE_API.Controllers
 
         private OutputBucketInfo GetOutputBucketGuts(string subId)
         {
-            
+            try { 
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("submissionId", subId.ToString());
             var submission = _dareHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist)
@@ -147,6 +155,12 @@ namespace TRE_API.Controllers
                 SubId = submission.Id.ToString(),
                 OutputFolder = "sub" + subId + "/"
         };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetOutputBucketGuts");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-hutch-admin,dare-tre-admin")]
@@ -157,7 +171,7 @@ namespace TRE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
         public IActionResult FilesReadyForReview([FromBody] ReviewFiles review)
         {
-
+            try { 
             var bucket = GetOutputBucketGuts(review.subId);
             var egsub = new EgressSubmission()
             {
@@ -178,6 +192,12 @@ namespace TRE_API.Controllers
             }
             var boolResult = _dataEgressHelper.CallAPI<EgressSubmission, BoolReturn>("/api/DataEgress/AddNewDataEgress/", egsub).Result;
             return StatusCode(200, boolResult);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "FilesReadyForReview");
+                throw;
+            }
         }
         
        
@@ -189,6 +209,7 @@ namespace TRE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
         public async Task<IActionResult> EgressResults([FromBody] EgressReview review)
         {
+            try { 
             //Update status of submission to "Sending to hutch for final packaging"
             var statusParams = new Dictionary<string, string>()
                                     {
@@ -234,6 +255,12 @@ namespace TRE_API.Controllers
             var HUTCHres = await _hutchHelper.CallAPI<ApprovalResult, APIReturn>($"/api/jobs/{review.subId}/approval", hutchPayload);
 
             return StatusCode(200, HUTCHres);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "EgressResults");
+                throw;
+            }
         }
 
         
@@ -247,7 +274,7 @@ namespace TRE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
         public IActionResult FinalOutcome([FromBody] FinalOutcome outcome)
         {
-
+            try { 
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("submissionId", outcome.subId);
             var submission = _dareHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist)
@@ -287,6 +314,12 @@ namespace TRE_API.Controllers
                 Result = copyResult.Result
             };
             return StatusCode(200, copyResult);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "FinalOutcomeSubmission");
+                throw;
+            }
         }
 
 
@@ -294,10 +327,17 @@ namespace TRE_API.Controllers
         [HttpPost("SendSubmissionToHUTCH")]
         public IActionResult SendSubmissionToHUTCH(Submission sub)
         {
+            try { 
             //Update status of submission to "Sending to hutch"
             _subHelper.SendSumissionToHUTCH(sub);
 
             return StatusCode(200);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "SendSubmissionToHUTCH");
+                throw;
+            }
         }
 
         
