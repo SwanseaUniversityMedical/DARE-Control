@@ -71,7 +71,7 @@ namespace DARE_API.Controllers
         public virtual async Task<IActionResult> CancelTask([FromRoute] [Required] string id,
             CancellationToken cancellationToken)
         {
-            
+            try { 
 
             var sub = _DbContext.Submissions.FirstOrDefault(x => x.Parent == null && x.TesId == id);
             if (sub== null)
@@ -105,10 +105,17 @@ namespace DARE_API.Controllers
 
 
             return StatusCode(200, new TesCancelTaskResponse());
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "CancelTESTask");
+                throw;
+            }
         }
 
         private string SetTesTaskStateToCancelled(string testaskstr, int subid)
         {
+            try { 
             var tesTask = JsonConvert.DeserializeObject<TesTask>(testaskstr);
             if (tesTask.State == TesState.COMPLETEEnum ||
                 tesTask.State == TesState.EXECUTORERROREnum ||
@@ -124,6 +131,12 @@ namespace DARE_API.Controllers
             }
 
             return JsonConvert.SerializeObject(tesTask);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "SetTESTaskStateToCancelled");
+                throw;
+            }
         }
 
         /// <summary>
@@ -141,6 +154,7 @@ namespace DARE_API.Controllers
         public virtual async Task<IActionResult> CreateTaskAsync([FromBody] TesTask tesTask,
             CancellationToken cancellationToken)
         {
+            try { 
             var usersName = (from x in User.Claims where x.Type== "preferred_username" select x.Value).First();
 
             var user = _DbContext.Users.FirstOrDefault(x => x.Name.ToLower() == usersName.ToLower());
@@ -322,11 +336,17 @@ namespace DARE_API.Controllers
 
 
             return StatusCode(200, new TesCreateTaskResponse { Id = tesTask.Id });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "CreateTESTaskAsync");
+                throw;
+            }
         }
 
         private bool AreTresOnProject(Project project, List<string> tres)
         {
-            
+            try { 
             var projends = project.Tres.Select(x => x.Name.ToLower()).ToList();
             foreach (var tre in tres)
             {
@@ -336,6 +356,12 @@ namespace DARE_API.Controllers
                 }
             }
             return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "AreTRESonProject");
+                throw;
+            }
         }
 
         private bool IsDockerThere(string dockerloc)
@@ -346,8 +372,14 @@ namespace DARE_API.Controllers
 
         private bool IsUserOnProject(Project project, string username)
         {
+            try { 
             return project.Users.Any(x => x.Name == username.ToLower());
-            
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "IsUserOnProject_TES");
+                throw;
+            }
         }
 
         /// <summary>
@@ -362,6 +394,7 @@ namespace DARE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(TesServiceInfo), description: "")]
         public virtual IActionResult GetServiceInfo()
         {
+            try { 
             var serviceInfo = new TesServiceInfo
             {
                 Name = "DARE FX",
@@ -376,6 +409,12 @@ namespace DARE_API.Controllers
                 "GetServiceInfo", serviceInfo.Name, serviceInfo.Doc, serviceInfo.Storage,
                 string.Join(",", serviceInfo.TesResourcesSupportedBackendParameters));
             return StatusCode(200, serviceInfo);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetServiceInfo");
+                throw;
+            }
         }
 
         /// <summary>
@@ -390,6 +429,7 @@ namespace DARE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
         public virtual IActionResult GetTestTes()
         {
+            try { 
             var test = new TesTask()
             {
                
@@ -412,6 +452,12 @@ namespace DARE_API.Controllers
 
             var teststring = JsonConvert.SerializeObject(test);
             return StatusCode(200, teststring);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetTestTES");
+                throw;
+            }
         }
 
 
@@ -435,7 +481,7 @@ namespace DARE_API.Controllers
         public virtual async Task<IActionResult> GetTaskAsync([FromRoute] [Required] string id, [FromQuery] string view,
             CancellationToken cancellationToken)
         {
-
+            try { 
 
             var sub = _DbContext.Submissions.FirstOrDefault(x => x.ParentId == null && x.TesId == id);
             if (sub == null)
@@ -445,6 +491,12 @@ namespace DARE_API.Controllers
 
             var tesobj = JsonConvert.DeserializeObject<TesTask>(sub.TesJson);
             return TesJsonResult(tesobj, view);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetTesTaskAsync");
+                throw;
+            }
         }
 
         /// <summary>
@@ -465,6 +517,7 @@ namespace DARE_API.Controllers
         public virtual async Task<IActionResult> ListTasks([FromQuery] string namePrefix, [FromQuery] long? pageSize,
             [FromQuery] string pageToken, [FromQuery] string view, CancellationToken cancellationToken)
         {
+            try { 
             var decodedPageToken =
                 pageToken is not null ? Encoding.UTF8.GetString(Base64UrlTextEncoder.Decode(pageToken)) : null;
 
@@ -496,17 +549,31 @@ namespace DARE_API.Controllers
             var response = new TesListTasksResponse { Tasks = tesTasks.ToList(), NextPageToken = encodedNextPageToken };
 
             return TesJsonResult(response, view);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "ListTasks");
+                throw;
+            }
         }
 
         private static Submission Clone(Submission obj)
         {
+            try { 
             if (ReferenceEquals(obj, null)) return default;
 
             return JsonConvert.DeserializeObject<Submission>(JsonConvert.SerializeObject(obj), new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "SubmissionClone");
+                throw;
+            }
         }
 
         private IActionResult TesJsonResult(object value, string view)
         {
+            
             TesView viewEnum;
 
             try

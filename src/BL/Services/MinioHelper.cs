@@ -22,12 +22,22 @@ namespace BL.Services
         }
         public async Task<bool> CheckBucketExists(string bucketName = "")
         {
+            try
+            {
+
+            
             if (string.IsNullOrEmpty(bucketName)) { bucketName = _minioSettings.BucketName; }
 
             var amazonS3Client = GenerateAmazonS3Client();
 
             var buckets = await amazonS3Client.ListBucketsAsync();
             return buckets.Buckets.Any(x => x.BucketName.Equals(bucketName));
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "{Function} Something went wrong", "CheckBucketExists");
+                throw;
+            }
         }
         public async Task<bool> CreateBucket(string bucketName = "")
         {
@@ -35,7 +45,7 @@ namespace BL.Services
 
             if (!string.IsNullOrEmpty(bucketName))
             {
-                var amazonS3Client = GenerateAmazonS3Client();
+                
 
                 try
                 {
@@ -49,6 +59,7 @@ namespace BL.Services
                     }
                     else
                     {
+                        var amazonS3Client = GenerateAmazonS3Client();
                         await amazonS3Client.PutBucketAsync(bucketName);
                         Log.Information("{bucketName} created successfully.", bucketName);
                         return true;
@@ -72,17 +83,36 @@ namespace BL.Services
 
         public async Task<bool> UploadFileAsync(IFormFile? filePath, string bucketName = "", string objectName = "")
         {
+            try
+            {
+
+           
             var amazonS3Client = GenerateAmazonS3Client();
             if (filePath != null)
             {
                 using (var stream = new MemoryStream())
                 {
-                    await filePath.CopyToAsync(stream);
+                    //var filePathTest = Path.Combine(@"c:\testing", "file.gif");
+
+                    //if (File.Exists(filePathTest))
+                    //{
+                    //    File.Delete(filePathTest);
+                    //}
+                    //using (var fileStream = new FileStream(filePathTest, FileMode.Create))
+                    //{
+                    //    await filePath.CopyToAsync(fileStream);
+                    //}
+
+                        await filePath.CopyToAsync(stream);
+                   
+                   
+
+                    //var outstream = new  MemoryStream(File.ReadAllBytes(@"c:\testing\testing.gif"));
                     var uploadRequest = new PutObjectRequest
                     {
                         BucketName = bucketName,
                         Key = filePath.FileName,
-                        InputStream = stream,
+                        InputStream = stream, // outstream,
                         ContentType = filePath.ContentType
                     };
 
@@ -101,6 +131,12 @@ namespace BL.Services
                 }
             }
             return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         public async Task<bool> DownloadFileAsync(string bucketName = "", string objectName = "")
@@ -255,21 +291,35 @@ namespace BL.Services
             var amazonS3Client = GenerateAmazonS3Client();
 
 
-            
 
-
-            PutObjectRequest putObjectRequest = new PutObjectRequest
+            long contentLength = response.Headers.ContentLength;
+            using (Stream responseStream = response.ResponseStream)
             {
-                BucketName = destinationBucketName,
-                Key = destinationObjectKey,
-                InputStream = response.ResponseStream,
-            };
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    await responseStream.CopyToAsync(memoryStream);
+                    string path = Path.Combine(@"c:\testing", destinationObjectKey);
+                    //using (FileStream outputFileStream = new FileStream(path, FileMode.Create))
+                    //{
+                    //    responseStream.CopyTo(outputFileStream);
+                    //}
+                    PutObjectRequest putObjectRequest = new PutObjectRequest
+                    {
+                        BucketName = destinationBucketName,
+                        Key = destinationObjectKey,
+                        InputStream = memoryStream,
+                        ContentType = response.Headers.ContentType
 
-            var putObjectResponse = amazonS3Client.PutObjectAsync(putObjectRequest).Result;
-           
+
+                    };
+
+                    var putObjectResponse = amazonS3Client.PutObjectAsync(putObjectRequest).Result;
 
 
-            return putObjectResponse.HttpStatusCode == HttpStatusCode.OK;
+
+                    return putObjectResponse.HttpStatusCode == HttpStatusCode.OK;
+                }
+            }
         }
 
         public async Task<GetObjectResponse> GetCopyObject(string sourceBucketName, string sourceObjectKey)

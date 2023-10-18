@@ -41,9 +41,16 @@ namespace TRE_API.Controllers
         [HttpGet("GetMemberships")]
         public List<TreMembershipDecision> GetMemberships(int projectId, bool showOnlyUnprocessed)
         {
+            try { 
             return _DbContext.MembershipDecisions.Where(x =>
                 (projectId <= 0 || x.Project.Id == projectId) &&
                 (!showOnlyUnprocessed || x.Decision == Decision.Undecided)).ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetMemberships");
+                throw;
+            }
         }
 
 
@@ -52,21 +59,42 @@ namespace TRE_API.Controllers
         [HttpGet("GetAllTreProjects")]
         public List<TreProject> GetAllTreProjects(bool showOnlyUnprocessed)
         {
+            try { 
             return _DbContext.Projects.Where(x => !showOnlyUnprocessed || x.Decision == Decision.Undecided).ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetAllTreProjects");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetTreProject")]
         public TreProject GetTreProject(int projectId)
         {
+            try { 
             return _DbContext.Projects.First(x => x.Id == projectId);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetTreProject");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllActiveTreProjects")]
         public List<TreProject> GetAllActiveTreProjects()
         {
+            try { 
             return _DbContext.Projects.Where(x => !x.Archived).ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetAllActiveTreProjects");
+                throw;
+            }
         }
 
 
@@ -74,42 +102,78 @@ namespace TRE_API.Controllers
         [HttpGet("GetAllTreUsers")]
         public List<TreUser> GetAllTreUsers()
         {
+            try { 
             return _DbContext.Users.ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetAllTreUsers");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllActiveTreUsers")]
         public List<TreUser> GetAllActiveTreUsers()
         {
+            try { 
             return _DbContext.Users.Where(x => !x.Archived).ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetAllActiveTreUsers");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllMembershipDecisions")]
         public List<TreMembershipDecision> GetAllMembershipDecisions()
         {
+            try { 
             return _DbContext.MembershipDecisions.ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetAllMembershipDecisions");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllActiveMembershipDecisions")]
         public List<TreMembershipDecision> GetAllActiveMembershipDecisions()
         {
+            try { 
             return _DbContext.MembershipDecisions.Where(x => !x.Archived).ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetAllActiveMembershipDecisions");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllUndecidedMembershipDecisions")]
         public List<TreMembershipDecision> GetAllUndecidedActiveMembershipDecisions()
         {
+            try { 
             return _DbContext.MembershipDecisions.Where(x => !x.Archived && x.Decision  == Decision.Undecided)
                 .ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetAllUndecidedActiveMembershipDecisions");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("UpdateProjects")]
         public async Task<List<TreProject>> UpdateProjects(List<TreProject> projects)
         {
+            try { 
             var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
             if (string.IsNullOrWhiteSpace(approvedBy))
             {
@@ -161,12 +225,19 @@ namespace TRE_API.Controllers
             }
             await _DbContext.SaveChangesAsync();
             return resultList;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "UpdateProjects");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("UpdateMembershipDecisions")]
         public async Task<List<TreMembershipDecision>> UpdateMembershipDecisions(List<TreMembershipDecision> membershipDecisions)
         {
+            try { 
             var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
             var returnResult = new List<TreMembershipDecision>();
             if (string.IsNullOrWhiteSpace(approvedBy))
@@ -200,7 +271,13 @@ namespace TRE_API.Controllers
             }
 
             await _DbContext.SaveChangesAsync();
-            return returnResult; 
+            return returnResult;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "UpdateMembershipDecisions");
+                throw;
+            }
 
         }
 
@@ -208,9 +285,15 @@ namespace TRE_API.Controllers
         [HttpGet("SyncSubmissionWithTre")]
         public async Task<BoolReturn> SyncSubmissionWithTre()
         {
+            try { 
             return await _dareSyncHelper.SyncSubmissionWithTre();
-            
 
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "SyncSubmissionWithTre");
+                throw;
+            }
         }
 
     }

@@ -34,6 +34,7 @@ namespace TRE_API.Controllers
         [HttpGet("CheckCredentialsAreValid")]
         public async Task<BoolReturn> CheckCredentialsAreValidAsync()
         {
+            try { 
             var result = new BoolReturn(){Result = false};
             var creds = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Submission);
             if (creds != null)
@@ -45,6 +46,12 @@ namespace TRE_API.Controllers
             }
 
             return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "CheckCredentialsAreValid");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-tre-admin")]

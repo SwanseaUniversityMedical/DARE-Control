@@ -70,7 +70,7 @@ namespace DARE_API.Services
                 messageMQ.BucketName = sub.Project.SubmissionBucket;
                 messageMQ.Key = fileName;
 
-                if (uri.Host + ":" + uri.Port != _minioSettings.Url)
+                if (uri.Host + ":" + uri.Port != _minioSettings.AdminConsole)
                 {
                     _minioHelper.RabbitExternalObject(messageMQ);
 
