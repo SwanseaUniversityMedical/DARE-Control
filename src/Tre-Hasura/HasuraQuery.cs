@@ -1,14 +1,10 @@
-﻿using BL.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BL.Models;
-using BL.Models.ViewModels;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Newtonsoft.Json;
 using Tre_Hasura.Models;
@@ -17,7 +13,12 @@ using System.Reflection.Metadata.Ecma335;
 using System.Text.Json;
 using System.Reflection.PortableExecutable;
 using Microsoft.AspNetCore.Mvc;
-
+using GraphQL;
+using GraphQL.Types;
+using GraphQL.NewtonsoftJson;
+using System.Reflection;
+using Amazon.Runtime.Internal.Util;
+using System.Text.RegularExpressions;
 
 namespace Tre_Hasura
 {
@@ -40,27 +41,44 @@ namespace Tre_Hasura
         public async Task Run(string[] args)
         {
             var Token = "";
-            string Query = "query {   testHasura_testing {     id     name   } }";
 
-            if (args is null)
-                foreach (var arg in args)
+
+
+            var Query = @"query MyQuery {
+  Anewschema_two(order_by: {AAAAA: asc}) {
+    id
+    AAAAA
+  }
+}
+";
+
+//            var Query = @"{
+//  ""query"" : ""query MyQuery { Anewschema_two { AAAAA id }}""
+//}";
+
+//  { "query": "Query MyQuery { Anewschema_two { AAAAA id}}" }
+
+            foreach (var arg in args)
+            {
+                if (arg.StartsWith("--"))
                 {
-                    if (arg.StartsWith("--")) {
-                        Token = arg.Replace("--", "");
-                    }
-
-                    if (arg.StartsWith("@"))
-                    {
-                        Query = arg.Replace("@", "");
-                    }
-
+                    Token = arg.Replace("--", "");
                 }
-        
 
+                if (arg.StartsWith("@"))
+                {
+                    Query = arg.Replace("@", "");
+                }
+
+            }
+
+            Query = Regex.Replace(Query, @"\r\n?|\n", " ");
+
+            Query = @"{ ""query"": """ + Query + @""" }";
             Console.WriteLine("Query > " + Query);
             Console.WriteLine("Token > " + Token);
             var data = await RunQuery(Token, Query);
-            File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), $"data_{DateTime.Now}.json"), data);
+            File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), $"data_{DateTime.UtcNow.Ticks}.json"), data);
         }
 
 
@@ -83,14 +101,17 @@ namespace Tre_Hasura
             // Set the endpoint URL
 
             //need to get the headers to send from the token userid
-            string endpointUrl = _hasuraSettings.HasuraURL + "/v1/query";
+            string endpointUrl = _hasuraSettings.HasuraURL + "/v1/graphql";
+            Console.WriteLine(endpointUrl);
+
             try
             {
-                Query = System.Text.Json.JsonSerializer.Serialize(Query);
                 var Result = await HttpClient(endpointUrl, Query, false, token);
 
-                var Content = await Result.Content.ReadAsStringAsync();
+                Console.WriteLine(Result.StatusCode);
 
+                var Content = await Result.Content.ReadAsStringAsync();
+                Console.WriteLine(Content);
                 var data = Content;
 
                 return data;
@@ -114,8 +135,9 @@ namespace Tre_Hasura
             {
                 // Set the request headers
                 HttpRequestMessage re = new HttpRequestMessage(HttpMethod.Post, endpointUrl);
-   
-            
+
+
+                re.Headers.Add("x-hasura-admin-secret", "ohCOOl");
                 re.Headers.Add("token", token);
             
            

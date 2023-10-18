@@ -6,7 +6,6 @@ using Microsoft.Extensions.Hosting;
 using Tre_Hasura;
 using Microsoft.AspNetCore.Hosting;
 using static System.Formats.Asn1.AsnWriter;
-using BL.Services;
 using Tre_Hasura.Models;
 
 
@@ -19,7 +18,7 @@ var services = scope.ServiceProvider;
 
 try
 {
-    services.GetRequiredService<IHasuraQuery>().Run(args);
+    await services.GetRequiredService<IHasuraQuery>().Run(args);
 }
 catch (Exception e)
 {
