@@ -77,8 +77,15 @@ namespace TRE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(List<Submission>), description: "")]
         public virtual IActionResult GetWaitingSubmissionsForTre()
         {
+            try { 
             var result = _subHelper.GetWaitingSubmissionForTre();
             return StatusCode(200, result);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetWaitingSubmissionsForTre");
+                throw;
+            }
         }
 
 
@@ -90,8 +97,15 @@ namespace TRE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
         public IActionResult UpdateStatusForTre([FromBody] SubmissionDetails subDetails)
         {
+            try { 
             APIReturn? result = _subHelper.UpdateStatusForTre(subDetails.subId, subDetails.statusType, subDetails.description);
             return StatusCode(200, result);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "UpdateStatusForTre");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-hutch-admin,dare-tre-admin")]
