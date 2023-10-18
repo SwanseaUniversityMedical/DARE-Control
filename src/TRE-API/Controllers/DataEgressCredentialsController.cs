@@ -33,17 +33,26 @@ namespace TRE_API.Controllers
         [HttpGet("CheckCredentialsAreValid")]
         public async Task<BoolReturn> CheckCredentialsAreValidAsync()
         {
-            var result = new BoolReturn(){Result = false};
-            var creds = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Egress);
-            if (creds != null)
+            try
             {
-                var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
-                    _encDecHelper.Decrypt(creds.PasswordEnc), "dare-tre-admin");
-                result.Result = !string.IsNullOrWhiteSpace(token);
-                    
+                var result = new BoolReturn() { Result = false };
+                var creds = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Egress);
+                if (creds != null)
+                {
+                    var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
+                        _encDecHelper.Decrypt(creds.PasswordEnc), "dare-tre-admin");
+                    result.Result = !string.IsNullOrWhiteSpace(token);
+
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "CheckCredentialsAreValid");
+                throw;
             }
 
-            return result;
         }
 
         [Authorize(Roles = "dare-tre-admin")]

@@ -121,11 +121,16 @@ namespace DARE_API.Controllers
         [HttpGet("TestSubRabbitSendRemoveBeforeDeploy")]
         public void TestSubRabbitSendRemoveBeforeDeploy(int id)
         {
-
+            try { 
             var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
 
             _rabbit.Advanced.Publish(exch, RoutingConstants.Subs, false, new Message<int>(id));
-            
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "TestSubRabbitSendBeforeDeploy");
+                throw;
+            }
         }
 
         [AllowAnonymous]
@@ -283,6 +288,7 @@ namespace DARE_API.Controllers
         [HttpPost("SaveSubmissionFiles")]
         public IActionResult SaveSubmissionFiles(int submissionId, List<SubmissionFile> submissionFiles)
         {
+            try { 
             var existingSubmission = _DbContext.Submissions
                 .Include(d => d.SubmissionFiles)
                 .FirstOrDefault(d => d.Id == submissionId);
@@ -315,7 +321,12 @@ namespace DARE_API.Controllers
             {
                 return BadRequest();
             }
-
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "SaveSubmissionFiles");
+                throw;
+            }
         }
     }
 }

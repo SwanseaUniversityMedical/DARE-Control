@@ -367,7 +367,7 @@ namespace Data_Egress_API.Controllers
         [HttpGet("DownloadFile")]
         public async Task<IActionResult> DownloadFileAsync(int fileId)
         {
-            
+            try { 
 
             var egressFile = _DbContext.EgressFiles.First(x => x.Id == fileId);
            
@@ -383,7 +383,12 @@ namespace Data_Egress_API.Controllers
                     // Create a FileContentResult and return it as the response
                     return File(fileBytes, GetContentType(egressFile.Name), egressFile.Name);
                 }
-           
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "DownloadFiles");
+                throw;
+            }
 
         }
 
