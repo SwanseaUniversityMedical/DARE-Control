@@ -174,7 +174,7 @@ namespace DARE_FrontEnd.Controllers
             {
                 FormIoUrl = _formIOSettings.ProjectForm,
                 FormIoString = @"{""id"":0}",
-
+                Id = projectId
             };
 
             if (projectId > 0)
