@@ -83,27 +83,36 @@ namespace BL.Services
 
         public async Task<bool> UploadFileAsync(IFormFile? filePath, string bucketName = "", string objectName = "")
         {
+            try
+            {
+
+           
             var amazonS3Client = GenerateAmazonS3Client();
             if (filePath != null)
             {
                 using (var stream = new MemoryStream())
                 {
-                    await filePath.CopyToAsync(stream);
-                    using (FileStream file = new FileStream(@"c:\testing\file.bin", FileMode.Create, System.IO.FileAccess.Write))
-                    {
-                        byte[] bytes = new byte[stream.Length];
-                        stream.Read(bytes, 0, (int)stream .Length);
-                        file.Write(bytes, 0, bytes.Length);
-                        stream.Close();
-                        stream.Position = 0;
-                    }
+                    //var filePathTest = Path.Combine(@"c:\testing", "file.gif");
 
-                    var outstream = new  MemoryStream(File.ReadAllBytes(@"c:\testing.gif"));
+                    //if (File.Exists(filePathTest))
+                    //{
+                    //    File.Delete(filePathTest);
+                    //}
+                    //using (var fileStream = new FileStream(filePathTest, FileMode.Create))
+                    //{
+                    //    await filePath.CopyToAsync(fileStream);
+                    //}
+
+                        await filePath.CopyToAsync(stream);
+                   
+                   
+
+                    //var outstream = new  MemoryStream(File.ReadAllBytes(@"c:\testing\testing.gif"));
                     var uploadRequest = new PutObjectRequest
                     {
                         BucketName = bucketName,
                         Key = filePath.FileName,
-                        InputStream = outstream,
+                        InputStream = stream, // outstream,
                         ContentType = filePath.ContentType
                     };
 
@@ -122,6 +131,12 @@ namespace BL.Services
                 }
             }
             return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         public async Task<bool> DownloadFileAsync(string bucketName = "", string objectName = "")
