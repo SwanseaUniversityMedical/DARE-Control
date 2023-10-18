@@ -36,7 +36,10 @@ namespace DARE_API.Services
 
                     if (user["attributes"] == null)
                     {
-                        user.Add("attributes", null);
+                        JObject attributes = new JObject();
+
+                        // Add the "attributes" object to the user object
+                        user["attributes"] = attributes;
                     }
                     if (user["attributes"][attributeKey] != null)
                     {
