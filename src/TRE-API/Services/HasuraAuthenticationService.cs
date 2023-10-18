@@ -61,8 +61,8 @@ namespace TRE_API.Services
             }
 
             var hasuraVariables = new Dictionary<string, string> {
-                        { "X-Hasura-Role", role.Name },
-                        { "X-Hasura-User_ID", role.Id.ToString() },
+                        { "x-hasura-role", role.Name },
+                        { "x-hasura-user_id", role.Id.ToString() },
                 };
             //cool.StatusCode = 200;
 
