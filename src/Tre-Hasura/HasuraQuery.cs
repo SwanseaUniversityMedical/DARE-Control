@@ -52,11 +52,6 @@ namespace Tre_Hasura
 }
 ";
 
-//            var Query = @"{
-//  ""query"" : ""query MyQuery { Anewschema_two { AAAAA id }}""
-//}";
-
-//  { "query": "Query MyQuery { Anewschema_two { AAAAA id}}" }
 
             foreach (var arg in args)
             {
@@ -72,7 +67,7 @@ namespace Tre_Hasura
 
             }
 
-            Query = Regex.Replace(Query, @"\r\n?|\n", " ");
+            Query = Regex.Replace(Query, @"\r\n?|\n", " "); //no new lines in json
 
             Query = @"{ ""query"": """ + Query + @""" }";
             Console.WriteLine("Query > " + Query);
