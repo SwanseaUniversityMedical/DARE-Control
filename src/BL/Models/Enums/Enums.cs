@@ -114,7 +114,7 @@ namespace BL.Models.Enums
         //Stage 2
         [Display(Name = "Sending submission to Hutch")]
         SendingSubmissionToHutch = 28,
-        //Stage 5
+        //Stage 4
         [Display(Name = "Requesting Hutch packages up final output")]
         RequestingHutchDoesFinalPackaging = 29,
         //Stage 3
