@@ -95,7 +95,7 @@ namespace Tre_Hasura
 
             try
             {
-                var Result = await HttpClient(endpointUrl, Query, false, token);
+                var Result = await HttpClient(endpointUrl, Query, token);
 
                 Console.WriteLine(Result.StatusCode);
 
