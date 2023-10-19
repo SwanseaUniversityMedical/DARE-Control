@@ -323,7 +323,8 @@ namespace DARE_API.Controllers
             {
                 StatusType.DataOutApprovalBegun,
                 StatusType.DataOutApprovalRejected,
-                StatusType.DataOutApproved
+                StatusType.DataOutApproved,
+                StatusType.RequestingHutchDoesFinalPackaging
             };
             Dictionary<int, List<StatusType>> stage4Dict = new Dictionary<int, List<StatusType>>();
             stage4Dict.Add(4, stage4List.statusTypeList);
@@ -334,7 +335,7 @@ namespace DARE_API.Controllers
             stage5List.stageNumber = 5;
 
             stage5List.statusTypeList = SubCompleteTypes;
-            stage5List.statusTypeList.Add(StatusType.RequestingHutchDoesFinalPackaging);
+            //stage5List.statusTypeList.Add(StatusType.RequestingHutchDoesFinalPackaging);
             Dictionary<int, List<StatusType>> stage5Dict = new Dictionary<int, List<StatusType>>();
             stage5Dict.Add(5, stage5List.statusTypeList);
             stage5List.stagesDict = stage5Dict;

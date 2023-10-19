@@ -163,7 +163,7 @@
                     @{
                         foreach (var stage in Model.Stages.StageInfos)
                         {
-                            if (stage.stageNumber == 5)
+                            if (stage.stageNumber == Model.Stages.StageInfos.Count - 1)
                             {
                                     <tfoot>
                                         <tr class="row">
@@ -275,7 +275,7 @@
                                 var stageNum = stage.stageNumber;
 
                                     <tr class="row">
-                                        <td class="col-2">@stage.stageName @stage.stageNumber</td>
+                                        <td class="col-2">@stage.stageName</td>
                                     @{
                                         foreach (var child in Model.Submission.Children)
 
