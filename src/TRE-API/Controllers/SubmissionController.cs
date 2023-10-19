@@ -109,26 +109,26 @@ namespace TRE_API.Controllers
                 throw;
             }
         }
-
+        
         [Authorize(Roles = "dare-hutch-admin,dare-tre-admin")]
         [HttpGet]
         [Route("GetOutputBucketInfo")]
         [ValidateModelState]
         [SwaggerOperation("GetOutputBucketInfo")]
-        [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
+        [SwaggerResponse(statusCode: 200, type: typeof(OutputBucketInfo), description: "")]
         public IActionResult GetOutputBucketInfo(string subId)
         {
             try { 
             var outputInfo = GetOutputBucketGuts(subId);
 
-            var status = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-                new Dictionary<string, string>()
-                {
+                var status = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
+                    new Dictionary<string, string>()
+                    {
                     { "subId", outputInfo.SubId }, { "statusType", StatusType.PodProcessingComplete.ToString() },
                     { "description", "" }
-                }).Result;
+                    }).Result;
 
-            return StatusCode(200, outputInfo);
+                return StatusCode(200, outputInfo);
             }
             catch (Exception ex)
             {
@@ -186,7 +186,7 @@ namespace TRE_API.Controllers
         [Route("FilesReadyForReview")]
         [ValidateModelState]
         [SwaggerOperation("FilesReadyForReview")]
-        [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
+        [SwaggerResponse(statusCode: 200, type: typeof(BoolReturn), description: "")]
         public IActionResult FilesReadyForReview([FromBody] ReviewFiles review)
         {
             try { 
@@ -223,7 +223,7 @@ namespace TRE_API.Controllers
         [Route("EgressResults")]
         [ValidateModelState]
         [SwaggerOperation("EgressResults")]
-        [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
+        [SwaggerResponse(statusCode: 200, type: typeof(BoolReturn), description: "")]
         public async Task<IActionResult> EgressResults([FromBody] EgressReview review)
         {
             try { 
@@ -272,7 +272,7 @@ namespace TRE_API.Controllers
             //Not sure what the return type is
             var HUTCHres = await _hutchHelper.CallAPI<ApprovalResult, APIReturn>($"/api/jobs/{review.SubId}/approval", hutchPayload);
 
-            return StatusCode(200, HUTCHres);
+            return StatusCode(200, new BoolReturn(){Result = true});
             }
             catch (Exception ex)
             {
@@ -289,7 +289,7 @@ namespace TRE_API.Controllers
         [Route("FinalOutcome")]
         [ValidateModelState]
         [SwaggerOperation("FinalOutcome")]
-        [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
+        [SwaggerResponse(statusCode: 200, type: typeof(BoolReturn), description: "")]
         public IActionResult FinalOutcome([FromBody] FinalOutcome outcome)
         {
             try { 
@@ -331,7 +331,7 @@ namespace TRE_API.Controllers
             {
                 Result = copyResult.Result
             };
-            return StatusCode(200, copyResult);
+            return StatusCode(200, boolresult);
             }
             catch (Exception ex)
             {
