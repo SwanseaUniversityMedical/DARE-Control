@@ -48,7 +48,7 @@ jobs:
           - 'src/BL/**'
         tre-hasura:
           - './.github/workflows/on-pr-update.yaml'
-          - 'TRE-Hasura/**'
+          - 'src/TRE-Hasura/**'
           - 'src/BL/**'
         chart:
         - './.github/workflows/on-pr-update.yaml'
