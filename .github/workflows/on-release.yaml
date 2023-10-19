@@ -48,7 +48,7 @@ jobs:
           - 'src/BL/**'
         tre-hasura-container:
           - './.github/workflows/on-release.yaml'
-          - 'TRE-Hasura/**'
+          - 'src/TRE-Hasura/**'
           - 'src/BL/**'
         chart:
           - './.github/workflows/on-release.yaml'
