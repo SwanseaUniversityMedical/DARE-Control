@@ -6,6 +6,7 @@
     var getAllUsers = @ViewBag.getAllUsers;
     var getAllTres = @ViewBag.getAllTres;
     var userOnProjCount = @ViewBag.userOnProjectCount;
+    var userWroteSubCount = @ViewBag.userWroteSubCount;
 
 }
 @if (User.IsInRole("dare-control-admin"))
@@ -21,15 +22,15 @@
             <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
                 <li class="nav-item" role="presentation">
                     <a href="#about" class="nav-link text-dark active" id="about" data-bs-toggle="tab" data-bs-target="#project" role="tab" aria-controls="Project" aria-selected="true">
-                        <span>Projects</span>
+                        <span>Your Projects</span>
                         <span class="badge bg-dark-blue rounded-pill ms-2">@userOnProjCount</span>
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
                     <a href="#submissions" class="nav-link text-dark" id="submissions" data-bs-toggle="tab" data-bs-target="#submissions-tab" role="tab" aria-controls="submissions" aria-selected="false">
                         <div class="d-flex justify-content-between align-items-center">
-                            <span>Submissions</span>
-                            <span class="badge bg-dark-blue rounded-pill ms-2">@Model.Submissions.Count @*@ @User?.FindAll("submissions").Count() *@</span>
+                            <span>Your Submissions</span>
+                            <span class="badge bg-dark-blue rounded-pill ms-2">@userWroteSubCount</span>
                         </div>
                     </a>
                 </li>
@@ -45,7 +46,7 @@
                                     <table id="projectList" class="table table-bordered table-striped no-head" caption="List of Projects">
                                         <thead><tr><td>Project</td></tr></thead>
                                         <tbody>
-                                              @*@{
+                                              @{
 
                                         foreach (var project in Model.Projects)
                                         {
@@ -90,7 +91,7 @@
                                         </td>
                                         </tr>
                                         }
-                                        }*@
+                                        }
                                         </tbody>
                                     </table>
                                 </div>
@@ -113,7 +114,200 @@
                         </div>
                     }
 
-                    <p>List of submissions this user has made...</p>
+                    <hr class="d-flex my-4">
+                    <div class="table-responsive">
+                        <table id="submissionList" class="table" caption="List of Submissions">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Submission Name</th>
+                                    <th>Project</th>
+                                    <th>Submitted by</th>
+                                    <th>Submission Date</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var submission in Model.Submissions)
+                                {
+                                    <tr>
+                                        <td>
+                                            @{
+                                                var overallStatus = submission.Status;
+                                                if (overallStatus == BL.Models.Enums.StatusType.Completed)
+                                                {
+
+                                                    <h6 class="mb-0">
+                                                        <span class="badge bg-success rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Completed: @submission.EndTime">
+                                                            <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
+                                                            <span>Completed</span>
+                                                        </span>
+                                                    </h6>
+                                                }
+                                                else if (overallStatus == BL.Models.Enums.StatusType.Failed)
+                                                {
+                                                    <h6 class="mb-0">
+                                                        <span class="badge bg-danger rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Failed: @submission.EndTime">
+                                                            <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
+                                                            <span>Failed</span>
+                                                        </span>
+                                                    </h6>
+                                                }
+                                                else
+                                                {
+                                                    var runtime = DateTime.UtcNow - submission.StartTime;
+                                                    var displayRuntime = "";
+                                                    var displaySec = " seconds";
+                                                    var displayMin = " minutes";
+                                                    var displayHour = " hours";
+                                                    var displayDay = " days";
+
+                                                    if (runtime.TotalSeconds < 60)
+                                                    {
+                                                        if (runtime.Seconds == 1)
+                                                        {
+                                                            displaySec = " Second ";
+                                                        }
+                                                        else
+                                                        {
+                                                            displaySec = " Seconds ";
+                                                        }
+
+                                                        displayRuntime = @runtime.Seconds + displaySec;
+
+
+                                                    }
+                                                    else if (runtime.TotalMinutes < 60)
+                                                    {
+                                                        if (runtime.Minutes == 1)
+                                                        {
+                                                            displayMin = " Minute ";
+                                                        }
+                                                        else
+                                                        {
+                                                            displayMin = " Minutes ";
+                                                        }
+                                                        if (runtime.Seconds == 1)
+                                                        {
+                                                            displaySec = " Second ";
+                                                        }
+                                                        else
+                                                        {
+                                                            displaySec = " Seconds ";
+                                                        }
+                                                        displayRuntime = @runtime.Minutes + displayMin + @runtime.Seconds + " and " + displaySec;
+
+                                                    }
+                                                    else if (runtime.TotalHours < 24)
+                                                    {
+                                                        if (runtime.Hours == 1)
+                                                        {
+                                                            displayHour = " Hour ";
+                                                        }
+                                                        else
+                                                        {
+                                                            displayHour = " Hours ";
+                                                        }
+                                                        if (runtime.Minutes == 1)
+                                                        {
+                                                            displayMin = " Minute ";
+                                                        }
+                                                        else
+                                                        {
+                                                            displayMin = " Minutes ";
+                                                        }
+                                                        if (runtime.Seconds == 1)
+                                                        {
+                                                            displaySec = " Second ";
+                                                        }
+                                                        else
+                                                        {
+                                                            displaySec = " Seconds ";
+                                                        }
+
+
+                                                        displayRuntime = runtime.Hours + displayHour + @runtime.Minutes + displayMin + " and " + @runtime.Seconds + displaySec;
+                                                    }
+                                                    else
+                                                    {
+                                                        if (runtime.Days == 1)
+                                                        {
+                                                            displayDay = " Day ";
+                                                        }
+                                                        else
+                                                        {
+                                                            displayDay = " Days ";
+                                                        }
+                                                        if (runtime.Hours == 1)
+                                                        {
+                                                            displayHour = " Hour ";
+                                                        }
+                                                        else
+                                                        {
+                                                            displayHour = " Hours ";
+                                                        }
+                                                        if (runtime.Minutes == 1)
+                                                        {
+                                                            displayMin = " Minute ";
+                                                        }
+                                                        else
+                                                        {
+                                                            displayMin = " Minutes ";
+                                                        }
+                                                        if (runtime.Seconds == 1)
+                                                        {
+                                                            displaySec = " Second ";
+                                                        }
+                                                        else
+                                                        {
+                                                            displaySec = " Seconds ";
+                                                        }
+
+                                                        displayRuntime = runtime.Days + displayDay + runtime.Hours + displayHour + @runtime.Minutes + displayMin + " and " + @runtime.Seconds + displaySec;
+
+
+                                                    }
+                                                    <h6 class="mb-0">
+                                                        <span class="badge bg-primary rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Runtime: @displayRuntime">
+                                                            <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
+                                                            <span>Running</span>
+                                                        </span>
+                                                    </h6>
+
+
+                                                }
+
+                                            }
+
+                                        </td>
+                                        <td>
+                                            <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })">
+                                                <h2 class="mb-0 fw-bold hover-underline fs-6">
+                                                    @submission.TesName
+                                                </h2>
+                                            </a>
+
+                                        </td>
+                                        <td>
+                                            @submission.Project.Name
+                                        </td>
+                                        <td>
+                                            @submission.SubmittedBy.Name
+                                        </td>
+                                        <td>
+                                            @submission.StartTime
+                                        </td>
+                                        <td>
+                                            <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })" class="btn btn-sm btn-outline-primary">
+                                                <span class="small">View</span>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                    </div>
                 </div>
             </div>
         </div>
