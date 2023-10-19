@@ -184,7 +184,7 @@ namespace BL.Models.Enums
         //Green
         //Parent Only
         [Display(Name = "Task is Complete but not all Tres returned a result")]
-        PartialResult = 48,
+        PartialResult = 49,
 
 
     }

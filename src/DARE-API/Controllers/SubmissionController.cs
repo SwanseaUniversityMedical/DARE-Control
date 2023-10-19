@@ -334,7 +334,7 @@ namespace DARE_API.Controllers
             stage5List.stageNumber = 5;
 
             stage5List.statusTypeList = SubCompleteTypes;
-
+            stage5List.statusTypeList.Add(StatusType.RequestingHutchDoesFinalPackaging);
             Dictionary<int, List<StatusType>> stage5Dict = new Dictionary<int, List<StatusType>>();
             stage5Dict.Add(5, stage5List.statusTypeList);
             stage5List.stagesDict = stage5Dict;
@@ -411,7 +411,6 @@ namespace DARE_API.Controllers
                 StatusType.Completed,
                 StatusType.Cancelled,
                 StatusType.Failed,
-                StatusType.RequestingHutchDoesFinalPackaging,
                 StatusType.PartialResult
             };
 
