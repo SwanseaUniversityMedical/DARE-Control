@@ -378,7 +378,7 @@ namespace DARE_API.Controllers
                     StatusType.Failed,
                     
                 },
-                StageInfos = infoList
+                StageInfos = infoList.OrderBy(x => x.stageNumber).ToList()
             };
 
             return result;
