@@ -260,7 +260,7 @@ namespace TRE_API
                             // Do this to avoid db locking issues
                             BackgroundJob.Enqueue(() => ClearJob(taskID));
 
-                            var data = await _minioTreHelper.GetFilesInBucket(TREBucket);
+                            var data = await _minioTreHelper.GetFilesInBucket(outputBucket);
                             var files = new List<string>();
 
                             foreach (var s3Object in data.S3Objects) //TODO is this right?
