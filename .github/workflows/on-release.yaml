@@ -172,7 +172,7 @@ jobs:
       slack-token: ${{ secrets.SLACK_TOKEN }}
       
   tre-hasura-container:
-    # Build the tre ui container and push it as :rc-1.0.0
+    # Build the tre hasura container and push it as :rc-1.0.0
     needs: changes
     if: fromJSON(needs.changes.outputs.changes).tre-hasura-container == 'true'
     uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v4.1.1
