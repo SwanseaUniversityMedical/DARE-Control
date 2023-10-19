@@ -33,7 +33,8 @@ namespace DARE_FrontEnd.Controllers
             {
                 
                 FormIoUrl = _formIOSettings.TreForm,
-                FormIoString = @"{""id"":0}"
+                FormIoString = @"{""id"":0}",
+                Id = treId
             };
 
             if (treId > 0)

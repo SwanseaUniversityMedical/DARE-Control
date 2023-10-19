@@ -37,7 +37,8 @@ namespace DARE_FrontEnd.Controllers
             var formData = new FormData()
             {
                 FormIoUrl = _formIOSettings.UserForm,
-                FormIoString = @"{""id"":0}"
+                FormIoString = @"{""id"":0}",
+                Id = userId
             };
             
             if (userId > 0)

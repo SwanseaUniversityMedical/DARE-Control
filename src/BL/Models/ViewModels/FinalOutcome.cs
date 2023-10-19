@@ -8,7 +8,7 @@ namespace BL.Models.ViewModels
 {
     public class FinalOutcome
     {
-        public string subId { get; set; }
-        public string file { get; set; }
+        public string SubId { get; set; }
+        public string File { get; set; }
     }
 }

@@ -5,7 +5,14 @@
 @{
 }
 @{
-    ViewData["Title"] = "TRE Registration Form";
+    if (Model.Id > 0)
+    {
+        ViewData["Title"] = "Edit TRE";
+    }
+    else
+    {
+        ViewData["Title"] = "Create TRE";
+    }
     //<p>@TempData["Friend"]</p>
     if (Model != null && Model.FormIoUrl.StartsWith('/'))
     {
@@ -14,7 +21,7 @@
 }
 <div class="container-lg p-4">
     <div class="d-flex align-items-center justify-content-between">
-        <h1 class="fs-3 mb-0">TRE Registration Form</h1>
+        <h1 class="fs-3 mb-0">@ViewData["Title"]</h1>
     </div>
     <hr class="d-flex my-4">
 
