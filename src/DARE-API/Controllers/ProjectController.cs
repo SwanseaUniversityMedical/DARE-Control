@@ -540,9 +540,17 @@ namespace DARE_API.Controllers
         [AllowAnonymous]
         public List<Tre> GetTresInProject(int projectId)
         {
-            List<Tre> tres = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Tres).ToList();
+            try
+            {
+                List<Tre> tres = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Tres).ToList();
 
-            return tres;
+                return tres;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetTresInProject");
+                throw;
+            }
         }
 
         private static string GenerateRandomName(string prefix)
@@ -564,9 +572,16 @@ namespace DARE_API.Controllers
         [HttpPost("TestFetchAndStoreObject")]
         public async Task<IActionResult> TestFetchAndStoreObject(testFetch testf)
         {
+            try { 
             await _minioHelper.FetchAndStoreObject(testf.url,testf.bucketName, testf.key);
 
             return Ok();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "TestFetchAandStoreObject");
+                throw;
+            }
         }
 
         [AllowAnonymous]
@@ -632,6 +647,7 @@ namespace DARE_API.Controllers
 
         private IFormFile ConvertJsonToIFormFile(string fileJson)
         {
+            try { 
             if (string.IsNullOrEmpty(fileJson))
                 return null;
             var fileData = System.Text.Json.JsonSerializer.Deserialize<IFileData>(fileJson);
@@ -648,6 +664,12 @@ namespace DARE_API.Controllers
             };
 
             return formFile;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "ConvertJsonToIformFile");
+                throw;
+            }
         }
 
 

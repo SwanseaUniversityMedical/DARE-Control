@@ -5,7 +5,14 @@
 @{
 }
 @{
-    ViewData["Title"] = "User Registration Form";
+    if (Model.Id > 0)
+    {
+        ViewData["Title"] = "Edit User";
+    }
+    else
+    {
+        ViewData["Title"] = "Create User";
+    }    
     if (Model != null && Model.FormIoUrl.StartsWith('/'))
     {
         Model.FormIoUrl = $"{Context.Request.Scheme}://{Context.Request.Host.Value}" + Model.FormIoUrl;
@@ -13,7 +20,7 @@
 }
 <div class="container-lg p-4">
     <div class="d-flex align-items-center justify-content-between">
-        <h1 class="fs-3 mb-0">Create User</h1>
+        <h1 class="fs-3 mb-0">@ViewData["Title"]</h1>
     </div>
     <hr class="d-flex my-4">
     <div class="row">

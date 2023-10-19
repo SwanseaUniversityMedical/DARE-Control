@@ -251,8 +251,6 @@ namespace TRE_API
 
 
                         
-                        try
-                        {
                             Uri uri = new Uri(aSubmission.DockerInputLocation);
                             string fileName = Path.GetFileName(uri.LocalPath);
                             var sourceBucket = aSubmission.Project.SubmissionBucket;
@@ -261,15 +259,10 @@ namespace TRE_API
                             {
                                 var destinationBucket = proj.SubmissionBucketTre;
                                 var source =  _minioSubHelper.GetCopyObject(sourceBucket, fileName);
-                                var result =  _minioTreHelper.CopyObjectToDestination(destinationBucket, fileName, source.Result);
+                                var result =  _minioTreHelper.CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
 
                             }
-                        }
-                        catch (Exception ex)
-                        {
-
-                            throw;
-                        }
+                       
                         
                         // The TES message
                         var tesMessage = JsonConvert.DeserializeObject<TesTask>(aSubmission.TesJson);

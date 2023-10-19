@@ -75,6 +75,9 @@ namespace Data_Egress_API.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
+                    b.Property<string>("SubFolder")
+                        .HasColumnType("text");
+
                     b.Property<string>("SubmissionId")
                         .HasColumnType("text");
 

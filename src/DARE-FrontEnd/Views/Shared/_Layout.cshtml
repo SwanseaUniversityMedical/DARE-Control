@@ -145,7 +145,7 @@
     <script src="~/js/bootstrap-history-tabs.js"></script>
     <script src="~/js/datatables.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script>
+<script>
         $(document).ready(function () {
             if (location.hash !== '') $('a[href="' + location.hash + '"]').tab('show');
             return $('a[data-toggle="tab"]').on('shown', function (e) {
@@ -202,6 +202,21 @@
     </script>
 
     <script>
+        $("input[name='OriginOption']").change(function () {
+
+            var selectedValue = $(this).val();
+
+            $("#externalUrlField, #uploadedFileField").hide();
+
+            if (selectedValue === "External") {
+                $("#externalUrlField").show();
+            } else if (selectedValue === "FileUpload") {
+                $("#uploadedFileField").show();
+            }
+        });
+    </script>
+
+<script>
         var SaveUserList = function (el) {
             //debugger;
             var projectId = $(el).attr('id');
@@ -344,7 +359,7 @@
             formData.append("File", File);
 
             $.ajax({
-                url: '/Project/SubmissionWizerd',
+                url: '/Project/SubmissionWizard',
                 type: 'POST',
                 data: formData,
                 contentType: false,

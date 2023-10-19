@@ -4,6 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" shrink-to-fit="no" />
     <title>@ViewData["Title"] - TRE FX Admin</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="stylesheet" href="~/css/fontawesome.css" />
+    <link rel="stylesheet" href="~/css/brands.css" />
+    <link rel="stylesheet" href="~/css/solid.css" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
     <link rel="stylesheet" href="~/css/datatables.min.css" />
@@ -30,18 +37,10 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" href="@Url.Action("GetAllProjects","Approval", new {  showOnlyUnprocessed = false })">Projects</a>
                         </li>
-                        @*<li class="nav-item">
-                            <a class="nav-link text-dark" href="@Url.Action("GetAllProjects","Approval", new {  showOnlyUnprocessed = true })">Undecided Projects</a>
-                        </li>*@
-
                         <li class="nav-item">
                             <a class="nav-link text-dark" href="@Url.Action("EditMemberships","Approval", new { projectId = 0, showOnlyUnprocessed = false })">Memberships</a>
 
                         </li>
-                        @*<li class="nav-item">
-                            <a class="nav-link text-dark" href="@Url.Action("EditMemberships","Approval", new { projectId = 0, showOnlyUnprocessed = true })">Undecided Memberships</a>
-                        </li>*@
-
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="SubmissionCredentials" asp-action="UpdateCredentials">Update Submission Credentials</a>
                         </li>
@@ -111,10 +110,10 @@
             <div class="container text-md-start text-center">
                 <ul class="nav mb-2 flex-md-row flex-column">
                     <li class="nav-item">
-                        <a class="nav-link text-light" href="#">Terms and Conditions</a>
+                        <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="TermsAndConditions">Terms and Conditions</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
+                        <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="PrivacyPolicy">Privacy Policy</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-light" href="https://dareuk.org.uk/about/" target="_blank">About DARE UK</a>
@@ -152,6 +151,32 @@
             if (window.location.href.indexOf("showOnlyUnprocessed=True") > -1) {
                 $('.memberships-menu li:last-child .nav-link').addClass('active');
             }
+
+            if ($('#Approved').is(':checked')) {
+                $('.db-cred').addClass('d-block');
+                $('.db-cred').removeClass('d-none');
+            }
+            if ($('#Approved').onClick) {
+                $('.db-cred').addClass('d-block');
+                $('.db-cred').removeClass('d-none');
+            }
+            if ($('#Rejected').is(':checked')) {
+                $('.db-cred').removeClass('d-block');
+                $('.db-cred').addClass('d-none');
+            }
+            if ($('#Undecided').is(':checked')) {
+                $('.db-cred').removeClass('d-block');
+                $('.db-cred').addClass('d-none');
+            }
+            $('#radio-decision input:radio').click(function () {
+                if ($(this).val() === 'Approved') {
+                    $('.db-cred').addClass('d-block');
+                    $('.db-cred').removeClass('d-none');
+                } else if ($(this).val() === 'Rejected') {
+                    $('.db-cred').removeClass('d-block');
+                    $('.db-cred').addClass('d-none');
+                }
+            });
         });
 
     </script>
