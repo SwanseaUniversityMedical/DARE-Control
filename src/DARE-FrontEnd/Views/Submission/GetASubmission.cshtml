@@ -305,32 +305,13 @@
                                                                 <span class="position-relative d-inline-flex">
                                                                     @{
                                                                         
-                                                                        if (status.Status == BL.Models.Enums.StatusType.ValidationSuccessful
-                                                                        || status.Status == BL.Models.Enums.StatusType.TransferredToPod
-                                                                        || status.Status == BL.Models.Enums.StatusType.DataOutApproved
-                                                                        || status.Status == BL.Models.Enums.StatusType.PodProcessingComplete
-                                                                        || status.Status == BL.Models.Enums.StatusType.SubmissionCrateValidated
-                                                                        || status.Status == BL.Models.Enums.StatusType.TreCrateValidated
-                                                                        || status.Status == BL.Models.Enums.StatusType.Completed)
+                                                                        if (Model.Stages.IsGreen(status.Status))
                                                                         {
                                                                             <span class="icon-wrap">
                                                                                 <i class="fa-solid fa-check-circle fs-6 text-success me-3"></i>
                                                                             </span>
                                                                         }
-                                                                        else if (status.Status == BL.Models.Enums.StatusType.InvalidUser
-                                                                            || status.Status == BL.Models.Enums.StatusType.CancellingChildren
-                                                                            || status.Status == BL.Models.Enums.StatusType.UserNotOnProject
-                                                                            || status.Status == BL.Models.Enums.StatusType.RequestCancellation
-                                                                            || status.Status == BL.Models.Enums.StatusType.CancellationRequestSent
-                                                                                || status.Status == BL.Models.Enums.StatusType.Cancelled
-                                                                        || status.Status == BL.Models.Enums.StatusType.InvalidSubmission
-                                                                        || status.Status == BL.Models.Enums.StatusType.TRENotAuthorisedForProject
-                                                                        || status.Status == BL.Models.Enums.StatusType.DataOutApprovalRejected
-                                                                        || status.Status == BL.Models.Enums.StatusType.SubmissionCrateValidationFailed
-                                                                        || status.Status == BL.Models.Enums.StatusType.TreCrateValidationFailed
-                                                                        || status.Status == BL.Models.Enums.StatusType.TransferToPodFailed
-                                                                        || status.Status == BL.Models.Enums.StatusType.PodProcessingFailed
-                                                                        || status.Status == BL.Models.Enums.StatusType.Failed)
+                                                                        else if (Model.Stages.IsRed(status.Status))
                                                                         {
                                                                             <span class="icon-wrap">
                                                                                 <i class="fa-solid fa-warning fs-6 text-danger me-3"></i>
