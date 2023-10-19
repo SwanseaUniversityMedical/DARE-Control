@@ -121,17 +121,16 @@ namespace TRE_API.Services
         }
         public BoolReturn FilesReadyForReview(ReviewFiles review)
         {
-            var bucket = GetOutputBucketGuts(review.subId);
+            var bucket = GetOutputBucketGuts(review.SubId);
             var egsub = new EgressSubmission()
             {
-                SubmissionId = review.subId,
-                OutputBucket = bucket.OutputBucket,
-                SubFolder = bucket.OutputFolder,
+                SubmissionId = review.SubId,
+                OutputBucket = bucket.Bucket,
                 Status = EgressStatus.NotCompleted,
                 Files = new List<EgressFile>()
             };
 
-            foreach (var reviewFile in review.files)
+            foreach (var reviewFile in review.Files)
             {
                 egsub.Files.Add(new EgressFile()
                 {
