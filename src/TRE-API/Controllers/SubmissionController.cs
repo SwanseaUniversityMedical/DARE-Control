@@ -172,11 +172,11 @@ namespace TRE_API.Controllers
 
                 var outputBucket = bucket.FirstOrDefault();
 
-                var isFolderExists = _minioTreHelper.FolderExists(outputBucket.ToString(), "sub" + subId).Result;
-                if (!isFolderExists)
-                {
-                    var submissionFolder = _minioTreHelper.CreateFolder(outputBucket.ToString(), "sub" + subId).Result;
-                }
+                //var isFolderExists = _minioTreHelper.FolderExists(outputBucket.ToString(), "sub" + subId).Result;
+                //if (!isFolderExists)
+                //{
+                //    var submissionFolder = _minioTreHelper.CreateFolder(outputBucket.ToString(), "sub" + subId).Result;
+                //}
 
                 outputBucket = outputBucket.ToString();
                 return new OutputBucketInfo()
@@ -340,17 +340,17 @@ namespace TRE_API.Controllers
                 var destinationBucket = project.OutputBucket;
 
                 //Copy file to output bucket
-                var source = _minioTreHelper.GetCopyObject(sourceBucket.Bucket, outcome.File);
-                var isFolderExists = _minioTreHelper.FolderExists(destinationBucket, "sub" + submission.Id).Result;
-                if (!isFolderExists)
-                {
-                    var submissionFolder =
-                        _minioTreHelper.CreateFolder(destinationBucket, "sub" + submission.Id).Result;
-                }
+                var source = _minioTreHelper.GetCopyObject(sourceBucket.Bucket, outcome.File).Result;
+                //var isFolderExists = _minioTreHelper.FolderExists(destinationBucket, "sub" + submission.Id).Result;
+                //if (!isFolderExists)
+                //{
+                //    var submissionFolder =
+                //        _minioTreHelper.CreateFolder(destinationBucket, "sub" + submission.Id).Result;
+                //}
 
                 var destfile = sourceBucket.Path + _treName + "/" + outcome.File.Replace(sourceBucket.Path, "");
                 var copyResult =
-                    _minioSubHelper.CopyObjectToDestination(destinationBucket, destfile, source.Result);
+                    _minioSubHelper.CopyObjectToDestination(destinationBucket, destfile, source);
                 
                 var StatusResult = _subHelper.CloseSubmissionForTre(outcome.SubId, StatusType.Completed, "", destfile);
                 
