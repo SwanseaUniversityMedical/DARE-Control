@@ -165,9 +165,8 @@ namespace TRE_API.Services
             outputBucket = outputBucket.ToString();
             return new OutputBucketInfo()
             {
-                OutputBucket = outputBucket,
+                Bucket = outputBucket,
                 SubId = submission.Id.ToString(),
-                OutputFolder = "/" + "sub" + subId + "/"
             };
         }
 

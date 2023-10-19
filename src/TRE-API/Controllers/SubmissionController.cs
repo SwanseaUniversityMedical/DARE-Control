@@ -190,15 +190,17 @@ namespace TRE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(BoolReturn), description: "")]
         public IActionResult FilesReadyForReview([FromBody] ReviewFiles review)
         {
-            var boolResult = _subHelper.FilesReadyForReview(review);
-
-            return StatusCode(200, boolResult);
+            try 
+            { 
+                var boolResult = _subHelper.FilesReadyForReview(review);
+                return StatusCode(200, boolResult);
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "{Function} Crash", "FilesReadyForReview");
                 throw;
             }
+            return BadRequest();
         }
         
        
@@ -243,7 +245,7 @@ namespace TRE_API.Controllers
 
             }
 
-            var bucket = _subHelper.GetOutputBucketGuts(review.subId);
+            var bucket = _subHelper.GetOutputBucketGuts(review.SubId);
 
             ApprovalResult hutchPayload = new ApprovalResult()
             {
@@ -282,7 +284,7 @@ namespace TRE_API.Controllers
             paramlist.Add("submissionId", outcome.SubId);
             var submission = _dareHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist)
                 .Result;
-            var sourceBucket = _subHelper.GetOutputBucketGuts(outcome.subId);
+            var sourceBucket = _subHelper.GetOutputBucketGuts(outcome.SubId);
 
             
 

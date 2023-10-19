@@ -31,7 +31,7 @@ namespace TRE_API
     public interface IDoAgentWork
     {
         Task Execute();
-        void CheckTESK(string taskID, string TesId, string TREBucket);
+        void CheckTESK(string taskID, string TesId, string outputBucket);
         void ClearJob(string jobname);
         Task testing();
     }
@@ -120,7 +120,7 @@ namespace TRE_API
             CreateTESK(jsonContent, "99", "AAA");
         }
 
-        public string CreateTESK(string jsonContent, string TesId, string TREBucket)
+        public string CreateTESK(string jsonContent, string TesId, string outputBucket)
         {
             using (var httpClient = new HttpClient())
             {
@@ -152,7 +152,7 @@ namespace TRE_API
                     var responseObj = JsonConvert.DeserializeObject<ResponseModel>(responseBody);
                     string id = responseObj.id;
 
-                    RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTESK(id, TesId, TREBucket), Cron.MinuteInterval(1));
+                    RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTESK(id, TesId, outputBucket), Cron.MinuteInterval(1));
 
                     _dbContext.Add(new TeskAudit() { message = jsonContent, teskid = id });
                     _dbContext.SaveChanges();
@@ -171,7 +171,7 @@ namespace TRE_API
         {
             public string id { get; set; }
         }
-        public async void CheckTESK(string taskID, string TesId, string TREBucket )
+        public async void CheckTESK(string taskID, string TesId, string outputBucket)
         {
             Console.WriteLine("Check TESK : " + taskID + ",  TES : " + TesId);
 
@@ -271,8 +271,8 @@ namespace TRE_API
 
                             _subHelper.FilesReadyForReview(new ReviewFiles()
                             {
-                                subId = taskID, //TODO is this right  
-                                files = files
+                                SubId = taskID, //TODO is this right  
+                                Files = files
                             }) ; 
 
                             //
@@ -460,7 +460,7 @@ namespace TRE_API
                             _dbContext.SaveChanges();
 
                             if (tesMessage is not null)
-                                CreateTESK(JsonConvert.SerializeObject(tesMessage), aSubmission.TesId, TREBucket);
+                                CreateTESK(JsonConvert.SerializeObject(tesMessage), aSubmission.TesId, OutputBucket);
                         }
 
                         // **************  TELL SUBMISSION LAYER WE DONE
