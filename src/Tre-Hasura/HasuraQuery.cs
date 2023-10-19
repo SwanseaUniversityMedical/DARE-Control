@@ -119,7 +119,7 @@ namespace Tre_Hasura
 
         }
 
-        public async Task<HttpResponseMessage> HttpClient(string endpointUrl, string payload, bool doto = false, string token = "")
+        public async Task<HttpResponseMessage> HttpClient(string endpointUrl, string payload, string token = "")
         {
             HttpResponseMessage response = null;
             // Create the HttpClient
@@ -128,8 +128,6 @@ namespace Tre_Hasura
                 // Set the request headers
                 HttpRequestMessage re = new HttpRequestMessage(HttpMethod.Post, endpointUrl);
 
-
-                re.Headers.Add("x-hasura-admin-secret", "ohCOOl");
                 re.Headers.Add("token", token);
             
            
