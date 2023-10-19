@@ -39,16 +39,13 @@ namespace Tre_Hasura
         {
             var Token = "";
 
-
-
             var Query = @"query MyQuery {
-  Anewschema_two(order_by: {AAAAA: asc}) {
-    id
-    AAAAA
-  }
-}
-";
-
+              Anewschema_two(order_by: {AAAAA: asc}) {
+                id
+                AAAAA
+              }
+            }
+            ";
 
             foreach (var arg in args)
             {
