@@ -188,17 +188,17 @@ namespace Data_Egress_API.Controllers
 
                 var backtotre = new EgressReview()
                 {
-                    subId = dbegress.SubmissionId,
-                    fileResults = new List<EgressResult>()
+                    SubId = dbegress.SubmissionId,
+                    FileResults = new List<EgressResult>()
                 };
                 foreach (var file in egress.Files)
                 {
                     var dbegressfile = dbegress.Files.First(x => x.Id == file.Id);
                     dbegressfile.Status = file.Status;
-                    backtotre.fileResults.Add(new EgressResult()
+                    backtotre.FileResults.Add(new EgressResult()
                     {
-                        fileName = dbegressfile.Name,
-                        approved = dbegressfile.Status == FileStatus.Approved,
+                        FileName = dbegressfile.Name,
+                        Approved = dbegressfile.Status == FileStatus.Approved,
                     });
                     var egfile = dbegress.Files.First(x => x.Id == file.Id);
                     egfile.Status = file.Status;
@@ -373,7 +373,7 @@ namespace Data_Egress_API.Controllers
            
 
             
-                var response = await _minioHelper.GetCopyObject(egressFile.EgressSubmission.OutputBucket, egressFile.EgressSubmission.SubFolder + egressFile.Name);
+                var response = await _minioHelper.GetCopyObject(egressFile.EgressSubmission.OutputBucket, egressFile.Name);
 
                 using (var responseStream = response.ResponseStream)
                 {

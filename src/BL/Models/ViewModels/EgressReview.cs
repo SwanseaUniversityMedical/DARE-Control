@@ -8,13 +8,13 @@ namespace BL.Models.ViewModels
 {
     public class EgressReview
     {
-        public string subId { get; set; }
-        public List<EgressResult> fileResults { get; set; }
+        public string SubId { get; set; }
+        public List<EgressResult> FileResults { get; set; }
     }
 
     public class EgressResult
     {
-        public string? fileName { get; set; }
-        public bool approved { get; set; } 
+        public string? FileName { get; set; }
+        public bool Approved { get; set; } 
     }
 }
