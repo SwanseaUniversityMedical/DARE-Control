@@ -163,16 +163,16 @@
                     @{
                         foreach (var stage in Model.Stages.StageInfos)
                         {
-                            if (stage.stageNumber == Model.Stages.StageInfos.Count - 1)
+                            if (stage.stageNumber == Model.Stages.StageInfos.Count)
                             {
                                     <tfoot>
                                         <tr class="row">
-                                            <td scope="col" class="col-2">
+                                            <td scope="col" class="col-2"></td>
                                             @{
                                                 foreach (var child in Model.Submission.Children)
                                                 {
                                                     var validstats = child.HistoricStatuses.Where(x => stage.statusTypeList.Contains(x.Status)).ToList();
-                                                    if (stage.stagesDict.ContainsKey(5) && stage.stageNumber == 5 && stage.statusTypeList.Contains(child.Status))
+                                                            if (stage.stagesDict.ContainsKey(Model.Stages.StageInfos.Count) && stage.stageNumber == Model.Stages.StageInfos.Count && stage.statusTypeList.Contains(child.Status))
                                                     {
                                                         validstats.Add(new BL.Models.HistoricStatus() { Start = child.StartTime, Status = child.Status });
                                                         validstats = validstats.OrderBy(x => x.Start).ToList();
@@ -194,17 +194,20 @@
                                                                            
 
 
-                                                                                if (status.Status == BL.Models.Enums.StatusType.Completed)
+                                                                                @if (status.Status == BL.Models.Enums.StatusType.Completed)
 
                                                                                 {
                                                                                     <h6 class="mb-0">
-                                                                                        <span class="badge bg-success rounded-pill d-inline-flex align-items-center pe-3" data-bs-toggle="tooltip" data-bs-title="Completed: @Model.Submission.EndTime">
-                                                                                            <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
-                                                                                            <span class="text-start">
-                                                                                                <span class="mb-1">Completed</span>
-                                                                                                <span class="font-monospace small d-block">@status.GetDisplayRunTime()</span>
-                                                                                            </span>
-                                                                                        </span>
+                                                                                <a href="@Url.Action("DownloadFile", "Submission",new{subId=@child.Id})" >
+                                                                                <span class="badge bg-success rounded-pill d-inline-flex align-items-center pe-3" data-bs-toggle="tooltip" data-bs-title="Completed: @Model.Submission.EndTime">
+                                                                                    <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
+                                                                                    <span class="text-start">
+                                                                                        <span class="mb-1">Completed</span>
+                                                                                        <span class="font-monospace small d-block">@child.GetTotalDisplayTime()</span>
+                                                                                            <span class="font-monospace small d-block"><span class="small">Click to Download Results</span></span>
+                                                                                    </span>
+                                                                                </span>
+                                                                                </a>
                                                                                     </h6>
                                                                                 }
                                                                                 else if (status.Status == BL.Models.Enums.StatusType.Failed)
@@ -216,7 +219,7 @@
                                                                                             <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
                                                                                             <span class="text-start">
                                                                                             <span class="mb-1">Failed</span>
-                                                                                                <span class="font-monospace small d-block">@status.GetDisplayRunTime()</span>
+                                                                                        <span class="font-monospace small d-block">@child.GetTotalDisplayTime()</span>
                                                                                             </span>
                                                                                         </span>
                                                                                     </h6>
@@ -232,7 +235,7 @@
                                                                                             <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
                                                                                             <span class="text-start">
                                                                                             <span class="mb-1">Cancelled</span>
-                                                                                                <span class="font-monospace small d-block">@status.GetDisplayRunTime()</span>
+                                                                                        <span class="font-monospace small d-block">@child.GetTotalDisplayTime()</span>
                                                                                             </span>
                                                                                         </span>
                                                                                     </h6>
@@ -245,15 +248,13 @@
                                                                                             <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
                                                                                             <span class="text-start">
                                                                                                 <span class="mb-1">Running</span>
-                                                                                    <span class="font-monospace small d-block">@status.GetDisplayRunTime()</span>
+                                                                                        <span class="font-monospace small d-block">@child.GetTotalDisplayTime()</span>
                                                                                             </span>
                                                                                         </span>
                                                                                     </h6>
                                                                                 }
-                                                                            }
-                                                                            @*
-                                                                      
-                                                                        *@
+                                                                            
+                                                                            
                                                                     </span>
                                                                 </li>
 

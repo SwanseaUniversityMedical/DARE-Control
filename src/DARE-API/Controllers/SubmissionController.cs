@@ -16,6 +16,8 @@ using System.Reflection;
 using System.ComponentModel.DataAnnotations;
 using System.Numerics;
 using System.Xml.Linq;
+using BL.Services;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace DARE_API.Controllers
 {
@@ -32,12 +34,14 @@ namespace DARE_API.Controllers
     {
         private readonly ApplicationDbContext _DbContext;
         private readonly IBus _rabbit;
+        private readonly IMinioHelper _minioHelper;
 
 
-        public SubmissionController(ApplicationDbContext repository, IBus rabbit)
+        public SubmissionController(ApplicationDbContext repository, IBus rabbit, IMinioHelper minioHelper)
         {
             _DbContext = repository;
             _rabbit = rabbit;
+            _minioHelper = minioHelper;
 
 
         }
@@ -404,7 +408,49 @@ namespace DARE_API.Controllers
         //    return null;
 
         //}
+        public static string GetContentType(string fileName)
+        {
+            // Create a new FileExtensionContentTypeProvider
+            var provider = new FileExtensionContentTypeProvider();
 
+            // Try to get the content type based on the file name's extension
+            if (provider.TryGetContentType(fileName, out var contentType))
+            {
+                return contentType;
+            }
+
+            // If the content type cannot be determined, provide a default value
+            return "application/octet-stream"; // This is a common default for unknown file types
+        }
+        
+        [HttpGet("DownloadFile")]
+        public async Task<IActionResult> DownloadFileAsync(int submissionId)
+        {
+            try
+            {
+
+                var submission = _DbContext.Submissions.First(x => x.Id == submissionId);
+
+
+
+                var response = await _minioHelper.GetCopyObject(submission.Project.OutputBucket, submission.FinalOutputFile);
+
+                using (var responseStream = response.ResponseStream)
+                {
+                    var fileBytes = new byte[responseStream.Length];
+                    await responseStream.ReadAsync(fileBytes, 0, (int)responseStream.Length);
+
+                    // Create a FileContentResult and return it as the response
+                    return File(fileBytes, GetContentType(submission.FinalOutputFile), submission.FinalOutputFile);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "DownloadFiles");
+                throw;
+            }
+
+        }
         public static List<StatusType> SubCompleteTypes =>
             new()
             {

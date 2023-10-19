@@ -26,7 +26,7 @@ namespace BL.Models.Helpers
                 displaySec = " Seconds ";
             }
 
-            displayRuntime = @runtime.Seconds + displaySec;
+            displayRuntime = runtime.Seconds + displaySec;
             if (runtime.TotalMinutes < 60)
             {
                 if (runtime.Minutes == 1)

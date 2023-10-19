@@ -4,6 +4,7 @@ using BL.Models.ViewModels;
 using BL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.CodeAnalysis;
 
 namespace DARE_FrontEnd.Controllers
@@ -114,6 +115,36 @@ namespace DARE_FrontEnd.Controllers
             var result = _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test).Result;
 
             return RedirectToAction("GetProject", "Project", new {id = model.ProjectId});
+        }
+
+        [HttpGet]
+        public IActionResult DownloadFile(int subId)
+        {
+
+            var paramlist = new Dictionary<string, string>
+            {
+                { "submissionId", subId.ToString() }
+            };
+
+            var submission = _clientHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist).Result;
+            var file = _clientHelper.CallAPIToGetFile(
+                "/api/Submission/DownloadFile", paramlist).Result;
+            return File(file, GetContentType(submission.FinalOutputFile), submission.FinalOutputFile);
+        }
+
+        public static string GetContentType(string fileName)
+        {
+            // Create a new FileExtensionContentTypeProvider
+            var provider = new FileExtensionContentTypeProvider();
+
+            // Try to get the content type based on the file name's extension
+            if (provider.TryGetContentType(fileName, out var contentType))
+            {
+                return contentType;
+            }
+
+            // If the content type cannot be determined, provide a default value
+            return "application/octet-stream"; // This is a common default for unknown file types
         }
 
         [HttpGet] 
