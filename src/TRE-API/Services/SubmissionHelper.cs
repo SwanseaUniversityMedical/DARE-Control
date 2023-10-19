@@ -82,6 +82,17 @@ namespace TRE_API.Services
             return result;
         }
 
+        public APIReturn? CloseSubmissionForTre(string subId, StatusType statusType, string? description, string? finalFile)
+        {
+            var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/CloseSubmissionForTre",
+                    new Dictionary<string, string>()
+                        { { "subId", subId }, { "statusType", statusType.ToString() }, { "description", description }, {"finalFile", finalFile} })
+                .Result;
+            return result;
+        }
+
+       
+
         public bool IsUserApprovedOnProject(int projectId, int userId)
         {
             return _dbContext.MembershipDecisions.Any(x =>

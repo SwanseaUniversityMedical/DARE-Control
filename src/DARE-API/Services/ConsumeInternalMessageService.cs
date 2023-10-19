@@ -97,6 +97,7 @@ namespace DARE_API.Services
                 else
                 {
                     UpdateSubmissionStatus.UpdateStatus(sub, StatusType.SubmissionCrateValidationFailed, "");
+                    UpdateSubmissionStatus.UpdateStatus(sub, StatusType.Failed, "");
                 }
 
                 var dbproj = sub.Project;

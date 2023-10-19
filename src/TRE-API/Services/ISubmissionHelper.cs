@@ -11,5 +11,6 @@ namespace TRE_API.Services
         List<Submission>? GetWaitingSubmissionForTre();
         void SendSumissionToHUTCH(Submission submission);
         List<Submission>? GetRequestCancelSubsForTre();
+        APIReturn? CloseSubmissionForTre(string subId, StatusType statusType, string? description, string? finalFile);
     }
 }
