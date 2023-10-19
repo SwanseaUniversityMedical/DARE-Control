@@ -54,13 +54,20 @@ namespace DARE_API.Services
             }
         }
 
+
+        //Implement proper check
+        private bool ValidateCreate(Submission sub)
+        {
+            return true;
+        }
+
         private void Process(IMessage<int> message, MessageReceivedInfo info)
         {
             try
             {
                 var sub = _dbContext.Submissions.First(s => s.Id == message.Body);
 
-                //TODO: Mahadi copy crate from external to local submission (if in external)
+               
 
                 Uri uri = new Uri(sub.DockerInputLocation);
                 string fileName = Path.GetFileName(uri.LocalPath);
@@ -82,7 +89,15 @@ namespace DARE_API.Services
                     messageMQ.Url = "http://" + minioEndpoint.Url + "/browser/" + messageMQ.BucketName + "/" + messageMQ.Key;
                 }
 
-                //TODO: Validate format of Crate
+                UpdateSubmissionStatus.UpdateStatus(sub, StatusType.SubmissionWaitingForCrateFormatCheck, "");
+                if (ValidateCreate(sub))
+                {
+                    UpdateSubmissionStatus.UpdateStatus(sub, StatusType.SubmissionCrateValidated, "");
+                }
+                else
+                {
+                    UpdateSubmissionStatus.UpdateStatus(sub, StatusType.SubmissionCrateValidationFailed, "");
+                }
 
                 var dbproj = sub.Project;
                 var tesTask = JsonConvert.DeserializeObject<TesTask>(sub.TesJson);

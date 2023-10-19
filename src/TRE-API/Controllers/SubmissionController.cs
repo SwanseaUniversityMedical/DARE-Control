@@ -99,9 +99,15 @@ namespace TRE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
         public IActionResult UpdateStatusForTre([FromBody] SubmissionDetails subDetails)
         {
-            try { 
-            APIReturn? result = _subHelper.UpdateStatusForTre(subDetails.SubId, subDetails.StatusType, subDetails.Description);
-            return StatusCode(200, result);
+            if (!EnumHelper.GetHutchAllowedStatusUpdates().Contains(subDetails.StatusType))
+            {
+                throw new Exception("Restricted StatusType")
+            }
+            try
+            {
+                APIReturn? result =
+                    _subHelper.UpdateStatusForTre(subDetails.SubId, subDetails.StatusType, subDetails.Description);
+                return StatusCode(200, result);
             }
             catch (Exception ex)
             {
@@ -109,7 +115,7 @@ namespace TRE_API.Controllers
                 throw;
             }
         }
-        
+
         [Authorize(Roles = "dare-hutch-admin,dare-tre-admin")]
         [HttpGet]
         [Route("GetOutputBucketInfo")]
@@ -257,6 +263,11 @@ namespace TRE_API.Controllers
             {
                 hutchRes.Add(i.FileName, i.Approved);
 
+            }
+
+            if (approvalStatus != ApprovalType.FullyApproved)
+            {
+                _subHelper.UpdateStatusForTre(review.SubId.ToString(), StatusType.DataOutApprovalRejected, "");
             }
 
             var bucket = GetOutputBucketGuts(review.SubId);

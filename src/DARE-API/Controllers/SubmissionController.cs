@@ -69,6 +69,30 @@ namespace DARE_API.Controllers
 
         [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
         [HttpGet]
+        [Route("GetRequestCancelSubsForTre")]
+        [ValidateModelState]
+        [SwaggerOperation("GetRequestCancelSubsForTre")]
+        [SwaggerResponse(statusCode: 200, type: typeof(List<Submission>), description: "")]
+        public virtual IActionResult GetRequestCancelSubsForTre()
+        {
+
+            var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+            var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName);
+            if (tre == null)
+            {
+                return BadRequest("User " + usersName + " doesn't have a tre");
+            }
+
+            tre.LastHeartBeatReceived = DateTime.Now.ToUniversalTime();
+            _DbContext.SaveChanges();
+            var results = tre.Submissions.Where(x => x.Status == StatusType.RequestCancellation).ToList();
+
+
+            return StatusCode(200, results);
+        }
+
+        [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
+        [HttpGet]
         [Route("UpdateStatusForTre")]
         [ValidateModelState]
         [SwaggerOperation("UpdateStatusForTre")]
@@ -89,15 +113,78 @@ namespace DARE_API.Controllers
             {
                 return BadRequest("Invalid subid or tre not valid for tes");
             }
-
+            if (SubCompleteTypes.Contains(sub.Status))
+            {
+                throw new Exception("Submission already closed. Can't change status");
+            }
             UpdateSubmissionStatus.UpdateStatus(sub, statusType, description);
             _DbContext.SaveChanges();
+           
 
 
             return StatusCode(200, new APIReturn() { ReturnType = ReturnType.voidReturn });
         }
 
+        [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
+        [HttpGet]
+        [Route("CloseSubmissionForTre")]
+        [ValidateModelState]
+        [SwaggerOperation("CloseSubmissionForTre")]
+        [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
+        public IActionResult CloseSubmissionForTre(string subId, StatusType statusType, string? finalFile, string? description)
+        {
+            if (!SubCompleteTypes.Contains(statusType))
+            {
+                throw new Exception("Invalid completion type");
+            }
+            var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+            var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
+            if (tre == null)
+            {
+                return BadRequest("User " + usersName + " doesn't have an tre");
+            }
 
+
+            var sub = _DbContext.Submissions.FirstOrDefault(x => x.Id == int.Parse(subId) && x.Tre == tre);
+            if (sub == null)
+            {
+                return BadRequest("Invalid subid or tre not valid for tes");
+            }
+            if (SubCompleteTypes.Contains(sub.Status))
+            {
+                throw new Exception("Submission already closed. Can't change status");
+            }
+
+            UpdateSubmissionStatus.UpdateStatus(sub, statusType, description);
+            sub.FinalOutputFile = finalFile;
+            _DbContext.SaveChanges();
+            var parentStatus = StatusType.WaitingForChildSubsToComplete;
+            if (sub.Parent.Children.All(x => SubCompleteTypes.Contains(x.Status)))
+            {
+                if (sub.Parent.Children.All(x => x.Status == StatusType.Failed))
+                {
+                    UpdateSubmissionStatus.UpdateStatus(sub.Parent, StatusType.Failed, "");
+
+                }
+                else if (sub.Parent.Children.All(x => x.Status == StatusType.Completed))
+                {
+                    UpdateSubmissionStatus.UpdateStatus(sub.Parent, StatusType.Completed, "");
+
+                }
+                else if (sub.Parent.Children.All(x => x.Status == StatusType.Cancelled))
+                {
+                    UpdateSubmissionStatus.UpdateStatus(sub.Parent, StatusType.Cancelled, "");
+                }
+                else
+                {
+                    UpdateSubmissionStatus.UpdateStatus(sub.Parent, StatusType.PartialResult, "");
+                }
+                sub.Parent.EndTime = DateTime.Now.ToUniversalTime();
+            }
+
+            _DbContext.SaveChanges();
+            return StatusCode(200, new APIReturn() { ReturnType = ReturnType.voidReturn });
+        }
 
         [AllowAnonymous]
         [HttpGet("GetAllSubmissions")]
@@ -154,39 +241,43 @@ namespace DARE_API.Controllers
 
         [AllowAnonymous]
         [HttpGet("StageTypes")]
-        public List<StageInfo> StageTypes()
+        public Stages StageTypes()
         {
             var stage1List = new StageInfo();
-            stage1List.stageName = "Submission Layer Validation";
+            stage1List.stageName = "Submission Layer Processing";
             stage1List.stageNumber = 1;
 
             stage1List.statusTypeList = new List<StatusType>
             {
-                StatusType.InvalidUser,
+                StatusType.WaitingForChildSubsToComplete,
+                StatusType.WaitingForAgentToTransfer,
                 StatusType.UserNotOnProject,
-                StatusType.InvalidSubmission,
-                StatusType.WaitingForCrateFormatCheck,
-                StatusType.ValidatingUser,
-                StatusType.ValidatingSubmission,
-                StatusType.ValidationSuccessful
+                StatusType.SubmissionWaitingForCrateFormatCheck,
+                StatusType.Running,
+                StatusType.SubmissionReceived,
+                StatusType.SubmissionCrateValidated,
+                StatusType.SubmissionCrateValidationFailed,
+
+
             };
             Dictionary<int, List<StatusType>> stage1Dict = new Dictionary<int, List<StatusType>>();
             stage1Dict.Add(1, stage1List.statusTypeList);
             stage1List.stagesDict = stage1Dict;
 
             var stage2List = new StageInfo();
-            stage2List.stageName = "Tre Layer Validation";
+            stage2List.stageName = "Tre Layer Processing";
             stage2List.stageNumber = 2;
             stage2List.statusTypeList = new List<StatusType>
             {
-                StatusType.WaitingForAgentToTransfer,
                 StatusType.TransferredToPod,
+                StatusType.InvalidUser,
                 StatusType.TRENotAuthorisedForProject,
                 StatusType.AgentTransferringToPod,
                 StatusType.TransferToPodFailed,
-                StatusType.TRERejectedProject,
-                StatusType.TREApprovedProject
-
+                StatusType.SendingSubmissionToHutch,
+                StatusType.TreCrateValidated,
+                StatusType.TreCrateValidationFailed,
+                StatusType.TreCrateValidated,
 
 
             };
@@ -199,13 +290,8 @@ namespace DARE_API.Controllers
             stage3List.stageNumber = 3;
             stage3List.statusTypeList = new List<StatusType>
             {
-                StatusType.WaitingForChildSubsToComplete,
                 StatusType.PodProcessing,
                 StatusType.PodProcessingComplete,
-                StatusType.RequestCancellation,
-                StatusType.CancellationRequestSent,
-                StatusType.CancellingChildren,
-                //StatusType.Cancelled,
                 StatusType.PodProcessingFailed,
                 StatusType.WaitingForCrate,
                 StatusType.FetchingCrate,
@@ -219,7 +305,11 @@ namespace DARE_API.Controllers
                 StatusType.TransferredForDataOut,
                 StatusType.PackagingApprovedResults,
                 StatusType.Complete,
-                StatusType.Failure
+                StatusType.Failure,
+
+
+
+
 
             };
             Dictionary<int, List<StatusType>> stage3Dict = new Dictionary<int, List<StatusType>>();
@@ -227,7 +317,7 @@ namespace DARE_API.Controllers
             stage3List.stagesDict = stage3Dict;
 
             var stage4List = new StageInfo();
-            stage4List.stageName = "Data Approval Processing";
+            stage4List.stageName = "Data Egress Processing";
             stage4List.stageNumber = 4;
             stage4List.statusTypeList = new List<StatusType>
             {
@@ -240,15 +330,11 @@ namespace DARE_API.Controllers
             stage4List.stagesDict = stage4Dict;
 
             var stage5List = new StageInfo();
-            stage5List.stageName = "Result";
+            stage5List.stageName = "Final Processing";
             stage5List.stageNumber = 5;
-            stage5List.statusTypeList = new List<StatusType>
-            {
-                StatusType.Cancelled,
-                StatusType.Completed,
-                StatusType.Running,
-                StatusType.Failed
-            };
+
+            stage5List.statusTypeList = SubCompleteTypes;
+
             Dictionary<int, List<StatusType>> stage5Dict = new Dictionary<int, List<StatusType>>();
             stage5Dict.Add(5, stage5List.statusTypeList);
             stage5List.stagesDict = stage5Dict;
@@ -261,7 +347,41 @@ namespace DARE_API.Controllers
             infoList.Add(stage4List);
             infoList.Add(stage5List);
 
-            return infoList;
+            var result = new Stages()
+            {
+                GreenStages = new List<StatusType>()
+                {
+                    StatusType.ValidationSuccessful,
+                    StatusType.TransferredToPod,
+                    StatusType.DataOutApproved,
+                    StatusType.PodProcessingComplete,
+                    StatusType.SubmissionCrateValidated,
+                    StatusType.TreCrateValidated,
+                    StatusType.Completed,
+                    StatusType.PartialResult
+                },
+                RedStages = new List<StatusType>()
+                {
+                    StatusType.InvalidUser,
+                    StatusType.CancellingChildren,
+                    StatusType.UserNotOnProject,
+                    StatusType.RequestCancellation,
+                    StatusType.CancellationRequestSent,
+                    StatusType.Cancelled,
+                    StatusType.InvalidSubmission,
+                    StatusType.TRENotAuthorisedForProject,
+                    StatusType.DataOutApprovalRejected,
+                    StatusType.SubmissionCrateValidationFailed,
+                    StatusType.TreCrateValidationFailed,
+                    StatusType.TransferToPodFailed,
+                    StatusType.PodProcessingFailed,
+                    StatusType.Failed,
+                    
+                },
+                StageInfos = infoList
+            };
+
+            return result;
 
         }
 
@@ -278,11 +398,22 @@ namespace DARE_API.Controllers
         //        StatusType.InvalidUser,
         //        StatusType.UserNotOnProject,
         //        StatusType.InvalidSubmission,
-        //        StatusType.WaitingForCrateFormatCheck
+        //        StatusType.SubmissionWaitingForCrateFormatCheck
         //    };
         //    return null;
 
         //}
+
+        public static List<StatusType> SubCompleteTypes =>
+            new()
+            {
+
+                StatusType.Completed,
+                StatusType.Cancelled,
+                StatusType.Failed,
+                StatusType.RequestingHutchDoesFinalPackaging,
+                StatusType.PartialResult
+            };
 
         [Authorize(Roles = "dare-control-admin")]
         [HttpPost("SaveSubmissionFiles")]

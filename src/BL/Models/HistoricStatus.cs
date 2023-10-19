@@ -1,4 +1,5 @@
 ﻿using BL.Models.Enums;
+using BL.Models.Helpers;
 
 namespace BL.Models
 {
@@ -11,6 +12,13 @@ namespace BL.Models
         public virtual Submission Submission { get; set; }
         public StatusType Status { get; set; }
         public string? StatusDescription { get; set; }
+
+        public string GetDisplayRunTime()
+        {
+
+            return TimeHelper.GetDisplayTime(Start, End);
+
+        }
 
     }
 

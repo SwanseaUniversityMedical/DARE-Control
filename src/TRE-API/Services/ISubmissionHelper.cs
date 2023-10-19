@@ -10,5 +10,6 @@ namespace TRE_API.Services
         bool IsUserApprovedOnProject(int projectId, int userId);
         List<Submission>? GetWaitingSubmissionForTre();
         void SendSumissionToHUTCH(Submission submission);
+        List<Submission>? GetRequestCancelSubsForTre();
     }
 }

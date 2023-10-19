@@ -215,7 +215,17 @@ namespace TRE_API
             using (var scope = _serviceProvider.CreateScope())
             {
 
-                Console.WriteLine("Getting list of submissions");
+                var cancelsubprojs =  _subHelper.GetRequestCancelSubsForTre();
+                if (cancelsubprojs != null)
+                {
+                    foreach (var cancelsubproj in cancelsubprojs)
+                    {
+                        _subHelper.UpdateStatusForTre(cancelsubproj.Id.ToString(), StatusType.CancellationRequestSent, "");
+                        //TODO Do we need to call Hutch or other stuff to cancel and do other cancel stuff
+                        _subHelper.UpdateStatusForTre(cancelsubproj.Id.ToString(), StatusType.Cancelled, "");
+                    }
+                    
+                }
 
                 // Get list of submissions
                 List<Submission> listOfSubmissions;
