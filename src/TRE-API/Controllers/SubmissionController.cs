@@ -38,10 +38,11 @@ namespace TRE_API.Controllers
         private readonly ISubmissionHelper _subHelper;
         private readonly IMinioSubHelper _minioSubHelper;
         private readonly IMinioTreHelper _minioTreHelper;
+        private readonly MinioTRESettings _minioTreSettings;
 
 
         public SubmissionController(ISignalRService signalRService, IDareClientWithoutTokenHelper helper,
-            ApplicationDbContext dbContext, IBus rabbit, ISubmissionHelper subHelper, IDataEgressClientWithoutTokenHelper egressHelper, IHutchClientHelper hutchClientHelper, IMinioSubHelper minioSubHelper, IMinioTreHelper minioTreHelper)
+            ApplicationDbContext dbContext, IBus rabbit, ISubmissionHelper subHelper, IDataEgressClientWithoutTokenHelper egressHelper, IHutchClientHelper hutchClientHelper, IMinioSubHelper minioSubHelper, IMinioTreHelper minioTreHelper, MinioTRESettings minioTreSettings)
         {
             _signalRService = signalRService;
             _dareHelper = helper;
@@ -52,7 +53,8 @@ namespace TRE_API.Controllers
             _subHelper = subHelper;
             _minioTreHelper = minioTreHelper;
             _minioSubHelper = minioSubHelper;
-            
+            _minioTreSettings = minioTreSettings;
+
         }
 
        
@@ -98,7 +100,7 @@ namespace TRE_API.Controllers
         public IActionResult UpdateStatusForTre([FromBody] SubmissionDetails subDetails)
         {
             try { 
-            APIReturn? result = _subHelper.UpdateStatusForTre(subDetails.subId, subDetails.statusType, subDetails.description);
+            APIReturn? result = _subHelper.UpdateStatusForTre(subDetails.SubId, subDetails.StatusType, subDetails.Description);
             return StatusCode(200, result);
             }
             catch (Exception ex)
@@ -107,26 +109,26 @@ namespace TRE_API.Controllers
                 throw;
             }
         }
-
+        
         [Authorize(Roles = "dare-hutch-admin,dare-tre-admin")]
         [HttpGet]
         [Route("GetOutputBucketInfo")]
         [ValidateModelState]
         [SwaggerOperation("GetOutputBucketInfo")]
-        [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
+        [SwaggerResponse(statusCode: 200, type: typeof(OutputBucketInfo), description: "")]
         public IActionResult GetOutputBucketInfo(string subId)
         {
             try { 
             var outputInfo = GetOutputBucketGuts(subId);
 
-            var status = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-                new Dictionary<string, string>()
-                {
+                var status = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
+                    new Dictionary<string, string>()
+                    {
                     { "subId", outputInfo.SubId }, { "statusType", StatusType.PodProcessingComplete.ToString() },
                     { "description", "" }
-                }).Result;
+                    }).Result;
 
-            return StatusCode(200, outputInfo);
+                return StatusCode(200, outputInfo);
             }
             catch (Exception ex)
             {
@@ -137,9 +139,10 @@ namespace TRE_API.Controllers
 
         public class OutputBucketInfo
         {
+            public string Host { get; set; }
             public string SubId { get; set; }
-            public string OutputBucket { get; set; }
-            public string OutputFolder { get; set; }
+            public string Bucket { get; set; }
+            public string Path { get; set; }
         }
 
         private OutputBucketInfo GetOutputBucketGuts(string subId)
@@ -165,10 +168,11 @@ namespace TRE_API.Controllers
             outputBucket = outputBucket.ToString();
             return new OutputBucketInfo()
             {
-                OutputBucket = outputBucket,
+                Bucket = outputBucket,
                 SubId = submission.Id.ToString(),
-                OutputFolder = "sub" + subId + "/"
-        };
+                Path = "sub" + subId + "/",
+                Host = _minioTreSettings.Url
+            };
             }
             catch (Exception ex)
             {
@@ -182,21 +186,20 @@ namespace TRE_API.Controllers
         [Route("FilesReadyForReview")]
         [ValidateModelState]
         [SwaggerOperation("FilesReadyForReview")]
-        [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
+        [SwaggerResponse(statusCode: 200, type: typeof(BoolReturn), description: "")]
         public IActionResult FilesReadyForReview([FromBody] ReviewFiles review)
         {
             try { 
-            var bucket = GetOutputBucketGuts(review.subId);
+            var bucket = GetOutputBucketGuts(review.SubId);
             var egsub = new EgressSubmission()
             {
-                SubmissionId = review.subId,
-                OutputBucket = bucket.OutputBucket,
-                SubFolder = bucket.OutputFolder,
+                SubmissionId = review.SubId,
+                OutputBucket = bucket.Bucket,
                 Status = EgressStatus.NotCompleted, 
                 Files = new List<EgressFile>()
             };
 
-            foreach (var reviewFile in review.files)
+            foreach (var reviewFile in review.Files)
             {
                 egsub.Files.Add(new EgressFile()
                 {
@@ -220,14 +223,14 @@ namespace TRE_API.Controllers
         [Route("EgressResults")]
         [ValidateModelState]
         [SwaggerOperation("EgressResults")]
-        [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
+        [SwaggerResponse(statusCode: 200, type: typeof(BoolReturn), description: "")]
         public async Task<IActionResult> EgressResults([FromBody] EgressReview review)
         {
             try { 
             //Update status of submission to "Sending to hutch for final packaging"
             var statusParams = new Dictionary<string, string>()
                                     {
-                                        { "subId", review.subId.ToString() },
+                                        { "subId", review.SubId.ToString() },
                                         { "statusType", StatusType.SendingToHUTCHForFinalPackaging.ToString() },
                                         { "description", "" }
                                     };
@@ -235,14 +238,14 @@ namespace TRE_API.Controllers
 
             Dictionary<string, bool> hutchRes = new Dictionary<string, bool>();
             ApprovalType approvalStatus;
-            var approvedCount = review.fileResults.Count(x => x.approved);
-            var rejectedCount = review.fileResults.Count(x => !x.approved);
+            var approvedCount = review.FileResults.Count(x => x.Approved);
+            var rejectedCount = review.FileResults.Count(x => !x.Approved);
 
-            if (approvedCount == review.fileResults.Count)
+            if (approvedCount == review.FileResults.Count)
             {
                 approvalStatus = ApprovalType.FullyApproved;
             }
-            else if (rejectedCount == review.fileResults.Count)
+            else if (rejectedCount == review.FileResults.Count)
             {
                 approvalStatus = ApprovalType.NotApproved;
             }
@@ -250,25 +253,26 @@ namespace TRE_API.Controllers
             {
                 approvalStatus = ApprovalType.PartiallyApproved;
             }
-            foreach (var i in review.fileResults)
+            foreach (var i in review.FileResults)
             {
-                hutchRes.Add(i.fileName, i.approved);
+                hutchRes.Add(i.FileName, i.Approved);
 
             }
 
-            var bucket = GetOutputBucketGuts(review.subId);
+            var bucket = GetOutputBucketGuts(review.SubId);
             ApprovalResult hutchPayload = new ApprovalResult()
             {
-                OutputBucket = bucket.OutputBucket,
-                SubFolder = bucket.OutputFolder,
+                Host = _minioTreSettings.Url,
+                Bucket = bucket.Bucket,
+                Path = bucket.Path,
                 Status = approvalStatus,
                 FileResults = hutchRes
             };
 
             //Not sure what the return type is
-            var HUTCHres = await _hutchHelper.CallAPI<ApprovalResult, APIReturn>($"/api/jobs/{review.subId}/approval", hutchPayload);
+            var HUTCHres = await _hutchHelper.CallAPI<ApprovalResult, APIReturn>($"/api/jobs/{review.SubId}/approval", hutchPayload);
 
-            return StatusCode(200, HUTCHres);
+            return StatusCode(200, new BoolReturn(){Result = true});
             }
             catch (Exception ex)
             {
@@ -285,15 +289,15 @@ namespace TRE_API.Controllers
         [Route("FinalOutcome")]
         [ValidateModelState]
         [SwaggerOperation("FinalOutcome")]
-        [SwaggerResponse(statusCode: 200, type: typeof(string), description: "")]
+        [SwaggerResponse(statusCode: 200, type: typeof(BoolReturn), description: "")]
         public IActionResult FinalOutcome([FromBody] FinalOutcome outcome)
         {
             try { 
             var paramlist = new Dictionary<string, string>();
-            paramlist.Add("submissionId", outcome.subId);
+            paramlist.Add("submissionId", outcome.SubId);
             var submission = _dareHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist)
                 .Result;
-            var sourceBucket = GetOutputBucketGuts(outcome.subId);
+            var sourceBucket = GetOutputBucketGuts(outcome.SubId);
             
 
             var paramlist2 = new Dictionary<string, string>();
@@ -304,17 +308,17 @@ namespace TRE_API.Controllers
             var destinationBucket = project.OutputBucket;
 
             //Copy file to output bucket
-            var source = _minioTreHelper.GetCopyObject(sourceBucket.OutputBucket, sourceBucket.OutputFolder + sourceBucket.OutputFolder + outcome.file);
+            var source = _minioTreHelper.GetCopyObject(sourceBucket.Bucket,  outcome.File);
             var isFolderExists = _minioTreHelper.FolderExists(destinationBucket, "sub" + submission.Id).Result;
             if (!isFolderExists)
             {
                 var submissionFolder = _minioTreHelper.CreateFolder(destinationBucket, "sub" + submission.Id).Result;
             }
-            var copyResult = _minioSubHelper.CopyObjectToDestination(destinationBucket, sourceBucket.OutputFolder + sourceBucket.OutputFolder + outcome.file, source.Result);
+            var copyResult = _minioSubHelper.CopyObjectToDestination(destinationBucket, outcome.File, source.Result);
             //For me to code
             var statusParams = new Dictionary<string, string>()
                                     {
-                                        { "subId", outcome.subId.ToString() },
+                                        { "subId", outcome.SubId.ToString() },
                                         { "statusType", StatusType.Completed.ToString() },
                                         { "description", "" }
                                     };
@@ -327,7 +331,7 @@ namespace TRE_API.Controllers
             {
                 Result = copyResult.Result
             };
-            return StatusCode(200, copyResult);
+            return StatusCode(200, boolresult);
             }
             catch (Exception ex)
             {
