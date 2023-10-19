@@ -20,10 +20,8 @@ namespace TRE_API.Controllers
         [HttpGet("RunQuery/{token}/{Query}")]
         public async  Task<string> RunQuery(string token, string Query)
         {
-
            string a = await _hasuraService.ExecuteQuery(token, Query);
            return a.ToString();
-
         }
 
     }

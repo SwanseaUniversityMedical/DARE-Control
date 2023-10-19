@@ -424,7 +424,7 @@ namespace TRE_API
                           
                             var projectId = aSubmission.Project.Id;
 
-                            var TREBucket = "S3://" + _dbContext.Projects.First(x => x.Id == projectId).SubmissionBucketTre; //TODO Check, Projects not getting The synchronised Properly 
+                            var OutputBucket = "S3://" + _dbContext.Projects.First(x => x.Id == projectId).OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
                             //it need the file name?? (key-name)
 
 
@@ -432,7 +432,7 @@ namespace TRE_API
 
                             foreach (var output in tesMessage.Outputs)
                             {
-                                output.Url = TREBucket;
+                                output.Url = OutputBucket;
                             }
 
                             foreach (var Executor in tesMessage.Executors)
