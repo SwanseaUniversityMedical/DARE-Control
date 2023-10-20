@@ -48,7 +48,7 @@ namespace BL.Models.ViewModels
             // Check if the request is authorized
             if (result.IsAuthorized)
             {
-                await _next(context);
+                //await _next(context);
             }
             else
             {
