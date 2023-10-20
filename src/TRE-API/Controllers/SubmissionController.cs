@@ -20,6 +20,7 @@ using Newtonsoft.Json;
 using System;
 using Amazon.Runtime.Internal.Transform;
 using Serilog;
+using Microsoft.AspNetCore.SignalR;
 
 namespace TRE_API.Controllers
 {
@@ -136,7 +137,7 @@ namespace TRE_API.Controllers
         {
             try
             {
-                var outputInfo = GetOutputBucketGuts(subId);
+                var outputInfo = _subHelper.GetOutputBucketGuts(subId);
                 //_subHelper.UpdateStatusForTre(subId, StatusType.PodProcessingComplete, "");
 
                 return StatusCode(200, outputInfo);
@@ -156,43 +157,7 @@ namespace TRE_API.Controllers
             public string Path { get; set; }
         }
 
-        private OutputBucketInfo GetOutputBucketGuts(string subId)
-        {
-            try
-            {
-                var paramlist = new Dictionary<string, string>();
-                paramlist.Add("submissionId", subId.ToString());
-                var submission = _dareHelper
-                    .CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist)
-                    .Result;
-
-                var bucket = _dbContext.Projects
-                    .Where(x => x.SubmissionProjectId == submission.Project.Id)
-                    .Select(x => x.OutputBucketTre);
-
-                var outputBucket = bucket.FirstOrDefault();
-
-                //var isFolderExists = _minioTreHelper.FolderExists(outputBucket.ToString(), "sub" + subId).Result;
-                //if (!isFolderExists)
-                //{
-                //    var submissionFolder = _minioTreHelper.CreateFolder(outputBucket.ToString(), "sub" + subId).Result;
-                //}
-
-                outputBucket = outputBucket.ToString();
-                return new OutputBucketInfo()
-                {
-                    Bucket = outputBucket,
-                    SubId = submission.Id.ToString(),
-                    Path = "sub" + subId + "/",
-                    Host = _minioTreSettings.Url
-                };
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crash", "GetOutputBucketGuts");
-                throw;
-            }
-        }
+        
 
         [Authorize(Roles = "dare-hutch-admin,dare-tre-admin")]
         [HttpPost]
@@ -205,7 +170,7 @@ namespace TRE_API.Controllers
             try
             {
                 _subHelper.UpdateStatusForTre(review.SubId, StatusType.DataOutRequested, "");
-                var bucket = GetOutputBucketGuts(review.SubId);
+                var bucket = _subHelper.GetOutputBucketGuts(review.SubId);
                 var egsub = new EgressSubmission()
                 {
                     SubmissionId = review.SubId,
@@ -287,7 +252,7 @@ namespace TRE_API.Controllers
                     _subHelper.UpdateStatusForTre(review.SubId.ToString(), StatusType.DataOutApproved, "");
                 }
 
-                var bucket = GetOutputBucketGuts(review.SubId);
+                var bucket = _subHelper.GetOutputBucketGuts(review.SubId);
                 ApprovalResult hutchPayload = new ApprovalResult()
                 {
                     Host = _minioTreSettings.Url,
@@ -329,41 +294,16 @@ namespace TRE_API.Controllers
         {
             try
             {
-                var paramlist = new Dictionary<string, string>();
-                paramlist.Add("submissionId", outcome.SubId);
-                var submission = _dareHelper
-                    .CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist)
-                    .Result;
-                var sourceBucket = GetOutputBucketGuts(outcome.SubId);
+                var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Tre, "topic");
 
-
-                var paramlist2 = new Dictionary<string, string>();
-                paramlist2.Add("projectId", submission.Project.Id.ToString());
-                var project = _dareHelper.CallAPIWithoutModel<Project?>(
-                    "/api/Project/GetProject/", paramlist2).Result;
-
-                var destinationBucket = project.OutputBucket;
-
-                //Copy file to output bucket
-                var source = _minioTreHelper.GetCopyObject(sourceBucket.Bucket, outcome.File).Result;
-                //var isFolderExists = _minioTreHelper.FolderExists(destinationBucket, "sub" + submission.Id).Result;
-                //if (!isFolderExists)
-                //{
-                //    var submissionFolder =
-                //        _minioTreHelper.CreateFolder(destinationBucket, "sub" + submission.Id).Result;
-                //}
-
-                var destfile = sourceBucket.Path + _treName + "/" + outcome.File.Replace(sourceBucket.Path, "");
-                var copyResult =
-                    _minioSubHelper.CopyObjectToDestination(destinationBucket, destfile, source);
-                
-                var StatusResult = _subHelper.CloseSubmissionForTre(outcome.SubId, StatusType.Completed, "", destfile);
+                _rabbit.Advanced.Publish(exch, RoutingConstants.ProcessFinalOutput, false, new Message<FinalOutcome>(outcome));
+               
                 
 
 
                 var boolresult = new BoolReturn()
                 {
-                    Result = copyResult.Result
+                    Result = true
                 };
                 return StatusCode(200, boolresult);
             }

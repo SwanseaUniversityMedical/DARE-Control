@@ -3,8 +3,10 @@ using BL.Models.Enums;
 using BL.Models.ViewModels;
 using BL.Services;
 using EasyNetQ;
+using Serilog;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services.SignalR;
+using static TRE_API.Controllers.SubmissionController;
 
 namespace TRE_API.Services
 {
@@ -33,6 +35,44 @@ namespace TRE_API.Services
             _hutchDbServer = config["Hutch:DbServer"];
             _minioTreSettings = minioTreSettings;
 
+        }
+
+        public OutputBucketInfo GetOutputBucketGuts(string subId)
+        {
+            try
+            {
+                var paramlist = new Dictionary<string, string>();
+                paramlist.Add("submissionId", subId.ToString());
+                var submission = _dareHelper
+                    .CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist)
+                    .Result;
+
+                var bucket = _dbContext.Projects
+                    .Where(x => x.SubmissionProjectId == submission.Project.Id)
+                    .Select(x => x.OutputBucketTre);
+
+                var outputBucket = bucket.FirstOrDefault();
+
+                //var isFolderExists = _minioTreHelper.FolderExists(outputBucket.ToString(), "sub" + subId).Result;
+                //if (!isFolderExists)
+                //{
+                //    var submissionFolder = _minioTreHelper.CreateFolder(outputBucket.ToString(), "sub" + subId).Result;
+                //}
+
+                outputBucket = outputBucket.ToString();
+                return new OutputBucketInfo()
+                {
+                    Bucket = outputBucket,
+                    SubId = submission.Id.ToString(),
+                    Path = "sub" + subId + "/",
+                    Host = _minioTreSettings.Url
+                };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetOutputBucketGuts");
+                throw;
+            }
         }
 
         public void SendSumissionToHUTCH(Submission submission)
