@@ -181,6 +181,14 @@ namespace TRE_API
 
 
                                 var result = _subHelper.UpdateStatusForTre(TesId, statusMessage, "");
+                                if (status.state == "COMPLETE")
+                                {
+                                    result = _subHelper.CloseSubmissionForTre(TesId.ToString(), StatusType.Completed, "", "");
+                            }
+                                else if (status.state == "EXECUTER_ERROR")
+                                {
+                                    result = _subHelper.CloseSubmissionForTre(TesId.ToString(), StatusType.Failed, "", "");
+                            }
                         }
 
                         // are we done ?
@@ -205,7 +213,11 @@ namespace TRE_API
            
         }
 
-
+        //Implement proper check
+        private bool ValidateCreate(Submission sub)
+        {
+            return true;
+        }
 
         // Method executed upon hangfire job
         public void Execute(bool useRabbit = true, bool useHutch = false, bool useTESK = true)
@@ -215,7 +227,17 @@ namespace TRE_API
             using (var scope = _serviceProvider.CreateScope())
             {
 
-                Console.WriteLine("Getting list of submissions");
+                var cancelsubprojs =  _subHelper.GetRequestCancelSubsForTre();
+                if (cancelsubprojs != null)
+                {
+                    foreach (var cancelsubproj in cancelsubprojs)
+                    {
+                        _subHelper.UpdateStatusForTre(cancelsubproj.Id.ToString(), StatusType.CancellationRequestSent, "");
+                        //TODO Do we need to call Hutch or other stuff to cancel and do other cancel stuff
+                        _subHelper.CloseSubmissionForTre(cancelsubproj.Id.ToString(), StatusType.Cancelled, "", "");
+                    }
+                    
+                }
 
                 // Get list of submissions
                 List<Submission> listOfSubmissions;
@@ -245,6 +267,7 @@ namespace TRE_API
                         Log.Error("User {UserID}/project {ProjectId} is not value for this submission {submission}", aSubmission.SubmittedBy.Id, aSubmission.Project.Id, aSubmission);
                         // record error with submission layer
                         var result = _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.InvalidUser, "");
+                        result = _subHelper.CloseSubmissionForTre(aSubmission.Id.ToString(), StatusType.Failed, "", "");
                     }
                     else
                     {
@@ -254,16 +277,27 @@ namespace TRE_API
                             Uri uri = new Uri(aSubmission.DockerInputLocation);
                             string fileName = Path.GetFileName(uri.LocalPath);
                             var sourceBucket = aSubmission.Project.SubmissionBucket;
-                            var subProj = _dbContext.Projects.Where(x => x.SubmissionProjectId == aSubmission.Project.Id);
-                            foreach (var proj in subProj)
-                            {
-                                var destinationBucket = proj.SubmissionBucketTre;
+                            var subProj = _dbContext.Projects.Where(x => x.SubmissionProjectId == aSubmission.Project.Id).FirstOrDefault();
+                            
+                                var destinationBucket = subProj.SubmissionBucketTre;
                                 var source =  _minioSubHelper.GetCopyObject(sourceBucket, fileName);
-                                var result =  _minioTreHelper.CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
+                                var resultcopy =  _minioTreHelper.CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
 
-                            }
-                       
-                        
+                                _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.TreWaitingForCrateFormatCheck, "");
+                        if (ValidateCreate(aSubmission))
+                        {
+                            _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.TreCrateValidated, "");
+                        }
+                        else
+                        {
+                            _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.SubmissionCrateValidationFailed, "");
+                            _subHelper.CloseSubmissionForTre(aSubmission.Id.ToString(), StatusType.Failed, "", "");
+                        }
+
+
+
+
+
                         // The TES message
                         var tesMessage = JsonConvert.DeserializeObject<TesTask>(aSubmission.TesJson);
                         var processedOK = true;

@@ -9,9 +9,9 @@ namespace BL.Models.ViewModels
 {
     public class SubmissionDetails
     {
-        public string subId { get; set; }
-        public StatusType statusType { get; set; }
-        public string? description { get; set; }
+        public string SubId { get; set; }
+        public StatusType StatusType { get; set; }
+        public string? Description { get; set; }
 
         
     }

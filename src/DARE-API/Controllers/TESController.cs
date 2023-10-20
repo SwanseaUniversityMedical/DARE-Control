@@ -229,11 +229,7 @@ namespace DARE_API.Controllers
 
             }
 
-            //TODO: discuss Simon & Justin
-            //if (tesTask.Executors.Count != 1)
-            //{
-            //    return BadRequest("TES Task must contain one and only one Executer.");
-            //}
+            
 
             var exec = tesTask.Executors.First();
             //TODO: Implement IsDockerThere
@@ -300,7 +296,7 @@ namespace DARE_API.Controllers
                 DockerInputLocation = tesTask.Executors.First().Image,
                 Project = dbproj,
                 StartTime = DateTime.Now.ToUniversalTime(),
-                Status = StatusType.WaitingForChildSubsToComplete,
+                Status = StatusType.SubmissionReceived,
                 LastStatusUpdate = DateTime.Now.ToUniversalTime(),
                 SubmittedBy = user,
                 TesName = tesTask.Name,
