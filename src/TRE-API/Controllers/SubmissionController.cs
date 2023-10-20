@@ -296,7 +296,12 @@ namespace TRE_API.Controllers
                     Status = approvalStatus,
                     FileResults = hutchRes
                 };
-                _subHelper.UpdateStatusForTre(review.SubId, StatusType.RequestingHutchDoesFinalPackaging, "");
+                //Only send if fully approved
+                if (approvalStatus == ApprovalType.FullyApproved)
+                {
+                    _subHelper.UpdateStatusForTre(review.SubId, StatusType.RequestingHutchDoesFinalPackaging, "");
+                }
+                
                 //Not sure what the return type is
                 var HUTCHres =
                     await _hutchHelper.CallAPI<ApprovalResult, APIReturn>($"/api/jobs/{review.SubId}/approval",

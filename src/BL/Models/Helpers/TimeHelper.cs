@@ -19,15 +19,16 @@ namespace BL.Models.Helpers
 
             if (runtime.Seconds == 1)
             {
-                displaySec = " Second ";
+                displaySec = " Second";
             }
             else
             {
-                displaySec = " Seconds ";
+                displaySec = " Seconds";
             }
 
             displayRuntime = runtime.Seconds + displaySec;
-            if (runtime.TotalMinutes < 60)
+            //if (runtime.TotalMinutes >= 60 || (runtime.TotalMinutes < 60 && runtime.TotalMinutes > 0 ))
+            if (runtime.Minutes >  0)
             {
                 if (runtime.Minutes == 1)
                 {
@@ -38,10 +39,11 @@ namespace BL.Models.Helpers
                     displayMin = " Minutes ";
                 }
 
-                displayRuntime = @runtime.Minutes + displayMin + " and " + displayRuntime;
+                displayRuntime = runtime.Minutes + displayMin + " and " + displayRuntime;
 
             }
-            if (runtime.TotalHours < 24)
+            //if (runtime.TotalHours >= 24 || (runtime.TotalHours < 24 && runtime.TotalHours > 0))
+            if (runtime.Hours > 0)
             {
                 if (runtime.Hours == 1)
                 {
@@ -54,11 +56,12 @@ namespace BL.Models.Helpers
 
 
 
-                displayRuntime = runtime.Hours + displayHour + displaySec;
+                displayRuntime = runtime.Hours + displayHour + displayRuntime;
             }
-            else
+            //if (runtime.TotalDays >= 1)
+            if (runtime.Days > 0)
             {
-                if (runtime.Days == 1)
+                if (runtime.Days == 1 )
                 {
                     displayDay = " Day ";
                 }
@@ -68,7 +71,7 @@ namespace BL.Models.Helpers
                 }
 
 
-                displayRuntime = runtime.Days + displayDay + displaySec;
+                displayRuntime = runtime.Days + displayDay + displayRuntime;
 
 
 

@@ -65,13 +65,13 @@
 
                                                     <div class="d-flex align-items-center justify-content-between mb-3">
                                                         <div>
-                                                            <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })">
+                                                            <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Parent.Id })">
                                                                 <h2 class="mb-0 fw-bold hover-underline fs-5">
                                                                     @submission.TesName
                                                                 </h2>
                                                             </a>
 
-                                                            <p class="text-muted small mb-0">#@submission.Id</p>
+                                                            <p class="text-muted small mb-0">#@submission.Parent.Id</p>
                                                         </div>
 
                                                     </div>
