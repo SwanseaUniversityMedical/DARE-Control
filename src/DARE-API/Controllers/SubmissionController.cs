@@ -213,9 +213,9 @@ namespace DARE_API.Controllers
         public void TestSubRabbitSendRemoveBeforeDeploy(int id)
         {
             try { 
-            var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
+            var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Submission, "topic");
 
-            _rabbit.Advanced.Publish(exch, RoutingConstants.Subs, false, new Message<int>(id));
+            _rabbit.Advanced.Publish(exch, RoutingConstants.ProcessSub, false, new Message<int>(id));
             }
             catch (Exception ex)
             {
@@ -339,7 +339,7 @@ namespace DARE_API.Controllers
             stage5List.stageNumber = 5;
 
             stage5List.statusTypeList = SubCompleteTypes;
-            //stage5List.statusTypeList.Add(StatusType.RequestingHutchDoesFinalPackaging);
+            
             Dictionary<int, List<StatusType>> stage5Dict = new Dictionary<int, List<StatusType>>();
             stage5Dict.Add(5, stage5List.statusTypeList);
             stage5List.stagesDict = stage5Dict;
@@ -354,17 +354,17 @@ namespace DARE_API.Controllers
 
             var result = new Stages()
             {
-                GreenStages = new List<StatusType>()
-                {
-                    StatusType.ValidationSuccessful,
-                    StatusType.TransferredToPod,
-                    StatusType.DataOutApproved,
-                    StatusType.PodProcessingComplete,
-                    StatusType.SubmissionCrateValidated,
-                    StatusType.TreCrateValidated,
-                    StatusType.Completed,
-                    StatusType.PartialResult
-                },
+                //GreenStages = new List<StatusType>()
+                //{
+                //    StatusType.ValidationSuccessful,
+                //    StatusType.TransferredToPod,
+                //    StatusType.DataOutApproved,
+                //    StatusType.PodProcessingComplete,
+                //    StatusType.SubmissionCrateValidated,
+                //    StatusType.TreCrateValidated,
+                //    StatusType.Completed,
+                //    StatusType.PartialResult
+                //},
                 RedStages = new List<StatusType>()
                 {
                     StatusType.InvalidUser,

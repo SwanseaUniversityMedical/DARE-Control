@@ -29,7 +29,7 @@ namespace TRE_API
     public interface IDoAgentWork
     {
         void Execute(bool useRabbit = true, bool useHutch = false, bool useTESK = true);
-        void CheckTESK(string taskID, string TesId);
+        void CheckTESK(string taskID, string subId, string tesId);
         void ClearJob(string jobname);
         void testing();
     }
@@ -61,10 +61,10 @@ namespace TRE_API
             Console.WriteLine("Testing");
             string jsonContent = "{ \"name\": \"Hello World\", \"description\": \"Hello World, inspired by Funnel's most basic example\",\r\n\"executors\": [\r\n{ \"image\": \"alpine\", \"command\": [ \"sleep\", \"5m\" ] },\r\n{ \"image\": \"alpine\", \"command\": [ \"echo\", \"TESK says:   Hello World\" ]    }\r\n  ]\r\n}";
 
-            CreateTESK(jsonContent,"99");
+            CreateTESK(jsonContent,"99", "99");
         }
 
-        public string CreateTESK(string jsonContent, string TesId)
+        public string CreateTESK(string jsonContent, string subId, string tesId)
         {
             using (var httpClient = new HttpClient())
             {
@@ -96,9 +96,9 @@ namespace TRE_API
                     var responseObj = JsonConvert.DeserializeObject<ResponseModel>(responseBody);
                     string id = responseObj.id;
 
-                    RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTESK(id,TesId), Cron.MinuteInterval(1));
+                    RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTESK(id,subId, tesId), Cron.MinuteInterval(1));
 
-                    _dbContext.Add(new TeskAudit(){message = jsonContent, teskid = id});
+                    _dbContext.Add(new TeskAudit(){message = jsonContent, teskid = tesId, subid = subId});
                     _dbContext.SaveChanges();
 
                     return id;
@@ -115,9 +115,9 @@ namespace TRE_API
         {
             public string id { get; set; }
         }
-        public void CheckTESK(string taskID, string TesId)
+        public void CheckTESK(string taskID, string subId, string tesId)
         {
-            Console.WriteLine("Check TESK : "+taskID + ",  TES : "+TesId);
+            Console.WriteLine("Check TESK : "+taskID + ",  TES : " + tesId + ", sub: " + subId);
 
             string url = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks/"+taskID+"?view=basic";
             using (HttpClient client = new HttpClient())
@@ -180,14 +180,14 @@ namespace TRE_API
                                 }
 
 
-                                var result = _subHelper.UpdateStatusForTre(TesId, statusMessage, "");
+                                var result = _subHelper.UpdateStatusForTre(subId, statusMessage, "");
                                 if (status.state == "COMPLETE")
                                 {
-                                    result = _subHelper.CloseSubmissionForTre(TesId.ToString(), StatusType.Completed, "", "");
+                                    result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Completed, "", "");
                             }
                                 else if (status.state == "EXECUTER_ERROR")
                                 {
-                                    result = _subHelper.CloseSubmissionForTre(TesId.ToString(), StatusType.Failed, "", "");
+                                    result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Failed, "", "");
                             }
                         }
 
@@ -309,8 +309,8 @@ namespace TRE_API
                             {
                                 // Not ideal to create each time around the loop but ???
                                 IBus rabbit = scope.ServiceProvider.GetRequiredService<IBus>();
-                                EasyNetQ.Topology.Exchange exchangeObject = rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
-                                rabbit.Advanced.Publish(exchangeObject, RoutingConstants.Subs, false, new Message<TesTask>(tesMessage));
+                                EasyNetQ.Topology.Exchange exchangeObject = rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Submission, "topic");
+                                rabbit.Advanced.Publish(exchangeObject, RoutingConstants.ProcessSub, false, new Message<TesTask>(tesMessage));
                             }
                             catch (Exception e)
                             {
@@ -340,7 +340,7 @@ namespace TRE_API
                         if (useTESK)
                         {
                             if (tesMessage is not null)
-                                CreateTESK(aSubmission.TesJson, aSubmission.TesId);
+                                CreateTESK(aSubmission.TesJson, aSubmission.Id.ToString(), aSubmission.TesId);
                         }
 
                         // **************  TELL SUBMISSION LAYER WE DONE

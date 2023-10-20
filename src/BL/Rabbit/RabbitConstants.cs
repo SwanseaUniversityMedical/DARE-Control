@@ -3,19 +3,22 @@ namespace BL.Rabbit
 {
     public static class QueueConstants
     {
-        public const string Submissions = "Submissions";
-        public const string FetchExtarnalFile = "FetchExtarnalFile";
+        public const string ProcessSub = "ProcessSub";
+        //public const string FetchExternalFile = "FetchExternalFile";
+        public const string ProcessFinalOutput = "ProcessFinalOutput";
     }
 
     public static class ExchangeConstants
     {
-        public const string Main = "Main";
+        public const string Submission = "Submission";
+        public const string Tre = "Tre";
     }
 
     public static class RoutingConstants
     {
-        public const string Subs = "sub";
-        public const string FetchFile = "FetchFile";
+        public const string ProcessSub = "ProcessSub";
+        //public const string FetchExternalFile = "FetchExternalFile";
+        public const string ProcessFinalOutput = "ProcessFinalOutput";
     }
 
 
