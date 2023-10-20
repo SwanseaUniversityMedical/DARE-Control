@@ -11,7 +11,7 @@ namespace BL.Models.ViewModels
     {
         public List<StageInfo> StageInfos { get; set; }
 
-        public List<StatusType> GreenStages { get; set; }
+        
         public List<StatusType> RedStages { get; set; }
 
         public bool IsRed(StatusType statusType)
@@ -19,9 +19,6 @@ namespace BL.Models.ViewModels
             return RedStages.Contains(statusType);
         }
 
-        public bool IsGreen(StatusType statusType)
-        {
-            return GreenStages.Contains(statusType);
-        }
+        
     }
 }

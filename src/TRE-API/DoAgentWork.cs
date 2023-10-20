@@ -309,8 +309,8 @@ namespace TRE_API
                             {
                                 // Not ideal to create each time around the loop but ???
                                 IBus rabbit = scope.ServiceProvider.GetRequiredService<IBus>();
-                                EasyNetQ.Topology.Exchange exchangeObject = rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
-                                rabbit.Advanced.Publish(exchangeObject, RoutingConstants.Subs, false, new Message<TesTask>(tesMessage));
+                                EasyNetQ.Topology.Exchange exchangeObject = rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Submission, "topic");
+                                rabbit.Advanced.Publish(exchangeObject, RoutingConstants.ProcessSub, false, new Message<TesTask>(tesMessage));
                             }
                             catch (Exception e)
                             {

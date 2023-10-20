@@ -41,11 +41,11 @@ namespace DARE_API.Services
             try
             {
                 //Consume All Queue
-                var subs = await _bus.Advanced.QueueDeclareAsync(QueueConstants.Submissions);
+                var subs = await _bus.Advanced.QueueDeclareAsync(QueueConstants.ProcessSub);
                 _bus.Advanced.Consume<int>(subs, Process);
 
-                var fetch = await _bus.Advanced.QueueDeclareAsync(QueueConstants.FetchExtarnalFile);
-                _bus.Advanced.Consume<byte[]>(fetch, ProcessFetchExternal);
+                //var fetch = await _bus.Advanced.QueueDeclareAsync(QueueConstants.FetchExternalFile);
+                //_bus.Advanced.Consume<byte[]>(fetch, ProcessFetchExternal);
             }
             catch (Exception e)
             {
@@ -159,19 +159,19 @@ namespace DARE_API.Services
             }
         }
 
-        private async Task ProcessFetchExternal(IMessage<byte[]> msgBytes,   MessageReceivedInfo info )
-        {
-            try
-            {
-                var message = Encoding.UTF8.GetString(msgBytes.Body);
-                await _minioHelper.RabbitExternalObject(JsonConvert.DeserializeObject<MQFetchFile>(message));
-            }
-            catch (Exception e)
-            {
+        //private async Task ProcessFetchExternal(IMessage<byte[]> msgBytes,   MessageReceivedInfo info )
+        //{
+        //    try
+        //    {
+        //        var message = Encoding.UTF8.GetString(msgBytes.Body);
+        //        await _minioHelper.RabbitExternalObject(JsonConvert.DeserializeObject<MQFetchFile>(message));
+        //    }
+        //    catch (Exception e)
+        //    {
 
-                throw;
-            }
-        }
+        //        throw;
+        //    }
+        //}
 
 
 

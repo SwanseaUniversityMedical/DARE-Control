@@ -21,10 +21,7 @@ namespace DARE_FrontEnd.Controllers
             _configuration = configuration;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
+      
 
         public IActionResult Instructions()
         {
@@ -151,7 +148,7 @@ namespace DARE_FrontEnd.Controllers
         public IActionResult GetAllSubmissions()
         {
             List<Submission> displaySubmissionsList = new List<Submission>();
-            var res = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions/").Result;
+            var res = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions/").Result.Where(x => x.Parent == null).ToList();
 
             res = res.Where(x => x.Parent == null).ToList();
 

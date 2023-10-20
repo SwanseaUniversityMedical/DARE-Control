@@ -314,9 +314,9 @@ namespace DARE_API.Controllers
             await _DbContext.SaveChangesAsync(cancellationToken);
             
             //Send to rabbit q to processed async
-            var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
+            var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Submission, "topic");
 
-            _rabbit.Advanced.Publish(exch, RoutingConstants.Subs, false, new Message<int>(sub.Id));
+            _rabbit.Advanced.Publish(exch, RoutingConstants.ProcessSub, false, new Message<int>(sub.Id));
 
             var audit = new AuditLog()
             {
