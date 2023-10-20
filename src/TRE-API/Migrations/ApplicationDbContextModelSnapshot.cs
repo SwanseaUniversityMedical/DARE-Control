@@ -46,7 +46,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("KeycloakCredentials");
+                    b.ToTable("KeycloakCredentials", (string)null);
                 });
 
             modelBuilder.Entity("BL.Models.TESKstatus", b =>
@@ -68,7 +68,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("id");
 
-                    b.ToTable("TESK_Status");
+                    b.ToTable("TESK_Status", (string)null);
                 });
 
             modelBuilder.Entity("BL.Models.TeskAudit", b =>
@@ -93,7 +93,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("id");
 
-                    b.ToTable("TESK_Audit");
+                    b.ToTable("TESK_Audit", (string)null);
                 });
 
             modelBuilder.Entity("BL.Models.TreAuditLog", b =>
@@ -118,7 +118,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TreAuditLogs");
+                    b.ToTable("TreAuditLogs", (string)null);
                 });
 
             modelBuilder.Entity("BL.Models.TreMembershipDecision", b =>
@@ -153,7 +153,7 @@ namespace TRE_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("MembershipDecisions");
+                    b.ToTable("MembershipDecisions", (string)null);
                 });
 
             modelBuilder.Entity("BL.Models.TreProject", b =>
@@ -202,7 +202,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Projects");
+                    b.ToTable("Projects", (string)null);
                 });
 
             modelBuilder.Entity("BL.Models.TreUser", b =>
@@ -227,7 +227,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("BL.Models.TreMembershipDecision", b =>

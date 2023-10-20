@@ -63,14 +63,14 @@ namespace TRE_API.Services
             var statusParams = new Dictionary<string, string>()
             {
                 { "subId", submission.Id.ToString() },
-                { "statusType", StatusType.SendingFileToHUTCH.ToString() },
+                { "statusType", StatusType.SendingSubmissionToHutch.ToString() },
                 { "description", "" }
             };
-            
-
-            var res = _hutchHelper.CallAPI<SubmitJobModel, JobStatusModel>($"/api/jobs/", job).Result;
 
             var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams).Result;
+            var res = _hutchHelper.CallAPI<SubmitJobModel, JobStatusModel>($"/api/jobs/", job).Result;
+
+            
         }
 
         public APIReturn? UpdateStatusForTre(string subId, StatusType statusType, string? description)
@@ -81,6 +81,17 @@ namespace TRE_API.Services
                 .Result;
             return result;
         }
+
+        public APIReturn? CloseSubmissionForTre(string subId, StatusType statusType, string? description, string? finalFile)
+        {
+            var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/CloseSubmissionForTre",
+                    new Dictionary<string, string>()
+                        { { "subId", subId }, { "statusType", statusType.ToString() }, { "description", description }, {"finalFile", finalFile} })
+                .Result;
+            return result;
+        }
+
+       
 
         public bool IsUserApprovedOnProject(int projectId, int userId)
         {
@@ -95,6 +106,13 @@ namespace TRE_API.Services
         {
             var result =
                 _dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre").Result;
+            return result;
+        }
+
+        public List<Submission>? GetRequestCancelSubsForTre()
+        {
+            var result =
+                _dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetRequestCancelSubsForTre").Result;
             return result;
         }
     }
