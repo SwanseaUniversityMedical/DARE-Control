@@ -27,4 +27,3 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Tre-Hasura.dll"]
-CMD [ "arg0" ]
