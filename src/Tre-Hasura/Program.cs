@@ -9,9 +9,19 @@ using static System.Formats.Asn1.AsnWriter;
 using Tre_Hasura.Models;
 
 
-Console.WriteLine("Start Tre-Hasura");
+Console.WriteLine("Hello, World!");
+var configuration = GetConfiguration();
 
-using IHost host = CreateHostBuilder(args).Build();
+using IHost host = Host.CreateDefaultBuilder(args).ConfigureServices
+  (services =>
+  {
+      services.AddSingleton<IHasuraQuery, HasuraQuery>();
+      var HasuraSettings = new HasuraSettings();
+      configuration.Bind(nameof(HasuraSettings), HasuraSettings);
+      services.AddSingleton(HasuraSettings);
+      services.AddHttpClient();
+  }).Build();
+
 using var scope = host.Services.CreateScope();
 
 var services = scope.ServiceProvider;
@@ -24,20 +34,14 @@ catch (Exception e)
 {
     Console.WriteLine(e.Message);
 }
-
-IHostBuilder CreateHostBuilder(string[] strings)
+IConfiguration GetConfiguration()
 {
-    return Host.CreateDefaultBuilder().ConfigureServices((context, services) =>
-        {
-            services.AddSingleton<IHasuraQuery, HasuraQuery>();
+  
+    var builder = new ConfigurationBuilder()
+        .SetBasePath(Directory.GetCurrentDirectory())
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .AddJsonFile($"appsettings.development.json", optional: true, reloadOnChange: true)
+        .AddEnvironmentVariables();
 
-            var HasuraSettings = new HasuraSettings();
-            context.Configuration.Bind(nameof(HasuraSettings), HasuraSettings);
-            services.AddSingleton(HasuraSettings);
-            services.AddHttpClient();
-            services.AddHttpContextAccessor();
-        });
-        
-    
-
+    return builder.Build();
 }

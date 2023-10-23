@@ -2,7 +2,7 @@
   "profiles": {
     "Tre-Hasura": {
       "commandName": "Project",
-      "commandLineArgs": "--l0sg2Zrs9w5l3wzS1OZIR9v5FPBNIe1EGxrO6ceaXlsxVbFmbAcOYtEeI79jyC8R0q8vqJnuaaELV5GsHKkAspnwu3Yc2sAmpJvwBWzHpuZC3oCblXVx1oRDcqVY09M0 @\"query {   testHasura_testing {     id     name   } }\"",
+      "commandLineArgs": "--mBb7eYkLsPDaSzzHAHIZzSL6J8PSVmQIICSY7nryenIt2GQKOT9O4QlufZHDHe2pk9wMckOtDrMoTn0b0Kdagr39Xu729G1f7FlqQlnG8H5IScf9MI3rVEZrRBAWcbmi @\"query {   testHasura_testing {     id     name   } }\"",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
