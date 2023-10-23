@@ -9,7 +9,7 @@ using static System.Formats.Asn1.AsnWriter;
 using Tre_Hasura.Models;
 
 
-Console.WriteLine("Hello, World!");
+Console.WriteLine("Start Tre-Hasura");
 
 using IHost host = CreateHostBuilder(args).Build();
 using var scope = host.Services.CreateScope();
