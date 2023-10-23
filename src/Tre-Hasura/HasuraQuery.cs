@@ -79,17 +79,10 @@ namespace Tre_Hasura
 
         public async Task<string> RunQuery(string token, string Query)
         {
-            //dont need to check token as Hasura does this 
-
-            var paramlist = new Dictionary<string, string>
-            {
-               { "token", token},
-               { "Query", Query}
-            };
-
+            
             // Set the endpoint URL
-
             //need to get the headers to send from the token userid
+
             string endpointUrl = _hasuraSettings.HasuraURL + "/v1/graphql";
             Console.WriteLine(endpointUrl);
 
