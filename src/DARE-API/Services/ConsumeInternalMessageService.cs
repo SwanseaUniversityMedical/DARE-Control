@@ -14,6 +14,8 @@ using EasyNetQ.Management.Client.Model;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using System.Text.Json.Nodes;
+using Microsoft.EntityFrameworkCore;
+using System.Threading;
 
 namespace DARE_API.Services
 {
@@ -67,7 +69,10 @@ namespace DARE_API.Services
             {
                 var sub = _dbContext.Submissions.First(s => s.Id == message.Body);
 
-               
+                try
+                {
+                    
+                
 
                 Uri uri = new Uri(sub.DockerInputLocation);
                 string fileName = Path.GetFileName(uri.LocalPath);
@@ -89,15 +94,15 @@ namespace DARE_API.Services
                     messageMQ.Url = "http://" + minioEndpoint.Url + "/browser/" + messageMQ.BucketName + "/" + messageMQ.Key;
                 }
 
-                UpdateSubmissionStatus.UpdateStatus(sub, StatusType.SubmissionWaitingForCrateFormatCheck, "");
+                UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.SubmissionWaitingForCrateFormatCheck, "");
                 if (ValidateCreate(sub))
                 {
-                    UpdateSubmissionStatus.UpdateStatus(sub, StatusType.SubmissionCrateValidated, "");
+                    UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.SubmissionCrateValidated, "");
                 }
                 else
                 {
-                    UpdateSubmissionStatus.UpdateStatus(sub, StatusType.SubmissionCrateValidationFailed, "");
-                    UpdateSubmissionStatus.UpdateStatus(sub, StatusType.Failed, "");
+                    UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.SubmissionCrateValidationFailed, "");
+                    UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.Failed, "");
                 }
 
                 var dbproj = sub.Project;
@@ -125,7 +130,7 @@ namespace DARE_API.Services
                         dbtres.Add(dbproj.Tres.First(x => x.Name.ToLower() == tre.ToLower()));
                     }
                 }
-                UpdateSubmissionStatus.UpdateStatus(sub, StatusType.WaitingForChildSubsToComplete, "");
+                UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.WaitingForChildSubsToComplete, "");
 
                 foreach (var tre in dbtres)
                 {
@@ -149,7 +154,16 @@ namespace DARE_API.Services
 
                 _dbContext.SaveChanges();
                 Log.Information("{Function} Processed sub for {id}", "Process", message.Body);
+                }
+                catch (Exception e)
+                {
+                    UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.Failed, e.Message);
+                    _dbContext.SaveChanges();
 
+                    
+                    
+                    throw;
+                }
 
             }
             catch (Exception ex)

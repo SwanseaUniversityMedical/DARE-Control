@@ -109,6 +109,7 @@ namespace TRE_API.Services
             }
             catch (Exception e)
             {
+                _subHelper.CloseSubmissionForTre(message.Body.SubId, StatusType.Failed, e.Message, "");
                 Log.Error(e, "{Function} Error", "ProcessFinalOutcome");
                 throw;
             }

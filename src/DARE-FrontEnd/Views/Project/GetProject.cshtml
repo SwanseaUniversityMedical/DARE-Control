@@ -80,31 +80,338 @@
                             <i class="fa fa-info-circle align-middle me-2"></i>
                             <span>Submit with API</span>
                         </a>
+                        <a href="#" class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none">
+                            <i class="fa fa-table-columns align-middle me-2"></i>
+                            <span>Submit with Wizard</span>
+                        </a>
+                    </div>
+                    <hr class="d-flex my-4">
+                }
+
+                
+                <div class="table-responsive">
+                    <table id="submissionList" class="table" caption="List of Submissions">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Submission Name</th>
+                            <th>Project</th>
+                            <th>Submitted by</th>
+                            <th>Submission Date</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var submission in Model.Submissions)
+                        {
+                            <tr>
+                                <td>
+                                    @{
+                                        var overallStatus = submission.Status;
+                                        if (overallStatus == BL.Models.Enums.StatusType.Completed)
+                                        {
+
+                                            <h6 class="mb-0">
+                                                <span class="badge bg-success rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Completed: @submission.EndTime">
+                                                    <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
+                                                    <span>Completed</span>
+                                                </span>
+                                            </h6>
+                                        }
+                                        else if (overallStatus == BL.Models.Enums.StatusType.Failed || overallStatus == BL.Models.Enums.StatusType.Cancelled)
+                                        {
+                                            <h6 class="mb-0">
+                                                <span class="badge bg-danger rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="@overallStatus.ToString(): @submission.EndTime">
+                                                    <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
+                                                    <span>@overallStatus.ToString()</span>
+                                                </span>
+                                            </h6>
+                                        }
+                                        else if (overallStatus == BL.Models.Enums.StatusType.PartialResult)
+                                        {
+                                            <h6 class="mb-0">
+                                                <span class="badge bg-warning rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="@overallStatus.ToString(): @submission.EndTime">
+                                                    <i class="fa-solid fa-circle-check  fs-6 text-white me-2"></i>
+                                                    <span>Partial Result</span>
+                                                </span>
+                                            </h6>
+                                        }
+                                        else
+                                        {
+
+                                            <h6 class="mb-0">
+                                                <span class="badge bg-primary rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Runtime: @submission.GetTotalDisplayTime()">
+                                                    <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
+                                                    <span>Running</span>
+                                                </span>
+                                            </h6>
+
+
+                                        }
+
+                                    }
+
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })">
+                                        <h2 class="mb-0 fw-bold hover-underline fs-6">
+                                            @submission.TesName
+                                        </h2>
+                                    </a>
+
+                                </td>
+                                <td>
+                                    @submission.Project.Name
+                                </td>
+                                <td>
+                                    @submission.SubmittedBy.Name
+                                </td>
+                                <td>
+                                    @submission.StartTime
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })" class="btn btn-sm btn-outline-primary">
+                                        <span class="small">View</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+
+                </div>
+            @* @if (User.IsInRole("dare-control-admin"))
+                {
+                    <div class="d-flex align-items-center mb-3">
+                        <a asp-controller="Submission" asp-action="Instructions" class="btn btn-primary btn-sm d-flex align-items-center mb-3 me-2">
+                            <i class="fa fa-info-circle align-middle me-2"></i>
+                            <span>Submit with API</span>
+                        </a>
                         <a href="@Url.Action("SubmissionWizard", "Submission", new { projectId = Model.Id })" class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" id="redirectSubmission">
                             <i class="fa fa-table-columns align-middle me-2"></i>
                             <span>Submit with Wizard</span>
                         </a>
+
                        
-                        @*<a href="#" class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" id="addSubmission">
-                            <i class="fa fa-table-columns align-middle me-2"></i>
-                            <span>Submit with Wizard</span>
-                        </a>*@
                     </div>
                 }
 
                 <div class="row">
-                    <div class="col-lg-5 col-md-6">
-                        <ul class="list-group">
-                            @foreach (var submission in Model.Submissions)
-                            {
-                                <li class="list-group-item justify-content-between d-flex">
-                                    <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })">@submission.TesName</a>
+                    <div class="col-12">
+                        <hr class="d-flex my-4">
+                        <div class="table-responsive">
+                            <table id="submissionList" class="table" caption="List of Submissions">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Submission Name</th>
+                                        <th>Project</th>
+                                        <th>Submitted by</th>
+                                        <th>Submission Date</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var submission in Model.Submissions)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @
+            {
+                                            switch (submission.Status)
+                                            {
+                                            case BL.Models.Enums.StatusType.DataOutApproved:
+                                            <span class="badge bg-dark-blue rounded-pill">@submission.Status</span>
+                                            break;
+                                            default:
+                                            <span class="badge bg-dark-blue rounded-pill">@submission.Status</span>
+                                            break;
+                                            }
+                                            }
+                                                @{
+                                                    var overallStatus = submission.Status;
+                                                    if (overallStatus == BL.Models.Enums.StatusType.Completed)
+                                                    {
 
-                                </li>
-                            }
-                        </ul>
+                                                        <h6 class="mb-0">
+                                                            <span class="badge bg-success rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Completed: @submission.EndTime">
+                                                                <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
+                                                                <span>Completed</span>
+                                                            </span>
+                                                        </h6>
+                                                    }
+                                                    else if (overallStatus == BL.Models.Enums.StatusType.Failed)
+                                                    {
+                                                        <h6 class="mb-0">
+                                                            <span class="badge bg-danger rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Failed: @submission.EndTime">
+                                                                <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
+                                                                <span>Failed</span>
+                                                            </span>
+                                                        </h6>
+                                                    }
+                                                    else
+                                                    {
+                                                        var runtime = DateTime.UtcNow - submission.StartTime;
+                                                        var displayRuntime = "";
+                                                        var displaySec = " seconds";
+                                                        var displayMin = " minutes";
+                                                        var displayHour = " hours";
+                                                        var displayDay = " days";
+
+                                                        if (runtime.TotalSeconds < 60)
+                                                        {
+                                                            if (runtime.Seconds == 1)
+                                                            {
+                                                                displaySec = " Second ";
+                                                            }
+                                                            else
+                                                            {
+                                                                displaySec = " Seconds ";
+                                                            }
+
+                                                            displayRuntime = @runtime.Seconds + displaySec;
+
+
+                                                        }
+                                                        else if (runtime.TotalMinutes < 60)
+                                                        {
+                                                            if (runtime.Minutes == 1)
+                                                            {
+                                                                displayMin = " Minute ";
+                                                            }
+                                                            else
+                                                            {
+                                                                displayMin = " Minutes ";
+                                                            }
+                                                            if (runtime.Seconds == 1)
+                                                            {
+                                                                displaySec = " Second ";
+                                                            }
+                                                            else
+                                                            {
+                                                                displaySec = " Seconds ";
+                                                            }
+                                                            displayRuntime = @runtime.Minutes + displayMin + @runtime.Seconds + " and " + displaySec;
+
+                                                        }
+                                                        else if (runtime.TotalHours < 24)
+                                                        {
+                                                            if (runtime.Hours == 1)
+                                                            {
+                                                                displayHour = " Hour ";
+                                                            }
+                                                            else
+                                                            {
+                                                                displayHour = " Hours ";
+                                                            }
+                                                            if (runtime.Minutes == 1)
+                                                            {
+                                                                displayMin = " Minute ";
+                                                            }
+                                                            else
+                                                            {
+                                                                displayMin = " Minutes ";
+                                                            }
+                                                            if (runtime.Seconds == 1)
+                                                            {
+                                                                displaySec = " Second ";
+                                                            }
+                                                            else
+                                                            {
+                                                                displaySec = " Seconds ";
+                                                            }
+
+
+                                                            displayRuntime = runtime.Hours + displayHour + @runtime.Minutes + displayMin + " and " + @runtime.Seconds + displaySec;
+                                                        }
+                                                        else
+                                                        {
+                                                            if (runtime.Days == 1)
+                                                            {
+                                                                displayDay = " Day ";
+                                                            }
+                                                            else
+                                                            {
+                                                                displayDay = " Days ";
+                                                            }
+                                                            if (runtime.Hours == 1)
+                                                            {
+                                                                displayHour = " Hour ";
+                                                            }
+                                                            else
+                                                            {
+                                                                displayHour = " Hours ";
+                                                            }
+                                                            if (runtime.Minutes == 1)
+                                                            {
+                                                                displayMin = " Minute ";
+                                                            }
+                                                            else
+                                                            {
+                                                                displayMin = " Minutes ";
+                                                            }
+                                                            if (runtime.Seconds == 1)
+                                                            {
+                                                                displaySec = " Second ";
+                                                            }
+                                                            else
+                                                            {
+                                                                displaySec = " Seconds ";
+                                                            }
+
+                                                            displayRuntime = runtime.Days + displayDay + runtime.Hours + displayHour + @runtime.Minutes + displayMin + " and " + @runtime.Seconds + displaySec;
+
+
+                                                        }
+                                                        <h6 class="mb-0">
+                                                            <span class="badge bg-primary rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Runtime: @displayRuntime">
+                                                                <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
+                                                                <span>Running</span>
+                                                            </span>
+                                                        </h6>
+
+
+                                                    }
+
+                                                }
+                                                @*
+                                            <i class="fa-solid fa-circle-check fs-5 text-success" data-bs-toggle="tooltip" data-bs-title="Completed: xx/xx/xxxx"></i>
+                                            <i class="fa-solid fa-triangle-exclamation fs-5 text-danger" data-bs-toggle="tooltip" data-bs-title="Failed: error message"></i>
+                                            <i class="fa-solid fa-circle-notch fa-spin fs-5 text-primary" data-bs-toggle="tooltip" data-bs-title="@submission.Status"></i>
+                                            
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })">
+                                                    <h2 class="mb-0 fw-bold hover-underline fs-6">
+                                                        @submission.TesName
+                                                        @*<span class="text-muted fw-normal fs-7 mb-0">
+                                                    ID: @submission.Id<br>
+                                                    </span>
+                                                    </h2>
+                                                </a>
+
+                                            </td>
+                                            <td>
+                                                @submission.Project.Name
+                                            </td>
+                                            <td>
+                                                @submission.SubmittedBy.Name
+                                            </td>
+                                            <td>
+                                                @submission.StartTime
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })" class="btn btn-sm btn-outline-primary">
+                                                    <span class="small">View</span>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            </div>
                     </div>
-                </div>
+                </div>*@
             </div>
             <div class="tab-pane fade" id="userMembership" role="tabpanel" aria-labelledby="people">
                 @if (User.IsInRole("dare-control-admin"))
