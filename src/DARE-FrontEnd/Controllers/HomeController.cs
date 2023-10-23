@@ -31,7 +31,7 @@ namespace DARE_FrontEnd.Controllers
             var getAllProj = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects").Result;
             ViewBag.getAllProj = getAllProj.Count;
 
-            var getAllSubs = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions").Result;
+            var getAllSubs = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions").Result.Where(x => x.Parent == null).ToList();
             ViewBag.getAllSubs = getAllSubs.Count;
 
             var getAllUsers = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers").Result;
