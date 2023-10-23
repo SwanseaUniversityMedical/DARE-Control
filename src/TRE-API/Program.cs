@@ -313,6 +313,9 @@ void AddServices(WebApplicationBuilder builder)
       ));
     }
 }
+//for Opa
+app.UseMiddleware<OpaAuthorizationMiddleware>();
+app.UseRouting();
 
 //for SignalR
 app.UseCors();

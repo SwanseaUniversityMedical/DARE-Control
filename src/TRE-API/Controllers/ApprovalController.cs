@@ -114,6 +114,7 @@ namespace TRE_API.Controllers
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllActiveTreUsers")]
+        [Authorize(Policy = "Limited,Full")]
         public List<TreUser> GetAllActiveTreUsers()
         {
             try { 
