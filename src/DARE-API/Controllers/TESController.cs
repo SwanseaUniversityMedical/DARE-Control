@@ -89,18 +89,18 @@ namespace DARE_API.Controllers
                 var newstart = DateTime.Now.ToUniversalTime();
                 
                 asub.TesJson = SetTesTaskStateToCancelled(asub.TesJson, asub.Id);
-                
-                if (asub.Parent == null)
-                {
-                    UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.CancellingChildren,"");
-                    
+
+                    if (asub.Parent == null)
+                    {
+                        UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.CancellingChildren, "");
+
+                    }
+                    else
+                    {
+                        UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.RequestCancellation, "");
+
+                    }
                 }
-                else
-                {
-                    UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.RequestCancellation, "");
-                    
-                }
-            }
 
             await _DbContext.SaveChangesAsync(cancellationToken);
             
