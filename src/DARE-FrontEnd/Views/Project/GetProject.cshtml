@@ -80,7 +80,7 @@
                             <i class="fa fa-info-circle align-middle me-2"></i>
                             <span>Submit with API</span>
                         </a>
-                        <a href="#" class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none">
+                        <a href="@Url.Action("SubmissionWizard", "Submission", new { projectId = Model.Id })" class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" id="redirectSubmission">
                             <i class="fa fa-table-columns align-middle me-2"></i>
                             <span>Submit with Wizard</span>
                         </a>
