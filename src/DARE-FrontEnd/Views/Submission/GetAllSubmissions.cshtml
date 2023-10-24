@@ -1,5 +1,4 @@
-﻿@using BL.Models.Enums
-@model List<BL.Models.Submission>
+﻿@model List<BL.Models.Submission>
 @{
     ViewData["Title"] = "Submissions";
     var submissionCount = Model.Count;
@@ -58,21 +57,12 @@
                                         </span>
                                     </h6>
                                 }
-                                else if (overallStatus == BL.Models.Enums.StatusType.Failed || overallStatus == StatusType.Cancelled)
+                                else if (overallStatus == BL.Models.Enums.StatusType.Failed)
                                 {
                                     <h6 class="mb-0">
-                                        <span class="badge bg-danger rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="@overallStatus.ToString(): @submission.EndTime">
+                                        <span class="badge bg-danger rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Failed: @submission.EndTime">
                                             <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
-                                            <span>@overallStatus.ToString()</span>
-                                        </span>
-                                    </h6>
-                                }else if (overallStatus == BL.Models.Enums.StatusType.PartialResult)
-                                {
-
-                                    <h6 class="mb-0">
-                                        <span class="badge bg-warning rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Partial: @submission.EndTime">
-                                            <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
-                                            <span>Partial</span>
+                                            <span>Failed</span>
                                         </span>
                                     </h6>
                                 }

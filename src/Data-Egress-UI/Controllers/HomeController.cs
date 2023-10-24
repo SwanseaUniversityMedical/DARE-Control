@@ -30,7 +30,7 @@ namespace Data_Egress_UI.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme
             }, new AuthenticationProperties
             {
-                RedirectUri = Url.Action("GetAllEgresses", "Data")
+                RedirectUri = Url.Action("Login", "Home")
             });
         }
 
@@ -45,7 +45,6 @@ namespace Data_Egress_UI.Controllers
         //    }
         //    return View();
         //}
-
         public async Task<IActionResult> Index()
         {
             if (!HttpContext.User.Identity.IsAuthenticated)

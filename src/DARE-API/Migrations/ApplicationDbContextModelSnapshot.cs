@@ -208,9 +208,6 @@ namespace DARE_API.Migrations
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("FinalOutputFile")
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("LastStatusUpdate")
                         .HasColumnType("timestamp with time zone");
 
@@ -352,9 +349,6 @@ namespace DARE_API.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Organisation")
                         .HasColumnType("text");
 
                     b.HasKey("Id");

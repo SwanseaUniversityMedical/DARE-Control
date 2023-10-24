@@ -48,7 +48,7 @@
                                     TREs
                                     </a>*@
                                         <a href="@Url.Action("GetUser", "User", new { id = user.Id })#submissions" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                            @user.Submissions.Where(x => x.Parent == null).ToList().Count Submissions
+                                            @user.Submissions.Count Submissions
                                         </a>
                                     </div>
                                 </td>

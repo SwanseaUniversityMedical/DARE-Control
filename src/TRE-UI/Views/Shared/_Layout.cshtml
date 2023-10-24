@@ -131,15 +131,7 @@
     <script src="~/js/datatables.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
-        $('#projectList').DataTable({
-            columns: [
-                null,
-                null,
-                null,
-                null,
-                { orderable: false }
-            ]
-        });
+        new DataTable('#projectList');
         new DataTable('#memberList');
         $('#launch-button').on('click', function () {
 

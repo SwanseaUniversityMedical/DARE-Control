@@ -41,8 +41,6 @@ namespace TRE_API.Services
                     Result = false
                 };
             }
-
-           
             var subprojs = await _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForTre");
             var dbprojs = _DbContext.Projects.ToList();
             var projectAdds = subprojs.Where(x => !_DbContext.Projects.Any(y => y.SubmissionProjectId == x.Id));

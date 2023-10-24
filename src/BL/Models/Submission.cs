@@ -2,7 +2,6 @@
 using BL.Models.ViewModels;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations.Schema;
-using BL.Models.Helpers;
 
 namespace BL.Models
 {
@@ -14,8 +13,6 @@ namespace BL.Models
         public string SourceCrate { get; set; }
         public string TesName { get; set; }
         public string? TesJson { get; set; }
-
-        public string? FinalOutputFile { get; set; }
         public string DockerInputLocation { get; set; }
         public virtual Project Project { get; set; }
         [ForeignKey("ParentID")]
@@ -32,25 +29,8 @@ namespace BL.Models
         public DateTime EndTime { get; set; }
         public StatusType Status { get; set; }
         public string? StatusDescription { get; set; }
-
-        public string GetTotalDisplayTime()
-        {
-            var end = EndTime == DateTime.MinValue ? (DateTime.Now).ToUniversalTime() : EndTime;
-
-            return TimeHelper.GetDisplayTime(StartTime, end);
-        }
-
-        public string GetCurrentStatusDisplayTime()
-        {
-            var end = EndTime == DateTime.MinValue ? DateTime.Now.ToUniversalTime() : EndTime;
-           
-            return TimeHelper.GetDisplayTime(LastStatusUpdate, end);
-        }
-
-
-
+        
     }
 
   
 }
-

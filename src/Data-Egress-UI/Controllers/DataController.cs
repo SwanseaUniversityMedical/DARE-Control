@@ -88,12 +88,12 @@ namespace Data_Egress_UI.Controllers
         }
 
         [HttpGet]
-        public IActionResult DownloadFile(int? fileId)
+        public IActionResult DownloadFile(int? FileId)
         {
 
             var paramlist = new Dictionary<string, string>
             {
-                { "id", fileId.ToString() }
+                { "id", FileId.ToString() }
             };
 
             var egressFile = _dataClientHelper.CallAPIWithoutModel<EgressFile>("/api/DataEgress/GetEgressFile", paramlist).Result;

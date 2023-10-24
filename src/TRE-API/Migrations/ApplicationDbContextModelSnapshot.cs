@@ -87,10 +87,6 @@ namespace TRE_API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("subid")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("teskid")
                         .IsRequired()
                         .HasColumnType("text");
