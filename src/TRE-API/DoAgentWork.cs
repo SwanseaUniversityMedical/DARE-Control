@@ -25,13 +25,14 @@ using TREAgent.Repositories;
 using System.Net.Http.Json;
 using TRE_API.Models;
 using Castle.Components.DictionaryAdapter.Xml;
+using System;
 
 namespace TRE_API
 {
     public interface IDoAgentWork
     {
         Task Execute();
-        void CheckTESK(string taskID, string TesId, string outputBucket);
+        void CheckTESK(string taskID, int subId, string outputBucket);
         void ClearJob(string jobname);
         Task testing();
     }
@@ -117,10 +118,10 @@ namespace TRE_API
     ""creation_time"":null
 }
 ";
-            CreateTESK(jsonContent, "99", "AAA");
+            CreateTESK(jsonContent, 0, "AAA");
         }
 
-        public string CreateTESK(string jsonContent, string TesId, string outputBucket)
+        public string CreateTESK(string jsonContent, int subId, string outputBucket)
         {
             using (var httpClient = new HttpClient())
             {
@@ -152,7 +153,7 @@ namespace TRE_API
                     var responseObj = JsonConvert.DeserializeObject<ResponseModel>(responseBody);
                     string id = responseObj.id;
 
-                    RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTESK(id, TesId, outputBucket), Cron.MinuteInterval(1));
+                    RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTESK(id, subId, outputBucket), Cron.MinuteInterval(1));
 
                     _dbContext.Add(new TeskAudit() { message = jsonContent, teskid = id });
                     _dbContext.SaveChanges();
@@ -161,6 +162,7 @@ namespace TRE_API
                 }
                 else
                 {
+                    var darta = response.Content.ReadAsStringAsync().Result;
                     Console.WriteLine($"Request failed with status code: {response.StatusCode}");
                     return "";
                 }
@@ -171,9 +173,9 @@ namespace TRE_API
         {
             public string id { get; set; }
         }
-        public async void CheckTESK(string taskID, string TesId, string outputBucket)
+        public async void CheckTESK(string taskID, int subId, string outputBucket)
         {
-            Console.WriteLine("Check TESK : " + taskID + ",  TES : " + TesId);
+            Console.WriteLine("Check TESK : " + taskID + ",  TES : " + subId);
 
             string url = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks/" + taskID + "?view=basic";
             using (HttpClient client = new HttpClient())
@@ -202,7 +204,6 @@ namespace TRE_API
                     {
                         if (fromDatabase.state != status.state)
                         {
-                            shouldReport = true;
                             fromDatabase.state = status.state;
                             _dbContext.Update(fromDatabase);
 
@@ -230,7 +231,7 @@ namespace TRE_API
                                     break;
                                 case "COMPLETE":
                                     statusMessage = StatusType.PodProcessingComplete;
-                                    Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.TesId == TesId);
+                                    Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
                                     if (Token != null)
                                     {
                                         _dbContext.TokensToExpire.Remove(Token);
@@ -240,7 +241,7 @@ namespace TRE_API
                                     break;
                                 case "EXECUTOR_ERROR":
                                     statusMessage = StatusType.Cancelled;
-                                    Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.TesId == TesId);
+                                    Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
                                     if (Token != null)
                                     {
                                         _dbContext.TokensToExpire.Remove(Token);
@@ -251,7 +252,7 @@ namespace TRE_API
                             }
 
 
-                            var result = _subHelper.UpdateStatusForTre(TesId, statusMessage, "");
+                            var result = _subHelper.UpdateStatusForTre(subId, statusMessage, "");
                         }
 
                         // are we done ?
@@ -273,7 +274,7 @@ namespace TRE_API
                             {
                                 SubId = taskID, //TODO is this right  
                                 Files = files
-                            }) ; 
+                            }); 
 
                             //
 
@@ -341,7 +342,7 @@ namespace TRE_API
                     {
                         Log.Error("User {UserID}/project {ProjectId} is not value for this submission {submission}", aSubmission.SubmittedBy.Id, aSubmission.Project.Id, aSubmission);
                         // record error with submission layer
-                        var result = _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.InvalidUser, "");
+                        //var result = _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.InvalidUser, "");
                     }
                     else
                     {
@@ -413,8 +414,10 @@ namespace TRE_API
                         {
 
                            
-
+                            //GEt jobID AAAAA TODO
                             var arr = new HttpClient();
+
+                  
 
                             var role = aSubmission.Project.Name; //TODO Check
 
@@ -429,7 +432,6 @@ namespace TRE_API
 
 
                             //S3://bucket-name/key-name
-
                             foreach (var output in tesMessage.Outputs)
                             {
                                 output.Url = OutputBucket;
@@ -454,13 +456,13 @@ namespace TRE_API
 
                             _dbContext.TokensToExpire.Add(new TokenToExpire()
                             {
-                                TesId = aSubmission.TesId,
+                                SubId = aSubmission.Id,
                                 Token = Token
                             });
                             _dbContext.SaveChanges();
 
                             if (tesMessage is not null)
-                                CreateTESK(JsonConvert.SerializeObject(tesMessage), aSubmission.TesId, OutputBucket);
+                                CreateTESK(JsonConvert.SerializeObject(tesMessage), aSubmission.Id, OutputBucket);
                         }
 
                         // **************  TELL SUBMISSION LAYER WE DONE
@@ -468,7 +470,7 @@ namespace TRE_API
                         {
                             try
                             {
-                                var result = _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.TransferredToPod, "");
+                                var result = _subHelper.UpdateStatusForTre(aSubmission.Id, StatusType.TransferredToPod, "");
                             }
                             catch (Exception e)
                             {

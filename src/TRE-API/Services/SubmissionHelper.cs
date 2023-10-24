@@ -13,7 +13,7 @@ namespace TRE_API.Services
 
     public interface ISubmissionHelper
     {
-        APIReturn? UpdateStatusForTre(string subId, StatusType statusType, string? description);
+        APIReturn? UpdateStatusForTre(int subId, StatusType statusType, string? description);
         bool IsUserApprovedOnProject(int projectId, int userId);
         Task<List<Submission>?> GetWaitingSubmissionForTre();
         void SendSumissionToHUTCH(Submission submission);
