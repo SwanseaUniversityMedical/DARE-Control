@@ -51,6 +51,9 @@ AddServices(builder);
 //Add Dependancies
 AddDependencies(builder, configuration);
 
+builder.Services.Configure<OPASettings>(configuration.GetSection("OPASettings"));
+builder.Services.AddTransient(opa => opa.GetService<IOptions<OPASettings>>().Value);
+
 builder.Services.Configure<RabbitMQSetting>(configuration.GetSection("RabbitMQ"));
 builder.Services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);
 var bus =
@@ -158,10 +161,12 @@ builder.Services.AddAuthentication(options =>
 
 // - authorize here
 // - Opa authorization
-builder.Services.AddAuthorization(options => { options.AddPolicy("UserAllowedPolicy", AuthorizationPolicies.GetUserAllowedPolicy()); 
-
+builder.Services.AddAuthorization(options => { options.AddPolicy("UserAllowedPolicy", AuthorizationPolicies.GetUserAllowedPolicy());
+   
 
 });
+  
+
 
 // Enable CORS
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -315,10 +320,6 @@ void AddServices(WebApplicationBuilder builder)
       ));
     }
 }
-//for Opa
-app.UseMiddleware<OpaAuthorizationMiddleware>();
-app.UseRouting();
-
 //for SignalR
 app.UseCors();
 app.MapHub<SignalRService>("/signalRHub", options =>

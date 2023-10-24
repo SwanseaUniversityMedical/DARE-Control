@@ -1,24 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-
-namespace BL.Models
+﻿using Microsoft.AspNetCore.Authorization;
+public static class AuthorizationPolicies 
 {
-    public static class AuthorizationPolicies
-    {
-        public static AuthorizationPolicy GetUserAllowedPolicy()
-        {
-            var policyBuilder = new AuthorizationPolicyBuilder(); 
-            //add other policy requirements here
+    public static AuthorizationPolicy GetUserAllowedPolicy() 
+    
+    { var policyBuilder = new AuthorizationPolicyBuilder();
+        
+     // Add your policy requirements here
+     policyBuilder.RequireClaim("user_in_tre");
+     policyBuilder.RequireClaim("allow"); 
+     policyBuilder.RequireClaim("project_allow");
+     return policyBuilder.Build(); 
+    } 
 
-            policyBuilder.RequireClaim("user_in_tre");
-            policyBuilder.RequireClaim("allow");
-            policyBuilder.RequireClaim("project_allow");
-
-            return policyBuilder.Build(); 
-        }
-    }
 }
