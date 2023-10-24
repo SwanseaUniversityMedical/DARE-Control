@@ -452,15 +452,6 @@ namespace DARE_API.Controllers
 
 				};
 
-				//var ob = JObject.Parse(test);
-                
-				//JObject NewOb = new JObject();
-				//todo Token 
-				//string Token = "AAAAAAAAAAAAAA";
-
-				//NewOb.Add("HASURAAuthenticationToken", Token);
-
-				//ob.Add("env", NewOb);
 
 				return StatusCode(200, test);
 

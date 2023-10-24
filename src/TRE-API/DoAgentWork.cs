@@ -303,10 +303,7 @@ namespace TRE_API
             // control use of dependency injection
             using (var scope = _serviceProvider.CreateScope())
             {
-
-
                 // OPTIONS
-                // TODO get these from somewhere
                 var useRabbit = _AgentSettings.UseRabbit;
                 var useHutch = _AgentSettings.UseHutch;
                 var useTESK = _AgentSettings.UseTESK;
@@ -365,7 +362,7 @@ namespace TRE_API
                         }
                         catch (Exception ex)
                         {
-
+                            Log.Error(ex.ToString());
                             throw;
                         }
 

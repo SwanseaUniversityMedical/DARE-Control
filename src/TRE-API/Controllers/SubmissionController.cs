@@ -100,7 +100,7 @@ namespace TRE_API.Controllers
         public IActionResult UpdateStatusForTre([FromBody] SubmissionDetails subDetails)
         {
             try { 
-            APIReturn? result = _subHelper.UpdateStatusForTre(subDetails.SubId, subDetails.StatusType, subDetails.Description);
+            APIReturn? result = _subHelper.UpdateStatusForTre(int.Parse(subDetails.SubId), subDetails.StatusType, subDetails.Description);
             return StatusCode(200, result);
             }
             catch (Exception ex)
