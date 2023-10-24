@@ -3,12 +3,12 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" shrink-to-fit="no" />
-    <title>@ViewData["Title"] - DATA EGRESS</title>
+    <title>@ViewData["Title"] - Data Egress</title>
     <link rel="stylesheet" href="~/css/fontawesome.css" />
     <link rel="stylesheet" href="~/css/brands.css" />
     <link rel="stylesheet" href="~/css/solid.css" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-     <link rel="stylesheet" href="~/css/datatables.min.css" />
+    <link rel="stylesheet" href="~/css/datatables.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <script src="~/js/clipboard.min.js"></script>
     <link rel="stylesheet" href="https://use.typekit.net/tyz0nfb.css">
@@ -30,13 +30,7 @@
                 <div class="navbar-collapse collapse d-md-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Data" asp-action="GetAllEgresses">All Files</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Data" asp-action="GetAllUnprocessedEgresses">Unprocessed Files</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Data" asp-action="GetAllEgresses">Requests</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="TreCredentials" asp-action="UpdateCredentials">Update Tre Credentials</a>
@@ -52,31 +46,27 @@
                     </ul>
                 </div>
                 <div class="account-nav align-items-center">
-                    <form class="me-3 d-none d-lg-block" asp-controller="Home" asp-action="Index">
-                        <input type="search" class="form-control form-control-sm" name="SearchString" value="@ViewData["CurrentFilter"]" placeholder="Search..." aria-label="Search">
-                    </form>
-                   
-                        <div class="nav-item dropdown">
-                            <a class="nav-link text-dark dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                @User?.FindFirst("name")?.Value
-                            </a>
-                            <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="#">Account</a></li>
-                                <li><a class="dropdown-item" href="#">Helpdesk</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                @if (@User?.FindFirst("name")?.Value == null)
-                                {
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Logout">Login</a></li>
-                                }
-                                else
-                                {
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Logout">Logout</a></li>
-                                }
+                    <div class="nav-item dropdown">
+                        <a class="nav-link text-dark dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            @User?.FindFirst("name")?.Value
+                        </a>
+                        <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="#">Account</a></li>
+                            <li><a class="dropdown-item" href="#">Helpdesk</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            @if (@User?.FindFirst("name")?.Value == null)
+                            {
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Logout">Login</a></li>
+                            }
+                            else
+                            {
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Logout">Logout</a></li>
+                            }
 
-                            </ul>
-                        </div>
-                    
-                   
+                        </ul>
+                    </div>
+
+
                 </div>
 
             </div>
@@ -117,9 +107,6 @@
                         <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="PrivacyPolicy">Privacy Policy</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-light" href="#">Cookie Notice</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link text-light" href="https://dareuk.org.uk/about/" target="_blank">About DARE UK</a>
                     </li>
                     <li class="nav-item">
@@ -136,5 +123,25 @@
     <script src="~/js/datatables.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        $('#fileList').DataTable({
+            columns: [
+                null,
+                null,
+                null,
+                null,
+                { orderable: false }
+            ]
+        });
+
+        $(document).ready(function () {
+            if (window.location.href.indexOf("GetAllEgresses") > -1) {
+                $('.egress-menu li:first-child .nav-link').addClass('active');
+            }
+            if (window.location.href.indexOf("GetAllUnprocessedEgresses") > -1) {
+                $('.egress-menu li:last-child .nav-link').addClass('active');
+            }
+        });
+    </script>
 </body>
 </html>
