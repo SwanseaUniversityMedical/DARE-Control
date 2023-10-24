@@ -14,6 +14,7 @@ using BL.Models.Tes;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Threading;
 
+
 namespace TRE_API.Controllers
 {
 
@@ -57,6 +58,7 @@ namespace TRE_API.Controllers
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllTreProjects")]
+        [Authorize(Policy = "UserAllowedPolicy")]
         public List<TreProject> GetAllTreProjects(bool showOnlyUnprocessed)
         {
             try { 
@@ -85,6 +87,7 @@ namespace TRE_API.Controllers
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllActiveTreProjects")]
+        [Authorize(Policy = "UserAllowedPolicy")]
         public List<TreProject> GetAllActiveTreProjects()
         {
             try { 
@@ -114,6 +117,7 @@ namespace TRE_API.Controllers
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllActiveTreUsers")]
+        [Authorize(Policy = "UserAllowedPolicy")]
         public List<TreUser> GetAllActiveTreUsers()
         {
             try { 
