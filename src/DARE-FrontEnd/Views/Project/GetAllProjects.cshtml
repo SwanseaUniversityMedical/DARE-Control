@@ -48,7 +48,7 @@
                                     </div>
                                     <div class="">
                                         <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#submissions" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                            @project.Submissions.Count Submissions
+                                            @project.Submissions.Where(x => x.Parent == null).ToList().Count Submissions
                                         </a>
                                         <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#people" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
                                             @project.Users.Count People
