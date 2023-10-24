@@ -1,22 +1,28 @@
 ﻿@model BL.Models.User
 @{
     ViewData["Title"] = "User Name";
-
+    if (Model.Organisation == null)
+    { 
+        Model.Organisation = "No Organisation";
+    }
+    
+    
 
 }
 <div class="container-lg mt-4 p-4 bg-white border-1 shadow-sm">
     <div class="d-flex align-items-center justify-content-between">
         <div>
             <h1 class="fs-3 mb-0">@Model.Name</h1>
-            <p class="text-muted small mb-0">Model.Organisation</p>
+            <p class="text-muted small mb-0">Organisation: @Model.Organisation</p>
         </div>
+        
         @*        <a href="#" class="btn btn-primary btn-sm d-flex align-items-center">
         <i class="fa fa-edit align-middle me-2"></i>*@
         @if (User.IsInRole("dare-control-admin"))
         {
             <a href="@Url.Action("SaveUserForm", "User",new{userId=@Model.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
         }
-        </a>
+        
     </div>
     <div class="mt-4">
         <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
@@ -59,7 +65,101 @@
             <div class="tab-pane fade" id="submissions-tab" role="tabpanel" aria-labelledby="submissions">
                 <div class="row">
                     <div class="col-12">
+                        
+
+
                         <div class="table-responsive">
+                            <table id="submissionList" class="table" caption="List of Submissions">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Submission Name</th>
+                                        <th>Project</th>
+                                        <th>Submitted by</th>
+                                        <th>Submission Date</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var submission in Model.Submissions.Where(x => x.Parent == null))
+                                    {
+                                        <tr>
+                                            <td>
+                                                @{
+                                                    var overallStatus = submission.Status;
+                                                    if (overallStatus == BL.Models.Enums.StatusType.Completed)
+                                                    {
+
+                                                        <h6 class="mb-0">
+                                                            <span class="badge bg-success rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Completed: @submission.EndTime">
+                                                                <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
+                                                                <span>Completed</span>
+                                                            </span>
+                                                        </h6>
+                                                    }
+                                                    else if (overallStatus == BL.Models.Enums.StatusType.Failed || overallStatus == BL.Models.Enums.StatusType.Cancelled)
+                                                    {
+                                                        <h6 class="mb-0">
+                                                            <span class="badge bg-danger rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="@overallStatus.ToString(): @submission.EndTime">
+                                                                <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
+                                                                <span>@overallStatus.ToString()</span>
+                                                            </span>
+                                                        </h6>
+                                                    }
+                                                    else if (overallStatus == BL.Models.Enums.StatusType.PartialResult)
+                                                    {
+                                                        <h6 class="mb-0">
+                                                            <span class="badge bg-warning rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="@overallStatus.ToString(): @submission.EndTime">
+                                                                <i class="fa-solid fa-circle-check  fs-6 text-white me-2"></i>
+                                                                <span>Partial Result</span>
+                                                            </span>
+                                                        </h6>
+                                                    }
+                                                    else
+                                                    {
+
+                                                        <h6 class="mb-0">
+                                                            <span class="badge bg-primary rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Runtime: @submission.GetTotalDisplayTime()">
+                                                                <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
+                                                                <span>Running</span>
+                                                            </span>
+                                                        </h6>
+
+
+                                                    }
+
+                                                }
+
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })">
+                                                    <h2 class="mb-0 fw-bold hover-underline fs-6">
+                                                        @submission.TesName
+                                                    </h2>
+                                                </a>
+
+                                            </td>
+                                            <td>
+                                                @submission.Project.Name
+                                            </td>
+                                            <td>
+                                                @submission.SubmittedBy.Name
+                                            </td>
+                                            <td>
+                                                @submission.StartTime
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })" class="btn btn-sm btn-outline-primary">
+                                                    <span class="small">View</span>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                        </div>
+                        @*<div class="table-responsive">
                             <div class="table-responsive">
                                 <table id="submissionList" class="table" caption="List of Submissions">
                                     <thead>
@@ -226,7 +326,7 @@
                                                 <i class="fa-solid fa-circle-check fs-5 text-success" data-bs-toggle="tooltip" data-bs-title="Completed: xx/xx/xxxx"></i>
                                                 <i class="fa-solid fa-triangle-exclamation fs-5 text-danger" data-bs-toggle="tooltip" data-bs-title="Failed: error message"></i>
                                                 <i class="fa-solid fa-circle-notch fa-spin fs-5 text-primary" data-bs-toggle="tooltip" data-bs-title="@submission.Status"></i>
-                                                *@
+                                                
                                                 </td>
                                                 <td>
                                                     <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })">
@@ -234,7 +334,7 @@
                                                             @submission.TesName
                                                             @*<span class="text-muted fw-normal fs-7 mb-0">
                                                         ID: @submission.Id<br>
-                                                        </span>*@
+                                                        </span>
                                                         </h2>
                                                     </a>
 
@@ -259,7 +359,7 @@
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
+                        </div>*@
                     </div>
                 </div>
             </div>
