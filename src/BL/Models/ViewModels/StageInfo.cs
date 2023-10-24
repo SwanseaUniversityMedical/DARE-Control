@@ -9,9 +9,10 @@ namespace BL.Models.ViewModels
 {
     public class StageInfo
     {
-        public List<StatusType> statusTypeList;
-        public string stageName;
-        public int stageNumber;
-        public Dictionary<int, List<StatusType>> stagesDict;
+        public List<StatusType> statusTypeList { get; set; }
+        public string stageName { get; set; }
+        public int stageNumber { get; set; }
+        public Dictionary<int, List<StatusType>> stagesDict { get; set; }
+       
     }
 }

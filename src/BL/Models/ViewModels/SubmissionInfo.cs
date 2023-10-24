@@ -10,6 +10,9 @@ namespace BL.Models.ViewModels
     {
         
         public Submission Submission { get; set; }
-        public List<StageInfo> StageInfo { get; set; }
+        public Stages Stages { get; set; }
+
+
+        
     }
 }

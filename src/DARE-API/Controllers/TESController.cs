@@ -92,12 +92,12 @@ namespace DARE_API.Controllers
                 
                 if (asub.Parent == null)
                 {
-                    UpdateSubmissionStatus.UpdateStatus(sub, StatusType.CancellingChildren,"");
+                    UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.CancellingChildren,"");
                     
                 }
                 else
                 {
-                    UpdateSubmissionStatus.UpdateStatus(sub, StatusType.RequestCancellation, "");
+                    UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.RequestCancellation, "");
                     
                 }
             }
@@ -156,194 +156,208 @@ namespace DARE_API.Controllers
         public virtual async Task<IActionResult> CreateTaskAsync([FromBody] TesTask tesTask,
             CancellationToken cancellationToken)
         {
-            try { 
-            var usersName = (from x in User.Claims where x.Type== "preferred_username" select x.Value).First();
-
-            var user = _DbContext.Users.FirstOrDefault(x => x.Name.ToLower() == usersName.ToLower());
-
-            if (user == null)
+            try
             {
-                return BadRequest(
-                    "User " + usersName + " doesn't exist");
-            }
-            if (!string.IsNullOrWhiteSpace(tesTask.Id))
-            {
-                return BadRequest(
-                    "Id should not be included by the client in the request; the server is responsible for generating a unique Id.");
-            }
+                var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
 
-            if (string.IsNullOrWhiteSpace(tesTask.Executors?.FirstOrDefault()?.Image))
-            {
-                return BadRequest("Docker container image name is required.");
-            }
+                var user = _DbContext.Users.FirstOrDefault(x => x.Name.ToLower() == usersName.ToLower());
 
-            foreach (var input in tesTask.Inputs ?? Enumerable.Empty<TesInput>())
-            {
-                if (!input.Path.StartsWith('/'))
-                {
-                    return BadRequest("Input paths in the container must be absolute paths.");
-                }
-            }
-
-            foreach (var output in tesTask.Outputs ?? Enumerable.Empty<TesOutput>())
-            {
-                if (!output.Path.StartsWith('/'))
-                {
-                    return BadRequest("Output paths in the container must be absolute paths.");
-                }
-            }
-
-            
-
-
-            if (tesTask?.Resources?.BackendParameters is not null)
-            {
-                var keys = tesTask.Resources.BackendParameters.Keys.Select(k => k).ToList();
-
-                if (keys.Count > 1 && keys.Select(k => k?.ToLowerInvariant()).Distinct().Count() != keys.Count)
-                {
-                    return BadRequest("Duplicate backend_parameters were specified");
-                }
-
-
-
-
-                keys = tesTask.Resources.BackendParameters.Keys.Select(k => k).ToList();
-
-                // Backends shall log system warnings if a key is passed that is unsupported.
-                var unsupportedKeys = keys.Except(Enum.GetNames(typeof(TesResources.SupportedBackendParameters)))
-                    .ToList();
-
-                if (unsupportedKeys.Count > 0)
-                {
-                    Log.Warning("{Function }Unsupported keys were passed to TesResources.backend_parameters: {Keys}",
-                        "CreateTaskAsync", string.Join(",", unsupportedKeys));
-                }
-
-                // If backend_parameters_strict equals true, backends should fail the task if any key / values are unsupported
-                if (tesTask.Resources?.BackendParametersStrict == true
-                    && unsupportedKeys.Count > 0)
+                if (user == null)
                 {
                     return BadRequest(
-                        $"backend_parameters_strict is set to true and unsupported backend_parameters were specified: {string.Join(",", unsupportedKeys)}");
+                        "User " + usersName + " doesn't exist");
                 }
 
-
-            }
-
-            //TODO: discuss Simon & Justin
-            //if (tesTask.Executors.Count != 1)
-            //{
-            //    return BadRequest("TES Task must contain one and only one Executer.");
-            //}
-
-            var exec = tesTask.Executors.First();
-            //TODO: Implement IsDockerThere
-            if (!IsDockerThere(exec.Image))
-            {
-                return BadRequest("Crate Location " + exec.Image + " doesn't exist");
-            }
-
-            //TODO: External containers need copying over and change image loc
-
-            var project = tesTask.Tags.Where(x => x.Key.ToLower() == "project").Select(x => x.Value).FirstOrDefault();
-            if (string.IsNullOrWhiteSpace(project))
-            {
-                return BadRequest("Tags must contain key project.");
-            }
-
-            var trestr = tesTask.Tags.Where(x => x.Key.ToLower() == "tres").Select(x => x.Value).FirstOrDefault();
-            List<string> tres = new List<string>();
-            if (!string.IsNullOrWhiteSpace(trestr))
-            {
-                tres = trestr.Split('|').Select(x => x.ToLower()).ToList();
-            }
-
-            var dbproj = _DbContext.Projects.FirstOrDefault(x => x.Name.ToLower() == project.ToLower());
-
-            if (dbproj == null)
-            {
-                return BadRequest("Project " + project + " doesn't exist.");
-            }
-
-            
-            if (!IsUserOnProject(dbproj, usersName))
-            {
-                return BadRequest("User " + User.Identity.Name + "isn't on project " + project + ".");
-            }
-
-            if (tres.Count > 0 && !AreTresOnProject(dbproj, tres))
-            {
-                return BadRequest("One or more of the tres are not authorised for this project " + project + ".");
-            }
-
-            var dbtres = new List<BL.Models.Tre>();
-
-            if (tres.Count == 0)
-            {
-                dbtres = dbproj.Tres;
-            }
-            else
-            {
-                foreach (var tre in tres)
+                if (!string.IsNullOrWhiteSpace(tesTask.Id))
                 {
-                    dbtres.Add(dbproj.Tres.First(x => x.Name.ToLower() == tre.ToLower()));
+                    return BadRequest(
+                        "Id should not be included by the client in the request; the server is responsible for generating a unique Id.");
                 }
-            }
 
-            if (dbtres.Count == 0)
-            {
-                return BadRequest("No valid tres for this project " + project + ".");
-            }
+                if (string.IsNullOrWhiteSpace(tesTask.Executors?.FirstOrDefault()?.Image))
+                {
+                    return BadRequest("Docker container image name is required.");
+                }
 
-           
-            var sub = new Submission()
-            {
-                DockerInputLocation = tesTask.Executors.First().Image,
-                Project = dbproj,
-                StartTime = DateTime.Now.ToUniversalTime(),
-                Status = StatusType.WaitingForChildSubsToComplete,
-                LastStatusUpdate = DateTime.Now.ToUniversalTime(),
-                SubmittedBy = user,
-                TesName = tesTask.Name,
-                SourceCrate = tesTask.Executors.First().Image,
-            };
+                foreach (var input in tesTask.Inputs ?? Enumerable.Empty<TesInput>())
+                {
+                    if (!input.Path.StartsWith('/'))
+                    {
+                        return BadRequest("Input paths in the container must be absolute paths.");
+                    }
+                }
 
-
-
-            _DbContext.Submissions.Add(sub);
-            await _DbContext.SaveChangesAsync(cancellationToken);
-            tesTask.Id = sub.Id.ToString();
-            sub.TesId = tesTask.Id;
-            var tesstring = JsonConvert.SerializeObject(tesTask);
-            sub.TesJson = tesstring;
-            await _DbContext.SaveChangesAsync(cancellationToken);
-            
-            //Send to rabbit q to processed async
-            var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Main, "topic");
-
-            _rabbit.Advanced.Publish(exch, RoutingConstants.Subs, false, new Message<int>(sub.Id));
-
-            var audit = new AuditLog()
-            {
-                IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                UserName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
-                TestaskId = Convert.ToInt32(tesTask.Id),        
-                Date = DateTime.Now.ToUniversalTime()
-            };
-            _DbContext.AuditLogs.Add(audit);
-          Log.Debug("{Function} Creating task with id {Id} state {State}", "CreateTaskAsync", tesTask.Id,
-                tesTask.State);
+                foreach (var output in tesTask.Outputs ?? Enumerable.Empty<TesOutput>())
+                {
+                    if (!output.Path.StartsWith('/'))
+                    {
+                        return BadRequest("Output paths in the container must be absolute paths.");
+                    }
+                }
 
 
 
-            return StatusCode(200, new TesCreateTaskResponse { Id = tesTask.Id });
+
+                if (tesTask?.Resources?.BackendParameters is not null)
+                {
+                    var keys = tesTask.Resources.BackendParameters.Keys.Select(k => k).ToList();
+
+                    if (keys.Count > 1 && keys.Select(k => k?.ToLowerInvariant()).Distinct().Count() != keys.Count)
+                    {
+                        return BadRequest("Duplicate backend_parameters were specified");
+                    }
+
+
+
+
+                    keys = tesTask.Resources.BackendParameters.Keys.Select(k => k).ToList();
+
+                    // Backends shall log system warnings if a key is passed that is unsupported.
+                    var unsupportedKeys = keys.Except(Enum.GetNames(typeof(TesResources.SupportedBackendParameters)))
+                        .ToList();
+
+                    if (unsupportedKeys.Count > 0)
+                    {
+                        Log.Warning(
+                            "{Function }Unsupported keys were passed to TesResources.backend_parameters: {Keys}",
+                            "CreateTaskAsync", string.Join(",", unsupportedKeys));
+                    }
+
+                    // If backend_parameters_strict equals true, backends should fail the task if any key / values are unsupported
+                    if (tesTask.Resources?.BackendParametersStrict == true
+                        && unsupportedKeys.Count > 0)
+                    {
+                        return BadRequest(
+                            $"backend_parameters_strict is set to true and unsupported backend_parameters were specified: {string.Join(",", unsupportedKeys)}");
+                    }
+
+
+                }
+
+
+
+                var exec = tesTask.Executors.First();
+                //TODO: Implement IsDockerThere
+                if (!IsDockerThere(exec.Image))
+                {
+                    return BadRequest("Crate Location " + exec.Image + " doesn't exist");
+                }
+
+                //TODO: External containers need copying over and change image loc
+
+                var project = tesTask.Tags.Where(x => x.Key.ToLower() == "project").Select(x => x.Value)
+                    .FirstOrDefault();
+                if (string.IsNullOrWhiteSpace(project))
+                {
+                    return BadRequest("Tags must contain key project.");
+                }
+
+                var trestr = tesTask.Tags.Where(x => x.Key.ToLower() == "tres").Select(x => x.Value).FirstOrDefault();
+                List<string> tres = new List<string>();
+                if (!string.IsNullOrWhiteSpace(trestr))
+                {
+                    tres = trestr.Split('|').Select(x => x.ToLower()).ToList();
+                }
+
+                var dbproj = _DbContext.Projects.FirstOrDefault(x => x.Name.ToLower() == project.ToLower());
+
+                if (dbproj == null)
+                {
+                    return BadRequest("Project " + project + " doesn't exist.");
+                }
+
+
+                if (!IsUserOnProject(dbproj, usersName))
+                {
+                    return BadRequest("User " + User.Identity.Name + "isn't on project " + project + ".");
+                }
+
+                if (tres.Count > 0 && !AreTresOnProject(dbproj, tres))
+                {
+                    return BadRequest("One or more of the tres are not authorised for this project " + project + ".");
+                }
+
+                var dbtres = new List<BL.Models.Tre>();
+
+                if (tres.Count == 0)
+                {
+                    dbtres = dbproj.Tres;
+                }
+                else
+                {
+                    foreach (var tre in tres)
+                    {
+                        dbtres.Add(dbproj.Tres.First(x => x.Name.ToLower() == tre.ToLower()));
+                    }
+                }
+
+                if (dbtres.Count == 0)
+                {
+                    return BadRequest("No valid tres for this project " + project + ".");
+                }
+
+
+                var sub = new Submission()
+                {
+                    DockerInputLocation = tesTask.Executors.First().Image,
+                    Project = dbproj,
+                    StartTime = DateTime.Now.ToUniversalTime(),
+                    Status = StatusType.SubmissionReceived,
+                    LastStatusUpdate = DateTime.Now.ToUniversalTime(),
+                    SubmittedBy = user,
+                    TesName = tesTask.Name,
+                    SourceCrate = tesTask.Executors.First().Image,
+                };
+
+
+
+                _DbContext.Submissions.Add(sub);
+                await _DbContext.SaveChangesAsync(cancellationToken);
+                tesTask.Id = sub.Id.ToString();
+                sub.TesId = tesTask.Id;
+                var tesstring = JsonConvert.SerializeObject(tesTask);
+                sub.TesJson = tesstring;
+                await _DbContext.SaveChangesAsync(cancellationToken);
+
+                try
+                {
+
+                    //Send to rabbit q to processed async
+                    var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Submission, "topic");
+
+                    _rabbit.Advanced.Publish(exch, RoutingConstants.ProcessSub, false, new Message<int>(sub.Id));
+
+                    var audit = new AuditLog()
+                    {
+                        IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
+                        UserName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
+                        TestaskId = Convert.ToInt32(tesTask.Id),
+                        Date = DateTime.Now.ToUniversalTime()
+                    };
+                    _DbContext.AuditLogs.Add(audit);
+                    Log.Debug("{Function} Creating task with id {Id} state {State}", "CreateTaskAsync", tesTask.Id,
+                        tesTask.State);
+
+                }
+                catch (Exception ex)
+                {
+                    UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.Failed, ex.Message);
+                    await _DbContext.SaveChangesAsync(cancellationToken);
+
+                   
+                    throw;
+                }
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "{Function} Crashed", "CreateTESTaskAsync");
                 throw;
             }
+
+           
+
+            return StatusCode(200, new TesCreateTaskResponse { Id = tesTask.Id });
+
         }
 
         private bool AreTresOnProject(Project project, List<string> tres)
