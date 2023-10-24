@@ -12,6 +12,6 @@ namespace TREAgent.Repositories
 
         public string Token { get; set; }
 
-        public string TesId { get; set; }
+        public int SubId { get; set; }
     }
 }

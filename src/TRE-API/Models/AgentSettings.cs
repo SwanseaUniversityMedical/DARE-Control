@@ -6,5 +6,7 @@
         public bool UseHutch { get; set; }
         public bool UseTESK { get; set; }
 
+        public string TESKOutputBucketPrefix { get; set; }
+
     }
 }

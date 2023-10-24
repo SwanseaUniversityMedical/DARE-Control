@@ -276,9 +276,8 @@ namespace TRE_API
                                 Files = files
                             }); 
 
-                            //
 
-                            // RecurringJob.RemoveIfExists(taskID);
+                            RecurringJob.RemoveIfExists(taskID);
                         }
                     }
                     else
@@ -412,9 +411,6 @@ namespace TRE_API
                         // **************  SEND TO TESK
                         if (useTESK)
                         {
-
-                           
-                            //GEt jobID AAAAA TODO
                             var arr = new HttpClient();
 
                   
@@ -427,7 +423,9 @@ namespace TRE_API
                           
                             var projectId = aSubmission.Project.Id;
 
-                            var OutputBucket = "S3://" + _dbContext.Projects.First(x => x.Id == projectId).OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
+                           
+
+                            var OutputBucket = _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects.First(x => x.Id == projectId).OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
                             //it need the file name?? (key-name)
 
 

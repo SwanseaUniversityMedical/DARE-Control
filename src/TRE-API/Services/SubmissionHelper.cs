@@ -96,11 +96,11 @@ namespace TRE_API.Services
             var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams).Result;
         }
 
-        public APIReturn? UpdateStatusForTre(string subId, StatusType statusType, string? description)
+        public APIReturn? UpdateStatusForTre(int subId, StatusType statusType, string? description)
         {
             var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
                     new Dictionary<string, string>()
-                        { { "subId", subId }, { "statusType", statusType.ToString() }, { "description", description } })
+                        { { "subId", subId.ToString() }, { "statusType", statusType.ToString() }, { "description", description } })
                 .Result;
             return result;
         }
