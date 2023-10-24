@@ -32,15 +32,24 @@
                 </span>
             </h6>
         }
-        else if (overallStatus == BL.Models.Enums.StatusType.Failed)
+        else if (overallStatus == BL.Models.Enums.StatusType.Failed || overallStatus == BL.Models.Enums.StatusType.Cancelled)
         {
             <h6 class="mb-0">
-                <span class="badge bg-danger rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Failed: @Model.Submission.EndTime">
+                <span class="badge bg-danger rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="@overallStatus.ToString(): @Model.Submission.EndTime">
                     <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
-                    <span>Failed</span>
+                    <span>@overallStatus.ToString()</span>
                 </span>
             </h6>
-        }
+            }
+            else if (overallStatus == BL.Models.Enums.StatusType.PartialResult)
+            {
+                <h6 class="mb-0">
+                    <span class="badge bg-warning rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Partial Result: @Model.Submission.EndTime">
+                        <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
+                        <span>Partial Result</span>
+                    </span>
+                </h6>
+            }
         else
         {
             <h6 class="mb-0">
@@ -57,7 +66,7 @@
         var minio = @ViewBag.minioendpoint;
     }
     <a class="btn btn-sm btn-primary me-2" target="_blank" href="http://@minio/browser/@Model.Submission.Project.SubmissionBucket">Submission Bucket<i class="fa fa-external-link ms-2"></i></a>
-    <a class="btn btn-sm btn-outline-secondary" target="_blank" href="http://@minio/browser/@Model.Submission.Project.OutputBucket + @Model.Submission.Project.OutputBucket">Output Bucket<i class="fa fa-external-link ms-2"></i></a>
+    <a class="btn btn-sm btn-outline-secondary" target="_blank" href="http://@minio/browser/@Model.Submission.Project.OutputBucket">Output Bucket<i class="fa fa-external-link ms-2"></i></a>
 </div>
 <div class="row">
     <div class="col-md-4">
@@ -92,6 +101,10 @@
                                 @if (Model.Stages.IsRed(Model.Submission.Status))
                                 {
                                         <i class="fa-solid fa-warning fs-3 text-danger me-3"></i>
+                                }else if (overallStatus == BL.Models.Enums.StatusType.PartialResult)
+                                {
+                                    <i class="fa-solid fa-circle-check fs-3 text-warning me-3"></i>
+
                                 }else{
                                     <i class="fa-solid fa-circle-check fs-3 text-success me-3"></i>
                                     
@@ -295,7 +308,7 @@
                         var validstats = child.HistoricStatuses.Where(x => stage.statusTypeList.Contains(x.Status)).ToList();
                         if (stage.stagesDict.ContainsKey(stageNum) && stage.stageNumber == stageNum && stage.statusTypeList.Contains(child.Status))
                         {
-                            validstats.Add(new BL.Models.HistoricStatus() { Start = child.LastStatusUpdate, Status = child.Status, End = child.EndTime == DateTime.MinValue ? DateTime.Now : child.EndTime, IsCurrent = true, IsStillRunning = child.EndTime == DateTime.MinValue});
+                            validstats.Add(new BL.Models.HistoricStatus() { Start = child.LastStatusUpdate, Status = child.Status, End = child.EndTime == DateTime.MinValue ? DateTime.Now.ToUniversalTime() : child.EndTime, IsCurrent = true, IsStillRunning = child.EndTime == DateTime.MinValue});
                             validstats = validstats.OrderBy(x => x.Start).ToList();
                         }
                         <td class="col">

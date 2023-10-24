@@ -114,14 +114,14 @@ namespace TRE_API.Controllers
             {
                 APIReturn? result =
                     _subHelper.UpdateStatusForTre(subDetails.SubId, subDetails.StatusType, subDetails.Description);
-                if (subDetails.StatusType == StatusType.Failure)
+                if (subDetails.StatusType == StatusType.Failure || subDetails.StatusType == StatusType.Cancelled)
                 {
-                    _subHelper.CloseSubmissionForTre(subDetails.SubId, StatusType.Failed, "", "");
+                    _subHelper.CloseSubmissionForTre(subDetails.SubId, subDetails.StatusType, "", "");
                 }
                 return StatusCode(200, result);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
+                
                 Log.Error(ex, "{Function} Crash", "UpdateStatusForTre");
                 throw;
             }
@@ -138,7 +138,7 @@ namespace TRE_API.Controllers
             try
             {
                 var outputInfo = _subHelper.GetOutputBucketGuts(subId);
-                //_subHelper.UpdateStatusForTre(subId, StatusType.PodProcessingComplete, "");
+                
 
                 return StatusCode(200, outputInfo);
             }
@@ -212,7 +212,7 @@ namespace TRE_API.Controllers
         {
             try
             {
-                //Update status of submission to "Sending to hutch for final packaging"
+                
                 
                
                 Dictionary<string, bool> hutchRes = new Dictionary<string, bool>();

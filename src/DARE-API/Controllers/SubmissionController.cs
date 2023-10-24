@@ -46,7 +46,7 @@ namespace DARE_API.Controllers
 
         }
 
-        
+
         [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
         [HttpGet]
         [Route("GetWaitingSubmissionsForTre")]
@@ -117,11 +117,11 @@ namespace DARE_API.Controllers
             {
                 return BadRequest("Invalid subid or tre not valid for tes");
             }
-            if (SubCompleteTypes.Contains(sub.Status))
+            if (UpdateSubmissionStatus.SubCompleteTypes.Contains(sub.Status))
             {
                 throw new Exception("Submission already closed. Can't change status");
             }
-            UpdateSubmissionStatus.UpdateStatus(sub, statusType, description);
+            UpdateSubmissionStatus.UpdateStatusNoSave(sub, statusType, description);
             _DbContext.SaveChanges();
            
 
@@ -137,7 +137,7 @@ namespace DARE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
         public IActionResult CloseSubmissionForTre(string subId, StatusType statusType, string? finalFile, string? description)
         {
-            if (!SubCompleteTypes.Contains(statusType))
+            if (!UpdateSubmissionStatus.SubCompleteTypes.Contains(statusType))
             {
                 throw new Exception("Invalid completion type");
             }
@@ -154,41 +154,19 @@ namespace DARE_API.Controllers
             {
                 return BadRequest("Invalid subid or tre not valid for tes");
             }
-            if (SubCompleteTypes.Contains(sub.Status))
+            if (UpdateSubmissionStatus.SubCompleteTypes.Contains(sub.Status))
             {
                 throw new Exception("Submission already closed. Can't change status");
             }
 
-            UpdateSubmissionStatus.UpdateStatus(sub, statusType, description);
+            UpdateSubmissionStatus.UpdateStatusNoSave(sub, statusType, description);
             sub.FinalOutputFile = finalFile;
             _DbContext.SaveChanges();
-            var parentStatus = StatusType.WaitingForChildSubsToComplete;
-            if (sub.Parent.Children.All(x => SubCompleteTypes.Contains(x.Status)))
-            {
-                if (sub.Parent.Children.All(x => x.Status == StatusType.Failed))
-                {
-                    UpdateSubmissionStatus.UpdateStatus(sub.Parent, StatusType.Failed, "");
-
-                }
-                else if (sub.Parent.Children.All(x => x.Status == StatusType.Completed))
-                {
-                    UpdateSubmissionStatus.UpdateStatus(sub.Parent, StatusType.Completed, "");
-
-                }
-                else if (sub.Parent.Children.All(x => x.Status == StatusType.Cancelled))
-                {
-                    UpdateSubmissionStatus.UpdateStatus(sub.Parent, StatusType.Cancelled, "");
-                }
-                else
-                {
-                    UpdateSubmissionStatus.UpdateStatus(sub.Parent, StatusType.PartialResult, "");
-                }
-                sub.Parent.EndTime = DateTime.Now.ToUniversalTime();
-            }
-
-            _DbContext.SaveChanges();
+            
             return StatusCode(200, new APIReturn() { ReturnType = ReturnType.voidReturn });
         }
+
+        
 
         [AllowAnonymous]
         [HttpGet("GetAllSubmissions")]
@@ -338,7 +316,7 @@ namespace DARE_API.Controllers
             stage5List.stageName = "Final Processing";
             stage5List.stageNumber = 5;
 
-            stage5List.statusTypeList = SubCompleteTypes;
+            stage5List.statusTypeList = UpdateSubmissionStatus.SubCompleteTypes;
             
             Dictionary<int, List<StatusType>> stage5Dict = new Dictionary<int, List<StatusType>>();
             stage5Dict.Add(5, stage5List.statusTypeList);
@@ -451,15 +429,7 @@ namespace DARE_API.Controllers
             }
 
         }
-        public static List<StatusType> SubCompleteTypes =>
-            new()
-            {
-
-                StatusType.Completed,
-                StatusType.Cancelled,
-                StatusType.Failed,
-                StatusType.PartialResult
-            };
+       
 
         [Authorize(Roles = "dare-control-admin")]
         [HttpPost("SaveSubmissionFiles")]

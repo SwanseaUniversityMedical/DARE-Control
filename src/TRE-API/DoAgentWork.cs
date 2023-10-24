@@ -42,15 +42,17 @@ namespace TRE_API
         private readonly IServiceProvider _serviceProvider;
         private readonly ApplicationDbContext _dbContext;
         private readonly ISubmissionHelper _subHelper;
-        
+
         private readonly IMinioSubHelper _minioSubHelper;
         private readonly IMinioTreHelper _minioTreHelper;
-        public DoAgentWork(IServiceProvider serviceProvider, ApplicationDbContext dbContext, ISubmissionHelper subHelper,  IMinioTreHelper minioTreHelper, IMinioSubHelper minioSubHelper)
+
+        public DoAgentWork(IServiceProvider serviceProvider, ApplicationDbContext dbContext,
+            ISubmissionHelper subHelper, IMinioTreHelper minioTreHelper, IMinioSubHelper minioSubHelper)
         {
             _serviceProvider = serviceProvider;
             _dbContext = dbContext;
             _subHelper = subHelper;
-            
+
             _minioTreHelper = minioTreHelper;
             _minioSubHelper = minioSubHelper;
         }
@@ -58,10 +60,12 @@ namespace TRE_API
         public void testing()
         {
 
-            Console.WriteLine("Testing");
-            string jsonContent = "{ \"name\": \"Hello World\", \"description\": \"Hello World, inspired by Funnel's most basic example\",\r\n\"executors\": [\r\n{ \"image\": \"alpine\", \"command\": [ \"sleep\", \"5m\" ] },\r\n{ \"image\": \"alpine\", \"command\": [ \"echo\", \"TESK says:   Hello World\" ]    }\r\n  ]\r\n}";
+            
+            Log.Information("{Function} testing", "testing");
+            string jsonContent =
+                "{ \"name\": \"Hello World\", \"description\": \"Hello World, inspired by Funnel's most basic example\",\r\n\"executors\": [\r\n{ \"image\": \"alpine\", \"command\": [ \"sleep\", \"5m\" ] },\r\n{ \"image\": \"alpine\", \"command\": [ \"echo\", \"TESK says:   Hello World\" ]    }\r\n  ]\r\n}";
 
-            CreateTESK(jsonContent,"99", "99");
+            CreateTESK(jsonContent, "99", "99");
         }
 
         public string CreateTESK(string jsonContent, string subId, string tesId)
@@ -89,23 +93,24 @@ namespace TRE_API
                 if (response.IsSuccessStatusCode)
                 {
                     string responseBody = response.Content.ReadAsStringAsync().Result;
-                    Console.WriteLine("Request successful. Response:");
-                    Console.WriteLine(responseBody);
-                    Log.Information("Request successful. Response: {response}", responseBody);
-
+                    Log.Information("{Function} Request successful. Response: {Response}", "CreateTESK", responseBody);
+                    
+                    
                     var responseObj = JsonConvert.DeserializeObject<ResponseModel>(responseBody);
                     string id = responseObj.id;
 
-                    RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTESK(id,subId, tesId), Cron.MinuteInterval(1));
+                    RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTESK(id, subId, tesId),
+                        Cron.MinuteInterval(1));
 
-                    _dbContext.Add(new TeskAudit(){message = jsonContent, teskid = tesId, subid = subId});
+                    _dbContext.Add(new TeskAudit() { message = jsonContent, teskid = tesId, subid = subId });
                     _dbContext.SaveChanges();
 
                     return id;
                 }
                 else
                 {
-                    Console.WriteLine($"Request failed with status code: {response.StatusCode}");
+                    Log.Error("{Function} Request failed with status code: {Code}", "CreateTESK", response.StatusCode);
+                    
                     return "";
                 }
             }
@@ -115,21 +120,22 @@ namespace TRE_API
         {
             public string id { get; set; }
         }
+
         public void CheckTESK(string taskID, string subId, string tesId)
         {
-            Console.WriteLine("Check TESK : "+taskID + ",  TES : " + tesId + ", sub: " + subId);
-
-            string url = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks/"+taskID+"?view=basic";
+            
+            Log.Information("{Function} Check TESK : {TaskId},  TES : {TesId}, sub: {SubId}", "CheckTESK", taskID, tesId, subId);
+            string url = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks/" + taskID + "?view=basic";
             using (HttpClient client = new HttpClient())
             {
-                HttpResponseMessage response =  client.GetAsync(url).Result;
-
+                HttpResponseMessage response = client.GetAsync(url).Result;
+                Log.Information("{Function} Response status {State}", "CheckTESK", response.StatusCode);
                 Console.WriteLine(response.StatusCode);
 
                 if (response.IsSuccessStatusCode)
                 {
                     string content = response.Content.ReadAsStringAsync().Result;
-//                    Console.WriteLine(content);
+
 
                     TESKstatus status = JsonConvert.DeserializeObject<TESKstatus>(content);
 
@@ -155,65 +161,69 @@ namespace TRE_API
 
                     _dbContext.SaveChanges();
 
-                        if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR"))
+                    if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR"))
+                    {
+                        Log.Information("{Function} *** status change *** {State}", "CheckTESK", status.state);
+                        
+
+                        // send update
+                        using (var scope = _serviceProvider.CreateScope())
                         {
-                            Console.WriteLine("*** status change *** " + status.state);
-
-                            // send update
-                            using (var scope = _serviceProvider.CreateScope())
+                            var statusMessage = StatusType.TransferredToPod;
+                            switch (status.state)
                             {
-                                var statusMessage = StatusType.TransferredToPod;
-                                switch (status.state)
-                                {
-                                    case "QUEUED":
-                                        statusMessage = StatusType.TransferredToPod;
-                                        break;
-                                    case "RUNNING":
-                                        statusMessage = StatusType.PodProcessing;
-                                        break;
-                                    case "COMPLETE":
-                                        statusMessage = StatusType.PodProcessingComplete;
-                                        break;
-                                    case "EXECUTOR_ERROR":
-                                        statusMessage = StatusType.Cancelled;
-                                        break;
-                                }
-
-
-                                var result = _subHelper.UpdateStatusForTre(subId, statusMessage, "");
-                                if (status.state == "COMPLETE")
-                                {
-                                    result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Completed, "", "");
+                                case "QUEUED":
+                                    statusMessage = StatusType.TransferredToPod;
+                                    break;
+                                case "RUNNING":
+                                    statusMessage = StatusType.PodProcessing;
+                                    break;
+                                case "COMPLETE":
+                                    statusMessage = StatusType.PodProcessingComplete;
+                                    break;
+                                case "EXECUTOR_ERROR":
+                                    statusMessage = StatusType.Cancelled;
+                                    break;
                             }
-                                else if (status.state == "EXECUTER_ERROR")
-                                {
-                                    result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Failed, "", "");
+
+
+                            var result = _subHelper.UpdateStatusForTre(subId, statusMessage, "");
+                            if (status.state == "COMPLETE")
+                            {
+                                result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Completed, "",
+                                    "");
+                            }
+                            else if (status.state == "EXECUTER_ERROR")
+                            {
+                                result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Failed, "", "");
                             }
                         }
 
                         // are we done ?
                         if (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR")
-                            {
-                                // Do this to avoid db locking issues
-                                BackgroundJob.Enqueue(() => ClearJob(taskID));
-                                // RecurringJob.RemoveIfExists(taskID);
-                            }
+                        {
+                            // Do this to avoid db locking issues
+                            BackgroundJob.Enqueue(() => ClearJob(taskID));
+                            
                         }
-                        else
-                            Console.WriteLine("NO CHANGE " + status.state);
-                  
+                    }
+                    else
+                        Log.Information("{Function} No change", "CheckTESK");
+                    
+
 
                 }
                 else
                 {
-                    Console.WriteLine($"HTTP Request {url} failed with status code: {response.StatusCode}");
+                    Log.Error("{Function} HTTP Request {url} failed with status code {code}", "CheckTESK", url, response.StatusCode);
+                    
                 }
             }
 
-           
+
         }
 
-        //Implement proper check
+        //TODO Implement proper check
         private bool ValidateCreate(Submission sub)
         {
             return true;
@@ -222,152 +232,178 @@ namespace TRE_API
         // Method executed upon hangfire job
         public void Execute(bool useRabbit = true, bool useHutch = false, bool useTESK = true)
         {
-            
+
             // control use of dependency injection
             using (var scope = _serviceProvider.CreateScope())
             {
 
-                var cancelsubprojs =  _subHelper.GetRequestCancelSubsForTre();
+                var cancelsubprojs = _subHelper.GetRequestCancelSubsForTre();
                 if (cancelsubprojs != null)
                 {
                     foreach (var cancelsubproj in cancelsubprojs)
                     {
-                        _subHelper.UpdateStatusForTre(cancelsubproj.Id.ToString(), StatusType.CancellationRequestSent, "");
+                        _subHelper.UpdateStatusForTre(cancelsubproj.Id.ToString(), StatusType.CancellationRequestSent,
+                            "");
                         //TODO Do we need to call Hutch or other stuff to cancel and do other cancel stuff
                         _subHelper.CloseSubmissionForTre(cancelsubproj.Id.ToString(), StatusType.Cancelled, "", "");
                     }
-                    
+
                 }
 
                 // Get list of submissions
                 List<Submission> listOfSubmissions;
-               // var treApi = scope.ServiceProvider.GetRequiredService<ITreClientWithoutTokenHelper>();
+                
                 try
                 {
                     listOfSubmissions = _subHelper.GetWaitingSubmissionForTre();
                 }
                 catch (Exception e)
                 {
-                   Log.Error("Error getting submissions: {message}", e.Message);
-                   Console.WriteLine(e.Message);
-                   throw;
+                    Log.Error(e,"{Function} Error getting submissions", "Execute");
+                    
+                    throw;
                 }
 
-                Console.WriteLine("Number of submission = "+listOfSubmissions.Count);
+                
 
                 foreach (var aSubmission in listOfSubmissions)
                 {
-                    Log.Information("Submission: {submission}", aSubmission);
-
-                    
-
-                    // Check user is allowed ont he project
-                    if (!_subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
-                    {
-                        Log.Error("User {UserID}/project {ProjectId} is not value for this submission {submission}", aSubmission.SubmittedBy.Id, aSubmission.Project.Id, aSubmission);
-                        // record error with submission layer
-                        var result = _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.InvalidUser, "");
-                        result = _subHelper.CloseSubmissionForTre(aSubmission.Id.ToString(), StatusType.Failed, "", "");
-                    }
-                    else
+                    try
                     {
 
 
-                        
-                            Uri uri = new Uri(aSubmission.DockerInputLocation);
-                            string fileName = Path.GetFileName(uri.LocalPath);
-                            var sourceBucket = aSubmission.Project.SubmissionBucket;
-                            var subProj = _dbContext.Projects.Where(x => x.SubmissionProjectId == aSubmission.Project.Id).FirstOrDefault();
-                            
-                                var destinationBucket = subProj.SubmissionBucketTre;
-                                var source =  _minioSubHelper.GetCopyObject(sourceBucket, fileName);
-                                var resultcopy =  _minioTreHelper.CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
+                        Log.Information("{Function }Submission: {submission}", "Execute", aSubmission.Id);
 
-                                _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.TreWaitingForCrateFormatCheck, "");
-                        if (ValidateCreate(aSubmission))
+
+
+                        // Check user is allowed ont he project
+                        if (!_subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
                         {
-                            _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.TreCrateValidated, "");
+                            Log.Error("{Function }User {UserID}/project {ProjectId} is not value for this submission {submission}","Execute",
+                                aSubmission.SubmittedBy.Id, aSubmission.Project.Id, aSubmission);
+                            // record error with submission layer
+                            var result =
+                                _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.InvalidUser, "");
+                            result = _subHelper.CloseSubmissionForTre(aSubmission.Id.ToString(), StatusType.Failed, "",
+                                "");
                         }
                         else
                         {
-                            _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.SubmissionCrateValidationFailed, "");
-                            _subHelper.CloseSubmissionForTre(aSubmission.Id.ToString(), StatusType.Failed, "", "");
+
+
+
+                            Uri uri = new Uri(aSubmission.DockerInputLocation);
+                            string fileName = Path.GetFileName(uri.LocalPath);
+                            var sourceBucket = aSubmission.Project.SubmissionBucket;
+                            var subProj = _dbContext.Projects
+                                .FirstOrDefault(x => x.SubmissionProjectId == aSubmission.Project.Id);
+
+                            var destinationBucket = subProj.SubmissionBucketTre;
+                            var source = _minioSubHelper.GetCopyObject(sourceBucket, fileName);
+                            var resultcopy = _minioTreHelper
+                                .CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
+
+                            _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(),
+                                StatusType.TreWaitingForCrateFormatCheck, "");
+                            if (ValidateCreate(aSubmission))
+                            {
+                                _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.TreCrateValidated,
+                                    "");
+                            }
+                            else
+                            {
+                                _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(),
+                                    StatusType.SubmissionCrateValidationFailed, "");
+                                _subHelper.CloseSubmissionForTre(aSubmission.Id.ToString(), StatusType.Failed, "", "");
+                            }
+
+
+
+
+
+                            // The TES message
+                            var tesMessage = JsonConvert.DeserializeObject<TesTask>(aSubmission.TesJson);
+                            var processedOK = true;
+
+                            // **************  SEND TO RABBIT
+                            if (useRabbit)
+                            {
+                                try
+                                {
+                                    // Not ideal to create each time around the loop but ???
+                                    IBus rabbit = scope.ServiceProvider.GetRequiredService<IBus>();
+                                    EasyNetQ.Topology.Exchange exchangeObject =
+                                        rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Submission, "topic");
+                                    rabbit.Advanced.Publish(exchangeObject, RoutingConstants.ProcessSub, false,
+                                        new Message<TesTask>(tesMessage));
+                                }
+                                catch (Exception e)
+                                {
+                                    
+                                    Log.Error(e, "{Function} Send rabbit failed for sub {SubId}", "Execute", aSubmission.Id);
+
+                                    processedOK = false;
+                                }
+                            }
+
+                            // **************  SEND TO HUTCH
+                            if (useHutch)
+                            {
+                                // TODO for rest API
+                                try
+                                {
+
+                                    _subHelper.SendSumissionToHUTCH(aSubmission);
+
+                                }
+                                catch (Exception e)
+                                {
+                                    Log.Error(e, "{Function} Send HUTCH failed for sub {SubId}", "Execute", aSubmission.Id);
+                                    processedOK = false;
+                                }
+                            }
+
+                            // **************  SEND TO TESK
+                            if (useTESK)
+                            {
+                                if (tesMessage is not null)
+                                    CreateTESK(aSubmission.TesJson, aSubmission.Id.ToString(), aSubmission.TesId);
+                            }
+
+                            // **************  TELL SUBMISSION LAYER WE DONE
+                            if (processedOK)
+                            {
+                                try
+                                {
+                                    var result = _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(),
+                                        StatusType.TransferredToPod, "");
+                                }
+                                catch (Exception e)
+                                {
+                                    Log.Error(e,"{Function} Error sending record outcome to submission layer for sub {SubId}", "Execute", aSubmission.Id);
+                                    processedOK = false;
+                                }
+
+                            }
+
                         }
-
-
-
-
-
-                        // The TES message
-                        var tesMessage = JsonConvert.DeserializeObject<TesTask>(aSubmission.TesJson);
-                        var processedOK = true;
-
-                        // **************  SEND TO RABBIT
-                        if (useRabbit)
-                        {
-                            try
-                            {
-                                // Not ideal to create each time around the loop but ???
-                                IBus rabbit = scope.ServiceProvider.GetRequiredService<IBus>();
-                                EasyNetQ.Topology.Exchange exchangeObject = rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Submission, "topic");
-                                rabbit.Advanced.Publish(exchangeObject, RoutingConstants.ProcessSub, false, new Message<TesTask>(tesMessage));
-                            }
-                            catch (Exception e)
-                            {
-                               Log.Error("Send rabbit failed : {message}",e.Message);
-                               processedOK = false;
-                            }
-                        }
-
-                        // **************  SEND TO HUTCH
-                        if (useHutch)
-                        {
-                            // TODO for rest API
-                            try
-                            {
-                                
-                                _subHelper.SendSumissionToHUTCH(aSubmission);
-
-                            }
-                            catch (Exception e)
-                            {
-                                Log.Error("Send HUTCH failed : {message}", e.Message);
-                                processedOK = false;
-                            }
-                        }
-
-                        // **************  SEND TO TESK
-                        if (useTESK)
-                        {
-                            if (tesMessage is not null)
-                                CreateTESK(aSubmission.TesJson, aSubmission.Id.ToString(), aSubmission.TesId);
-                        }
-
-                        // **************  TELL SUBMISSION LAYER WE DONE
-                        if (processedOK)
-                        {
-                            try
-                            {
-                                var result = _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.TransferredToPod, "");
-                            }
-                            catch (Exception e)
-                            {
-                                Log.Error("Send record outcome to submission layer : {message}", e.Message);
-                                processedOK = false;
-                            }
-                         
-                        }
-
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e, "{Function } Error occured processing submission {SubId}", "Execute", aSubmission.Id);
+                        
                     }
                 }
             }
-            
+
         }
 
         public void ClearJob(string jobname)
         {
-            Console.WriteLine("Hangfire clear job: "+jobname);
+            Log.Information("{Function} Hangfire clear job: {Jobname}", "ClearJob", jobname);
+            
             RecurringJob.RemoveIfExists(jobname);
         }
     }
+
 }

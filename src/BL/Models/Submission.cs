@@ -35,14 +35,14 @@ namespace BL.Models
 
         public string GetTotalDisplayTime()
         {
-            var end = EndTime == DateTime.MinValue ? DateTime.Now : EndTime;
+            var end = EndTime == DateTime.MinValue ? (DateTime.Now).ToUniversalTime() : EndTime;
 
             return TimeHelper.GetDisplayTime(StartTime, end);
         }
 
         public string GetCurrentStatusDisplayTime()
         {
-            var end = EndTime == DateTime.MinValue ? DateTime.Now : EndTime;
+            var end = EndTime == DateTime.MinValue ? DateTime.Now.ToUniversalTime() : EndTime;
            
             return TimeHelper.GetDisplayTime(LastStatusUpdate, end);
         }
