@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Serilog;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
@@ -155,7 +156,7 @@ namespace TREAPI.Services
             }
             catch (Exception ex)
             {
-                //Log.Error(ex.Message);
+                Log.Error(ex.Message);
 
             }
         }
@@ -189,7 +190,7 @@ namespace TREAPI.Services
             }
             catch (Exception ex)
             {
-                //Log.Error(ex.Message);
+                Log.Error(ex.Message);
 
             }
 
@@ -226,7 +227,7 @@ namespace TREAPI.Services
             }
             catch (Exception ex)
             {
-                //Log.Error(ex.Message);
+                Log.Error(ex.Message);
 
             }
 
@@ -321,7 +322,7 @@ namespace TREAPI.Services
             }
             catch (Exception ex)
             {
-                //Log.Error(ex.Message);
+                Log.Error(ex.Message);
 
             }
             return false;
@@ -365,7 +366,7 @@ namespace TREAPI.Services
             }
             catch (Exception ex)
             {
-                //Log.Error(ex.Message);
+                Log.Error(ex.Message);
 
             }
         }
@@ -389,7 +390,7 @@ namespace TREAPI.Services
             }
             catch (Exception ex)
             {
-                //Log.Error(ex.Message);
+                Log.Error(ex.Message);
 
             }
 
