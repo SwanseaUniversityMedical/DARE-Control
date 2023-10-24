@@ -46,6 +46,10 @@ jobs:
           - './.github/workflows/on-release.yaml'
           - 'src/TRE-UI/**'
           - 'src/BL/**'
+        tre-hasura-container:
+          - './.github/workflows/on-release.yaml'
+          - 'src/Tre-Hasura/**'
+          - 'src/BL/**'
         chart:
           - './.github/workflows/on-release.yaml'
           - 'charts/**'
@@ -166,7 +170,26 @@ jobs:
     secrets:
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
-
+      
+  tre-hasura-container:
+    # Build the tre hasura container and push it as :rc-1.0.0
+    needs: changes
+    if: fromJSON(needs.changes.outputs.changes).tre-hasura-container == 'true'
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/on-release-container.yaml@v4.1.1
+    with:
+      job-name: tre-hasura-container
+      container-registry: ${{ vars.HARBOR_REGISTRY }}
+      container-registry-user: ${{ vars.HARBOR_USER }}
+      container-registry-project: ${{ vars.HARBOR_PROJECT }}
+      container-registry-repo: ${{ vars.HARBOR_REPO }}-tre-hasura
+      release-tag-format: 'DARE-TRE-HASURA-Container-${version}'
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      build-command: |
+        docker build -t $IMAGE -f src/Tre-Hasura/Dockerfile src/
+    secrets:
+      container-registry-token: ${{ secrets.HARBOR_TOKEN }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
+      
   chart:
     # Build the chart and push it as x.y.z-rc
     needs: changes

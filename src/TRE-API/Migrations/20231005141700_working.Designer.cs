@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TRE_API.Repositories.DbContexts;
@@ -11,9 +12,11 @@ using TRE_API.Repositories.DbContexts;
 namespace TRE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231005141700_working")]
+    partial class working
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,16 +28,13 @@ namespace TRE_API.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("BL.Models.KeycloakCredentials", b =>
+            modelBuilder.Entity("BL.Models.SubmissionCredentials", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CredentialType")
-                        .HasColumnType("integer");
 
                     b.Property<string>("PasswordEnc")
                         .IsRequired()
@@ -46,7 +46,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("KeycloakCredentials");
+                    b.ToTable("SubmissionCredentials");
                 });
 
             modelBuilder.Entity("BL.Models.TESKstatus", b =>
@@ -84,10 +84,6 @@ namespace TRE_API.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("message")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("subid")
                         .IsRequired()
                         .HasColumnType("text");
 
