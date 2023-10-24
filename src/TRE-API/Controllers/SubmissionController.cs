@@ -21,6 +21,27 @@ using System;
 using Amazon.Runtime.Internal.Transform;
 using Serilog;
 using Microsoft.AspNetCore.SignalR;
+using BL.Models.ViewModels;
+using BL.Models;
+using BL.Models.Enums;
+using BL.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
+using TRE_API.Attributes;
+using TRE_API.Services;
+using TRE_API.Services.SignalR;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
+using BL.Models.APISimpleTypeReturns;
+using TRE_API.Repositories.DbContexts;
+using EasyNetQ.Management.Client.Model;
+using BL.Rabbit;
+using EasyNetQ;
+using Newtonsoft.Json;
+using System;
+using Amazon.Runtime.Internal.Transform;
+using Serilog;
 
 namespace TRE_API.Controllers
 {
@@ -42,11 +63,16 @@ namespace TRE_API.Controllers
         private readonly MinioTRESettings _minioTreSettings;
         private readonly string _treName;
 
-
         public SubmissionController(ISignalRService signalRService, IDareClientWithoutTokenHelper helper,
-            ApplicationDbContext dbContext, IBus rabbit, ISubmissionHelper subHelper,
-            IDataEgressClientWithoutTokenHelper egressHelper, IHutchClientHelper hutchClientHelper,
-            IMinioSubHelper minioSubHelper, IMinioTreHelper minioTreHelper, MinioTRESettings minioTreSettings, IConfiguration config)
+            ApplicationDbContext dbContext, 
+            IBus rabbit, 
+            ISubmissionHelper subHelper,
+            IDataEgressClientWithoutTokenHelper egressHelper, 
+            IHutchClientHelper hutchClientHelper,
+            IMinioSubHelper minioSubHelper,
+            IMinioTreHelper minioTreHelper,
+            MinioTRESettings minioTreSettings, 
+            IConfiguration config)
         {
             _signalRService = signalRService;
             _dareHelper = helper;
@@ -59,7 +85,6 @@ namespace TRE_API.Controllers
             _minioSubHelper = minioSubHelper;
             _minioTreSettings = minioTreSettings;
             _treName = config["TreName"];
-
         }
 
 
