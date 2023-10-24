@@ -266,7 +266,9 @@ namespace TRE_API
                                     break;
                                 case "COMPLETE":
                                     statusMessage = StatusType.PodProcessingComplete;
+                                    
                                     Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
+                                    Log.Information("{Function} *** COMPLETE remove Token *** {Token} ", "CheckTESK", Token);
                                     if (Token != null)
                                     {
                                         _dbContext.TokensToExpire.Remove(Token);
@@ -277,6 +279,7 @@ namespace TRE_API
                                 case "EXECUTOR_ERROR":
                                     statusMessage = StatusType.Cancelled;
                                     Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
+                                    Log.Information("{Function} *** EXECUTOR_ERROR remove Token *** {Token} ", "CheckTESK", Token);
                                     if (Token != null)
                                     {
                                         _dbContext.TokensToExpire.Remove(Token);
@@ -290,8 +293,7 @@ namespace TRE_API
                             var result = _subHelper.UpdateStatusForTre(subId.ToString(), statusMessage, "");
                             if (status.state == "COMPLETE")
                             {
-                                result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Completed, "",
-                                    "");
+                                result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Completed, "","");
                             }
                             else if (status.state == "EXECUTER_ERROR")
                             {
@@ -310,6 +312,7 @@ namespace TRE_API
 
                             foreach (var s3Object in data.S3Objects) //TODO is this right?
                             {
+                                Log.Information("{Function} *** added file from outputBucket *** {file} ", "CheckTESK", s3Object.Key);
                                 files.Add(s3Object.Key);
                             }
 

@@ -101,12 +101,9 @@ namespace Tre_Hasura
             }
             catch (Exception ex)
             {
-               Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.Message);
+                throw;
             }
-
-      
-			return null;
-
         }
 
         public async Task<HttpResponseMessage> HttpClient(string endpointUrl, string payload, string token = "")
