@@ -4,6 +4,7 @@ using BL.Models.ViewModels;
 using BL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.CodeAnalysis;
 
 namespace DARE_FrontEnd.Controllers
@@ -20,10 +21,7 @@ namespace DARE_FrontEnd.Controllers
             _configuration = configuration;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
+      
 
         public IActionResult Instructions()
         {
@@ -116,11 +114,41 @@ namespace DARE_FrontEnd.Controllers
             return RedirectToAction("GetProject", "Project", new {id = model.ProjectId});
         }
 
+        [HttpGet]
+        public IActionResult DownloadFile(int subId)
+        {
+
+            var paramlist = new Dictionary<string, string>
+            {
+                { "submissionId", subId.ToString() }
+            };
+
+            var submission = _clientHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist).Result;
+            var file = _clientHelper.CallAPIToGetFile(
+                "/api/Submission/DownloadFile", paramlist).Result;
+            return File(file, GetContentType(submission.FinalOutputFile), submission.FinalOutputFile);
+        }
+
+        public static string GetContentType(string fileName)
+        {
+            // Create a new FileExtensionContentTypeProvider
+            var provider = new FileExtensionContentTypeProvider();
+
+            // Try to get the content type based on the file name's extension
+            if (provider.TryGetContentType(fileName, out var contentType))
+            {
+                return contentType;
+            }
+
+            // If the content type cannot be determined, provide a default value
+            return "application/octet-stream"; // This is a common default for unknown file types
+        }
+
         [HttpGet] 
         public IActionResult GetAllSubmissions()
         {
             List<Submission> displaySubmissionsList = new List<Submission>();
-            var res = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions/").Result;
+            var res = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions/").Result.Where(x => x.Parent == null).ToList();
 
             res = res.Where(x => x.Parent == null).ToList();
 
@@ -136,7 +164,7 @@ namespace DARE_FrontEnd.Controllers
             paramlist.Add("submissionId", id.ToString());
 
             var res = _clientHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist).Result;
-            //var res1 = _clientHelper.CallAPIWithoutModel<SubmissionInfo>("/api/Submission/StageTypes/").Result;
+            
 
             var minio = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
             ViewBag.minioendpoint = minio?.Url;
@@ -144,7 +172,7 @@ namespace DARE_FrontEnd.Controllers
             var test = new SubmissionInfo()
             {
                 Submission = res,
-                StageInfo = _clientHelper.CallAPIWithoutModel<List<StageInfo>>("/api/Submission/StageTypes/").Result
+                Stages = _clientHelper.CallAPIWithoutModel<Stages>("/api/Submission/StageTypes/").Result
             };
             return View(test);
         }

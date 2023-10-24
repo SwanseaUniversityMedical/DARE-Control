@@ -19,44 +19,50 @@ else
         <div class="d-flex align-items-center justify-content-between">
             <h1 class="fs-3 mb-0">Egress Requests</h1>
 
-     
         </div>
-        <hr class="d-flex my-4">
+        <ul class="nav nav-underline border-bottom my-4 egress-menu">
+            <li class="nav-item" role="presentation">
+                <a asp-area="" asp-controller="Data" asp-action="GetAllEgresses" class="nav-link text-dark">All Requests</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a asp-area="" asp-controller="Data" asp-action="GetAllUnprocessedEgresses" class="nav-link text-dark">
+                    Unprocessed Requests
+                </a>
+            </li>
+        </ul>
         <div class="table-responsive">
-            <table id="fileList" class="table table-bordered table-striped no-head" caption="List of Files">
-                <thead><tr><td>Project</td></tr></thead>
+            <table id="fileList" class="table" caption="List of Files">
+                <thead>
+                    <tr>
+                        <th>Submission ID</th>
+                        <th>Project</th>
+                        <th>Number of Files</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
                 <tbody>
                     @foreach (var egressSubmission in Model)
                     {
                         <tr>
-                            <td class="card mb-2 p-3 bg-white shadow-sm border-1">
-
-                                <div class="d-flex align-items-center justify-content-between mb-3">
-                                    <div>
-                                        <a href="@Url.Action("GetEgress", "Data", new {id = egressSubmission.Id })">
-                                            <h2 class="mb-0 fw-bold hover-underline fs-5">
-                                                Submission Id: @egressSubmission.SubmissionId
-                                            </h2>
-                                            <p class="my-4">
-
-                                                Status:  @egressSubmission.EgressStatusDisplay
-
-                                            </p>
-                                            <p class="my-4">
-
-                                                FileCount:  @egressSubmission.Files.Count
-
-                                            </p>
-                                     
-                                    </a>
-                                  
-                                    </div>
-                                     <div class="">
-                                        <a href="@Url.Action("GetEgress", "Data",new{id=egressSubmission.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Review</span></a>
-                                    </div>
-                                </div>
-
-
+                            <td>
+                                <a href="@Url.Action("GetEgress", "Data", new {id = egressSubmission.Id })">
+                                    <h2 class="mb-0 fw-bold hover-underline fs-6">
+                                        @egressSubmission.SubmissionId
+                                    </h2>
+                                </a>
+                            </td>
+                            <td>
+                                Project Name
+                            </td>
+                            <td>
+                                @egressSubmission.Files.Count
+                            </td>
+                            <td>
+                                @egressSubmission.EgressStatusDisplay
+                            </td>
+                            <td class="text-center">
+                                <a href="@Url.Action("GetEgress", "Data",new{id=egressSubmission.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Review</span></a>
                             </td>
                         </tr>
                     }

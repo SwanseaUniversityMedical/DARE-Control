@@ -280,11 +280,11 @@ namespace Data_Egress_API.Controllers
         }
         [Authorize(Roles = "data-egress-admin")]
         [HttpGet("DownloadFile")]
-        public async Task<IActionResult> DownloadFileAsync(int fileId)
+        public async Task<IActionResult> DownloadFileAsync(int id)
         {
             try { 
 
-            var egressFile = _DbContext.EgressFiles.First(x => x.Id == fileId);
+            var egressFile = _DbContext.EgressFiles.First(x => x.Id == id);
            
 
             
