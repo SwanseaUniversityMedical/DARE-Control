@@ -17,6 +17,7 @@ namespace BL.Models
             policyBuilder.RequireClaim("user_in_tre");
             policyBuilder.RequireClaim("allow");
             policyBuilder.RequireClaim("project_allow");
+
             return policyBuilder.Build(); 
         }
     }
