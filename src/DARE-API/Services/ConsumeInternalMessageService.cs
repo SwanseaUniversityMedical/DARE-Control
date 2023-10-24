@@ -14,6 +14,8 @@ using EasyNetQ.Management.Client.Model;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using System.Text.Json.Nodes;
+using Microsoft.EntityFrameworkCore;
+using System.Threading;
 
 namespace DARE_API.Services
 {
@@ -41,11 +43,11 @@ namespace DARE_API.Services
             try
             {
                 //Consume All Queue
-                var subs = await _bus.Advanced.QueueDeclareAsync(QueueConstants.Submissions);
+                var subs = await _bus.Advanced.QueueDeclareAsync(QueueConstants.ProcessSub);
                 _bus.Advanced.Consume<int>(subs, Process);
 
-                var fetch = await _bus.Advanced.QueueDeclareAsync(QueueConstants.FetchExtarnalFile);
-                _bus.Advanced.Consume<byte[]>(fetch, ProcessFetchExternal);
+                //var fetch = await _bus.Advanced.QueueDeclareAsync(QueueConstants.FetchExternalFile);
+                //_bus.Advanced.Consume<byte[]>(fetch, ProcessFetchExternal);
             }
             catch (Exception e)
             {
@@ -54,13 +56,23 @@ namespace DARE_API.Services
             }
         }
 
+
+        //Implement proper check
+        private bool ValidateCreate(Submission sub)
+        {
+            return true;
+        }
+
         private void Process(IMessage<int> message, MessageReceivedInfo info)
         {
             try
             {
                 var sub = _dbContext.Submissions.First(s => s.Id == message.Body);
 
-                //TODO: Mahadi copy crate from external to local submission (if in external)
+                try
+                {
+                    
+                
 
                 Uri uri = new Uri(sub.DockerInputLocation);
                 string fileName = Path.GetFileName(uri.LocalPath);
@@ -82,7 +94,16 @@ namespace DARE_API.Services
                     messageMQ.Url = "http://" + minioEndpoint.Url + "/browser/" + messageMQ.BucketName + "/" + messageMQ.Key;
                 }
 
-                //TODO: Validate format of Crate
+                UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.SubmissionWaitingForCrateFormatCheck, "");
+                if (ValidateCreate(sub))
+                {
+                    UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.SubmissionCrateValidated, "");
+                }
+                else
+                {
+                    UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.SubmissionCrateValidationFailed, "");
+                    UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.Failed, "");
+                }
 
                 var dbproj = sub.Project;
                 var tesTask = JsonConvert.DeserializeObject<TesTask>(sub.TesJson);
@@ -109,7 +130,7 @@ namespace DARE_API.Services
                         dbtres.Add(dbproj.Tres.First(x => x.Name.ToLower() == tre.ToLower()));
                     }
                 }
-                UpdateSubmissionStatus.UpdateStatus(sub, StatusType.WaitingForChildSubsToComplete, "");
+                UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.WaitingForChildSubsToComplete, "");
 
                 foreach (var tre in dbtres)
                 {
@@ -133,7 +154,16 @@ namespace DARE_API.Services
 
                 _dbContext.SaveChanges();
                 Log.Information("{Function} Processed sub for {id}", "Process", message.Body);
+                }
+                catch (Exception e)
+                {
+                    UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.Failed, e.Message);
+                    _dbContext.SaveChanges();
 
+                    
+                    
+                    throw;
+                }
 
             }
             catch (Exception ex)
@@ -143,19 +173,19 @@ namespace DARE_API.Services
             }
         }
 
-        private async Task ProcessFetchExternal(IMessage<byte[]> msgBytes,   MessageReceivedInfo info )
-        {
-            try
-            {
-                var message = Encoding.UTF8.GetString(msgBytes.Body);
-                await _minioHelper.RabbitExternalObject(JsonConvert.DeserializeObject<MQFetchFile>(message));
-            }
-            catch (Exception e)
-            {
+        //private async Task ProcessFetchExternal(IMessage<byte[]> msgBytes,   MessageReceivedInfo info )
+        //{
+        //    try
+        //    {
+        //        var message = Encoding.UTF8.GetString(msgBytes.Body);
+        //        await _minioHelper.RabbitExternalObject(JsonConvert.DeserializeObject<MQFetchFile>(message));
+        //    }
+        //    catch (Exception e)
+        //    {
 
-                throw;
-            }
-        }
+        //        throw;
+        //    }
+        //}
 
 
 
