@@ -1,8 +1,11 @@
 ﻿@model BL.Models.User
 
 @{
-    
-
+    var getAllProj = @ViewBag.getAllProj;
+    var getAllSubs = @ViewBag.getAllSubs;
+    var getAllUsers = @ViewBag.getAllUsers;
+    var getAllTres = @ViewBag.getAllTres;
+    ViewData["Title"] = "Home";
 }
 @if (User.IsInRole("dare-control-admin"))
 {
@@ -18,14 +21,14 @@
                 <li class="nav-item" role="presentation">
                     <a href="#about" class="nav-link text-dark active" id="about" data-bs-toggle="tab" data-bs-target="#project" role="tab" aria-controls="Project" aria-selected="true">
                         <span>Projects</span>
-                        <span class="badge bg-dark-blue rounded-pill ms-2"></span>
+                        <span class="badge bg-dark-blue rounded-pill ms-2">@getAllProj</span>
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
                     <a href="#submissions" class="nav-link text-dark" id="submissions" data-bs-toggle="tab" data-bs-target="#submissions-tab" role="tab" aria-controls="submissions" aria-selected="false">
                         <div class="d-flex justify-content-between align-items-center">
                             <span>Submissions</span>
-                            <span class="badge bg-dark-blue rounded-pill ms-2"></span>
+                            <span class="badge bg-dark-blue rounded-pill ms-2">@getAllSubs</span>
                         </div>
                     </a>
                 </li>
@@ -132,7 +135,7 @@ else
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <h4 class="m-0 text-dark fs-5">Submissions</h4>
-                            <span class="badge bg-dark-blue rounded-pill"></span>
+                            <span class="badge bg-dark-blue rounded-pill">@getAllSubs</span>
                         </div>
                     </div>
                 </a>
@@ -143,7 +146,7 @@ else
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <h4 class="m-0 text-dark fs-5">Projects</h4>
-                            <span class="badge bg-dark-blue rounded-pill"></span>
+                            <span class="badge bg-dark-blue rounded-pill">@getAllProj</span>
                         </div>
                     </div>
                 </a>
@@ -154,7 +157,7 @@ else
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <h4 class="m-0 text-dark fs-5">People</h4>
-                            <span class="badge bg-dark-blue rounded-pill"></span>
+                            <span class="badge bg-dark-blue rounded-pill">@getAllUsers</span>
                         </div>
                     </div>
                 </a>
@@ -166,7 +169,7 @@ else
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <h4 class="m-0 text-dark fs-5">TREs</h4>
-                            <span class="badge bg-dark-blue rounded-pill"></span>
+                            <span class="badge bg-dark-blue rounded-pill">@getAllTres</span>
                         </div>
                     </div>
                 </a>
