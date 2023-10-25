@@ -7,9 +7,32 @@ using Serilog;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services.SignalR;
 using static TRE_API.Controllers.SubmissionController;
+using BL.Models;
+using BL.Models.APISimpleTypeReturns;
+using BL.Models.Enums;
+using BL.Models.ViewModels;
+using BL.Services;
+using EasyNetQ;
+using TRE_API.Repositories.DbContexts;
+using TRE_API.Services.SignalR;
+using static TRE_API.Controllers.SubmissionController;
+
 
 namespace TRE_API.Services
 {
+
+    public interface ISubmissionHelper
+    {
+        APIReturn? UpdateStatusForTre(string subId, StatusType statusType, string? description);
+        bool IsUserApprovedOnProject(int projectId, int userId);
+        List<Submission>? GetWaitingSubmissionForTre();
+        void SendSumissionToHUTCH(Submission submission);
+        List<Submission>? GetRequestCancelSubsForTre();
+        OutputBucketInfo GetOutputBucketGuts(string subId);
+        APIReturn? CloseSubmissionForTre(string subId, StatusType statusType, string? description, string? finalFile);
+
+        BoolReturn FilesReadyForReview(ReviewFiles review);
+    }
     public class SubmissionHelper: ISubmissionHelper
     {
         private readonly IHutchClientHelper _hutchHelper;
@@ -17,13 +40,24 @@ namespace TRE_API.Services
         private readonly ApplicationDbContext _dbContext;
         private readonly MinioTRESettings _minioTreSettings;
         private readonly IBus _rabbit;
+        private readonly IDataEgressClientWithoutTokenHelper _dataEgressHelper;
+        private readonly IMinioTreHelper _minioTreHelper;
+ 
+
         public string _hutchDbServer { get; set; }
         public string _hutchDbPort { get; set; }
         public string _hutchDbName { get; set; }
 
 
-        public SubmissionHelper(ISignalRService signalRService, IDareClientWithoutTokenHelper helper,
-            ApplicationDbContext dbContext, IBus rabbit, IHutchClientHelper hutchHelper, IConfiguration config, MinioTRESettings minioTreSettings)
+        public SubmissionHelper(ISignalRService signalRService,
+            IDareClientWithoutTokenHelper helper,
+            ApplicationDbContext dbContext,
+            IBus rabbit,
+            IHutchClientHelper hutchHelper,
+            IConfiguration config,
+            MinioTRESettings minioTreSettings,
+            IDataEgressClientWithoutTokenHelper dataEgressHelper,
+            IMinioTreHelper minioTreHelper)
         {
             
             _dareHelper = helper;
@@ -34,6 +68,9 @@ namespace TRE_API.Services
             _hutchDbPort = config["Hutch:DbPort"];
             _hutchDbServer = config["Hutch:DbServer"];
             _minioTreSettings = minioTreSettings;
+
+            _dataEgressHelper = dataEgressHelper;
+            _minioTreHelper = minioTreHelper;
 
         }
 
@@ -154,6 +191,29 @@ namespace TRE_API.Services
             var result =
                 _dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetRequestCancelSubsForTre").Result;
             return result;
+        }
+
+        public BoolReturn FilesReadyForReview(ReviewFiles review)
+        {
+            var bucket = GetOutputBucketGuts(review.SubId);
+            var egsub = new EgressSubmission()
+            {
+                SubmissionId = review.SubId,
+                OutputBucket = bucket.Bucket,
+                Status = EgressStatus.NotCompleted,
+                Files = new List<EgressFile>()
+            };
+
+            foreach (var reviewFile in review.Files)
+            {
+                egsub.Files.Add(new EgressFile()
+                {
+                    Name = reviewFile,
+                    Status = FileStatus.Undecided
+                });
+            }
+            var boolResult = _dataEgressHelper.CallAPI<EgressSubmission, BoolReturn>("/api/DataEgress/AddNewDataEgress/", egsub).Result;
+            return boolResult;
         }
     }
 }

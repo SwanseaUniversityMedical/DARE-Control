@@ -62,7 +62,6 @@ namespace BL.Services
                 response = await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Post, jsonString, paramlist, fileParameterName, file);
             }
 
-
             if (response.IsSuccessStatusCode)
             {
                 var result = response.Content;

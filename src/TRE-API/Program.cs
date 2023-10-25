@@ -23,6 +23,9 @@ using BL.Models.ViewModels;
 using BL.Rabbit;
 using Microsoft.Extensions.Options;
 using EasyNetQ;
+using TRE_API.Models;
+using TREAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +53,9 @@ AddServices(builder);
 //Add Dependancies
 AddDependencies(builder, configuration);
 
+builder.Services.Configure<OPASettings>(configuration.GetSection("OPASettings"));
+builder.Services.AddTransient(opa => opa.GetService<IOptions<OPASettings>>().Value);
+
 builder.Services.Configure<RabbitMQSetting>(configuration.GetSection("RabbitMQ"));
 builder.Services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);
 var bus =
@@ -59,6 +65,15 @@ await SetUpRabbitMQ.DoItTreAsync(configuration["RabbitMQ:HostAddress"], configur
 var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
 builder.Services.AddSingleton(treKeyCloakSettings);
+
+
+var HasuraSettings = new HasuraSettings();
+configuration.Bind(nameof(HasuraSettings), HasuraSettings);
+builder.Services.AddSingleton(HasuraSettings);
+
+var minioSettings = new MinioSettings();
+configuration.Bind(nameof(MinioSettings), minioSettings);
+builder.Services.AddSingleton(minioSettings);
 
 var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
 configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
@@ -72,6 +87,19 @@ builder.Services.AddSingleton(minioSubSettings);
 var minioTRESettings = new MinioTRESettings();
 configuration.Bind(nameof(MinioTRESettings), minioTRESettings);
 builder.Services.AddSingleton(minioTRESettings);
+
+
+
+var AuthenticationSetting = new AuthenticationSettings();
+configuration.Bind(nameof(AuthenticationSetting), AuthenticationSetting);
+builder.Services.AddSingleton(AuthenticationSetting);
+
+var AgentSettings = new AgentSettings();
+configuration.Bind(nameof(AgentSettings), AgentSettings);
+builder.Services.AddSingleton(AgentSettings);
+
+
+
 
 builder.Services.AddHostedService<ConsumeInternalMessageService>();
 
@@ -95,6 +123,8 @@ builder.Services.AddScoped<IDareSyncHelper, DareSyncHelper>();
 builder.Services.AddScoped<ISubmissionHelper, SubmissionHelper>();
 builder.Services.AddScoped<IDoSyncWork, DoSyncWork>();
 builder.Services.AddScoped<IDoAgentWork, DoAgentWork>();
+builder.Services.AddScoped<IHasuraService, HasuraService>();
+builder.Services.AddScoped<IHasuraAuthenticationService, HasuraAuthenticationService>();
 
 
 var TVP = new TokenValidationParameters
@@ -156,10 +186,13 @@ builder.Services.AddAuthentication(options =>
     });
 
 // - authorize here
-builder.Services.AddAuthorization(options =>
-{
+// - Opa authorization
+builder.Services.AddAuthorization(options => { options.AddPolicy("UserAllowedPolicy", AuthorizationPolicies.GetUserAllowedPolicy());
+   
 
 });
+  
+
 
 // Enable CORS
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -313,7 +346,6 @@ void AddServices(WebApplicationBuilder builder)
       ));
     }
 }
-
 //for SignalR
 app.UseCors();
 app.MapHub<SignalRService>("/signalRHub", options =>
@@ -327,6 +359,7 @@ configuration.Bind(nameof(JobSettings), jobSettings);
 
 app.UseHangfireDashboard();
 
+
 const string syncJobName = "Sync Projects and Membership";
 if (jobSettings.syncSchedule == 0)
     RecurringJob.RemoveIfExists(syncJobName);
@@ -338,8 +371,15 @@ if (jobSettings.scanSchedule == 0)
     RecurringJob.RemoveIfExists(scanJobName);
 else
     RecurringJob.AddOrUpdate<IDoAgentWork>(scanJobName,
-        x => x.Execute(jobSettings.useRabbit, jobSettings.useHutch, jobSettings.useTESK),
+        x => x.Execute(),
         Cron.MinuteInterval(jobSettings.scanSchedule));
+
+
+if (HasuraSettings.IsEnabled)
+{
+    RecurringJob.AddOrUpdate<IHasuraService>(a => a.Run(), Cron.HourInterval(4));
+}
+
 
 var port = app.Environment.WebRootPath;
 Console.WriteLine("Application is running on port: " + port);

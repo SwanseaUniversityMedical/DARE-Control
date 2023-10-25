@@ -71,6 +71,27 @@ namespace TREAgent.Migrations
 
                     b.ToTable("TESK_Audit", "agent");
                 });
+
+            modelBuilder.Entity("TREAgent.Repositories.TokenToExpire", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("TesId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TokensToExpire", "agent");
+                });
 #pragma warning restore 612, 618
         }
     }
