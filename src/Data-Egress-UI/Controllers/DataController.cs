@@ -64,10 +64,17 @@ namespace Data_Egress_UI.Controllers
             return RedirectToAction("GetFiles", new { Id = Id });
         }
         [HttpPost]
-        public IActionResult GetEgress(EgressSubmission model)
+        public IActionResult GetEgress(EgressSubmission model, string submitButton)
         {
-            
-            var egress = _dataClientHelper.CallAPI<EgressSubmission, EgressSubmission>("/api/DataEgress/CompleteEgress/", model).Result;
+            if (submitButton == "SubmitButton")
+            {
+                var egress = _dataClientHelper.CallAPI<EgressSubmission, EgressSubmission>("/api/DataEgress/CompleteEgress/", model).Result;
+
+            }
+            else if (submitButton == "SaveButton")
+            {
+                //save the results
+            }
 
             return RedirectToAction("GetAllUnprocessedEgresses");
             
