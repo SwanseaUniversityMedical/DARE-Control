@@ -69,9 +69,9 @@
                     @*Implement at later time*@
                     @*
                     <form class="me-3 d-none d-lg-block" asp-controller="Home" asp-action="Index">
-                        <input type="search" class="form-control form-control-sm" name="SearchString" value="@ViewData["CurrentFilter"]" placeholder="Search..." aria-label="Search">
+                    <input type="search" class="form-control form-control-sm" name="SearchString" value="@ViewData["CurrentFilter"]" placeholder="Search..." aria-label="Search">
                     </form>
-              *@
+                    *@
                     @if (User.IsInRole("dare-control-admin"))
                     {
                         <div class="nav-item dropdown">
@@ -145,7 +145,7 @@
     <script src="~/js/bootstrap-history-tabs.js"></script>
     <script src="~/js/datatables.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-<script>
+    <script>
         $(document).ready(function () {
             if (location.hash !== '') $('a[href="' + location.hash + '"]').tab('show');
             return $('a[data-toggle="tab"]').on('shown', function (e) {
@@ -159,7 +159,7 @@
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
         const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
         new DataTable('#projectList');
-        $('#submissionList').DataTable( {
+        $('#submissionList').DataTable({
             columns: [
                 { orderable: false },
                 null,
@@ -193,11 +193,11 @@
 
         })
 
-        $('#addSubmission').on('click', function () {
+        //$('#addSubmission').on('click', function () {
 
-            $('#submissionModal').modal('show');
+        //    $('#submissionModal').modal('show');
 
-        })
+        //})
 
     </script>
 
@@ -216,7 +216,7 @@
         });
     </script>
 
-<script>
+    <script>
         var SaveUserList = function (el) {
             //debugger;
             var projectId = $(el).attr('id');
@@ -371,6 +371,18 @@
                     console.log(error);
                 }
             });
+        });
+    </script>
+    <script>
+        $("#showModalButton").click(function () {
+            //$('#showModalButton').on('click', function (e) {
+            debugger;
+            var message = $('#showModalButton').data('message');
+            $('#modalContent').text(message);
+
+            //$('#modalComponentContainer').load('/Components/SubmissionWizerdView?message=' + message);
+
+            $('#submissionModal').modal('show');
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)

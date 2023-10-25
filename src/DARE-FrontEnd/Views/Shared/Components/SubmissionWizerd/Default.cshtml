@@ -9,10 +9,10 @@
     <div class="d-flex align-items-center justify-content-between">
         <div>
             <h1 class="fs-3 mb-0">Submission Wizard</h1>
-        
+
         </div>
         @*<p class="badge py-2 px-3 badge-lg bg-warning text-dark rounded-pill m-0">
-            <i class="fa-solid fa-flag me-2"></i>Embargoed: @project.MarkAsEmbargoed
+        <i class="fa-solid fa-flag me-2"></i>Embargoed: @project.MarkAsEmbargoed
         </p>*@
     </div>
     <div class="mt-4">
@@ -20,7 +20,7 @@
 
         <div class="d-flex align-items-center justify-content-between mb-2">
             <div class="modal-body">
-                @using (Html.BeginForm("SubmissionWizard", "Submission", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain", @class="row g-3"  }))
+                @using (Html.BeginForm("SubmissionWizard", "Submission", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain", @class = "row g-3" }))
                 {
                     @Html.HiddenFor(x => x.ProjectId)
                     {
@@ -39,7 +39,7 @@
 
                         </div>
                         <div class="form-group">
-                    
+
                             @Html.LabelFor(x => x.OriginOption, new {@class="form-label"} )
                             <div class="form-check">
                                 @Html.RadioButtonFor(x => x.OriginOption, CrateOrigin.FileUpload, new {@class="form-check-input"})
@@ -49,9 +49,9 @@
                                 @Html.RadioButtonFor(x => x.OriginOption, CrateOrigin.External, new {@class="form-check-input"})
                                 @Html.Label(Helpers.PrettyCrateOrigin(CrateOrigin.External), Helpers.PrettyCrateOrigin(CrateOrigin.External), new {@class="form-check-label"})
                             </div>
-                       
 
-                   
+
+
 
 
                         </div>
