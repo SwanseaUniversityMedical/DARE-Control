@@ -29,22 +29,6 @@ namespace DARE_FrontEnd.Controllers
             return View(model:url);
         }
 
-        [Authorize]
-        [HttpGet]
-        public IActionResult SubmissionWizard(int projectId)
-        {
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("projectId", projectId.ToString());
-            var project = _clientHelper.CallAPIWithoutModel<BL.Models.Project?>(
-                "/api/Project/GetProject/", paramlist).Result;
-            var model = new SubmissionWizard()
-            {
-                ProjectId = project.Id,
-                ProjectName = project.Name,
-                SelectTresOptions = project.Tres.Select(x => x.Name).ToList()
-            };
-            return View(model);
-        }
 
         [Authorize]
         [HttpPost]
