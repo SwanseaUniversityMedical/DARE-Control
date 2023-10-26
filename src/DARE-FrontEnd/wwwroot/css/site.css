@@ -424,6 +424,23 @@ table tr {
     height:28px;
     background-color:#fff;
 }
+
+.modal-header, .modal-content, .model-footer {
+    border-radius:0px !important;
+}
+.modal-backdrop.show {
+    opacity: .6;
+}
+@supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
+    .modal {
+        -webkit-backdrop-filter: blur(2px);
+        backdrop-filter: blur(2px);
+    }
+
+    .warning {
+        display: none;
+    }
+}
 @media (min-width: 768px) {
     .navbar-expand-md .navbar-toggler {
         display: block;

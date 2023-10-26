@@ -478,7 +478,7 @@
 </div>
 
 <div class="modal fade bd-user-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="userModal">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-md shadow-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Add User</h1>
@@ -488,12 +488,14 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="table-responsive">
-                            <table class="table table-bordered" id="UserList">
+                            <table class="table" id="UserList">
                                 @foreach (var user in Model.UserItemList)
                                 {
                                     <tr>
-                                        <td><input type="checkbox" value="@user.Value" id="@user.Value" name="selectedUser" /></td>
-                                        <td>@user.Text</td>
+                                        <td>
+                                            <input type="checkbox" value="@user.Value" id="@user.Value" name="selectedUser" class="form-check-input me-2" />
+                                            @user.Text
+                                        </td>
                                     </tr>
                                 }
                             </table>
@@ -502,15 +504,15 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="SaveUserList(@Model.Id)">Add</button>
+                <button type="button" class="btn btn-sm btn-link" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-sm btn-primary" onclick="SaveUserList(@Model.Id)">Add</button>
             </div>
         </div>
     </div>
 </div>
 
 <div class="modal fade bd-tre-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="treModal">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-md shadow-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Add TRE</h1>
@@ -520,12 +522,14 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="table-responsive">
-                            <table class="table table-bordered" id="TreList">
+                            <table class="table " id="TreList">
                                 @foreach (var tre in Model.TreItemList)
                                 {
                                     <tr>
-                                        <td><input type="checkbox" value="@tre.Value" id="Tre_@tre.Value" name="selectedTre" /></td>
-                                        <td>@tre.Text</td>
+                                        <td>
+                                            <input type="checkbox" value="@tre.Value" id="Tre_@tre.Value" name="selectedTre" class="form-check-input me-2" />
+                                            @tre.Text
+                                        </td>
                                     </tr>
                                 }
                             </table>
@@ -534,27 +538,21 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="SaveTreList(@Model.Id)">Add</button>
+                <button type="button" class="btn btn-sm btn-link" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-sm btn-primary" onclick="SaveTreList(@Model.Id)">Add</button>
             </div>
         </div>
     </div>
 </div>
 
 <div class="modal fade bd-tre-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="submissionModal">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-md shadow-lg">
         <div class="modal-content">
             <div class="modal-header">
-                @*<h1 class="modal-title fs-5" id="exampleModalLabel">Add Submission</h1>*@
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Create Submission</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                @await Component.InvokeAsync("SubmissionWizerd", new {projectId=pId})
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                @*<button type="button" class="btn btn-primary" id="submitButton">Submit</button>*@
-            </div>
+            @await Component.InvokeAsync("SubmissionWizerd", new {projectId=pId})
         </div>
     </div>
 </div>
