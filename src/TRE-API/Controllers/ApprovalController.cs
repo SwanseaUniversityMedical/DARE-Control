@@ -87,7 +87,6 @@ namespace TRE_API.Controllers
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllActiveTreProjects")]
-       // [Authorize(Policy = "UserAllowedPolicy")]
         public List<TreProject> GetAllActiveTreProjects()
         {
             try { 
@@ -117,7 +116,6 @@ namespace TRE_API.Controllers
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllActiveTreUsers")]
-       // [Authorize(Policy = "UserAllowedPolicy")]
         public List<TreUser> GetAllActiveTreUsers()
         {
             try { 
