@@ -6,17 +6,11 @@
 }
 
 <div class="container-lg mt-4 p-4 bg-white border-1 shadow-sm">
-
-    <div class="d-flex align-items-center justify-content-between">
-        <div>
-            <h1 class="fs-3 mb-0">Approve Project</h1>
-        </div>
-    </div>
-    <div class="mt-4">
+    <div>
         <div class="d-flex align-items-center justify-content-between">
             <div>
                 <h1 class="fs-3 mb-0">@Model.SubmissionProjectName</h1>
-                <p class="text-muted small">#@Model.SubmissionProjectId</p>
+                <p class="font-monospace text-muted small">#@Model.SubmissionProjectId</p>
                 <p class="text-muted mb-0">
                     @if (Model.Decision == Decision.Undecided)
                     {
@@ -35,10 +29,21 @@
                 </span>
             }
         </div>
-        <hr class="d-flex my-4">
+        <ul class="nav nav-underline border-bottom mt-4 mb-5">
+            <li class="nav-item" role="presentation">
+                <a href="#" class="nav-link text-dark active">Project Approval</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a href="@Url.Action("EditMemberships", new { projectId = @Model.SubmissionProjectId})" class="nav-link text-dark">
+                    Memberships
+                </a>
+            </li>
+        </ul>
         <div class="form-group mb-4">
             <h2 class="fs-5">About</h2>
             @Model.Description
+
+            
         </div>
         <div class="row">
             <div class="col-md-4">
