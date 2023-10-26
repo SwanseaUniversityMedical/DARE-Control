@@ -53,9 +53,6 @@ AddServices(builder);
 //Add Dependancies
 AddDependencies(builder, configuration);
 
-builder.Services.Configure<OPASettings>(configuration.GetSection("OPASettings"));
-builder.Services.AddTransient(opa => opa.GetService<IOptions<OPASettings>>().Value);
-
 builder.Services.Configure<RabbitMQSetting>(configuration.GetSection("RabbitMQ"));
 builder.Services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);
 var bus =
@@ -65,7 +62,6 @@ await SetUpRabbitMQ.DoItTreAsync(configuration["RabbitMQ:HostAddress"], configur
 var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
 builder.Services.AddSingleton(treKeyCloakSettings);
-
 
 var HasuraSettings = new HasuraSettings();
 configuration.Bind(nameof(HasuraSettings), HasuraSettings);
@@ -187,10 +183,10 @@ builder.Services.AddAuthentication(options =>
 
 // - authorize here
 // - Opa authorization
-builder.Services.AddAuthorization(options => { options.AddPolicy("UserAllowedPolicy", AuthorizationPolicies.GetUserAllowedPolicy());
+//builder.Services.AddAuthorization(options => { options.AddPolicy("UserAllowedPolicy", AuthorizationPolicies.GetUserAllowedPolicy());
    
 
-});
+//});
   
 
 
@@ -265,6 +261,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<OpaAuthorizationMiddleware>();
+app.UseRouting();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

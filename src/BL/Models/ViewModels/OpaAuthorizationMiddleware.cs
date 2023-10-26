@@ -23,11 +23,11 @@ namespace BL.Models.ViewModels
         public async Task InvokeAsync(HttpContext context)
         {
             // Evaluate the policy using OPA
+            //var treuser = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+          
             var input = new
             {
-                method = context.Request.Method,
-                path = context.Request.Path.Value,
-                user = context.User?.Identity?.Name ?? "anonymous",
+          user = "Patricia", today = DateTime.Today
             };
 
             var requestContent = new StringContent(JsonConvert.SerializeObject(input), Encoding.UTF8, "application/json");
@@ -43,15 +43,16 @@ namespace BL.Models.ViewModels
             var result = JsonConvert.DeserializeObject<AuthorizationResult>(responseBody);
 
             // Check if the request is authorized
-            //if (result.IsAuthorized)
-            //{
-            //    await _next(context);
-            //}
-            //else
-            //{
-            //    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+            if (result.allow== "true" & result.project_allow == "true")
+            {
+                //await _next(context);
+                return;
+            }
+            else
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 
-            //}
+            }
 
         }
     }
