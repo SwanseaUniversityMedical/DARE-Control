@@ -33,6 +33,7 @@ namespace BL.Models
 
         [Display(Name = "Submission Bucket for TRE Layer")]
         public string? SubmissionBucketTre { get; set; }
+		
         [Display(Name = "Output Bucket Out for TRE Layer")]
         public string? OutputBucketTre { get; set; }
     }

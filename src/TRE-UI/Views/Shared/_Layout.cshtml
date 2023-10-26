@@ -38,10 +38,6 @@
                             <a class="nav-link text-dark" href="@Url.Action("GetAllProjects","Approval", new {  showOnlyUnprocessed = false })">Projects</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" href="@Url.Action("EditMemberships","Approval", new { projectId = 0, showOnlyUnprocessed = false })">Memberships</a>
-
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="SubmissionCredentials" asp-action="UpdateCredentials">Update Submission Credentials</a>
                         </li>
                         <li class="nav-item">
@@ -152,6 +148,7 @@
             }
             if (window.location.href.indexOf("GetAllProjects?showOnlyUnprocessed=True") > -1) {
                 $('.projects-menu li:last-child .nav-link').addClass('active');
+                $('.projects-menu li:first-child .nav-link').removeClass('active');
             }
             if (window.location.href.indexOf("showOnlyUnprocessed=False") > -1) {
                 $('.memberships-menu li:first-child .nav-link').addClass('active');

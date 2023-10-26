@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Authorization;
 using System.Threading;
 using BL.Services;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json.Linq;
+using System.Net.Http.Json;
 
 namespace DARE_API.Controllers
 {
@@ -87,18 +89,18 @@ namespace DARE_API.Controllers
                 var newstart = DateTime.Now.ToUniversalTime();
                 
                 asub.TesJson = SetTesTaskStateToCancelled(asub.TesJson, asub.Id);
-                
-                if (asub.Parent == null)
-                {
-                    UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.CancellingChildren,"");
-                    
+
+                    if (asub.Parent == null)
+                    {
+                        UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.CancellingChildren, "");
+
+                    }
+                    else
+                    {
+                        UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.RequestCancellation, "");
+
+                    }
                 }
-                else
-                {
-                    UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.RequestCancellation, "");
-                    
-                }
-            }
 
             await _DbContext.SaveChangesAsync(cancellationToken);
             
@@ -444,34 +446,36 @@ namespace DARE_API.Controllers
         public virtual IActionResult GetTestTes()
         {
             try { 
-            var test = new TesTask()
-            {
-               
-                Name = "Atest",
-                Executors = new List<TesExecutor>()
-                {
-                    new TesExecutor()
-                    {
-                        Image = @"\\minio\justin1.crate",
-                      
-                    }
-                },
-                Tags = new Dictionary<string, string>()
-                {
-                    { "project", "Head" },
-                    { "tres", "SAIL|DPUK" }
-                }
+				var test = new TesTask()
+				{
+				   
+					Name = "Atest",
+					Executors = new List<TesExecutor>()
+					{
+						new TesExecutor()
+						{
+							Image = @"\\minio\justin1.crate",
+						  
+						}
+					},
+					Tags = new Dictionary<string, string>()
+					{
+						{ "project", "Head" },
+						{ "tres", "SAIL|DPUK" }
+					}
 
-            };
+				};
 
-            var teststring = JsonConvert.SerializeObject(test);
-            return StatusCode(200, teststring);
+
+				return StatusCode(200, test);
+
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "{Function} Crashed", "GetTestTES");
                 throw;
             }
+
         }
 
 

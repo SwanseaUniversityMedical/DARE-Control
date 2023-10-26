@@ -3,7 +3,7 @@
     string pageName = Model.Name;
 
     ViewData["Title"] = @pageName;
-
+    int pId = Model.Id;
 
 }
 
@@ -15,7 +15,7 @@
             <p class="font-monospace text-muted small mb-0">#@Model.Id</p>
         </div>
         @*<p class="badge py-2 px-3 badge-lg bg-warning text-dark rounded-pill m-0">
-            <i class="fa-solid fa-flag me-2"></i>Embargoed: @project.MarkAsEmbargoed
+        <i class="fa-solid fa-flag me-2"></i>Embargoed: @project.MarkAsEmbargoed
         </p>*@
     </div>
     <div class="mt-4">
@@ -80,337 +80,342 @@
                             <i class="fa fa-info-circle align-middle me-2"></i>
                             <span>Submit with API</span>
                         </a>
-                        <a href="@Url.Action("SubmissionWizard", "Submission", new { projectId = Model.Id })" class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" id="redirectSubmission">
+                        <a class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" id="showModalButton">
                             <i class="fa fa-table-columns align-middle me-2"></i>
                             <span>Submit with Wizard</span>
                         </a>
+                        @*<a href="@Url.Action("SubmissionWizard", "Submission", new { projectId = Model.Id })" class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" id="redirectSubmission">
+                    <i class="fa fa-table-columns align-middle me-2"></i>
+                    <span>Submit with Wizard</span>
+                    </a>
+                    <button id="showModalButton" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-message="@Model.Id">Show Modal</button>*@
                     </div>
                     <hr class="d-flex my-4">
                 }
 
-                
+
                 <div class="table-responsive">
                     <table id="submissionList" class="table" caption="List of Submissions">
                         <thead>
-                        <tr>
-                            <th></th>
-                            <th>Submission Name</th>
-                            <th>Project</th>
-                            <th>Submitted by</th>
-                            <th>Submission Date</th>
-                            <th></th>
-                        </tr>
+                            <tr>
+                                <th></th>
+                                <th>Submission Name</th>
+                                <th>Project</th>
+                                <th>Submitted by</th>
+                                <th>Submission Date</th>
+                                <th></th>
+                            </tr>
                         </thead>
                         <tbody>
-                        @foreach (var submission in Model.Submissions)
-                        {
-                            <tr>
-                                <td>
-                                    @{
-                                        var overallStatus = submission.Status;
-                                        if (overallStatus == BL.Models.Enums.StatusType.Completed)
-                                        {
+                            @foreach (var submission in Model.Submissions)
+                            {
+                                <tr>
+                                    <td>
+                                        @{
+                                            var overallStatus = submission.Status;
+                                            if (overallStatus == BL.Models.Enums.StatusType.Completed)
+                                            {
 
-                                            <h6 class="mb-0">
-                                                <span class="badge bg-success rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Completed: @submission.EndTime">
-                                                    <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
-                                                    <span>Completed</span>
-                                                </span>
-                                            </h6>
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-success rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Completed: @submission.EndTime">
+                                                        <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
+                                                        <span>Completed</span>
+                                                    </span>
+                                                </h6>
+                                            }
+                                            else if (overallStatus == BL.Models.Enums.StatusType.Failed || overallStatus == BL.Models.Enums.StatusType.Cancelled)
+                                            {
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-danger rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="@overallStatus.ToString(): @submission.EndTime">
+                                                        <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
+                                                        <span>@overallStatus.ToString()</span>
+                                                    </span>
+                                                </h6>
+                                            }
+                                            else if (overallStatus == BL.Models.Enums.StatusType.PartialResult)
+                                            {
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-warning rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="@overallStatus.ToString(): @submission.EndTime">
+                                                        <i class="fa-solid fa-circle-check  fs-6 text-white me-2"></i>
+                                                        <span>Partial Result</span>
+                                                    </span>
+                                                </h6>
+                                            }
+                                            else
+                                            {
+
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Runtime: @submission.GetTotalDisplayTime()">
+                                                        <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
+                                                        <span>Running</span>
+                                                    </span>
+                                                </h6>
+
+
+                                            }
+
                                         }
-                                        else if (overallStatus == BL.Models.Enums.StatusType.Failed || overallStatus == BL.Models.Enums.StatusType.Cancelled)
-                                        {
-                                            <h6 class="mb-0">
-                                                <span class="badge bg-danger rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="@overallStatus.ToString(): @submission.EndTime">
-                                                    <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
-                                                    <span>@overallStatus.ToString()</span>
-                                                </span>
-                                            </h6>
-                                        }
-                                        else if (overallStatus == BL.Models.Enums.StatusType.PartialResult)
-                                        {
-                                            <h6 class="mb-0">
-                                                <span class="badge bg-warning rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="@overallStatus.ToString(): @submission.EndTime">
-                                                    <i class="fa-solid fa-circle-check  fs-6 text-white me-2"></i>
-                                                    <span>Partial Result</span>
-                                                </span>
-                                            </h6>
-                                        }
-                                        else
-                                        {
 
-                                            <h6 class="mb-0">
-                                                <span class="badge bg-primary rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Runtime: @submission.GetTotalDisplayTime()">
-                                                    <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
-                                                    <span>Running</span>
-                                                </span>
-                                            </h6>
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })">
+                                            <h2 class="mb-0 fw-bold hover-underline fs-6">
+                                                @submission.TesName
+                                            </h2>
+                                        </a>
 
-
-                                        }
-
-                                    }
-
-                                </td>
-                                <td>
-                                    <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })">
-                                        <h2 class="mb-0 fw-bold hover-underline fs-6">
-                                            @submission.TesName
-                                        </h2>
-                                    </a>
-
-                                </td>
-                                <td>
-                                    @submission.Project.Name
-                                </td>
-                                <td>
-                                    @submission.SubmittedBy.Name
-                                </td>
-                                <td>
-                                    @submission.StartTime
-                                </td>
-                                <td>
-                                    <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })" class="btn btn-sm btn-outline-primary">
-                                        <span class="small">View</span>
-                                    </a>
-                                </td>
-                            </tr>
-                        }
+                                    </td>
+                                    <td>
+                                        @submission.Project.Name
+                                    </td>
+                                    <td>
+                                        @submission.SubmittedBy.Name
+                                    </td>
+                                    <td>
+                                        @submission.StartTime
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })" class="btn btn-sm btn-outline-primary">
+                                            <span class="small">View</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
 
                 </div>
-            @* @if (User.IsInRole("dare-control-admin"))
+                @* @if (User.IsInRole("dare-control-admin"))
                 {
-                    <div class="d-flex align-items-center mb-3">
-                        <a asp-controller="Submission" asp-action="Instructions" class="btn btn-primary btn-sm d-flex align-items-center mb-3 me-2">
-                            <i class="fa fa-info-circle align-middle me-2"></i>
-                            <span>Submit with API</span>
-                        </a>
-                        <a href="@Url.Action("SubmissionWizard", "Submission", new { projectId = Model.Id })" class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" id="redirectSubmission">
-                            <i class="fa fa-table-columns align-middle me-2"></i>
-                            <span>Submit with Wizard</span>
-                        </a>
+                <div class="d-flex align-items-center mb-3">
+                <a asp-controller="Submission" asp-action="Instructions" class="btn btn-primary btn-sm d-flex align-items-center mb-3 me-2">
+                <i class="fa fa-info-circle align-middle me-2"></i>
+                <span>Submit with API</span>
+                </a>
+                <a href="@Url.Action("SubmissionWizard", "Submission", new { projectId = Model.Id })" class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" id="redirectSubmission">
+                <i class="fa fa-table-columns align-middle me-2"></i>
+                <span>Submit with Wizard</span>
+                </a>
 
-                       
-                    </div>
+
+                </div>
                 }
 
                 <div class="row">
-                    <div class="col-12">
-                        <hr class="d-flex my-4">
-                        <div class="table-responsive">
-                            <table id="submissionList" class="table" caption="List of Submissions">
-                                <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th>Submission Name</th>
-                                        <th>Project</th>
-                                        <th>Submitted by</th>
-                                        <th>Submission Date</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var submission in Model.Submissions)
-                                    {
-                                        <tr>
-                                            <td>
-                                                @
-            {
-                                            switch (submission.Status)
-                                            {
-                                            case BL.Models.Enums.StatusType.DataOutApproved:
-                                            <span class="badge bg-dark-blue rounded-pill">@submission.Status</span>
-                                            break;
-                                            default:
-                                            <span class="badge bg-dark-blue rounded-pill">@submission.Status</span>
-                                            break;
-                                            }
-                                            }
-                                                @{
-                                                    var overallStatus = submission.Status;
-                                                    if (overallStatus == BL.Models.Enums.StatusType.Completed)
-                                                    {
+                <div class="col-12">
+                <hr class="d-flex my-4">
+                <div class="table-responsive">
+                <table id="submissionList" class="table" caption="List of Submissions">
+                <thead>
+                <tr>
+                <th></th>
+                <th>Submission Name</th>
+                <th>Project</th>
+                <th>Submitted by</th>
+                <th>Submission Date</th>
+                <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var submission in Model.Submissions)
+                {
+                <tr>
+                <td>
+                @
+                {
+                switch (submission.Status)
+                {
+                case BL.Models.Enums.StatusType.DataOutApproved:
+                <span class="badge bg-dark-blue rounded-pill">@submission.Status</span>
+                break;
+                default:
+                <span class="badge bg-dark-blue rounded-pill">@submission.Status</span>
+                break;
+                }
+                }
+                @{
+                var overallStatus = submission.Status;
+                if (overallStatus == BL.Models.Enums.StatusType.Completed)
+                {
 
-                                                        <h6 class="mb-0">
-                                                            <span class="badge bg-success rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Completed: @submission.EndTime">
-                                                                <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
-                                                                <span>Completed</span>
-                                                            </span>
-                                                        </h6>
-                                                    }
-                                                    else if (overallStatus == BL.Models.Enums.StatusType.Failed)
-                                                    {
-                                                        <h6 class="mb-0">
-                                                            <span class="badge bg-danger rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Failed: @submission.EndTime">
-                                                                <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
-                                                                <span>Failed</span>
-                                                            </span>
-                                                        </h6>
-                                                    }
-                                                    else
-                                                    {
-                                                        var runtime = DateTime.UtcNow - submission.StartTime;
-                                                        var displayRuntime = "";
-                                                        var displaySec = " seconds";
-                                                        var displayMin = " minutes";
-                                                        var displayHour = " hours";
-                                                        var displayDay = " days";
+                <h6 class="mb-0">
+                <span class="badge bg-success rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Completed: @submission.EndTime">
+                <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
+                <span>Completed</span>
+                </span>
+                </h6>
+                }
+                else if (overallStatus == BL.Models.Enums.StatusType.Failed)
+                {
+                <h6 class="mb-0">
+                <span class="badge bg-danger rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Failed: @submission.EndTime">
+                <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
+                <span>Failed</span>
+                </span>
+                </h6>
+                }
+                else
+                {
+                var runtime = DateTime.UtcNow - submission.StartTime;
+                var displayRuntime = "";
+                var displaySec = " seconds";
+                var displayMin = " minutes";
+                var displayHour = " hours";
+                var displayDay = " days";
 
-                                                        if (runtime.TotalSeconds < 60)
-                                                        {
-                                                            if (runtime.Seconds == 1)
-                                                            {
-                                                                displaySec = " Second ";
-                                                            }
-                                                            else
-                                                            {
-                                                                displaySec = " Seconds ";
-                                                            }
+                if (runtime.TotalSeconds < 60)
+                {
+                if (runtime.Seconds == 1)
+                {
+                displaySec = " Second ";
+                }
+                else
+                {
+                displaySec = " Seconds ";
+                }
 
-                                                            displayRuntime = @runtime.Seconds + displaySec;
-
-
-                                                        }
-                                                        else if (runtime.TotalMinutes < 60)
-                                                        {
-                                                            if (runtime.Minutes == 1)
-                                                            {
-                                                                displayMin = " Minute ";
-                                                            }
-                                                            else
-                                                            {
-                                                                displayMin = " Minutes ";
-                                                            }
-                                                            if (runtime.Seconds == 1)
-                                                            {
-                                                                displaySec = " Second ";
-                                                            }
-                                                            else
-                                                            {
-                                                                displaySec = " Seconds ";
-                                                            }
-                                                            displayRuntime = @runtime.Minutes + displayMin + @runtime.Seconds + " and " + displaySec;
-
-                                                        }
-                                                        else if (runtime.TotalHours < 24)
-                                                        {
-                                                            if (runtime.Hours == 1)
-                                                            {
-                                                                displayHour = " Hour ";
-                                                            }
-                                                            else
-                                                            {
-                                                                displayHour = " Hours ";
-                                                            }
-                                                            if (runtime.Minutes == 1)
-                                                            {
-                                                                displayMin = " Minute ";
-                                                            }
-                                                            else
-                                                            {
-                                                                displayMin = " Minutes ";
-                                                            }
-                                                            if (runtime.Seconds == 1)
-                                                            {
-                                                                displaySec = " Second ";
-                                                            }
-                                                            else
-                                                            {
-                                                                displaySec = " Seconds ";
-                                                            }
+                displayRuntime = @runtime.Seconds + displaySec;
 
 
-                                                            displayRuntime = runtime.Hours + displayHour + @runtime.Minutes + displayMin + " and " + @runtime.Seconds + displaySec;
-                                                        }
-                                                        else
-                                                        {
-                                                            if (runtime.Days == 1)
-                                                            {
-                                                                displayDay = " Day ";
-                                                            }
-                                                            else
-                                                            {
-                                                                displayDay = " Days ";
-                                                            }
-                                                            if (runtime.Hours == 1)
-                                                            {
-                                                                displayHour = " Hour ";
-                                                            }
-                                                            else
-                                                            {
-                                                                displayHour = " Hours ";
-                                                            }
-                                                            if (runtime.Minutes == 1)
-                                                            {
-                                                                displayMin = " Minute ";
-                                                            }
-                                                            else
-                                                            {
-                                                                displayMin = " Minutes ";
-                                                            }
-                                                            if (runtime.Seconds == 1)
-                                                            {
-                                                                displaySec = " Second ";
-                                                            }
-                                                            else
-                                                            {
-                                                                displaySec = " Seconds ";
-                                                            }
+                }
+                else if (runtime.TotalMinutes < 60)
+                {
+                if (runtime.Minutes == 1)
+                {
+                displayMin = " Minute ";
+                }
+                else
+                {
+                displayMin = " Minutes ";
+                }
+                if (runtime.Seconds == 1)
+                {
+                displaySec = " Second ";
+                }
+                else
+                {
+                displaySec = " Seconds ";
+                }
+                displayRuntime = @runtime.Minutes + displayMin + @runtime.Seconds + " and " + displaySec;
 
-                                                            displayRuntime = runtime.Days + displayDay + runtime.Hours + displayHour + @runtime.Minutes + displayMin + " and " + @runtime.Seconds + displaySec;
+                }
+                else if (runtime.TotalHours < 24)
+                {
+                if (runtime.Hours == 1)
+                {
+                displayHour = " Hour ";
+                }
+                else
+                {
+                displayHour = " Hours ";
+                }
+                if (runtime.Minutes == 1)
+                {
+                displayMin = " Minute ";
+                }
+                else
+                {
+                displayMin = " Minutes ";
+                }
+                if (runtime.Seconds == 1)
+                {
+                displaySec = " Second ";
+                }
+                else
+                {
+                displaySec = " Seconds ";
+                }
 
 
-                                                        }
-                                                        <h6 class="mb-0">
-                                                            <span class="badge bg-primary rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Runtime: @displayRuntime">
-                                                                <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
-                                                                <span>Running</span>
-                                                            </span>
-                                                        </h6>
+                displayRuntime = runtime.Hours + displayHour + @runtime.Minutes + displayMin + " and " + @runtime.Seconds + displaySec;
+                }
+                else
+                {
+                if (runtime.Days == 1)
+                {
+                displayDay = " Day ";
+                }
+                else
+                {
+                displayDay = " Days ";
+                }
+                if (runtime.Hours == 1)
+                {
+                displayHour = " Hour ";
+                }
+                else
+                {
+                displayHour = " Hours ";
+                }
+                if (runtime.Minutes == 1)
+                {
+                displayMin = " Minute ";
+                }
+                else
+                {
+                displayMin = " Minutes ";
+                }
+                if (runtime.Seconds == 1)
+                {
+                displaySec = " Second ";
+                }
+                else
+                {
+                displaySec = " Seconds ";
+                }
+
+                displayRuntime = runtime.Days + displayDay + runtime.Hours + displayHour + @runtime.Minutes + displayMin + " and " + @runtime.Seconds + displaySec;
 
 
-                                                    }
+                }
+                <h6 class="mb-0">
+                <span class="badge bg-primary rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Runtime: @displayRuntime">
+                <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
+                <span>Running</span>
+                </span>
+                </h6>
 
-                                                }
-                                                @*
-                                            <i class="fa-solid fa-circle-check fs-5 text-success" data-bs-toggle="tooltip" data-bs-title="Completed: xx/xx/xxxx"></i>
-                                            <i class="fa-solid fa-triangle-exclamation fs-5 text-danger" data-bs-toggle="tooltip" data-bs-title="Failed: error message"></i>
-                                            <i class="fa-solid fa-circle-notch fa-spin fs-5 text-primary" data-bs-toggle="tooltip" data-bs-title="@submission.Status"></i>
-                                            
-                                            </td>
-                                            <td>
-                                                <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })">
-                                                    <h2 class="mb-0 fw-bold hover-underline fs-6">
-                                                        @submission.TesName
-                                                        @*<span class="text-muted fw-normal fs-7 mb-0">
-                                                    ID: @submission.Id<br>
-                                                    </span>
-                                                    </h2>
-                                                </a>
 
-                                            </td>
-                                            <td>
-                                                @submission.Project.Name
-                                            </td>
-                                            <td>
-                                                @submission.SubmittedBy.Name
-                                            </td>
-                                            <td>
-                                                @submission.StartTime
-                                            </td>
-                                            <td>
-                                                <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })" class="btn btn-sm btn-outline-primary">
-                                                    <span class="small">View</span>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                            </div>
-                    </div>
+                }
+
+                }
+                @*
+                <i class="fa-solid fa-circle-check fs-5 text-success" data-bs-toggle="tooltip" data-bs-title="Completed: xx/xx/xxxx"></i>
+                <i class="fa-solid fa-triangle-exclamation fs-5 text-danger" data-bs-toggle="tooltip" data-bs-title="Failed: error message"></i>
+                <i class="fa-solid fa-circle-notch fa-spin fs-5 text-primary" data-bs-toggle="tooltip" data-bs-title="@submission.Status"></i>
+
+                </td>
+                <td>
+                <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })">
+                <h2 class="mb-0 fw-bold hover-underline fs-6">
+                @submission.TesName
+                @*<span class="text-muted fw-normal fs-7 mb-0">
+                ID: @submission.Id<br>
+                </span>
+                </h2>
+                </a>
+
+                </td>
+                <td>
+                @submission.Project.Name
+                </td>
+                <td>
+                @submission.SubmittedBy.Name
+                </td>
+                <td>
+                @submission.StartTime
+                </td>
+                <td>
+                <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })" class="btn btn-sm btn-outline-primary">
+                <span class="small">View</span>
+                </a>
+                </td>
+                </tr>
+                }
+                </tbody>
+                </table>
+                </div>
+                </div>
                 </div>*@
             </div>
             <div class="tab-pane fade" id="userMembership" role="tabpanel" aria-labelledby="people">
@@ -447,10 +452,21 @@
                             @foreach (var tre in Model.Tres)
                             {
                                 <li class="list-group-item justify-content-between d-flex">
-                                    <a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })">@tre.Name</a>
-                                    <a href="@Url.Action("RemoveTreFromProject", "Project",new{ProjectId=Model.Id,TreId=tre.Id})">
-                                        <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
-                                    </a>
+                                    <a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })" class="fw-bold">@tre.Name</a>
+                                    <span class="d-flex align-items-center">
+                                        <span class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 me-3">
+                                            <i class="fa-solid fa-check-circle me-1"></i> Approved
+                                        </span>
+                                        <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 me-3">
+                                            <i class="fa-solid fa-circle-notch fa-spin me-1"></i> Awaiting Approval
+                                        </span>
+                                        <span class="badge  px-2 badge-sm bg-danger text-light rounded-pill m-0 me-3">
+                                            <i class="fa-solid fa-close me-1"></i> Rejected
+                                        </span>
+                                        <a href="@Url.Action("RemoveTreFromProject", "Project",new{ProjectId=Model.Id,TreId=tre.Id})">
+                                            <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
+                                        </a>
+                                    </span>
                                 </li>
                             }
                         </ul>
@@ -462,7 +478,7 @@
 </div>
 
 <div class="modal fade bd-user-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="userModal">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-md shadow-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Add User</h1>
@@ -472,12 +488,14 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="table-responsive">
-                            <table class="table table-bordered" id="UserList">
+                            <table class="table" id="UserList">
                                 @foreach (var user in Model.UserItemList)
                                 {
                                     <tr>
-                                        <td><input type="checkbox" value="@user.Value" id="@user.Value" name="selectedUser" /></td>
-                                        <td>@user.Text</td>
+                                        <td>
+                                            <input type="checkbox" value="@user.Value" id="@user.Value" name="selectedUser" class="form-check-input me-2" />
+                                            @user.Text
+                                        </td>
                                     </tr>
                                 }
                             </table>
@@ -486,15 +504,15 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="SaveUserList(@Model.Id)">Add</button>
+                <button type="button" class="btn btn-sm btn-link" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-sm btn-primary" onclick="SaveUserList(@Model.Id)">Add</button>
             </div>
         </div>
     </div>
 </div>
 
 <div class="modal fade bd-tre-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="treModal">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-md shadow-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Add TRE</h1>
@@ -504,12 +522,14 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="table-responsive">
-                            <table class="table table-bordered" id="TreList">
+                            <table class="table " id="TreList">
                                 @foreach (var tre in Model.TreItemList)
                                 {
                                     <tr>
-                                        <td><input type="checkbox" value="@tre.Value" id="Tre_@tre.Value" name="selectedTre" /></td>
-                                        <td>@tre.Text</td>
+                                        <td>
+                                            <input type="checkbox" value="@tre.Value" id="Tre_@tre.Value" name="selectedTre" class="form-check-input me-2" />
+                                            @tre.Text
+                                        </td>
                                     </tr>
                                 }
                             </table>
@@ -518,64 +538,21 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="SaveTreList(@Model.Id)">Add</button>
+                <button type="button" class="btn btn-sm btn-link" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-sm btn-primary" onclick="SaveTreList(@Model.Id)">Add</button>
             </div>
         </div>
     </div>
 </div>
 
 <div class="modal fade bd-tre-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="submissionModal">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-md shadow-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Add Submission</h1>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Create Submission</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-
-                <form class="row g-3" id="submissionForm" enctype="multipart/form-data">
-                    <input type="hidden" id="projectId" name="projectId" value="@Model.Id" />
-                    <input type="hidden" id="projectName" name="projectName" value="@Model.Name" />
-                    <input type="hidden" id="submissionBucket" name="submissionBucket" value="@Model.SubmissionBucket" />
-                    <div class="col-12">
-                        <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="name" placeholder="">
-                    </div>
-                    <div class="col-md-12">
-                        <select id="treDropdown" name="treDropdown" class="form-select" multiple>
-                            @foreach (var p in Model.Tres)
-                            {
-                                <option value="@p.Name">@p.Name</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Choose an option:</label>
-                        <div class="form-check">
-                            <input type="radio" name="Option" value="url" class="form-check-input" />
-                            <label class="form-check-label">External Url</label>
-                        </div>
-                        <div class="form-check">
-                            <input type="radio" name="Option" value="file" class="form-check-input" />
-                            <label class="form-check-label">File Upload</label>
-                        </div>
-                    </div>
-                    <div id="externalUrl" class="form-group" style="display:none;">
-                        <label for="Url">External Url</label>
-                        <input class="form-control" id="url" name="url" />
-                    </div>
-
-                    <div id="uploadedFile" class="form-group" style="display:none;">
-                        <label for="File">Image</label>
-                        <input class="form-control" type="file" id="file" name="file" />
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="submitButton">Submit</button>
-            </div>
+            @await Component.InvokeAsync("SubmissionWizerd", new {projectId=pId})
         </div>
     </div>
 </div>

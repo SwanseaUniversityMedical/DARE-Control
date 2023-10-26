@@ -20,19 +20,21 @@ namespace BL.Models.ViewModels
     public class SubmissionWizard
     {
         public int ProjectId { get; set; }
+
+        [Display(Name = "TES Name")]
         public string TESName { get; set; }
 
         [Display(Name = "Submitting to Project: ")]
         public string ProjectName { get; set; }
 
-        [Display(Name = "Select TREs or leave blank for all")]
+        [Display(Name = "Select TREs")]
         public List<string>? Tres { get; set; }
 
         public List<string>? SelectTresOptions { get; set; }
         [Display(Name = "Select TREs or leave blank for all")]
         public string SelectedTres { get; set; }
 
-        [Display(Name = "Select external URL or upload to project bucket")]
+        [Display(Name = "Upload script file via external URL or upload to project bucket")]
         public CrateOrigin OriginOption { get; set; }
 
         [Display(Name = "External URL")]
