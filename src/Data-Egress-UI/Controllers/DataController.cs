@@ -73,7 +73,8 @@ namespace Data_Egress_UI.Controllers
             }
             else if (submitButton == "SaveButton")
             {
-                //save the results
+                var egress = _dataClientHelper.CallAPI<EgressSubmission, EgressSubmission>("/api/DataEgress/PartialEgress/", model).Result;
+
             }
 
             return RedirectToAction("GetAllUnprocessedEgresses");
