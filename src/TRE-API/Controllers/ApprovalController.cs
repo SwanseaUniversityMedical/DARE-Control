@@ -18,8 +18,6 @@ using System.Threading;
 namespace TRE_API.Controllers
 {
 
-    // 
-    
     [Route("api/[controller]")]
     [ApiController]
 
