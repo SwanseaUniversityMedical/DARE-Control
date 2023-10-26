@@ -85,10 +85,10 @@
                             <span>Submit with Wizard</span>
                         </a>
                         @*<a href="@Url.Action("SubmissionWizard", "Submission", new { projectId = Model.Id })" class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" id="redirectSubmission">
-                            <i class="fa fa-table-columns align-middle me-2"></i>
-                            <span>Submit with Wizard</span>
-                        </a>
-                        <button id="showModalButton" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-message="@Model.Id">Show Modal</button>*@
+                    <i class="fa fa-table-columns align-middle me-2"></i>
+                    <span>Submit with Wizard</span>
+                    </a>
+                    <button id="showModalButton" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-message="@Model.Id">Show Modal</button>*@
                     </div>
                     <hr class="d-flex my-4">
                 }
@@ -452,10 +452,21 @@
                             @foreach (var tre in Model.Tres)
                             {
                                 <li class="list-group-item justify-content-between d-flex">
-                                    <a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })">@tre.Name</a>
-                                    <a href="@Url.Action("RemoveTreFromProject", "Project",new{ProjectId=Model.Id,TreId=tre.Id})">
-                                        <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
-                                    </a>
+                                    <a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })" class="fw-bold">@tre.Name</a>
+                                    <span class="d-flex align-items-center">
+                                        <span class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 me-3">
+                                            <i class="fa-solid fa-check-circle me-1"></i> Approved
+                                        </span>
+                                        <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 me-3">
+                                            <i class="fa-solid fa-circle-notch fa-spin me-1"></i> Awaiting Approval
+                                        </span>
+                                        <span class="badge  px-2 badge-sm bg-danger text-light rounded-pill m-0 me-3">
+                                            <i class="fa-solid fa-close me-1"></i> Rejected
+                                        </span>
+                                        <a href="@Url.Action("RemoveTreFromProject", "Project",new{ProjectId=Model.Id,TreId=tre.Id})">
+                                            <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
+                                        </a>
+                                    </span>
                                 </li>
                             }
                         </ul>
