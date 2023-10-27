@@ -451,12 +451,13 @@
                         <ul class="list-group">
                             @foreach (var tre in Model.Tres)
                             {
+                                <a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })" class="fw-bold">@tre.Name</a>
                                 @foreach (var decision in tre.ProjectTreDecisions)
                                 {
                                    
 
                                                         <li class="list-group-item justify-content-between d-flex">
-                                                            <a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })" class="fw-bold">@tre.Name</a>
+                                                            
                                                             <span class="d-flex align-items-center">
                                             @if (decision.Decision == BL.Models.Enums.Decision.Approved)
                                             {
