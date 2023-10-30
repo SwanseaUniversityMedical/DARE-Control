@@ -19,6 +19,7 @@
     <script src="~/js/formIo.js"></script>
     <script src="~/js/clipboard.min.js"></script>
     <link rel="stylesheet" href="https://use.typekit.net/tyz0nfb.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
 </head>
 <body class="d-flex flex-column h-100">
     <header>
@@ -96,6 +97,7 @@
         </nav>
     </header>
     <main role="main" class="pb-3">
+        <partial name="_Notification" />
         @RenderBody()
     </main>
 
