@@ -88,6 +88,7 @@ namespace DARE_FrontEnd.Controllers
                 if (result.Error)
                     return BadRequest();
 
+                TempData["success"] = "Tre Save Successfully";
                 return Ok(result);
             }
             return BadRequest();
