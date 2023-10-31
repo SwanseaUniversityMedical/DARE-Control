@@ -137,7 +137,6 @@ namespace BL.Services
                     throw new Exception("API Call Failure: " + res.StatusCode + ": " + res.ReasonPhrase + " " + content);
                 }
                 Log.Information("{Function} The response {res}", "ClientHelperRequestAsync", res);
-               
                 return res;
             }
             catch (Exception ex) {
