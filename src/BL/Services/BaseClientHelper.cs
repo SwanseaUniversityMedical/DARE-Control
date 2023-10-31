@@ -133,7 +133,7 @@ namespace BL.Services
                         // Output the string content
                         
                     }
-                    Log.Information("{Function} Api returned an error Response {Res} Error content {Content}", "ClientHelperRequestAsync", res, content);
+                    Log.Information("{Function} Api returned an error for {endPoint} Response {Res} Error content {Content}", "ClientHelperRequestAsync",endPoint ,  res, content);
                     throw new Exception("API Call Failure: " + res.StatusCode + ": " + res.ReasonPhrase + " " + content);
                 }
                 Log.Information("{Function} The response {res}", "ClientHelperRequestAsync", res);
