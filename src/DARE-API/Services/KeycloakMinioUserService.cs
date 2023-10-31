@@ -26,7 +26,7 @@ namespace DARE_API.Services
                 var baseUrl = _submissionKeyCloakSettings.Server;
                 var realm = _submissionKeyCloakSettings.Realm;
                 var attributeKey = "policy";
-                var userId = await GetUserIDAsync(baseUrl, realm, accessToken, userName);
+                var userId = await GetUserIDAsync(accessToken, userName);
                 var userAttributesJson = await GetUserAttributesAsync(baseUrl, realm, accessToken, userId);
 
                 if (userAttributesJson != null)
@@ -91,7 +91,7 @@ namespace DARE_API.Services
                 var baseUrl = _submissionKeyCloakSettings.Server;
                 var realm = _submissionKeyCloakSettings.Realm;
                 var attributeKey = "policy";
-                var userId = await GetUserIDAsync(baseUrl, realm, accessToken, userName);
+                var userId = await GetUserIDAsync(accessToken, userName);
                 var userAttributesJson = await GetUserAttributesAsync(baseUrl, realm, accessToken, userId);
 
                 if (userAttributesJson != null)
@@ -147,9 +147,10 @@ namespace DARE_API.Services
                 throw;
             }
         }
-        public async Task<string> GetUserIDAsync(string baseUrl, string realm, string accessToken, string userName)
+        public async Task<string> GetUserIDAsync(string accessToken, string userName)
         {
-
+            var baseUrl = _submissionKeyCloakSettings.Server;
+            var realm = _submissionKeyCloakSettings.Realm;
             HttpClient httpClient = new HttpClient(_submissionKeyCloakSettings.getProxyHandler);
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
@@ -170,8 +171,8 @@ namespace DARE_API.Services
                     }
                 }
 
-
-                throw new Exception("User not found");
+                return string.Empty;
+                //throw new Exception("User not found");
             }
             catch (Exception ex)
             {
