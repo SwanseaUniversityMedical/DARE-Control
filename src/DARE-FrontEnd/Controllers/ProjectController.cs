@@ -286,7 +286,8 @@ namespace DARE_FrontEnd.Controllers
                 if (user.UserId == 0)
                 {
                     TempData["error"] = "User not found. Need to Register";
-                    return Ok();
+                    //return Ok();
+                    //TO DO make array of none exists user 
                 }
                 var response =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
