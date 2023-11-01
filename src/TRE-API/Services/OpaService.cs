@@ -5,18 +5,19 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Diagnostics.Eventing.Reader;
 using BL.Models;
+using BL.Models.ViewModels;
 
 namespace TRE_API.Services
 {
-
-    public class OpaService
+   public class OpaService
     {
         private readonly HttpClient _httpClient;
-        public OpaService()
+        private readonly OPASettings _opaSettings;
+     public OpaService(OPASettings opaSettings)
         {
+            _opaSettings = opaSettings;
             _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri("http://localhost:8181/v1/data/");
-            // Replace with OPA server URL
+            _httpClient.BaseAddress = new Uri(_opaSettings.OPAUrl);
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
