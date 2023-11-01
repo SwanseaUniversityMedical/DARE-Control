@@ -55,6 +55,7 @@ AddDependencies(builder, configuration);
 
 builder.Services.Configure<OPASettings>(configuration.GetSection("OPASettings"));
 builder.Services.AddTransient(opa => opa.GetService<IOptions<OPASettings>>().Value);
+builder.Services.AddScoped<OpaService>();
 
 builder.Services.Configure<RabbitMQSetting>(configuration.GetSection("RabbitMQ"));
 builder.Services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);
