@@ -69,10 +69,13 @@ jobs:
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: ${{ vars.HARBOR_REPO }}-main-api
       release-tag-format: 'DARE-Control-API-Container-${version}'
+      cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       build-command: |
         docker build -t $IMAGE -f src/DARE-API/Dockerfile src/
     secrets:
+      cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      cosign-password: ${{ secrets.COSIGN_PASSWORD }}
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
 
@@ -88,10 +91,13 @@ jobs:
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: ${{ vars.HARBOR_REPO }}-main-ui
       release-tag-format: 'DARE-Control-UI-Container-${version}'
+      cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       build-command: |
         docker build -t $IMAGE -f src/DARE-FrontEnd/Dockerfile src/
     secrets:
+      cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      cosign-password: ${{ secrets.COSIGN_PASSWORD }}
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
 
@@ -107,10 +113,13 @@ jobs:
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: ${{ vars.HARBOR_REPO }}-egress-api
       release-tag-format: 'DARE-Egress-API-Container-${version}'
+      cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       build-command: |
         docker build -t $IMAGE -f src/Data-Egress-API/Dockerfile src/
     secrets:
+      cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      cosign-password: ${{ secrets.COSIGN_PASSWORD }}
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
 
@@ -126,10 +135,13 @@ jobs:
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: ${{ vars.HARBOR_REPO }}-egress-ui
       release-tag-format: 'DARE-Egress-UI-Container-${version}'
+      cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       build-command: |
         docker build -t $IMAGE -f src/Data-Egress-UI/Dockerfile src/
     secrets:
+      cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      cosign-password: ${{ secrets.COSIGN_PASSWORD }}
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
 
@@ -145,10 +157,13 @@ jobs:
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: ${{ vars.HARBOR_REPO }}-tre-api
       release-tag-format: 'DARE-TRE-API-Container-${version}'
+      cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       build-command: |
         docker build -t $IMAGE -f src/TRE-API/Dockerfile src/
     secrets:
+      cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      cosign-password: ${{ secrets.COSIGN_PASSWORD }}
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
 
@@ -164,10 +179,13 @@ jobs:
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: ${{ vars.HARBOR_REPO }}-tre-ui
       release-tag-format: 'DARE-TRE-UI-Container-${version}'
+      cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       build-command: |
         docker build -t $IMAGE -f src/TRE-UI/Dockerfile src/
     secrets:
+      cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      cosign-password: ${{ secrets.COSIGN_PASSWORD }}
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
       
@@ -183,10 +201,13 @@ jobs:
       container-registry-project: ${{ vars.HARBOR_PROJECT }}
       container-registry-repo: ${{ vars.HARBOR_REPO }}-tre-hasura
       release-tag-format: 'DARE-TRE-HASURA-Container-${version}'
+      cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       build-command: |
         docker build -t $IMAGE -f src/Tre-Hasura/Dockerfile src/
     secrets:
+      cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      cosign-password: ${{ secrets.COSIGN_PASSWORD }}
       container-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
       
@@ -203,9 +224,12 @@ jobs:
       chart-registry-project: ${{ vars.HARBOR_PROJECT }}
       chart-registry-repo: ${{ vars.HARBOR_REPO }}
       release-tag-format: 'DARE-Control-Helm-${version}'
+      cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       test-command: |
         helm template $CHART --values charts/control/values.yaml
     secrets:
+      cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      cosign-password: ${{ secrets.COSIGN_PASSWORD }}
       chart-registry-token: ${{ secrets.HARBOR_TOKEN }}
       slack-token: ${{ secrets.SLACK_TOKEN }}
