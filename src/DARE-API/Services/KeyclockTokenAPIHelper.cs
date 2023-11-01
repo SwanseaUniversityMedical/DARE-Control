@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using Serilog;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
-using BL.Models.ViewModels;
 using BL.Services;
 
 namespace DARE_API.Services
