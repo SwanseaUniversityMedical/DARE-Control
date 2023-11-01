@@ -13,16 +13,13 @@ namespace TRE_API.Services
     {
         private readonly HttpClient _httpClient;
         private readonly OPASettings _opaSettings;
-     public OpaService(OPASettings opaSettings)
+     public OpaService()
         {
-            _opaSettings = opaSettings;
             _httpClient = new HttpClient();
             _httpClient.BaseAddress = new Uri(_opaSettings.OPAUrl);
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
-
-
 
         public async Task<bool> CheckAccess(string userName, DateTime today, List<Project> treData)
         {
