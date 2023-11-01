@@ -1,7 +1,6 @@
 using BL.Models;
 using BL.Models.APISimpleTypeReturns;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Data_Egress_API.Repositories.DbContexts;
 using Castle.Components.DictionaryAdapter.Xml;
 using static System.Runtime.InteropServices.JavaScript.JSType;

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using BL.Models;
 using BL.Models.APISimpleTypeReturns;
 using BL.Models.Enums;
-using BL.Models.ViewModels;
 using Serilog;
 using Microsoft.Extensions.Options;
 using BL.Services;

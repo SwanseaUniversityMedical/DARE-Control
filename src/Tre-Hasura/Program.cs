@@ -1,5 +1,4 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using Serilog;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
