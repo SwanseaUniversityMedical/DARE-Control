@@ -31,7 +31,7 @@ public class OpaService
             { var result = await response.Content.ReadAsAsync<Dictionary<string,object>>();
                 return (bool)result["result"]; 
             }
-            // Handle error cases throw new Exception("OPA policy evaluation failed.");
+            // Handle error cases/throwing new exception;
             return false;
         }
 }
