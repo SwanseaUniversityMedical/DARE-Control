@@ -9,8 +9,7 @@
     var userWroteSubCount = @ViewBag.userWroteSubCount;
     ViewData["Title"] = "Home";
 }
-@if (User.IsInRole("dare-control-admin"))
-{
+
     <div class="container-lg mt-4 p-4 bg-white border-1 shadow-sm">
         <div class="d-flex align-items-center justify-content-between">
             <div>
@@ -43,54 +42,53 @@
                         <div class="col-12">
                             <div class="table-responsive">
                                 <div class="table-responsive">
-                                    <table id="projectList" class="table table-bordered table-striped no-head" caption="List of Projects">
-                                        <thead><tr><td>Project</td></tr></thead>
+                                    <table id="projectList" class="table table-bordered table-striped no-head" >
+                                        <caption>List of Projects</caption>
+                                        <thead><tr><th scope="col">Project</th></tr></thead>
                                         <tbody>
-                                              @{
+                                        @{
 
-                                        foreach (var project in Model.Projects)
-                                        {
-                                        <tr>
-                                        <td class="card mb-2 p-3 bg-white shadow-sm border-1">
+                                            foreach (var project in Model.Projects)
+                                            {
+                                                <tr>
+                                                    <td class="card mb-2 p-3 bg-white shadow-sm border-1">
 
-                                        <div class="d-flex align-items-center justify-content-between mb-3">
-                                        <div>
-                                        <a href="@Url.Action("GetProject", "Project", new { id = project.Id })">
-                                        <h2 class="mb-0 fw-bold hover-underline fs-5">
-                                        @project.Name
-                                        </h2>
-                                        </a>
-                                        @*<a href="@Url.Action("RemoveProjectfromUser", "User",new{UserId=Model.Id,ProjectId=@project.Id})">
-                                        <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove user from project"></span>
-                                        </a>*@
-                                        <p class="text-muted small mb-0">#@project.Id</p>
-                                        </div>
-                                        @if (User.IsInRole("dare-control-admin"))
-                                        {
-                                                                    <a href="@Url.Action("SaveProjectForm", "Project",new{ProjectId=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
-                                        }
-                                        </div>
-                                        <div class="">
-                                        <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#submissions" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                                                    @project.Submissions.Where(x => x.Parent == null).ToList().Count Submissions
-                                        </a>
-                                        <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#people" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                        @project.Users.Count People
-                                        </a>
-                                        <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#tre" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                        @project.Tres.Count TREs
-                                        </a>
-                                        </div>
-                                        <p class="my-4">
-                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                                        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in...
-                                        </p>
-                                        <p class="text-muted fs-7 mb-0">
-                                        LastStatusUpdate Date: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate
-                                        </p>
-                                        </td>
-                                        </tr>
-                                        }
+                                                        <div class="d-flex align-items-center justify-content-between mb-3">
+                                                            <div>
+                                                                <a href="@Url.Action("GetProject", "Project", new { id = project.Id })">
+                                                                    <h2 class="mb-0 fw-bold hover-underline fs-5">
+                                                                        @project.Name
+                                                                    </h2>
+                                                                </a>
+                                                              
+                                                                <p class="text-muted small mb-0">#@project.Id</p>
+                                                            </div>
+                                                            @if (User.IsInRole("dare-control-admin"))
+                                                            {
+                                                                <a href="@Url.Action("SaveProjectForm", "Project", new { ProjectId = @project.Id })" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+                                                            }
+                                                        </div>
+                                                        <div class="">
+                                                            <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#submissions" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                                                @project.Submissions.Where(x => x.Parent == null).ToList().Count Submissions
+                                                            </a>
+                                                            <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#people" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                                                @project.Users.Count People
+                                                            </a>
+                                                            <a href="@Url.Action("GetProject", "Project", new { id = project.Id })#tre" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                                                                @project.Tres.Count TREs
+                                                            </a>
+                                                        </div>
+                                                        <p class="my-4">
+                                                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                                                            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in...
+                                                        </p>
+                                                        <p class="text-muted fs-7 mb-0">
+                                                            LastStatusUpdate Date: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate
+                                                        </p>
+                                                    </td>
+                                                </tr>
+                                            }
                                         }
                                         </tbody>
                                     </table>
@@ -104,92 +102,93 @@
 
                     
                     <div class="table-responsive">
-                        <table id="submissionList" class="table" caption="List of Submissions">
+                        <table id="submissionList" class="table">
+                            <caption>List of Submissions</caption>
                             <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>Submission Name</th>
-                                    <th>Project</th>
-                                    <th>Submitted by</th>
-                                    <th>Submission Date</th>
-                                    <th></th>
-                                </tr>
+                            <tr>
+                                <th></th>
+                                <th>Submission Name</th>
+                                <th>Project</th>
+                                <th>Submitted by</th>
+                                <th>Submission Date</th>
+                                <th></th>
+                            </tr>
                             </thead>
                             <tbody>
-                                @foreach (var submission in Model.Submissions)
-                                {
-                                    <tr>
-                                        <td>
-                                            @{
-                                                var overallStatus = submission.Status;
-                                                if (overallStatus == BL.Models.Enums.StatusType.Completed)
-                                                {
+                            @foreach (var submission in Model.Submissions)
+                            {
+                                <tr>
+                                    <td>
+                                        @{
+                                            var overallStatus = submission.Status;
+                                            if (overallStatus == BL.Models.Enums.StatusType.Completed)
+                                            {
 
-                                                    <h6 class="mb-0">
-                                                        <span class="badge bg-success rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Completed: @submission.EndTime">
-                                                            <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
-                                                            <span>Completed</span>
-                                                        </span>
-                                                    </h6>
-                                                }
-                                                else if (overallStatus == BL.Models.Enums.StatusType.Failed || overallStatus == BL.Models.Enums.StatusType.Cancelled)
-                                                {
-                                                    <h6 class="mb-0">
-                                                        <span class="badge bg-danger rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="@overallStatus.ToString(): @submission.EndTime">
-                                                            <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
-                                                            <span>@overallStatus.ToString()</span>
-                                                        </span>
-                                                    </h6>
-                                                }
-                                                else if (overallStatus == BL.Models.Enums.StatusType.PartialResult)
-                                                {
-                                                    <h6 class="mb-0">
-                                                        <span class="badge bg-warning rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="@overallStatus.ToString(): @submission.EndTime">
-                                                            <i class="fa-solid fa-circle-check  fs-6 text-white me-2"></i>
-                                                            <span>Partial Result</span>
-                                                        </span>
-                                                    </h6>
-                                                }
-                                                else
-                                                {
-                                                
-                                                    <h6 class="mb-0">
-                                                        <span class="badge bg-primary rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Runtime: @submission.GetTotalDisplayTime()">
-                                                            <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
-                                                            <span>Running</span>
-                                                        </span>
-                                                    </h6>
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-success rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Completed: @submission.EndTime">
+                                                        <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
+                                                        <span>Completed</span>
+                                                    </span>
+                                                </h6>
+                                            }
+                                            else if (overallStatus == BL.Models.Enums.StatusType.Failed || overallStatus == BL.Models.Enums.StatusType.Cancelled)
+                                            {
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-danger rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="@overallStatus.ToString(): @submission.EndTime">
+                                                        <i class="fa-solid fa-triangle-exclamation fs-6 text-white me-2"></i>
+                                                        <span>@overallStatus.ToString()</span>
+                                                    </span>
+                                                </h6>
+                                            }
+                                            else if (overallStatus == BL.Models.Enums.StatusType.PartialResult)
+                                            {
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-warning rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="@overallStatus.ToString(): @submission.EndTime">
+                                                        <i class="fa-solid fa-circle-check  fs-6 text-white me-2"></i>
+                                                        <span>Partial Result</span>
+                                                    </span>
+                                                </h6>
+                                            }
+                                            else
+                                            {
 
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Runtime: @submission.GetTotalDisplayTime()">
+                                                        <i class="fa-solid fa-circle-notch fa-spin fs-6 text-white me-2"></i>
+                                                        <span>Running</span>
+                                                    </span>
+                                                </h6>
 
-                                                }
 
                                             }
 
-                                        </td>
-                                        <td>
-                                            <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })">
-                                                <h2 class="mb-0 fw-bold hover-underline fs-6">
-                                                    @submission.TesName
-                                                </h2>
-                                            </a>
+                                        }
 
-                                        </td>
-                                        <td>
-                                            @submission.Project.Name
-                                        </td>
-                                        <td>
-                                            @submission.SubmittedBy.Name
-                                        </td>
-                                        <td>
-                                            @submission.StartTime
-                                        </td>
-                                        <td>
-                                            <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })" class="btn btn-sm btn-outline-primary">
-                                                <span class="small">View</span>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                }
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })">
+                                            <h2 class="mb-0 fw-bold hover-underline fs-6">
+                                                @submission.TesName
+                                            </h2>
+                                        </a>
+
+                                    </td>
+                                    <td>
+                                        @submission.Project.Name
+                                    </td>
+                                    <td>
+                                        @submission.SubmittedBy.Name
+                                    </td>
+                                    <td>
+                                        @submission.StartTime
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })" class="btn btn-sm btn-outline-primary">
+                                            <span class="small">View</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
                             </tbody>
                         </table>
 
@@ -198,76 +197,3 @@
             </div>
         </div>
     </div>
-}
-else
-{
-    <div class="home-banner text-center">
-        <h1 class="display-5 text-light">Safe &amp; Transparent Research</h1>
-        <p class="text-light fs-6">Search and discover the types of research this trusted platform is enabling for public good.</p>
-        <div class="col-xl-4 col-lg-6 col-md-8 mx-auto">
-            <form class="col-12 col-lg-auto mb-3 mb-lg-0" asp-controller="Home" asp-action="Index">
-                <input type="search" class="form-control form-control-sm" name="SearchString" value="@ViewData["CurrentFilter"]" placeholder="Search..." aria-label="Search">
-            </form>
-        </div>
-    </div>
-    <div class="container mt-5">
-
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-md-5 g-4">
-            <div class="col">
-                <a asp-area="" asp-controller="Submission" asp-action="GetAllSubmissions" class="card shadow-sm">
-                    <img class="card-img-top" src="/img/data-image.jpg" alt="Submissions image" />
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h4 class="m-0 text-dark fs-5">Submissions</h4>
-                            <span class="badge bg-dark-blue rounded-pill">@getAllSubs</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col">
-                <a asp-area="" asp-controller="Project" asp-action="GetAllProjects" class="card shadow-sm">
-                    <img class="card-img-top" src="/img/shutterstock_1081970570-Reduced-740x481.jpg" alt="Projects image" />
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h4 class="m-0 text-dark fs-5">Projects</h4>
-                            <span class="badge bg-dark-blue rounded-pill">@getAllProj</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col">
-                <a asp-area="" asp-controller="User" asp-action="GetAllUsers" class="card shadow-sm">
-                    <img class="card-img-top" src="/img/shutterstock_376975414-740x481.jpg.webp" alt="People image" />
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h4 class="m-0 text-dark fs-5">People</h4>
-                            <span class="badge bg-dark-blue rounded-pill">@getAllUsers</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col">
-                <a asp-area="" asp-controller="Tre" asp-action="GetAllTres" class="card shadow-sm">
-                    <img class="card-img-top" src="/img/about-banner.jpg" alt="TREs image" />
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h4 class="m-0 text-dark fs-5">TREs</h4>
-                            <span class="badge bg-dark-blue rounded-pill">@getAllTres</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-        </div>
-    </div>
-    <div class="container my-5">
-        <div class="col-lg-8 mx-auto">
-            <h3 class="text-center mb-4">About TRE FX</h3>
-
-            <p>TRE FX was developed by UKRI's DARE UK to support fast and efficient sharing, linkage, and advanced analysis of sensitive data in an ethical and secure manner.</p>
-            <p>TRE FX allows approved researchers to work with a ‘federated’ network of trusted research environments (TREs) by querying the data held by different TREs from one location - meaning the data doesn't have to be joined or moved from its secure location and the researcher saves time by submitting a query once for multiple TREs.</p>
-            <p>The platform adopts a transparent approach and is open for the public to see what research is being conducted across the different TREs and also opens up the possibility of more collaboration in the research community.</p>
-        </div>
-    </div>
-}

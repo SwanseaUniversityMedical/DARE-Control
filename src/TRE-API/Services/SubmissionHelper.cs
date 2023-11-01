@@ -90,16 +90,10 @@ namespace TRE_API.Services
 
                 var outputBucket = bucket.FirstOrDefault();
 
-                //var isFolderExists = _minioTreHelper.FolderExists(outputBucket.ToString(), "sub" + subId).Result;
-                //if (!isFolderExists)
-                //{
-                //    var submissionFolder = _minioTreHelper.CreateFolder(outputBucket.ToString(), "sub" + subId).Result;
-                //}
-
-                outputBucket = outputBucket.ToString();
+                
                 return new OutputBucketInfo()
                 {
-                    Bucket = outputBucket,
+                    Bucket = outputBucket ?? "",
                     SubId = submission.Id.ToString(),
                     Path = "sub" + subId + "/",
                     Host = _minioTreSettings.Url

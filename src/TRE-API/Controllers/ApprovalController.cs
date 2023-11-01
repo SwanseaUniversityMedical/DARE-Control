@@ -190,21 +190,14 @@ namespace TRE_API.Controllers
                 var dbproj = _DbContext.Projects.First(x => x.Id == treProject.Id);
                 dbproj.LocalProjectName = treProject.LocalProjectName;
 
-                if (treProject.Password == null)
+                if (treProject.Password != null)
                 {
-                    dbproj.Password = dbproj.Password;
-
-                }
-                else {
+                    
                     dbproj.Password = treProject.Password;
                 }
-                if (treProject.UserName == null)
+                if (treProject.UserName != null)
                 {
-                    dbproj.UserName = dbproj.UserName;
-
-                }
-                else
-                {
+                    
                     dbproj.UserName = treProject.UserName;
                 }
 
