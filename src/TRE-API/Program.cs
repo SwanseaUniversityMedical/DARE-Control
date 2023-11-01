@@ -186,11 +186,7 @@ builder.Services.AddAuthentication(options =>
     });
 
 // - authorize here
-// - Opa authorization
-builder.Services.AddAuthorization(options => { options.AddPolicy("UserAllowedPolicy", AuthorizationPolicies.GetUserAllowedPolicy());
-   
 
-});
   
 
 
