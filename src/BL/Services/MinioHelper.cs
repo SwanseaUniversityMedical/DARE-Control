@@ -121,22 +121,10 @@ namespace BL.Services
             {
                 using (var stream = new MemoryStream())
                 {
-                    //var filePathTest = Path.Combine(@"c:\testing", "file.gif");
-
-                    //if (File.Exists(filePathTest))
-                    //{
-                    //    File.Delete(filePathTest);
-                    //}
-                    //using (var fileStream = new FileStream(filePathTest, FileMode.Create))
-                    //{
-                    //    await filePath.CopyToAsync(fileStream);
-                    //}
+                  
 
                         await filePath.CopyToAsync(stream);
                    
-                   
-
-                    //var outstream = new  MemoryStream(File.ReadAllBytes(@"c:\testing\testing.gif"));
                     var uploadRequest = new PutObjectRequest
                     {
                         BucketName = bucketName,
@@ -299,7 +287,7 @@ namespace BL.Services
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Put,
-                RequestUri = new Uri("http://" + _minioSettings.Url + "/minio/admin/v3/add-canned-policy?name=" + bucketName + "_policy"),
+                RequestUri = new Uri(_minioSettings.Url + "/minio/admin/v3/add-canned-policy?name=" + bucketName + "_policy"),
                 Content = content
             };
 
@@ -328,10 +316,7 @@ namespace BL.Services
                 {
                     await responseStream.CopyToAsync(memoryStream);
                     string path = Path.Combine(@"c:\testing", destinationObjectKey);
-                    //using (FileStream outputFileStream = new FileStream(path, FileMode.Create))
-                    //{
-                    //    responseStream.CopyTo(outputFileStream);
-                    //}
+                    
                     PutObjectRequest putObjectRequest = new PutObjectRequest
                     {
                         BucketName = destinationBucketName,
@@ -452,7 +437,7 @@ namespace BL.Services
             return new AmazonS3Config
             {
                 RegionEndpoint = RegionEndpoint.USEast1, // MUST set this before setting ServiceURL and it should match the `MINIO_REGION` environment variable.
-                ServiceURL = $"http://{_minioSettings.Url}", // replace http://localhost:9000 with URL of your MinIO server
+                ServiceURL = _minioSettings.Url, // replace http://localhost:9000 with URL of your MinIO server
                 ForcePathStyle = true, // MUST be true to work correctly with MinIO server
             };
         }

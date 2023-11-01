@@ -64,6 +64,8 @@ namespace DARE_FrontEnd.Controllers
             if(User.Identity.IsAuthenticated == false) {
                 return RedirectToAction("Index", "Home");
             }
+
+           
             var preferedUsername = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
             
             var getAllProj = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects").Result;

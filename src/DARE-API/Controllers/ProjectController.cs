@@ -55,15 +55,9 @@ namespace DARE_API.Controllers
                 project.Name = project.Name.Trim();
                 project.StartDate = project.StartDate.ToUniversalTime();
                 project.EndDate = project.EndDate.ToUniversalTime();
-
                 project.ProjectDescription = project.ProjectDescription.Trim();
-                project.MarkAsEmbargoed = project.MarkAsEmbargoed;
-
-
-
-
-                project.FormData = data.FormIoString;
-                project.Display = project.Display;
+               project.FormData = data.FormIoString;
+                
 
                 if (_DbContext.Projects.Any(x => x.Name.ToLower() == project.Name.ToLower().Trim() && x.Id != project.Id))
                 {
@@ -149,6 +143,10 @@ namespace DARE_API.Controllers
         {
             var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
             var user = _DbContext.Users.FirstOrDefault(x => x.Id == model.UserId);
+            if (user == null)
+            {
+                return model;
+            }
             var userId = await _keycloakMinioUserService.GetUserIDAsync(accessToken, user.Name.ToString());
             if (userId == "")
             {

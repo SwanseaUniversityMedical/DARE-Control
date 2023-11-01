@@ -21,71 +21,73 @@
         </li>
     </ul>
     <div class="table-responsive">
-        <table id="projectList" class="table" caption="List of Projects">
+        <table id="projectList" class="table">
+        <table id="projectList" class="table">
+            <caption>List of Projects</caption>
             <thead>
-                <tr>
-                    <th>Project</th>
-                    <th>Memberships</th>
-                    <th>Decision</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
+            <tr>
+                <th>Project</th>
+                <th>Memberships</th>
+                <th>Decision</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
             </thead>
             <tbody>
-                @foreach (var project in Model)
-                {
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <a href="@Url.Action("EditProject", new { projectId = project.Id })">
-                                        <h2 class="mb-0 fw-bold hover-underline fs-5">@project.SubmissionProjectName</h2>
-                                    </a>
-                                    <p class="text-muted font-monospace small mb-0">#@project.SubmissionProjectId</p>
-                                    @if (!string.IsNullOrWhiteSpace(project.LocalProjectName))
-                                    {
-                                        <p class="mt-2 mb-0">
-                                            Local Name: @project.LocalProjectName
-                                        </p>
-                                    }
-                                </div>
-                                @if (project.Archived)
+            @foreach (var project in Model)
+            {
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <a href="@Url.Action("EditProject", new { projectId = project.Id })">
+                                    <h2 class="mb-0 fw-bold hover-underline fs-5">@project.SubmissionProjectName</h2>
+                                </a>
+                                <p class="text-muted font-monospace small mb-0">#@project.SubmissionProjectId</p>
+                                @if (!string.IsNullOrWhiteSpace(project.LocalProjectName))
                                 {
-                                    <span class="badge py-2 px-3 badge-lg bg-warning text-dark rounded-pill">
-                                        Archived
-                                    </span>
+                                    <p class="mt-2 mb-0">
+                                        Local Name: @project.LocalProjectName
+                                    </p>
                                 }
                             </div>
-                        </td>
-                        <td>
-                            <a href="@Url.Action("EditMemberships", new { projectId = project.Id})" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
-                                @project.MemberDecisions.Count Memberships
-                            </a>
-                        </td>
-                        <td>
-                            
-                            <p class="my-4">
-                                @project.Decision.ToString()
-                            </p>
-                        </td>
-                        <td>
-                            @if (project.Decision == Decision.Undecided)
+                            @if (project.Archived)
                             {
-                                @:This project hasn't been processed yet
+                                <span class="badge py-2 px-3 badge-lg bg-warning text-dark rounded-pill">
+                                    Archived
+                                </span>
                             }
-                            else
-                            {
-                                @:Last Updated: @project.LastDecisionDate by @project.ApprovedBy
-                            }
-                        </td>
-                        @*<td>
+                        </div>
+                    </td>
+                    <td>
+                        <a href="@Url.Action("EditMemberships", new { projectId = project.Id })" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
+                            @project.MemberDecisions.Count Memberships
+                        </a>
+                    </td>
+                    <td>
+
+                        <p class="my-4">
+                            @project.Decision.ToString()
+                        </p>
+                    </td>
+                    <td>
+                        @if (project.Decision == Decision.Undecided)
+                        {
+                            @:This project hasn't been processed yet
+                        }
+                        else
+                        {
+                            @:Last Updated: @project.LastDecisionDate by @project.ApprovedBy
+                        }
+                    </td>
+                    @*<td>
                             @project.Description
                         </td>*@
-                        <td class="text-center">
-                            <a href="@Url.Action("EditProject",new{Projectid=@project.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Review</span></a>
-                        </td>
-                    </tr>
-                }
+                    <td class="text-center">
+                        <a href="@Url.Action("EditProject", new { Projectid = @project.Id })" class="btn btn-sm btn-outline-primary"><span class="small">Review</span></a>
+                    </td>
+                </tr>
+            }
             </tbody>
         </table>
 
