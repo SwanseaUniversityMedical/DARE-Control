@@ -152,6 +152,8 @@ namespace TRE_API
 
         public string CreateTESK(string jsonContent, int subId, string tesId, string outputBucket)
         {
+
+            Log.Information("{Function} {jsonContent} runhing CreateTESK ", "CreateTESK", jsonContent);
             using (var httpClient = new HttpClient())
             {
                 // Define the URL for the POST request
@@ -490,6 +492,8 @@ namespace TRE_API
                             // **************  SEND TO TESK
                             if (useTESK)
                             {
+
+                                Log.Information("{Function}  SEND TO TESK ", "Execute");
                                 var arr = new HttpClient();
 
 
@@ -538,7 +542,10 @@ namespace TRE_API
                                 });
                                 _dbContext.SaveChanges();
 
+                                
+
                                 if (tesMessage is not null)
+                                    Log.Information("{Function} tesMessage is not null runhing CreateTESK ", "Execute");
                                     CreateTESK(JsonConvert.SerializeObject(tesMessage), aSubmission.Id, aSubmission.TesId, OutputBucket);
 
                             }
