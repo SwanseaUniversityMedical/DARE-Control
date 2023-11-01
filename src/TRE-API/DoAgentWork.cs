@@ -352,7 +352,7 @@ namespace TRE_API
         // Method executed upon hangfire job
         public void Execute()
         {
-
+            Log.Information("{Function} DoAgentWork ruinng", "Execute");
             // control use of dependency injection
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -360,6 +360,10 @@ namespace TRE_API
                 var useRabbit = _AgentSettings.UseRabbit;
                 var useHutch = _AgentSettings.UseHutch;
                 var useTESK = _AgentSettings.UseTESK;
+
+                Log.Information("{Function} useRabbit {useRabbit}", "Execute", useRabbit);
+                Log.Information("{Function} useHutch {useHutch}", "Execute", useHutch);
+                Log.Information("{Function} useTESK {useTESK}", "Execute", useTESK);
 
                 var cancelsubprojs = _subHelper.GetRequestCancelSubsForTre();
                 if (cancelsubprojs != null)
@@ -388,13 +392,13 @@ namespace TRE_API
                     throw;
                 }
 
-                
 
+                Log.Information("{Function} listOfSubmissions {listOfSubmissions}", "Execute", listOfSubmissions?.Count);
                 foreach (var aSubmission in listOfSubmissions)
                 {
                     try
                     {
-                        Log.Information("{Function }Submission: {submission}", "Execute", aSubmission.Id);
+                        Log.Information("{Function}Submission: {submission}", "Execute", aSubmission.Id);
 
                         // Check user is allowed ont he project
                         if (!_subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
