@@ -406,9 +406,6 @@ namespace DARE_API.Controllers
                 //TODO - use User.Identity.IsAuthenticated to alter list returned : embargoed etc
 
                 var allProjects = _DbContext.Projects
-                    //.Include(x => x.Tres)
-                    //.Include(x => x.Submissions)
-                    //.Include(x => x.Users)
                     .ToList();
 
 

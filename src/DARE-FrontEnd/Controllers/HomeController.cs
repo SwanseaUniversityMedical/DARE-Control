@@ -100,7 +100,7 @@ namespace DARE_FrontEnd.Controllers
 
             var userWroteSubList = new List<User>();
             var userWroteSubListSub = new List<Submission>();
-            var subList = getAllSubs;// _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions").Result.ToList();
+            var subList = getAllSubs;
             foreach (var sub in subList)
             {
 

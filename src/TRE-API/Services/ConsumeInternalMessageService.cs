@@ -62,20 +62,7 @@ namespace TRE_API.Services
             
         }
 
-        //private async Task Process(IMessage<MQFetchFile> message, MessageReceivedInfo info)
-        //{
-        //    try
-        //    {
-        //        var messageMQ = message.Body;
-        //        await _minioTreHelper.RabbitExternalObject(messageMQ);
-        //    }
-        //    catch (Exception e)
-        //    {
-
-        //        throw;
-        //    }
-        //}
-
+      
         private void ProcessFinalOutcome(IMessage<FinalOutcome> message, MessageReceivedInfo info)
         {
             try
