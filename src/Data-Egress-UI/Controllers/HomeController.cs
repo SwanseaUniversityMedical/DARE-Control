@@ -34,17 +34,7 @@ namespace Data_Egress_UI.Controllers
             });
         }
 
-        //public async Task<IActionResult> Index()
-        //{
-
-        //    var alreadyset = await _dataClientHelper.CallAPIWithoutModel<BoolReturn>("/api/TreCredentials/CheckCredentialsAreValid");
-        //    if (!alreadyset.Result)
-        //    {
-
-        //        return RedirectToAction("UpdateCredentials", "TreCredentials");
-        //    }
-        //    return View();
-        //}
+      
 
         public async Task<IActionResult> Index()
         {

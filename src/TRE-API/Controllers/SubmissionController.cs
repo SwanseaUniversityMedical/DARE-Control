@@ -20,28 +20,7 @@ using Newtonsoft.Json;
 using System;
 using Amazon.Runtime.Internal.Transform;
 using Serilog;
-using Microsoft.AspNetCore.SignalR;
-using BL.Models.ViewModels;
-using BL.Models;
-using BL.Models.Enums;
-using BL.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Swashbuckle.AspNetCore.Annotations;
-using TRE_API.Attributes;
-using TRE_API.Services;
-using TRE_API.Services.SignalR;
-using Microsoft.AspNetCore.Authorization;
-using System.Data;
-using BL.Models.APISimpleTypeReturns;
-using TRE_API.Repositories.DbContexts;
-using EasyNetQ.Management.Client.Model;
-using BL.Rabbit;
-using EasyNetQ;
-using Newtonsoft.Json;
-using System;
-using Amazon.Runtime.Internal.Transform;
-using Serilog;
+
 
 namespace TRE_API.Controllers
 {

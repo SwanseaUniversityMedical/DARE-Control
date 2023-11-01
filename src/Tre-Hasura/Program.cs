@@ -34,9 +34,10 @@ catch (Exception e)
 {
     Console.WriteLine(e.Message);
 }
+
 IConfiguration GetConfiguration()
 {
-  
+
     var builder = new ConfigurationBuilder()
         .SetBasePath(Directory.GetCurrentDirectory())
         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)

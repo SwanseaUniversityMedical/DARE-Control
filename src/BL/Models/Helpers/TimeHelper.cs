@@ -27,7 +27,6 @@ namespace BL.Models.Helpers
             }
 
             displayRuntime = runtime.Seconds + displaySec;
-            //if (runtime.TotalMinutes >= 60 || (runtime.TotalMinutes < 60 && runtime.TotalMinutes > 0 ))
             if (runtime.Minutes >  0)
             {
                 if (runtime.Minutes == 1)
@@ -42,7 +41,6 @@ namespace BL.Models.Helpers
                 displayRuntime = runtime.Minutes + displayMin + " and " + displayRuntime;
 
             }
-            //if (runtime.TotalHours >= 24 || (runtime.TotalHours < 24 && runtime.TotalHours > 0))
             if (runtime.Hours > 0)
             {
                 if (runtime.Hours == 1)
@@ -58,7 +56,7 @@ namespace BL.Models.Helpers
 
                 displayRuntime = runtime.Hours + displayHour + displayRuntime;
             }
-            //if (runtime.TotalDays >= 1)
+            
             if (runtime.Days > 0)
             {
                 if (runtime.Days == 1 )

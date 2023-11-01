@@ -50,7 +50,6 @@ namespace TRE_UI.Controllers
         }
 
 
-        //UpdateMembershipDecisions
         [HttpPost]
         public async Task<IActionResult> EditMemberships(List<TreMembershipDecision> model)
         {

@@ -270,8 +270,7 @@ namespace Data_Egress_API.Controllers
 
                 }
 
-                //var result =
-                //    await _treClientHelper.CallAPI<EgressReview, Submission>("/api/Submission/EgressResults", backtotre);
+                
                 await _DbContext.SaveChangesAsync();
 
 
