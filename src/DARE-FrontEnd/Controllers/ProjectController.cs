@@ -11,6 +11,7 @@ using BL.Models.APISimpleTypeReturns;
 using BL.Models.Tes;
 using Newtonsoft.Json;
 using Serilog;
+using EasyNetQ.Management.Client.Model;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -32,7 +33,7 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public IActionResult GetProject(int id)
         {
-            var users = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
+            var users = _clientHelper.CallAPIWithoutModel<List<BL.Models.User>>("/api/User/GetAllUsers/").Result;
             var tres = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Tre/GetAllTres/").Result;
 
             var paramlist = new Dictionary<string, string>();
@@ -97,7 +98,7 @@ namespace DARE_FrontEnd.Controllers
         private ProjectUser GetProjectUserModel()
         {
             var projs = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
-            var users = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
+            var users = _clientHelper.CallAPIWithoutModel<List<BL.Models.User>>("/api/User/GetAllUsers/").Result;
 
             var projectItems = projs
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
@@ -274,6 +275,8 @@ namespace DARE_FrontEnd.Controllers
         public async Task<IActionResult> AddUserList(string ProjectId, string ItemList)
         {
             string[] arr = ItemList.Split(',');
+            List<string> userList = new List<string>();
+            bool addedUser = false;
             foreach (string s in arr)
             {
                 var model = new ProjectUser()
@@ -285,15 +288,28 @@ namespace DARE_FrontEnd.Controllers
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/CheckUserExists", model);
                 if (user.UserId == 0)
                 {
-                    TempData["error"] = "User not found. Need to Register";
-                    //return Ok();
-                    //TO DO make array of none exists user 
+                    var paramList = new Dictionary<string, string>();
+                    paramList.Add("userId", s.ToString());
+                    var userInfo = _clientHelper.CallAPIWithoutModel<BL.Models.User?>("/api/User/GetUser/", paramList).Result;
+                    userList.Add(userInfo.Name);
                 }
-                var response =
+                else
+                {
+                    var response =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
+                    addedUser = true;
+                }
             }
-            TempData["success"] = "User Added Successfully";
-            //return RedirectToAction("GetProject", new { id = ProjectId });
+            if (userList.Count > 0)
+            {
+                var listOfNoneExistingUser = string.Join(", ", userList);
+                TempData["error"] = listOfNoneExistingUser + "are not exist in keycloak. Need to Register";
+            }
+            if (addedUser)
+            {
+
+                TempData["success"] = "User Added Successfully";
+            }
             return Ok();
         }
 
