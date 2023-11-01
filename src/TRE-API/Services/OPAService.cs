@@ -12,7 +12,6 @@ namespace TRE_API.Services
 public class OpaService 
 {
         private readonly HttpClient _httpClient;
-
         public OpaService()
         {
             _httpClient = new HttpClient(); 

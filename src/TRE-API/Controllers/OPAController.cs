@@ -36,7 +36,7 @@ namespace OPA.Controllers
 
     
         [HttpGet("GetAuthorizedProjects")]
-        public List<Project> AllowAccessToProjects()
+        public async Task<IActionResult> AllowAccessToProjects()
         {        
             try
             {
@@ -48,7 +48,7 @@ namespace OPA.Controllers
                     user = "PatriciaAkinkuade",
                     today = DateTime.Today
                 };      
-                bool hasAccess = _opaService.CheckAccess(userName, today, treData);
+                bool hasAccess = await _opaService.CheckAccess(userName, today, treData);
                 if (hasAccess)
                     if (hasAccess)
                     {
