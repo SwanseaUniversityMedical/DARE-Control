@@ -265,8 +265,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseMiddleware<OpaAuthorizationMiddleware>();
-app.UseRouting();
+//app.UseMiddleware<OpaAuthorizationMiddleware>();
+//app.UseRouting();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using BL.Models.Tes;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Threading;
-
+using System.Collections.Generic;
 
 namespace OPA.Controllers
 {
@@ -25,60 +25,52 @@ namespace OPA.Controllers
     {
 
         private readonly ApplicationDbContext _DbContext;
-        protected readonly IHttpContextAccessor _httpContextAccessor;
-
-        public IDareSyncHelper _dareSyncHelper { get; set; }
-
-        public OPAController(IDareSyncHelper dareSyncHelper, ApplicationDbContext applicationDbContext, IHttpContextAccessor httpContextAccessor)
+        private readonly IDareClientWithoutTokenHelper _dareHelper;
+        private readonly OpaService _opaService;
+        public OPAController(IDareClientWithoutTokenHelper helper, ApplicationDbContext applicationDbContext, OpaService opaservice)
         {
-            _dareSyncHelper = dareSyncHelper;
+            _dareHelper = helper;
             _DbContext = applicationDbContext;
-            _httpContextAccessor = httpContextAccessor;
-        }
-
-        //[Authorize(Roles = "dare-tre-admin")]
-        //[HttpGet("GetOPAUser")]
-        //public List<TreMembershipDecision> GetOPAUser(string Username)
-        //{
-        //    try
-        //    {
-        //    //    return _DbContext.MembershipDecisions.Where(x =>
-        //    //        (projectId <= 0 || x.Project.Id == projectId) &&
-        //    //        (!showOnlyUnprocessed || x.Decision == Decision.Undecided)).ToList();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Log.Error(ex, "{Function} Crash", "GetOPAUser");
-        //        throw;
-        //    }
-        //}
-        [HttpGet("GetOPAUser")]
-        // GET /bundles/{bundleId}
-        public List<TreMembershipDecision> GetOPAUser(string Username)
-        {
-            // Retrieve the policy bundle based on the bundleId
-            // You can use a database query or any other mechanism to fetch the data
-            var today = DateTime.Today;
-            var userDetails = FetchPolicyBundleFromDataSource(Username); 
-        // If the bundle does not exist, return a 404 Not Found response
-         if (userDetails == null) { return null;
-        } 
-        // Format the bundle data as desired (e.g., convert to JSON)
-        var formattedBundle = FormatPolicyBundle(userDetails);
-        // Return the formatted bundle as the API response
-         return Json(formattedBundle, JsonRequestBehavior.AllowGet);
-         } 
-        // Helper methods
-        private OPAUser FetchPolicyBundleFromDataSource(string Username)
-        { 
-        // Implement the logic to fetch the policy bundle from the data source (e.g., database) 
-        // Return the fetched bundle or null if it doesn't exist
-        }
-        //private object FormatPolicyBundle(PolicyBundle bundle) { 
-        //// Implement the logic to format the policy bundle as desired (e.g., convert to JSON) 
-        // Return the formatted bundle data
-        }
+            _opaService = opaservice;
         }
 
     
+        [HttpGet("GetAuthorizedProjects")]
+        public List<Project> AllowAccessToProjects()
+        {        
+            try
+            {
+                var today = DateTime.Today;
+                var userName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+                var treData =  _dareHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForTre").Result;
+                var user = new
+                {
+                    user = "PatriciaAkinkuade",
+                    today = DateTime.Today
+                };      
+                bool hasAccess = _opaService.CheckAccess(userName, today, treData);
+                if (hasAccess)
+                    if (hasAccess)
+                    {
+                        // Access allowed  return View();  
+
+                        // }else {Access denied
+                        
+                        // return RedirectToAction("AccessDenied");
+                    }
+
+                Log.Information("{Function} Projects retrieved successfully", "GetAllProjectsForTre");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetAllProjectsForTre");
+                throw;
+            }
+
+        }
+
+
+    }
+
 }
