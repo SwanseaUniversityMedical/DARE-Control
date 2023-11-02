@@ -31,6 +31,20 @@ namespace DARE_API.Services
 
         }
 
+
+        public static Tre? GetUserTre(ClaimsPrincipal loggedInUser, ApplicationDbContext dbContext)
+        {
+            var usersName = (from x in loggedInUser.Claims where x.Type == "preferred_username" select x.Value).First();
+            var tre = dbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
+            if (tre == null)
+            {
+                throw new Exception("User " + usersName + " doesn't have a tre");
+            }
+
+            return tre;
+        }
+
+
         public static async Task RemoveUserFromMinioBucket(User user, Project project,
             IHttpContextAccessor httpContextAccessor, string attributeName,
             IKeycloakMinioUserService keycloakMinioUserService, ClaimsPrincipal loggedInUser,

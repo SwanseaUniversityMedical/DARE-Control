@@ -30,7 +30,7 @@ namespace Data_Egress_UI.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme
             }, new AuthenticationProperties
             {
-                RedirectUri = Url.Action("GetAllEgresses", "Data")
+                RedirectUri = Url.Action("GetAllEgresses", "Data", new {unprocessedonly = true})
             });
         }
 
@@ -38,6 +38,7 @@ namespace Data_Egress_UI.Controllers
 
         public async Task<IActionResult> Index()
         {
+            
             if (!HttpContext.User.Identity.IsAuthenticated)
             {
                 return Challenge(OpenIdConnectDefaults.AuthenticationScheme);
@@ -48,8 +49,8 @@ namespace Data_Egress_UI.Controllers
 
                 return RedirectToAction("UpdateCredentials", "TreCredentials");
             }
-            return View();
-            
+            return RedirectToAction("GetAllEgresses", "Data", new { unprocessedonly = true });
+
 
         }
 

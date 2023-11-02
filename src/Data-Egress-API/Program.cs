@@ -174,7 +174,7 @@ app.UseSwaggerUI(c =>
 });
 if (app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();
+    //app.UseDeveloperExceptionPage();
 }
 
 // Configure the HTTP request pipeline.

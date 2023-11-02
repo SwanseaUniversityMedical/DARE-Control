@@ -391,13 +391,7 @@ namespace DARE_API.Controllers
             try
             {
 
-                var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-                var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
-                if (tre == null)
-                {
-                    throw new Exception("User " + usersName + " doesn't have a tre");
-
-                }
+                var tre = ControllerHelpers.GetUserTre(User, _DbContext);
 
                 var allProjects = tre.Projects;
 
@@ -413,6 +407,7 @@ namespace DARE_API.Controllers
 
         }
 
+        
 
 
         [HttpPost("SyncTreProjectDecisions")]
@@ -422,13 +417,7 @@ namespace DARE_API.Controllers
             try
             {
                 var result = new BoolReturn();
-                var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-                var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
-                if (tre == null)
-                {
-                    throw new Exception("User " + usersName + " doesn't have a tre");
-
-                }
+                var tre = ControllerHelpers.GetUserTre(User, _DbContext);
 
                 foreach (var item in decisions)
                 {
@@ -469,12 +458,7 @@ namespace DARE_API.Controllers
             {
                 var result = new BoolReturn();
                 var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-                var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
-                if (tre == null)
-                {
-                    throw new Exception("User " + usersName + " doesn't have a tre");
-
-                }
+                var tre = ControllerHelpers.GetUserTre(User, _DbContext);
 
                 foreach (var item in decisions)
                 {
