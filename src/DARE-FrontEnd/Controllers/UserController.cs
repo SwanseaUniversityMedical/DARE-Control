@@ -98,8 +98,11 @@ namespace DARE_FrontEnd.Controllers
                 var result = await _clientHelper.CallAPI<FormData, BL.Models.User>("/api/User/SaveUser", data);
 
                 if (result.Id == 0)
+                {
+                    TempData["error"] = "";
                     return BadRequest();
-
+                }
+                TempData["success"] = "User Save Successfully";
                 return Ok(result);
             }
             return BadRequest();
@@ -136,7 +139,7 @@ namespace DARE_FrontEnd.Controllers
             };
 
             var result = await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/User/RemoveProjectMembership", model);
-
+            TempData["success"] = "Project Remove Successfully";
             return RedirectToAction("GetUser", new { id = userId });
         }
 
@@ -172,10 +175,19 @@ namespace DARE_FrontEnd.Controllers
                     UserId = Int32.Parse(Id),
                     ProjectId = Int32.Parse(s)
                 };
+                var user =
+                await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/CheckUserExists", model);
+                if (user.UserId == 0)
+                {
+                    TempData["error"] = "User not found. Need to Register";
+                    return Ok();
+                }
                 var result =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/User/AddProjectMembership", model);
             }
-            return RedirectToAction("GetUser", new { id = Id });
+            TempData["success"] = "Project Added Successfully";
+            //return RedirectToAction("GetUser", new { id = Id });
+            return Ok();
         }
 
     }

@@ -3,7 +3,6 @@ using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using BL.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 
 
@@ -50,7 +49,6 @@ namespace TRE_UI.Controllers
         }
 
 
-        //UpdateMembershipDecisions
         [HttpPost]
         public async Task<IActionResult> EditMemberships(List<TreMembershipDecision> model)
         {
@@ -68,26 +66,17 @@ namespace TRE_UI.Controllers
 
             return View(result.First());
         }
-
         
         [HttpGet]
         public IActionResult EditProject(int? projectId)
         {
-
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", projectId.ToString());
             var project = _treclientHelper.CallAPIWithoutModel<TreProject>(
                 "/api/Approval/GetTreProject/", paramlist).Result;
-            
-
-           
-          
+                           
             return View(project);
         }
-
-        
-
-
 
     }
 

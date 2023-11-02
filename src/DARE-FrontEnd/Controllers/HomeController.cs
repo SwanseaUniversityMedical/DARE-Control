@@ -8,6 +8,7 @@ using BL.Services;
 using BL.Models.ViewModels;
 using NuGet.Protocol;
 using System.Linq;
+using Serilog;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -27,18 +28,32 @@ namespace DARE_FrontEnd.Controllers
 
         public IActionResult Index()
         {
+            ViewBag.getAllProj = 0;
+            ViewBag.getAllSubs = 0;
+            ViewBag.getAllUsers = 0;
+            ViewBag.getAllTres = 0;
+            try
+            {
+                var getAllProj = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects").Result;
+                ViewBag.getAllProj = getAllProj.Count;
 
-            var getAllProj = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects").Result;
-            ViewBag.getAllProj = getAllProj.Count;
 
-            var getAllSubs = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions").Result.Where(x => x.Parent == null).ToList();
-            ViewBag.getAllSubs = getAllSubs.Count;
+                var getAllSubs = _clientHelper
+                    .CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions").Result
+                    .Where(x => x.Parent == null).ToList();
+                ViewBag.getAllSubs = getAllSubs.Count;
 
-            var getAllUsers = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers").Result;
-            ViewBag.getAllUsers = getAllUsers.Count;
+                var getAllUsers = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers").Result;
+                ViewBag.getAllUsers = getAllUsers.Count;
 
-            var getAllTres = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Tre/GetAllTres").Result;
-            ViewBag.getAllTres = getAllTres.Count;
+                var getAllTres = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Tre/GetAllTres").Result;
+                ViewBag.getAllTres = getAllTres.Count;
+            }
+            catch (Exception e)
+            {
+                Log.Warning(e, "{Function} Unable to call api. Might just be initialisation issue");
+
+            }
 
             return View();
         }
@@ -49,6 +64,8 @@ namespace DARE_FrontEnd.Controllers
             if(User.Identity.IsAuthenticated == false) {
                 return RedirectToAction("Index", "Home");
             }
+
+           
             var preferedUsername = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
             
             var getAllProj = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects").Result;
@@ -83,7 +100,7 @@ namespace DARE_FrontEnd.Controllers
 
             var userWroteSubList = new List<User>();
             var userWroteSubListSub = new List<Submission>();
-            var subList = getAllSubs;// _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions").Result.ToList();
+            var subList = getAllSubs;
             foreach (var sub in subList)
             {
 

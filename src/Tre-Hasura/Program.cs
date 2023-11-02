@@ -1,5 +1,4 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using Serilog;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -34,9 +33,10 @@ catch (Exception e)
 {
     Console.WriteLine(e.Message);
 }
+
 IConfiguration GetConfiguration()
 {
-  
+
     var builder = new ConfigurationBuilder()
         .SetBasePath(Directory.GetCurrentDirectory())
         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)

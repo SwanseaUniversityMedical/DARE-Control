@@ -152,6 +152,8 @@ namespace TRE_API
 
         public string CreateTESK(string jsonContent, int subId, string tesId, string outputBucket)
         {
+
+            Log.Information("{Function} {jsonContent} runhing CreateTESK ", "CreateTESK", jsonContent);
             using (var httpClient = new HttpClient())
             {
                 // Define the URL for the POST request
@@ -350,7 +352,7 @@ namespace TRE_API
         // Method executed upon hangfire job
         public void Execute()
         {
-
+            Log.Information("{Function} DoAgentWork ruinng", "Execute");
             // control use of dependency injection
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -358,6 +360,10 @@ namespace TRE_API
                 var useRabbit = _AgentSettings.UseRabbit;
                 var useHutch = _AgentSettings.UseHutch;
                 var useTESK = _AgentSettings.UseTESK;
+
+                Log.Information("{Function} useRabbit {useRabbit}", "Execute", useRabbit);
+                Log.Information("{Function} useHutch {useHutch}", "Execute", useHutch);
+                Log.Information("{Function} useTESK {useTESK}", "Execute", useTESK);
 
                 var cancelsubprojs = _subHelper.GetRequestCancelSubsForTre();
                 if (cancelsubprojs != null)
@@ -386,13 +392,13 @@ namespace TRE_API
                     throw;
                 }
 
-                
 
+                Log.Information("{Function} listOfSubmissions {listOfSubmissions}", "Execute", listOfSubmissions?.Count);
                 foreach (var aSubmission in listOfSubmissions)
                 {
                     try
                     {
-                        Log.Information("{Function }Submission: {submission}", "Execute", aSubmission.Id);
+                        Log.Information("{Function}Submission: {submission}", "Execute", aSubmission.Id);
 
                         // Check user is allowed ont he project
                         if (!_subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
@@ -490,6 +496,8 @@ namespace TRE_API
                             // **************  SEND TO TESK
                             if (useTESK)
                             {
+
+                                Log.Information("{Function}  SEND TO TESK ", "Execute");
                                 var arr = new HttpClient();
 
 
@@ -538,7 +546,10 @@ namespace TRE_API
                                 });
                                 _dbContext.SaveChanges();
 
+                                
+
                                 if (tesMessage is not null)
+                                    Log.Information("{Function} tesMessage is not null runhing CreateTESK ", "Execute");
                                     CreateTESK(JsonConvert.SerializeObject(tesMessage), aSubmission.Id, aSubmission.TesId, OutputBucket);
 
                             }

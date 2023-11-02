@@ -55,6 +55,7 @@ AddDependencies(builder, configuration);
 
 builder.Services.Configure<OPASettings>(configuration.GetSection("OPASettings"));
 builder.Services.AddTransient(opa => opa.GetService<IOptions<OPASettings>>().Value);
+builder.Services.AddScoped<OpaService>();
 
 builder.Services.Configure<RabbitMQSetting>(configuration.GetSection("RabbitMQ"));
 builder.Services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);
@@ -88,7 +89,7 @@ var minioTRESettings = new MinioTRESettings();
 configuration.Bind(nameof(MinioTRESettings), minioTRESettings);
 builder.Services.AddSingleton(minioTRESettings);
 
-
+Log.Information($"minioTRESettings  Url> {minioTRESettings.Url}");
 
 var AuthenticationSetting = new AuthenticationSettings();
 configuration.Bind(nameof(AuthenticationSetting), AuthenticationSetting);
@@ -186,11 +187,7 @@ builder.Services.AddAuthentication(options =>
     });
 
 // - authorize here
-// - Opa authorization
-builder.Services.AddAuthorization(options => { options.AddPolicy("UserAllowedPolicy", AuthorizationPolicies.GetUserAllowedPolicy());
-   
 
-});
   
 
 

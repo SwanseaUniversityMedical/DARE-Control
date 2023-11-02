@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using System.Security.Cryptography;
 using System.Text.Json;
 using TRE_API.Models;
 using TRE_API.Repositories.DbContexts;
@@ -88,23 +89,30 @@ namespace TRE_API.Services
 
         }
 
-
+        
         private string GenToken()
         {
             string code = "";
-
-            Random RNG = new Random();
             bool Duplicate = true;
-            for (int i = 0; i < 3; i++)
+            string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+            using (var rng = new RNGCryptoServiceProvider())
             {
-                string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
 
-                code = new string(Enumerable.Repeat(chars, 128).Select(s => s[RNG.Next(s.Length)]).ToArray());
-
-                if (_applicationDbContext.DataToRoles.Any(x => x.Token == code) == false)
+                List<string> usedCodes = new List<string>();
+                
+                for (int i = 0; i < 3; i++)
                 {
-                    Duplicate = false;
-                    break;
+                    byte[] randomBytes = new byte[128];
+                    rng.GetBytes(randomBytes);
+                    code = new string(Enumerable.Range(0, 128)
+                        .Select(_ => chars[randomBytes[_] % chars.Length])
+                        .ToArray());
+                    
+                    if (_applicationDbContext.DataToRoles.Any(x => x.Token == code) == false)
+                    {
+                        Duplicate = false;
+                        break;
+                    }
                 }
             }
 

@@ -1,6 +1,5 @@
 ﻿using BL.Models.Enums;
 using BL.Models.ViewModels;
-using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations.Schema;
 using BL.Models.Helpers;
 

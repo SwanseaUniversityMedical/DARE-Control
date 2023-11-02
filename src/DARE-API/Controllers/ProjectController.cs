@@ -22,8 +22,8 @@ namespace DARE_API.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-    
-    
+
+
     public class ProjectController : Controller
     {
 
@@ -49,22 +49,16 @@ namespace DARE_API.Controllers
         {
             try
             {
-           
+
                 Project project = JsonConvert.DeserializeObject<Project>(data.FormIoString);
                 //2023-06-01 14:30:00 use this as the datetime
                 project.Name = project.Name.Trim();
                 project.StartDate = project.StartDate.ToUniversalTime();
                 project.EndDate = project.EndDate.ToUniversalTime();
-
                 project.ProjectDescription = project.ProjectDescription.Trim();
-                project.MarkAsEmbargoed = project.MarkAsEmbargoed;
-                
-                
+               project.FormData = data.FormIoString;
                 
 
-                project.FormData = data.FormIoString;
-                project.Display = project.Display;
-                
                 if (_DbContext.Projects.Any(x => x.Name.ToLower() == project.Name.ToLower().Trim() && x.Id != project.Id))
                 {
 
@@ -103,16 +97,17 @@ namespace DARE_API.Controllers
                         }
                     }
                 }
-               
+
 
                 if (project.Id > 0)
                 {
                     if (_DbContext.Projects.Select(x => x.Id == project.Id).Any())
                         _DbContext.Projects.Update(project);
                     else
-                       _DbContext.Projects.Add(project);
+                        _DbContext.Projects.Add(project);
                 }
-                else { 
+                else
+                {
                     _DbContext.Projects.Add(project);
 
                 }
@@ -121,12 +116,12 @@ namespace DARE_API.Controllers
                     FormData = data.FormIoString,
                     IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
                     UserName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
-                    ProjectId = project.Id,           
+                    ProjectId = project.Id,
                     Date = DateTime.Now.ToUniversalTime()
                 };
 
                 _DbContext.AuditLogs.Add(audit);
-                Log.Information("{Function}:", "AuditLogs","SaveProject", "FormData: " + data.FormIoString + "ProjectId:" + project.Id  + @User?.FindFirst("name")?.Value);              
+                Log.Information("{Function}:", "AuditLogs", "SaveProject", "FormData: " + data.FormIoString + "ProjectId:" + project.Id + @User?.FindFirst("name")?.Value);
                 await _DbContext.SaveChangesAsync();
                 Log.Information("{Function} Projects added successfully", "CreateProject");
                 return project;
@@ -140,6 +135,25 @@ namespace DARE_API.Controllers
             }
 
 
+        }
+
+        [Authorize(Roles = "dare-control-admin")]
+        [HttpPost("CheckUserExists")]
+        public async Task<ProjectUser?> CheckUserExists(ProjectUser model)
+        {
+            var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
+            var user = _DbContext.Users.FirstOrDefault(x => x.Id == model.UserId);
+            if (user == null)
+            {
+                return model;
+            }
+            var userId = await _keycloakMinioUserService.GetUserIDAsync(accessToken, user.Name.ToString());
+            if (userId == "")
+            {
+                var newUser=new ProjectUser();
+                return newUser;
+            }
+            return model;
         }
 
         [Authorize(Roles = "dare-control-admin")]
@@ -185,7 +199,7 @@ namespace DARE_API.Controllers
                     Date = DateTime.Now.ToUniversalTime()
                 };
                 _DbContext.AuditLogs.Add(audit);
-                Log.Information("{Function}:", "AuditLogs","AddUserMembership", "UserId: " + user.Id + "ProjectId:" + project.Id + @User?.FindFirst("name")?.Value);
+                Log.Information("{Function}:", "AuditLogs", "AddUserMembership", "UserId: " + user.Id + "ProjectId:" + project.Id + @User?.FindFirst("name")?.Value);
 
                 await _DbContext.SaveChangesAsync();
                 Log.Information("{Function} Added User {UserName} to {ProjectName}", "AddUserMembership", user.Name, project.Name);
@@ -243,7 +257,7 @@ namespace DARE_API.Controllers
                     Date = DateTime.Now.ToUniversalTime()
                 };
                 _DbContext.AuditLogs.Add(audit);
-                Log.Information("{Function}:", "AuditLogs", "RemoveUserMembership", "ProjectId:" + project.Id + " UserId:" + user.Id  + @User?.FindFirst("name")?.Value);
+                Log.Information("{Function}:", "AuditLogs", "RemoveUserMembership", "ProjectId:" + project.Id + " UserId:" + user.Id + @User?.FindFirst("name")?.Value);
 
                 await _DbContext.SaveChangesAsync();
                 Log.Information("{Function} Added User {UserName} to {ProjectName}", "RemoveUserMembership", user.Name, project.Name);
@@ -282,7 +296,7 @@ namespace DARE_API.Controllers
                 {
                     Log.Error("{Function} Tre {Tre} is already on {ProjectName}", "AddTreMembership", tre.Name, project.Name);
                     return null;
-                  }
+                }
 
                 project.Tres.Add(tre);
                 var audit = new AuditLog()
@@ -392,9 +406,6 @@ namespace DARE_API.Controllers
                 //TODO - use User.Identity.IsAuthenticated to alter list returned : embargoed etc
 
                 var allProjects = _DbContext.Projects
-                    //.Include(x => x.Tres)
-                    //.Include(x => x.Submissions)
-                    //.Include(x => x.Users)
                     .ToList();
 
 
@@ -417,13 +428,13 @@ namespace DARE_API.Controllers
         {
             try
             {
-                
+
                 var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
                 var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
                 if (tre == null)
                 {
                     throw new Exception("User " + usersName + " doesn't have a tre");
-                    
+
                 }
 
                 var allProjects = tre.Projects;
@@ -474,7 +485,7 @@ namespace DARE_API.Controllers
                 }
                 _DbContext.SaveChanges();
 
-                
+
                 result.Result = true;
                 Log.Information("{Function} Tre {TreName} decisions synched", "SyncTreProjectDecisions", tre.Name);
                 return result;
@@ -572,10 +583,11 @@ namespace DARE_API.Controllers
         [HttpPost("TestFetchAndStoreObject")]
         public async Task<IActionResult> TestFetchAndStoreObject(testFetch testf)
         {
-            try { 
-            await _minioHelper.FetchAndStoreObject(testf.url,testf.bucketName, testf.key);
+            try
+            {
+                await _minioHelper.FetchAndStoreObject(testf.url, testf.bucketName, testf.key);
 
-            return Ok();
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -609,7 +621,7 @@ namespace DARE_API.Controllers
             var minioEndPoint = new MinioEndpoint()
             {
                 Url = _minioSettings.AdminConsole,
-            };  
+            };
 
             return minioEndPoint;
         }
@@ -634,7 +646,7 @@ namespace DARE_API.Controllers
             try
             {
                 var submissionBucket = await _minioHelper.UploadFileAsync(file, bucketName, file.Name);
-                
+
 
                 return new BoolReturn() { Result = true };
             }
@@ -647,23 +659,24 @@ namespace DARE_API.Controllers
 
         private IFormFile ConvertJsonToIFormFile(string fileJson)
         {
-            try { 
-            if (string.IsNullOrEmpty(fileJson))
-                return null;
-            var fileData = System.Text.Json.JsonSerializer.Deserialize<IFileData>(fileJson);
-
-            var bytes = Convert.FromBase64String(fileData.Content);
-
-            var fileName = fileData.FileName;
-            var contentType = fileData.ContentType;
-
-            var formFile = new FormFile(new MemoryStream(bytes), 0, bytes.Length, null, fileName)
+            try
             {
-                Headers = new HeaderDictionary(),
-                ContentType = contentType
-            };
+                if (string.IsNullOrEmpty(fileJson))
+                    return null;
+                var fileData = System.Text.Json.JsonSerializer.Deserialize<IFileData>(fileJson);
 
-            return formFile;
+                var bytes = Convert.FromBase64String(fileData.Content);
+
+                var fileName = fileData.FileName;
+                var contentType = fileData.ContentType;
+
+                var formFile = new FormFile(new MemoryStream(bytes), 0, bytes.Length, null, fileName)
+                {
+                    Headers = new HeaderDictionary(),
+                    ContentType = contentType
+                };
+
+                return formFile;
             }
             catch (Exception ex)
             {

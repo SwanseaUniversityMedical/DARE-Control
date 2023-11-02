@@ -30,6 +30,8 @@ namespace BL.Models.ViewModels
         [Display(Name = "Select TREs")]
         public List<string>? Tres { get; set; }
 
+        public List<TreInfo>? TreRadios { get; set; }
+
         public List<string>? SelectTresOptions { get; set; }
         [Display(Name = "Select TREs or leave blank for all")]
         public string SelectedTres { get; set; }
@@ -42,5 +44,13 @@ namespace BL.Models.ViewModels
 
         [Display(Name = "Select file to upload to bucket")]
         public IFormFile? File { get; set; }
+    }
+
+    public class TreInfo
+    {
+        public string Name { get; set; }
+        public bool IsSelected { get; set; }
+
+        public bool IsOnline { get; set; }
     }
 }

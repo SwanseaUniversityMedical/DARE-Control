@@ -1,5 +1,10 @@
-public class JobSettings{
+namespace TRE_API
+{
 
-    public int syncSchedule { get; set; }
-    public int scanSchedule { get; set; }
+    public class JobSettings
+    {
+
+        public int syncSchedule { get; set; }
+        public int scanSchedule { get; set; }
+    }
 }

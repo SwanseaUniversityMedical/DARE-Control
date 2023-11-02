@@ -1,7 +1,6 @@
 using BL.Models;
 using BL.Models.APISimpleTypeReturns;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Data_Egress_API.Repositories.DbContexts;
 using Castle.Components.DictionaryAdapter.Xml;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -229,6 +228,63 @@ namespace Data_Egress_API.Controllers
             }
 
         }
+        [Authorize(Roles = "data-egress-admin")]
+        [HttpPost("PartialEgress")]
+        public async Task<EgressSubmission> PartialEgressAsync([FromBody] EgressSubmission egress)
+        {
+           
+                var dbegress = _DbContext.EgressSubmissions.First(x => x.Id == egress.Id);
+                if (dbegress.Status != EgressStatus.NotCompleted)
+                {
+                    throw new Exception("Egress has already been completed");
+                }
+                var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).FirstOrDefault();
+                if (string.IsNullOrWhiteSpace(approvedBy))
+                {
+                    approvedBy = "[Unknown]";
+                }
+                var approvedDate = DateTime.Now.ToUniversalTime();
+                
+                dbegress.Reviewer = approvedBy;
+                dbegress.Completed = approvedDate;
+
+                var backtotre = new EgressReview()
+                {
+                    SubId = dbegress.SubmissionId,
+                    FileResults = new List<EgressResult>()
+                };
+                foreach (var file in egress.Files)
+                {
+                    var dbegressfile = dbegress.Files.First(x => x.Id == file.Id);
+                    dbegressfile.Status = file.Status;
+                    backtotre.FileResults.Add(new EgressResult()
+                    {
+                        FileName = dbegressfile.Name,
+                        Approved = dbegressfile.Status == FileStatus.Approved,
+                    });
+                    var egfile = dbegress.Files.First(x => x.Id == file.Id);
+                    egfile.Status = file.Status;
+                    egfile.LastUpdate = approvedDate;
+                    egfile.Reviewer = approvedBy;
+
+                }
+
+                
+                await _DbContext.SaveChangesAsync();
+
+
+
+
+
+
+
+
+
+                Log.Information("{Function} Egress Completed for Submission {SubId}", "CompleteEgress", dbegress.SubmissionId);
+                return dbegress;
+            }
+
+        
 
         [Authorize(Roles = "data-egress-admin")]
         [HttpPost("UpdateFileData")]

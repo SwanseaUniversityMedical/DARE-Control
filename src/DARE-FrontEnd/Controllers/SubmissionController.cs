@@ -40,7 +40,7 @@ namespace DARE_FrontEnd.Controllers
             paramlist.Add("projectId", model.ProjectId.ToString());
             var project = _clientHelper.CallAPIWithoutModel<BL.Models.Project?>(
                 "/api/Project/GetProject/", paramlist).Result;
-            if (model.Tres == null)
+            if (model.TreRadios == null)
             {
                 var paramList = new Dictionary<string, string>();
                 paramList.Add("projectId", model.ProjectId.ToString());
@@ -50,7 +50,7 @@ namespace DARE_FrontEnd.Controllers
             }
             else
             {
-                listOfTre = string.Join("|", model.Tres);
+                listOfTre = string.Join("|", model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
             }
 
             if (model.OriginOption == CrateOrigin.External)

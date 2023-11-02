@@ -159,7 +159,7 @@ if (app.Environment.IsDevelopment())
         c.OAuthClientSecret(submissionKeyCloakSettings.ClientSecret);
         c.OAuthAppName(submissionKeyCloakSettings.ClientId);
     });
-    app.UseDeveloperExceptionPage();
+    //app.UseDeveloperExceptionPage();
 }
 
 // Configure the HTTP request pipeline.

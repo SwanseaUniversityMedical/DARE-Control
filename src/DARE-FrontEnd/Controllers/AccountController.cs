@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using IdentityModel.Client;
 using Newtonsoft.Json;
 using Serilog;
 using System.IdentityModel.Tokens.Jwt;

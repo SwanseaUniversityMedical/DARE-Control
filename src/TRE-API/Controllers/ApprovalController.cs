@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using BL.Models;
 using BL.Models.APISimpleTypeReturns;
 using BL.Models.Enums;
-using BL.Models.ViewModels;
 using Serilog;
 using Microsoft.Extensions.Options;
 using BL.Services;
@@ -87,7 +86,6 @@ namespace TRE_API.Controllers
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllActiveTreProjects")]
-       // [Authorize(Policy = "UserAllowedPolicy")]
         public List<TreProject> GetAllActiveTreProjects()
         {
             try { 
@@ -117,7 +115,6 @@ namespace TRE_API.Controllers
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllActiveTreUsers")]
-       // [Authorize(Policy = "UserAllowedPolicy")]
         public List<TreUser> GetAllActiveTreUsers()
         {
             try { 
@@ -190,21 +187,14 @@ namespace TRE_API.Controllers
                 var dbproj = _DbContext.Projects.First(x => x.Id == treProject.Id);
                 dbproj.LocalProjectName = treProject.LocalProjectName;
 
-                if (treProject.Password == null)
+                if (treProject.Password != null)
                 {
-                    dbproj.Password = dbproj.Password;
-
-                }
-                else {
+                    
                     dbproj.Password = treProject.Password;
                 }
-                if (treProject.UserName == null)
+                if (treProject.UserName != null)
                 {
-                    dbproj.UserName = dbproj.UserName;
-
-                }
-                else
-                {
+                    
                     dbproj.UserName = treProject.UserName;
                 }
 

@@ -332,17 +332,6 @@ namespace DARE_API.Controllers
 
             var result = new Stages()
             {
-                //GreenStages = new List<StatusType>()
-                //{
-                //    StatusType.ValidationSuccessful,
-                //    StatusType.TransferredToPod,
-                //    StatusType.DataOutApproved,
-                //    StatusType.PodProcessingComplete,
-                //    StatusType.SubmissionCrateValidated,
-                //    StatusType.TreCrateValidated,
-                //    StatusType.Completed,
-                //    StatusType.PartialResult
-                //},
                 RedStages = new List<StatusType>()
                 {
                     StatusType.InvalidUser,
