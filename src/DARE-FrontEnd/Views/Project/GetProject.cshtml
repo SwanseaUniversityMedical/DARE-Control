@@ -217,22 +217,41 @@
                         <ul class="list-group">
                             @foreach (var tre in Model.Tres)
                             {
-                                <li class="list-group-item justify-content-between d-flex">
-                                    <a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })" class="fw-bold">@tre.Name</a>
-                                    <span class="d-flex align-items-center">
-                                        <span class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 me-3">
-                                            <i class="fa-solid fa-check-circle me-1"></i> Approved
-                                        </span>
-                                        <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 me-3">
-                                            <i class="fa-solid fa-circle-notch fa-spin me-1"></i> Awaiting Approval
-                                        </span>
-                                        <span class="badge  px-2 badge-sm bg-danger text-light rounded-pill m-0 me-3">
-                                            <i class="fa-solid fa-close me-1"></i> Rejected
-                                        </span>
-                                        <a href="@Url.Action("RemoveTreFromProject", "Project",new{ProjectId=Model.Id,TreId=tre.Id})">
-                                            <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
-                                        </a>
-                                    </span>
+                                 <li class="list-group-item justify-content-between d-flex">
+                                <a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })" class="fw-bold">@tre.Name</a>
+
+                                    @foreach (var decision in tre.ProjectTreDecisions.Where(x => x.SubmissionProj.Id == Model.Id))
+                                    {
+
+
+
+                                           
+
+                                                <span class="d-flex align-items-center">
+                                                    @if (decision.Decision == BL.Models.Enums.Decision.Approved)
+                                                    {
+                                                        <span class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 me-3">
+                                                            <i class="fa-solid fa-check-circle me-1"></i> @decision.Decision.ToString()
+                                                        </span>
+                                                    }
+                                                    else if (decision.Decision == BL.Models.Enums.Decision.Undecided)
+                                                    {
+                                                        <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 me-3">
+                                                            <i class="fa-solid fa-circle-notch fa-spin me-1"></i> @decision.Decision.ToString()
+                                                        </span>
+                                                    }
+                                                    else if (decision.Decision == BL.Models.Enums.Decision.Rejected)
+                                                    {
+                                                        <span class="badge  px-2 badge-sm bg-danger text-light rounded-pill m-0 me-3">
+                                                            <i class="fa-solid fa-close me-1"></i> @decision.Decision.ToString()
+                                                        </span>
+                                                    }
+                                                    <a href="@Url.Action("RemoveTreFromProject", "Project",new{ProjectId=Model.Id,TreId=tre.Id})">
+                                                        <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
+                                                    </a>
+                                                </span>
+                                            
+                                }
                                 </li>
                             }
                         </ul>
