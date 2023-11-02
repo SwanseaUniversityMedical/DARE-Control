@@ -89,7 +89,6 @@ var minioTRESettings = new MinioTRESettings();
 configuration.Bind(nameof(MinioTRESettings), minioTRESettings);
 builder.Services.AddSingleton(minioTRESettings);
 
-Log.Information($"minioTRESettings  Url> {minioTRESettings.Url}");
 
 var AuthenticationSetting = new AuthenticationSettings();
 configuration.Bind(nameof(AuthenticationSetting), AuthenticationSetting);
@@ -380,4 +379,6 @@ if (HasuraSettings.IsEnabled)
 
 var port = app.Environment.WebRootPath;
 Console.WriteLine("Application is running on port: " + port);
+
+Log.Information($"minioTRESettings  Url> {minioTRESettings.Url}");
 app.Run();
