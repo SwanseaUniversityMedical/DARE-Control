@@ -10,7 +10,9 @@ env:
   DAREAPI: dare-control-api
   TREUI: dare-control-treui
   TREAPI: dare-control-treapi
-  TREAGENT: dare-control-agent
+  EGRESSUI: dare-control-egressui
+  EGRESSAPI: dare-control-egressapi
+  COMMONBL: dare-control-bl
   
 
 jobs:
@@ -97,6 +99,66 @@ jobs:
               /d:sonar.login=${{ secrets.SONAR_TOKEN }} \
               && dotnet restore "TRE-API.csproj" \
               && dotnet build "TRE-API.csproj" -c Release \
+              && dotnet /sonar-scanner/SonarScanner.MSBuild.dll end \
+              /d:sonar.login=${{ secrets.SONAR_TOKEN }}"
+
+      - name: Sleep for 30 seconds to give the SQ server a chance to catch up
+        run: sleep 30s
+        shell: bash
+
+      - name: scan ${{ env.EGRESSUI }} project
+        run: |
+          docker run --rm \
+          -v $(pwd):/source \
+          alleeex/dotnet-sonar:23.06.4-r2 \
+          bash -c \
+              "cd /source/src/Data-Egress-UI \
+              && dotnet /sonar-scanner/SonarScanner.MSBuild.dll begin \
+              /k:${{ env.EGRESSUI }} /name:${{ env.EGRESSUI }} \
+              /d:sonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+              /d:sonar.login=${{ secrets.SONAR_TOKEN }} \
+              && dotnet restore "Data-Egress-UI.csproj" \
+              && dotnet build "Data-Egress-UI.csproj" -c Release \
+              && dotnet /sonar-scanner/SonarScanner.MSBuild.dll end \
+              /d:sonar.login=${{ secrets.SONAR_TOKEN }}"
+
+      - name: Sleep for 30 seconds to give the SQ server a chance to catch up
+        run: sleep 30s
+        shell: bash
+
+      - name: scan ${{ env.EGRESSAPI }} project
+        run: |
+          docker run --rm \
+          -v $(pwd):/source \
+          alleeex/dotnet-sonar:23.06.4-r2 \
+          bash -c \
+              "cd /source/src/Data-Egress-API \
+              && dotnet /sonar-scanner/SonarScanner.MSBuild.dll begin \
+              /k:${{ env.EGRESSAPI }} /name:${{ env.EGRESSAPI }} \
+              /d:sonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+              /d:sonar.login=${{ secrets.SONAR_TOKEN }} \
+              && dotnet restore "Data-Egress-API.csproj" \
+              && dotnet build "Data-Egress-API.csproj" -c Release \
+              && dotnet /sonar-scanner/SonarScanner.MSBuild.dll end \
+              /d:sonar.login=${{ secrets.SONAR_TOKEN }}"
+
+      - name: Sleep for 30 seconds to give the SQ server a chance to catch up
+        run: sleep 30s
+        shell: bash
+
+      - name: scan ${{ env.COMMONBL }} project
+        run: |
+          docker run --rm \
+          -v $(pwd):/source \
+          alleeex/dotnet-sonar:23.06.4-r2 \
+          bash -c \
+              "cd /source/src/BL \
+              && dotnet /sonar-scanner/SonarScanner.MSBuild.dll begin \
+              /k:${{ env.COMMONBL }} /name:${{ env.COMMONBL }} \
+              /d:sonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+              /d:sonar.login=${{ secrets.SONAR_TOKEN }} \
+              && dotnet restore "BL.csproj" \
+              && dotnet build "BL.csproj" -c Release \
               && dotnet /sonar-scanner/SonarScanner.MSBuild.dll end \
               /d:sonar.login=${{ secrets.SONAR_TOKEN }}"
 
