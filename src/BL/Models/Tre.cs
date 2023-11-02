@@ -17,6 +17,7 @@ namespace BL.Models
         public virtual List<ProjectTreDecision> ProjectTreDecisions { get; set; }
 
         public virtual List<MembershipTreDecision> MembershipTreDecision { get; set; }
+        public virtual List<AuditLog> AuditLogs { get; set; }
 
     }
 }
