@@ -66,26 +66,17 @@ namespace TRE_UI.Controllers
 
             return View(result.First());
         }
-
         
         [HttpGet]
         public IActionResult EditProject(int? projectId)
         {
-
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", projectId.ToString());
             var project = _treclientHelper.CallAPIWithoutModel<TreProject>(
                 "/api/Approval/GetTreProject/", paramlist).Result;
-            
-
-           
-          
+                           
             return View(project);
         }
-
-        
-
-
 
     }
 

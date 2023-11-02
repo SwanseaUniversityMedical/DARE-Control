@@ -35,8 +35,8 @@ namespace OPA.Controllers
         }
 
 
-        [HttpGet("GetAuthorizedProjects")]
-        public async Task<IActionResult> AllowAccessToProjects()
+        [HttpGet("CheckUserAccess")]
+        public async Task<IActionResult> CheckUserAccess()
         {
             try
             {
@@ -45,7 +45,7 @@ namespace OPA.Controllers
                 var treData = _dareHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForTre").Result;
                 var user = new
                 {
-                    user = "PatriciaAkinkuade",
+                    user = userName,
                     today = DateTime.Today
                 };
                 bool hasAccess = await _opaService.CheckAccess(userName, today, treData);
@@ -59,12 +59,12 @@ namespace OPA.Controllers
                         // return RedirectToAction("AccessDenied");
                     }
 
-                Log.Information("{Function} Projects retrieved successfully", "GetAllProjectsForTre");
+                Log.Information("{Function} User Access Allowed", "CheckUserAccess");
                 return null;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "{Function} Crashed", "GetAllProjectsForTre");
+                Log.Error(ex, "{Function} Crashed", "CheckUserAccess");
                 throw;
             }
 
