@@ -145,6 +145,9 @@ namespace TRE_API.Migrations
                     b.Property<DateTime>("LastDecisionDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime>("ProjectExpiryDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int?>("ProjectId")
                         .HasColumnType("integer");
 
