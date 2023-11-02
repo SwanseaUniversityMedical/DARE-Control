@@ -6,6 +6,8 @@ using Serilog;
 using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using BL.Models;
+using BL.Models.Tes;
+using DARE_API.Services;
 
 namespace DARE_API.Controllers
 {
@@ -49,30 +51,26 @@ namespace DARE_API.Controllers
                 }
                 tre.FormData = data.FormIoString;
 
+                var logtype = LogType.AddTre;
                 if (tre.Id > 0)
                 {
-                    if(_DbContext.Tres.Select(x => x.Id == tre.Id).Any())
+                    if (_DbContext.Tres.Select(x => x.Id == tre.Id).Any())
+                    {
                         _DbContext.Tres.Update(tre);
+                        logtype = LogType.UpdateTre;
+                    }
                     else
+                    {
                         _DbContext.Tres.Add(tre);
+                    }
                 }
 
                 else {
                     _DbContext.Tres.Add(tre);
                 }
-                var audit = new AuditLog()
-                {
-                    FormData = data.FormIoString,
-                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                    UserName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
-                    TreId = tre.Id,
-                    Date = DateTime.Now.ToUniversalTime()
-                };
-
-                _DbContext.AuditLogs.Add(audit);
-                Log.Information("{Function}:", "AuditLogs", "SaveTre", "FormData: " + data.FormIoString + "TreId:" + tre.Id + @User?.FindFirst("name")?.Value);
-
                 await _DbContext.SaveChangesAsync();
+                await ControllerHelpers.AddAuditLog(logtype, null, null, tre, null, null, _httpContextAccessor, User, _DbContext);
+             
                 return tre;
 
             }
