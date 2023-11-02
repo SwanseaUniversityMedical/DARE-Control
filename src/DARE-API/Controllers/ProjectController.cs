@@ -16,6 +16,11 @@ using System.Threading;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using BL.Models.APISimpleTypeReturns;
 using Amazon.Util.Internal;
+using DARE_API.Services;
+using User = BL.Models.User;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SignalR;
 
 namespace DARE_API.Controllers
 {
@@ -98,31 +103,30 @@ namespace DARE_API.Controllers
                     }
                 }
 
+                var logtype = LogType.AddProject;
 
                 if (project.Id > 0)
                 {
                     if (_DbContext.Projects.Select(x => x.Id == project.Id).Any())
+                    {
                         _DbContext.Projects.Update(project);
+                        logtype = LogType.UpdateProject;
+                    }
                     else
+                    {
                         _DbContext.Projects.Add(project);
+                    }
                 }
                 else
                 {
                     _DbContext.Projects.Add(project);
 
                 }
-                var audit = new AuditLog()
-                {
-                    FormData = data.FormIoString,
-                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                    UserName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
-                    ProjectId = project.Id,
-                    Date = DateTime.Now.ToUniversalTime()
-                };
-
-                _DbContext.AuditLogs.Add(audit);
-                Log.Information("{Function}:", "AuditLogs", "SaveProject", "FormData: " + data.FormIoString + "ProjectId:" + project.Id + @User?.FindFirst("name")?.Value);
                 await _DbContext.SaveChangesAsync();
+                await ControllerHelpers.AddAuditLog(logtype, null, project, null, null, null, _httpContextAccessor, User, _DbContext);
+                
+                
+                
                 Log.Information("{Function} Projects added successfully", "CreateProject");
                 return project;
             }
@@ -181,27 +185,11 @@ namespace DARE_API.Controllers
                     Log.Error("{Function} User {UserName} is already on {ProjectName}", "AddUserMembership", user.Name, project.Name);
                     return null;
                 }
-
+                
                 project.Users.Add(user);
-
-                var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
-                var attributeName = _minioSettings.AttributeName;
-
-                await _keycloakMinioUserService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.SubmissionBucket.ToLower() + "_policy");
-
-                await _keycloakMinioUserService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.OutputBucket.ToLower() + "_policy");
-                var audit = new AuditLog()
-                {
-                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                    UserName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
-                    ProjectId = project.Id,
-                    UserId = user.Id,
-                    Date = DateTime.Now.ToUniversalTime()
-                };
-                _DbContext.AuditLogs.Add(audit);
-                Log.Information("{Function}:", "AuditLogs", "AddUserMembership", "UserId: " + user.Id + "ProjectId:" + project.Id + @User?.FindFirst("name")?.Value);
-
                 await _DbContext.SaveChangesAsync();
+                await ControllerHelpers.AddUserToMinioBucket(user, project, _httpContextAccessor, _minioSettings.AttributeName, _keycloakMinioUserService, User, _DbContext );
+                await ControllerHelpers.AddAuditLog(LogType.AddUserToProject, user, project, null, null, null, _httpContextAccessor, User, _DbContext);
                 Log.Information("{Function} Added User {UserName} to {ProjectName}", "AddUserMembership", user.Name, project.Name);
                 return model;
             }
@@ -213,6 +201,8 @@ namespace DARE_API.Controllers
 
 
         }
+
+        
 
         [Authorize(Roles = "dare-control-admin")]
         [HttpPost("RemoveUserMembership")]
@@ -240,26 +230,13 @@ namespace DARE_API.Controllers
                     return null;
                 }
 
-                project.Users.Remove(user);
-
-                var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
-                var attributeName = _minioSettings.AttributeName;
-                var attributeValue = project.Name.ToLower() + "_policy";
-
-                await _keycloakMinioUserService.RemoveMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.SubmissionBucket.ToLower() + "_policy");
-                await _keycloakMinioUserService.RemoveMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.OutputBucket.ToLower() + "_policy");
-                var audit = new AuditLog()
-                {
-                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                    UserName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
-                    ProjectId = project.Id,
-                    UserId = user.Id,
-                    Date = DateTime.Now.ToUniversalTime()
-                };
-                _DbContext.AuditLogs.Add(audit);
-                Log.Information("{Function}:", "AuditLogs", "RemoveUserMembership", "ProjectId:" + project.Id + " UserId:" + user.Id + @User?.FindFirst("name")?.Value);
 
                 await _DbContext.SaveChangesAsync();
+                await ControllerHelpers.RemoveUserFromMinioBucket(user, project, _httpContextAccessor, _minioSettings.AttributeName, _keycloakMinioUserService, User, _DbContext);
+
+                await ControllerHelpers.AddAuditLog(LogType.RemoveUserFromProject, user, project, null, null, null, _httpContextAccessor, User, _DbContext);
+
+                
                 Log.Information("{Function} Added User {UserName} to {ProjectName}", "RemoveUserMembership", user.Name, project.Name);
                 return model;
             }
@@ -271,6 +248,8 @@ namespace DARE_API.Controllers
 
 
         }
+
+        
 
         [Authorize(Roles = "dare-control-admin")]
         [HttpPost("AddTreMembership")]
@@ -299,17 +278,9 @@ namespace DARE_API.Controllers
                 }
 
                 project.Tres.Add(tre);
-                var audit = new AuditLog()
-                {
-                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                    UserName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
-                    ProjectId = project.Id,
-                    TreId = tre.Id,
-                    Date = DateTime.Now.ToUniversalTime()
-                };
-                _DbContext.AuditLogs.Add(audit);
-                Log.Information("{Function}:", "AuditLogs", "AddTreMembership", "ProjectId:" + project.Id + " TreId:" + tre.Id + @User?.FindFirst("name")?.Value);
+
                 await _DbContext.SaveChangesAsync();
+                await ControllerHelpers.AddAuditLog(LogType.AddTreToProject, null, project, tre, null, null, _httpContextAccessor, User, _DbContext);
                 Log.Information("{Function} Added Tre {Tre} to {ProjectName}", "AddTreMembership", tre.Name, project.Name);
                 return model;
             }
@@ -349,18 +320,9 @@ namespace DARE_API.Controllers
                 }
 
                 project.Tres.Remove(tre);
-                var audit = new AuditLog()
-                {
-                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                    UserName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
-                    ProjectId = project.Id,
-                    TreId = tre.Id,
-                    Date = DateTime.Now.ToUniversalTime()
-                };
-                _DbContext.AuditLogs.Add(audit);
-                Log.Information("{Function}:", "AuditLogs", "RemoveTreMembership", "ProjectId:" + project.Id + " TreId:" + tre.Id + @User?.FindFirst("name")?.Value);
-
+                
                 await _DbContext.SaveChangesAsync();
+                await ControllerHelpers.AddAuditLog(LogType.RemoveTreFromProject, null, project, tre, null, null, _httpContextAccessor, User, _DbContext);
                 Log.Information("{Function} Added Tre {Tre} to {ProjectName}", "AddTreMembership", tre.Name, project.Name);
                 return model;
             }
@@ -626,16 +588,7 @@ namespace DARE_API.Controllers
             return minioEndPoint;
         }
 
-        //[HttpGet("UploadToMinioOld")]
-        //[AllowAnonymous]
-        //public async Task<BoolReturn> UploadToMinioOld(string bucketName, string fileJson)
-        //{
-        //    IFormFile iFile = ConvertJsonToIFormFile(fileJson);
-
-        //    var submissionBucket = await _minioHelper.UploadFileAsync(_minioSettings, iFile, bucketName, iFile.Name);
-
-        //    return new BoolReturn();
-        //}
+        
 
         [HttpPost("UploadToMinio")]
         public async Task<BoolReturn> UploadToMinio(string bucketName, IFormFile file)

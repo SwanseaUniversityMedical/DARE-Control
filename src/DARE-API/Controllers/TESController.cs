@@ -20,6 +20,7 @@ using BL.Services;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DARE_API.Controllers
 {
@@ -326,15 +327,10 @@ namespace DARE_API.Controllers
                     var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Submission, "topic");
 
                     _rabbit.Advanced.Publish(exch, RoutingConstants.ProcessSub, false, new Message<int>(sub.Id));
+                    await ControllerHelpers.AddAuditLog(LogType.CreateSubmission, user, dbproj, null, sub, null, _httpContextAccessor, User, _DbContext);
+                    
 
-                    var audit = new AuditLog()
-                    {
-                        IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                        UserName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
-                        TestaskId = Convert.ToInt32(tesTask.Id),
-                        Date = DateTime.Now.ToUniversalTime()
-                    };
-                    _DbContext.AuditLogs.Add(audit);
+                   
                     Log.Debug("{Function} Creating task with id {Id} state {State}", "CreateTaskAsync", tesTask.Id,
                         tesTask.State);
 
