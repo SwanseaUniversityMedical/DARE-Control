@@ -19,7 +19,7 @@
     <p>This token will expire overtime. Your token can also be renewed from the same page.</p>
 
     <h2 class="fs-4 mt-4">Message Format</h2>
-    <p>The system uses the <a href="https://www.ga4gh.org/news_item/ga4gh-tes-api-bringing-compatibility-to-task-execution-across-hpc-systems-the-cloud-and-beyond/" target="_blank">GA4GH TES</a> message format to pass a job to the system in order to tell a TRE to download and execute an RO-CRATE.</p>
+    <p>The system uses the <a href="https://www.ga4gh.org/news_item/ga4gh-tes-api-bringing-compatibility-to-task-execution-across-hpc-systems-the-cloud-and-beyond/" target="_blank" rel="noopener">GA4GH TES</a> message format to pass a job to the system in order to tell a TRE to download and execute an RO-CRATE.</p>
     <p>In order for the system to align with the '5 Safes' requirement, the message must also contain a set number of parameters:</p>
     <h3 class="fs-5 mt-3">Key parameters</h3>
     <ol>
@@ -85,7 +85,7 @@ curl -X 'POST' \
     </div>
 
     <h2 class="fs-4 mt-4">Calling the REST API through Swagger</h2>
-    <p>Access Swagger URL at <a href="@Html.Raw(Model)/swagger/index.html" target="_blank">@Html.Raw(Model)/swagger/index.html</a></p>
+    <p>Access Swagger URL at <a href="@Html.Raw(Model)/swagger/index.html" target="_blank" rel="noopener">@Html.Raw(Model)/swagger/index.html</a></p>
     <ol>
         <li>Click Authorize, enter Token into Value and press Authorize then Close</li>
         <li>Section TaskServiceApi, POST /v1/tasks</li>
