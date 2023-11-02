@@ -89,7 +89,7 @@ var minioTRESettings = new MinioTRESettings();
 configuration.Bind(nameof(MinioTRESettings), minioTRESettings);
 builder.Services.AddSingleton(minioTRESettings);
 
-
+Log.Information($"minioTRESettings  Url> {minioTRESettings.Url}");
 
 var AuthenticationSetting = new AuthenticationSettings();
 configuration.Bind(nameof(AuthenticationSetting), AuthenticationSetting);
