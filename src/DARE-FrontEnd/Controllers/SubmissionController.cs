@@ -38,13 +38,13 @@ namespace DARE_FrontEnd.Controllers
             var imageUrl = "";
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", model.ProjectId.ToString());
-            var project = _clientHelper.CallAPIWithoutModel<BL.Models.Project?>(
-                "/api/Project/GetProject/", paramlist).Result;
+            var project = await _clientHelper.CallAPIWithoutModel<BL.Models.Project?>(
+                "/api/Project/GetProject/", paramlist);
             if (model.TreRadios == null)
             {
                 var paramList = new Dictionary<string, string>();
                 paramList.Add("projectId", model.ProjectId.ToString());
-                var tre = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList).Result;
+                var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList);
                 List<string> namesList = tre.Select(test => test.Name).ToList();
                 listOfTre = string.Join("|", namesList);
             }
@@ -64,8 +64,8 @@ namespace DARE_FrontEnd.Controllers
 
                 paramss.Add("bucketName", project.SubmissionBucket);
 
-                var uplodaResultTest = _clientHelper.CallAPIToSendFile<APIReturn>("/api/Project/UploadToMinio", "file", model.File, paramss).Result;
-                var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
+                var uplodaResultTest = await _clientHelper.CallAPIToSendFile<APIReturn>("/api/Project/UploadToMinio", "file", model.File, paramss);
+                var minioEndpoint = await _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
 
                 imageUrl = "http://" + minioEndpoint.Url + "/browser/" + project.SubmissionBucket + "/" + model.File.FileName;
 
@@ -93,7 +93,7 @@ namespace DARE_FrontEnd.Controllers
 
             };
 
-            var result = _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test).Result;
+            var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test);
 
             return RedirectToAction("GetProject", "Project", new {id = model.ProjectId});
         }

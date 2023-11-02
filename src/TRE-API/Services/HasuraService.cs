@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
 using System.Net.Http.Headers;
@@ -182,7 +183,7 @@ namespace TREAPI.Services
                 var Result = await HttpClient(endpointUrl, payload);
 
                 var strign = await Result.Content.ReadAsStringAsync();
-
+                Log.Information($"TablesInSchemas ReadAsStringAsync " + strign);
                 var data = JsonConvert.DeserializeObject<ReturnData>(strign);
 
                 return data.result;
@@ -219,6 +220,8 @@ namespace TREAPI.Services
                 var Result = await HttpClient(endpointUrl, payload);
 
                 var Content = await Result.Content.ReadAsStringAsync();
+
+                Log.Information("TablesInSchemas ReadAsStringAsync > "  + Content);
 
                 var data = JsonConvert.DeserializeObject<ReturnData>(Content);
 
@@ -316,6 +319,7 @@ namespace TREAPI.Services
                         } 
                     }
                    
+                    Log.Information($"TrackData error > {error} table > {table} Schema > {Schema} Db > {Db} ");
                     return false;
                 }
 

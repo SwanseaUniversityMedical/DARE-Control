@@ -18,6 +18,7 @@ using System.Xml.Linq;
 using System.Text.RegularExpressions;
 using BL.Models.Enums;
 using Microsoft.AspNetCore.StaticFiles;
+using Amazon.Runtime.Internal.Transform;
 
 namespace Data_Egress_UI.Controllers
 {
@@ -110,13 +111,27 @@ namespace Data_Egress_UI.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllEgresses()
+        public IActionResult GetAllEgresses(bool unprocessedonly)
         {
-            var egresses = _dataClientHelper.CallAPIWithoutModel<List<EgressSubmission>>("/api/DataEgress/GetAllEgresses/").Result;
+             
+            var paramlist = new Dictionary<string, string>();
+            if (unprocessedonly)
+            {
+                ViewBag.PageTitle = "Unprocessed Egresses";
+                paramlist.Add("unprocessedonly", true.ToString());
+                
+            }
+            else
+            {
+                ViewBag.PageTitle = "All Egresses";
+                paramlist.Add("unprocessedonly", false.ToString());
+                
+            }
 
-           
 
-           
+            List<EgressSubmission> egresses = _dataClientHelper
+                .CallAPIWithoutModel<List<EgressSubmission>>("/api/DataEgress/GetAllEgresses/", paramlist).Result;
+
             return View(egresses);
         }
 

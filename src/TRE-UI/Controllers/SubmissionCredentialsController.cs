@@ -3,6 +3,7 @@ using BL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using BL.Models.APISimpleTypeReturns;
+using TRE_UI.Services;
 
 namespace TRE_UI.Controllers
 {
@@ -21,38 +22,24 @@ namespace TRE_UI.Controllers
 
         public async Task<IActionResult> UpdateCredentialsAsync()
         {
-            var valid = await _clientHelper.CallAPIWithoutModel<BoolReturn>("/api/SubmissionCredentials/CheckCredentialsAreValid");
-
-
-            return View(new KeycloakCredentials()
-                { Valid = valid.Result })
-                ;
+            return View(await ControllerHelpers.CheckCredentialsAreValid("SubmissionCredentials", _clientHelper));
+            
         }
 
         [HttpPost]
         
         public async Task<IActionResult> UpdateCredentials(KeycloakCredentials credentials) {
 
-            if (ModelState.IsValid)
+            if (await ControllerHelpers.UpdateCredentials("SubmissionCredentials", _clientHelper, ModelState,
+                    credentials))
             {
-
-
-                var result =
-                    await _clientHelper.CallAPI<KeycloakCredentials, KeycloakCredentials>(
-                        "/api/SubmissionCredentials/UpdateCredentials", credentials);
-                if (result.Valid)
-                {
-                    return RedirectToAction("Index", "Home");
-                }
-                else
-                {
-                    return View(credentials);
-                }
+                return RedirectToAction("Index", "Home");
             }
             else
             {
                 return View(credentials);
             }
+            
 
         }
 
