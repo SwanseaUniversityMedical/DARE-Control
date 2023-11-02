@@ -221,7 +221,7 @@ namespace TRE_API.Controllers
 
                     resultList.Add(dbproj);
                     await _DbContext.SaveChangesAsync();
-                    await ControllerHelper.AddTreAuditLog(dbproj, null, treProject.Decision == Decision.Approved,
+                    await ControllerHelpers.AddTreAuditLog(dbproj, null, treProject.Decision == Decision.Approved,
                         _DbContext, _httpContextAccessor, User);
 
 
@@ -268,7 +268,7 @@ namespace TRE_API.Controllers
                     returnResult.Add(dbMembership);
                     
                     await _DbContext.SaveChangesAsync();
-                    await ControllerHelper.AddTreAuditLog(null, dbMembership, dbMembership.Decision == Decision.Approved,
+                    await ControllerHelpers.AddTreAuditLog(null, dbMembership, dbMembership.Decision == Decision.Approved,
                         _DbContext, _httpContextAccessor, User);
                     
 

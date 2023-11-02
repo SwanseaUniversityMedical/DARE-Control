@@ -22,7 +22,7 @@ namespace TRE_UI.Controllers
 
         public async Task<IActionResult> UpdateCredentialsAsync()
         {
-            return View(await ControllerHelpers.UpdateCredentials("SubmissionCredentials", _clientHelper));
+            return View(await ControllerHelpers.CheckCredentialsAreValid("SubmissionCredentials", _clientHelper));
             
         }
 

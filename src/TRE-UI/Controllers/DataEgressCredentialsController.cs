@@ -24,7 +24,7 @@ namespace TRE_UI.Controllers
 
         public async Task<IActionResult> UpdateCredentialsAsync()
         {
-            return View(await ControllerHelpers.UpdateCredentials("DataEgressCredentials", _clientHelper));
+            return View(await ControllerHelpers.CheckCredentialsAreValid("DataEgressCredentials", _clientHelper));
         }
 
 
