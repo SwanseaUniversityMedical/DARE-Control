@@ -57,11 +57,7 @@ namespace DARE_API.Controllers
         {
 
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-            var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName);
-            if (tre == null)
-            {
-                return BadRequest("User " + usersName + " doesn't have a tre");
-            }
+            var tre = ControllerHelpers.GetUserTre(User, _DbContext);
 
             tre.LastHeartBeatReceived = DateTime.Now.ToUniversalTime();
             _DbContext.SaveChanges();
@@ -81,11 +77,7 @@ namespace DARE_API.Controllers
         {
 
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-            var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName);
-            if (tre == null)
-            {
-                return BadRequest("User " + usersName + " doesn't have a tre");
-            }
+            var tre = ControllerHelpers.GetUserTre(User, _DbContext);
 
             tre.LastHeartBeatReceived = DateTime.Now.ToUniversalTime();
             _DbContext.SaveChanges();
@@ -104,29 +96,33 @@ namespace DARE_API.Controllers
         public IActionResult UpdateStatusForTre(string subId, StatusType statusType, string? description)
         {
 
-            var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-            var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
-            if (tre == null)
-            {
-                return BadRequest("User " + usersName + " doesn't have an tre");
-            }
-
-
-            var sub = _DbContext.Submissions.FirstOrDefault(x => x.Id == int.Parse(subId) && x.Tre == tre);
-            if (sub == null)
-            {
-                return BadRequest("Invalid subid or tre not valid for tes");
-            }
-            if (UpdateSubmissionStatus.SubCompleteTypes.Contains(sub.Status))
-            {
-                throw new Exception("Submission already closed. Can't change status");
-            }
-            UpdateSubmissionStatus.UpdateStatusNoSave(sub, statusType, description);
+            UpdateStatusForTreGuts(subId, statusType, description);
             _DbContext.SaveChanges();
            
 
 
             return StatusCode(200, new APIReturn() { ReturnType = ReturnType.voidReturn });
+        }
+
+        private Submission UpdateStatusForTreGuts(string subId, StatusType statusType, string? description)
+        {
+            var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+            var tre = ControllerHelpers.GetUserTre(User, _DbContext);
+
+
+            var sub = _DbContext.Submissions.FirstOrDefault(x => x.Id == int.Parse(subId) && x.Tre == tre);
+            if (sub == null)
+            {
+                throw new Exception("Invalid subid or tre not valid for tes");
+            }
+
+            if (UpdateSubmissionStatus.SubCompleteTypes.Contains(sub.Status))
+            {
+                throw new Exception("Submission already closed. Can't change status");
+            }
+
+            UpdateSubmissionStatus.UpdateStatusNoSave(sub, statusType, description);
+            return sub;
         }
 
         [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
@@ -141,25 +137,7 @@ namespace DARE_API.Controllers
             {
                 throw new Exception("Invalid completion type");
             }
-            var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-            var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
-            if (tre == null)
-            {
-                return BadRequest("User " + usersName + " doesn't have an tre");
-            }
-
-
-            var sub = _DbContext.Submissions.FirstOrDefault(x => x.Id == int.Parse(subId) && x.Tre == tre);
-            if (sub == null)
-            {
-                return BadRequest("Invalid subid or tre not valid for tes");
-            }
-            if (UpdateSubmissionStatus.SubCompleteTypes.Contains(sub.Status))
-            {
-                throw new Exception("Submission already closed. Can't change status");
-            }
-
-            UpdateSubmissionStatus.UpdateStatusNoSave(sub, statusType, description);
+            var sub = UpdateStatusForTreGuts(subId, statusType, description);
             sub.FinalOutputFile = finalFile;
             _DbContext.SaveChanges();
             

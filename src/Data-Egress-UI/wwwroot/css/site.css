@@ -525,9 +525,9 @@ table tr {
 
 @media (min-width: 880px) {
     .navbar-expand-md .navbar-nav .nav-link {
+        padding: 0;
         padding-right: 0rem;
         padding-left: 0rem;
-        padding: 0;
     }
 
     .navbar-expand-md .navbar-collapse.collapse.show {
