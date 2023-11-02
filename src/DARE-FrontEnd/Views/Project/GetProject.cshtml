@@ -451,7 +451,7 @@
                         <ul class="list-group">
                             @foreach (var tre in Model.Tres)
                             {
-                                
+                                 <li class="list-group-item justify-content-between d-flex">
                                 <a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })" class="fw-bold">@tre.Name</a>
 
                                     @foreach (var decision in tre.ProjectTreDecisions.Where(x => x.SubmissionProj.Id == Model.Id))
@@ -459,7 +459,7 @@
 
 
 
-                                            <li class="list-group-item justify-content-between d-flex">
+                                           
 
                                                 <span class="d-flex align-items-center">
                                                     @if (decision.Decision == BL.Models.Enums.Decision.Approved)
@@ -484,8 +484,9 @@
                                                         <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
                                                     </a>
                                                 </span>
-                                            </li>
+                                            
                                 }
+                                </li>
                             }
                         </ul>
                     </div>
