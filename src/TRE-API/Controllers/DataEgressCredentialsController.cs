@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using TRE_API.Repositories.DbContexts;
+using TRE_API.Services;
 
 
 namespace TRE_API.Controllers
@@ -33,25 +34,8 @@ namespace TRE_API.Controllers
         [HttpGet("CheckCredentialsAreValid")]
         public async Task<BoolReturn> CheckCredentialsAreValidAsync()
         {
-            try
-            {
-                var result = new BoolReturn() { Result = false };
-                var creds = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Egress);
-                if (creds != null)
-                {
-                    var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
-                        _encDecHelper.Decrypt(creds.PasswordEnc), "dare-tre-admin");
-                    result.Result = !string.IsNullOrWhiteSpace(token);
-
-                }
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crash", "CheckCredentialsAreValid");
-                throw;
-            }
+            return await ControllerHelpers.CheckCredentialsAreValid(_keycloakTokenHelper, _encDecHelper, _DbContext, CredentialType.Egress);
+            
 
         }
 
@@ -59,47 +43,10 @@ namespace TRE_API.Controllers
         [HttpPost("UpdateCredentials")]
         public async Task<KeycloakCredentials> UpdateCredentials(KeycloakCredentials creds)
         {
-            try
-            {
-                creds.Valid = true;
-                var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
-                    creds.PasswordEnc, "dare-tre-admin");
-                if (string.IsNullOrWhiteSpace(token))
-                {
-                    creds.Valid = false;
-                    return creds;
-                }
-                
-                var add = true;
-                var dbcred = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Egress);
-                if (dbcred != null)
-                {
-                    creds.Id = dbcred.Id;
-                    creds.CredentialType = CredentialType.Egress;
-                    add = false;
-                }
-
-                creds.PasswordEnc = _encDecHelper.Encrypt(creds.PasswordEnc);
-                if (add)
-                {
-                    _DbContext.KeycloakCredentials.Add(creds);
-                    
-                }
-                else
-                {
-                    _DbContext.KeycloakCredentials.Update(creds);
-                }
-                
-                await _DbContext.SaveChangesAsync();
-
-                Log.Information("{Function} Credentials Successfully update", "UpdateCredentials");
-                return creds;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crash", "UpdateCredentials");
-                throw;
-            }
+            creds = await ControllerHelpers.UpdateCredentials(creds, _keycloakTokenHelper, _DbContext, _encDecHelper, CredentialType.Egress);
+            return creds;
         }
+
+        
     }
 }
