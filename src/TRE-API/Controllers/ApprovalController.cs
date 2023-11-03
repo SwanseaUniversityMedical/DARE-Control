@@ -218,6 +218,9 @@ namespace TRE_API.Controllers
                         dbproj.ApprovedBy = approvedBy;
                         dbproj.LastDecisionDate = approvedDate;
                     }
+        
+                        dbproj.ProjectExpiryDate = treProject.ProjectExpiryDate;
+                    
 
                     resultList.Add(dbproj);
                     await _DbContext.SaveChangesAsync();
