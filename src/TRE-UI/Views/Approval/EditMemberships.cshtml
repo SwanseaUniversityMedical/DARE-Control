@@ -64,6 +64,7 @@
                         @*<th>Project</th>*@
                         <th>Status</th>
                         <th>Decision</th>
+                            <th>ProjectExpiryDate</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -113,15 +114,19 @@
                                         </div>
                                     }
                                 </td>
+                                    <td>
+                                        @Model[i].ProjectExpiryDate
+                                    </td>
                             </tr>
-
+                               
                         }
-                        <div class="hero-block-1">
-                            <button type="submit" class="btn btn-sm btn-primary mb-3"><i class="fa fa-save me-2"></i><span class="small">Save Changes</span></button>
-                        </div>
+                            <div class="hero-block-1">
+                                <button type="submit" class="btn btn-sm btn-primary mb-3"><i class="fa fa-save me-2"></i><span class="small">Save Changes</span></button>
+                            </div>
                     }
                     </tbody>
                 </table>
+              
             </div>
         </div>
     </div>
