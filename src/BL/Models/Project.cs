@@ -22,7 +22,7 @@ namespace BL.Models
 
         
         public virtual List<Submission> Submissions { get; set; }
-        public virtual List<AuditLog> AuditLogs { get; set; }
+        public virtual List<AuditLog>? AuditLogs { get; set; }
 
         public virtual List<ProjectTreDecision> ProjectTreDecisions { get; set; }
         public virtual List<MembershipTreDecision> MembershipTreDecision { get; set; }
