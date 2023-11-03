@@ -9,10 +9,14 @@
 <div class="container-lg mt-4 p-4 bg-white border-1 shadow-sm">
     <div class="d-flex align-items-center justify-content-between">
         <div>
-            <h1 class="fs-3 mb-0">Model.SubmissionProjectName</h1>
-            <p class="font-monospace text-muted small">#Model.SubmissionProjectId</p>
-            <p class="text-muted mb-0">
-                Decision
+            @foreach (var decision in Model)
+            {
+                if(decision.Project.Id == decision.Id)
+                {
+                <h1 class="fs-3 mb-0">@decision.Project.SubmissionProjectName</h1>
+                <p class="font-monospace text-muted small">#@decision.Project.SubmissionProjectId</p>
+                <p class="text-muted mb-0">
+                    @decision.Decision
                 @*@if (Model.Decision == Decision.Undecided)
                 {
                 @:This project hasn't been processed yet
@@ -21,18 +25,21 @@
                 {
                 @:Last Updated: @Model.LastDecisionDate by @Model.ApprovedBy
                 }*@
-            </p>
-        </div>
+                </p>
+            
+            
+        
         @*@if (Model.Archived)
         {
         <span class="badge py-2 px-3 badge-lg bg-warning text-dark rounded-pill">
         Archived
         </span>
         }*@
-    </div>
+    
     <ul class="nav nav-underline border-bottom mt-4 mb-5">
         <li class="nav-item" role="presentation">
-            <a href="#" class="nav-link text-dark">Project Approval</a>
+            <a href="@Url.Action("EditProject", new { projectId = decision.Id})" class="nav-link text-dark">
+            Project Approval</a>
         </li>
         <li class="nav-item" role="presentation">
             <a href="#" class="nav-link text-dark active">
@@ -40,6 +47,11 @@
             </a>
         </li>
     </ul>
+    }
+}
+    </div>
+
+    </div>
     <div class="row">
         <div class="col-md-8">
             <div class="table-responsive">
