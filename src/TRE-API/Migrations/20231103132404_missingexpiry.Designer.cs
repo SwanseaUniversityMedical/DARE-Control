@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TRE_API.Repositories.DbContexts;
@@ -11,9 +12,11 @@ using TRE_API.Repositories.DbContexts;
 namespace TRE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231103132404_missingexpiry")]
+    partial class missingexpiry
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,7 +49,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("KeycloakCredentials", (string)null);
+                    b.ToTable("KeycloakCredentials");
                 });
 
             modelBuilder.Entity("BL.Models.TESKstatus", b =>
@@ -68,7 +71,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("id");
 
-                    b.ToTable("TESK_Status", (string)null);
+                    b.ToTable("TESK_Status");
                 });
 
             modelBuilder.Entity("BL.Models.TeskAudit", b =>
@@ -97,7 +100,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("id");
 
-                    b.ToTable("TESK_Audit", (string)null);
+                    b.ToTable("TESK_Audit");
                 });
 
             modelBuilder.Entity("BL.Models.TreAuditLog", b =>
@@ -132,7 +135,7 @@ namespace TRE_API.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("TreAuditLogs", (string)null);
+                    b.ToTable("TreAuditLogs");
                 });
 
             modelBuilder.Entity("BL.Models.TreMembershipDecision", b =>
@@ -170,7 +173,7 @@ namespace TRE_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("MembershipDecisions", (string)null);
+                    b.ToTable("MembershipDecisions");
                 });
 
             modelBuilder.Entity("BL.Models.TreProject", b =>
@@ -222,7 +225,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Projects", (string)null);
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("BL.Models.TreUser", b =>
@@ -247,7 +250,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("TREAgent.Repositories.GeneratedRole", b =>
@@ -264,7 +267,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("GeneratedRole", (string)null);
+                    b.ToTable("GeneratedRole");
                 });
 
             modelBuilder.Entity("TREAgent.Repositories.TokenToExpire", b =>
@@ -284,7 +287,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TokensToExpire", (string)null);
+                    b.ToTable("TokensToExpire");
                 });
 
             modelBuilder.Entity("TRE_TESK.Models.RoleData", b =>
@@ -308,7 +311,7 @@ namespace TRE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DataToRoles", (string)null);
+                    b.ToTable("DataToRoles");
                 });
 
             modelBuilder.Entity("BL.Models.TreAuditLog", b =>

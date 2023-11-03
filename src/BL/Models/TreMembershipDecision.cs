@@ -21,7 +21,7 @@ namespace BL.Models
         [Display(Name = "Date of Last Decision")]
         public DateTime LastDecisionDate { get; set; }
 
-        public virtual List<TreAuditLog> AuditLogs { get; set; }
+        public virtual List<TreAuditLog>? AuditLogs { get; set; }
     }
     
 }

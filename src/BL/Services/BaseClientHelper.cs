@@ -130,7 +130,7 @@ namespace BL.Services
                         // Read the stream content into a string
                         content = reader.ReadToEnd();
 
-                        // Output the string content
+                        // Output the string contentsn
                         
                     }
                     Log.Information("{Function} Api returned an error for {endPoint} Response {Res} Error content {Content}", "ClientHelperRequestAsync",endPoint ,  res, content);

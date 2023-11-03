@@ -40,7 +40,7 @@ namespace BL.Models
         [Display(Name = "Output Bucket Out for TRE Layer")]
         public string? OutputBucketTre { get; set; }
 
-        public virtual List<TreAuditLog> AuditLogs { get; set; }
+        public virtual List<TreAuditLog>? AuditLogs { get; set; }
     }
     
 }
