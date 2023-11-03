@@ -31,6 +31,9 @@ namespace BL.Models
         [Display(Name = "Date of Last Decision")]
         public DateTime LastDecisionDate { get; set; }
 
+        [Display(Name = "Project Expiry Date")]
+        public DateTime ProjectExpiryDate { get; set; }
+
         [Display(Name = "Submission Bucket for TRE Layer")]
         public string? SubmissionBucketTre { get; set; }
 		
