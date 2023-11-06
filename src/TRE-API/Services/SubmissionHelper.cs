@@ -96,7 +96,7 @@ namespace TRE_API.Services
                     Bucket = outputBucket ?? "",
                     SubId = submission.Id.ToString(),
                     Path = "sub" + subId + "/",
-                    Host = _minioTreSettings.AdminConsole
+                    Host = hostnameonly ? _minioTreSettings.Url.Replace("https://", "").Replace("http://","") : _minioTreSettings.Url
                 };
             }
             catch (Exception ex)
@@ -128,7 +128,7 @@ namespace TRE_API.Services
                 {
                     Bucket = project.SubmissionBucketTre,
                     Path = fileName,
-                    Host = _minioTreSettings.AdminConsole,
+                    Host = _minioTreSettings.Url.Replace("http://","").Replace("https://", ""),
                     Secure = secure
                 }
                 
