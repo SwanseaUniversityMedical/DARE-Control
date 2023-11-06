@@ -129,40 +129,56 @@
                             {
                                  <li class="list-group-item justify-content-between d-flex">
                                 <a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })" class="fw-bold">@tre.Name</a>
+                                    @{
+                                        var doesNotHaveDecision = true;
+                                     }
+                                @foreach (var decision in tre.ProjectTreDecisions.Where(x => x.SubmissionProj.Id == Model.Id))
+                                {
 
-                                    @foreach (var decision in tre.ProjectTreDecisions.Where(x => x.SubmissionProj.Id == Model.Id))
-                                    {
+                                        
+                                     
 
-
-
-                                           
-
-                                                <span class="d-flex align-items-center">
+                                        <span class="d-flex align-items-center">
                                                     @if (decision.Decision == BL.Models.Enums.Decision.Approved)
                                                     {
-                                                        <span class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 me-3">
+                                                doesNotHaveDecision = false;
+                                                <span class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 me-3">
                                                             <i class="fa-solid fa-check-circle me-1"></i> @decision.Decision.ToString()
                                                         </span>
                                                     }
                                                     else if (decision.Decision == BL.Models.Enums.Decision.Undecided)
                                                     {
+                                                doesNotHaveDecision = false;
+
                                                         <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 me-3">
                                                             <i class="fa-solid fa-circle-notch fa-spin me-1"></i> @decision.Decision.ToString()
                                                         </span>
                                                     }
                                                     else if (decision.Decision == BL.Models.Enums.Decision.Rejected)
                                                     {
+                                                doesNotHaveDecision = false;
+
                                                         <span class="badge  px-2 badge-sm bg-danger text-light rounded-pill m-0 me-3">
                                                             <i class="fa-solid fa-close me-1"></i> @decision.Decision.ToString()
                                                         </span>
                                                     }
-                                                    <a href="@Url.Action("RemoveTreFromProject", "Project",new{ProjectId=Model.Id,TreId=tre.Id})">
-                                                        <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
-                                                    </a>
                                                 </span>
                                             
                                 }
+
+                                    @if (doesNotHaveDecision == true)
+                                    {
+                                        <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 me-3">
+                                            <i class="fa-solid fa-circle-notch fa-spin me-1"></i> Undecided
+                                        </span>
+
+
+                                    }
+                                    <a href="@Url.Action("RemoveTreFromProject", "Project",new{ProjectId=Model.Id,TreId=tre.Id})">
+                                        <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
+                                    </a>
                                 </li>
+
                             }
                         </ul>
                     </div>
