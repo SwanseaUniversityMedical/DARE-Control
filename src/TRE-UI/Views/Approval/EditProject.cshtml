@@ -59,7 +59,7 @@
                     <p>The date the project expires.</p>
 
                     <div id ="date" class="form-group">
-                        @Html.TextBoxFor(x => x.ProjectExpiryDate, "{0:yyyy-MM-dd}", new { @class = "form-control", @placeholder = "kindly input date", @type = "date" })
+                        @Html.TextBoxFor(x => x.ProjectExpiryDate, new { @class = "form-control", @placeholder = "kindly input date", @type = "date", @Value = Model.ProjectExpiryDate})
 
                     </div>
                     <h2 class="fs-5 mt-5">Decision</h2>

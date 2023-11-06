@@ -219,7 +219,7 @@ namespace TRE_API.Controllers
                         dbproj.LastDecisionDate = approvedDate;
                     }
         
-                        dbproj.ProjectExpiryDate = treProject.ProjectExpiryDate;
+                        dbproj.ProjectExpiryDate = treProject.ProjectExpiryDate.ToUniversalTime();
                     
 
                     resultList.Add(dbproj);
