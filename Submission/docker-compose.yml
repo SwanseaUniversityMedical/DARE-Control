@@ -2,7 +2,7 @@ version: '3.5'
 services:
   
   submission-ui:
-    image: harbor.ukserp.ac.uk/dare-trefx/control-main-ui:1.144.0
+    image: harbor.ukserp.ac.uk/dare-trefx/control-main-ui:1.145.0
     container_name: submission-ui
     networks:
       - sub-net
@@ -12,7 +12,7 @@ services:
       - submission-api
 
   submission-api:
-    image: harbor.ukserp.ac.uk/dare-trefx/control-main-api:1.99.1
+    image: harbor.ukserp.ac.uk/dare-trefx/control-main-api:1.100.1
     container_name: submission-api
     environment:
       ConnectionStrings__DefaultConnection: Server=postgres;Port=5432;Database=DARE-Control;Include Error Detail=true;User Id=${PGLOGIN};Password=${PGPASSWORD};

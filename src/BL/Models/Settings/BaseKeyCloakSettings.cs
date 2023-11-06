@@ -1,5 +1,6 @@
 ﻿using System.Runtime;
 using System.Net;
+using Serilog;
 
 namespace BL.Models.Settings
 {
@@ -34,6 +35,7 @@ namespace BL.Models.Settings
         public HttpClientHandler getProxyHandler {
             get
             {
+                Log.Information($"getProxyHandler ProxyAddresURL > {ProxyAddresURL} Proxy > {Proxy} ");
                 HttpClientHandler handler = new HttpClientHandler
                 {
                     Proxy = new WebProxy(ProxyAddresURL,true), // Replace with your proxy server URL
