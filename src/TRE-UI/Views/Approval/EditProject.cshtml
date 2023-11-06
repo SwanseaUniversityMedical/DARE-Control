@@ -31,7 +31,8 @@
         </div>
         <ul class="nav nav-underline border-bottom mt-4 mb-5">
             <li class="nav-item" role="presentation">
-                <a href="#" class="nav-link text-dark active">Project Approval</a>
+                <a href="@Url.Action("EditProject", new { projectId = @Model.SubmissionProjectId})" class="nav-link text-dark">
+                Project Approval</a>
             </li>
             <li class="nav-item" role="presentation">
                 <a href="@Url.Action("EditMemberships", new { projectId = @Model.SubmissionProjectId})" class="nav-link text-dark">
@@ -53,6 +54,13 @@
                     <p>The name of the project being used by your organisation.</p>
                     <div class="form-group">
                         @Html.TextBoxFor(x => x.LocalProjectName, new { @class = "form-control"})
+                    </div>
+                    <h2 class="fs-5 mt-5">Project Expiry Date</h2>
+                    <p>The date the project expires.</p>
+
+                    <div class="form-group">
+                        @Html.TextBoxFor(x => x.ProjectExpiryDate, "{0:yyyy-MM-dd}", new { @class = "form-control", @placeholder = "kindly input date" })
+
                     </div>
                     <h2 class="fs-5 mt-5">Decision</h2>
                     <div id="radio-decision" class="form-group">
