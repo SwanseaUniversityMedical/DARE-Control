@@ -132,13 +132,14 @@
                                     @{
                                         var doesNotHaveDecision = true;
                                      }
+                                    <span class="d-flex align-items-center">
                                 @foreach (var decision in tre.ProjectTreDecisions.Where(x => x.SubmissionProj.Id == Model.Id))
                                 {
 
                                         
                                      
 
-                                        <span class="d-flex align-items-center">
+                                        
                                                     @if (decision.Decision == BL.Models.Enums.Decision.Approved)
                                                     {
                                                 doesNotHaveDecision = false;
@@ -162,7 +163,7 @@
                                                             <i class="fa-solid fa-close me-1"></i> @decision.Decision.ToString()
                                                         </span>
                                                     }
-                                                </span>
+                                                
                                             
                                 }
 
@@ -177,6 +178,7 @@
                                     <a href="@Url.Action("RemoveTreFromProject", "Project",new{ProjectId=Model.Id,TreId=tre.Id})">
                                         <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
                                     </a>
+                                    </span>
                                 </li>
 
                             }
