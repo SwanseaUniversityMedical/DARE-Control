@@ -16,7 +16,7 @@ namespace BL.Models.ViewModels
         /// but also to interact with the TRE Agent in future.
         /// </summary>
         [Required]
-        public string JobId { get; set; } = string.Empty;
+        public string SubId { get; set; } = string.Empty;
 
         /// <summary>
         /// Optional Project Database Connection details.

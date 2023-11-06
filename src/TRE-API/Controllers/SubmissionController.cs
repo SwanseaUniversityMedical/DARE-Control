@@ -141,7 +141,7 @@ namespace TRE_API.Controllers
         {
             try
             {
-                var outputInfo = _subHelper.GetOutputBucketGuts(subId);
+                var outputInfo = _subHelper.GetOutputBucketGuts(subId, true);
                 
 
                 return StatusCode(200, outputInfo);
@@ -174,7 +174,7 @@ namespace TRE_API.Controllers
             try
             {
                 _subHelper.UpdateStatusForTre(review.SubId, StatusType.DataOutRequested, "");
-                var bucket = _subHelper.GetOutputBucketGuts(review.SubId);
+                var bucket = _subHelper.GetOutputBucketGuts(review.SubId, false);
                 var egsub = new EgressSubmission()
                 {
                     SubmissionId = review.SubId,
@@ -256,7 +256,7 @@ namespace TRE_API.Controllers
                     _subHelper.UpdateStatusForTre(review.SubId.ToString(), StatusType.DataOutApproved, "");
                 }
 
-                var bucket = _subHelper.GetOutputBucketGuts(review.SubId);
+                var bucket = _subHelper.GetOutputBucketGuts(review.SubId, true);
                 ApprovalResult hutchPayload = new ApprovalResult()
                 {
                     Host = _minioTreSettings.Url,

@@ -28,7 +28,7 @@ namespace TRE_API.Services
         List<Submission>? GetWaitingSubmissionForTre();
         void SendSumissionToHUTCH(Submission submission);
         List<Submission>? GetRequestCancelSubsForTre();
-        OutputBucketInfo GetOutputBucketGuts(string subId);
+        OutputBucketInfo GetOutputBucketGuts(string subId, bool hostnameonly);
         APIReturn? CloseSubmissionForTre(string subId, StatusType statusType, string? description, string? finalFile);
 
         BoolReturn FilesReadyForReview(ReviewFiles review);
@@ -74,7 +74,7 @@ namespace TRE_API.Services
 
         }
 
-        public OutputBucketInfo GetOutputBucketGuts(string subId)
+        public OutputBucketInfo GetOutputBucketGuts(string subId, bool hostnameonly)
         {
             try
             {
@@ -96,7 +96,7 @@ namespace TRE_API.Services
                     Bucket = outputBucket ?? "",
                     SubId = submission.Id.ToString(),
                     Path = "sub" + subId + "/",
-                    Host = _minioTreSettings.Url
+                    Host = hostnameonly ? _minioTreSettings.Url.Replace("https://", "").Replace("http://","") : _minioTreSettings.Url
                 };
             }
             catch (Exception ex)
@@ -111,9 +111,10 @@ namespace TRE_API.Services
             Uri uri = new Uri(submission.DockerInputLocation);
             string fileName = Path.GetFileName(uri.LocalPath);
             var project = _dbContext.Projects.First(x => x.SubmissionProjectId == submission.Project.Id);
+            bool secure = !_minioTreSettings.Url.ToLower().StartsWith("http://");
             var job = new SubmitJobModel()
             {
-                JobId = submission.Id.ToString(),
+                SubId = submission.Id.ToString(),
                 
                 DataAccess = new DatabaseConnectionDetails()
                 {
@@ -127,7 +128,8 @@ namespace TRE_API.Services
                 {
                     Bucket = project.SubmissionBucketTre,
                     Path = fileName,
-                    Host = _minioTreSettings.Url
+                    Host = _minioTreSettings.Url.Replace("http://","").Replace("https://", ""),
+                    Secure = secure
                 }
                 
             };
@@ -189,7 +191,7 @@ namespace TRE_API.Services
 
         public BoolReturn FilesReadyForReview(ReviewFiles review)
         {
-            var bucket = GetOutputBucketGuts(review.SubId);
+            var bucket = GetOutputBucketGuts(review.SubId, false);
             var egsub = new EgressSubmission()
             {
                 SubmissionId = review.SubId,
