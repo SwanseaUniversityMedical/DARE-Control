@@ -35,6 +35,8 @@ namespace BL.Services
             string clientId = _clientId;
             string clientSecret = _clientSecret;
 
+            Log.Information($"GetTokenForUser _proxyUrl > {_proxyUrl} UseProxy > {_useProxy}");
+
             // Create an HttpClientHandler with proxy settings
             HttpClientHandler handler = new HttpClientHandler
             {
