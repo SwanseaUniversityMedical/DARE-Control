@@ -1,6 +1,14 @@
 ﻿
 <div class="container mt-5">
-
+    @if (ViewBag.SearchResults != null && ViewBag.SearchResults.Count > 0)
+    {
+        <ul>
+            @foreach (var result in ViewBag.SearchResults)
+            {
+                <li>@result</li>
+            }
+        </ul>
+    }
     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-md-5 g-4">
 
         <div class="col">
