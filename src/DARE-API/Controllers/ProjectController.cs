@@ -623,7 +623,7 @@ namespace DARE_API.Controllers
         }
         [AllowAnonymous]
         [HttpGet("GetSearchData")]
-        public List<Project> GetSearchData(string searchTerm)
+        public List<Project> GetSearchData(string searchString)
         {
             try
             {
@@ -631,9 +631,9 @@ namespace DARE_API.Controllers
                     .Include(c => c.Users)
                     .Include(c => c.Submissions)
                      .Include(c => c.Tres)
-                    .Where(c => c.Name.Contains(searchTerm) ||
-                    c.Users.Any(t => t.Name.Contains(searchTerm)) ||
-                    c.Tres.Any(t => t.Name.Contains(searchTerm)) || c.Submissions.Any(s => s.TesName.Contains(searchTerm))).ToList();
+                    .Where(c => c.Name.Contains(searchString) ||
+                    c.Users.Any(t => t.Name.Contains(searchString)) ||
+                    c.Tres.Any(t => t.Name.Contains(searchString)) || c.Submissions.Any(s => s.TesName.Contains(searchString))).ToList();
 
                 Log.Information("{Function} Search Data retrieved successfully", "GetSearchData");
                 return searchResults;
