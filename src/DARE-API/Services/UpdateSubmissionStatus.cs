@@ -41,7 +41,7 @@ namespace DARE_API.Services
                 StatusType.Cancelled,
                 StatusType.Failed,
                 StatusType.PartialResult,
-                StatusType.Failure
+                
             };
 
         private static void UpdateParentStatusNoSave(Submission parent)
