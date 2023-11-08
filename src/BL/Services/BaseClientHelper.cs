@@ -44,12 +44,22 @@ namespace BL.Services
         }
 
 
-        private async Task<T> CallAPIWithReturnType<T>(string endPoint, StringContent? jsonString = null, Dictionary<string, string>? paramlist = null, bool usePut = false, string? fileParameterName = null, IFormFile? file = null) where T : class?, new()
+        private async Task<T> CallAPIWithReturnType<T>(
+            string endPoint,
+            StringContent? jsonString = null,
+            Dictionary<string, string>? paramlist = null,
+            bool usePut = false,
+            string? fileParameterName = null,
+            IFormFile? file = null,
+            HttpMethod httpMethod = null) where T : class?, new()
         {
 
             HttpResponseMessage response = null;
-
-            if (jsonString == null && file == null)
+            if (httpMethod != null)
+            {
+                response = await ClientHelperRequestAsync(_address + endPoint, httpMethod, jsonString, paramlist, fileParameterName, file);
+            }
+            else if(jsonString == null && file == null)
             {
                 response = await ClientHelperRequestAsync(_address + endPoint, HttpMethod.Get, jsonString, paramlist, fileParameterName, file);
             }
@@ -225,7 +235,7 @@ namespace BL.Services
 
         public async Task<TOutput?> CallAPIToSendFile<TOutput>(string endPoint, string fileParamaterName, IFormFile file, Dictionary<string, string>? paramList = null) where TOutput : class?, new()
         {
-            return await CallAPIWithReturnType<TOutput>(endPoint, null, paramList, false, fileParamaterName, file);
+            return await CallAPIWithReturnType<TOutput>(endPoint, null, paramList, false, fileParamaterName, file, httpMethod: HttpMethod.Put);
         }
         public async Task<HttpResponseMessage> CallAPI(string endPoint, StringContent? jsonString, Dictionary<string, string>? paramList = null, bool usePut = false)
         {
