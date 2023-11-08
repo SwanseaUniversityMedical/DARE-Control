@@ -8,6 +8,8 @@
         public virtual List<Project> Projects { get; set; }
         public virtual List<Submission> Submissions { get; set; }
         public string FormData { get; set; }
+
+        public string? Biography { get; set; }
         public string? Organisation {get;set;}
         public virtual List<MembershipTreDecision> MembershipTreDecision { get; set; }
         public virtual List<AuditLog>? AuditLogs { get; set; }
