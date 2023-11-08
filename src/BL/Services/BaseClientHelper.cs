@@ -281,8 +281,8 @@ namespace BL.Services
                 formData.Add(new StreamContent(file.OpenReadStream()), fileParameterName, file.FileName);
 
                 // Send the POST request to the API
-                Log.Debug("UploadFileAsync apiClient.PutAsync(endPoint, formData)");
-                HttpResponseMessage response = await apiClient.PutAsync(endPoint, formData);
+                Log.Debug("UploadFileAsync apiClient.PostAsync(endPoint, formData)");
+                HttpResponseMessage response = await apiClient.PostAsync(endPoint, formData);
                 return response;
 
             }
