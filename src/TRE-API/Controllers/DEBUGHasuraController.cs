@@ -18,7 +18,7 @@ namespace TRE_API.Controllers
         private readonly IDoSyncWork _iDoSyncWork;
         private readonly IDoAgentWork _iDoAgentWork;
 
-        
+
         public DEBUGHasuraController(IHasuraService iHasuraService, IDoSyncWork iDoSyncWork,
            IDoAgentWork iDoAgentWork)
         {
@@ -27,7 +27,7 @@ namespace TRE_API.Controllers
             _iDoAgentWork = iDoAgentWork;
         }
 
- 
+
         [HttpPost]
         [Route("RunHasuraSetup")]
         public async Task<IActionResult> RunHasuraSetup()
@@ -80,6 +80,28 @@ namespace TRE_API.Controllers
         }
 
 
+        public class Cooldat{
+            public string role { get; set; }
+            public string Torun { get; set; }
+        }
+
+        [HttpPost]
+        [Route("RunThniny")]
+        public async Task<IActionResult> RunThniny(Cooldat cooldat)
+        {
+
+            Log.Information("RunThniny");
+            try
+            {
+                await _iDoAgentWork.testing(cooldat.Torun, cooldat.role);
+                return StatusCode(200);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "RunThniny");
+                throw;
+            }
+        }
 
     }
 }
