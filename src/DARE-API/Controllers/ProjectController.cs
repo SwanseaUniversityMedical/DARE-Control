@@ -421,7 +421,12 @@ namespace DARE_API.Controllers
 
                 foreach (var item in decisions)
                 {
-                    var dbproj = _DbContext.Projects.First(x => x.Id == item.ProjectId);
+                    var dbproj = _DbContext.Projects.FirstOrDefault(x => x.Id == item.ProjectId);
+                    if (dbproj == null)
+                    {
+                        Log.Error($"no Projects with ID of {item.ProjectId}");
+                        continue;
+                    }
                     var tredecision = _DbContext.ProjectTreDecisions.FirstOrDefault(x => x.SubmissionProj == dbproj && x.Tre == tre);
                     if (tredecision == null)
                     {
