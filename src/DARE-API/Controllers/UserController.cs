@@ -9,6 +9,8 @@ using DARE_API.Services.Contract;
 using Microsoft.AspNetCore.Authentication;
 using DARE_API.Services;
 using BL.Models.Tes;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace DARE_API.Controllers
 {
@@ -133,8 +135,30 @@ namespace DARE_API.Controllers
 
             
         }
+        [AllowAnonymous]
+        [HttpGet("GetSearchData")]
+        public List<User> GetSearchData(string searchTerm)
+        {
+            try
+            {
+                List<User> searchResults= _DbContext.Users
+                    .Include(c=> c.Projects)
+                    .Include(c=> c.Submissions)
+                    .Where(c=>c.Name.Contains(searchTerm)|| 
+                    c.Projects.Any(t=> t.Name.Contains(searchTerm)) || c.Submissions.Any(s=>s.TesName.Contains(searchTerm))).ToList();
+                
+                Log.Information("{Function} Search Data retrieved successfully", "GetSearchData");
+                return searchResults;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetSearchData");
+                throw;
+            }
 
-       
+
+        }
+
         [Authorize(Roles = "dare-control-admin")]
         [HttpPost("AddProjectMembership")]
         public async Task<ProjectUser?> AddProjectMembership([FromBody]ProjectUser model)
