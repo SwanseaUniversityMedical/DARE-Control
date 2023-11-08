@@ -63,8 +63,10 @@ namespace DARE_FrontEnd.Controllers
                 var paramss = new Dictionary<string, string>();
 
                 paramss.Add("bucketName", project.SubmissionBucket);
-
-                var uplodaResultTest = await _clientHelper.CallAPIToSendFile<APIReturn>("/api/Project/UploadToMinio", "file", model.File, paramss);
+                if (model.File != null)
+                {
+                    var uplodaResultTest = await _clientHelper.CallAPIToSendFile<APIReturn>("/api/Project/UploadToMinio", "file", model.File, paramss);
+                }
                 var minioEndpoint = await _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
 
                 imageUrl = "http://" + minioEndpoint.Url + "/browser/" + project.SubmissionBucket + "/" + model.File.FileName;
