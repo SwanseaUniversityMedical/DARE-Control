@@ -6,6 +6,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Serilog;
 using System.Net;
+using System.Net.Http;
 
 namespace BL.Services
 {
@@ -125,11 +126,12 @@ namespace BL.Services
                 };
                 if (fileInfo != null && fileParameterName != null)
                 {
+                    Log.Debug("UploadFileAsync httpMethod > fileInfo != null && fileParameterName != null");
                     res = await UploadFileAsync(fileInfo, apiClient, fileParameterName, endPoint);
                 }
                 else
                 {
-
+                    Log.Debug("ClientHelperRequestAsync httpMethod > " + method);
                     if (method == HttpMethod.Get) res = await apiClient.GetAsync(endPoint);
                     if (method == HttpMethod.Post) res = await apiClient.PostAsync(endPoint, jsonString);
                     if (method == HttpMethod.Put) res = await apiClient.PutAsync(endPoint, jsonString);
@@ -279,6 +281,7 @@ namespace BL.Services
                 formData.Add(new StreamContent(file.OpenReadStream()), fileParameterName, file.FileName);
 
                 // Send the POST request to the API
+                Log.Debug("UploadFileAsync apiClient.PutAsync(endPoint, formData)");
                 HttpResponseMessage response = await apiClient.PutAsync(endPoint, formData);
                 return response;
 
