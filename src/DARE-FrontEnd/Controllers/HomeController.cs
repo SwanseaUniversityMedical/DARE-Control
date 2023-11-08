@@ -9,6 +9,7 @@ using BL.Models.ViewModels;
 using NuGet.Protocol;
 using System.Linq;
 using Serilog;
+using Microsoft.CodeAnalysis.Elfie.Diagnostics;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -57,10 +58,12 @@ namespace DARE_FrontEnd.Controllers
 
             return View();
         }
+
         [HttpPost]
         public IActionResult Index(string searchString)
         {
             List<Project> results = SearchData(searchString);
+    
             ViewBag.SearchResults = results;
             return View();
         }
@@ -70,9 +73,9 @@ namespace DARE_FrontEnd.Controllers
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("searchString", searchString);
             var results = _clientHelper.CallAPIWithoutModel<List<Project>>(
-                "/api/Project/GetSearchData/", paramlist).Result;
+                "/api/Project/GetSearchData/", paramlist).Result.ToList();
 
-            results = new List<Project>();
+          
             return results;
 
         }
