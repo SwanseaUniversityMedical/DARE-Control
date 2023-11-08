@@ -59,7 +59,7 @@ namespace TRE_API
         void Execute();
         Task CheckTESK(string taskID, int subId, string tesId, string outputBucket);
         void ClearJob(string jobname);
-        Task testing();
+        Task testing(string toRun, string Role);
     }
 
     // TESK : http://172.16.34.31:8080/    https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks
@@ -108,46 +108,81 @@ namespace TRE_API
             _minioSubHelper = minioSubHelper;
         }
 
-        public async Task testing()
+        public async Task testing(string toRun, string Role)
         {
 
 
             //TesId
 
             Console.WriteLine("Testing");
-            string jsonContent = @"{
-    ""name"": ""Hello World"",
-    ""description"": ""Hello World, inspired by Funnel's most basic example"",
-    ""executors"": [{
-            ""image"": ""alpine"",
-            ""command"": [""sleep"", ""5m""]
-        }, {
-            ""image"": ""alpine"",
-            ""command"": [""echo"", ""TESK says:   Hello World""]
-        }
-    ],
-	""outputs"" : [
-		{
-          ""path"": ""/data/outfile"",
-          ""url"": ""s3://my-object-store/outfile-1"",
-          ""type"": ""FILE""
-        },
-		{
-          ""path"": ""/data/outfile2"",
-          ""url"": ""s3://my-object-store/outfile-2"",
-          ""type"": ""FILE""
-        },
-	],
-    ""volumes"":null,
-    ""tags"":{
-        ""project"":""Head"",
-        ""tres"":""SAIL|DPUK""
-     },
-    ""logs"":null,
-    ""creation_time"":null
-}
-";
-            CreateTESK(jsonContent, 0, "AAA", "AAAAAAA");
+            Log.Information("{Function}  SEND TO TESK ", "Execute");
+            var arr = new HttpClient();
+
+
+
+            var role = Role; 
+
+            var Token = _hasuraAuthenticationService.GetNewToken(role);
+
+
+
+            var projectId = 1;
+
+
+
+            var OutputBucket = "head8480submission"; // _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects.First(x => x.Id == projectId).OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
+            var tesMessage = JsonConvert.DeserializeObject<TesTask>(toRun);                                                                                                                 //it need the file name?? (key-name)
+
+            if (tesMessage.Outputs == null)
+            {
+                tesMessage.Outputs = new List<TesOutput> { };
+            }
+
+            //S3://bucket-name/key-name
+            foreach (var output in tesMessage.Outputs)
+            {
+                output.Url = OutputBucket;
+            }
+
+            if (tesMessage.Executors == null)
+            {
+                tesMessage.Executors = new List<TesExecutor>();
+            }
+
+            foreach (var Executor in tesMessage.Executors)
+            {
+                if (Executor.Image == "CustomerImages") //TODO
+                {
+                    for (int i = 0; i < Executor.Command.Count; i++)
+                    {
+                        Executor.Command[i] += "--" + Token;
+                    }
+                }
+
+                //if (Executor.Env == null)
+                //{
+                //    Executor.Env = new Dictionary<string, string>();
+                //}
+                //Executor.Env["HASURAAuthenticationToken"] = Token;
+            }
+
+            _dbContext.TokensToExpire.Add(new TokenToExpire()
+            {
+                SubId = 99,
+                Token = Token
+            });
+            _dbContext.SaveChanges();
+
+
+
+            if (tesMessage is not null)
+            {
+                var stringdata = JsonConvert.SerializeObject(tesMessage);
+                Log.Information("{Function} tesMessage is not null runhing CreateTESK {tesMessage}", "Execute", stringdata);
+                CreateTESK(stringdata, 99, "123COOOLLL", OutputBucket);
+            }
+
+ 
         }
 
         public string CreateTESK(string jsonContent, int subId, string tesId, string outputBucket)
@@ -515,11 +550,20 @@ namespace TRE_API
                                 var OutputBucket = _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects.First(x => x.Id == projectId).OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
                                                                                                                                                               //it need the file name?? (key-name)
 
+                                if (tesMessage.Outputs == null)
+                                {
+                                    tesMessage.Outputs = new List<TesOutput> {};
+                                }
 
                                 //S3://bucket-name/key-name
                                 foreach (var output in tesMessage.Outputs)
                                 {
                                     output.Url = OutputBucket;
+                                }
+
+                                if (tesMessage.Executors == null)
+                                {
+                                    tesMessage.Executors = new List<TesExecutor>();
                                 }
 
                                 foreach (var Executor in tesMessage.Executors)
@@ -546,11 +590,14 @@ namespace TRE_API
                                 });
                                 _dbContext.SaveChanges();
 
-                                
+
 
                                 if (tesMessage is not null)
-                                    Log.Information("{Function} tesMessage is not null runhing CreateTESK ", "Execute");
-                                    CreateTESK(JsonConvert.SerializeObject(tesMessage), aSubmission.Id, aSubmission.TesId, OutputBucket);
+                                {
+                                    var stringdata = JsonConvert.SerializeObject(tesMessage);
+                                    Log.Information("{Function} tesMessage is not null runhing CreateTESK {tesMessage}", "Execute", stringdata);
+                                    CreateTESK(stringdata, aSubmission.Id, aSubmission.TesId, OutputBucket);
+                                }
 
                             }
 
