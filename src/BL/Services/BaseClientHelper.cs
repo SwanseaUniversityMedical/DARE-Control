@@ -114,7 +114,7 @@ namespace BL.Services
                 
                 HttpClient? apiClient;
                 
-                    apiClient = await CreateClientWithKeycloak();
+                apiClient = await CreateClientWithKeycloak();
                 
                     
                 endPoint = ConstructEndPoint(endPoint, paramlist);
@@ -279,7 +279,7 @@ namespace BL.Services
                 formData.Add(new StreamContent(file.OpenReadStream()), fileParameterName, file.FileName);
 
                 // Send the POST request to the API
-                HttpResponseMessage response = await apiClient.PostAsync(endPoint, formData);
+                HttpResponseMessage response = await apiClient.PutAsync(endPoint, formData);
                 return response;
 
             }
