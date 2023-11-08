@@ -625,9 +625,7 @@ namespace DARE_API.Controllers
         [HttpGet("GetSearchData")]
         public List<Project> GetSearchData(string searchString)
         {
-            //string value = string.Empty;
-            //value.Equals(searchString, StringComparison.InvariantCultureIgnoreCase);
-           try
+              try
             {
                 List<Project> searchResults = _DbContext.Projects
                     .Include(c => c.Users)
