@@ -137,6 +137,13 @@ namespace DARE_API.Controllers
             {
                 throw new Exception("Invalid completion type");
             }
+
+            if (statusType == StatusType.Failed)
+            {
+                UpdateStatusForTreGuts(subId, statusType, description);
+                _DbContext.SaveChanges();
+                statusType = StatusType.Failed;
+            }
             var sub = UpdateStatusForTreGuts(subId, statusType, description);
             sub.FinalOutputFile = finalFile;
             _DbContext.SaveChanges();

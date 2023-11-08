@@ -107,8 +107,18 @@ namespace TRE_API.Controllers
         [ValidateModelState]
         [SwaggerOperation("UpdateStatusForTre")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public IActionResult UpdateStatusForTre([FromBody] SubmissionDetails subDetails)
+        // public IActionResult UpdateStatusForTre([FromBody] SubmissionDetails subDetails)
+        public IActionResult UpdateStatusForTre(
+            [FromQuery] string subId,
+            [FromQuery] StatusType statusType,
+            [FromQuery] string? description)
         {
+            var subDetails = new SubmissionDetails()
+            {
+                StatusType = statusType,
+                SubId = subId,
+                Description = description
+            };
             if (!EnumHelper.GetHutchAllowedStatusUpdates().Contains(subDetails.StatusType))
             {
                 throw new Exception("Restricted StatusType");
