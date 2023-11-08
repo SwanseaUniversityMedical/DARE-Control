@@ -240,8 +240,8 @@ namespace BL.Services
 
         public async Task<TOutput?> CallAPIToSendFile<TOutput>(string endPoint, string fileParamaterName, IFormFile file, Dictionary<string, string>? paramList = null) where TOutput : class?, new()
         {
-            Log.Debug("CallAPIToSendFile uesing HttpMethod.Put");
-            return await CallAPIWithReturnType<TOutput>(endPoint, null, paramList, false, fileParamaterName, file, httpMethod: HttpMethod.Put);
+            Log.Debug("CallAPIToSendFile uesing HttpMethod.Post");
+            return await CallAPIWithReturnType<TOutput>(endPoint, null, paramList, false, fileParamaterName, file, httpMethod: HttpMethod.Post);
         }
         public async Task<HttpResponseMessage> CallAPI(string endPoint, StringContent? jsonString, Dictionary<string, string>? paramList = null, bool usePut = false)
         {
