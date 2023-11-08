@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using BL.Models;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace TRE_UI.Controllers
 {
@@ -40,7 +41,20 @@ namespace TRE_UI.Controllers
            return RedirectToAction("GetAllProjects", "Approval");
             //return View();
         }
-     
+        [HttpPost]
+        public IActionResult IndexAsync(string SearchString)
+        {
+            List<SearchResult> results = SearchData(SearchString);
+            ViewBag.SearchResults = results;
+            return View();
+        }
+        //private helpers
+        private List<SearchResult> SearchData(string SearchString)
+        {
+            List<SearchResult> results = new List<SearchResult>();
+              return results;
+
+        }
         public IActionResult LoginAfterTokenExpired()
         {
             return new SignOutResult(new[]
