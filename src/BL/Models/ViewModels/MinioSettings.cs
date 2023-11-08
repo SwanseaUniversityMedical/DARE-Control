@@ -1,4 +1,7 @@
 ﻿
+using BL.Models.Settings;
+using System.Net;
+
 namespace BL.Models.ViewModels
 {
     public class MinioSettings
@@ -11,5 +14,10 @@ namespace BL.Models.ViewModels
         public string AWSService { get; set; }
         public string AttributeName { get; set; }
         public string AdminConsole { get; set; }
+
+        public bool UesProxy { get; set; }
+        public string ProxyAddresURL { get; set; }
+
+        public string BypassProxy { get; set; }
     }
 }
