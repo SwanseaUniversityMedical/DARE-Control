@@ -53,10 +53,15 @@ namespace BL.Services
             IFormFile? file = null,
             HttpMethod httpMethod = null) where T : class?, new()
         {
+            if (httpMethod == null)
+            {
+                Log.Debug("CallAPIWithReturnType httpMethod > is null");
+            }
 
             HttpResponseMessage response = null;
             if (httpMethod != null)
             {
+                Log.Debug("CallAPIWithReturnType httpMethod > " + httpMethod);
                 response = await ClientHelperRequestAsync(_address + endPoint, httpMethod, jsonString, paramlist, fileParameterName, file);
             }
             else if(jsonString == null && file == null)
@@ -235,6 +240,7 @@ namespace BL.Services
 
         public async Task<TOutput?> CallAPIToSendFile<TOutput>(string endPoint, string fileParamaterName, IFormFile file, Dictionary<string, string>? paramList = null) where TOutput : class?, new()
         {
+            Log.Debug("CallAPIToSendFile uesing HttpMethod.Put");
             return await CallAPIWithReturnType<TOutput>(endPoint, null, paramList, false, fileParamaterName, file, httpMethod: HttpMethod.Put);
         }
         public async Task<HttpResponseMessage> CallAPI(string endPoint, StringContent? jsonString, Dictionary<string, string>? paramList = null, bool usePut = false)
