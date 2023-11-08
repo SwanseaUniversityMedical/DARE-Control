@@ -89,7 +89,6 @@ namespace TRE_API.Controllers
         [Route("RunThniny")]
         public async Task<IActionResult> RunThniny(Cooldat cooldat)
         {
-
             Log.Information("RunThniny");
             try
             {
