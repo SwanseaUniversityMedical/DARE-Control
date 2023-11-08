@@ -57,7 +57,25 @@ namespace DARE_FrontEnd.Controllers
 
             return View();
         }
+        [HttpPost]
+        public IActionResult Index(string searchString)
+        {
+            List<Project> results = SearchData(searchString);
+            ViewBag.SearchResults = results;
+            return View();
+        }
+        //private helpers
+        private List<Project> SearchData(string searchString)
+        {
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("searchString", searchString);
+            var results = _clientHelper.CallAPIWithoutModel<List<Project>>(
+                "/api/Project/GetSearchData/", paramlist).Result;
 
+            results = new List<Project>();
+            return results;
+
+        }
         [Authorize]
         public IActionResult LoggedInUser()
         {
