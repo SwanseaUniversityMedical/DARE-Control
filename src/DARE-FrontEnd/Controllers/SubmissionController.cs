@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
+using NuGet.Common;
+using Serilog;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -34,52 +37,52 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<IActionResult> SubmissionWizard(SubmissionWizard model)
         {
-            var listOfTre = "";
-            var imageUrl = "";
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("projectId", model.ProjectId.ToString());
-            var project = await _clientHelper.CallAPIWithoutModel<BL.Models.Project?>(
-                "/api/Project/GetProject/", paramlist);
-            if (model.TreRadios == null)
+            try
             {
-                var paramList = new Dictionary<string, string>();
-                paramList.Add("projectId", model.ProjectId.ToString());
-                var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList);
-                List<string> namesList = tre.Select(test => test.Name).ToList();
-                listOfTre = string.Join("|", namesList);
-            }
-            else
-            {
-                listOfTre = string.Join("|", model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
-            }
-
-            if (model.OriginOption == CrateOrigin.External)
-            {
-                imageUrl = model.ExternalURL;
-            }
-            else
-            {
-
-                var paramss = new Dictionary<string, string>();
-
-                paramss.Add("bucketName", project.SubmissionBucket);
-                if (model.File != null)
+                var listOfTre = "";
+                var imageUrl = "";
+                var paramlist = new Dictionary<string, string>();
+                paramlist.Add("projectId", model.ProjectId.ToString());
+                var project = await _clientHelper.CallAPIWithoutModel<BL.Models.Project?>(
+                    "/api/Project/GetProject/", paramlist);
+                if (model.TreRadios == null)
                 {
-                    var uplodaResultTest = await _clientHelper.CallAPIToSendFile<APIReturn>("/api/Project/UploadToMinio", "file", model.File, paramss);
+                    var paramList = new Dictionary<string, string>();
+                    paramList.Add("projectId", model.ProjectId.ToString());
+                    var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList);
+                    List<string> namesList = tre.Select(test => test.Name).ToList();
+                    listOfTre = string.Join("|", namesList);
                 }
-                var minioEndpoint = await _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
+                else
+                {
+                    listOfTre = string.Join("|", model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
+                }
 
-                imageUrl = "http://" + minioEndpoint.Url + "/browser/" + project.SubmissionBucket + "/" + model.File.FileName;
+                if (model.OriginOption == CrateOrigin.External)
+                {
+                    imageUrl = model.ExternalURL;
+                }
+                else
+                {
 
+                    var paramss = new Dictionary<string, string>();
 
+                    paramss.Add("bucketName", project.SubmissionBucket);
+                    if (model.File != null)
+                    {
+                        var uplodaResultTest = await _clientHelper.CallAPIToSendFile<APIReturn>("/api/Project/UploadToMinio", "file", model.File, paramss);
+                    }
+                    var minioEndpoint = await _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
 
-            }
-
-            var test = new TesTask()
-            {
-
-                Name = model.TESName,
-                Executors = new List<TesExecutor>()
+                    imageUrl = "http://" + minioEndpoint.Url + "/browser/" + project.SubmissionBucket + "/" + model.File.FileName;
+                }
+                var test = new TesTask();
+                if (string.IsNullOrEmpty(model.TesRun))
+                {
+                    test = new TesTask()
+                    {
+                        Name = model.TESName,
+                        Executors = new List<TesExecutor>()
                 {
                     new TesExecutor()
                     {
@@ -87,22 +90,34 @@ namespace DARE_FrontEnd.Controllers
 
                     }
                 },
-                Tags = new Dictionary<string, string>()
+                        Tags = new Dictionary<string, string>()
                 {
                     { "project", project.Name },
                     { "tres", listOfTre }
                 }
 
-            };
+                    };
+                }
+                else
+                {
+                    test = JsonConvert.DeserializeObject<TesTask>(model.TesRun);
+                }
 
-            var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test);
+                var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test);
 
-            return RedirectToAction("GetProject", "Project", new {id = model.ProjectId});
+                return RedirectToAction("GetProject", "Project", new { id = model.ProjectId });
+            }
+            catch (Exception ex)
+            {
+                Log.Error("SubmissionWizard > " + ex.ToString());
+                return BadRequest();
+            }
         }
 
         [HttpGet]
-        public IActionResult DownloadFile(int subId)
+        public async Task<IActionResult> DownloadFileAsync(int subId)
         {
+
 
             var paramlist = new Dictionary<string, string>
             {
@@ -110,8 +125,9 @@ namespace DARE_FrontEnd.Controllers
             };
 
             var submission = _clientHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist).Result;
-            var file = _clientHelper.CallAPIToGetFile(
-                "/api/Submission/DownloadFile", paramlist).Result;
+            var file = await _clientHelper.CallAPIToGetFile(
+                "/api/Submission/DownloadFile", paramlist);
+            
             return File(file, GetContentType(submission.FinalOutputFile), submission.FinalOutputFile);
         }
 

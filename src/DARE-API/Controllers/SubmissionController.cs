@@ -133,9 +133,16 @@ namespace DARE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
         public IActionResult CloseSubmissionForTre(string subId, StatusType statusType, string? finalFile, string? description)
         {
-            if (!UpdateSubmissionStatus.SubCompleteTypes.Contains(statusType))
+            if (!UpdateSubmissionStatus.SubCompleteTypes.Contains(statusType) && statusType != StatusType.Failure)
             {
                 throw new Exception("Invalid completion type");
+            }
+
+            if (statusType == StatusType.Failure)
+            {
+                UpdateStatusForTreGuts(subId, statusType, description);
+                _DbContext.SaveChanges();
+                statusType = StatusType.Failed;
             }
             var sub = UpdateStatusForTreGuts(subId, statusType, description);
             sub.FinalOutputFile = finalFile;
@@ -326,7 +333,8 @@ namespace DARE_API.Controllers
                     StatusType.TransferToPodFailed,
                     StatusType.PodProcessingFailed,
                     StatusType.Failed,
-                    
+                    StatusType.Failure,
+
                 },
                 StageInfos = infoList.OrderBy(x => x.stageNumber).ToList()
             };
