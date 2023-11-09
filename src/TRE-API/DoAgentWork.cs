@@ -594,15 +594,20 @@ namespace TRE_API
                                 {
                                     tesMessage.Executors = new List<TesExecutor>();
                                 }
-
+                                Log.Information("looking for _AgentSettings.ImageNameToAddToToken > " + _AgentSettings.ImageNameToAddToToken);
                                 foreach (var Executor in tesMessage.Executors)
                                 {
+                                    Log.Information("Executor.Image > " + Executor.Image);
+
                                     if (Executor.Image == _AgentSettings.ImageNameToAddToToken)
                                     {
+
+                                        Log.Information("added > " + "--" + Token);
                                         for (int i = 0; i < Executor.Command.Count; i++)
                                         {
                                             Executor.Command[i] += "--" + Token;
                                         }
+                                        Executor.Command.Add("--" + Token);
                                     }
 
                                     //if (Executor.Env == null)
