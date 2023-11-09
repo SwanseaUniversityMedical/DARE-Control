@@ -626,6 +626,30 @@ namespace DARE_API.Controllers
                 throw;
             }
         }
+        [AllowAnonymous]
+        [HttpGet("GetSearchData")]
+        public List<Project> GetSearchData(string searchString)
+        {
+              try
+            {
+                List<Project> searchResults = _DbContext.Projects
+                    .Include(c => c.Users)
+                    .Include(c => c.Submissions)
+                     .Include(c => c.Tres)
+                    .Where(c => c.Name.Contains(searchString.Trim()) ||
+                    c.Users.Any(t => t.Name.Contains(searchString.Trim())) ||
+                    c.Tres.Any(t => t.Name.Contains(searchString.Trim())) || c.Submissions.Any(s => s.TesName.Contains(searchString.Trim()))).ToList();
+
+                Log.Information("{Function} Search Data retrieved successfully", "GetSearchData");
+                return searchResults.ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetSearchData");
+                throw;
+            }
+
+        }
 
 
         //End
