@@ -44,6 +44,9 @@ namespace BL.Models.ViewModels
 
         [Display(Name = "Select file to upload to bucket")]
         public IFormFile? File { get; set; }
+
+        [Display(Name = "Tes to run")]
+        public string? TesRun { get; set; }
     }
 
     public class TreInfo

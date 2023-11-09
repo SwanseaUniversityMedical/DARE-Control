@@ -452,16 +452,19 @@ namespace TRE_API
 
                             try
                             {
-                                Uri uri = new Uri(aSubmission.DockerInputLocation);
-                                string fileName = Path.GetFileName(uri.LocalPath);
-                                var sourceBucket = aSubmission.Project.SubmissionBucket;
-                                var subProj = _dbContext.Projects
-                                    .FirstOrDefault(x => x.SubmissionProjectId == aSubmission.Project.Id);
+                                if (useTESK == false)
+                                {
+                                    Uri uri = new Uri(aSubmission.DockerInputLocation);
+                                    string fileName = Path.GetFileName(uri.LocalPath);
+                                    var sourceBucket = aSubmission.Project.SubmissionBucket;
+                                    var subProj = _dbContext.Projects
+                                        .FirstOrDefault(x => x.SubmissionProjectId == aSubmission.Project.Id);
 
-                                var destinationBucket = subProj.SubmissionBucketTre;
-                                var source = _minioSubHelper.GetCopyObject(sourceBucket, fileName);
-                                var resultcopy = _minioTreHelper
-                                    .CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
+                                    var destinationBucket = subProj.SubmissionBucketTre;
+                                    var source = _minioSubHelper.GetCopyObject(sourceBucket, fileName);
+                                    var resultcopy = _minioTreHelper
+                                        .CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
+                                }
 
                                 _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(),
                                     StatusType.TreWaitingForCrateFormatCheck, "");
