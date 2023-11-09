@@ -51,6 +51,7 @@ using System.Net.Http.Json;
 using TRE_API.Models;
 using Castle.Components.DictionaryAdapter.Xml;
 using System;
+using System.Net;
 
 namespace TRE_API
 {
@@ -189,7 +190,20 @@ namespace TRE_API
         {
 
             Log.Information("{Function} {jsonContent} runhing CreateTESK ", "CreateTESK", jsonContent);
-            using (var httpClient = new HttpClient())
+
+            HttpClientHandler handler = new HttpClientHandler();
+
+            if (_AgentSettings.Proxy)
+            {
+                handler = new HttpClientHandler
+                {
+                    Proxy = new WebProxy(_AgentSettings.ProxyAddresURL, true), // Replace with your proxy server URL
+                    UseProxy = _AgentSettings.Proxy,
+                };
+            }
+
+
+            using (var httpClient = new HttpClient(handler))
             {
                 // Define the URL for the POST request
                 string apiUrl = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks";
@@ -248,7 +262,19 @@ namespace TRE_API
             
             Log.Information("{Function} Check TESK : {TaskId},  TES : {TesId}, sub: {SubId}", "CheckTESK", taskID, tesId, subId);
             string url = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks/" + taskID + "?view=basic";
-            using (HttpClient client = new HttpClient())
+
+            HttpClientHandler handler = new HttpClientHandler();
+
+            if (_AgentSettings.Proxy)
+            {
+                handler = new HttpClientHandler
+                {
+                    Proxy = new WebProxy(_AgentSettings.ProxyAddresURL, true), // Replace with your proxy server URL
+                    UseProxy = _AgentSettings.Proxy,
+                };
+            }
+
+            using (HttpClient client = new HttpClient(handler))
             {
                 HttpResponseMessage response = client.GetAsync(url).Result;
                 Log.Information("{Function} Response status {State}", "CheckTESK", response.StatusCode);
@@ -571,7 +597,7 @@ namespace TRE_API
 
                                 foreach (var Executor in tesMessage.Executors)
                                 {
-                                    if (Executor.Image == "CustomerImages") //TODO
+                                    if (Executor.Image == _AgentSettings.ImageNameToAddToToken)
                                     {
                                         for (int i = 0; i < Executor.Command.Count; i++)
                                         {
