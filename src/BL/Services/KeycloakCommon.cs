@@ -15,6 +15,7 @@ namespace BL.Services
         public static async Task<string> GetTokenForUserGuts(string username, string password, string requiredRole, HttpClientHandler proxyHandler,
             string keycloakBaseUrl, string clientId, string clientSecret)
         {
+            Log.Information("{Function} keycloakBaseUrl > " + keycloakBaseUrl , "GetTokenForUserGuts");
             var client = new HttpClient(proxyHandler);
             var disco = await client.GetDiscoveryDocumentAsync(new DiscoveryDocumentRequest
             {

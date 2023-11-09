@@ -1,8 +1,11 @@
 ﻿using Amazon;
+using Amazon.Runtime;
+using Amazon.Runtime.Internal.Util;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using Aws4RequestSigner;
+using BL.Models.Settings;
 using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Minio;
@@ -25,14 +28,12 @@ namespace BL.Services
         {
             try
             {
+                if (string.IsNullOrEmpty(bucketName)) { bucketName = _minioSettings.BucketName; }
 
-            
-            if (string.IsNullOrEmpty(bucketName)) { bucketName = _minioSettings.BucketName; }
+                var amazonS3Client = GenerateAmazonS3Client();
 
-            var amazonS3Client = GenerateAmazonS3Client();
-
-            var buckets = await amazonS3Client.ListBucketsAsync();
-            return buckets.Buckets.Any(x => x.BucketName.Equals(bucketName));
+                var buckets = await amazonS3Client.ListBucketsAsync();
+                return buckets.Buckets.Any(x => x.BucketName.Equals(bucketName));
             }
             catch (Exception e)
             {
@@ -434,12 +435,24 @@ namespace BL.Services
         #region PrivateHelpers
         private AmazonS3Config GenerateAmazonS3Config()
         {
-            return new AmazonS3Config
+            var config = new AmazonS3Config
             {
                 RegionEndpoint = RegionEndpoint.USEast1, // MUST set this before setting ServiceURL and it should match the `MINIO_REGION` environment variable.
                 ServiceURL = _minioSettings.Url, // replace http://localhost:9000 with URL of your MinIO server
                 ForcePathStyle = true, // MUST be true to work correctly with MinIO server
             };
+            
+            if (_minioSettings.UesProxy)
+            {
+                config.SetWebProxy(new System.Net.WebProxy
+                {
+                    Address = new Uri(_minioSettings.ProxyAddresURL),
+                    BypassList = new[] { _minioSettings.BypassProxy }
+                });
+            }
+
+        
+            return config;
         }
 
         private AmazonS3Client GenerateAmazonS3Client()

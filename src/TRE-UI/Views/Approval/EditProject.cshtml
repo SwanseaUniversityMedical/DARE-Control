@@ -11,6 +11,7 @@
             <div>
                 <h1 class="fs-3 mb-0">@Model.SubmissionProjectName</h1>
                 <p class="font-monospace text-muted small">#@Model.SubmissionProjectId</p>
+                <p class="text-muted mb-0">@Model.Decision</p>
                 <p class="text-muted mb-0">
                     @if (Model.Decision == Decision.Undecided)
                     {
@@ -58,8 +59,8 @@
                     <h2 class="fs-5 mt-5">Project Expiry Date</h2>
                     <p>The date the project expires.</p>
 
-                    <div class="form-group">
-                        @Html.TextBoxFor(x => x.ProjectExpiryDate, "{0:yyyy-MM-dd}", new { @class = "form-control", @placeholder = "kindly input date" })
+                    <div id ="date" class="form-group">
+                        @Html.TextBoxFor(x => x.ProjectExpiryDate, new { @class = "form-control", @placeholder = "kindly input date", @type = "date", @Value = Model.ProjectExpiryDate})
 
                     </div>
                     <h2 class="fs-5 mt-5">Decision</h2>

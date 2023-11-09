@@ -8,6 +8,7 @@ using Serilog;
 using System.IdentityModel.Tokens.Jwt;
 using BL.Models.Settings;
 using Newtonsoft.Json.Linq;
+using System.Net;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -40,7 +41,18 @@ namespace DARE_FrontEnd.Controllers
             string clientSecret = _keycloakSettings.ClientSecret;
             string refreshToken = currentRefreshToken;
 
-            HttpClient httpClient = new HttpClient();
+            HttpClientHandler handler = new HttpClientHandler();
+
+            if (_keycloakSettings.Proxy)
+            {
+                handler = new HttpClientHandler
+                {
+                    Proxy = new WebProxy(_keycloakSettings.ProxyAddresURL, true), // Replace with your proxy server URL
+                    UseProxy = _keycloakSettings.Proxy,
+                };
+            }
+
+            HttpClient httpClient = new HttpClient(handler);
 
             var tokenEndpoint = $"{keycloakBaseUrl}/protocol/openid-connect/token";
             var tokenRequestBody = new FormUrlEncodedContent(new Dictionary<string, string>
@@ -51,6 +63,8 @@ namespace DARE_FrontEnd.Controllers
                 {"refresh_token", refreshToken},
                 {"max_age", _keycloakSettings.TokenRefreshSeconds} // Set a longer max_age in seconds
             });
+
+           
 
             var tokenResponse = await httpClient.PostAsync(tokenEndpoint, tokenRequestBody);
             var tokenResponseContent = await tokenResponse.Content.ReadAsStringAsync();
