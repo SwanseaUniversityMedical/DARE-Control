@@ -8,20 +8,31 @@
     var searchResults = @ViewBag.SearchResults;
     ViewData["Title"] = "Home";
 }
+
         @if (searchResults != null)
         {
             <h3>Search Results:</h3>
             <ul>
                 @foreach (var project in searchResults)
-        {         
+        {   
             <li>Project Name: @project.Name</li>
-                    <li>Tre Name: @project.Tres[0].Name</li>
-            <li>User Name: @project.Users[0].Name</li>
-                @*    <li>Users: @project.Users.Name.Select(u=>u.Name)</li>*@
-                    <!-- Display other properties as needed -->
+    
+              <ul>
+    @foreach (var user in project.Users)
+    {
+    <li>User Name: @user.Name</li>
+    }
+    </ul>
+            <ul>
+                @foreach (var tre in project.Tres)
+                {
+                    <li>Tre Name: @tre.Name</li>
                 }
             </ul>
-        }       
+         }
+            </ul>
+        }
+       
     <div class="home-banner text-center">
         <h1 class="display-5 text-light">Safe &amp; Transparent Research</h1>
         <p class="text-light fs-6">Search and discover the types of research this trusted platform is enabling for public good.</p>
