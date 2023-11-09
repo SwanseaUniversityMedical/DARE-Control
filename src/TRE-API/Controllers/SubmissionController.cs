@@ -169,6 +169,7 @@ namespace TRE_API.Controllers
             public string SubId { get; set; }
             public string Bucket { get; set; }
             public string Path { get; set; }
+            public bool Secure { get; set; }
         }
 
         
@@ -265,13 +266,14 @@ namespace TRE_API.Controllers
                 {
                     _subHelper.UpdateStatusForTre(review.SubId.ToString(), StatusType.DataOutApproved, "");
                 }
-
+                bool secure = !_minioTreSettings.Url.ToLower().StartsWith("http://");
                 var bucket = _subHelper.GetOutputBucketGuts(review.SubId, true);
                 ApprovalResult hutchPayload = new ApprovalResult()
                 {
-                    Host = _minioTreSettings.Url,
+                    Host = _minioTreSettings.Url.Replace("https://", "").Replace("http://", ""),
                     Bucket = bucket.Bucket,
                     Path = bucket.Path,
+                    Secure = secure,
                     Status = approvalStatus,
                     FileResults = hutchRes
                 };

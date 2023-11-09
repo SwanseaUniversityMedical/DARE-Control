@@ -90,12 +90,13 @@ namespace TRE_API.Services
 
                 var outputBucket = bucket.FirstOrDefault();
 
-                
+                bool secure = !_minioTreSettings.Url.ToLower().StartsWith("http://");
                 return new OutputBucketInfo()
                 {
                     Bucket = outputBucket ?? "",
                     SubId = submission.Id.ToString(),
                     Path = "sub" + subId + "/",
+                    Secure = secure,
                     Host = hostnameonly ? _minioTreSettings.Url.Replace("https://", "").Replace("http://","") : _minioTreSettings.Url
                 };
             }
