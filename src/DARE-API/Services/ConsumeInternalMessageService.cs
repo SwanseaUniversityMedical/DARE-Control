@@ -16,6 +16,8 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
+using DARE_API.Models;
+
 
 namespace DARE_API.Services
 {
@@ -25,16 +27,17 @@ namespace DARE_API.Services
         private readonly ApplicationDbContext _dbContext;
         private readonly MinioSettings _minioSettings;
         private readonly IMinioHelper _minioHelper;
-        
+        private readonly TEMPTES _TEMPTES;
 
 
-        public ConsumeInternalMessageService(IBus bus, IServiceProvider serviceProvider)
+
+        public ConsumeInternalMessageService(IBus bus, IServiceProvider serviceProvider, TEMPTES TEMPTES)
         {
             _bus = bus;
             _dbContext = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<ApplicationDbContext>();
             _minioSettings = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<MinioSettings>();
             _minioHelper = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IMinioHelper>();
-            
+            _TEMPTES = TEMPTES; 
 
         }
 
@@ -72,29 +75,37 @@ namespace DARE_API.Services
                 try
                 {
                     
-                
+              
 
-                Uri uri = new Uri(sub.DockerInputLocation);
-                string fileName = Path.GetFileName(uri.LocalPath);
+               
+                
 
                 var messageMQ = new MQFetchFile();
                 messageMQ.Url = sub.SourceCrate;
                 messageMQ.BucketName = sub.Project.SubmissionBucket;
-                messageMQ.Key = fileName;
+              
 
-                if (uri.Host + ":" + uri.Port != _minioSettings.AdminConsole)
-                {
-                    _minioHelper.RabbitExternalObject(messageMQ);
-
-                    
-                    var minioEndpoint = new MinioEndpoint()
+                    if (_TEMPTES.UesTES == false)
                     {
-                        Url = _minioSettings.AdminConsole,
-                    };
-                    messageMQ.Url = "http://" + minioEndpoint.Url + "/browser/" + messageMQ.BucketName + "/" + messageMQ.Key;
-                }
+                        Uri uri = new Uri(sub.DockerInputLocation);
+                        string fileName = Path.GetFileName(uri.LocalPath);
+                        messageMQ.Key = fileName;
+                        if (uri.Host + ":" + uri.Port != _minioSettings.AdminConsole)
+                        {
+                            _minioHelper.RabbitExternalObject(messageMQ);
 
-                UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.SubmissionWaitingForCrateFormatCheck, "");
+
+                            var minioEndpoint = new MinioEndpoint()
+                            {
+                                Url = _minioSettings.AdminConsole,
+                            };
+                            messageMQ.Url = "http://" + minioEndpoint.Url + "/browser/" + messageMQ.BucketName + "/" + messageMQ.Key;
+                        }
+
+                    }
+                   
+
+                    UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.SubmissionWaitingForCrateFormatCheck, "");
                 if (ValidateCreate(sub))
                 {
                     UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.SubmissionCrateValidated, "");

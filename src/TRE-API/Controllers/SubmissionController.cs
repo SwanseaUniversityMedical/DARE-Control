@@ -107,8 +107,18 @@ namespace TRE_API.Controllers
         [ValidateModelState]
         [SwaggerOperation("UpdateStatusForTre")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public IActionResult UpdateStatusForTre([FromBody] SubmissionDetails subDetails)
+        // public IActionResult UpdateStatusForTre([FromBody] SubmissionDetails subDetails)
+        public IActionResult UpdateStatusForTre(
+            [FromQuery] string subId,
+            [FromQuery] StatusType statusType,
+            [FromQuery] string? description)
         {
+            var subDetails = new SubmissionDetails()
+            {
+                StatusType = statusType,
+                SubId = subId,
+                Description = description
+            };
             if (!EnumHelper.GetHutchAllowedStatusUpdates().Contains(subDetails.StatusType))
             {
                 throw new Exception("Restricted StatusType");
@@ -141,7 +151,7 @@ namespace TRE_API.Controllers
         {
             try
             {
-                var outputInfo = _subHelper.GetOutputBucketGuts(subId);
+                var outputInfo = _subHelper.GetOutputBucketGuts(subId, true);
                 
 
                 return StatusCode(200, outputInfo);
@@ -159,6 +169,7 @@ namespace TRE_API.Controllers
             public string SubId { get; set; }
             public string Bucket { get; set; }
             public string Path { get; set; }
+            public bool Secure { get; set; }
         }
 
         
@@ -174,7 +185,7 @@ namespace TRE_API.Controllers
             try
             {
                 _subHelper.UpdateStatusForTre(review.SubId, StatusType.DataOutRequested, "");
-                var bucket = _subHelper.GetOutputBucketGuts(review.SubId);
+                var bucket = _subHelper.GetOutputBucketGuts(review.SubId, false);
                 var egsub = new EgressSubmission()
                 {
                     SubmissionId = review.SubId,
@@ -255,13 +266,14 @@ namespace TRE_API.Controllers
                 {
                     _subHelper.UpdateStatusForTre(review.SubId.ToString(), StatusType.DataOutApproved, "");
                 }
-
-                var bucket = _subHelper.GetOutputBucketGuts(review.SubId);
+                bool secure = !_minioTreSettings.Url.ToLower().StartsWith("http://");
+                var bucket = _subHelper.GetOutputBucketGuts(review.SubId, true);
                 ApprovalResult hutchPayload = new ApprovalResult()
                 {
-                    Host = _minioTreSettings.Url,
+                    Host = _minioTreSettings.Url.Replace("https://", "").Replace("http://", ""),
                     Bucket = bucket.Bucket,
                     Path = bucket.Path,
+                    Secure = secure,
                     Status = approvalStatus,
                     FileResults = hutchRes
                 };

@@ -51,6 +51,7 @@ using System.Net.Http.Json;
 using TRE_API.Models;
 using Castle.Components.DictionaryAdapter.Xml;
 using System;
+using System.Net;
 
 namespace TRE_API
 {
@@ -59,7 +60,7 @@ namespace TRE_API
         void Execute();
         Task CheckTESK(string taskID, int subId, string tesId, string outputBucket);
         void ClearJob(string jobname);
-        Task testing();
+        Task testing(string toRun, string Role);
     }
 
     // TESK : http://172.16.34.31:8080/    https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks
@@ -108,53 +109,101 @@ namespace TRE_API
             _minioSubHelper = minioSubHelper;
         }
 
-        public async Task testing()
+        public async Task testing(string toRun, string Role)
         {
 
 
             //TesId
 
             Console.WriteLine("Testing");
-            string jsonContent = @"{
-    ""name"": ""Hello World"",
-    ""description"": ""Hello World, inspired by Funnel's most basic example"",
-    ""executors"": [{
-            ""image"": ""alpine"",
-            ""command"": [""sleep"", ""5m""]
-        }, {
-            ""image"": ""alpine"",
-            ""command"": [""echo"", ""TESK says:   Hello World""]
-        }
-    ],
-	""outputs"" : [
-		{
-          ""path"": ""/data/outfile"",
-          ""url"": ""s3://my-object-store/outfile-1"",
-          ""type"": ""FILE""
-        },
-		{
-          ""path"": ""/data/outfile2"",
-          ""url"": ""s3://my-object-store/outfile-2"",
-          ""type"": ""FILE""
-        },
-	],
-    ""volumes"":null,
-    ""tags"":{
-        ""project"":""Head"",
-        ""tres"":""SAIL|DPUK""
-     },
-    ""logs"":null,
-    ""creation_time"":null
-}
-";
-            CreateTESK(jsonContent, 0, "AAA", "AAAAAAA");
+            Log.Information("{Function}  SEND TO TESK ", "Execute");
+            var arr = new HttpClient();
+
+
+
+            var role = Role; 
+
+            var Token = _hasuraAuthenticationService.GetNewToken(role);
+
+
+
+            var projectId = 1;
+
+
+
+            var OutputBucket = "head8480submission"; // _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects.First(x => x.Id == projectId).OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
+            var tesMessage = JsonConvert.DeserializeObject<TesTask>(toRun);                                                                                                                 //it need the file name?? (key-name)
+
+            if (tesMessage.Outputs == null)
+            {
+                tesMessage.Outputs = new List<TesOutput> { };
+            }
+
+            //S3://bucket-name/key-name
+            foreach (var output in tesMessage.Outputs)
+            {
+                output.Url = OutputBucket;
+            }
+
+            if (tesMessage.Executors == null)
+            {
+                tesMessage.Executors = new List<TesExecutor>();
+            }
+
+            foreach (var Executor in tesMessage.Executors)
+            {
+                if (Executor.Image == "CustomerImages") //TODO
+                {
+                    for (int i = 0; i < Executor.Command.Count; i++)
+                    {
+                        Executor.Command[i] += "--" + Token;
+                    }
+                }
+
+                //if (Executor.Env == null)
+                //{
+                //    Executor.Env = new Dictionary<string, string>();
+                //}
+                //Executor.Env["HASURAAuthenticationToken"] = Token;
+            }
+
+            _dbContext.TokensToExpire.Add(new TokenToExpire()
+            {
+                SubId = 99,
+                Token = Token
+            });
+            _dbContext.SaveChanges();
+
+
+
+            if (tesMessage is not null)
+            {
+                var stringdata = JsonConvert.SerializeObject(tesMessage);
+                Log.Information("{Function} tesMessage is not null runhing CreateTESK {tesMessage}", "Execute", stringdata);
+                CreateTESK(stringdata, 99, "123COOOLLL", OutputBucket);
+            }
+
+ 
         }
 
         public string CreateTESK(string jsonContent, int subId, string tesId, string outputBucket)
         {
 
             Log.Information("{Function} {jsonContent} runhing CreateTESK ", "CreateTESK", jsonContent);
-            using (var httpClient = new HttpClient())
+
+            HttpClientHandler handler = new HttpClientHandler();
+
+            if (_AgentSettings.Proxy)
+            {
+                handler = new HttpClientHandler
+                {
+                    Proxy = new WebProxy(_AgentSettings.ProxyAddresURL, true), // Replace with your proxy server URL
+                    UseProxy = _AgentSettings.Proxy,
+                };
+            }
+
+
+            using (var httpClient = new HttpClient(handler))
             {
                 // Define the URL for the POST request
                 string apiUrl = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks";
@@ -213,7 +262,19 @@ namespace TRE_API
             
             Log.Information("{Function} Check TESK : {TaskId},  TES : {TesId}, sub: {SubId}", "CheckTESK", taskID, tesId, subId);
             string url = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks/" + taskID + "?view=basic";
-            using (HttpClient client = new HttpClient())
+
+            HttpClientHandler handler = new HttpClientHandler();
+
+            if (_AgentSettings.Proxy)
+            {
+                handler = new HttpClientHandler
+                {
+                    Proxy = new WebProxy(_AgentSettings.ProxyAddresURL, true), // Replace with your proxy server URL
+                    UseProxy = _AgentSettings.Proxy,
+                };
+            }
+
+            using (HttpClient client = new HttpClient(handler))
             {
                 HttpResponseMessage response = client.GetAsync(url).Result;
                 Log.Information("{Function} Response status {State}", "CheckTESK", response.StatusCode);
@@ -417,16 +478,19 @@ namespace TRE_API
 
                             try
                             {
-                                Uri uri = new Uri(aSubmission.DockerInputLocation);
-                                string fileName = Path.GetFileName(uri.LocalPath);
-                                var sourceBucket = aSubmission.Project.SubmissionBucket;
-                                var subProj = _dbContext.Projects
-                                    .FirstOrDefault(x => x.SubmissionProjectId == aSubmission.Project.Id);
+                                if (useTESK == false)
+                                {
+                                    Uri uri = new Uri(aSubmission.DockerInputLocation);
+                                    string fileName = Path.GetFileName(uri.LocalPath);
+                                    var sourceBucket = aSubmission.Project.SubmissionBucket;
+                                    var subProj = _dbContext.Projects
+                                        .FirstOrDefault(x => x.SubmissionProjectId == aSubmission.Project.Id);
 
-                                var destinationBucket = subProj.SubmissionBucketTre;
-                                var source = _minioSubHelper.GetCopyObject(sourceBucket, fileName);
-                                var resultcopy = _minioTreHelper
-                                    .CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
+                                    var destinationBucket = subProj.SubmissionBucketTre;
+                                    var source = _minioSubHelper.GetCopyObject(sourceBucket, fileName);
+                                    var resultcopy = _minioTreHelper
+                                        .CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
+                                }
 
                                 _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(),
                                     StatusType.TreWaitingForCrateFormatCheck, "");
@@ -515,6 +579,10 @@ namespace TRE_API
                                 var OutputBucket = _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects.First(x => x.Id == projectId).OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
                                                                                                                                                               //it need the file name?? (key-name)
 
+                                if (tesMessage.Outputs == null)
+                                {
+                                    tesMessage.Outputs = new List<TesOutput> {};
+                                }
 
                                 //S3://bucket-name/key-name
                                 foreach (var output in tesMessage.Outputs)
@@ -522,12 +590,19 @@ namespace TRE_API
                                     output.Url = OutputBucket;
                                 }
 
+                                if (tesMessage.Executors == null)
+                                {
+                                    tesMessage.Executors = new List<TesExecutor>();
+                                }
+                                Log.Information("looking for _AgentSettings.ImageNameToAddToToken > " + _AgentSettings.ImageNameToAddToToken);
                                 foreach (var Executor in tesMessage.Executors)
                                 {
-                                    if (Executor.Image == "CustomerImages") //TODO
+                                    Log.Information("Executor.Image > " + Executor.Image);
+
+                                    if (Executor.Image == _AgentSettings.ImageNameToAddToToken)
                                     {
                                         Executor.Command[1] += "--" + Token;
-                                    }
+									}
 
                                     //if (Executor.Env == null)
                                     //{
@@ -543,11 +618,14 @@ namespace TRE_API
                                 });
                                 _dbContext.SaveChanges();
 
-                                
+
 
                                 if (tesMessage is not null)
-                                    Log.Information("{Function} tesMessage is not null runhing CreateTESK ", "Execute");
-                                    CreateTESK(JsonConvert.SerializeObject(tesMessage), aSubmission.Id, aSubmission.TesId, OutputBucket);
+                                {
+                                    var stringdata = JsonConvert.SerializeObject(tesMessage);
+                                    Log.Information("{Function} tesMessage is not null runhing CreateTESK {tesMessage}", "Execute", stringdata);
+                                    CreateTESK(stringdata, aSubmission.Id, aSubmission.TesId, OutputBucket);
+                                }
 
                             }
 
