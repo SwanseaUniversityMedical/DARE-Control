@@ -8,15 +8,13 @@
     var searchResults = @ViewBag.SearchResults;
     ViewData["Title"] = "Home";
 }
-
         @if (searchResults != null)
         {
             <h3>Search Results:</h3>
             <ul>
                 @foreach (var project in searchResults)
         {
-            
-
+           
             <li>Project Name: @project.Name</li>
 
                     <li>Tre Name: @project.Tres[0].Name</li>
