@@ -140,6 +140,8 @@ namespace BL.Models.ViewModels
         public string Host { get; set; }
         public string Bucket  { get; set; }
 
+        public bool Secure { get; set; }
+
         public string Path { get; set; }
         public ApprovalType Status { get; set; }
 

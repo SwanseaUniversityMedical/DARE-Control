@@ -77,8 +77,8 @@ namespace Data_Egress_UI.Controllers
 
             }
 
-            return RedirectToAction("GetAllUnprocessedEgresses");
-            
+            return RedirectToAction("GetAllEgresses", "Data", new { unprocessedonly = true });
+
         }
         public static string GetContentType(string fileName)
         {

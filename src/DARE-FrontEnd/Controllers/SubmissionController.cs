@@ -99,7 +99,7 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpGet]
-        public IActionResult DownloadFile(int subId)
+        public async Task<IActionResult> DownloadFileAsync(int subId)
         {
 
             var paramlist = new Dictionary<string, string>
@@ -108,8 +108,8 @@ namespace DARE_FrontEnd.Controllers
             };
 
             var submission = _clientHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist).Result;
-            var file = _clientHelper.CallAPIToGetFile(
-                "/api/Submission/DownloadFile", paramlist).Result;
+            var file = await _clientHelper.CallAPIToGetFile(
+                "/api/Submission/DownloadFile", paramlist);
             return File(file, GetContentType(submission.FinalOutputFile), submission.FinalOutputFile);
         }
 
