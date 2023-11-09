@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
+using NuGet.Common;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -70,16 +72,14 @@ namespace DARE_FrontEnd.Controllers
                 var minioEndpoint = await _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
 
                 imageUrl = "http://" + minioEndpoint.Url + "/browser/" + project.SubmissionBucket + "/" + model.File.FileName;
-
-
-
             }
-
-            var test = new TesTask()
+            var test = new TesTask();
+            if (string.IsNullOrEmpty(model.TesRun))
             {
-
-                Name = model.TESName,
-                Executors = new List<TesExecutor>()
+                test = new TesTask()
+                {
+                    Name = model.TESName,
+                    Executors = new List<TesExecutor>()
                 {
                     new TesExecutor()
                     {
@@ -87,13 +87,18 @@ namespace DARE_FrontEnd.Controllers
 
                     }
                 },
-                Tags = new Dictionary<string, string>()
+                    Tags = new Dictionary<string, string>()
                 {
                     { "project", project.Name },
                     { "tres", listOfTre }
                 }
 
-            };
+                };
+            }
+            else
+            {
+                test = JsonConvert.DeserializeObject<TesTask>(model.TESName);
+            }
 
             var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test);
 
