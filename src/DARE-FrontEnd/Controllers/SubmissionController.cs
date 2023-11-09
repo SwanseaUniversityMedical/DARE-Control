@@ -37,6 +37,7 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<IActionResult> SubmissionWizard(SubmissionWizard model)
         {
+
             try
             {
                 var listOfTre = "";
