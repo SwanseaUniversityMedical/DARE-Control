@@ -46,9 +46,9 @@ namespace Tre_Hasura
 
             foreach (var arg in args)
             {
-                if (arg.StartsWith("££"))
+                if (arg.StartsWith("!!"))
                 {
-                    URL = arg.Replace("££", "");
+                    URL = arg.Replace("!!", "");
                 }
 
                 if (arg.StartsWith("--"))
@@ -68,6 +68,7 @@ namespace Tre_Hasura
             Query = @"{ ""query"": """ + Query + @""" }";
             Console.WriteLine("Query > " + Query);
             Console.WriteLine("Token > " + Token);
+            Console.WriteLine("URL > " + URL);
             var data = await RunQuery(Token, Query, URL);
             File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), $"data_{DateTime.UtcNow.Ticks}.json"), data);
         }
