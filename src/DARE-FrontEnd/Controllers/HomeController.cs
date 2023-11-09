@@ -63,9 +63,18 @@ namespace DARE_FrontEnd.Controllers
         public IActionResult Index(string searchString)
         {
             List<Project> results = SearchData(searchString);
-    
-            ViewBag.SearchResults = results;
-            return View();
+
+            {
+                if (results != null)
+                {
+                    ViewBag.SearchResults = results;
+                }
+                else
+                {
+                    ViewBag.SearchResults = "No search results found.";
+                }
+                return View();
+            }
         }
         //private helpers
         private List<Project> SearchData(string searchString)
