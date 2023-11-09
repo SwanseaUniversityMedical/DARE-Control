@@ -18,7 +18,6 @@ namespace TRE_API.Controllers
         private readonly IDoSyncWork _iDoSyncWork;
         private readonly IDoAgentWork _iDoAgentWork;
 
-
         public DEBUGHasuraController(IHasuraService iHasuraService, IDoSyncWork iDoSyncWork,
            IDoAgentWork iDoAgentWork)
         {

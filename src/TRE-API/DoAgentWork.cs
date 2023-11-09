@@ -601,14 +601,8 @@ namespace TRE_API
 
                                     if (Executor.Image == _AgentSettings.ImageNameToAddToToken)
                                     {
-
-                                        Log.Information("added > " + "--" + Token);
-                                        for (int i = 0; i < Executor.Command.Count; i++)
-                                        {
-                                            Executor.Command[i] += "--" + Token;
-                                        }
-                                        Executor.Command.Add("--" + Token);
-                                    }
+                                        Executor.Command[1] += "--" + Token;
+									}
 
                                     //if (Executor.Env == null)
                                     //{
