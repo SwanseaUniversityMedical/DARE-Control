@@ -21,7 +21,7 @@ namespace Tre_Hasura
 {
     public interface IHasuraQuery
     {
-        Task<string> RunQuery(string token,  string Query);
+        Task<string> RunQuery(string token,  string Query, string URL);
         Task Run(string[] args);
 
 
