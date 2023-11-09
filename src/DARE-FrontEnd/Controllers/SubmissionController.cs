@@ -100,7 +100,7 @@ namespace DARE_FrontEnd.Controllers
                 }
                 else
                 {
-                    test = JsonConvert.DeserializeObject<TesTask>(model.TESName);
+                    test = JsonConvert.DeserializeObject<TesTask>(model.TesRun);
                 }
 
                 var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test);
