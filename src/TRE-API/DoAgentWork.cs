@@ -526,10 +526,7 @@ namespace TRE_API
                                 {
                                     if (Executor.Image == "CustomerImages") //TODO
                                     {
-                                        for (int i = 0; i < Executor.Command.Count; i++)
-                                        {
-                                            Executor.Command[i] += "--" + Token;
-                                        }
+                                        Executor.Command[1] += "--" + Token;
                                     }
 
                                     //if (Executor.Env == null)

@@ -28,16 +28,13 @@ namespace Tre_Hasura
     }
     public class HasuraQuery : IHasuraQuery
     {
-        private readonly HasuraSettings _hasuraSettings;
-        public HasuraQuery(HasuraSettings HasuraSettings)
-        {
-            _hasuraSettings = HasuraSettings;
-
-        }
+  
 
         public async Task Run(string[] args)
         {
             var Token = "";
+
+            var URL = "http://localhost:8080";
 
             var Query = @"query MyQuery {
               Anewschema_two(order_by: {AAAAA: asc}) {
@@ -49,6 +46,11 @@ namespace Tre_Hasura
 
             foreach (var arg in args)
             {
+                if (arg.StartsWith("££"))
+                {
+                    URL = arg.Replace("££", "");
+                }
+
                 if (arg.StartsWith("--"))
                 {
                     Token = arg.Replace("--", "");
@@ -66,7 +68,7 @@ namespace Tre_Hasura
             Query = @"{ ""query"": """ + Query + @""" }";
             Console.WriteLine("Query > " + Query);
             Console.WriteLine("Token > " + Token);
-            var data = await RunQuery(Token, Query);
+            var data = await RunQuery(Token, Query, URL);
             File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), $"data_{DateTime.UtcNow.Ticks}.json"), data);
         }
 
@@ -77,13 +79,13 @@ namespace Tre_Hasura
             public List<List<string>> result { get; set; }
         }
 
-        public async Task<string> RunQuery(string token, string Query)
+        public async Task<string> RunQuery(string token, string Query, string URL )
         {
             
             // Set the endpoint URL
             //need to get the headers to send from the token userid
 
-            string endpointUrl = _hasuraSettings.HasuraURL + "/v1/graphql";
+            string endpointUrl = URL + "/v1/graphql";
             Console.WriteLine(endpointUrl);
 
             try
