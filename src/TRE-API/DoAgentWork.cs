@@ -601,7 +601,7 @@ namespace TRE_API
 
                                     if (Executor.Image == _AgentSettings.ImageNameToAddToToken)
                                     {
-                                        Executor.Command[1] += "--" + Token;
+                                        Executor.Command.Add("--Token_" + Token);
 									}
 
                                     //if (Executor.Env == null)
