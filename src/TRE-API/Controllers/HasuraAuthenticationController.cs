@@ -19,31 +19,12 @@ namespace TRE_API.Controllers
     [Route("api/[controller]")]
     public class HasuraAuthenticationController : Controller
     {
-        private readonly AuthenticationSettings _authenticationSettings;
-    
         private readonly IHasuraAuthenticationService _hasuraAuthenticationService;
 
         public HasuraAuthenticationController(AuthenticationSettings AuthenticationSettings, IHasuraAuthenticationService hasuraAuthenticationService)
-        {
-            _authenticationSettings = AuthenticationSettings;          
+        {        
             _hasuraAuthenticationService = hasuraAuthenticationService;
         }
-
-        [HttpGet("GetNewToken/{role}")]
-        public string GetNewToken(string role)
-        {
-            return _hasuraAuthenticationService.GetNewToken(role);
-
-        }
-
-
-        [HttpPost("ExpirerToken/{Token}")]
-        public bool ExpirerToken(string Token)
-        {
-            return _hasuraAuthenticationService.ExpirerToken(Token);
-
-        }
-
 
         [HttpGet("")]
         public string Index([FromHeader] string Token)
