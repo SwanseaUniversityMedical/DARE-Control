@@ -632,13 +632,14 @@ namespace DARE_API.Controllers
         {
               try
             {
+               
                 List<Project> searchResults = _DbContext.Projects
                     .Include(c => c.Users)
                     .Include(c => c.Submissions)
                      .Include(c => c.Tres)
-                    .Where(c => c.Name.Contains(searchString.Trim()) ||
-                    c.Users.Any(t => t.Name.Contains(searchString.Trim())) ||
-                    c.Tres.Any(t => t.Name.Contains(searchString.Trim())) || c.Submissions.Any(s => s.TesName.Contains(searchString.Trim()))).ToList();
+                    .Where(c => c.Name.ToLower().Contains(searchString.Trim().ToLower()) ||
+                    c.Users.Any(t => t.Name.ToLower().Contains(searchString.Trim().ToLower())) ||
+                    c.Tres.Any(t => t.Name.ToLower().Contains(searchString.Trim().ToLower())) || c.Submissions.Any(s => s.TesName.Contains(searchString.Trim().ToLower()))).ToList();
 
                 Log.Information("{Function} Search Data retrieved successfully", "GetSearchData");
                 return searchResults.ToList();

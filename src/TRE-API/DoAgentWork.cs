@@ -599,9 +599,9 @@ namespace TRE_API
                                 {
                                     Log.Information("Executor.Image > " + Executor.Image);
 
-                                    if (Executor.Image == _AgentSettings.ImageNameToAddToToken)
+                                    if (Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken))
                                     {
-                                        Executor.Command[1] += "--" + Token;
+                                        Executor.Command.Add("--Token_" + Token);
 									}
 
                                     //if (Executor.Env == null)
