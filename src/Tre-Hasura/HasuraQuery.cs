@@ -21,7 +21,7 @@ namespace Tre_Hasura
 {
     public interface IHasuraQuery
     {
-        Task<string> RunQuery(string token,  string Query, string URL);
+        Task<string> RunQuery(string token,  string Query, string URL, string Proxy);
         Task Run(string[] args);
 
 
@@ -32,6 +32,8 @@ namespace Tre_Hasura
 
         public async Task Run(string[] args)
         {
+            var Proxy = "";
+
             var Token = "";
 
             var URL = "http://localhost:8080";
@@ -46,19 +48,24 @@ namespace Tre_Hasura
 
             foreach (var arg in args)
             {
-                if (arg.StartsWith("!!"))
+                if (arg.StartsWith("--URL_"))
                 {
-                    URL = arg.Replace("!!", "");
+                    URL = arg.Replace("--URL_", "");
                 }
 
-                if (arg.StartsWith("--"))
+                if (arg.StartsWith("--Token_"))
                 {
-                    Token = arg.Replace("--", "");
+                    Token = arg.Replace("--Token_", "");
                 }
 
-                if (arg.StartsWith("@"))
+                if (arg.StartsWith("--Query_"))
                 {
-                    Query = arg.Replace("@", "");
+                    Query = arg.Replace("--Query_", "");
+                }
+
+                if (arg.StartsWith("--Proxy_"))
+                {
+                    Proxy = arg.Replace("--Proxy_", "");
                 }
 
             }
@@ -69,7 +76,9 @@ namespace Tre_Hasura
             Console.WriteLine("Query > " + Query);
             Console.WriteLine("Token > " + Token);
             Console.WriteLine("URL > " + URL);
-            var data = await RunQuery(Token, Query, URL);
+            Console.WriteLine("Proxy > " + Proxy);
+            
+            var data = await RunQuery(Token, Query, URL, Proxy);
             File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), $"data_{DateTime.UtcNow.Ticks}.json"), data);
         }
 
@@ -80,7 +89,7 @@ namespace Tre_Hasura
             public List<List<string>> result { get; set; }
         }
 
-        public async Task<string> RunQuery(string token, string Query, string URL )
+        public async Task<string> RunQuery(string token, string Query, string URL, string Proxy)
         {
             
             // Set the endpoint URL
@@ -91,7 +100,7 @@ namespace Tre_Hasura
 
             try
             {
-                var Result = await HttpClient(endpointUrl, Query, token);
+                var Result = await HttpClient(endpointUrl, Query, token, Proxy);
 
                 Console.WriteLine(Result.StatusCode);
 
@@ -109,11 +118,22 @@ namespace Tre_Hasura
             }
         }
 
-        public async Task<HttpResponseMessage> HttpClient(string endpointUrl, string payload, string token = "")
+        public async Task<HttpResponseMessage> HttpClient(string endpointUrl, string payload, string token, string proxy)
         {
+            HttpClientHandler handler = new HttpClientHandler();
+
+            if (string.IsNullOrEmpty(proxy) == false)
+            {
+                handler = new HttpClientHandler
+                {
+                    Proxy = new WebProxy(proxy),
+                    UseProxy = true,
+                };
+            }
+
             HttpResponseMessage response = null;
             // Create the HttpClient
-            using (HttpClient client = new HttpClient())
+            using (HttpClient client = new HttpClient(handler))
             {
                 // Set the request headers
                 HttpRequestMessage re = new HttpRequestMessage(HttpMethod.Post, endpointUrl);
