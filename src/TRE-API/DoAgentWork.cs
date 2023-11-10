@@ -131,7 +131,7 @@ namespace TRE_API
 
 
 
-            var OutputBucket = "head8480submission"; // _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects.First(x => x.Id == projectId).OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
+            var OutputBucket = _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects.First(x => x.Id == projectId).OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
             var tesMessage = JsonConvert.DeserializeObject<TesTask>(toRun);                                                                                                                 //it need the file name?? (key-name)
 
             if (tesMessage.Outputs == null)
