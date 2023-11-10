@@ -40,7 +40,7 @@ namespace OPA.Controllers
         {
             try
             {
-                var userName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+                //var userName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
                 var treData = _dareHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForTre").Result;
             
                 DateTime today = DateTime.Today;
@@ -48,7 +48,7 @@ namespace OPA.Controllers
                 //{
                 //    expiryDate = DateTime.Now.AddMinutes(_opaSettings.ExpiryDelayMinutes);
                 //}
-                userName = "PatriciaAkinkuade";
+                var userName = "PatriciaAkinkuade";
                 bool hasAccess = await _opaService.CheckAccess(userName, today, treData);
                 if (hasAccess)
                     if (hasAccess)

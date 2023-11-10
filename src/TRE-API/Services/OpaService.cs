@@ -16,7 +16,8 @@ namespace TRE_API.Services
         public OpaService()
         {
             _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri(_opaSettings.OPAUrl);
+            //_httpClient.BaseAddress = new Uri(_opaSettings.OPAUrl);
+            _httpClient.BaseAddress = new System.Uri("http://localhost:8181/v1/policies/checkaccess");
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
@@ -33,7 +34,7 @@ namespace TRE_API.Services
                 input = new { user = userName, expiryDate },
                 data = new { tre = treData }
             };
-            var response = await _httpClient.PostAsJsonAsync(_opaSettings.OPAUrl, input);
+            var response = await _httpClient.PostAsJsonAsync("app/checkaccess/allow", input);
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadAsAsync<Dictionary<string, object>>();
