@@ -24,13 +24,14 @@
                 @Html.ListBoxFor(x => x.Tres, Model.SelectTresOptions.Select(y => new SelectListItem(y, y)), new { @class = "form-select" })*@
                 @for (var i = 0; i < Model.TreRadios.Count(); i++)
                 {
-                    <div class="form-check">
-                        @Html.HiddenFor(x => x.TreRadios[i].Name)
-                        @Html.CheckBoxFor(x=>x.TreRadios[i].IsSelected, new {@class = "form-check-input"})
-                        <label class="form-check-label" for="flexCheckDefault">
-                            @Model.TreRadios[i].Name
-                        </label>
-
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="form-check">
+                            @Html.HiddenFor(x => x.TreRadios[i].Name)
+                            @Html.CheckBoxFor(x=>x.TreRadios[i].IsSelected, new {@class = "form-check-input"})
+                            <label class="form-check-label" for="flexCheckDefault">
+                                @Model.TreRadios[i].Name
+                            </label>
+                        </div>
                         @if (Model.TreRadios[i].IsOnline)
                         {
                             <span class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 ms-3">
