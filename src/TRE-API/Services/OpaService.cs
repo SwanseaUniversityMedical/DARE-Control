@@ -33,7 +33,7 @@ namespace TRE_API.Services
                 input = new { user = userName, expiryDate },
                 data = new { tre = treData }
             };
-            var response = await _httpClient.PostAsJsonAsync("app/userallowed/project_allow", input);
+            var response = await _httpClient.PostAsJsonAsync(_opaSettings.OPAUrl, input);
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadAsAsync<Dictionary<string, object>>();
