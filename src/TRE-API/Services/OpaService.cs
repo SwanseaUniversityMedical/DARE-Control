@@ -22,7 +22,7 @@ namespace TRE_API.Services
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        public async Task<bool> CheckAccess(string userName, DateTime expiryDate, List<Project> treData)
+        public async Task<bool> CheckAccess(string userName, DateTime expiryDate, List<TreProject>? treData)
         {
             DateTime today = DateTime.Today;
             if (expiryDate > today)
@@ -34,7 +34,7 @@ namespace TRE_API.Services
                 input = new { user = userName, expiryDate },
                 data = new { tre = treData }
             };
-            var response = await _httpClient.PostAsJsonAsync("app/checkaccess/allow", input);
+            var response = await _httpClient.PostAsJsonAsync(_httpClient.BaseAddress, input);
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadAsAsync<Dictionary<string, object>>();
