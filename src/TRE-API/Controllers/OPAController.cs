@@ -48,6 +48,7 @@ namespace OPA.Controllers
                 //{
                 //    expiryDate = DateTime.Now.AddMinutes(_opaSettings.ExpiryDelayMinutes);
                 //}
+                userName = "PatriciaAkinkuade";
                 bool hasAccess = await _opaService.CheckAccess(userName, today, treData);
                 if (hasAccess)
                     if (hasAccess)
