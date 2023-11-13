@@ -15,17 +15,17 @@
             <ul>
                 @foreach (var project in searchResults)
         {
-            <li><a href="@Url.Action("GetProject", "Project", new { id = project.Id })">Project Name: @project.Name </a> </li>
+            <li><a href="@Url.Action("GetProject", "Project", new { id = project.Id })">@project.Name </a> </li>
             <ul>
     @foreach (var user in project.Users)
     {
-                    <li><a href="@Url.Action("GetUser", "User", new { id = user.Id })">User Name:  @user.Name </a></li>
+                    <li><a href="@Url.Action("GetUser", "User", new { id = user.Id })">@user.Name </a></li>
     }
     </ul>
             <ul>
                 @foreach (var tre in project.Tres)
                 {
-                    <li><a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })">Tre Name:@tre.Name</a></li>
+                    <li><a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })">@tre.Name</a></li>
                 }
             </ul>
          }
