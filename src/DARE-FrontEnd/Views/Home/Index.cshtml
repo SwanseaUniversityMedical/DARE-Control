@@ -14,19 +14,18 @@
             <h3>Search Results:</h3>
             <ul>
                 @foreach (var project in searchResults)
-        {   
-            <li>Project Name: @project.Name</li>
-    
-              <ul>
+        {
+            <li><a href="@Url.Action("GetProject", "Project", new { id = project.Id })">Project Name: @project.Name </a> </li>
+            <ul>
     @foreach (var user in project.Users)
     {
-    <li>User Name: @user.Name</li>
+                    <li><a href="@Url.Action("GetUser", "User", new { id = user.Id })">User Name:  @user.Name </a></li>
     }
     </ul>
             <ul>
                 @foreach (var tre in project.Tres)
                 {
-                    <li>Tre Name: @tre.Name</li>
+                    <li><a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })">Tre Name:@tre.Name</a></li>
                 }
             </ul>
          }
