@@ -86,14 +86,18 @@ namespace DARE_FrontEnd.Controllers
         //private helpers
         private List<Project> SearchData(string searchString)
         {
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("searchString", searchString);
-            var results = _clientHelper.CallAPIWithoutModel<List<Project>>(
-                "/api/Project/GetSearchData/", paramlist).Result.ToList();
-
-          
-            return results;
-
+            try
+            {
+                var paramlist = new Dictionary<string, string>();
+                paramlist.Add("searchString", searchString);
+                var results = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetSearchData/", paramlist).Result.ToList();
+                return results;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+                return null;
+            }
         }
         [Authorize]
         public IActionResult LoggedInUser()
