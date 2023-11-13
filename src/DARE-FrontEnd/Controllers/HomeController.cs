@@ -56,6 +56,13 @@ namespace DARE_FrontEnd.Controllers
 
             }
 
+
+            foreach (var Claim in User.Claims)
+            {
+                Log.Debug($"User has Claim {Claim.ToString()}");
+            }
+
+
             return View();
         }
 
