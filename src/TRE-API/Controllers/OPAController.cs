@@ -36,35 +36,26 @@ namespace OPA.Controllers
 
 
         [HttpGet("CheckUserAccess")]
-        public async Task<IActionResult> CheckUserAccess()
+        public async Task<bool> CheckUserAccess()
         {
             try
             {
-                var userName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-                var treData = _dareHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForTre").Result;
-            
+                //var userName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+                var userName = "PatriciaAkinkuade";
+                var treData = _DbContext.Projects.Where(x=> x.Decision == Decision.Undecided)
+                      .ToList();
                 DateTime today = DateTime.Today;
-                //if (expiryDate > today)
-                //{
-                //    expiryDate = DateTime.Now.AddMinutes(_opaSettings.ExpiryDelayMinutes);
-                //}
+               
                 bool hasAccess = await _opaService.CheckAccess(userName, today, treData);
                 if (hasAccess)
-                    if (hasAccess)
-                    {
-                        // Access allowed  return View();  
-
-                        // }else {Access denied
-
-                        // return RedirectToAction("AccessDenied");
-                    }
-
+                   
                 Log.Information("{Function} User Access Allowed", "CheckUserAccess");
-                return null;
+                return true ;
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "{Function} Crashed", "CheckUserAccess");
+                return false;
                 throw;
             }
 
