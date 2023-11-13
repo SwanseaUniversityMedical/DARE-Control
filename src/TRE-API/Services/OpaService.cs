@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Diagnostics.Eventing.Reader;
 using BL.Models;
 using BL.Models.ViewModels;
+using Newtonsoft.Json;
 
 namespace TRE_API.Services
 {
@@ -24,7 +25,9 @@ namespace TRE_API.Services
 
         public async Task<bool> CheckAccess(string userName, DateTime expiryDate, List<TreProject>? treData)
         {
-            DateTime today = DateTime.Today;
+     
+               
+                DateTime today = DateTime.Today;
             if (expiryDate > today)
             {
                 expiryDate = DateTime.Now.AddMinutes(_opaSettings.ExpiryDelayMinutes);
@@ -34,7 +37,29 @@ namespace TRE_API.Services
                 input = new { user = userName, expiryDate },
                 data = new { tre = treData }
             };
-            var response = await _httpClient.PostAsJsonAsync(_httpClient.BaseAddress, input);
+            //var queryString = $"input={JsonConvert.SerializeObject(input)}";
+            var inputData = new
+            {
+
+                userName = "PatriciaAkinkuade",
+
+                expiryDate = "2023-12-31T00:00:00Z",
+
+                treData = new { tre = treData },
+
+                time = "2023-11-13T12:34:56Z"
+
+            };
+            var settings = new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+
+
+            string jsonInput = JsonConvert.SerializeObject(inputData,settings);
+            var requestUri = $"http://localhost:8181/v1/data/app/checkaccess{jsonInput}";
+
+            var response = await _httpClient.GetAsync(requestUri);
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadAsAsync<Dictionary<string, object>>();
