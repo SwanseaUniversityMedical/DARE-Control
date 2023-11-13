@@ -24,46 +24,30 @@ namespace TRE_API.Services
         }
 
         public async Task<bool> CheckAccess(string userName, DateTime expiryDate, List<TreProject>? treData)
-        {
-     
-               
-                DateTime today = DateTime.Today;
+        {         
+            DateTime today = DateTime.Today;
             if (expiryDate > today)
             {
                 expiryDate = DateTime.Now.AddMinutes(_opaSettings.ExpiryDelayMinutes);
             }
-            var input = new
-            {
-                input = new { user = userName, expiryDate },
-                data = new { tre = treData }
-            };
-            //var queryString = $"input={JsonConvert.SerializeObject(input)}";
             var inputData = new
             {
-
-                userName = "PatriciaAkinkuade",
-
-                expiryDate = "2023-12-31T00:00:00Z",
-
+                userName = userName,
+                expiryDate = "2023-12-1T00:00:00Z",
                 treData = new { tre = treData },
-
-                time = "2023-11-13T12:34:56Z"
-
+                time = "2023-12-31T12:34:56Z"
             };
             var settings = new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
-
-
             string jsonInput = JsonConvert.SerializeObject(inputData,settings);
             var requestUri = $"http://localhost:8181/v1/data/app/checkaccess{jsonInput}";
 
             var response = await _httpClient.GetAsync(requestUri);
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadAsAsync<Dictionary<string, object>>();
-                return (bool)result["result"];
+                return true;
             }
             // Handle error cases/throwing new exception;
             return false;
