@@ -320,6 +320,9 @@ footer img:hover {
 table {
     width:100% !important;
 }
+caption {
+    display: none;
+}
 tbody, td, tfoot, th, thead, tr {
     border-color: rgba(208, 211, 212, 0.75) !important;
 }
@@ -352,6 +355,14 @@ table tr {
 .table-striped-columns > :not(caption) > tr > :nth-child(3n) {
     --bs-table-accent-bg: var(--bs-table-striped-bg);
     color: var(--bs-table-striped-color);
+}
+.page-link {
+    border-color: rgb(208, 211, 212);
+    border-width: 2px;
+}
+.page-item.active .page-link {
+    background-color: #475da7;
+    border-color: #475da7;
 }
 #submissionList tr td:last-child {
     text-align:center;
@@ -441,6 +452,38 @@ table tr {
         display: none;
     }
 }
+:root {
+    --lh: 1.4rem;
+}
+
+.desription-wrapper {
+    max-width: 100%;
+    line-height: var(--lh);
+}
+.description {
+    --max-lines: 3;
+    position: relative;
+    max-height: calc(var(--lh) * var(--max-lines));
+    overflow: hidden;
+    padding-right: 1rem;
+}
+
+    .description::before {
+        position: absolute;
+        content: "...";
+        bottom: 0;
+        right: 0;
+    }
+
+    .description::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        width: 1rem;
+        height: 1rem;
+        background: white;
+    }
+
 @media (min-width: 768px) {
     .navbar-expand-md .navbar-toggler {
         display: block;
