@@ -35,7 +35,7 @@ namespace TRE_API.Services
                 userName = userName,
                 expiryDate = "2023-12-1T00:00:00Z",
                 treData = new { tre = treData },
-                time = "2023-12-31T12:34:56Z"
+      
             };
             var settings = new JsonSerializerSettings
             {
