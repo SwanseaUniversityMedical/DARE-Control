@@ -75,7 +75,7 @@ namespace BL.Services
 
             if (!string.IsNullOrEmpty(bucketName))
             {
-                
+
 
                 try
                 {
@@ -116,39 +116,39 @@ namespace BL.Services
             try
             {
 
-           
-            var amazonS3Client = GenerateAmazonS3Client();
-            if (filePath != null)
-            {
-                using (var stream = new MemoryStream())
+
+                var amazonS3Client = GenerateAmazonS3Client();
+                if (filePath != null)
                 {
-                  
+                    using (var stream = new MemoryStream())
+                    {
+
 
                         await filePath.CopyToAsync(stream);
-                   
-                    var uploadRequest = new PutObjectRequest
-                    {
-                        BucketName = bucketName,
-                        Key = filePath.FileName,
-                        InputStream = stream, // outstream,
-                        ContentType = filePath.ContentType
-                    };
+
+                        var uploadRequest = new PutObjectRequest
+                        {
+                            BucketName = bucketName,
+                            Key = filePath.FileName,
+                            InputStream = stream, // outstream,
+                            ContentType = filePath.ContentType
+                        };
 
 
-                    var response = await amazonS3Client.PutObjectAsync(uploadRequest);
-                    if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                    {
-                        Log.Warning($"Successfully uploaded {objectName} to {bucketName}.");
-                        return true;
-                    }
-                    else
-                    {
-                        Log.Warning($"Could not upload {objectName} to {bucketName}.");
-                        return false;
+                        var response = await amazonS3Client.PutObjectAsync(uploadRequest);
+                        if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                        {
+                            Log.Warning($"Successfully uploaded {objectName} to {bucketName}.");
+                            return true;
+                        }
+                        else
+                        {
+                            Log.Warning($"Could not upload {objectName} to {bucketName}.");
+                            return false;
+                        }
                     }
                 }
-            }
-            return true;
+                return true;
             }
             catch (Exception e)
             {
@@ -273,7 +273,7 @@ namespace BL.Services
             }
             else
             {
-                await FetchAndStoreObject(FileInfo.Url,FileInfo.BucketName, FileInfo.Key);
+                await FetchAndStoreObject(FileInfo.Url, FileInfo.BucketName, FileInfo.Key);
                 return true;
             }
         }
@@ -311,23 +311,22 @@ namespace BL.Services
             var signer = new AWS4RequestSigner(_minioSettings.AccessKey, _minioSettings.SecretKey);
 
             var content = new StringContent(@"{
-            ""Version"": ""2012-10-17"",
-            ""Statement"": [
-                {
-                    ""Effect"": ""Allow"",
-                    ""Principal"": ""*"",
-                    ""Action"": [
-                        ""s3:GetObject"",
-                        ""s3:PutObject"",
-                        ""s3:ListBucket""
-                    ],
-                    ""Resource"": [
-                        ""arn:aws:s3:::" + bucketName + @"/*"",
-                        ""arn: aws:s3:::" + bucketName + @"
-                    ]
-                }
+    ""Version"": ""2012-10-17"",
+    ""Statement"": [
+        {
+            ""Effect"": ""Allow"",
+            ""Principal"": ""*"",
+            ""Action"": [
+                ""s3:GetObject"",
+                ""s3:PutObject"",
+                ""s3:ListBucket""
+            ],
+            ""Resource"": [
+                ""arn:aws:s3:::" + bucketName + @"/*""
             ]
-        }");
+        }
+    ]
+}");
 
             var request = new HttpRequestMessage
             {
@@ -348,7 +347,7 @@ namespace BL.Services
             return true;
         }
 
-        public async Task<bool> CopyObjectToDestination(string destinationBucketName,string destinationObjectKey, GetObjectResponse response)
+        public async Task<bool> CopyObjectToDestination(string destinationBucketName, string destinationObjectKey, GetObjectResponse response)
         {
             var amazonS3Client = GenerateAmazonS3Client();
 
@@ -361,7 +360,7 @@ namespace BL.Services
                 {
                     await responseStream.CopyToAsync(memoryStream);
                     string path = Path.Combine(@"c:\testing", destinationObjectKey);
-                    
+
                     PutObjectRequest putObjectRequest = new PutObjectRequest
                     {
                         BucketName = destinationBucketName,
@@ -385,7 +384,7 @@ namespace BL.Services
         {
             var amazonS3Client = GenerateAmazonS3Client();
 
-            
+
 
             GetObjectRequest getObjectRequest = new GetObjectRequest
             {
@@ -397,7 +396,7 @@ namespace BL.Services
 
             return getObjectResponse;
 
-            
+
         }
 
         public async Task<string> ShareMinioObject(string bucketName, string objectKey)
@@ -485,7 +484,7 @@ namespace BL.Services
                 ServiceURL = _minioSettings.Url, // replace http://localhost:9000 with URL of your MinIO server
                 ForcePathStyle = true, // MUST be true to work correctly with MinIO server
             };
-            
+
             if (_minioSettings.UesProxy)
             {
                 config.SetWebProxy(new System.Net.WebProxy
@@ -495,7 +494,7 @@ namespace BL.Services
                 });
             }
 
-        
+
             return config;
         }
 
