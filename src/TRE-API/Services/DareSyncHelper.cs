@@ -60,12 +60,17 @@ namespace TRE_API.Services
                     Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SyncSubmissionWithTre", submission);
                     submission = "";
                 }
+
+                await _minioTreHelper.BucketPolicySetPublic(submission);
+
                 var outputBucket = await _minioTreHelper.CreateBucket(output);
                 if (!outputBucket)
                 {
                     Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SyncSubmissionWithTre", output);
                     output = "";
                 }
+
+                await _minioTreHelper.BucketPolicySetPublic(output);
 
                 _DbContext.Projects.Add(new TreProject()
                 {
