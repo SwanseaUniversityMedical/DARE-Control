@@ -75,7 +75,7 @@ namespace DARE_FrontEnd.Controllers
                 if (results != null)
                 {
                     ViewBag.SearchResults = results;
-               
+                    ViewBag.SearchString = searchString;
                 }
                 else
                 {
