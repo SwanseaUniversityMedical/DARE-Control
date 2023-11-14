@@ -83,6 +83,8 @@ namespace Tre_Hasura
             DirectoryInfo directory = new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory()));
             var SubDirectory = directory.CreateSubdirectory("data");
             File.WriteAllText(Path.Combine(SubDirectory.ToString(), $"data_{DateTime.UtcNow.Ticks}.json"), data);
+        
+        
         }
 
 
