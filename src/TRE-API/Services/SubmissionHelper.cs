@@ -149,6 +149,7 @@ namespace TRE_API.Services
 
         public APIReturn? UpdateStatusForTre(string subId, StatusType statusType, string? description)
         {
+            Log.Information($"UpdateStatusForTre subId {subId} statusType {statusType} description {description} ");
             var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
                     new Dictionary<string, string>()
                         { { "subId", subId }, { "statusType", statusType.ToString() }, { "description", description } })
@@ -158,10 +159,12 @@ namespace TRE_API.Services
 
         public APIReturn? CloseSubmissionForTre(string subId, StatusType statusType, string? description, string? finalFile)
         {
+            Log.Information($"CloseSubmissionForTre subId {subId} statusType {statusType} description {description} finalFile {finalFile}");
             var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/CloseSubmissionForTre",
                     new Dictionary<string, string>()
                         { { "subId", subId }, { "statusType", statusType.ToString() }, { "description", description }, {"finalFile", finalFile} })
                 .Result;
+
             return result;
         }
 
@@ -209,6 +212,8 @@ namespace TRE_API.Services
                     Status = FileStatus.Undecided
                 });
             }
+
+            Log.Information($"FilesReadyForReview egsub.Files.Count {egsub.Files.Count} egsub.OutputBucket {egsub.OutputBucket} ");
             var boolResult = _dataEgressHelper.CallAPI<EgressSubmission, BoolReturn>("/api/DataEgress/AddNewDataEgress/", egsub).Result;
             return boolResult;
         }
