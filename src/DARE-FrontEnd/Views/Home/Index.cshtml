@@ -9,34 +9,12 @@
     ViewData["Title"] = "Home";
 }
 
-        @if (searchResults != null)
-        {
-            <h3>Search Results:</h3>
-            <ul>
-                @foreach (var project in searchResults)
-        {
-            <li><a href="@Url.Action("GetProject", "Project", new { id = project.Id })">@project.Name </a> </li>
-            <ul>
-    @foreach (var user in project.Users)
-    {
-                    <li><a href="@Url.Action("GetUser", "User", new { id = user.Id })">@user.Name </a></li>
-    }
-    </ul>
-            <ul>
-                @foreach (var tre in project.Tres)
-                {
-                    <li><a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })">@tre.Name</a></li>
-                }
-            </ul>
-         }
-            </ul>
-        }
-       
+        
     <div class="home-banner text-center">
         <h1 class="display-5 text-light">Safe &amp; Transparent Research</h1>
         <p class="text-light fs-6">Search and discover the types of research this trusted platform is enabling for public good.</p>
         <div class="col-xl-4 col-lg-6 col-md-8 mx-auto">
-            <form class="col-12 col-lg-auto mb-3 mb-lg-0" asp-controller="Home" asp-action="Index">
+            <form class="col-12 col-lg-auto mb-3 mb-lg-0" asp-controller="Home" asp-action="SearchView">
             <input type="search" class="form-control form-control-sm" name="searchString" value="" placeholder="Search..." aria-label="Search">      
         </form>
         </div>
