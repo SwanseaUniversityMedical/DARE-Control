@@ -67,7 +67,7 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpPost]
-        public IActionResult Index(string searchString)
+        public IActionResult SearchView(string searchString)
         {
             List<Project> results = SearchData(searchString);
 
@@ -75,6 +75,7 @@ namespace DARE_FrontEnd.Controllers
                 if (results != null)
                 {
                     ViewBag.SearchResults = results;
+               
                 }
                 else
                 {
@@ -83,6 +84,7 @@ namespace DARE_FrontEnd.Controllers
                 return View();
             }
         }
+
         //private helpers
         private List<Project> SearchData(string searchString)
         {
@@ -99,6 +101,8 @@ namespace DARE_FrontEnd.Controllers
                 return null;
             }
         }
+       
+
         [Authorize]
         public IActionResult LoggedInUser()
         {
