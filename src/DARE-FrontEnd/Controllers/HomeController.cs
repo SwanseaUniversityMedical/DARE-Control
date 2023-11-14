@@ -65,10 +65,6 @@ namespace DARE_FrontEnd.Controllers
 
             return View();
         }
-        //public IActionResult SearchView()
-        //{
-        //    return View();
-        //}
 
         [HttpPost]
         public IActionResult SearchView(string searchString)
@@ -80,7 +76,6 @@ namespace DARE_FrontEnd.Controllers
                 {
                     ViewBag.SearchResults = results;
                
-
                 }
                 else
                 {
@@ -89,6 +84,7 @@ namespace DARE_FrontEnd.Controllers
                 return View();
             }
         }
+
         //private helpers
         private List<Project> SearchData(string searchString)
         {
