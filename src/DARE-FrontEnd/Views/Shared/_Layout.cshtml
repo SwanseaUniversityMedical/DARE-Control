@@ -62,11 +62,15 @@
                 </div>
                 <div class=" align-items-center">
                     @*Implement at later time*@
-                    @*
-                    <form class="me-3 d-none d-lg-block" asp-controller="Home" asp-action="Index">
-                    <input type="search" class="form-control form-control-sm" name="SearchString" value="@ViewData["CurrentFilter"]" placeholder="Search..." aria-label="Search">
+
+                    <form class="me-3 d-none d-lg-block" asp-controller="Home" asp-action="SearchView">
+                        <input type="search" class="form-control form-control-sm" name="searchString" value="" placeholder="Search..." aria-label="Search">
+
                     </form>
-                    *@
+@*                    <form class="me-3 d-none d-lg-block" asp-controller="Home" asp-action="Index">
+                    <input type="search" class="form-control form-control-sm" name="SearchString" value="@ViewData["CurrentFilter"]" placeholder="Search..." aria-label="Search">
+                    </form>*@
+                    
                     @if (User.IsInRole("dare-control-admin"))
                     {
                         <div class="nav-item dropdown">
