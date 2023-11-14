@@ -79,7 +79,12 @@ namespace Tre_Hasura
             Console.WriteLine("Proxy > " + Proxy);
             
             var data = await RunQuery(Token, Query, URL, Proxy);
-            File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), $"data_{DateTime.UtcNow.Ticks}.json"), data);
+
+            DirectoryInfo directory = new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory()));
+            var SubDirectory = directory.CreateSubdirectory("data");
+            File.WriteAllText(Path.Combine(SubDirectory.ToString(), $"data_{DateTime.UtcNow.Ticks}.json"), data);
+        
+        
         }
 
 
