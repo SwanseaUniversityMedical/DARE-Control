@@ -493,11 +493,15 @@ table tr {
         flex-basis: auto;
     }
     .navbar-expand-md .navbar-collapse.show {
-        display: flex !important;
+        display: block !important;
         flex-basis: 100%;
     }
     .navbar-expand-md .navbar-nav {
         flex-direction: column;
+    }
+    .navbar-expand-md {
+        flex-wrap: wrap;
+        justify-content: flex-start;
     }
 }
 @media (min-width: 880px) {
