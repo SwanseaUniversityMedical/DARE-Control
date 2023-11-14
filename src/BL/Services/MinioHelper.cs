@@ -304,6 +304,43 @@ namespace BL.Services
             return true;
         }
 
+
+        public async Task<bool> BucketPolicySetPublic(string bucketName)
+        {
+
+            var signer = new AWS4RequestSigner(_minioSettings.AccessKey, _minioSettings.SecretKey);
+
+            var content = new StringContent(@"{
+                ""Version"": ""2012-10-17"",
+                ""Statement"": [
+                    {
+                        ""Effect"": ""Allow"",
+                        ""Principal"": ""*"",
+                        ""Action"": ""s3:GetObject"",
+                        ""Resource"": ""arn:aws:s3:::" + bucketName + @"/*""
+                    }
+                ]
+            }");
+
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Put,
+                RequestUri = new Uri(_minioSettings.Url + "/minio/admin/v3/add-canned-policy?name=" + bucketName + "_policy"),
+                Content = content
+            };
+
+            request = await signer.Sign(request, _minioSettings.AWSService, _minioSettings.AWSRegion);
+            var client = new HttpClient();
+            var response = await client.SendAsync(request);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public async Task<bool> CopyObjectToDestination(string destinationBucketName,string destinationObjectKey, GetObjectResponse response)
         {
             var amazonS3Client = GenerateAmazonS3Client();
