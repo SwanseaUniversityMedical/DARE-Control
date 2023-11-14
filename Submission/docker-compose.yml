@@ -12,7 +12,7 @@ services:
       - submission-api
 
   submission-api:
-    image: harbor.ukserp.ac.uk/dare-trefx/control-main-api:1.110.1
+    image: harbor.ukserp.ac.uk/dare-trefx/control-main-api:1.110.3
     container_name: submission-api
     environment:
       ConnectionStrings__DefaultConnection: Server=postgres;Port=5432;Database=DARE-Control;Include Error Detail=true;User Id=${PGLOGIN};Password=${PGPASSWORD};
