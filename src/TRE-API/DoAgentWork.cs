@@ -377,8 +377,8 @@ namespace TRE_API
                             Log.Information($"  status.state == \"COMPLETE\" || status.state == \"EXECUTOR_ERROR\" ");
 
                             ClearJob(taskID);
-
-                            var data = await _minioTreHelper.GetFilesInBucket(outputBucket.Replace(_AgentSettings.TESKOutputBucketPrefix, ""));
+                            var outputBucketGood = outputBucket.Replace(_AgentSettings.TESKOutputBucketPrefix, "");
+                            var data = await _minioTreHelper.GetFilesInBucket(outputBucketGood);
                             var files = new List<string>();
 
                             foreach (var s3Object in data.S3Objects) //TODO is this right?
@@ -392,7 +392,7 @@ namespace TRE_API
                             {
                                 SubId = taskID, //TODO is this right  
                                 Files = files
-                            });
+                            }, outputBucketGood);
 
                         }
                     }
