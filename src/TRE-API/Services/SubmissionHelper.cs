@@ -31,7 +31,7 @@ namespace TRE_API.Services
         OutputBucketInfo GetOutputBucketGuts(string subId, bool hostnameonly);
         APIReturn? CloseSubmissionForTre(string subId, StatusType statusType, string? description, string? finalFile);
 
-        BoolReturn FilesReadyForReview(ReviewFiles review);
+        BoolReturn FilesReadyForReview(ReviewFiles review, string Bucketname);
     }
     public class SubmissionHelper: ISubmissionHelper
     {
@@ -202,13 +202,12 @@ namespace TRE_API.Services
             return result;
         }
 
-        public BoolReturn FilesReadyForReview(ReviewFiles review)
+        public BoolReturn FilesReadyForReview(ReviewFiles review, string Bucketname)
         {
-            var bucket = GetOutputBucketGuts(review.SubId, false);
             var egsub = new EgressSubmission()
             {
                 SubmissionId = review.SubId,
-                OutputBucket = bucket.Bucket,
+                OutputBucket = Bucketname,
                 Status = EgressStatus.NotCompleted,
                 Files = new List<EgressFile>()
             };
