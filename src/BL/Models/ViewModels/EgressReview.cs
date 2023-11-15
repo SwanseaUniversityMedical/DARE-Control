@@ -10,6 +10,8 @@ namespace BL.Models.ViewModels
     {
         public string SubId { get; set; }
         public List<EgressResult> FileResults { get; set; }
+
+        public string OutputBucket { get; set; }
     }
 
     public class EgressResult

@@ -223,7 +223,8 @@ namespace Data_Egress_API.Controllers
             var backtotre = new EgressReview()
             {
                 SubId = dbegress.SubmissionId,
-                FileResults = new List<EgressResult>()
+                FileResults = new List<EgressResult>(),
+                OutputBucket = dbegress.OutputBucket
             };
             foreach (var file in egress.Files)
             {
