@@ -296,6 +296,7 @@ namespace TRE_API.Controllers
                     Log.Error(ex.ToString());
                 }
 
+
                 return StatusCode(200, new BoolReturn() { Result = true });
             }
             catch (Exception ex)
