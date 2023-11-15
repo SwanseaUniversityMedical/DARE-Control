@@ -31,7 +31,7 @@ namespace TRE_API.Services
         OutputBucketInfo GetOutputBucketGuts(string subId, bool hostnameonly);
         APIReturn? CloseSubmissionForTre(string subId, StatusType statusType, string? description, string? finalFile);
 
-        BoolReturn FilesReadyForReview(ReviewFiles review, string Bucketname)
+        BoolReturn FilesReadyForReview(ReviewFiles review, string Bucketname);
     }
     public class SubmissionHelper: ISubmissionHelper
     {
