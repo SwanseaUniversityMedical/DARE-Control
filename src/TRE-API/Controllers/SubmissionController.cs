@@ -283,10 +283,18 @@ namespace TRE_API.Controllers
                     _subHelper.UpdateStatusForTre(review.SubId, StatusType.RequestingHutchDoesFinalPackaging, "");
                 }
                 
-                //Not sure what the return type is
-                var HUTCHres =
-                    await _hutchHelper.CallAPI<ApprovalResult, APIReturn>($"/api/jobs/{review.SubId}/approval",
-                        hutchPayload);
+                try
+                {
+                    //Not sure what the return type is
+                    var HUTCHres =
+                        await _hutchHelper.CallAPI<ApprovalResult, APIReturn>($"/api/jobs/{review.SubId}/approval",
+                            hutchPayload);
+
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
 
                 return StatusCode(200, new BoolReturn() { Result = true });
             }
