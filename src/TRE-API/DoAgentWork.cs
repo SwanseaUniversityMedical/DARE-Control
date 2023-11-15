@@ -378,7 +378,7 @@ namespace TRE_API
 
                             ClearJob(taskID);
 
-                            var data = await _minioTreHelper.GetFilesInBucket(outputBucket);
+                            var data = await _minioTreHelper.GetFilesInBucket(outputBucket.Replace(_AgentSettings.TESKOutputBucketPrefix, ""));
                             var files = new List<string>();
 
                             foreach (var s3Object in data.S3Objects) //TODO is this right?
