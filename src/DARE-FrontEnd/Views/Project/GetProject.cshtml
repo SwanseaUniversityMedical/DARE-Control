@@ -65,8 +65,8 @@
                             @Model.ProjectDescription
                         </p>
                         <p class="text-muted fs-7">
-                            Project Start Date: @Model.StartDate <br />
-                            Project End Date: @Model.EndDate
+                            Project Start Date: @Model.StartDate.ToString("dd/MM/yyyy") <br />
+                            Project End Date: @Model.EndDate.ToString("dd/MM/yyyy")
                         </p>
                         <p>
                             Submission Bucket: <a href="#insertreallink">@Html.Raw(Model.SubmissionBucket)</a><br />
