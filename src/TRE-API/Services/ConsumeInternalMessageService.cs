@@ -67,6 +67,7 @@ namespace TRE_API.Services
         {
             try
             {
+
                 var outcome = message.Body;
                 var submission = _dareHelper
                     .CallAPIWithoutModel<Submission>($"/api/Submission/GetASubmission/{outcome.SubId}")
