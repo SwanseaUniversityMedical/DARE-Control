@@ -78,10 +78,8 @@ namespace TRE_API.Services
         {
             try
             {
-                var paramlist = new Dictionary<string, string>();
-                paramlist.Add("submissionId", subId.ToString());
                 var submission = _dareHelper
-                    .CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist)
+                    .CallAPIWithoutModel<Submission>($"/api/Submission/GetASubmission/{subId}")
                     .Result;
 
                 var bucket = _dbContext.Projects
