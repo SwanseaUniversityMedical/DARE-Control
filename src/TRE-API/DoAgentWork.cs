@@ -390,7 +390,7 @@ namespace TRE_API
                             Log.Information($"  FilesReadyForReview files {files.Count} ");
                             _subHelper.FilesReadyForReview(new ReviewFiles()
                             {
-                                SubId = taskID, //TODO is this right  
+                                SubId = subId.ToString(), 
                                 Files = files
                             }, outputBucketGood);
 
