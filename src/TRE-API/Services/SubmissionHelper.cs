@@ -149,12 +149,21 @@ namespace TRE_API.Services
 
         public APIReturn? UpdateStatusForTre(string subId, StatusType statusType, string? description)
         {
-            Log.Information($"UpdateStatusForTre subId {subId} statusType {statusType} description {description} ");
-            var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-                    new Dictionary<string, string>()
-                        { { "subId", subId }, { "statusType", statusType.ToString() }, { "description", description } })
-                .Result;
-            return result;
+            try
+            {
+                Log.Information($"UpdateStatusForTre subId {subId} statusType {statusType} description {description} ");
+                var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
+                        new Dictionary<string, string>()
+                            { { "subId", subId }, { "statusType", statusType.ToString() }, { "description", description } })
+                    .Result;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+                return null;
+            }
+           
         }
 
         public APIReturn? CloseSubmissionForTre(string subId, StatusType statusType, string? description, string? finalFile)
