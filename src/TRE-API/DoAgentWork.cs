@@ -332,23 +332,28 @@ namespace TRE_API
                                     
                                     Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
                                     Log.Information("{Function} *** COMPLETE remove Token *** {Token} ", "CheckTESK", Token);
+                                    
                                     if (Token != null)
                                     {
                                         _dbContext.TokensToExpire.Remove(Token);
                                         _hasuraAuthenticationService.ExpirerToken(Token.Token);
                                     }
+                                    
                                     _dbContext.SaveChanges();
                                     break;
                                 case "EXECUTOR_ERROR":
                                     statusMessage = StatusType.Cancelled;
                                     Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
                                     Log.Information("{Function} *** EXECUTOR_ERROR remove Token *** {Token} ", "CheckTESK", Token);
+                                    
                                     if (Token != null)
                                     {
                                         _dbContext.TokensToExpire.Remove(Token);
                                         _hasuraAuthenticationService.ExpirerToken(Token.Token);
                                     }
+                                    
                                     _dbContext.SaveChanges();
+
                                     break;
                             }
 

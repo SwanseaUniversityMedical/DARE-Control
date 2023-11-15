@@ -22,7 +22,11 @@ namespace BL.Services
 
         Task<ListObjectsV2Response> GetFilesInBucket(string bucketName);
 
+
         Task<bool> SetPublicPolicy(string bucketName);
+
+        Task<bool> BucketPolicySetPublic(string bucketName);
+
 
     }
 }

@@ -56,11 +56,18 @@ namespace DARE_FrontEnd.Controllers
 
             }
 
+
+            foreach (var Claim in User.Claims)
+            {
+                Log.Debug($"User has Claim {Claim.ToString()}");
+            }
+
+
             return View();
         }
 
         [HttpPost]
-        public IActionResult Index(string searchString)
+        public IActionResult SearchView(string searchString)
         {
             List<Project> results = SearchData(searchString);
 
@@ -68,6 +75,7 @@ namespace DARE_FrontEnd.Controllers
                 if (results != null)
                 {
                     ViewBag.SearchResults = results;
+                    ViewBag.SearchString = searchString;
                 }
                 else
                 {
@@ -76,18 +84,25 @@ namespace DARE_FrontEnd.Controllers
                 return View();
             }
         }
+
         //private helpers
         private List<Project> SearchData(string searchString)
         {
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("searchString", searchString);
-            var results = _clientHelper.CallAPIWithoutModel<List<Project>>(
-                "/api/Project/GetSearchData/", paramlist).Result.ToList();
-
-          
-            return results;
-
+            try
+            {
+                var paramlist = new Dictionary<string, string>();
+                paramlist.Add("searchString", searchString);
+                var results = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetSearchData/", paramlist).Result.ToList();
+                return results;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+                return null;
+            }
         }
+       
+
         [Authorize]
         public IActionResult LoggedInUser()
         {

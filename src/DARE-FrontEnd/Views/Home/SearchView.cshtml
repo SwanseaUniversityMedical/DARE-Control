@@ -1,0 +1,59 @@
+﻿
+@{
+    var searchResults = @ViewBag.SearchResults;
+    var searchString = @ViewBag.SearchString;
+
+    ViewData["Title"] = "Home";
+}
+@if (searchResults != null)
+{
+    <h2>Results:</h2>
+
+    <h3>Search Results for: @searchString.ToString()</h3>
+    @*<ul>
+        @foreach (var project in searchResults)
+        {
+            <li><a href="@Url.Action("GetProject", "Project", new { id = project.Id })">@project.Name </a> </li>
+            <ul>
+                @foreach (var user in project.Users)
+                {
+                    <li><a href="@Url.Action("GetUser", "User", new { id = user.Id })">@user.Name </a></li>
+                }
+            </ul>
+            <ul>
+                @foreach (var tre in project.Tres)
+                {
+                    <li><a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })">@tre.Name</a></li>
+                }
+            </ul>
+        }
+    </ul>*@
+    <ul>
+        @foreach (var project in searchResults)
+        {
+            <li><a href="@Url.Action("GetProject", "Project", new { id = project.Id })">Project: @project.Name </a> </li>
+            <ul>
+                @foreach (var user in project.Users)
+                {
+                    <li><a href="@Url.Action("GetUser", "User", new { id = user.Id })">User: @user.Name </a></li>
+                }
+            </ul>
+            <ul>
+                @foreach (var tre in project.Tres)
+                {
+                    
+                    <li><a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })">Tres: @tre.Name</a></li>
+                }
+            </ul>
+                <ul>
+                @foreach (var submissions in project.Submissions)
+                    {
+                        if(submissions.Parent == null)
+                    {
+                        <li><a href="@Url.Action("GetATre", "Tre", new { id = submissions.Id })">Submissions: @submissions.TesName</a></li>
+                    }
+                    }
+                </ul>
+        }
+    </ul>
+}

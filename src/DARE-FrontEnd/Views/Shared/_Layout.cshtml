@@ -25,17 +25,19 @@
     <header>
         <nav class="autohide navbar navbar-expand-md navbar-toggleable-md navbar-light bg-white box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand me-5 fw-bold" asp-area="" asp-controller="Home" asp-action="Index">TRE FX</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span id="nav-icon3" class="navbar-toggler-icon">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </span>
-                </button>
-                <div class="navbar-collapse collapse d-md-inline-flex justify-content-between">
+                <div class="d-flex align-items-center">
+                    <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <span id="nav-icon3" class="navbar-toggler-icon">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </span>
+                    </button>
+                    <a class="navbar-brand me-sm-5 me-2 fw-bold" asp-area="" asp-controller="Home" asp-action="Index">TRE FX</a>
+                </div>
+                <div class="navbar-collapse collapse">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="LoggedInUser">Home</a>
@@ -56,23 +58,18 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="NewTokenIssue">API Access Token</a>
                         </li>
-                        <li class="mobile-account-nav">
-                            <hr class="mobile-account-nav dropdown-divider" />
-                        </li>
-                        <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="http://keycloak-dev:8080/auth/">Account</a></li>
-                        <li class="mobile-account-nav nav-item"><a class="nav-link text-dark" href="https://jira.hiru.swan.ac.uk/servicedesk/customer/portal/6">Helpdesk</a></li>
-                        <li class="mobile-account-nav nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
-                        </li>
                     </ul>
                 </div>
-                <div class="account-nav align-items-center">
-                    @*Implement at later time*@
-                    @*
-                    <form class="me-3 d-none d-lg-block" asp-controller="Home" asp-action="Index">
-                    <input type="search" class="form-control form-control-sm" name="SearchString" value="@ViewData["CurrentFilter"]" placeholder="Search..." aria-label="Search">
+                
+                <div class="d-flex align-items-center">
+                    <div class="d-lg-none d-md-block">
+                        <a class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" id="showModalSearch">
+                            <span></span>
+                        </a>
+                    </div>
+                    <form class="me-3 d-none d-lg-block" asp-controller="Home" asp-action="SearchView">
+                        <input type="search" class="form-control form-control-sm" name="searchString" value="" placeholder="Search..." aria-label="Search">
                     </form>
-                    *@
                     @if (User.IsInRole("dare-control-admin"))
                     {
                         <div class="nav-item dropdown">
