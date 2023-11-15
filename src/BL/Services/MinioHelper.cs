@@ -60,11 +60,11 @@ namespace BL.Services
             }
             catch (MinioException e)
             {
-                Log.Warning("Create bucket: {bucketName}, failed due to Minio exception: {message}", bucketName, e.Message);
+                Log.Warning("GetFilesInBucket: {bucketName}, failed due to Minio exception: {message}", bucketName, e.Message);
             }
             catch (Exception ex)
             {
-                Log.Warning("Create bucket: {bucketName}, failed due to Exception: {message}", bucketName, ex.Message);
+                Log.Warning("GetFilesInBucket: {bucketName}, failed due to Exception: {message}", bucketName, ex.Message);
             }
 
             return null;
