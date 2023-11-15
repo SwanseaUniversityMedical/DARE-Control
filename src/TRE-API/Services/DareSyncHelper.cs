@@ -61,7 +61,7 @@ namespace TRE_API.Services
                     submission = "";
                 }
 
-                await _minioTreHelper.BucketPolicySetPublic(submission);
+                await _minioTreHelper.SetPublicPolicy(submission);
 
                 var outputBucket = await _minioTreHelper.CreateBucket(output);
                 if (!outputBucket)
@@ -70,7 +70,7 @@ namespace TRE_API.Services
                     output = "";
                 }
 
-                await _minioTreHelper.BucketPolicySetPublic(output);
+                await _minioTreHelper.SetPublicPolicy(output);
 
                 _DbContext.Projects.Add(new TreProject()
                 {
