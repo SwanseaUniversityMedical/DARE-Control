@@ -32,6 +32,8 @@ namespace TRE_API.Services
         APIReturn? CloseSubmissionForTre(string subId, StatusType statusType, string? description, string? finalFile);
 
         BoolReturn FilesReadyForReview(ReviewFiles review, string Bucketname);
+
+        OutputBucketInfo GetOutputBucketGutsSub(string subId, bool hostnameonly);
     }
     public class SubmissionHelper: ISubmissionHelper
     {
@@ -72,6 +74,37 @@ namespace TRE_API.Services
             _dataEgressHelper = dataEgressHelper;
             _minioTreHelper = minioTreHelper;
 
+        }
+        public OutputBucketInfo GetOutputBucketGutsSub(string subId, bool hostnameonly)
+        {
+            try
+            {
+                var submission = _dareHelper
+                    .CallAPIWithoutModel<Submission>($"/api/Submission/GetASubmission/{subId}")
+                    .Result;
+
+
+                var bucket = _dbContext.Projects
+                    .Where(x => x.SubmissionProjectId == submission.Project.Id)
+                    .Select(x => x.OutputBucketSub);
+
+                var outputBucket = bucket.FirstOrDefault();
+
+                bool secure = !_minioTreSettings.Url.ToLower().StartsWith("http://");
+                return new OutputBucketInfo()
+                {
+                    Bucket = outputBucket ?? "",
+                    SubId = submission.Id.ToString(),
+                    Path = "sub" + subId + "/",
+                    Secure = secure,
+                    Host = hostnameonly ? _minioTreSettings.Url.Replace("https://", "").Replace("http://", "") : _minioTreSettings.Url
+                };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetOutputBucketGuts");
+                throw;
+            }
         }
 
         public OutputBucketInfo GetOutputBucketGuts(string subId, bool hostnameonly)
