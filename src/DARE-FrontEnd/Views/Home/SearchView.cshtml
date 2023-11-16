@@ -5,7 +5,7 @@
 
     ViewData["Title"] = "Home";
 }
-@if (searchResults != null)
+@if (searchResults != null && searchString != null)
 {
     <h2>Results:</h2>
 
@@ -57,3 +57,11 @@
         }
     </ul>
 }
+else
+
+    
+    {
+        <h2>Results:</h2>
+
+        <h3>No results for this Query</h3>
+    }
