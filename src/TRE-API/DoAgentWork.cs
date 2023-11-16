@@ -206,7 +206,8 @@ namespace TRE_API
             using (var httpClient = new HttpClient(handler))
             {
                 // Define the URL for the POST request
-                string apiUrl = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks";
+                string apiUrl = _AgentSettings.TESKAPIURL;
+
 
                 // Create a HttpRequestMessage with the HTTP method set to POST
                 var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
