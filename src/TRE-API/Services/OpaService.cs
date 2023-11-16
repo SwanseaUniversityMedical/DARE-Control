@@ -20,18 +20,13 @@ namespace TRE_API.Services
         {
             _httpClient = new HttpClient();
             //_httpClient.BaseAddress = new Uri(_opaSettings.OPAUrl);
-            _httpClient.BaseAddress = new System.Uri("http://localhost:8181/v1/policies/checkaccess");
+            _httpClient.BaseAddress = new System.Uri("http://localhost:8181/v1/data/app/checkaccess");
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         public async Task<bool> CheckAccess(string userName, DateTime expiryDate, List<TreProject>? treData)
-        {         
-            DateTime today = DateTime.Today;
-            if (expiryDate > today)
-            {
-                expiryDate = DateTime.Now.AddMinutes(_opaSettings.ExpiryDelayMinutes);
-            }
+        {           
             var inputData = new
             {
                 userName = userName,

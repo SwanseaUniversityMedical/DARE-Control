@@ -28,12 +28,14 @@ namespace OPA.Controllers
         private readonly ApplicationDbContext _DbContext;
         private readonly IDareClientWithoutTokenHelper _dareHelper;
         private readonly OpaService _opaService;
-        public OPAController(IDareClientWithoutTokenHelper helper, ApplicationDbContext applicationDbContext, OpaService opaservice)
+        private readonly OPASettings _opaSettings;
+        public OPAController(IDareClientWithoutTokenHelper helper, ApplicationDbContext applicationDbContext, OpaService opaservice, OPASettings opasettings)
         {
             _dareHelper = helper;
             _DbContext = applicationDbContext;
             _opaService = opaservice;
-        }
+         _opaSettings = opasettings;
+    }
 
 
         [HttpGet("CheckUserAccess")]
@@ -42,11 +44,25 @@ namespace OPA.Controllers
             try
             {
                 //var userName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-                var userName = "PatriciaAkinkuade";
-                var treData = _DbContext.Projects.Where(x=> x.Decision == Decision.Undecided)
-                      .ToList();
+                var userName = "test";
+                var treData = _DbContext.Projects.Where(x => x.Decision == Decision.Undecided).ToList();
+              
+                //update ProjectExpiryDate if greater than today
+
                 DateTime today = DateTime.Today;
-               
+                var resultList = new List<TreProject>();
+                foreach (var project in treData)
+                {
+                    var dbproject = _DbContext.Projects.FirstOrDefault(x => x.Id == project.Id);
+
+                    if (project.ProjectExpiryDate > today)
+                    {
+                        dbproject.ProjectExpiryDate = DateTime.Now.AddMinutes(_opaSettings.ExpiryDelayMinutes);
+                        resultList.Add(dbproject);
+                    }
+                   
+                    await _DbContext.SaveChangesAsync();
+                }                          
                 bool hasAccess = await _opaService.CheckAccess(userName, today, treData);
                 if (hasAccess)
                 {
