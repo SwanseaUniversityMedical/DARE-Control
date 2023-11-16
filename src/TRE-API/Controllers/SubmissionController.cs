@@ -229,9 +229,7 @@ namespace TRE_API.Controllers
         public async Task<IActionResult> EgressResults([FromBody] EgressReview review)
         {
             try
-            {
-
-               
+            {  
                 Dictionary<string, bool> hutchRes = new Dictionary<string, bool>();
                 ApprovalType approvalStatus;
                 var approvedCount = review.FileResults.Count(x => x.Approved);
@@ -269,7 +267,7 @@ namespace TRE_API.Controllers
                     _subHelper.UpdateStatusForTre(review.SubId.ToString(), StatusType.DataOutApproved, "");
                 }
                 bool secure = !_minioTreSettings.Url.ToLower().StartsWith("http://");
-                var bucket = _subHelper.GetOutputBucketGuts(review.SubId, true);
+                var bucket = _subHelper.GetOutputBucketGutsSub(review.SubId, true);
                 ApprovalResult hutchPayload = new ApprovalResult()
                 {
                     Host = _minioTreSettings.Url.Replace("https://", "").Replace("http://", ""),
@@ -294,8 +292,10 @@ namespace TRE_API.Controllers
                 }
                 else
                 {
+                    Log.Information($"EgressResults with review.OutputBucket > {review.OutputBucket} bucket.Bucket > {bucket.Bucket} ");
                     foreach (var File in review.FileResults)
                     {
+                        Log.Information($"EgressResults with File.Approved > {File.Approved} File.FileName > {File.FileName} ");
                         if (File.Approved)
                         {
                             var source = _minioTreHelper.GetCopyObject(review.OutputBucket, File.FileName);
