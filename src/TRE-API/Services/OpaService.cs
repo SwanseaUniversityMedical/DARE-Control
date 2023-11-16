@@ -7,6 +7,8 @@ using System.Diagnostics.Eventing.Reader;
 using BL.Models;
 using BL.Models.ViewModels;
 using Newtonsoft.Json;
+using System.Text;
+using System.Linq;
 
 namespace TRE_API.Services
 {
@@ -33,7 +35,7 @@ namespace TRE_API.Services
             var inputData = new
             {
                 userName = userName,
-                expiryDate = "2023-12-1T00:00:00Z",
+        
                 treData = new { tre = treData },
       
             };
@@ -42,10 +44,13 @@ namespace TRE_API.Services
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
             string jsonInput = JsonConvert.SerializeObject(inputData,settings);
-            var requestUri = $"http://localhost:8181/v1/data/app/checkaccess{jsonInput}";
-
-            var response = await _httpClient.GetAsync(requestUri);
-            if (response.IsSuccessStatusCode)
+            var content = new StringContent(jsonInput, Encoding.UTF8, "application/json");
+            var requestUri = $"http://localhost:8181/v1/data/app/checkaccess";
+         ;
+            var response = await _httpClient.PostAsync(requestUri,content);
+            var resultjson = await response.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject(resultjson);
+            if (resultjson.Contains("true"))
             {
                 return true;
             }

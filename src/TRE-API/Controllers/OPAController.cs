@@ -14,6 +14,7 @@ using BL.Models.Tes;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Threading;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 
 namespace OPA.Controllers
 {
@@ -48,9 +49,15 @@ namespace OPA.Controllers
                
                 bool hasAccess = await _opaService.CheckAccess(userName, today, treData);
                 if (hasAccess)
-                   
-                Log.Information("{Function} User Access Allowed", "CheckUserAccess");
-                return true ;
+                {
+                    Log.Information("{Function} User Access Allowed", "CheckUserAccess");
+                    return true;
+                }
+                else
+                {
+                    Log.Information("{Function} User Access Denied", "CheckUserAccess");
+                    return false;
+                }
             }
             catch (Exception ex)
             {
