@@ -59,14 +59,22 @@
                         {
                             <a href="@Url.Action("SaveProjectForm", "Project",new{Projectid=@Model.Id})" class="btn btn-sm btn-primary mb-3">Edit</a>
                         }
-                        <p>Project Lead:</p>
-                        <p>Project Contact:</p>
-                        <p>
-                            @Model.ProjectDescription
-                        </p>
+                        <p>Project Lead: @Model.ProjectOwner</p>
+                        <p>Project Contact: @Model.ProjectContact</p>
+                        @{
+                            if (Model.ProjectDescription == null || Model.ProjectDescription == "")
+                            {
+                            }
+                            else
+                            {
+                                <p>
+                                    Project Description: @Model.ProjectDescription
+                                </p>
+                            }
+                        }
                         <p class="text-muted fs-7">
-                            Last Updated: @Model.StartDate <br />
-                            Project End Date: @Model.EndDate
+                            Project Start Date: @Model.StartDate.ToString("dd/MM/yyyy") <br />
+                            Project End Date: @Model.EndDate.ToString("dd/MM/yyyy")
                         </p>
                         <p>
                             Submission Bucket: <a href="#insertreallink">@Html.Raw(Model.SubmissionBucket)</a><br />

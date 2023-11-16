@@ -59,11 +59,20 @@
                                 @*                            <p class="my-4">
                                 @Html.Raw(project.Display?.Replace("\n","<br/>"))
                                 </p>*@
-                                <p class="my-4">
-                                    @project.ProjectDescription
-                                </p>
+                                    @{
+                                        if (project.ProjectDescription == null || project.ProjectDescription == "")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            <p class="my-4">
+                                                @project.ProjectDescription
+                                            </p>
+                                        }
+                                    }
+
                                 <p class="text-muted fs-7 mb-0">
-                                    Last Updated: @project.StartDate <span class="mx-2"></span>End Date: @project.EndDate
+                                        Start Date: @project.StartDate.ToString("dd/MM/yyyy") <span class="mx-2"></span>End Date: @project.EndDate.ToString("dd/MM/yyyy")
                                 </p>
                             </td>
                         </tr>

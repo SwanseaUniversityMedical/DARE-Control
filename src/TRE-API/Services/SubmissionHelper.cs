@@ -31,7 +31,7 @@ namespace TRE_API.Services
         OutputBucketInfo GetOutputBucketGuts(string subId, bool hostnameonly);
         APIReturn? CloseSubmissionForTre(string subId, StatusType statusType, string? description, string? finalFile);
 
-        BoolReturn FilesReadyForReview(ReviewFiles review);
+        BoolReturn FilesReadyForReview(ReviewFiles review, string Bucketname);
     }
     public class SubmissionHelper: ISubmissionHelper
     {
@@ -78,10 +78,8 @@ namespace TRE_API.Services
         {
             try
             {
-                var paramlist = new Dictionary<string, string>();
-                paramlist.Add("submissionId", subId.ToString());
                 var submission = _dareHelper
-                    .CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist)
+                    .CallAPIWithoutModel<Submission>($"/api/Submission/GetASubmission/{subId}")
                     .Result;
 
                 var bucket = _dbContext.Projects
@@ -149,12 +147,21 @@ namespace TRE_API.Services
 
         public APIReturn? UpdateStatusForTre(string subId, StatusType statusType, string? description)
         {
-            Log.Information($"UpdateStatusForTre subId {subId} statusType {statusType} description {description} ");
-            var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
-                    new Dictionary<string, string>()
-                        { { "subId", subId }, { "statusType", statusType.ToString() }, { "description", description } })
-                .Result;
-            return result;
+            try
+            {
+                Log.Information($"UpdateStatusForTre subId {subId} statusType {statusType} description {description} ");
+                var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
+                        new Dictionary<string, string>()
+                            { { "subId", subId }, { "statusType", statusType.ToString() }, { "description", description } })
+                    .Result;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+                return null;
+            }
+           
         }
 
         public APIReturn? CloseSubmissionForTre(string subId, StatusType statusType, string? description, string? finalFile)
@@ -193,13 +200,12 @@ namespace TRE_API.Services
             return result;
         }
 
-        public BoolReturn FilesReadyForReview(ReviewFiles review)
+        public BoolReturn FilesReadyForReview(ReviewFiles review, string Bucketname)
         {
-            var bucket = GetOutputBucketGuts(review.SubId, false);
             var egsub = new EgressSubmission()
             {
                 SubmissionId = review.SubId,
-                OutputBucket = bucket.Bucket,
+                OutputBucket = Bucketname,
                 Status = EgressStatus.NotCompleted,
                 Files = new List<EgressFile>()
             };
