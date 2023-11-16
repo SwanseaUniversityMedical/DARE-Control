@@ -79,7 +79,7 @@ namespace TRE_API.Services
                     Description = project.ProjectDescription,
                     SubmissionBucketTre = submission,
                     OutputBucketTre = output,
-
+                    OutputBucketSub = project.OutputBucket.ToLower()
                 });
             }
 
