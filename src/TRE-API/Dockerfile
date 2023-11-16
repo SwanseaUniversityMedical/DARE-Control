@@ -29,3 +29,8 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "TRE-API.dll"]
+
+COPY rootca.pem /usr/local/share/ca-certificates/chi-ansible.crt
+
+RUN chmod 644 /usr/local/share/ca-certificates/*.crt && \
+	update-ca-certificates
