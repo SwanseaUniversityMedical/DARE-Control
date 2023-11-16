@@ -60,11 +60,11 @@ namespace BL.Services
             }
             catch (MinioException e)
             {
-                Log.Warning("Create bucket: {bucketName}, failed due to Minio exception: {message}", bucketName, e.Message);
+                Log.Warning("GetFilesInBucket: {bucketName}, failed due to Minio exception: {message}", bucketName, e.Message);
             }
             catch (Exception ex)
             {
-                Log.Warning("Create bucket: {bucketName}, failed due to Exception: {message}", bucketName, ex.Message);
+                Log.Warning("GetFilesInBucket: {bucketName}, failed due to Exception: {message}", bucketName, ex.Message);
             }
 
             return null;
@@ -474,6 +474,71 @@ namespace BL.Services
 
 
         }
+
+        public async Task<bool> SetPublicPolicy(string bucketName)
+        {
+            var amazonS3Client = GenerateAmazonS3Client();
+
+            string bucketPolicyJson = $@"
+{{
+    ""Version"": ""2012-10-17"",
+    ""Statement"": [
+        {{
+            ""Effect"": ""Allow"",
+            ""Principal"": {{
+                ""AWS"": [
+                    ""*""
+                ]
+            }},
+            ""Action"": [
+                ""s3:GetBucketLocation"",
+                ""s3:ListBucket"",
+                ""s3:ListBucketMultipartUploads""
+            ],
+            ""Resource"": [
+                ""arn:aws:s3:::{bucketName}""
+            ]
+        }},
+        {{
+            ""Effect"": ""Allow"",
+            ""Principal"": {{
+                ""AWS"": [
+                    ""*""
+                ]
+            }},
+            ""Action"": [
+                ""s3:PutObject"",
+                ""s3:AbortMultipartUpload"",
+                ""s3:DeleteObject"",
+                ""s3:GetObject"",
+                ""s3:ListMultipartUploadParts""
+            ],
+            ""Resource"": [
+                ""arn:aws:s3:::{bucketName}/*""
+            ]
+        }}
+    ]
+}}";
+            try
+            {
+                // Set the bucket policy
+                PutBucketPolicyRequest putBucketPolicyRequest = new PutBucketPolicyRequest
+                {
+                    BucketName = bucketName,
+                    Policy = bucketPolicyJson
+                };
+
+                amazonS3Client.PutBucketPolicyAsync(putBucketPolicyRequest).Wait();
+
+                Console.WriteLine("Bucket policy set successfully!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error: {e.Message}");
+            }
+            return true;
+        }
+
 
         #region PrivateHelpers
         private AmazonS3Config GenerateAmazonS3Config()

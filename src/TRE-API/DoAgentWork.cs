@@ -361,21 +361,24 @@ namespace TRE_API
                             var result = _subHelper.UpdateStatusForTre(subId.ToString(), statusMessage, "");
                             if (status.state == "COMPLETE")
                             {
+                                Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == COMPLETE ");
                                 result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Completed, "","");
                             }
                             else if (status.state == "EXECUTER_ERROR")
                             {
+                                Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == EXECUTER_ERROR ");
                                 result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Failed, "", "");
                             }
                         }
-
+                        Log.Information($" Checking status ");
                         // are we done ?
                         if (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR")
                         {
-                            // Do this to avoid db locking issues
-                            BackgroundJob.Enqueue(() => ClearJob(taskID));
+                            Log.Information($"  status.state == \"COMPLETE\" || status.state == \"EXECUTOR_ERROR\" ");
 
-                            var data = await _minioTreHelper.GetFilesInBucket(outputBucket);
+                            ClearJob(taskID);
+                            var outputBucketGood = outputBucket.Replace(_AgentSettings.TESKOutputBucketPrefix, "");
+                            var data = await _minioTreHelper.GetFilesInBucket(outputBucketGood);
                             var files = new List<string>();
 
                             foreach (var s3Object in data.S3Objects) //TODO is this right?
@@ -384,12 +387,12 @@ namespace TRE_API
                                 files.Add(s3Object.Key);
                             }
 
-
+                            Log.Information($"  FilesReadyForReview files {files.Count} ");
                             _subHelper.FilesReadyForReview(new ReviewFiles()
                             {
-                                SubId = taskID, //TODO is this right  
+                                SubId = subId.ToString(), 
                                 Files = files
-                            });
+                            }, outputBucketGood);
 
                         }
                     }

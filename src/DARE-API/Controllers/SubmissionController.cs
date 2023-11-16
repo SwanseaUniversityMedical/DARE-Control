@@ -188,7 +188,7 @@ namespace DARE_API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("GetASubmission")]
+        [HttpGet("GetASubmission/{submissionId}")]
         public Submission GetASubmission(int submissionId)
         {
             try
