@@ -54,7 +54,7 @@ namespace TRE_API.Services
             {
                 return true;
             }
-            // Handle error cases/throwing new exception;
+   
             return false;
         }
     }
