@@ -294,8 +294,10 @@ namespace TRE_API.Controllers
                 }
                 else
                 {
+                    Log.Information($"EgressResults with review.OutputBucket > {review.OutputBucket} bucket.Bucket > {bucket.Bucket} ");
                     foreach (var File in review.FileResults)
                     {
+                        Log.Information($"EgressResults with File.Approved > {File.Approved} File.FileName > {File.FileName} ");
                         if (File.Approved)
                         {
                             var source = _minioTreHelper.GetCopyObject(review.OutputBucket, File.FileName);
