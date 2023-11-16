@@ -59,8 +59,29 @@
                         {
                             <a href="@Url.Action("SaveProjectForm", "Project",new{Projectid=@Model.Id})" class="btn btn-sm btn-primary mb-3">Edit</a>
                         }
-                        <p>Project Lead: @Model.ProjectOwner</p>
-                        <p>Project Contact: @Model.ProjectContact</p>
+                        @{
+                            if (Model.ProjectOwner == null || Model.ProjectOwner == "")
+                            {
+                            }
+                            else
+                            {
+                                <p>
+                                <p>Project Lead: @Model.ProjectOwner</p>
+                                </p>
+                            }
+                        }
+                        @{
+                            if (Model.ProjectContact == null || Model.ProjectContact == "")
+                            {
+                            }
+                            else
+                            {
+                                <p>
+                                <p>Project Contact: @Model.ProjectContact</p>
+                                </p>
+                            }
+                        }
+                        
                         @{
                             if (Model.ProjectDescription == null || Model.ProjectDescription == "")
                             {
