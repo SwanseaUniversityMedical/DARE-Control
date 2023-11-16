@@ -15,5 +15,7 @@
         public string ProxyAddresURL { get; set; }
 
         public string BypassProxy { get; set; }
+
+        public string TESKAPIURL { get; set; }
     }
 }
