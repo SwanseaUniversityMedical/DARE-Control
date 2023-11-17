@@ -46,8 +46,6 @@ namespace OPA.Controllers
                 //var userName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
                 var userName = "test";
                 var treData = _DbContext.Projects.Where(x => x.Decision == Decision.Undecided).ToList();
-              
-                //update ProjectExpiryDate if greater than today
 
                 DateTime today = DateTime.Today;
                 var resultList = new List<TreProject>();
@@ -63,7 +61,7 @@ namespace OPA.Controllers
                    
                     await _DbContext.SaveChangesAsync();
                 }                          
-                bool hasAccess = await _opaService.CheckAccess(userName, today, treData);
+                bool hasAccess = await _opaService.CheckAccess(userName, today, resultList);
                 if (hasAccess)
                 {
                     Log.Information("{Function} User Access Allowed", "CheckUserAccess");
