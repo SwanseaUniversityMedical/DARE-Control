@@ -379,7 +379,7 @@ namespace TRE_API
 
                             ClearJob(taskID);
                             var outputBucketGood = outputBucket.Replace(_AgentSettings.TESKOutputBucketPrefix, "");
-                            var data = await _minioTreHelper.GetFilesInBucket(outputBucketGood);
+                            var data = await _minioTreHelper.GetFilesInBucket(outputBucketGood, $"/{subId}/" );
                             var files = new List<string>();
 
                             foreach (var s3Object in data.S3Objects) //TODO is this right?
@@ -586,7 +586,7 @@ namespace TRE_API
 
 
 
-                                var OutputBucket = _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects.First(x => x.Id == projectId).OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
+                                var OutputBucket = _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects.First(x => x.Id == projectId).OutputBucketTre + $"/{aSubmission.Id}/"; //TODO Check, Projects not getting The synchronised Properly 
                                                                                                                                                               //it need the file name?? (key-name)
 
                                 if (tesMessage.Outputs == null)

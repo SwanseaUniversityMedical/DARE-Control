@@ -43,14 +43,15 @@ namespace BL.Services
         }
 
 
-        public async Task<ListObjectsV2Response> GetFilesInBucket(string bucketName)
+        public async Task<ListObjectsV2Response> GetFilesInBucket(string bucketName, string prefix = "")
         {
             try
             {
 
                 ListObjectsV2Request request = new ListObjectsV2Request
                 {
-                    BucketName = bucketName
+                    BucketName = bucketName,
+                    Prefix = prefix
                 };
 
                 var amazonS3Client = GenerateAmazonS3Client();
