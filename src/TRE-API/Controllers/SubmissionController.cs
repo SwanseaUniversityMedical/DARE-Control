@@ -21,6 +21,7 @@ using System;
 using Amazon.Runtime.Internal.Transform;
 using Serilog;
 using TRE_API.Models;
+using Minio;
 
 namespace TRE_API.Controllers
 {
@@ -301,7 +302,11 @@ namespace TRE_API.Controllers
                             var source = _minioTreHelper.GetCopyObject(review.OutputBucket, File.FileName);
                             var resultcopy = _minioSubHelper.CopyObjectToDestination(bucket.Bucket, File.FileName, source.Result).Result;
                         }
+
+                        _minioTreHelper.DeleteObject(review.OutputBucket, File.FileName).Wait();
                     }
+
+
                 }
 
 

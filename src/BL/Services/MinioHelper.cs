@@ -202,6 +202,21 @@ namespace BL.Services
 
         }
 
+        public async Task DeleteObject(string bucketName, string objectKey)
+        {
+            var amazonS3Client = GenerateAmazonS3Client();
+
+            try
+            {
+                await amazonS3Client.DeleteObjectAsync(bucketName, objectKey);
+
+            }
+            catch (AmazonS3Exception ex)
+            {
+                Log.Error(ex.ToString())
+            }
+        }
+
         public async Task<bool> CheckObjectExists(string bucketName, string objectKey)
         {
             var request = new GetObjectMetadataRequest

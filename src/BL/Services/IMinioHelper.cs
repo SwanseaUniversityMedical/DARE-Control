@@ -27,6 +27,6 @@ namespace BL.Services
 
         Task<bool> BucketPolicySetPublic(string bucketName);
 
-
+        Task DeleteObject(string bucketName, string objectKey);
     }
 }
