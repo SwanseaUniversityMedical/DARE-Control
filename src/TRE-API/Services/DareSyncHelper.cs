@@ -170,18 +170,17 @@ namespace TRE_API.Services
             var resultList = new List<TreProject>();
             foreach (var user in treusers )
             {           
-                var treuserproject = treprojects.Where(x =>
-                    (x.Id >= 0 || x.UserName == user.Username));
-
+            
                 foreach (var membership in trememberships)
                 {
                     DateTime membershipExpiryDate = membership.ProjectExpiryDate;
 
-                    DateTime projectExpiryDate = treuserproject.FirstOrDefault(p => p.Id == membership.Project.Id)?.ProjectExpiryDate ?? DateTime.MinValue;
+                    DateTime projectExpiryDate = treprojects.FirstOrDefault(p => p.Id == membership.Project.Id)?.ProjectExpiryDate ?? DateTime.MinValue;
 
                     DateTime selectedExpiryDate = membershipExpiryDate < projectExpiryDate ? membershipExpiryDate : projectExpiryDate;
-                    foreach (var project in treprojects)
-                    {
+                    var project = treprojects.FirstOrDefault(p => p.Id == membership.Project.Id);
+                    if(project != null)
+                    { 
                         if (selectedExpiryDate > today)
                         {
                             project.ProjectExpiryDate = DateTime.Now.AddMinutes(_opaSettings.ExpiryDelayMinutes);
@@ -199,7 +198,7 @@ namespace TRE_API.Services
 
                     }
 
-                  
+
                 }
             }
 
