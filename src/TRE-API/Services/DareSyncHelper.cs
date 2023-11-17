@@ -162,18 +162,22 @@ namespace TRE_API.Services
             await _DbContext.SaveChangesAsync();
             await SyncProjectDecisions();
             await SyncMembershipDecisions();
+
             DateTime today = DateTime.Today;
             var treusers = _DbContext.Users.ToList();
             var treprojects = _DbContext.Projects.ToList();
             var trememberships = _DbContext.MembershipDecisions.ToList();
             var resultList = new List<TreProject>();
-            foreach (var user in treusers ) 
-            {
-              foreach(var membership in trememberships)
+            foreach (var user in treusers )
+            {           
+                var treuserproject = treprojects.Where(x =>
+                    (x.Id >= 0 || x.UserName == user.Username));
+
+                foreach (var membership in trememberships)
                 {
                     DateTime membershipExpiryDate = membership.ProjectExpiryDate;
 
-                    DateTime projectExpiryDate = treprojects.FirstOrDefault(p => p.Id == membership.Project.Id)?.ProjectExpiryDate ?? DateTime.MinValue;
+                    DateTime projectExpiryDate = treuserproject.FirstOrDefault(p => p.Id == membership.Project.Id)?.ProjectExpiryDate ?? DateTime.MinValue;
 
                     DateTime selectedExpiryDate = membershipExpiryDate < projectExpiryDate ? membershipExpiryDate : projectExpiryDate;
                     foreach (var project in treprojects)
