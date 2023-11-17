@@ -25,7 +25,7 @@ namespace TRE_API.Services
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        public async Task<bool> CheckAccess(string userName, DateTime expiryDate, List<TreUser>? treData)
+        public async Task<bool> CheckAccess(string userName, DateTime expiryDate, List<TreProject>? treData)
         {           
             var inputData = new
             {

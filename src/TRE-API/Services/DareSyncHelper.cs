@@ -166,7 +166,7 @@ namespace TRE_API.Services
             var treusers = _DbContext.Users.ToList();
             var treprojects = _DbContext.Projects.ToList();
             var trememberships = _DbContext.MembershipDecisions.ToList();
-            var resultList = new List<TreUser>();
+            var resultList = new List<TreProject>();
             foreach (var user in treusers ) 
             {
               foreach(var membership in trememberships)
@@ -176,21 +176,26 @@ namespace TRE_API.Services
                     DateTime projectExpiryDate = treprojects.FirstOrDefault(p => p.Id == membership.Project.Id)?.ProjectExpiryDate ?? DateTime.MinValue;
 
                     DateTime selectedExpiryDate = membershipExpiryDate < projectExpiryDate ? membershipExpiryDate : projectExpiryDate;
-                    if (selectedExpiryDate > today)
+                    foreach (var project in treprojects)
                     {
-                        membership.ProjectExpiryDate = DateTime.Now.AddMinutes(_opaSettings.ExpiryDelayMinutes);
-                        resultList.Add(user);
+                        if (selectedExpiryDate > today)
+                        {
+                            project.ProjectExpiryDate = DateTime.Now.AddMinutes(_opaSettings.ExpiryDelayMinutes);
+                            resultList.Add(project);
+                            bool hasAccess = await _opaService.CheckAccess(user.Username, selectedExpiryDate, resultList);
+                            if (hasAccess)
+                            {
+                                Log.Information("{Function} User Access Allowed", "CheckUserAccess");
+                            }
+                            else
+                            {
+                                Log.Information("{Function} User Access Denied", "CheckUserAccess");
+                            }
+                        }
+
                     }
-        
-                    bool hasAccess = await _opaService.CheckAccess(user.Username, selectedExpiryDate, resultList);
-                    if (hasAccess)
-                    {
-                        Log.Information("{Function} User Access Allowed", "CheckUserAccess");
-                    }
-                    else
-                    {
-                        Log.Information("{Function} User Access Denied", "CheckUserAccess");
-                    }
+
+                  
                 }
             }
 
