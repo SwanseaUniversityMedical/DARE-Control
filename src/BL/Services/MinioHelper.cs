@@ -214,7 +214,7 @@ namespace BL.Services
             }
             catch (AmazonS3Exception ex)
             {
-                Log.Error(ex.ToString())
+                Log.Error(ex.ToString());
             }
         }
 
