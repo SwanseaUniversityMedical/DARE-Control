@@ -500,7 +500,6 @@ namespace TRE_API
                                     var resultcopy = _minioTreHelper
                                         .CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
 
-                                    _minioSubHelper.DeleteObject(sourceBucket, fileName);
                                 }
 
                                 _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(),
