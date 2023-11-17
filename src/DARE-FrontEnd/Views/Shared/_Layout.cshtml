@@ -386,6 +386,16 @@
 
             $('#submissionModal').modal('show');
         });
+        $("#showModalButton2").click(function () {
+            //$('#showModalButton').on('click', function (e) {
+            //debugger;
+            var message = $('#showModalButton2').data('message');
+            $('#modalContent').text(message);
+
+            //$('#modalComponentContainer').load('/Components/SubmissionWizerdView?message=' + message);
+
+            $('#submissionModal1').modal('show');
+        });
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 

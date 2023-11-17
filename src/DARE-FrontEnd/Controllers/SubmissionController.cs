@@ -45,41 +45,41 @@ namespace DARE_FrontEnd.Controllers
                 paramlist.Add("projectId", model.ProjectId.ToString());
                 var project = await _clientHelper.CallAPIWithoutModel<BL.Models.Project?>(
                     "/api/Project/GetProject/", paramlist);
-
-                if (model.TreRadios == null)
-                {
-                    var paramList = new Dictionary<string, string>();
-                    paramList.Add("projectId", model.ProjectId.ToString());
-                    var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList);
-                    List<string> namesList = tre.Select(test => test.Name).ToList();
-                    listOfTre = string.Join("|", namesList);
-                }
-                else
-                {
-                    listOfTre = string.Join("|", model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
-                }
-
-                if (model.OriginOption == CrateOrigin.External)
-                {
-                    imageUrl = model.ExternalURL;
-                }
-                else
-                {
-                    var paramss = new Dictionary<string, string>();
-
-                    paramss.Add("bucketName", project.SubmissionBucket);
-                    if (model.File != null)
-                    {
-                        var uplodaResultTest = await _clientHelper.CallAPIToSendFile<APIReturn>("/api/Project/UploadToMinio", "file", model.File, paramss);
-                    }
-                    var minioEndpoint = await _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
-
-                    imageUrl = "http://" + minioEndpoint.Url + "/browser/" + project.SubmissionBucket + "/" + model.File.FileName;
-
-                }
                 var test = new TesTask();
                 if (string.IsNullOrEmpty(model.TesRun))
                 {
+                        if (model.TreRadios == null)
+                    {
+                        var paramList = new Dictionary<string, string>();
+                        paramList.Add("projectId", model.ProjectId.ToString());
+                        var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList);
+                        List<string> namesList = tre.Select(test => test.Name).ToList();
+                        listOfTre = string.Join("|", namesList);
+                    }
+                    else
+                    {
+                        listOfTre = string.Join("|", model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
+                    }
+
+                    if (model.OriginOption == CrateOrigin.External)
+                    {
+                        imageUrl = model.ExternalURL;
+                    }
+                    else
+                    {
+                        var paramss = new Dictionary<string, string>();
+
+                        paramss.Add("bucketName", project.SubmissionBucket);
+                        if (model.File != null)
+                        {
+                            var uplodaResultTest = await _clientHelper.CallAPIToSendFile<APIReturn>("/api/Project/UploadToMinio", "file", model.File, paramss);
+                        }
+                        var minioEndpoint = await _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
+
+                        imageUrl = "http://" + minioEndpoint.Url + "/browser/" + project.SubmissionBucket + "/" + model.File.FileName;
+
+                    }
+              
                     test = new TesTask()
                     {
                         Name = model.TESName,
