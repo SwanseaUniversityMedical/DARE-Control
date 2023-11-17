@@ -23,12 +23,15 @@ namespace TRE_API.Services
         public IDareClientWithoutTokenHelper _dareclientHelper { get; set; }
         
         private readonly IMinioTreHelper _minioTreHelper;
-        public DareSyncHelper(ApplicationDbContext dbContext, IDareClientWithoutTokenHelper dareClient,  IMinioTreHelper minioTreHelper)
+        private readonly OPASettings _opaSettings;
+        private readonly OpaService _opaService;
+        public DareSyncHelper(ApplicationDbContext dbContext, IDareClientWithoutTokenHelper dareClient,  IMinioTreHelper minioTreHelper, OPASettings opasettings, OpaService opaservice)
         {
             _DbContext = dbContext;
-            _dareclientHelper = dareClient;
-            
+            _dareclientHelper = dareClient;     
             _minioTreHelper = minioTreHelper;
+            _opaSettings = opasettings;
+            _opaService = opaservice;
         }
 
         public async Task<BoolReturn> SyncSubmissionWithTre()
@@ -159,6 +162,37 @@ namespace TRE_API.Services
             await _DbContext.SaveChangesAsync();
             await SyncProjectDecisions();
             await SyncMembershipDecisions();
+            DateTime today = DateTime.Today;
+            var treusers = _DbContext.Users.ToList();
+            var treprojects = _DbContext.Projects.ToList();
+            var trememberships = _DbContext.MembershipDecisions.ToList();
+            var resultList = new List<TreUser>();
+            foreach (var user in treusers ) 
+            {
+              foreach(var membership in trememberships)
+                {
+                    DateTime membershipExpiryDate = membership.ProjectExpiryDate;
+
+                    DateTime projectExpiryDate = treprojects.FirstOrDefault(p => p.Id == membership.Project.Id)?.ProjectExpiryDate ?? DateTime.MinValue;
+
+                    DateTime selectedExpiryDate = membershipExpiryDate < projectExpiryDate ? membershipExpiryDate : projectExpiryDate;
+                    if (selectedExpiryDate > today)
+                    {
+                        selectedExpiryDate = DateTime.Now.AddMinutes(_opaSettings.ExpiryDelayMinutes);
+                        resultList.Add(user);
+                    }
+        
+                    bool hasAccess = await _opaService.CheckAccess(user.Username, selectedExpiryDate, resultList);
+                    if (hasAccess)
+                    {
+                        Log.Information("{Function} User Access Allowed", "CheckUserAccess");
+                    }
+                    else
+                    {
+                        Log.Information("{Function} User Access Denied", "CheckUserAccess");
+                    }
+                }
+            }
 
             return new BoolReturn()
             {
