@@ -586,7 +586,7 @@ namespace TRE_API
 
 
 
-                                var OutputBucket = _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects.First(x => x.Id == projectId).OutputBucketTre + $"/{aSubmission.Id}"; //TODO Check, Projects not getting The synchronised Properly 
+                                var OutputBucket = _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects.First(x => x.Id == projectId).OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
                                                                                                                                                               //it need the file name?? (key-name)
 
                                 if (tesMessage.Outputs == null)
@@ -597,7 +597,7 @@ namespace TRE_API
                                 //S3://bucket-name/key-name
                                 foreach (var output in tesMessage.Outputs)
                                 {
-                                    output.Url = OutputBucket;
+                                    output.Url = OutputBucket + $"/{aSubmission.Id}";
                                 }
 
                                 if (tesMessage.Executors == null)
