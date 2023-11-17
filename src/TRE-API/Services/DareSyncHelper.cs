@@ -183,7 +183,7 @@ namespace TRE_API.Services
                     { 
                         if (selectedExpiryDate > today)
                         {
-                            project.ProjectExpiryDate = DateTime.Now.AddMinutes(_opaSettings.ExpiryDelayMinutes);
+                            project.ProjectExpiryDate = DateTime.Now.AddDays(_opaSettings.ExpiryDelayDays);
                             resultList.Add(project);
                             bool hasAccess = await _opaService.CheckAccess(user.Username, selectedExpiryDate, resultList);
                             if (hasAccess)
