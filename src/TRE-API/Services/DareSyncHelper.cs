@@ -178,7 +178,7 @@ namespace TRE_API.Services
                     DateTime selectedExpiryDate = membershipExpiryDate < projectExpiryDate ? membershipExpiryDate : projectExpiryDate;
                     if (selectedExpiryDate > today)
                     {
-                        selectedExpiryDate = DateTime.Now.AddMinutes(_opaSettings.ExpiryDelayMinutes);
+                        membership.ProjectExpiryDate = DateTime.Now.AddMinutes(_opaSettings.ExpiryDelayMinutes);
                         resultList.Add(user);
                     }
         
