@@ -310,7 +310,7 @@ namespace TRE_API
 
                     _dbContext.SaveChanges();
 
-                    if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR"))
+                    if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR" || status.state == "SYSTEM_ERROR"))
                     {
                         Log.Information("{Function} *** status change *** {State}", "CheckTESK", status.state);
                         
@@ -356,6 +356,20 @@ namespace TRE_API
                                     _dbContext.SaveChanges();
 
                                     break;
+                                case "SYSTEM_ERROR":
+                                    statusMessage = StatusType.Cancelled;
+                                    Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
+                                    Log.Information("{Function} *** SYSTEM_ERROR remove Token *** {Token} ", "CheckTESK", Token);
+
+                                    if (Token != null)
+                                    {
+                                        _dbContext.TokensToExpire.Remove(Token);
+                                        _hasuraAuthenticationService.ExpirerToken(Token.Token);
+                                    }
+
+                                    _dbContext.SaveChanges();
+
+                                    break;
                             }
 
 
@@ -365,17 +379,17 @@ namespace TRE_API
                                 Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == COMPLETE ");
                                 result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Completed, "","");
                             }
-                            else if (status.state == "EXECUTER_ERROR")
+                            else if (status.state == "EXECUTER_ERROR" || status.state == "SYSTEM_ERROR")
                             {
-                                Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == EXECUTER_ERROR ");
+                                Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == EXECUTER_ERROR or SYSTEM_ERROR ");
                                 result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Failed, "", "");
                             }
                         }
                         Log.Information($" Checking status ");
                         // are we done ?
-                        if (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR")
+                        if (status.state == "COMPLETE" || status.state == "EXECUTER_ERROR" || status.state == "SYSTEM_ERROR")
                         {
-                            Log.Information($"  status.state == \"COMPLETE\" || status.state == \"EXECUTOR_ERROR\" ");
+                            Log.Information($"  status.state == \"COMPLETE\" || status.state == \"EXECUTOR_ERROR\" or SYSTEM_ERROR ");
 
                             ClearJob(taskID);
                             var outputBucketGood = outputBucket.Replace(_AgentSettings.TESKOutputBucketPrefix, "");
