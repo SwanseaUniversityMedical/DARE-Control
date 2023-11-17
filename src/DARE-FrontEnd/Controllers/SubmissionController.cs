@@ -45,6 +45,7 @@ namespace DARE_FrontEnd.Controllers
                 paramlist.Add("projectId", model.ProjectId.ToString());
                 var project = await _clientHelper.CallAPIWithoutModel<BL.Models.Project?>(
                     "/api/Project/GetProject/", paramlist);
+
                 if (model.TreRadios == null)
                 {
                     var paramList = new Dictionary<string, string>();
@@ -64,7 +65,6 @@ namespace DARE_FrontEnd.Controllers
                 }
                 else
                 {
-
                     var paramss = new Dictionary<string, string>();
 
                     paramss.Add("bucketName", project.SubmissionBucket);
@@ -75,6 +75,7 @@ namespace DARE_FrontEnd.Controllers
                     var minioEndpoint = await _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
 
                     imageUrl = "http://" + minioEndpoint.Url + "/browser/" + project.SubmissionBucket + "/" + model.File.FileName;
+
                 }
                 var test = new TesTask();
                 if (string.IsNullOrEmpty(model.TesRun))
@@ -83,19 +84,18 @@ namespace DARE_FrontEnd.Controllers
                     {
                         Name = model.TESName,
                         Executors = new List<TesExecutor>()
-                {
-                    new TesExecutor()
-                    {
-                        Image = imageUrl,
+                        {
+                            new TesExecutor()
+                            {
+                                Image = imageUrl,
 
-                    }
-                },
+                            }
+                        },
                         Tags = new Dictionary<string, string>()
-                {
-                    { "project", project.Name },
-                    { "tres", listOfTre }
-                }
-
+                        {
+                            { "project", project.Name },
+                            { "tres", listOfTre }
+                        }
                     };
                 }
                 else
