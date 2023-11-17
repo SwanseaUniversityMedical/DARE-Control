@@ -50,13 +50,11 @@ namespace OPA.Controllers
                 DateTime today = DateTime.Today;
                 var resultList = new List<TreProject>();
                 foreach (var project in treData)
-                {
-                    var dbproject = _DbContext.Projects.FirstOrDefault(x => x.Id == project.Id);
-
+                {               
                     if (project.ProjectExpiryDate > today)
                     {
-                        dbproject.ProjectExpiryDate = DateTime.Now.AddMinutes(_opaSettings.ExpiryDelayMinutes);
-                        resultList.Add(dbproject);
+                        project.ProjectExpiryDate = DateTime.Now.AddMinutes(_opaSettings.ExpiryDelayMinutes);
+                        resultList.Add(project);
                     }
                    
                     await _DbContext.SaveChangesAsync();
