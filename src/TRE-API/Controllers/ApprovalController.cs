@@ -17,8 +17,6 @@ using System.Threading;
 namespace TRE_API.Controllers
 {
 
-    // 
-
     [Route("api/[controller]")]
     [ApiController]
 
@@ -59,7 +57,6 @@ namespace TRE_API.Controllers
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllTreProjects")]
-        // [Authorize(Policy = "UserAllowedPolicy")]
         public List<TreProject> GetAllTreProjects(bool showOnlyUnprocessed)
         {
             try
