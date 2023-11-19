@@ -173,7 +173,7 @@ namespace TRE_API.Services
             {      
                 var usermemberships = _DbContext.MembershipDecisions.Where(m => m.User.Username==user.Username).ToList();
 
-                foreach (var membership in trememberships)
+                foreach (var membership in usermemberships)
                 {
                     DateTime membershipExpiryDate = membership.ProjectExpiryDate;
 
