@@ -9,7 +9,6 @@ using BL.Models.ViewModels;
 using Newtonsoft.Json;
 using System.Text;
 using System.Linq;
-using Amazon.S3.Model;
 using Serilog;
 
 namespace TRE_API.Services
