@@ -171,16 +171,16 @@ namespace TRE_API.Services
             var resultList = new List<TreProject>();
             foreach (var user in treusers )
             {      
-                var usermemberships = _DbContext.MembershipDecisions.Where(m => m.User.Username==user.Username).ToList();
+                var usermemberships = _DbContext.MembershipDecisions.Where(m => m.User.Username == user.Username).ToList();
 
                 foreach (var membership in usermemberships)
                 {
                     DateTime membershipExpiryDate = membership.ProjectExpiryDate;
-
                     DateTime projectExpiryDate = treprojects.FirstOrDefault(p => p.Id == membership.Project.Id)?.ProjectExpiryDate ?? DateTime.MinValue;
-
                     DateTime selectedExpiryDate = membershipExpiryDate < projectExpiryDate ? membershipExpiryDate : projectExpiryDate;
+                    
                     var project = treprojects.FirstOrDefault(p => p.Id == membership.Project.Id);
+                    
                     if(project != null)
                     { 
                         if (selectedExpiryDate > today)
