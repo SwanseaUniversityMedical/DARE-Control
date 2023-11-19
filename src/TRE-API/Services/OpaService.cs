@@ -9,6 +9,8 @@ using BL.Models.ViewModels;
 using Newtonsoft.Json;
 using System.Text;
 using System.Linq;
+using Amazon.S3.Model;
+using Serilog;
 
 namespace TRE_API.Services
 {
@@ -29,11 +31,13 @@ namespace TRE_API.Services
         {           
             var inputData = new
             {
+                input = new
+                {
                 userName = userName,
-        
+                expiryDate = expiryDate,
                 treData = new { tre = treData },
-      
-            };
+                }
+        };
             var settings = new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
@@ -41,16 +45,20 @@ namespace TRE_API.Services
             string jsonInput = JsonConvert.SerializeObject(inputData,settings);
             var content = new StringContent(jsonInput, Encoding.UTF8, "application/json");
             var requestUri = $"http://localhost:8181/v1/data/app/checkaccess";
-         ;
+        
             var response = await _httpClient.PostAsync(requestUri,content);
             var resultjson = await response.Content.ReadAsStringAsync();
-            var result = JsonConvert.DeserializeObject(resultjson);
-            if (resultjson.Contains("true"))
+            var responseObject = JsonConvert.DeserializeObject<CheckAccessResponse>(resultjson);
+            bool allow = responseObject?.Result?.Allow ?? false;
+            if (allow)
             {
-                return true;
+                Log.Information("{Function}Opa User Access Allowed for:" + userName, "CheckUserAccess");
             }
-   
-            return false;
+            else
+            {
+                Log.Information("{Function}Opa User Access Denied for:" + userName, "CheckUserAccess");
+            }
+            return allow;
         }
     }
 }

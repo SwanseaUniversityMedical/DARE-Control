@@ -167,6 +167,7 @@ namespace TRE_API.Services
             DateTime today = DateTime.Today;
             var treusers = _DbContext.Users.ToList();
             var treprojects = _DbContext.Projects.ToList();
+
             var resultList = new List<TreProject>();
             foreach (var user in treusers )
             {      
@@ -184,21 +185,12 @@ namespace TRE_API.Services
                     { 
                         if (selectedExpiryDate > today)
                         {
-                            project.ProjectExpiryDate = DateTime.Now.AddDays(_opaSettings.ExpiryDelayDays);
-                            resultList.Add(project);
-                            bool hasAccess = await _opaService.CheckAccess(user.Username, selectedExpiryDate, resultList);
-                            if (hasAccess)
-                            {
-                                Log.Information("{Function} User Access Allowed", "CheckUserAccess");
-                            }
-                            else
-                            {
-                                Log.Information("{Function} User Access Denied", "CheckUserAccess");
-                            }
+                            project.ProjectExpiryDate = DateTime.UtcNow.AddDays(_opaSettings.ExpiryDelayDays);
+                          
                         }
-
+                        resultList.Add(project);
+                        bool hasAccess = await _opaService.CheckAccess(user.Username, selectedExpiryDate, resultList);                     
                     }
-
 
                 }
             }
