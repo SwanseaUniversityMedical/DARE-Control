@@ -14,6 +14,7 @@ using System.Runtime.Intrinsics.X86;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Sentry;
+using System.Linq;
 
 namespace TRE_API.Services
 {
@@ -169,8 +170,9 @@ namespace TRE_API.Services
             var trememberships = _DbContext.MembershipDecisions.ToList();
             var resultList = new List<TreProject>();
             foreach (var user in treusers )
-            {           
-            
+            {      
+                var usermemberships = _DbContext.MembershipDecisions.Where(m => m.User.Username==user.Username).ToList();
+
                 foreach (var membership in trememberships)
                 {
                     DateTime membershipExpiryDate = membership.ProjectExpiryDate;
