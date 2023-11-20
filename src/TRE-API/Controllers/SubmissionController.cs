@@ -303,6 +303,8 @@ namespace TRE_API.Controllers
                             var resultcopy = _minioSubHelper.CopyObjectToDestination(bucket.Bucket,  File.FileName, source.Result).Result;
                         }
                     }
+
+                    _subHelper.UpdateStatusForTre(review.SubId, StatusType.Completed, "");
                 }
 
 

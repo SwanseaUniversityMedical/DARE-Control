@@ -17,5 +17,6 @@
         public string BypassProxy { get; set; }
 
         public string TESKAPIURL { get; set; }
+        public string URLHasuraToAdd { get; set; }
     }
 }

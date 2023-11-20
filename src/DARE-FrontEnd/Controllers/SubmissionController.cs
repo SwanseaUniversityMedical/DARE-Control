@@ -2,6 +2,7 @@
 using BL.Models.Tes;
 using BL.Models.ViewModels;
 using BL.Services;
+using DARE_FrontEnd.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -17,11 +18,13 @@ namespace DARE_FrontEnd.Controllers
     {
         private readonly IDareClientHelper _clientHelper;
         private readonly IConfiguration _configuration;
+        private readonly URLSettingsFrontEnd _URLSettingsFrontEnd; 
 
-        public SubmissionController(IDareClientHelper client, IConfiguration configuration)
+        public SubmissionController(IDareClientHelper client, IConfiguration configuration, URLSettingsFrontEnd URLSettingsFrontEnd)
         {
             _clientHelper = client;
             _configuration = configuration;
+            _URLSettingsFrontEnd = URLSettingsFrontEnd;
         }
 
       
@@ -166,7 +169,7 @@ namespace DARE_FrontEnd.Controllers
 
             var minio = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
             ViewBag.minioendpoint = minio?.Url;
-
+            ViewBag.URLBucket = _URLSettingsFrontEnd.MinioUrl;
             var test = new SubmissionInfo()
             {
                 Submission = res,

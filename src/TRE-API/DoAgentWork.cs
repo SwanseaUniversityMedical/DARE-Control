@@ -622,11 +622,12 @@ namespace TRE_API
                                 foreach (var Executor in tesMessage.Executors)
                                 {
                                     Log.Information("Executor.Image > " + Executor.Image);
-
+                                    // "--URL_http://192.168.70.84:8080"
                                     if (Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken))
                                     {
                                         Executor.Command.Add("--Token_" + Token);
-									}
+                                        Executor.Command.Add("--URL_" + _AgentSettings.URLHasuraToAdd);
+                                    }
 
                                     //if (Executor.Env == null)
                                     //{
