@@ -310,7 +310,7 @@ namespace TRE_API
 
                     _dbContext.SaveChanges();
 
-                    if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR"))
+                    if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR" || status.state == "SYSTEM_ERROR"))
                     {
                         Log.Information("{Function} *** status change *** {State}", "CheckTESK", status.state);
                         
@@ -356,6 +356,20 @@ namespace TRE_API
                                     _dbContext.SaveChanges();
 
                                     break;
+                                case "SYSTEM_ERROR":
+                                    statusMessage = StatusType.Cancelled;
+                                    Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
+                                    Log.Information("{Function} *** SYSTEM_ERROR remove Token *** {Token} ", "CheckTESK", Token);
+
+                                    if (Token != null)
+                                    {
+                                        _dbContext.TokensToExpire.Remove(Token);
+                                        _hasuraAuthenticationService.ExpirerToken(Token.Token);
+                                    }
+
+                                    _dbContext.SaveChanges();
+
+                                    break;
                             }
 
 
@@ -365,21 +379,21 @@ namespace TRE_API
                                 Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == COMPLETE ");
                                 result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Completed, "","");
                             }
-                            else if (status.state == "EXECUTER_ERROR")
+                            else if (status.state == "EXECUTER_ERROR" || status.state == "SYSTEM_ERROR")
                             {
-                                Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == EXECUTER_ERROR ");
+                                Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == EXECUTER_ERROR or SYSTEM_ERROR ");
                                 result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Failed, "", "");
                             }
                         }
                         Log.Information($" Checking status ");
                         // are we done ?
-                        if (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR")
+                        if (status.state == "COMPLETE" || status.state == "EXECUTER_ERROR" || status.state == "SYSTEM_ERROR")
                         {
-                            Log.Information($"  status.state == \"COMPLETE\" || status.state == \"EXECUTOR_ERROR\" ");
+                            Log.Information($"  status.state == \"COMPLETE\" || status.state == \"EXECUTOR_ERROR\" or SYSTEM_ERROR ");
 
                             ClearJob(taskID);
                             var outputBucketGood = outputBucket.Replace(_AgentSettings.TESKOutputBucketPrefix, "");
-                            var data = await _minioTreHelper.GetFilesInBucket(outputBucketGood);
+                            var data = await _minioTreHelper.GetFilesInBucket(outputBucketGood, $"{subId}" );
                             var files = new List<string>();
 
                             foreach (var s3Object in data.S3Objects) //TODO is this right?
@@ -499,6 +513,7 @@ namespace TRE_API
                                     var source = _minioSubHelper.GetCopyObject(sourceBucket, fileName);
                                     var resultcopy = _minioTreHelper
                                         .CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
+
                                 }
 
                                 _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(),
@@ -596,7 +611,7 @@ namespace TRE_API
                                 //S3://bucket-name/key-name
                                 foreach (var output in tesMessage.Outputs)
                                 {
-                                    output.Url = OutputBucket;
+                                    output.Url = OutputBucket + $"/{aSubmission.Id}";
                                 }
 
                                 if (tesMessage.Executors == null)
@@ -607,11 +622,12 @@ namespace TRE_API
                                 foreach (var Executor in tesMessage.Executors)
                                 {
                                     Log.Information("Executor.Image > " + Executor.Image);
-
+                                    // "--URL_http://192.168.70.84:8080"
                                     if (Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken))
                                     {
                                         Executor.Command.Add("--Token_" + Token);
-									}
+                                        Executor.Command.Add("--URL_" + _AgentSettings.URLHasuraToAdd);
+                                    }
 
                                     //if (Executor.Env == null)
                                     //{

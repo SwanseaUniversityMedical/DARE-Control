@@ -43,14 +43,15 @@ namespace BL.Services
         }
 
 
-        public async Task<ListObjectsV2Response> GetFilesInBucket(string bucketName)
+        public async Task<ListObjectsV2Response> GetFilesInBucket(string bucketName, string prefix = "")
         {
             try
             {
 
                 ListObjectsV2Request request = new ListObjectsV2Request
                 {
-                    BucketName = bucketName
+                    BucketName = bucketName,
+                    Prefix = prefix
                 };
 
                 var amazonS3Client = GenerateAmazonS3Client();
@@ -200,6 +201,21 @@ namespace BL.Services
             }
 
 
+        }
+
+        public async Task DeleteObject(string bucketName, string objectKey)
+        {
+            var amazonS3Client = GenerateAmazonS3Client();
+
+            try
+            {
+                await amazonS3Client.DeleteObjectAsync(bucketName, objectKey);
+
+            }
+            catch (AmazonS3Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
         }
 
         public async Task<bool> CheckObjectExists(string bucketName, string objectKey)
