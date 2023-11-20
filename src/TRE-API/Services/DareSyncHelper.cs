@@ -166,7 +166,6 @@ namespace TRE_API.Services
 
             DateTime today = DateTime.Today;
             var treusers = _DbContext.Users.ToList();
-            var treprojects = _DbContext.Projects.ToList();
 
             var resultList = new List<TreProject>();
             foreach (var user in treusers )
