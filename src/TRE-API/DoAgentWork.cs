@@ -622,7 +622,7 @@ namespace TRE_API
 
 
 
-                                var OutputBucket = _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects.First(x => x.Id == projectId).OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
+                                var OutputBucket = _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects.First(x => x.SubmissionProjectId == projectId).OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
                                                                                                                                                               //it need the file name?? (key-name)
 
                                 if (tesMessage.Outputs == null)
