@@ -372,17 +372,39 @@ namespace TRE_API
                                     break;
                             }
 
-
-                            var result = _subHelper.UpdateStatusForTre(subId.ToString(), statusMessage, "");
+                            APIReturn? result = null;
+                            try
+                            {
+                                result = _subHelper.UpdateStatusForTre(subId.ToString(), statusMessage, "");
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Error(ex.ToString());
+                            }
+                            
                             if (status.state == "COMPLETE")
                             {
                                 Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == COMPLETE ");
-                                result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Completed, "","");
+                                try
+                                {
+                                    result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Completed, "","");
+                                }
+                                catch (Exception ex)
+                                {
+                                    Log.Error(ex.ToString());
+                                }
                             }
                             else if (status.state == "EXECUTER_ERROR" || status.state == "SYSTEM_ERROR")
                             {
                                 Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == EXECUTER_ERROR or SYSTEM_ERROR ");
-                                result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Failed, "", "");
+                                try
+                                {
+                                    result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Failed, "", "");
+                                }
+                                catch (Exception ex)
+                                {
+                                    Log.Error(ex.ToString());
+                                }
                             }
                         }
                         Log.Information($" Checking status ");
