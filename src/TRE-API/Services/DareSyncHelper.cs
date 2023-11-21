@@ -171,7 +171,7 @@ namespace TRE_API.Services
             foreach (var user in treusers )
             {      
                 var usermemberships = user.MemberDecisions;
-
+              
                 foreach (var membership in usermemberships)
                 {
                     DateTime membershipExpiryDate = membership.ProjectExpiryDate;
