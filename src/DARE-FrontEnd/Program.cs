@@ -17,6 +17,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Authentication;
 using Newtonsoft.Json;
+using DARE_FrontEnd.Models;
 
 try
 {
@@ -50,6 +51,10 @@ builder.Services.AddSingleton(submissionKeyCloakSettings);
 var formIOSettings = new FormIOSettings();
 configuration.Bind(nameof(formIOSettings), formIOSettings);
 builder.Services.AddSingleton(formIOSettings);
+
+var URLSettingsFrontEnd = new URLSettingsFrontEnd();
+configuration.Bind(nameof(URLSettingsFrontEnd), URLSettingsFrontEnd);
+builder.Services.AddSingleton(URLSettingsFrontEnd);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();

@@ -1,0 +1,32 @@
+﻿@using BL.Models.ViewModels
+@using DARE_FrontEnd.Formatters
+@model BL.Models.ViewModels.SubmissionWizard
+@{
+    ViewData["Title"] = "Submission Wizard";
+}
+
+
+@using (Html.BeginForm("SubmissionWizard", "Submission", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain" }))
+{
+    @Html.HiddenFor(x => x.ProjectId)
+    {
+        <div class="modal-body">
+            <div id="TesRun" class="form-group">
+                @Html.TextAreaFor(m => m.TesRun)
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <div class="hero-block-1">
+
+                <button type="button" class="btn btn-sm btn-link me-2" onclick="location.href='@Url.Action("GetProject", "Project", new { id = Model.ProjectId })'">
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+            </div>
+        </div>
+    }
+}
+
+
+

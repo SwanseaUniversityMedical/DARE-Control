@@ -2,6 +2,7 @@
 using BL.Models.Tes;
 using BL.Models.ViewModels;
 using BL.Services;
+using DARE_FrontEnd.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -17,11 +18,13 @@ namespace DARE_FrontEnd.Controllers
     {
         private readonly IDareClientHelper _clientHelper;
         private readonly IConfiguration _configuration;
+        private readonly URLSettingsFrontEnd _URLSettingsFrontEnd; 
 
-        public SubmissionController(IDareClientHelper client, IConfiguration configuration)
+        public SubmissionController(IDareClientHelper client, IConfiguration configuration, URLSettingsFrontEnd URLSettingsFrontEnd)
         {
             _clientHelper = client;
             _configuration = configuration;
+            _URLSettingsFrontEnd = URLSettingsFrontEnd;
         }
 
       
@@ -45,41 +48,41 @@ namespace DARE_FrontEnd.Controllers
                 paramlist.Add("projectId", model.ProjectId.ToString());
                 var project = await _clientHelper.CallAPIWithoutModel<BL.Models.Project?>(
                     "/api/Project/GetProject/", paramlist);
-
-                if (model.TreRadios == null)
-                {
-                    var paramList = new Dictionary<string, string>();
-                    paramList.Add("projectId", model.ProjectId.ToString());
-                    var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList);
-                    List<string> namesList = tre.Select(test => test.Name).ToList();
-                    listOfTre = string.Join("|", namesList);
-                }
-                else
-                {
-                    listOfTre = string.Join("|", model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
-                }
-
-                if (model.OriginOption == CrateOrigin.External)
-                {
-                    imageUrl = model.ExternalURL;
-                }
-                else
-                {
-                    var paramss = new Dictionary<string, string>();
-
-                    paramss.Add("bucketName", project.SubmissionBucket);
-                    if (model.File != null)
-                    {
-                        var uplodaResultTest = await _clientHelper.CallAPIToSendFile<APIReturn>("/api/Project/UploadToMinio", "file", model.File, paramss);
-                    }
-                    var minioEndpoint = await _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
-
-                    imageUrl = "http://" + minioEndpoint.Url + "/browser/" + project.SubmissionBucket + "/" + model.File.FileName;
-
-                }
                 var test = new TesTask();
                 if (string.IsNullOrEmpty(model.TesRun))
                 {
+                        if (model.TreRadios == null)
+                    {
+                        var paramList = new Dictionary<string, string>();
+                        paramList.Add("projectId", model.ProjectId.ToString());
+                        var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList);
+                        List<string> namesList = tre.Select(test => test.Name).ToList();
+                        listOfTre = string.Join("|", namesList);
+                    }
+                    else
+                    {
+                        listOfTre = string.Join("|", model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
+                    }
+
+                    if (model.OriginOption == CrateOrigin.External)
+                    {
+                        imageUrl = model.ExternalURL;
+                    }
+                    else
+                    {
+                        var paramss = new Dictionary<string, string>();
+
+                        paramss.Add("bucketName", project.SubmissionBucket);
+                        if (model.File != null)
+                        {
+                            var uplodaResultTest = await _clientHelper.CallAPIToSendFile<APIReturn>("/api/Project/UploadToMinio", "file", model.File, paramss);
+                        }
+                        var minioEndpoint = await _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
+
+                        imageUrl = "http://" + minioEndpoint.Url + "/browser/" + project.SubmissionBucket + "/" + model.File.FileName;
+
+                    }
+              
                     test = new TesTask()
                     {
                         Name = model.TESName,
@@ -166,7 +169,7 @@ namespace DARE_FrontEnd.Controllers
 
             var minio = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
             ViewBag.minioendpoint = minio?.Url;
-
+            ViewBag.URLBucket = _URLSettingsFrontEnd.MinioUrl;
             var test = new SubmissionInfo()
             {
                 Submission = res,
