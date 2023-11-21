@@ -32,11 +32,11 @@
         </div>
         <ul class="nav nav-underline border-bottom mt-4 mb-5">
             <li class="nav-item" role="presentation">
-                <a href="@Url.Action("EditProject", new { projectId = @Model.SubmissionProjectId})" class="nav-link text-dark">
+                <a href="@Url.Action("EditProject", new { projectId = @Model.Id})" class="nav-link text-dark">
                 Project Approval</a>
             </li>
             <li class="nav-item" role="presentation">
-                <a href="@Url.Action("EditMemberships", new { projectId = @Model.SubmissionProjectId})" class="nav-link text-dark">
+                <a href="@Url.Action("EditMemberships", new { projectId = @Model.Id})" class="nav-link text-dark">
                     Memberships
                 </a>
             </li>
