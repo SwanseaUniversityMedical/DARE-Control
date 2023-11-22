@@ -20,7 +20,6 @@ using BL.Models.ViewModels;
 using System.Security.Claims;
 using System.Runtime;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using DARE_API.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,11 +67,6 @@ await SetUpRabbitMQ.DoItSubmissionAsync(configuration["RabbitMQ:HostAddress"], c
 var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
 builder.Services.AddSingleton(submissionKeyCloakSettings);
-
-var TEMPTES = new TEMPTES();
-configuration.Bind(nameof(TEMPTES), TEMPTES);
-builder.Services.AddSingleton(TEMPTES);
-
 
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
