@@ -253,6 +253,18 @@ namespace DARE_FrontEnd.Controllers
             {
                 Name = model.TESName,
                 Executors = tesExecutors,
+                Outputs = new List<TesOutput>()
+                {
+                    new TesOutput()
+                    {
+                        Url = "",
+                        Name = "aName",
+                        Description = "ADescription",
+                        Path = "/app/data",
+                        Type = TesFileType.DIRECTORYEnum,
+
+                    }
+                },
                 Tags = new Dictionary<string, string>()
                         {
                             { "project", project.Name },
