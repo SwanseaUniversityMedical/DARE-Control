@@ -17,8 +17,10 @@ namespace TRE_API.Services
     {
         private readonly HttpClient _httpClient;
         private readonly OPASettings _opaSettings;
-        public OpaService()
+        private readonly IConfiguration _configuration;
+        public OpaService(IConfiguration configuration)
         {
+            _configuration = configuration;
             _httpClient = new HttpClient();
             //_httpClient.BaseAddress = new Uri(_opaSettings.OPAUrl);
             _httpClient.BaseAddress = new System.Uri("http://localhost:8181/v1/data/app/checkaccess");
@@ -27,17 +29,20 @@ namespace TRE_API.Services
         }
 
         public async Task<bool> CheckAccess(string userName, string projectName, DateTime expiryDate, TreProject? treData)
-        {           
+        { 
+            string treName = _configuration["TreName"];         
             var inputData = new
             {
                 input = new
                 {
-                userName = userName,
-                    projectName = projectName,
-                    expiryDate = expiryDate,
-                treData = new { name = "SAIL", tre = treData },
-                }
-        };
+                    id = projectName,
+                    Description = treData.Description,
+                    trecount = 1,
+                    tre = treName,
+                    treData = new { name = "SAIL", active = true },
+                    users = new { name = treData.UserName, expiry = treData.ProjectExpiryDate }
+                },
+            };
             var settings = new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
