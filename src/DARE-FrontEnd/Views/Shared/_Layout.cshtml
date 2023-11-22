@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="https://cdn.form.io/formiojs/formio.form.min.css" crossorigin="anonymous" />
     <link rel="stylesheet" href="~/css/datatables.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/taginput/tagsinput.css" asp-append-version="true" />
     <script src="~/js/formIo.js"></script>
     <script src="~/js/clipboard.min.js"></script>
     <link rel="stylesheet" href="https://use.typekit.net/tyz0nfb.css">
@@ -397,6 +398,151 @@
             $('#submissionModal1').modal('show');
         });
     </script>
+
+   @* <script>
+        $(document).ready(function () {
+            
+
+            $('#addExecutorButton').click(function () {
+                //debugger;
+                addExecutor();
+            });
+
+            function addExecutor() {
+                debugger;
+                var image = $('#image').val();
+                var command = $('#command').val();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/Submission/AddExecutors',
+                    data: { image: image, command: command },
+                    success: function (data) {
+                        if (data.success) {
+                            
+                            refreshTable();
+                        } else {
+                            alert('Error adding executor.');
+                        }
+                    }
+                });
+            }
+
+            function refreshTable() {
+                $.get('/Shared/Components/SubmissionWizardRaw/Default', function (data) {
+                    $('#executorsTable tbody').html(data);
+                });
+            }
+        });
+    </script>*@
+
+    <script>
+        $(document).ready(function () {
+            
+            $('#addExecutorButton').on('click', function () {
+                
+                var text1 = $('#image').val();
+                var text2 = $('#command').val();
+
+                
+                if (text1 && text2) {
+                    
+                    var newRow = $('<tr><td>' + text1 + '</td><td>' + text2 + '</td></tr>');
+                    $('#executorsTable tbody').append(newRow);
+
+                    
+                    $('#image').val('');
+                    $('#command').val('');
+                } else {
+                    alert('Both input fields must be filled.');
+                }
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            $('#frmMain2').submit(function (e) {
+                e.preventDefault(); 
+                debugger;
+                
+                var executorData = [];
+                $('#executorsTable tbody tr').each(function () {
+                    var image = $(this).find('td:eq(0)').text();
+                    var command = $(this).find('td:eq(1)').text();
+                    executorData.push({ Image: image, Command: command });
+                });
+
+                
+                //var treData = [];
+                //$('.col-md-6.mb-4 .form-check-input').each(function () {
+                //    var name = $(this).siblings('input[type="hidden"]').val();
+                //    var isSelected = $(this).prop('checked');
+                //    treData.push({ Name: name, IsSelected: isSelected });
+                //});
+
+                var treData = [];
+                var anyCheckboxSelected = false;
+
+                $('.col-md-6.mb-4 .form-check-input').each(function () {
+                    var name = $(this).siblings('input[type="hidden"]').val();
+                    var isSelected = $(this).prop('checked');
+
+                    if (isSelected) {
+                        anyCheckboxSelected = true; 
+                    }
+
+                    treData.push({ Name: name, IsSelected: isSelected });
+                });
+
+                var treRadiosData = anyCheckboxSelected ? treData : null;
+
+                
+                var formData = new FormData($(this)[0]);
+
+                
+                formData.append('Executors', JSON.stringify(executorData));
+                formData.append('TreData', JSON.stringify(treData));
+                formData.append('selectedTre', treRadiosData);
+
+                
+                $.ajax({
+                    url: '@Url.Action("AddiSubmissionWizard", "Submission")',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (result) {
+                        
+                        console.log(result);
+                    },
+                    error: function (error) {
+                        
+                        console.log(error);
+                    }
+                });
+            });
+        });
+    </script>
+    <script src="/taginput/tagsinput.js"></script>
+    @*<script>
+        $(document).ready(function () {
+            debugger;
+            $('input[name="command"]').tagsinput({
+                trimValue: true,
+                confirmKeys: [13, 44, 32],
+                focusClass: 'my-focus-class'
+            });
+
+            $('.bootstrap-tagsinput input').on('focus', function () {
+                $(this).closest('.bootstrap-tagsinput').addClass('has-focus');
+            }).on('blur', function () {
+                $(this).closest('.bootstrap-tagsinput').removeClass('has-focus');
+            });
+
+        });
+
+    </script>*@
     @await RenderSectionAsync("Scripts", required: false)
 
     <div class="modal fade bd-tre-modal-lg" tabindex="-1" role="dialog" aria-labelledby="searchLabel" aria-hidden="true" id="showModalSearch">
