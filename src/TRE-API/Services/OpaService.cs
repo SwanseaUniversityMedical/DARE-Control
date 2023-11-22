@@ -26,7 +26,7 @@ namespace TRE_API.Services
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        public async Task<bool> CheckAccess(string userName, string projectName, DateTime expiryDate, List<TreProject>? treData)
+        public async Task<bool> CheckAccess(string userName, string projectName, DateTime expiryDate, TreProject? treData)
         {           
             var inputData = new
             {
@@ -35,7 +35,7 @@ namespace TRE_API.Services
                 userName = userName,
                     projectName = projectName,
                     expiryDate = expiryDate,
-                treData = new { tre = treData },
+                treData = new { name = "SAIL", tre = treData },
                 }
         };
             var settings = new JsonSerializerSettings

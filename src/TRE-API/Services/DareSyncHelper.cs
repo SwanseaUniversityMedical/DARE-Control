@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Sentry;
 using System.Linq;
+using Amazon.Runtime.Internal.Transform;
 
 namespace TRE_API.Services
 {
@@ -165,10 +166,10 @@ namespace TRE_API.Services
             await SyncMembershipDecisions();
 
             DateTime today = DateTime.Today;
-            //var treusers = _DbContext.Users.ToList();
            var treprojects = _DbContext.Projects.Where(x => x.Decision == Decision.Approved).ToList();
           
             var resultList = new List<TreProject>();
+            var resultListByProject = new Dictionary<TreProject,List<TreProject>>();
             foreach (var project in treprojects)
             {      
                 var projectmemberships = project.MemberDecisions.Where(x => x.Decision == Decision.Approved).ToList();
@@ -186,8 +187,8 @@ namespace TRE_API.Services
                             project.ProjectExpiryDate = DateTime.UtcNow.AddDays(_opaSettings.ExpiryDelayDays);
                           
                         }
-                        resultList.Add(project);
-                        bool hasAccess = await _opaService.CheckAccess(project.UserName, project.LocalProjectName,selectedExpiryDate, resultList);                     
+                        //resultList.Add(project);
+                        bool hasAccess = await _opaService.CheckAccess(project.UserName, project.LocalProjectName,selectedExpiryDate, project);                     
                     }
 
                 }
