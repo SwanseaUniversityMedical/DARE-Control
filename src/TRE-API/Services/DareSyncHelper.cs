@@ -165,17 +165,17 @@ namespace TRE_API.Services
             await SyncMembershipDecisions();
 
             DateTime today = DateTime.Today;
-            var treusers = _DbContext.Users.ToList();
-
+            //var treusers = _DbContext.Users.ToList();
+           var treprojects = _DbContext.Projects.Where(x => x.Decision == Decision.Approved).ToList();
+          
             var resultList = new List<TreProject>();
-            foreach (var user in treusers )
+            foreach (var project in treprojects)
             {      
-                var usermemberships = user.MemberDecisions;
-              
-                foreach (var membership in usermemberships)
+                var projectmemberships = project.MemberDecisions.Where(x => x.Decision == Decision.Approved).ToList();
+
+                foreach (var membership in projectmemberships)
                 {
                     DateTime membershipExpiryDate = membership.ProjectExpiryDate;
-                    var project = membership.Project;
                     if (project != null)
                     {
                     DateTime projectExpiryDate = project.ProjectExpiryDate;
@@ -187,7 +187,7 @@ namespace TRE_API.Services
                           
                         }
                         resultList.Add(project);
-                        bool hasAccess = await _opaService.CheckAccess(user.Username, selectedExpiryDate, resultList);                     
+                        bool hasAccess = await _opaService.CheckAccess(project.UserName, project.LocalProjectName,selectedExpiryDate, resultList);                     
                     }
 
                 }
