@@ -34,7 +34,7 @@ namespace DARE_FrontEnd.ViewComponents
                 };
                 treInfoList.Add(treInfo);
             }
-            var model = new SubmissionWizard()
+            var model = new AddiSubmissionWizard()
             {
                 ProjectId = project.Id,
                 ProjectName = project.Name,
