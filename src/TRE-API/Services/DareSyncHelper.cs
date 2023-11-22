@@ -169,7 +169,7 @@ namespace TRE_API.Services
            var treprojects = _DbContext.Projects.Where(x => x.Decision == Decision.Approved).ToList();
           
             var resultList = new List<TreProject>();
-            var resultListByProject = new Dictionary<TreProject,List<TreProject>>();
+
             foreach (var project in treprojects)
             {      
                 var projectmemberships = project.MemberDecisions.Where(x => x.Decision == Decision.Approved).ToList();

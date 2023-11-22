@@ -14,6 +14,9 @@ namespace BL.Models
     public class CheckAccessResult {
 
         public bool Allow { get; set; }
+        public bool AnyInvalidTre { get; set; }
+        public bool AnyValidUsers { get; set; }
+        public bool ProjectAllow { get; set; }
     }
 
 }
