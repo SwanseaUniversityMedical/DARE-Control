@@ -1,19 +1,90 @@
 ﻿@using BL.Models.ViewModels
 @using DARE_FrontEnd.Formatters
-@model BL.Models.ViewModels.SubmissionWizard
+@model BL.Models.ViewModels.AddiSubmissionWizard
 @{
     ViewData["Title"] = "Submission Wizard";
 }
 
 
-@using (Html.BeginForm("SubmissionWizard", "Submission", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain" }))
+@using (Html.BeginForm("", "", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain2" }))
 {
     @Html.HiddenFor(x => x.ProjectId)
     {
         <div class="modal-body">
-            <div id="TesRun" class="form-group">
-                @Html.TextAreaFor(m => m.TesRun)
+            <div class="form-group">
+                @Html.LabelFor(x => x.ProjectName,new {@class="form-label fw-bold"})
+                @Html.DisplayFor(x => x.ProjectName, new {@class="form-control"})
             </div>
+            <div class="mb-4">
+                @Html.LabelFor(x => x.TESName,new {@class="form-label fw-bold"})
+                @Html.TextBoxFor(x => x.TESName, new {@class="form-control"})
+            </div>
+            <div class="mb-4">
+                @Html.LabelFor(x => x.TESDescription,new {@class="form-label fw-bold"})
+                @Html.TextBoxFor(x => x.TESDescription, new {@class="form-control"})
+            </div>
+            <div class="mb-4">
+
+                <label for="image">Image:</label>
+                <input type="text" id="image" name="image" class="form-control"/>
+
+                <label for="command">Command:</label>
+                <input type="text" id="command" name="command" class="form-control" data-role="tagsinput" />
+                <small class="form-text text-muted">Separate keywords with enter key</small>
+                <a href="#" id="addExecutorButton" class="btn">Add Executor</a>
+            </div>
+            <div class="col-md-6 mb-4">
+                <table id="executorsTable" class="table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Command</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Executors != null)
+                        {
+                            @foreach (var executor in Model.Executors)
+                            {
+                                <tr>
+                                    <td>@executor.Image</td>
+                                    <td>@executor.Command</td>
+                                </tr>
+                            }
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6 mb-4">
+                @for (var i = 0; i < Model.TreRadios.Count(); i++)
+                {
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="form-check">
+                            @Html.HiddenFor(x => x.TreRadios[i].Name)
+                            @Html.CheckBoxFor(x=>x.TreRadios[i].IsSelected, new {@class = "form-check-input"})
+                            <label class="form-check-label" for="flexCheckDefault">
+                                @Model.TreRadios[i].Name
+                            </label>
+                        </div>
+                        @if (Model.TreRadios[i].IsOnline)
+                        {
+                            <span class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 ms-3">
+                                <i class="fa-solid fa-check-circle me-1"></i> Online
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 ms-3">
+                                <i class="fa-solid fa-ban me-1"></i> Offline
+                            </span>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="mb-4">
+            </div>
+
         </div>
 
         <div class="modal-footer">
@@ -27,6 +98,9 @@
         </div>
     }
 }
+
+
+
 
 
 

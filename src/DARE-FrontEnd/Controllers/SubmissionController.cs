@@ -10,6 +10,8 @@ using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 using NuGet.Common;
 using Serilog;
+using System;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -176,6 +178,91 @@ namespace DARE_FrontEnd.Controllers
                 Stages = _clientHelper.CallAPIWithoutModel<Stages>("/api/Submission/StageTypes/").Result
             };
             return View(test);
+        }
+        [HttpPost]
+        public IActionResult AddExecutors(string image, string command)
+        {
+            //var model = HttpContext.Session.GetString("AddiSubmissionWizard");
+            //var addiSubmissionWizard = string.IsNullOrEmpty(model)
+            //    ? new AddiSubmissionWizard()
+            //    : JsonConvert.DeserializeObject<AddiSubmissionWizard>(model);
+
+
+            //addiSubmissionWizard.Executors ??= new List<Executors>();
+            //addiSubmissionWizard.Executors.Add(new Executors { Image = image, Command = command });
+
+            //HttpContext.Session.SetString("AddiSubmissionWizard", JsonConvert.SerializeObject(addiSubmissionWizard));
+
+            //return Json(new { success = true });
+
+            var modelJson = HttpContext.Request.Cookies["AddiSubmissionWizard"];
+            var model = string.IsNullOrEmpty(modelJson)
+                ? new AddiSubmissionWizard()
+                : JsonConvert.DeserializeObject<AddiSubmissionWizard>(modelJson);
+
+            // Add the executor to your data source (e.g., a list)
+            model.Executors ??= new List<Executors>();
+            model.Executors.Add(new Executors { Image = image, Command = command });
+
+            var serializedModel = JsonConvert.SerializeObject(model);
+            HttpContext.Response.Cookies.Append("AddiSubmissionWizard", serializedModel);
+
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> AddiSubmissionWizard(AddiSubmissionWizard model, string Executors, string TreData,string selectedTre)
+        {
+            var listOfTre = "";
+
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("projectId", model.ProjectId.ToString());
+            var project = await _clientHelper.CallAPIWithoutModel<BL.Models.Project?>(
+                "/api/Project/GetProject/", paramlist);
+
+            var test = new TesTask();
+
+            List<Executors> executorsList = JsonConvert.DeserializeObject<List<Executors>>(Executors);
+            List<TreInfo> treDataList = JsonConvert.DeserializeObject<List<TreInfo>>(TreData);
+            var tesExecutors = new List<TesExecutor>();
+            foreach (var ex in executorsList)
+            {
+                List<string> commandList = ex.Command.Split(',').ToList();
+                var exet = new TesExecutor()
+                {
+                    Image = ex.Image,
+                    Command= commandList
+                };
+                tesExecutors.Add(exet);
+            }
+
+            if (selectedTre == "null")
+            {
+                var paramList = new Dictionary<string, string>();
+                paramList.Add("projectId", model.ProjectId.ToString());
+                var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList);
+                List<string> namesList = tre.Select(test => test.Name).ToList();
+                listOfTre = string.Join("|", namesList);
+            }
+            else
+            {
+                listOfTre = string.Join("|", model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
+            }
+
+            test = new TesTask()
+            {
+                Name = model.TESName,
+                Executors = tesExecutors,
+                Tags = new Dictionary<string, string>()
+                        {
+                            { "project", project.Name },
+                            { "tres", listOfTre }
+                        }
+            };
+
+            var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test);
+
+            return RedirectToAction("GetProject", "Project", new { id = model.ProjectId });
         }
     }
 }
