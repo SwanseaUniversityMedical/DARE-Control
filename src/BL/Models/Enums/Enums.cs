@@ -50,7 +50,7 @@ namespace BL.Models.Enums
         [Display(Name = "TRE Not Authorised For Project")]
         TRENotAuthorisedForProject = 10,
         //Stage 5
-        //Green
+        //Green I think this is our completed enum
         [Display(Name = "Completed")]
         Completed = 11,
         //Stage 1
