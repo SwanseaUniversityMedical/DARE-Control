@@ -707,7 +707,7 @@ namespace TRE_API
         public void ClearJob(string jobname)
         {
             Log.Information("{Function} Hangfire clear job: {Jobname}", "ClearJob", jobname);
-            
+            BackgroundJob.Delete(jobname);
             RecurringJob.RemoveIfExists(jobname);
         }
     }
