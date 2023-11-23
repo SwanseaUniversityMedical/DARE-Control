@@ -712,14 +712,6 @@ namespace TRE_API
         public void ClearJob(string jobname)
         {
             Log.Information("{Function} Hangfire clear job: {Jobname}", "ClearJob", jobname);
-            try
-            {
-                BackgroundJob.Delete(jobname);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
-            }
 
             try
             {
