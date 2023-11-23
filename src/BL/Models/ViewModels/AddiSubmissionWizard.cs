@@ -30,8 +30,10 @@ namespace BL.Models.ViewModels
         [Display(Name = "Select TREs or leave blank for all")]
         public string SelectedTres { get; set; }
         public List<Executors>? Executors { get; set; }
-
         public string? RawInput { get; set; }
+
+        public string? Query { get; set; }
+
     }
     public class Executors
     {

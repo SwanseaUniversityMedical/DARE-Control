@@ -261,7 +261,11 @@ namespace DARE_FrontEnd.Controllers
             {
                 test = JsonConvert.DeserializeObject<TesTask>(model.RawInput);
             }
-           
+
+
+
+        
+
             if (string.IsNullOrEmpty(model.TESName) == false)
             {
                 test.Name = model.TESName; 
@@ -281,6 +285,32 @@ namespace DARE_FrontEnd.Controllers
                 else
                 {
                     test.Executors.AddRange(tesExecutors);
+                }
+            }
+
+            if (string.IsNullOrEmpty(model.Query) == false)
+            {
+                var QueryExecutor = new TesExecutor()
+                {
+                    Image = _URLSettingsFrontEnd.QueryImage,
+                    Command = new List<string>
+                        {
+                            "/usr/bin/dotnet",
+                            "/app/Tre-Hasura.dll",
+                            "--Query_" + model.Query
+                        }
+                };
+
+
+
+                if (test.Executors == null)
+                {
+                    test.Executors = new List<TesExecutor>();
+                    test.Executors.Add(QueryExecutor);
+                }
+                else
+                {
+                    test.Executors.Insert(0, QueryExecutor);
                 }
             }
 
