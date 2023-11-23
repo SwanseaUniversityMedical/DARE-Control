@@ -23,6 +23,12 @@
                 @Html.LabelFor(x => x.TESDescription,new {@class="form-label fw-bold"})
                 @Html.TextBoxFor(x => x.TESDescription, new {@class="form-control"})
             </div>
+
+            <div class="mb-4">
+                @Html.LabelFor(x => x.Query,new {@class="form-label fw-bold"})
+                @Html.TextBoxFor(x => x.Query, new {@class="form-control"})
+            </div>
+
             <div class="mb-4">
 
                 <label for="image">Image:</label>
@@ -83,6 +89,10 @@
                 }
             </div>
             <div class="mb-4">
+            </div>
+            <div> Raw Json Input </div>
+            <div id="RawInput" class="form-group">
+                @Html.TextAreaFor(m => m.RawInput)
             </div>
 
         </div>

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.CodeAnalysis;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using NuGet.Common;
 using Serilog;
@@ -50,45 +51,44 @@ namespace DARE_FrontEnd.Controllers
                 paramlist.Add("projectId", model.ProjectId.ToString());
                 var project = await _clientHelper.CallAPIWithoutModel<BL.Models.Project?>(
                     "/api/Project/GetProject/", paramlist);
-                var test = new TesTask();
-                if (string.IsNullOrEmpty(model.TesRun))
+   
+
+                if (model.TreRadios == null)
                 {
-                        if (model.TreRadios == null)
-                    {
-                        var paramList = new Dictionary<string, string>();
-                        paramList.Add("projectId", model.ProjectId.ToString());
-                        var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList);
-                        List<string> namesList = tre.Select(test => test.Name).ToList();
-                        listOfTre = string.Join("|", namesList);
-                    }
-                    else
-                    {
-                        listOfTre = string.Join("|", model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
-                    }
+                    var paramList = new Dictionary<string, string>();
+                    paramList.Add("projectId", model.ProjectId.ToString());
+                    var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList);
+                    List<string> namesList = tre.Select(test => test.Name).ToList();
+                    listOfTre = string.Join("|", namesList);
+                }
+                else
+                {
+                    listOfTre = string.Join("|", model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
+                }
 
-                    if (model.OriginOption == CrateOrigin.External)
+                if (model.OriginOption == CrateOrigin.External)
+                {
+                    imageUrl = model.ExternalURL;
+                }
+                else
+                {
+                    var paramss = new Dictionary<string, string>();
+
+                    paramss.Add("bucketName", project.SubmissionBucket);
+                    if (model.File != null)
                     {
-                        imageUrl = model.ExternalURL;
+                        var uplodaResultTest = await _clientHelper.CallAPIToSendFile<APIReturn>("/api/Project/UploadToMinio", "file", model.File, paramss);
                     }
-                    else
-                    {
-                        var paramss = new Dictionary<string, string>();
+                    var minioEndpoint = await _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
 
-                        paramss.Add("bucketName", project.SubmissionBucket);
-                        if (model.File != null)
-                        {
-                            var uplodaResultTest = await _clientHelper.CallAPIToSendFile<APIReturn>("/api/Project/UploadToMinio", "file", model.File, paramss);
-                        }
-                        var minioEndpoint = await _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
+                    imageUrl = "http://" + minioEndpoint.Url + "/browser/" + project.SubmissionBucket + "/" + model.File.FileName;
 
-                        imageUrl = "http://" + minioEndpoint.Url + "/browser/" + project.SubmissionBucket + "/" + model.File.FileName;
+                }
 
-                    }
-              
-                    test = new TesTask()
-                    {
-                        Name = model.TESName,
-                        Executors = new List<TesExecutor>()
+                var TesTask = new TesTask()
+                {
+                    Name = model.TESName,
+                    Executors = new List<TesExecutor>()
                         {
                             new TesExecutor()
                             {
@@ -96,19 +96,15 @@ namespace DARE_FrontEnd.Controllers
 
                             }
                         },
-                        Tags = new Dictionary<string, string>()
+                    Tags = new Dictionary<string, string>()
                         {
                             { "project", project.Name },
                             { "tres", listOfTre }
                         }
-                    };
-                }
-                else
-                {
-                    test = JsonConvert.DeserializeObject<TesTask>(model.TesRun);
-                }
+                };
 
-                var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test);
+
+                var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", TesTask);
 
                 return RedirectToAction("GetProject", "Project", new { id = model.ProjectId });
             }
@@ -221,20 +217,23 @@ namespace DARE_FrontEnd.Controllers
                 "/api/Project/GetProject/", paramlist);
 
             var test = new TesTask();
-
-            List<Executors> executorsList = JsonConvert.DeserializeObject<List<Executors>>(Executors);
-            List<TreInfo> treDataList = JsonConvert.DeserializeObject<List<TreInfo>>(TreData);
             var tesExecutors = new List<TesExecutor>();
-            foreach (var ex in executorsList)
+
+            if (string.IsNullOrEmpty(Executors) == false && Executors != "null")
             {
-                List<string> commandList = ex.Command.Split(',').ToList();
-                var exet = new TesExecutor()
+                List<Executors> executorsList = JsonConvert.DeserializeObject<List<Executors>>(Executors);
+                foreach (var ex in executorsList)
                 {
-                    Image = ex.Image,
-                    Command= commandList
-                };
-                tesExecutors.Add(exet);
+                    List<string> commandList = ex.Command.Split(',').ToList();
+                    var exet = new TesExecutor()
+                    {
+                        Image = ex.Image,
+                        Command = commandList
+                    };
+                    tesExecutors.Add(exet);
+                }
             }
+
 
             if (selectedTre == "null")
             {
@@ -249,16 +248,92 @@ namespace DARE_FrontEnd.Controllers
                 listOfTre = string.Join("|", model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
             }
 
-            test = new TesTask()
+
+
+            test = new TesTask();
+
+            if (string.IsNullOrEmpty(model.RawInput) == false)
             {
-                Name = model.TESName,
-                Executors = tesExecutors,
-                Tags = new Dictionary<string, string>()
+                test = JsonConvert.DeserializeObject<TesTask>(model.RawInput);
+            }
+
+
+
+        
+
+            if (string.IsNullOrEmpty(model.TESName) == false)
+            {
+                test.Name = model.TESName; 
+            }
+
+            if (string.IsNullOrEmpty(model.TESDescription) == false)
+            {
+                test.Name = model.TESDescription;
+            }
+
+            if (tesExecutors.Count > 0)
+            {
+                if (test.Executors == null || test.Executors.Count == 0)
+                {
+                    test.Executors = tesExecutors;
+                }
+                else
+                {
+                    test.Executors.AddRange(tesExecutors);
+                }
+            }
+
+            if (string.IsNullOrEmpty(model.Query) == false)
+            {
+                var QueryExecutor = new TesExecutor()
+                {
+                    Image = _URLSettingsFrontEnd.QueryImage,
+                    Command = new List<string>
+                        {
+                            "/usr/bin/dotnet",
+                            "/app/Tre-Hasura.dll",
+                            "--Query_" + model.Query
+                        }
+                };
+
+
+
+                if (test.Executors == null)
+                {
+                    test.Executors = new List<TesExecutor>();
+                    test.Executors.Add(QueryExecutor);
+                }
+                else
+                {
+                    test.Executors.Insert(0, QueryExecutor);
+                }
+            }
+
+            if (test.Outputs == null || test.Outputs.Count == 0)
+            {
+                test.Outputs = new List<TesOutput>()
+                {
+                    new TesOutput()
+                    {
+                        Url = "",
+                        Name = "aName",
+                        Description = "ADescription",
+                        Path = "/app/data",
+                        Type = TesFileType.DIRECTORYEnum,
+
+                    }
+                };
+            }
+
+            if (test.Tags == null || test.Tags.Count == 0)
+            {
+                test.Tags = new Dictionary<string, string>()
                         {
                             { "project", project.Name },
                             { "tres", listOfTre }
-                        }
-            };
+                        };
+            }
+
 
             var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test);
 
