@@ -51,45 +51,44 @@ namespace DARE_FrontEnd.Controllers
                 paramlist.Add("projectId", model.ProjectId.ToString());
                 var project = await _clientHelper.CallAPIWithoutModel<BL.Models.Project?>(
                     "/api/Project/GetProject/", paramlist);
-                var test = new TesTask();
-                if (string.IsNullOrEmpty(model.TesRun))
+   
+
+                if (model.TreRadios == null)
                 {
-                        if (model.TreRadios == null)
-                    {
-                        var paramList = new Dictionary<string, string>();
-                        paramList.Add("projectId", model.ProjectId.ToString());
-                        var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList);
-                        List<string> namesList = tre.Select(test => test.Name).ToList();
-                        listOfTre = string.Join("|", namesList);
-                    }
-                    else
-                    {
-                        listOfTre = string.Join("|", model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
-                    }
+                    var paramList = new Dictionary<string, string>();
+                    paramList.Add("projectId", model.ProjectId.ToString());
+                    var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList);
+                    List<string> namesList = tre.Select(test => test.Name).ToList();
+                    listOfTre = string.Join("|", namesList);
+                }
+                else
+                {
+                    listOfTre = string.Join("|", model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
+                }
 
-                    if (model.OriginOption == CrateOrigin.External)
+                if (model.OriginOption == CrateOrigin.External)
+                {
+                    imageUrl = model.ExternalURL;
+                }
+                else
+                {
+                    var paramss = new Dictionary<string, string>();
+
+                    paramss.Add("bucketName", project.SubmissionBucket);
+                    if (model.File != null)
                     {
-                        imageUrl = model.ExternalURL;
+                        var uplodaResultTest = await _clientHelper.CallAPIToSendFile<APIReturn>("/api/Project/UploadToMinio", "file", model.File, paramss);
                     }
-                    else
-                    {
-                        var paramss = new Dictionary<string, string>();
+                    var minioEndpoint = await _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
 
-                        paramss.Add("bucketName", project.SubmissionBucket);
-                        if (model.File != null)
-                        {
-                            var uplodaResultTest = await _clientHelper.CallAPIToSendFile<APIReturn>("/api/Project/UploadToMinio", "file", model.File, paramss);
-                        }
-                        var minioEndpoint = await _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
+                    imageUrl = "http://" + minioEndpoint.Url + "/browser/" + project.SubmissionBucket + "/" + model.File.FileName;
 
-                        imageUrl = "http://" + minioEndpoint.Url + "/browser/" + project.SubmissionBucket + "/" + model.File.FileName;
+                }
 
-                    }
-              
-                    test = new TesTask()
-                    {
-                        Name = model.TESName,
-                        Executors = new List<TesExecutor>()
+                var TesTask = new TesTask()
+                {
+                    Name = model.TESName,
+                    Executors = new List<TesExecutor>()
                         {
                             new TesExecutor()
                             {
@@ -97,19 +96,15 @@ namespace DARE_FrontEnd.Controllers
 
                             }
                         },
-                        Tags = new Dictionary<string, string>()
+                    Tags = new Dictionary<string, string>()
                         {
                             { "project", project.Name },
                             { "tres", listOfTre }
                         }
-                    };
-                }
-                else
-                {
-                    test = JsonConvert.DeserializeObject<TesTask>(model.TesRun);
-                }
+                };
 
-                var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test);
+
+                var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", TesTask);
 
                 return RedirectToAction("GetProject", "Project", new { id = model.ProjectId });
             }
