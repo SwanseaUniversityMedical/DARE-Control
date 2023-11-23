@@ -309,7 +309,7 @@ namespace TRE_API
                     }
 
                     _dbContext.SaveChanges();
-
+                    Log.Information("{Function} shouldReport {shouldReport} status {status}", "CheckTESK", shouldReport ,  status.state);
                     if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR" || status.state == "SYSTEM_ERROR"))
                     {
                         Log.Information("{Function} *** status change *** {State}", "CheckTESK", status.state);
