@@ -19,7 +19,7 @@
                 @Html.LabelFor(x => x.TESName,new {@class="form-label fw-bold"})
                 @Html.TextBoxFor(x => x.TESName, new {@class="form-control"})
             </div>
-            
+
             <div class="mb-4">
                 @Html.LabelFor(x => x.TESDescription,new {@class="form-label fw-bold"})
                 @Html.TextAreaFor(x => x.TESDescription, new {@class="form-control"})
@@ -56,25 +56,25 @@
                 @Html.TextAreaFor(x => x.Query, new {@class="form-control"})
             </div>
 
-           <label class="form-label fw-bold">Executors</label>
+            <label class="form-label fw-bold">Executors</label>
             <div class="col-md-12 mb-4">
                 <table id="executorsTable" class="table">
                     <thead>
                         <tr>
-                            <th>Image</th>
-                            <th>Command</th>
+                            <th class="col-md-5">Image</th>
+                            <th class="col-md-7">Command</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr style="vertical-align: top;">
-                            <td>
+                            <td class="border-0">
                                 <input type="text" id="image" name="image" class="form-control" />
                             </td>
-                            <td>
+                            <td class="border-0">
                                 <div class="d-flex align-items-start justify-content-between">
                                     <div class="w-100 me-2">
                                         <input type="text" id="command" name="command" class="form-control" data-role="tagsinput" />
-                                        <p><small class="form-text text-muted">Separate commands with enter key</small></p>
+                                        <p><small class="form-text text-muted">Separate commands with Enter ↵ key</small></p>
                                     </div>
                                     <a href="#" id="addExecutorButton" class="btn btn-sm btn-secondary">Add</a>
                                 </div>
@@ -85,8 +85,8 @@
                             @foreach (var executor in Model.Executors)
                             {
                                 <tr>
-                                    <td>@executor.Image</td>
-                                    <td>@executor.Command</td>
+                                    <td class="col-md-5">@executor.Image</td>
+                                    <td class="col-md-7">@executor.Command</td>
                                 </tr>
                             }
                         }
@@ -94,9 +94,7 @@
                     </tbody>
                 </table>
             </div>
-            
-            <div class="mb-4">
-            </div>
+
             <label class="form-label fw-bold">Raw Json Input </label>
             <div id="RawInput" class="form-group">
                 @Html.TextAreaFor(m => m.RawInput, new {@class="form-control"})
