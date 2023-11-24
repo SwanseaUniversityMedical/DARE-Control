@@ -61,16 +61,12 @@ namespace TRE_API.Services
                     submission = "";
                 }
 
-                await _minioTreHelper.SetPublicPolicy(submission);
-
                 var outputBucket = await _minioTreHelper.CreateBucket(output);
                 if (!outputBucket)
                 {
                     Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SyncSubmissionWithTre", output);
                     output = "";
                 }
-
-                await _minioTreHelper.SetPublicPolicy(output);
 
                 _DbContext.Projects.Add(new TreProject()
                 {
@@ -79,7 +75,7 @@ namespace TRE_API.Services
                     Description = project.ProjectDescription,
                     SubmissionBucketTre = submission,
                     OutputBucketTre = output,
-
+                    OutputBucketSub = project.OutputBucket.ToLower()
                 });
             }
 

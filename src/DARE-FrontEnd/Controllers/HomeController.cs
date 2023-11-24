@@ -79,7 +79,9 @@ namespace DARE_FrontEnd.Controllers
                 }
                 else
                 {
+                    //results = new List<Project>();
                     ViewBag.SearchResults = "No search results found.";
+                    //ViewBag.SearchString = "No Results found";
                 }
                 return View();
             }

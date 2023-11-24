@@ -59,8 +59,29 @@
                         {
                             <a href="@Url.Action("SaveProjectForm", "Project",new{Projectid=@Model.Id})" class="btn btn-sm btn-primary mb-3">Edit</a>
                         }
-                        <p>Project Lead: @Model.ProjectOwner</p>
-                        <p>Project Contact: @Model.ProjectContact</p>
+                        @{
+                            if (Model.ProjectOwner == null || Model.ProjectOwner == "")
+                            {
+                            }
+                            else
+                            {
+                                <p>
+                                <p>Project Lead: @Model.ProjectOwner</p>
+                                </p>
+                            }
+                        }
+                        @{
+                            if (Model.ProjectContact == null || Model.ProjectContact == "")
+                            {
+                            }
+                            else
+                            {
+                                <p>
+                                <p>Project Contact: @Model.ProjectContact</p>
+                                </p>
+                            }
+                        }
+                        
                         @{
                             if (Model.ProjectDescription == null || Model.ProjectDescription == "")
                             {
@@ -94,6 +115,11 @@
                         <a class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" id="showModalButton">
                             <i class="fa fa-table-columns align-middle me-2"></i>
                             <span>Submit with Wizard</span>
+                        </a>
+
+                        <a class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" id="showModalButton2">
+                            <i class="fa fa-table-columns align-middle me-2"></i>
+                            <span>Submit with TES Wizard</span>
                         </a>
                     
                     </div>
@@ -278,6 +304,18 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             @await Component.InvokeAsync("SubmissionWizerd", new {projectId=pId})
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bd-tre-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="submissionModal1">
+    <div class="modal-dialog modal-md shadow-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Create Submission</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            @await Component.InvokeAsync("SubmissionWizardRaw", new {projectId=pId})
         </div>
     </div>
 </div>

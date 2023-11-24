@@ -20,7 +20,8 @@ using Newtonsoft.Json;
 using System;
 using Amazon.Runtime.Internal.Transform;
 using Serilog;
-
+using TRE_API.Models;
+using Minio;
 
 namespace TRE_API.Controllers
 {
@@ -41,6 +42,7 @@ namespace TRE_API.Controllers
         private readonly IMinioTreHelper _minioTreHelper;
         private readonly MinioTRESettings _minioTreSettings;
         private readonly string _treName;
+        private readonly AgentSettings _agentSettings;
 
         public SubmissionController(ISignalRService signalRService, IDareClientWithoutTokenHelper helper,
             ApplicationDbContext dbContext, 
@@ -51,7 +53,8 @@ namespace TRE_API.Controllers
             IMinioSubHelper minioSubHelper,
             IMinioTreHelper minioTreHelper,
             MinioTRESettings minioTreSettings, 
-            IConfiguration config)
+            IConfiguration config,
+            AgentSettings agentSettings)
         {
             _signalRService = signalRService;
             _dareHelper = helper;
@@ -64,6 +67,7 @@ namespace TRE_API.Controllers
             _minioSubHelper = minioSubHelper;
             _minioTreSettings = minioTreSettings;
             _treName = config["TreName"];
+            _agentSettings = agentSettings;
         }
 
 
@@ -226,10 +230,7 @@ namespace TRE_API.Controllers
         public async Task<IActionResult> EgressResults([FromBody] EgressReview review)
         {
             try
-            {
-                
-                
-               
+            {  
                 Dictionary<string, bool> hutchRes = new Dictionary<string, bool>();
                 ApprovalType approvalStatus;
                 var approvedCount = review.FileResults.Count(x => x.Approved);
@@ -267,7 +268,7 @@ namespace TRE_API.Controllers
                     _subHelper.UpdateStatusForTre(review.SubId.ToString(), StatusType.DataOutApproved, "");
                 }
                 bool secure = !_minioTreSettings.Url.ToLower().StartsWith("http://");
-                var bucket = _subHelper.GetOutputBucketGuts(review.SubId, true);
+                var bucket = _subHelper.GetOutputBucketGutsSub(review.SubId, true);
                 ApprovalResult hutchPayload = new ApprovalResult()
                 {
                     Host = _minioTreSettings.Url.Replace("https://", "").Replace("http://", ""),
@@ -282,11 +283,32 @@ namespace TRE_API.Controllers
                 {
                     _subHelper.UpdateStatusForTre(review.SubId, StatusType.RequestingHutchDoesFinalPackaging, "");
                 }
-                
-                //Not sure what the return type is
-                var HUTCHres =
-                    await _hutchHelper.CallAPI<ApprovalResult, APIReturn>($"/api/jobs/{review.SubId}/approval",
-                        hutchPayload);
+
+                if (_agentSettings.UseTESK == false)
+                {
+                    //Not sure what the return type is
+                    var HUTCHres =
+                        await _hutchHelper.CallAPI<ApprovalResult, APIReturn>($"/api/jobs/{review.SubId}/approval",
+                            hutchPayload);
+                }
+                else
+                {
+                    Log.Information($"EgressResults with review.OutputBucket > {review.OutputBucket} bucket.Bucket > {bucket.Bucket} ");
+                    foreach (var File in review.FileResults)
+                    {
+                        Log.Information($"EgressResults with File.Approved > {File.Approved} File.FileName > {File.FileName} ");
+                        if (File.Approved)
+                        {
+                            var source = _minioTreHelper.GetCopyObject(review.OutputBucket,  File.FileName);
+                            var resultcopy = _minioSubHelper.CopyObjectToDestination(bucket.Bucket,  File.FileName, source.Result).Result;
+                        }
+                    }
+
+                    _subHelper.UpdateStatusForTre(review.SubId, StatusType.Completed, "");
+                }
+
+
+
 
                 return StatusCode(200, new BoolReturn() { Result = true });
             }
@@ -313,9 +335,6 @@ namespace TRE_API.Controllers
                 var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Tre, "topic");
 
                 _rabbit.Advanced.Publish(exch, RoutingConstants.ProcessFinalOutput, false, new Message<FinalOutcome>(outcome));
-               
-                
-
 
                 var boolresult = new BoolReturn()
                 {

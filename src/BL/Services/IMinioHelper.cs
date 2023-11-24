@@ -20,13 +20,13 @@ namespace BL.Services
         Task<bool> FolderExists(string bucketName, string folderName);
         Task<bool> CreateFolder(string bucketName, string folderName);
 
-        Task<ListObjectsV2Response> GetFilesInBucket(string bucketName);
+        Task<ListObjectsV2Response> GetFilesInBucket(string bucketName, string prefix = "");
 
 
         Task<bool> SetPublicPolicy(string bucketName);
 
         Task<bool> BucketPolicySetPublic(string bucketName);
 
-
+        Task DeleteObject(string bucketName, string objectKey);
     }
 }

@@ -16,8 +16,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
-using DARE_API.Models;
-
+using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
 
 namespace DARE_API.Services
 {
@@ -27,17 +26,13 @@ namespace DARE_API.Services
         private readonly ApplicationDbContext _dbContext;
         private readonly MinioSettings _minioSettings;
         private readonly IMinioHelper _minioHelper;
-        private readonly TEMPTES _TEMPTES;
 
-
-
-        public ConsumeInternalMessageService(IBus bus, IServiceProvider serviceProvider, TEMPTES TEMPTES)
+        public ConsumeInternalMessageService(IBus bus, IServiceProvider serviceProvider)
         {
             _bus = bus;
             _dbContext = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<ApplicationDbContext>();
             _minioSettings = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<MinioSettings>();
-            _minioHelper = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IMinioHelper>();
-            _TEMPTES = TEMPTES; 
+            _minioHelper = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IMinioHelper>();; 
 
         }
 
@@ -83,11 +78,21 @@ namespace DARE_API.Services
                 var messageMQ = new MQFetchFile();
                 messageMQ.Url = sub.SourceCrate;
                 messageMQ.BucketName = sub.Project.SubmissionBucket;
-              
 
-                    if (_TEMPTES.UesTES == false)
+                    Uri uri = null;
+
+                    try
                     {
-                        Uri uri = new Uri(sub.DockerInputLocation);
+                        uri = new Uri(sub.DockerInputLocation);
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+
+                    if (uri != null)
+                    {
+                        
                         string fileName = Path.GetFileName(uri.LocalPath);
                         messageMQ.Key = fileName;
                         if (uri.Host + ":" + uri.Port != _minioSettings.AdminConsole)
@@ -101,7 +106,6 @@ namespace DARE_API.Services
                             };
                             messageMQ.Url = "http://" + minioEndpoint.Url + "/browser/" + messageMQ.BucketName + "/" + messageMQ.Key;
                         }
-
                     }
                    
 
