@@ -454,8 +454,12 @@
                     $('#image').val('');
                     $('#command').val('');
                 } else {
-                    alert('Both input fields must be filled.');
+                    alert('Both Image and Command fields must be filled.');
                 }
+            });
+
+            $('#addExecutorButton').click(function () {
+                $('.bootstrap-tagsinput .badge').remove();
             });
         });
     </script>
