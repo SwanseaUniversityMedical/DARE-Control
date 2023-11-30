@@ -58,13 +58,13 @@ namespace TRE_API.Services
         }
 
         public static async Task<KeycloakCredentials> UpdateCredentials(KeycloakCredentials creds, KeycloakTokenHelper keycloakTokenHelper,
-            ApplicationDbContext DbContext, IEncDecHelper encDecHelper, CredentialType type)
+            ApplicationDbContext DbContext, IEncDecHelper encDecHelper, CredentialType type, string requiredrole)
         {
             try
             {
                 creds.Valid = true;
                 var token = await keycloakTokenHelper.GetTokenForUser(creds.UserName,
-                    creds.PasswordEnc, "data-egress-admin");
+                    creds.PasswordEnc, requiredrole);
                 if (string.IsNullOrWhiteSpace(token))
                 {
                     creds.Valid = false;
