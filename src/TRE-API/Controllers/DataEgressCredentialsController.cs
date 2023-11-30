@@ -43,7 +43,7 @@ namespace TRE_API.Controllers
         [HttpPost("UpdateCredentials")]
         public async Task<KeycloakCredentials> UpdateCredentials(KeycloakCredentials creds)
         {
-            creds = await ControllerHelpers.UpdateCredentials(creds, _keycloakTokenHelper, _DbContext, _encDecHelper, CredentialType.Egress, "data-egress-admin");
+            creds = await ControllerHelpers.UpdateCredentials(creds, _keycloakTokenHelper, _DbContext, _encDecHelper, CredentialType.Egress, "dare-tre-admin");
             return creds;
         }
 
