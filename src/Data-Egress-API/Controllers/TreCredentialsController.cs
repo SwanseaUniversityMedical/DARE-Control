@@ -80,7 +80,7 @@ namespace Data_Egress_API.Controllers
                     creds.CredentialType = CredentialType.Tre;
                     add = false;
                 }
-
+                creds.CredentialType = CredentialType.Tre;
                 creds.PasswordEnc = _encDecHelper.Encrypt(creds.PasswordEnc);
                 if (add)
                 {
