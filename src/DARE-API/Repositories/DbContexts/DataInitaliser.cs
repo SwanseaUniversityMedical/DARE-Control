@@ -32,6 +32,7 @@ namespace DARE_API.Repositories.DbContexts
         }
         public void SeedData()
         {
+            return;
             var token = _keyclockTokenAPIHelper.GetTokenForUser("minioadmin", "password123", "").Result;
             try
             {
