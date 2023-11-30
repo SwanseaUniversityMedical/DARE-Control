@@ -221,16 +221,34 @@ namespace TRE_API.Services
 
         public List<Submission>? GetWaitingSubmissionForTre()
         {
-            var result =
-                _dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre").Result;
-            return result;
+            if (_dbContext.KeycloakCredentials.Any(x => x.CredentialType == CredentialType.Submission))
+            {
+
+
+                var result =
+                    _dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre")
+                        .Result;
+                return result;
+            }
+            else
+            {
+                return new List<Submission>();
+            }
         }
 
         public List<Submission>? GetRequestCancelSubsForTre()
         {
-            var result =
-                _dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetRequestCancelSubsForTre").Result;
-            return result;
+            if (_dbContext.KeycloakCredentials.Any(x => x.CredentialType == CredentialType.Submission))
+            {
+                var result =
+                    _dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetRequestCancelSubsForTre")
+                        .Result;
+                return result;
+            }
+            else
+            {
+                return new List<Submission>();
+            }
         }
 
         public BoolReturn FilesReadyForReview(ReviewFiles review, string Bucketname)

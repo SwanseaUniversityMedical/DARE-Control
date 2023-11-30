@@ -17,7 +17,7 @@ namespace BL.Services
         {
 
             Log.Information("{Function} keycloakBaseUrl > " + keycloakBaseUrl , "GetTokenForUserGuts");
-            Log.Information("{Function} username > " + username + " password: " + password, "GetTokenForUserGuts");
+           // Log.Information("{Function} username > " + username + " password: " + password, "GetTokenForUserGuts");
             var client = new HttpClient(proxyHandler);
             var disco = await client.GetDiscoveryDocumentAsync(new DiscoveryDocumentRequest
             {
