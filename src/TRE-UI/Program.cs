@@ -95,12 +95,12 @@ builder.Services.AddAuthentication(options =>
 
     options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
 })
-             
-             .AddCookie(o =>
-             {
-                 o.SessionStore = new MemoryCacheTicketStore();
-                 o.EventsType = typeof(CustomCookieEvent);
-             })
+             // ST : comment out to try get workign when no haproxy
+             //.AddCookie(o =>
+             //{
+             //    o.SessionStore = new MemoryCacheTicketStore();
+             //    o.EventsType = typeof(CustomCookieEvent);
+             //})
             .AddOpenIdConnect(options =>
             {
                 if (treKeyCloakSettings.Proxy)
