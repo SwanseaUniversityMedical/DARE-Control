@@ -27,8 +27,11 @@ builder.Services.AddControllersWithViews().AddNewtonsoftJson(options => {
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
+string AppName = typeof(Program).Module.Name.Replace(".dll", "");
+
 Log.Logger = CreateSerilogLogger(configuration, environment);
 Log.Information("TRE-UI logging LastStatusUpdate.");
+
 
 
 
@@ -244,8 +247,6 @@ Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHost
 {
     var seqServerUrl = configuration["Serilog:SeqServerUrl"];
     var seqApiKey = configuration["Serilog:SeqApiKey"];
-
-
 
     return new LoggerConfiguration()
     .MinimumLevel.Verbose()
