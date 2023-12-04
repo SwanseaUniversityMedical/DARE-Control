@@ -95,13 +95,12 @@ builder.Services.AddAuthentication(options =>
 
     options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
 })
-             // ST : comment out to try get working when no haproxy
-             //.AddCookie(o =>
-             //{
-             //    o.SessionStore = new MemoryCacheTicketStore();
-             //    o.EventsType = typeof(CustomCookieEvent);
-             //})
-            .AddCookie()
+            .AddCookie(o =>
+            {
+                o.SessionStore = new MemoryCacheTicketStore();
+                o.EventsType = typeof(CustomCookieEvent);
+            })
+  //          .AddCookie()
             .AddOpenIdConnect(options =>
             {
                 if (treKeyCloakSettings.Proxy)
@@ -267,7 +266,7 @@ app.UseStaticFiles();
 
 if (configuration["sslcookies"] == "true")
 {
-    Log.Information("Enablign Secure SSL Cookies");
+    Log.Information("Enabling Secure SSL Cookies");
     app.UseCookiePolicy(new CookiePolicyOptions
     {
         Secure = CookieSecurePolicy.Always
