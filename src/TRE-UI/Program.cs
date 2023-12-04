@@ -95,7 +95,7 @@ builder.Services.AddAuthentication(options =>
 
     options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
 })
-             // ST : comment out to try get workign when no haproxy
+             // ST : comment out to try get working when no haproxy
              //.AddCookie(o =>
              //{
              //    o.SessionStore = new MemoryCacheTicketStore();
