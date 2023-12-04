@@ -218,7 +218,7 @@ builder.Services.AddAuthentication(options =>
                 };
 
                 options.NonceCookie.SameSite = SameSiteMode.None;
-                options.CorrelationCookie.SameSite = SameSiteMode.None;
+                options.CorrelationCookie.SameSite = SameSiteMode.Lax;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     NameClaimType = "name",
