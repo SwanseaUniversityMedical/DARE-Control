@@ -101,6 +101,7 @@ builder.Services.AddAuthentication(options =>
              //    o.SessionStore = new MemoryCacheTicketStore();
              //    o.EventsType = typeof(CustomCookieEvent);
              //})
+            .AddCookie()
             .AddOpenIdConnect(options =>
             {
                 if (treKeyCloakSettings.Proxy)
