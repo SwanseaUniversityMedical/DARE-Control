@@ -265,11 +265,14 @@ Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHost
 
 app.UseStaticFiles();
 
-// ST: try removing to stop https redirect
-app.UseCookiePolicy(new CookiePolicyOptions
+if (configuration["sslcookies"] == "true")
 {
-    Secure = CookieSecurePolicy.Always
-});
+    Log.Information("Enablign Secure SSL Cookies");
+    app.UseCookiePolicy(new CookiePolicyOptions
+    {
+        Secure = CookieSecurePolicy.Always
+    });
+}
 
 app.UseRouting();
 app.UseAuthentication();
