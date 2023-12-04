@@ -218,7 +218,7 @@ builder.Services.AddAuthentication(options =>
                 };
 
                 options.NonceCookie.SameSite = SameSiteMode.None;
-                options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+                options.CorrelationCookie.SameSite = SameSiteMode.None;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     NameClaimType = "name",
@@ -265,10 +265,10 @@ Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHost
 app.UseStaticFiles();
 
 // ST: try removing to stop https redirect
-//app.UseCookiePolicy(new CookiePolicyOptions
-//{
-//    Secure = CookieSecurePolicy.Always
-//});
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    Secure = CookieSecurePolicy.Always
+});
 
 app.UseRouting();
 app.UseAuthentication();
