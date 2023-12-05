@@ -70,7 +70,7 @@ namespace Tre_Hasura
 
             }
 
-            Query = Regex.Replace(Query, @"\r\n?|\n", " "); //no new lines in json
+            Query = Regex.Replace(Query, @"\t|\r|\n", " "); //no new lines in json
 
             Query = @"{ ""query"": """ + Query + @""" }";
             Console.WriteLine("Query > " + Query);
