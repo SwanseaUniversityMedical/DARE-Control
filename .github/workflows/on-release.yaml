@@ -5,7 +5,6 @@ on:
     branches:
       - main
 
-
 permissions:
   # read needed for changes detection
   # write needed to author a Github release
