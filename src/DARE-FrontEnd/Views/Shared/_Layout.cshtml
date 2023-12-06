@@ -517,7 +517,7 @@
                     contentType: false,
                     processData: false,
                     success: function (result) {
-                        window.location.href = "/Project/GetProject/" + ProjectId;
+                        location.reload();
                         console.log(result);
                     },
                     error: function (error) {
