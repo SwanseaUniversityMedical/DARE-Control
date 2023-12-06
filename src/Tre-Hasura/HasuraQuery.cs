@@ -72,7 +72,12 @@ namespace Tre_Hasura
 
             Query = Regex.Replace(Query, @"\t|\r|\n", " "); //no new lines in json
 
-            Query = @"{ ""query"": """ + Query + @""" }";
+            var Payload = new Payload()
+            {
+                query = Query
+            };
+
+            Query = JsonConvert.SerializeObject(Payload);
             Console.WriteLine("Query > " + Query);
             Console.WriteLine("Token > " + Token);
             Console.WriteLine("URL > " + URL);
@@ -87,6 +92,12 @@ namespace Tre_Hasura
         
         }
 
+
+        public class Payload
+        {
+            public string query { get; set; }
+
+        }
 
         public class ReturnData
         {
