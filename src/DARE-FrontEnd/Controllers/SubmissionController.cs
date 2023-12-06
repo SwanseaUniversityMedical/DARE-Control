@@ -274,7 +274,7 @@ namespace DARE_FrontEnd.Controllers
 
             if (string.IsNullOrEmpty(model.TESDescription) == false)
             {
-                test.Name = model.TESDescription;
+                test.Description = model.TESDescription;
             }
 
             if (tesExecutors.Count > 0)

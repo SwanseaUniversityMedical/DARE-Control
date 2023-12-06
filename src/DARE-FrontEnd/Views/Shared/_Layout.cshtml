@@ -517,11 +517,10 @@
                     contentType: false,
                     processData: false,
                     success: function (result) {
-                        
+                        window.location.href = "/Project/GetProject/" + ProjectId;
                         console.log(result);
                     },
                     error: function (error) {
-                        
                         console.log(error);
                     }
                 });
