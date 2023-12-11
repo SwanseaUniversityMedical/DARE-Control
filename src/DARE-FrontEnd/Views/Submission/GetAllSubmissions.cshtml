@@ -20,7 +20,7 @@
     </div>
     <hr class="d-flex my-4">
     <div class="table-responsive">
-        <table id="submissionList" class="table">
+        <table id="submissionList" class="table" order="[[3, 'asc' ]]">
             <caption>List of Submissions</caption>
             <thead>
             <tr>
@@ -33,7 +33,7 @@
             </tr>
             </thead>
             <tbody>
-            @foreach (var submission in Model)
+                @foreach (var submission in Model.OrderByDescending(x => x.StartTime))
             {
                 <tr>
                     <td>
