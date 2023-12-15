@@ -44,7 +44,11 @@ namespace TRE_API.Controllers
         [HttpPost("UpdateCredentials")]
         public async Task<KeycloakCredentials> UpdateCredentials(KeycloakCredentials creds)
         {
-            creds = await ControllerHelpers.UpdateCredentials(creds, _keycloakTokenHelper, _DbContext, _encDecHelper, CredentialType.Submission);
+            if (string.IsNullOrWhiteSpace(creds.UserName))
+            {
+                var sdfsdf = 1;
+            }
+            creds = await ControllerHelpers.UpdateCredentials(creds, _keycloakTokenHelper, _DbContext, _encDecHelper, CredentialType.Submission, "dare-tre-admin");
             return creds;
         }
     }

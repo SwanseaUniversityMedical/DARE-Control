@@ -221,7 +221,7 @@ namespace TRE_API.Controllers
         }
 
 
-
+        [Authorize(Roles = "dare-tre-admin,data-egress-admin")]
         [HttpPost]
         [Route("EgressResults")]
         [ValidateModelState]

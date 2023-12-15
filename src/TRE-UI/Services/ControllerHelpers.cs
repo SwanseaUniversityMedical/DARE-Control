@@ -23,7 +23,7 @@ namespace TRE_UI.Services
 
                 var result =
                     await clientHelper.CallAPI<KeycloakCredentials, KeycloakCredentials>(
-                        "/api/" + credentials +"/UpdateCredentials", credentials);
+                        "/api/" + controller +"/UpdateCredentials", credentials);
                 if (result.Valid)
                 {
                     return true;

@@ -12,7 +12,6 @@ namespace DARE_FrontEnd.Controllers
     [Authorize(Roles = "dare-control-admin")]
     public class TreController : Controller
     {
-
         private readonly IDareClientHelper _clientHelper;
         
         private readonly FormIOSettings _formIOSettings;

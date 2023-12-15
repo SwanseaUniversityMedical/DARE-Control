@@ -89,7 +89,7 @@
                             else
                             {
                                 <p>
-                                    Project Description: @Model.ProjectDescription
+                                    @*Project Description: *@ @Model.ProjectDescription
                                 </p>
                             }
                         }
@@ -97,9 +97,14 @@
                             Project Start Date: @Model.StartDate.ToString("dd/MM/yyyy") <br />
                             Project End Date: @Model.EndDate.ToString("dd/MM/yyyy")
                         </p>
+                        @{
+                            var minio = @ViewBag.URLBucket;
+                        }
+
                         <p>
-                            Submission Bucket: <a href="#insertreallink">@Html.Raw(Model.SubmissionBucket)</a><br />
-                            Output Bucket: <a href="#insertreallink">@Html.Raw(Model.OutputBucket)</a>
+                            <a class="btn btn-sm btn-primary me-2" target="_blank" href="http://@minio/browser/@Model.SubmissionBucket" rel="noopener">Submission Bucket <i class="fa fa-external-link ms-2"></i></a>
+                            <a class="btn btn-sm btn-outline-secondary" target="_blank" href="http://@minio/browser/@Model.OutputBucket" rel="noopener">Output Bucket<i class="fa fa-external-link ms-2"></i></a>
+
                         </p>
                     </div>
                 </div>
@@ -119,7 +124,7 @@
 
                         <a class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" id="showModalButton2">
                             <i class="fa fa-table-columns align-middle me-2"></i>
-                            <span>Submit with Raw Wizard</span>
+                            <span>Submit with TES Wizard</span>
                         </a>
                     
                     </div>
@@ -309,7 +314,7 @@
 </div>
 
 <div class="modal fade bd-tre-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="submissionModal1">
-    <div class="modal-dialog modal-md shadow-lg">
+    <div class="modal-dialog modal-lg shadow-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Create Submission</h1>

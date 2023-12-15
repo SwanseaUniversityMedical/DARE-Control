@@ -43,6 +43,10 @@ namespace TRE_API.Services
                     x.CredentialType == type);
                 if (creds != null)
                 {
+                    if (string.IsNullOrWhiteSpace(creds.UserName))
+                    {
+                        var sdfsdf = 1;
+                    }
                     var token = await keycloakTokenHelper.GetTokenForUser(creds.UserName,
                         encDecHelper.Decrypt(creds.PasswordEnc), "dare-tre-admin");
                     result.Result = !string.IsNullOrWhiteSpace(token);
@@ -58,28 +62,29 @@ namespace TRE_API.Services
         }
 
         public static async Task<KeycloakCredentials> UpdateCredentials(KeycloakCredentials creds, KeycloakTokenHelper keycloakTokenHelper,
-            ApplicationDbContext DbContext, IEncDecHelper encDecHelper, CredentialType type)
+            ApplicationDbContext DbContext, IEncDecHelper encDecHelper, CredentialType type, string requiredrole)
         {
             try
             {
                 creds.Valid = true;
                 var token = await keycloakTokenHelper.GetTokenForUser(creds.UserName,
-                    creds.PasswordEnc, "data-egress-admin");
+                    creds.PasswordEnc, requiredrole);
                 if (string.IsNullOrWhiteSpace(token))
                 {
+                    Log.Information($"UpdateCredentials creds.Valid = false  for {creds.UserName}");
                     creds.Valid = false;
                     return creds;
                 }
 
                 var add = true;
-                var dbcred = DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Tre);
+                var dbcred = DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == type);
                 if (dbcred != null)
                 {
                     creds.Id = dbcred.Id;
-                    creds.CredentialType = type;
+                    
                     add = false;
                 }
-
+                creds.CredentialType = type;
                 creds.PasswordEnc = encDecHelper.Encrypt(creds.PasswordEnc);
                 if (add)
                 {

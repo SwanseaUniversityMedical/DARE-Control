@@ -260,192 +260,197 @@ namespace TRE_API
 
         public async Task CheckTESK(string taskID, int subId, string tesId, string outputBucket)
         {
-            
-            Log.Information("{Function} Check TESK : {TaskId},  TES : {TesId}, sub: {SubId}", "CheckTESK", taskID, tesId, subId);
-            string url = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks/" + taskID + "?view=basic";
-
-            HttpClientHandler handler = new HttpClientHandler();
-
-            if (_AgentSettings.Proxy)
+            try
             {
-                handler = new HttpClientHandler
+                Log.Information("{Function} Check TESK : {TaskId},  TES : {TesId}, sub: {SubId}", "CheckTESK", taskID, tesId, subId);
+                string url = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks/" + taskID + "?view=basic";
+
+                HttpClientHandler handler = new HttpClientHandler();
+
+                if (_AgentSettings.Proxy)
                 {
-                    Proxy = new WebProxy(_AgentSettings.ProxyAddresURL, true), // Replace with your proxy server URL
-                    UseProxy = _AgentSettings.Proxy,
-                };
-            }
+                    handler = new HttpClientHandler
+                    {
+                        Proxy = new WebProxy(_AgentSettings.ProxyAddresURL, true), // Replace with your proxy server URL
+                        UseProxy = _AgentSettings.Proxy,
+                    };
+                }
 
-            using (HttpClient client = new HttpClient(handler))
-            {
-                HttpResponseMessage response = client.GetAsync(url).Result;
-                Log.Information("{Function} Response status {State}", "CheckTESK", response.StatusCode);
-                Console.WriteLine(response.StatusCode);
-
-                if (response.IsSuccessStatusCode)
+                using (HttpClient client = new HttpClient(handler))
                 {
-                    string content = response.Content.ReadAsStringAsync().Result;
+                    HttpResponseMessage response = client.GetAsync(url).Result;
+                    Log.Information("{Function} Response status {State}", "CheckTESK", response.StatusCode);
+                    Console.WriteLine(response.StatusCode);
 
-
-                    TESKstatus status = JsonConvert.DeserializeObject<TESKstatus>(content);
-
-                    var shouldReport = false;
-
-                    var fromDatabase = (_dbContext.TESK_Status.Where(x => x.id == status.id)).FirstOrDefault();
-
-                    if (fromDatabase is null)
+                    if (response.IsSuccessStatusCode)
                     {
-                        shouldReport = true;
-                        _dbContext.Add(status);
-                    }
-                    else
-                    {
-                        if (fromDatabase.state != status.state)
+                        string content = response.Content.ReadAsStringAsync().Result;
+
+
+                        TESKstatus status = JsonConvert.DeserializeObject<TESKstatus>(content);
+
+                        var shouldReport = false;
+
+                        var fromDatabase = (_dbContext.TESK_Status.Where(x => x.id == status.id)).FirstOrDefault();
+
+                        if (fromDatabase is null)
                         {
                             shouldReport = true;
-                            fromDatabase.state = status.state;
-                            _dbContext.Update(fromDatabase);
-
+                            _dbContext.Add(status);
                         }
-                    }
-
-                    _dbContext.SaveChanges();
-
-                    if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR" || status.state == "SYSTEM_ERROR"))
-                    {
-                        Log.Information("{Function} *** status change *** {State}", "CheckTESK", status.state);
-                        
-
-                        // send update
-                        using (var scope = _serviceProvider.CreateScope())
+                        else
                         {
-                            TokenToExpire Token = null;
-                            var statusMessage = StatusType.TransferredToPod;
-                            switch (status.state)
+                            if (fromDatabase.state != status.state)
                             {
-                                case "QUEUED":
-                                    statusMessage = StatusType.TransferredToPod;
-                                    break;
-                                case "RUNNING":
-                                    statusMessage = StatusType.PodProcessing;
-                                    break;
-                                case "COMPLETE":
-                                    statusMessage = StatusType.PodProcessingComplete;
-                                    
-                                    Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
-                                    Log.Information("{Function} *** COMPLETE remove Token *** {Token} ", "CheckTESK", Token);
-                                    
-                                    if (Token != null)
-                                    {
-                                        _dbContext.TokensToExpire.Remove(Token);
-                                        _hasuraAuthenticationService.ExpirerToken(Token.Token);
-                                    }
-                                    
-                                    _dbContext.SaveChanges();
-                                    break;
-                                case "EXECUTOR_ERROR":
-                                    statusMessage = StatusType.Cancelled;
-                                    Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
-                                    Log.Information("{Function} *** EXECUTOR_ERROR remove Token *** {Token} ", "CheckTESK", Token);
-                                    
-                                    if (Token != null)
-                                    {
-                                        _dbContext.TokensToExpire.Remove(Token);
-                                        _hasuraAuthenticationService.ExpirerToken(Token.Token);
-                                    }
-                                    
-                                    _dbContext.SaveChanges();
+                                shouldReport = true;
+                                fromDatabase.state = status.state;
+                                _dbContext.Update(fromDatabase);
 
-                                    break;
-                                case "SYSTEM_ERROR":
-                                    statusMessage = StatusType.Cancelled;
-                                    Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
-                                    Log.Information("{Function} *** SYSTEM_ERROR remove Token *** {Token} ", "CheckTESK", Token);
-
-                                    if (Token != null)
-                                    {
-                                        _dbContext.TokensToExpire.Remove(Token);
-                                        _hasuraAuthenticationService.ExpirerToken(Token.Token);
-                                    }
-
-                                    _dbContext.SaveChanges();
-
-                                    break;
                             }
+                        }
 
-                            APIReturn? result = null;
-                            try
+                        _dbContext.SaveChanges();
+                        Log.Information("{Function} shouldReport {shouldReport} status {status}", "CheckTESK", shouldReport, status.state);
+                        if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR" || status.state == "SYSTEM_ERROR"))
+                        {
+                            Log.Information("{Function} *** status change *** {State}", "CheckTESK", status.state);
+
+
+                            // send update
+                            using (var scope = _serviceProvider.CreateScope())
                             {
-                                result = _subHelper.UpdateStatusForTre(subId.ToString(), statusMessage, "");
-                            }
-                            catch (Exception ex)
-                            {
-                                Log.Error(ex.ToString());
-                            }
-                            
-                            if (status.state == "COMPLETE")
-                            {
-                                Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == COMPLETE ");
+                                TokenToExpire Token = null;
+                                var statusMessage = StatusType.TransferredToPod;
+                                switch (status.state)
+                                {
+                                    case "QUEUED":
+                                        statusMessage = StatusType.TransferredToPod;
+                                        break;
+                                    case "RUNNING":
+                                        statusMessage = StatusType.PodProcessing;
+                                        break;
+                                    case "COMPLETE":
+                                        statusMessage = StatusType.PodProcessingComplete;
+
+                                        Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
+                                        Log.Information("{Function} *** COMPLETE remove Token *** {Token} ", "CheckTESK", Token);
+
+                                        if (Token != null)
+                                        {
+                                            _dbContext.TokensToExpire.Remove(Token);
+                                            _hasuraAuthenticationService.ExpirerToken(Token.Token);
+                                        }
+
+                                        _dbContext.SaveChanges();
+                                        break;
+                                    case "EXECUTOR_ERROR":
+                                        statusMessage = StatusType.Cancelled;
+                                        Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
+                                        Log.Information("{Function} *** EXECUTOR_ERROR remove Token *** {Token} ", "CheckTESK", Token);
+
+                                        if (Token != null)
+                                        {
+                                            _dbContext.TokensToExpire.Remove(Token);
+                                            _hasuraAuthenticationService.ExpirerToken(Token.Token);
+                                        }
+
+                                        _dbContext.SaveChanges();
+
+                                        break;
+                                    case "SYSTEM_ERROR":
+                                        statusMessage = StatusType.Cancelled;
+                                        Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
+                                        Log.Information("{Function} *** SYSTEM_ERROR remove Token *** {Token} ", "CheckTESK", Token);
+
+                                        if (Token != null)
+                                        {
+                                            _dbContext.TokensToExpire.Remove(Token);
+                                            _hasuraAuthenticationService.ExpirerToken(Token.Token);
+                                        }
+
+                                        _dbContext.SaveChanges();
+
+                                        break;
+                                }
+
+                                APIReturn? result = null;
                                 try
                                 {
-                                    result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Completed, "","");
+                                    result = _subHelper.UpdateStatusForTre(subId.ToString(), statusMessage, "");
                                 }
                                 catch (Exception ex)
                                 {
                                     Log.Error(ex.ToString());
                                 }
+
+                                if (status.state == "COMPLETE")
+                                {
+                                    Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == COMPLETE ");
+                                    try
+                                    {
+                                        result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Completed, "", "");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log.Error(ex.ToString());
+                                    }
+                                }
+                                else if (status.state == "EXECUTER_ERROR" || status.state == "SYSTEM_ERROR")
+                                {
+                                    Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == EXECUTER_ERROR or SYSTEM_ERROR ");
+                                    try
+                                    {
+                                        result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Failed, "", "");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log.Error(ex.ToString());
+                                    }
+                                }
                             }
-                            else if (status.state == "EXECUTER_ERROR" || status.state == "SYSTEM_ERROR")
+                            Log.Information($" Checking status ");
+                            // are we done ?
+                            if (status.state == "COMPLETE" || status.state == "EXECUTER_ERROR" || status.state == "SYSTEM_ERROR")
                             {
-                                Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == EXECUTER_ERROR or SYSTEM_ERROR ");
-                                try
+                                Log.Information($"  status.state == \"COMPLETE\" || status.state == \"EXECUTOR_ERROR\" or SYSTEM_ERROR ");
+
+                                ClearJob(taskID);
+                                var outputBucketGood = outputBucket.Replace(_AgentSettings.TESKOutputBucketPrefix, "");
+                                var data = await _minioTreHelper.GetFilesInBucket(outputBucketGood, $"{subId}");
+                                var files = new List<string>();
+
+                                foreach (var s3Object in data.S3Objects) //TODO is this right?
                                 {
-                                    result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Failed, "", "");
+                                    Log.Information("{Function} *** added file from outputBucket *** {file} ", "CheckTESK", s3Object.Key);
+                                    files.Add(s3Object.Key);
                                 }
-                                catch (Exception ex)
+
+                                Log.Information($"  FilesReadyForReview files {files.Count} ");
+                                _subHelper.FilesReadyForReview(new ReviewFiles()
                                 {
-                                    Log.Error(ex.ToString());
-                                }
+                                    SubId = subId.ToString(),
+                                    Files = files
+                                }, outputBucketGood);
+
                             }
                         }
-                        Log.Information($" Checking status ");
-                        // are we done ?
-                        if (status.state == "COMPLETE" || status.state == "EXECUTER_ERROR" || status.state == "SYSTEM_ERROR")
-                        {
-                            Log.Information($"  status.state == \"COMPLETE\" || status.state == \"EXECUTOR_ERROR\" or SYSTEM_ERROR ");
+                        else
+                            Log.Information("{Function} No change", "CheckTESK");
 
-                            ClearJob(taskID);
-                            var outputBucketGood = outputBucket.Replace(_AgentSettings.TESKOutputBucketPrefix, "");
-                            var data = await _minioTreHelper.GetFilesInBucket(outputBucketGood, $"{subId}" );
-                            var files = new List<string>();
 
-                            foreach (var s3Object in data.S3Objects) //TODO is this right?
-                            {
-                                Log.Information("{Function} *** added file from outputBucket *** {file} ", "CheckTESK", s3Object.Key);
-                                files.Add(s3Object.Key);
-                            }
 
-                            Log.Information($"  FilesReadyForReview files {files.Count} ");
-                            _subHelper.FilesReadyForReview(new ReviewFiles()
-                            {
-                                SubId = subId.ToString(), 
-                                Files = files
-                            }, outputBucketGood);
-
-                        }
                     }
                     else
-                        Log.Information("{Function} No change", "CheckTESK");
-                    
+                    {
+                        Log.Error("{Function} HTTP Request {url} failed with status code {code}", "CheckTESK", url, response.StatusCode);
 
-
-                }
-                else
-                {
-                    Log.Error("{Function} HTTP Request {url} failed with status code {code}", "CheckTESK", url, response.StatusCode);
-                    
+                    }
                 }
             }
-
+            catch (Exception e)
+            {
+                Log.Error(e.ToString());
+            }
 
         }
 
@@ -707,8 +712,17 @@ namespace TRE_API
         public void ClearJob(string jobname)
         {
             Log.Information("{Function} Hangfire clear job: {Jobname}", "ClearJob", jobname);
-            
-            RecurringJob.RemoveIfExists(jobname);
+
+            try
+            {
+                RecurringJob.RemoveIfExists(jobname);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+
+           
         }
     }
 

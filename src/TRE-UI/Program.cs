@@ -27,8 +27,11 @@ builder.Services.AddControllersWithViews().AddNewtonsoftJson(options => {
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
+string AppName = typeof(Program).Module.Name.Replace(".dll", "");
+
 Log.Logger = CreateSerilogLogger(configuration, environment);
 Log.Information("TRE-UI logging LastStatusUpdate.");
+
 
 
 
@@ -92,12 +95,12 @@ builder.Services.AddAuthentication(options =>
 
     options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
 })
-             
-             .AddCookie(o =>
-             {
-                 o.SessionStore = new MemoryCacheTicketStore();
-                 o.EventsType = typeof(CustomCookieEvent);
-             })
+            .AddCookie(o =>
+            {
+                o.SessionStore = new MemoryCacheTicketStore();
+                o.EventsType = typeof(CustomCookieEvent);
+            })
+  //          .AddCookie()
             .AddOpenIdConnect(options =>
             {
                 if (treKeyCloakSettings.Proxy)
@@ -245,8 +248,6 @@ Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHost
     var seqServerUrl = configuration["Serilog:SeqServerUrl"];
     var seqApiKey = configuration["Serilog:SeqApiKey"];
 
-
-
     return new LoggerConfiguration()
     .MinimumLevel.Verbose()
     .Enrich.WithProperty("ApplicationContext", environment.ApplicationName)
@@ -263,11 +264,14 @@ Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHost
 
 app.UseStaticFiles();
 
-// ST: try removing to stop https redirect
-//app.UseCookiePolicy(new CookiePolicyOptions
-//{
-//    Secure = CookieSecurePolicy.Always
-//});
+if (configuration["sslcookies"] == "true")
+{
+    Log.Information("Enabling Secure SSL Cookies");
+    app.UseCookiePolicy(new CookiePolicyOptions
+    {
+        Secure = CookieSecurePolicy.Always
+    });
+}
 
 app.UseRouting();
 app.UseAuthentication();
