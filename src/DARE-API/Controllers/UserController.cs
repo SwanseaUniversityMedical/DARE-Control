@@ -43,6 +43,7 @@ namespace DARE_API.Controllers
             {
 
                 User userData = JsonConvert.DeserializeObject<User>(data.FormIoString);
+                userData.FullName = userData.FullName.Trim();
                 userData.Name = userData.Name.Trim();
                 userData.Email = userData.Email.Trim();
                 userData.FormData = data.FormIoString;

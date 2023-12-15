@@ -29,8 +29,8 @@
                 <th>Memberships</th>
                 <th>Decision</th>
                 <th>Status</th>
-                    <th>ProjectExpiryDate</th>
-                    <th></th>
+                   @* <th>ProjectExpiryDate</th>*@
+                <th>Review</th>
                
             </tr>
             </thead>
@@ -81,18 +81,20 @@
                             @:Last Updated: @project.LastDecisionDate by @project.ApprovedBy
                         }
                     </td>
-                        <td>
+                        <td class="text-center">
+                            <a href="@Url.Action("EditProject", new { Projectid = @project.Id })" class="btn btn-sm btn-outline-primary"><span class="small">Review</span></a>
+                        </td>
+                    <td></td>
+                       @* <td>
 
                             <p class="my-4">
                                 @project.ProjectExpiryDate
                             </p>
-                        </td>
+                        </td>*@
                     @*<td>
                             @project.Description
                         </td>*@
-                    <td class="text-center">
-                        <a href="@Url.Action("EditProject", new { Projectid = @project.Id })" class="btn btn-sm btn-outline-primary"><span class="small">Review</span></a>
-                    </td>
+                    
                 </tr>
             }
             </tbody>

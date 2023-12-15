@@ -12,6 +12,7 @@ using BL.Models.Tes;
 using Newtonsoft.Json;
 using Serilog;
 using EasyNetQ.Management.Client.Model;
+using DARE_FrontEnd.Models;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -21,11 +22,16 @@ namespace DARE_FrontEnd.Controllers
         private readonly IDareClientHelper _clientHelper;
 
         private readonly FormIOSettings _formIOSettings;
-        public ProjectController(IDareClientHelper client, FormIOSettings formIo)
+
+
+        private readonly URLSettingsFrontEnd _URLSettingsFrontEnd;
+        public ProjectController(IDareClientHelper client, FormIOSettings formIo, URLSettingsFrontEnd URLSettingsFrontEnd)
         {
             _clientHelper = client;
 
             _formIOSettings = formIo;
+
+            _URLSettingsFrontEnd = URLSettingsFrontEnd;
 
         }
 
@@ -52,6 +58,10 @@ namespace DARE_FrontEnd.Controllers
                 .ToList();
 
             var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
+
+
+            ViewBag.minioendpoint = minioEndpoint?.Url;
+            ViewBag.URLBucket = _URLSettingsFrontEnd.MinioUrl;
 
             var projectView = new ProjectUserTre()
             {
