@@ -35,7 +35,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                @foreach (var egressSubmission in Model)
+                @foreach (var egressSubmission in Model.OrderByDescending(x => x.Completed))
                 {
                     <tr>
                         <td>
