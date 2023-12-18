@@ -190,9 +190,14 @@ namespace TRE_API.Controllers
             {
                 _subHelper.UpdateStatusForTre(review.SubId, StatusType.DataOutRequested, "");
                 var bucket = _subHelper.GetOutputBucketGuts(review.SubId, false);
+                var subId = Int32.Parse(review.SubId);
+                var ProjectName = "";
+                ProjectName = _dbContext.Projects.Where(x => x.SubmissionProjectId == subId).FirstOrDefault().SubmissionProjectName;
                 var egsub = new EgressSubmission()
                 {
                     SubmissionId = review.SubId,
+                   
+                    ProjectName = ProjectName,
                     OutputBucket = bucket.Bucket,
                     Status = EgressStatus.NotCompleted,
                     Files = new List<EgressFile>()

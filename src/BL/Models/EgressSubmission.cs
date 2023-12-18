@@ -17,7 +17,7 @@ namespace BL.Models
         public string? OutputBucket { get; set; }
 
        
-
+        public string ProjectName { get; set; } 
         public DateTime? Completed { get; set; }
         public string? Reviewer { get; set; }
         public virtual List<EgressFile> Files { get; set; }
