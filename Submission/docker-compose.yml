@@ -2,7 +2,7 @@ version: '3.5'
 services:
   
   submission-ui:
-    image: harbor.ukserp.ac.uk/dare-trefx/control-main-ui:1.177.4
+    image: harbor.ukserp.ac.uk/dare-trefx/control-main-ui:1.178.0
     container_name: submission-ui
     networks:
       - sub-net

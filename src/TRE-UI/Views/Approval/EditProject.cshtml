@@ -59,8 +59,12 @@
                     <h2 class="fs-5 mt-5">Project Expiry Date</h2>
                     <p>The date the project expires.</p>
 
+                                 
                     <div id ="date" class="form-group">
-                        @Html.TextBoxFor(x => x.ProjectExpiryDate, new { @class = "form-control", @placeholder = "kindly input date", @type = "date", @Value = Model.ProjectExpiryDate})
+                        @Html.TextBoxFor(x => x.ProjectExpiryDate, new { @class = "form-control", @Value=Model.ProjectExpiryDate.ToString("yyyy-MM-dd"), type = "date"});
+                        <script>
+                            document.getElementById("ProjectExpiryDate").valueAsDate = new Date("@Model.ProjectExpiryDate.ToString("yyyy-MM-dd")");
+                        </script>
 
                     </div>
                     <h2 class="fs-5 mt-5">Decision</h2>
