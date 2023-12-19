@@ -221,9 +221,15 @@ namespace DARE_FrontEnd.Controllers
 
             if (string.IsNullOrEmpty(Executors) == false && Executors != "null")
             {
+                bool First = true;
                 List<Executors> executorsList = JsonConvert.DeserializeObject<List<Executors>>(Executors);
                 foreach (var ex in executorsList)
                 {
+                    if (First)
+                    {
+                        First = false;
+                        continue;
+                    }
                     List<string> commandList = ex.Command.Split(',').ToList();
                     var exet = new TesExecutor()
                     {
@@ -268,7 +274,7 @@ namespace DARE_FrontEnd.Controllers
 
             if (string.IsNullOrEmpty(model.TESDescription) == false)
             {
-                test.Name = model.TESDescription;
+                test.Description = model.TESDescription;
             }
 
             if (tesExecutors.Count > 0)

@@ -60,13 +60,22 @@
                             <a href="@Url.Action("SaveProjectForm", "Project",new{Projectid=@Model.Id})" class="btn btn-sm btn-primary mb-3">Edit</a>
                         }
                         @{
+                            var minio = @ViewBag.URLBucket;
+                        }
+
+                        <p>
+                            <a class="btn btn-sm btn-primary me-2" target="_blank" href="http://@minio/browser/@Model.SubmissionBucket" rel="noopener">Submission Bucket <i class="fa fa-external-link ms-2"></i></a>
+                            <a class="btn btn-sm btn-outline-secondary" target="_blank" href="http://@minio/browser/@Model.OutputBucket" rel="noopener">Output Bucket<i class="fa fa-external-link ms-2"></i></a>
+
+                        </p>
+                        @{
                             if (Model.ProjectOwner == null || Model.ProjectOwner == "")
                             {
                             }
                             else
                             {
                                 <p>
-                                <p>Project Lead: @Model.ProjectOwner</p>
+                                    Project Lead: <strong>@Model.ProjectOwner</strong>
                                 </p>
                             }
                         }
@@ -76,12 +85,10 @@
                             }
                             else
                             {
-                                <p>
-                                <p>Project Contact: @Model.ProjectContact</p>
-                                </p>
+                                <p>Project Contact: <strong>@Model.ProjectContact</strong></p>
                             }
                         }
-                        
+
                         @{
                             if (Model.ProjectDescription == null || Model.ProjectDescription == "")
                             {
@@ -89,18 +96,15 @@
                             else
                             {
                                 <p>
-                                    Project Description: @Model.ProjectDescription
+                                    @*Project Description: *@ @Model.ProjectDescription
                                 </p>
                             }
                         }
-                        <p class="text-muted fs-7">
+                        <p class="text-muted fs-7 mt-4">
                             Project Start Date: @Model.StartDate.ToString("dd/MM/yyyy") <br />
                             Project End Date: @Model.EndDate.ToString("dd/MM/yyyy")
                         </p>
-                        <p>
-                            Submission Bucket: <a href="#insertreallink">@Html.Raw(Model.SubmissionBucket)</a><br />
-                            Output Bucket: <a href="#insertreallink">@Html.Raw(Model.OutputBucket)</a>
-                        </p>
+
                     </div>
                 </div>
             </div>
@@ -121,14 +125,14 @@
                             <i class="fa fa-table-columns align-middle me-2"></i>
                             <span>Submit with TES Wizard</span>
                         </a>
-                    
+
                     </div>
                     <hr class="d-flex my-4">
                 }
 
 
                 @await Html.PartialAsync("_SubmissionList", new SubmissionList(){Submissions  = Model.Submissions.Where(x => x.Parent == null).ToList(), UseParent = false})
-              
+
             </div>
             <div class="tab-pane fade" id="userMembership" role="tabpanel" aria-labelledby="people">
                 @if (User.IsInRole("dare-control-admin"))
@@ -163,57 +167,57 @@
                         <ul class="list-group">
                             @foreach (var tre in Model.Tres)
                             {
-                                 <li class="list-group-item justify-content-between d-flex">
-                                <a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })" class="fw-bold">@tre.Name</a>
+                                <li class="list-group-item justify-content-between d-flex">
+                                    <a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })" class="fw-bold">@tre.Name</a>
                                     @{
                                         var doesNotHaveDecision = true;
-                                     }
+                                    }
                                     <span class="d-flex align-items-center">
-                                @foreach (var decision in tre.ProjectTreDecisions.Where(x => x.SubmissionProj.Id == Model.Id))
-                                {
+                                        @foreach (var decision in tre.ProjectTreDecisions.Where(x => x.SubmissionProj.Id == Model.Id))
+                                        {
 
-                                        
-                                     
 
-                                        
-                                                    @if (decision.Decision == BL.Models.Enums.Decision.Approved)
-                                                    {
+
+
+
+                                            @if (decision.Decision == BL.Models.Enums.Decision.Approved)
+                                            {
                                                 doesNotHaveDecision = false;
                                                 <span class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 me-3">
-                                                            <i class="fa-solid fa-check-circle me-1"></i> @decision.Decision.ToString()
-                                                        </span>
-                                                    }
-                                                    else if (decision.Decision == BL.Models.Enums.Decision.Undecided)
-                                                    {
+                                                    <i class="fa-solid fa-check-circle me-1"></i> @decision.Decision.ToString()
+                                                </span>
+                                            }
+                                            else if (decision.Decision == BL.Models.Enums.Decision.Undecided)
+                                            {
                                                 doesNotHaveDecision = false;
 
-                                                        <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 me-3">
-                                                            <i class="fa-solid fa-circle-notch fa-spin me-1"></i> @decision.Decision.ToString()
-                                                        </span>
-                                                    }
-                                                    else if (decision.Decision == BL.Models.Enums.Decision.Rejected)
-                                                    {
+                                                <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 me-3">
+                                                    <i class="fa-solid fa-circle-notch fa-spin me-1"></i> @decision.Decision.ToString()
+                                                </span>
+                                            }
+                                            else if (decision.Decision == BL.Models.Enums.Decision.Rejected)
+                                            {
                                                 doesNotHaveDecision = false;
 
-                                                        <span class="badge  px-2 badge-sm bg-danger text-light rounded-pill m-0 me-3">
-                                                            <i class="fa-solid fa-close me-1"></i> @decision.Decision.ToString()
-                                                        </span>
-                                                    }
-                                                
-                                            
-                                }
-
-                                    @if (doesNotHaveDecision == true)
-                                    {
-                                        <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 me-3">
-                                            <i class="fa-solid fa-circle-notch fa-spin me-1"></i> Undecided
-                                        </span>
+                                                <span class="badge  px-2 badge-sm bg-danger text-light rounded-pill m-0 me-3">
+                                                    <i class="fa-solid fa-close me-1"></i> @decision.Decision.ToString()
+                                                </span>
+                                            }
 
 
-                                    }
-                                    <a href="@Url.Action("RemoveTreFromProject", "Project",new{ProjectId=Model.Id,TreId=tre.Id})">
-                                        <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
-                                    </a>
+                                        }
+
+                                        @if (doesNotHaveDecision == true)
+                                        {
+                                            <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 me-3">
+                                                <i class="fa-solid fa-circle-notch fa-spin me-1"></i> Undecided
+                                            </span>
+
+
+                                        }
+                                        <a href="@Url.Action("RemoveTreFromProject", "Project",new{ProjectId=Model.Id,TreId=tre.Id})">
+                                            <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
+                                        </a>
                                     </span>
                                 </li>
 
@@ -243,7 +247,7 @@
                                 {
                                     <tr>
                                         <td>
-                                            <input type="checkbox" value="@user.Value" id="@user.Value" name="selectedUser" class="form-check-input me-2"/>
+                                            <input type="checkbox" value="@user.Value" id="@user.Value" name="selectedUser" class="form-check-input me-2" />
                                             @user.Text
                                         </td>
                                     </tr>
@@ -278,7 +282,7 @@
                                 {
                                     <tr>
                                         <td>
-                                            <input type="checkbox" value="@tre.Value" id="Tre_@tre.Value" name="selectedTre" class="form-check-input me-2"/>
+                                            <input type="checkbox" value="@tre.Value" id="Tre_@tre.Value" name="selectedTre" class="form-check-input me-2" />
                                             @tre.Text
                                         </td>
                                     </tr>
