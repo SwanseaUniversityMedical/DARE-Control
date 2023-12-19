@@ -65,13 +65,15 @@
                                         }
                                         else
                                         {
-                                            <p class="my-4">
-                                                @project.ProjectDescription
-                                            </p>
+                                            <div class="description-wrapper mt-4">
+                                                <p class="description">
+                                                    @project.ProjectDescription
+                                                </p>
+                                            </div>
                                         }
                                     }
 
-                                <p class="text-muted fs-7 mb-0">
+                                <p class="text-muted fs-7 mt-4 mb-0">
                                         Start Date: @project.StartDate.ToString("dd/MM/yyyy") <span class="mx-2"></span>End Date: @project.EndDate.ToString("dd/MM/yyyy")
                                 </p>
                             </td>
