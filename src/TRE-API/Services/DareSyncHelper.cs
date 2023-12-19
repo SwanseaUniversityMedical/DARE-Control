@@ -165,7 +165,7 @@ namespace TRE_API.Services
             await SyncProjectDecisions();
             await SyncMembershipDecisions();
 
-            DateTime today = DateTime.Today;
+           DateTime today = DateTime.Today;
            var treprojects = _DbContext.Projects.Where(x => x.Decision == Decision.Approved).ToList();
           
             var resultList = new List<TreProject>();
