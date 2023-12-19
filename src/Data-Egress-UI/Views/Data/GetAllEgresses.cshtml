@@ -35,7 +35,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                @foreach (var egressSubmission in Model)
+                @foreach (var egressSubmission in Model.OrderByDescending(x => x.Completed))
                 {
                     <tr>
                         <td>
@@ -46,7 +46,7 @@
                             </a>
                         </td>
                         <td>
-                            Project Name
+                          @*  @egressSubmission.ProjectName*@
                         </td>
                         <td>
                             @egressSubmission.Files.Count
