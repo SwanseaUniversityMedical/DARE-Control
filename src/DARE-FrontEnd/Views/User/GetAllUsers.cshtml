@@ -25,14 +25,18 @@
                     <tbody>
                     @foreach (var user in Model)
                     {
-                        <tr>
+                            if (user.FullName == "" || user.FullName == null)
+                            {
+                                user.FullName = user.Name;    
+                            }
+                            <tr>
                             <td class="card mb-2 p-3 bg-white shadow-sm border-1">
 
                                 <div class="d-flex align-items-center justify-content-between mb-3">
                                     <div>
                                         <a href="#">
                                             <h2 class="mb-0 fw-bold hover-underline fs-5">
-                                                <a href="@Url.Action("GetUser", "User", new { id = user.Id })">@user.Name</a>
+                                                <a href="@Url.Action("GetUser", "User", new { id = user.Id })">@user.FullName</a>
                                             </h2>
                                         </a>
                                     </div>
