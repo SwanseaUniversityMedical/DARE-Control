@@ -66,7 +66,7 @@ jobs:
       job-name: api-container
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_USER }}
-      registry-repo: DARE-${{ vars.HARBOR_REPO }}-main-api
+      registry-repo: ${{ vars.HARBOR_REPO }}-main-api
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       build-file: src/DARE-API/Dockerfile
