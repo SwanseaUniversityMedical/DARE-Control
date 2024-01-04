@@ -87,7 +87,7 @@ jobs:
       job-name: ui-container
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_USER }}
-      registry-repo:  ${{ vars.HARBOR_REPO }}-main-ui
+      registry-repo:  ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-main-ui
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       build-file: src/DARE-FrontEnd/Dockerfile
@@ -108,7 +108,7 @@ jobs:
       job-name: egress-api-container
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_USER }}
-      registry-repo: ${{ vars.HARBOR_REPO }}-egress-api
+      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-egress-api
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       build-file: src/Data-Egress-API/Dockerfile
@@ -129,7 +129,7 @@ jobs:
       job-name: egress-ui-container
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_USER }}
-      registry-repo: ${{ vars.HARBOR_REPO }}-egress-ui
+      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-egress-ui
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       build-file: src/Data-Egress-UI/Dockerfile
@@ -150,7 +150,7 @@ jobs:
       job-name: tre-api-container
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_USER }}
-      registry-repo: ${{ vars.HARBOR_REPO }}-tre-api
+      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-api
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       build-file: src/TRE-API/Dockerfile
@@ -171,7 +171,7 @@ jobs:
       job-name: tre-ui-container
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_USER }}
-      registry-repo: ${{ vars.HARBOR_REPO }}-tre-ui
+      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-ui
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       build-file: src/TRE-UI/Dockerfile
@@ -192,7 +192,7 @@ jobs:
       job-name: tre-hasura-container
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_USER }}
-      registry-repo: ${{ vars.HARBOR_REPO }}-tre-hasura
+      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-hasura
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
       build-file: src/Tre-Hasura/Dockerfile
