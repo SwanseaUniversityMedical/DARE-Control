@@ -28,9 +28,10 @@ namespace TRE_API.Services
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        public async Task<bool> CheckAccess(string userName, string projectName, DateTime expiryDate, TreProject? treData, List<TreProject> treProjects)
+        public async Task<bool> UserPermit(string userName, string projectName, DateTime expiryDate, TreProject? treData)
         { 
-            string treName = _configuration["TreName"];         
+            string treName = _configuration["TreName"]; 
+            var userObjects = treData.Treusers.Select(Username=>new { name = Username, expiry = treData.ProjectExpiryDate }).ToList();
             var inputData = new
             {
                 input = new
@@ -39,9 +40,8 @@ namespace TRE_API.Services
                     Description = treData.Description,
                     trecount = 1,
                     tre = treName,
-                    treData = new { name = "SAIL", active = true },
-                    //treusers = new { name = treProjects., expiry = treData.ProjectExpiryDate },
-                    users = new { name = treData.UserName, expiry = treData.ProjectExpiryDate }
+                    treData = new { name = treName, active = true },
+                    users = new { userObjects }
                 },
             };
             var settings = new JsonSerializerSettings
@@ -50,7 +50,7 @@ namespace TRE_API.Services
             };
             string jsonInput = JsonConvert.SerializeObject(inputData,settings);
             var content = new StringContent(jsonInput, Encoding.UTF8, "application/json");
-            var requestUri = $"http://localhost:8181/v1/data/app/checkaccess";
+            var requestUri = $"http://localhost:8181/v1/data/app/userpermit";
         
             var response = await _httpClient.PostAsync(requestUri,content);
             var resultjson = await response.Content.ReadAsStringAsync();
