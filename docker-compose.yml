@@ -102,6 +102,17 @@ services:
     environment:
       - ACCEPT_EULA=Y
 
+  opaservice:
+    image: openpolicyagent/opa:latest
+    restart: always
+    ports:
+      - 8181:8181 
+    command:
+      - "run"
+      - "--server"  
+    networks:
+      - communicating
+
   #postgresHasura:
   #  image: postgres:15
   #  restart: always
