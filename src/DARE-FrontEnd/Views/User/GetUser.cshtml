@@ -7,14 +7,18 @@
         Model.Organisation = "No Organisation";
     }
     
-    
+    if (Model.FullName == "" || Model.FullName == null)
+    {
+        Model.FullName = Model.Name;
+    }
 
 }
+
 <div class="container-lg mt-4 p-4 bg-white border-1 shadow-sm">
 <div class="d-flex align-items-center justify-content-between">
     <div>
-        <h1 class="fs-3 mb-0">@Model.Name</h1>
-        <p class="text-muted small mb-0">Organisation: @Model.Organisation</p>
+        <h1 class="fs-3 mb-0">@Model.FullName</h1>
+        <p class="text-muted mb-0">@Model.Organisation</p>
     </div>
 
     @if (User.IsInRole("dare-control-admin"))
@@ -58,11 +62,7 @@
                                     Model.Biography = "User has not written a description";
                                 }
                             }
-                            User Description: @Model.Biography
-                    <br /><br />
-                    ORCID <a href="#">www.orcid.org</a>
-                    <br />
-                    URL <a href="#">www.orgwebsite.com/profile</a>
+                            @Model.Biography
                 </p>
             </div>
         </div>
