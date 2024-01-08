@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 using Sentry;
 using System.Linq;
 using Amazon.Runtime.Internal.Transform;
+using System.Collections.Generic;
 
 namespace TRE_API.Services
 {
@@ -188,7 +189,7 @@ namespace TRE_API.Services
                           
                         }
                         //resultList.Add(project);
-                        bool hasAccess = await _opaService.CheckAccess(project.UserName, project.LocalProjectName,selectedExpiryDate, project);                     
+                        bool hasAccess = await _opaService.CheckAccess(project.UserName, project.LocalProjectName,selectedExpiryDate, project, resultList);                     
                     }
 
                 }
