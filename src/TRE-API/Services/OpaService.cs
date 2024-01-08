@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using System.Text;
 using System.Linq;
 using Serilog;
+using System.Security.Cryptography.X509Certificates;
 
 namespace TRE_API.Services
 {
@@ -28,10 +29,10 @@ namespace TRE_API.Services
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        public async Task<bool> UserPermit(string userName, string projectName, DateTime expiryDate, TreProject? treData, List<TreProject> treProjects)
-        { 
-
-            string treName = _configuration["TreName"];         
+        public async Task<bool> UserPermit(string userName, string projectName, DateTime expiryDate, TreProject? treData)
+        {
+            string treName = _configuration["TreName"];
+            var userObjects = treData.Treusers.Select(Username => new { name = Username, expiry = treData.ProjectExpiryDate }).ToList();
             var inputData = new
             {
                 input = new
@@ -40,9 +41,8 @@ namespace TRE_API.Services
                     Description = treData.Description,
                     trecount = 1,
                     tre = treName,
-                    treData = new { name = "SAIL", active = true },
-                    //treusers = new { name = treProjects., expiry = treData.ProjectExpiryDate },
-                    users = new { name = treData.UserName, expiry = treData.ProjectExpiryDate }
+                    treData = new { name = treName, active = true },
+                    users = new { userObjects }
                 },
             };
             var settings = new JsonSerializerSettings

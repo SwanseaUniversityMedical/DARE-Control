@@ -43,6 +43,7 @@ namespace BL.Models
         public virtual List<TreAuditLog>? AuditLogs { get; set; }
 
         public string? OutputBucketSub { get; set; }
+        public virtual List<TreUser>? Treusers { get; set; }
     }
     
 }
