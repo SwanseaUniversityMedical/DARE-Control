@@ -169,7 +169,7 @@ namespace TRE_API.Services
            DateTime today = DateTime.Today;
            var treprojects = _DbContext.Projects.Where(x => x.Decision == Decision.Approved).ToList();
           
-            var resultList = new List<TreProject>();
+            //var resultList = new List<TreProject>();
 
             foreach (var project in treprojects)
             {      
