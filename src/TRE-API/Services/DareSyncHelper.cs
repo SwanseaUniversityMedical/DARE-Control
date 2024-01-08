@@ -17,6 +17,7 @@ using Sentry;
 using System.Linq;
 using Amazon.Runtime.Internal.Transform;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace TRE_API.Services
 {
@@ -28,8 +29,10 @@ namespace TRE_API.Services
         private readonly IMinioTreHelper _minioTreHelper;
         private readonly OPASettings _opaSettings;
         private readonly OpaService _opaService;
-        public DareSyncHelper(ApplicationDbContext dbContext, IDareClientWithoutTokenHelper dareClient,  IMinioTreHelper minioTreHelper, OPASettings opasettings, OpaService opaservice)
+        private readonly IConfiguration _configuration;
+        public DareSyncHelper(IConfiguration configuration, ApplicationDbContext dbContext, IDareClientWithoutTokenHelper dareClient,  IMinioTreHelper minioTreHelper, OPASettings opasettings, OpaService opaservice)
         {
+            _configuration = configuration;
             _DbContext = dbContext;
             _dareclientHelper = dareClient;     
             _minioTreHelper = minioTreHelper;
@@ -168,8 +171,15 @@ namespace TRE_API.Services
 
            DateTime today = DateTime.Today;
            var treprojects = _DbContext.Projects.Where(x => x.Decision == Decision.Approved).ToList();
-          
+
             //var resultList = new List<TreProject>();
+            string treName = _configuration["TreName"];
+
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("trename", treName);
+
+            var treuser = _dareclientHelper.CallAPIWithoutModel<List<Tre?>>(
+                "/api/Tre/GetTreListByName/", paramlist).Result;
 
             foreach (var project in treprojects)
             {      
@@ -189,7 +199,7 @@ namespace TRE_API.Services
                           
                         }
                         //resultList.Add(project);
-                        bool hasAccess = await _opaService.UserPermit(project.UserName, project.LocalProjectName, selectedExpiryDate, project);
+                        bool hasAccess = await _opaService.UserPermit(project.UserName, project.LocalProjectName, selectedExpiryDate, project,treName,treuser);
                     }
 
                 }

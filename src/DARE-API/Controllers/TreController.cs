@@ -99,6 +99,21 @@ namespace DARE_API.Controllers
                 throw;
             }
         }
+        [HttpGet("GetTreListByName/{trename}")]
+        [AllowAnonymous]
+        public List<Tre> GetTreListByName(string trename)
+        {
+            try
+            {
+                List<Tre> treusers = _DbContext.Tres.Where(p => p.Name == trename).ToList();
+                return treusers;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function Crashed", "GetTreListByName");
+                throw;
+            }
+        }
 
         [HttpGet("GetAllTres")]
         [AllowAnonymous]

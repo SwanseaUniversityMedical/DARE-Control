@@ -11,6 +11,8 @@ using System.Text;
 using System.Linq;
 using Serilog;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using BL.Services;
 
 namespace TRE_API.Services
 {
@@ -18,10 +20,13 @@ namespace TRE_API.Services
     {
         private readonly HttpClient _httpClient;
         private readonly OPASettings _opaSettings;
-        private readonly IConfiguration _configuration;
-        public OpaService(IConfiguration configuration)
+      
+        private readonly IDareClientHelper _clientHelper;
+        public OpaService( IDareClientHelper client)
         {
-            _configuration = configuration;
+       
+            _clientHelper = client;
+
             _httpClient = new HttpClient();
             //_httpClient.BaseAddress = new Uri(_opaSettings.OPAUrl);
             _httpClient.BaseAddress = new System.Uri("http://localhost:8181/v1/data/app/checkaccess");
@@ -29,11 +34,18 @@ namespace TRE_API.Services
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        public async Task<bool> UserPermit(string userName, string projectName, DateTime expiryDate, TreProject? treData)
+        public async Task<bool> UserPermit(string userName, string projectName, DateTime expiryDate, TreProject? treData, string treName )
         {
-            string treName = _configuration["TreName"];
-            var userObjects = treData.Treusers.Select(Username => new { name = Username, expiry = treData.ProjectExpiryDate }).ToList();
-            var inputData = new
+
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("trename", treName); 
+           
+            var treuserproject = _clientHelper.CallAPIWithoutModel<List<Tre?>>(
+                "/api/Tre/GetTreListByName/", paramlist).Result;
+
+            var treuser = treuserproject.Select(Username => new { Name = Username, expiry = treData.ProjectExpiryDate }).ToList();
+
+           var inputData = new
             {
                 input = new
                 {
@@ -42,7 +54,7 @@ namespace TRE_API.Services
                     trecount = 1,
                     tre = treName,
                     treData = new { name = treName, active = true },
-                    users = new { userObjects }
+                    users = new { treuser }
                 },
             };
             var settings = new JsonSerializerSettings
