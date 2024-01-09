@@ -11,7 +11,7 @@ using DARE_API.Services;
 
 namespace DARE_API.Controllers
 {
-    
+
     [ApiController]
     [Route("api/[controller]")]
     public class TreController : Controller
@@ -23,25 +23,25 @@ namespace DARE_API.Controllers
         {
 
             _DbContext = applicationDbContext;
-            _httpContextAccessor= httpContextAccessor;
+            _httpContextAccessor = httpContextAccessor;
 
         }
 
         [Authorize(Roles = "dare-control-admin")]
         [HttpPost("SaveTre")]
         public async Task<Tre> SaveTre([FromBody] FormData data)
-        {           
+        {
             try
             {
                 Tre tre = JsonConvert.DeserializeObject<Tre>(data.FormIoString);
                 tre.Name = tre.Name?.Trim();
                 if (_DbContext.Tres.Any(x => x.Name.ToLower() == tre.Name.ToLower().Trim() && x.Id != tre.Id))
                 {
-                    
-                    return new Tre(){Error = true, ErrorMessage = "Another tre already exists with the same name"};
+
+                    return new Tre() { Error = true, ErrorMessage = "Another tre already exists with the same name" };
                 }
-                
-                if  (_DbContext.Tres.Any(x => x.AdminUsername.ToLower() == tre.AdminUsername.ToLower() && x.Id != tre.Id))
+
+                if (_DbContext.Tres.Any(x => x.AdminUsername.ToLower() == tre.AdminUsername.ToLower() && x.Id != tre.Id))
                 {
                     return new Tre() { Error = true, ErrorMessage = "Another tre already exists with the same TRE Admin Name" };
                 }
@@ -65,12 +65,13 @@ namespace DARE_API.Controllers
                     }
                 }
 
-                else {
+                else
+                {
                     _DbContext.Tres.Add(tre);
                 }
                 await _DbContext.SaveChangesAsync();
                 await ControllerHelpers.AddAuditLog(logtype, null, null, tre, null, null, _httpContextAccessor, User, _DbContext);
-             
+
                 return tre;
 
             }
@@ -83,7 +84,7 @@ namespace DARE_API.Controllers
                 throw;
             }
         }
-     
+
         [HttpGet("GetTresInProject/{projectId}")]
         [AllowAnonymous]
         public List<Tre> GetTresInProject(int projectId)
@@ -99,6 +100,21 @@ namespace DARE_API.Controllers
                 throw;
             }
         }
+        [HttpGet("GetTreListByName/{trename}")]
+        [AllowAnonymous]
+        public List<Tre> GetTreListByName(string trename)
+        {
+            try
+            {
+                List<Tre> treusers = _DbContext.Tres.Where(p => p.Name == trename).ToList();
+                return treusers;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function Crashed", "GetTreListByName");
+                throw;
+            }
+        }
 
         [HttpGet("GetAllTres")]
         [AllowAnonymous]
@@ -109,7 +125,7 @@ namespace DARE_API.Controllers
                 var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
                 var allTres = _DbContext.Tres.ToList();
 
-                
+
 
                 Log.Information("{Function} Tres retrieved successfully", "GetAllTres");
                 return allTres;
@@ -122,7 +138,7 @@ namespace DARE_API.Controllers
 
 
         }
-        
+
         [HttpGet("GetATre")]
         [AllowAnonymous]
         public Tre? GetATre(int treId)

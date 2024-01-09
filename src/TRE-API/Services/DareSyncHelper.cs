@@ -14,6 +14,10 @@ using System.Runtime.Intrinsics.X86;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Sentry;
+using System.Linq;
+using Amazon.Runtime.Internal.Transform;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace TRE_API.Services
 {
@@ -21,14 +25,19 @@ namespace TRE_API.Services
     {
         public ApplicationDbContext _DbContext { get; set; }
         public IDareClientWithoutTokenHelper _dareclientHelper { get; set; }
-        
+
         private readonly IMinioTreHelper _minioTreHelper;
-        public DareSyncHelper(ApplicationDbContext dbContext, IDareClientWithoutTokenHelper dareClient,  IMinioTreHelper minioTreHelper)
+        private readonly OPASettings _opaSettings;
+        private readonly OpaService _opaService;
+        private readonly IConfiguration _configuration;
+        public DareSyncHelper(IConfiguration configuration, ApplicationDbContext dbContext, IDareClientWithoutTokenHelper dareClient, IMinioTreHelper minioTreHelper, OPASettings opasettings, OpaService opaservice)
         {
+            _configuration = configuration;
             _DbContext = dbContext;
             _dareclientHelper = dareClient;
-            
             _minioTreHelper = minioTreHelper;
+            _opaSettings = opasettings;
+            _opaService = opaservice;
         }
 
         public async Task<BoolReturn> SyncSubmissionWithTre()
@@ -42,7 +51,7 @@ namespace TRE_API.Services
                 };
             }
 
-           
+
             var subprojs = await _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForTre");
             var dbprojs = _DbContext.Projects.ToList();
             var projectAdds = subprojs.Where(x => !_DbContext.Projects.Any(y => y.SubmissionProjectId == x.Id));
@@ -160,6 +169,42 @@ namespace TRE_API.Services
             await SyncProjectDecisions();
             await SyncMembershipDecisions();
 
+            DateTime today = DateTime.Today;
+            var treprojects = _DbContext.Projects.Where(x => x.Decision == Decision.Approved).ToList();
+
+            //var resultList = new List<TreProject>();
+            string treName = _configuration["TreName"];
+
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("trename", treName);
+
+            var treuser = _dareclientHelper.CallAPIWithoutModel<List<Tre?>>(
+                "/api/Tre/GetTreListByName/", paramlist).Result;
+
+            foreach (var project in treprojects)
+            {
+                var projectmemberships = project.MemberDecisions.Where(x => x.Decision == Decision.Approved).ToList();
+
+                foreach (var membership in projectmemberships)
+                {
+                    DateTime membershipExpiryDate = membership.ProjectExpiryDate;
+                    if (project != null)
+                    {
+                        DateTime projectExpiryDate = project.ProjectExpiryDate;
+                        DateTime selectedExpiryDate = membershipExpiryDate < projectExpiryDate ? membershipExpiryDate : projectExpiryDate;
+
+                        if (selectedExpiryDate > today)
+                        {
+                            project.ProjectExpiryDate = DateTime.UtcNow.AddDays(_opaSettings.ExpiryDelayDays);
+
+                        }
+                        //resultList.Add(project);
+                        bool hasAccess = await _opaService.UserPermit(project.UserName, project.LocalProjectName, selectedExpiryDate, project, treName, treuser);
+                    }
+
+                }
+            }
+
             return new BoolReturn()
             {
                 Result = true
@@ -170,10 +215,10 @@ namespace TRE_API.Services
         public async Task<bool> SyncProjectDecisions()
         {
 
-            var dbprojs = _DbContext.Projects.ToList();            
+            var dbprojs = _DbContext.Projects.ToList();
             var synclist = dbprojs.Select(x => new ProjectTreDecisionsDTO() { ProjectId = x.SubmissionProjectId, Decision = x.Decision }).ToList();
             var result = await _dareclientHelper.CallAPI<List<ProjectTreDecisionsDTO>, BoolReturn>("/api/Project/SyncTreProjectDecisions", synclist);
-            
+
 
 
             return result.Result;

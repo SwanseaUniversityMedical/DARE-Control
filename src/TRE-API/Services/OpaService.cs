@@ -9,6 +9,10 @@ using BL.Models.ViewModels;
 using Newtonsoft.Json;
 using System.Text;
 using System.Linq;
+using Serilog;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using BL.Services;
 
 namespace TRE_API.Services
 {
@@ -16,8 +20,13 @@ namespace TRE_API.Services
     {
         private readonly HttpClient _httpClient;
         private readonly OPASettings _opaSettings;
-        public OpaService()
+
+        private readonly IDareClientHelper _clientHelper;
+        public OpaService(IDareClientHelper client)
         {
+
+            _clientHelper = client;
+
             _httpClient = new HttpClient();
             //_httpClient.BaseAddress = new Uri(_opaSettings.OPAUrl);
             _httpClient.BaseAddress = new System.Uri("http://localhost:8181/v1/data/app/checkaccess");
@@ -25,32 +34,50 @@ namespace TRE_API.Services
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        public async Task<bool> CheckAccess(string userName, DateTime expiryDate, List<TreProject>? treData)
-        {           
+        public async Task<bool> UserPermit(string userName, string projectName, DateTime expiryDate, TreProject? treData, string treName)
+        {
+
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("trename", treName);
+
+            var treuserproject = _clientHelper.CallAPIWithoutModel<List<Tre?>>(
+                "/api/Tre/GetTreListByName/", paramlist).Result;
+
+            var treuser = treuserproject.Select(Username => new { Name = Username, expiry = treData.ProjectExpiryDate }).ToList();
+
             var inputData = new
             {
-                userName = userName,
-        
-                treData = new { tre = treData },
-      
+                input = new
+                {
+                    id = projectName,
+                    Description = treData.Description,
+                    trecount = 1,
+                    tre = treName,
+                    treData = new { name = treName, active = true },
+                    users = new { treuser }
+                },
             };
             var settings = new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
-            string jsonInput = JsonConvert.SerializeObject(inputData,settings);
+            string jsonInput = JsonConvert.SerializeObject(inputData, settings);
             var content = new StringContent(jsonInput, Encoding.UTF8, "application/json");
             var requestUri = $"http://localhost:8181/v1/data/app/checkaccess";
-         ;
-            var response = await _httpClient.PostAsync(requestUri,content);
+
+            var response = await _httpClient.PostAsync(requestUri, content);
             var resultjson = await response.Content.ReadAsStringAsync();
-            var result = JsonConvert.DeserializeObject(resultjson);
-            if (resultjson.Contains("true"))
+            var responseObject = JsonConvert.DeserializeObject<CheckAccessResponse>(resultjson);
+            bool allow = responseObject?.Result?.Allow ?? false;
+            if (allow)
             {
-                return true;
+                Log.Information("{Function}Opa User Access Allowed for:" + userName, "CheckUserAccess");
             }
-   
-            return false;
+            else
+            {
+                Log.Information("{Function}Opa User Access Denied for:" + userName, "CheckUserAccess");
+            }
+            return allow;
         }
     }
 }
