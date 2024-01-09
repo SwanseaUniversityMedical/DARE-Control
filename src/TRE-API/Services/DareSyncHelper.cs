@@ -199,7 +199,7 @@ namespace TRE_API.Services
 
                         }
                         //resultList.Add(project);
-                        bool hasAccess = await _opaService.UserPermit(project.UserName, project.LocalProjectName, selectedExpiryDate, project, treName, treuser);
+                        bool hasAccess = await _opaService.UserPermit(project.UserName, project.LocalProjectName, selectedExpiryDate, project, treName, treuser, selectedExpiryDate);
                     }
 
                 }

@@ -21,11 +21,8 @@ namespace TRE_API.Services
         private readonly HttpClient _httpClient;
         private readonly OPASettings _opaSettings;
 
-        private readonly IDareClientHelper _clientHelper;
-        public OpaService(IDareClientHelper client)
+        public OpaService()
         {
-
-            _clientHelper = client;
 
             _httpClient = new HttpClient();
             //_httpClient.BaseAddress = new Uri(_opaSettings.OPAUrl);
@@ -34,16 +31,10 @@ namespace TRE_API.Services
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        public async Task<bool> UserPermit(string userName, string projectName, DateTime expiryDate, TreProject? treData, string treName)
+        public async Task<bool> UserPermit(string userName, string projectName, DateTime expiryDate, TreProject? treData, string treName,List<Tre?>? treuser, DateTime selectedexpirydate)
         {
 
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("trename", treName);
-
-            var treuserproject = _clientHelper.CallAPIWithoutModel<List<Tre?>>(
-                "/api/Tre/GetTreListByName/", paramlist).Result;
-
-            var treuser = treuserproject.Select(Username => new { Name = Username, expiry = treData.ProjectExpiryDate }).ToList();
+            var treUser = treuser.Select(Username => new { Name = Username, expiry = selectedexpirydate }).ToList();
 
             var inputData = new
             {
@@ -54,7 +45,7 @@ namespace TRE_API.Services
                     trecount = 1,
                     tre = treName,
                     treData = new { name = treName, active = true },
-                    users = new { treuser }
+                    users = new { treUser }
                 },
             };
             var settings = new JsonSerializerSettings
