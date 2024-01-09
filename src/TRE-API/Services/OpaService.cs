@@ -89,7 +89,7 @@ namespace TRE_API.Services
             
             policyContent = new StringContent(data, Encoding.UTF8, "application/json");
 
-            policyResponse = await _httpClient.PutAsync("/v1/data/dareprojectdata", content);
+            policyResponse = await _httpClient.PutAsync("/v1/data/dareprojectdata", policyContent);
 
             policyResponse.EnsureSuccessStatusCode();
 
@@ -102,71 +102,41 @@ namespace TRE_API.Services
             response.EnsureSuccessStatusCode();
 
             var evaluationResult = await response.Content.ReadAsStringAsync();
-            // Check result to decide whether to create the project
+           
+            // Checks if project does not exist
 
             if (ShouldCreateProject(evaluationResult, projectName))
 
             {
-
-                // Call a method to create the project
+                // create project
                     
                 await CreateProjectAsync(projectName);
 
                 return "Project created";
-
             }
-
             else
-
             {
-
                 return "Project already exists or creation not allowed by policy";
-
             }
 
         }
-
-
 
         private bool ShouldCreateProject(string evaluationResult, string projectName)
 
         {
 
-            // Implement logic to determine if the project should be created based on the evaluation result
-
-            // You should parse the evaluation result and apply your policy-specific logic here
-
-            // For example, check if the project name exists in the result
-
-            // Return true if the project should be created, false otherwise
-
             return !evaluationResult.Contains($"\"{projectName}\":");
 
         }
-
-
-
         private async Task CreateProjectAsync(string projectName)
 
         {
-
-            // Implement the logic to create the project
-
-            // This could involve making a call to another part of your application or to an external service
-
-            // For demonstration purposes, we'll simply print a message here
-
+      
             Console.WriteLine($"Creating project: {projectName}");
 
-            // You can add the actual project creation logic here
+            // adds project 
 
         }
-
-
-
-        // Other methods for data loading, evaluation, and policy saving remain the same
-
-        // ...
 
     }
 
