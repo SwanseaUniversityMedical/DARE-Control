@@ -86,6 +86,13 @@ namespace TRE_API.Services
 
             policyResponse.EnsureSuccessStatusCode();
 
+            
+            policyContent = new StringContent(data, Encoding.UTF8, "application/json");
+
+            policyResponse = await _httpClient.PutAsync("/v1/data/dareprojectdata", content);
+
+            policyResponse.EnsureSuccessStatusCode();
+
         }
         public async Task<string> EvaluatePolicyAndCreateProject(string input, string projectName)
 
