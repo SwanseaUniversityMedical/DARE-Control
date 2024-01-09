@@ -54,7 +54,7 @@ namespace TRE_API.Services
             };
             string jsonInput = JsonConvert.SerializeObject(inputData, settings);
             var content = new StringContent(jsonInput, Encoding.UTF8, "application/json");
-            var requestUri = $"http://localhost:8181/v1/data/app/checkaccess";
+            var requestUri = $"http://localhost:8181/v1/data/app/userpermit";
 
             var response = await _httpClient.PostAsync(requestUri, content);
             var resultjson = await response.Content.ReadAsStringAsync();

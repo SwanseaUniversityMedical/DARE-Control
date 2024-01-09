@@ -179,7 +179,7 @@ namespace TRE_API.Services
             paramlist.Add("trename", treName);
 
             var treuser = _dareclientHelper.CallAPIWithoutModel<List<Tre?>>(
-                "/api/Tre/GetTreListByName/", paramlist).Result;
+                "/api/Tre/GetTreListByName/"+ treName).Result;
 
             foreach (var project in treprojects)
             {
