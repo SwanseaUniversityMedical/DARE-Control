@@ -45,8 +45,7 @@ namespace TRE_API.Services
                     id = projectName,
                     Description = treData.Description,
                     trecount = 1,
-                    tre = treName,
-                    treData = new { name = treName, active = true },
+                    tre  = new { name = treName, active = true },
                     users = new { treUser }
                 },
             };
