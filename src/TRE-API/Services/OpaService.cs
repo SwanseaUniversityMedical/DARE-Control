@@ -114,7 +114,7 @@ namespace TRE_API.Services
             }
             else
             {
-                return "Project already exists on opa";
+                return "Project already exists ";
             }
 
         }

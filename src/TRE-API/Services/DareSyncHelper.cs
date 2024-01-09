@@ -171,8 +171,7 @@ namespace TRE_API.Services
 
             DateTime today = DateTime.Today;
             var treprojects = _DbContext.Projects.Where(x => x.Decision == Decision.Approved).ToList();
-
-            //var resultList = new List<TreProject>();
+           
             string treName = _configuration["TreName"];
 
             var paramlist = new Dictionary<string, string>();
@@ -197,8 +196,7 @@ namespace TRE_API.Services
                         {
                             project.ProjectExpiryDate = DateTime.UtcNow.AddDays(_opaSettings.ExpiryDelayDays);
 
-                        }
-                        //resultList.Add(project);
+                        }                      
                         bool hasAccess = await _opaService.UserPermit(project.UserName, project.LocalProjectName, selectedExpiryDate, project, treName, treuser, selectedExpiryDate);
                     }
 
