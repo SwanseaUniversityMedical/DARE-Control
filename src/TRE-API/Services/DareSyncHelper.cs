@@ -197,7 +197,7 @@ namespace TRE_API.Services
                             project.ProjectExpiryDate = DateTime.UtcNow.AddDays(_opaSettings.ExpiryDelayDays);
 
                         }                      
-                        bool hasAccess = await _opaService.UserPermit(project.UserName, project.LocalProjectName, selectedExpiryDate, project, treName, treuser, selectedExpiryDate);
+                        bool hasAccess = await _opaService.UserPermit(project.LocalProjectName, project, treName, treuser, selectedExpiryDate);
                     }
 
                 }

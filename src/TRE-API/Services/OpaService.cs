@@ -32,13 +32,13 @@ namespace TRE_API.Services
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        public async Task<bool> UserPermit(string userName, string projectName, DateTime expiryDate, TreProject? treData, string treName,List<Tre?>? treuser, DateTime selectedexpirydate)
+        public async Task<bool> UserPermit(string projectName, TreProject? treData, string treName,List<Tre?>? treuser, DateTime selectedexpirydate)
         {
-            string policy ="package app.userpermit\r\n\r\nimport future.keywords.if\r\nimport future.keywords.in\r\n\r\ndefault allow := true\r\n\r\ndefault any_invalid_tre := false\r\n\r\ndefault any_valid_users := true\r\n\r\ndefault project_allow := false\r\n\r\ndefault any_is_user_allowed := false\r\n\r\ndefault any_is_tre_data_valid := false\r\n\r\nallow if {\r\n\tis_tre_data_valid(input.treData)\r\n\tis_user_allowed(input.userName)\r\n}\r\n\r\nis_tre_data_valid(treData) if {\r\n\ttreData != null\r\n\tcount(treData) > 0\r\n}\r\n\r\nis_user_allowed(userName) if {\r\n\tuserName != null\r\n\tcount(userName) > 0\r\n}\r\n\r\nproject_allow if {\r\n\tany_is_tre_data_valid\r\n\tany_is_user_allowed\r\n}\r\n";
+            string policy ="package app.userpermit\r\n\r\nimport future.keywords.if\r\nimport future.keywords.in\r\n\r\ndefault allow := true\r\n\r\ndefault any_invalid_tre := false\r\n\r\ndefault any_valid_users := true\r\n\r\ndefault project_allow := true\r\n\r\ndefault any_is_user_allowed := true\r\n\r\ndefault any_is_tre_data_valid := true\r\n\r\nallow if {\r\n\tis_tre_data_valid(input.treData)\r\n\tis_user_allowed(input.userName)\r\n}\r\n\r\nis_tre_data_valid(treData) if {\r\n\ttreData != null\r\n\tcount(treData) > 0\r\n}\r\n\r\nis_user_allowed(userName) if {\r\n\tuserName != null\r\n\tcount(userName) > 0\r\n}\r\n\r\nproject_allow if {\r\n\tany_is_tre_data_valid\r\n\tany_is_user_allowed\r\n}\r\n";
          
             var treUser = treuser.Select(treUser => new { name = treUser.AdminUsername, expiry = selectedexpirydate }).ToList();
 
-            var inputData = new
+            var inputData= new
             {
                 input = new
                 {
@@ -67,11 +67,11 @@ namespace TRE_API.Services
             bool allow = responseObject?.Result?.Allow ?? false;
             if (allow)
             {
-                Log.Information("{Function}Opa User Access Allowed for:" + userName, "CheckUserAccess");
+                Log.Information("{Function}Opa User Access Allowed for:" + projectName, "CheckUserAccess");
             }
             else
             {
-                Log.Information("{Function}Opa User Access Denied for:" + userName, "CheckUserAccess");
+                Log.Information("{Function}Opa User Access Denied for:" + projectName, "CheckUserAccess");
             }
             return allow;
         }
