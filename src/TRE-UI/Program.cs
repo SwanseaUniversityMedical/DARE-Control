@@ -55,7 +55,7 @@ builder.Services.AddMvc().AddViewComponentsAsServices();
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
-    options.MinimumSameSitePolicy = SameSiteMode.None;
+    options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
     options.OnAppendCookie = cookieContext =>
         CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
     options.OnDeleteCookie = cookieContext =>
@@ -69,6 +69,14 @@ var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddCors(options =>
 {
+    options.AddDefaultPolicy(
+        builder =>
+        {
+            builder
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
     options.AddPolicy(name: MyAllowSpecificOrigins,
         policy =>
         {
@@ -81,7 +89,8 @@ builder.Services.AddCors(options =>
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto |
+                               ForwardedHeaders.XForwardedHost;
 
     options.KnownNetworks.Clear();
     options.KnownProxies.Clear();
@@ -91,8 +100,8 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-
+    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
 })
             .AddCookie(o =>
@@ -162,10 +171,9 @@ builder.Services.AddAuthentication(options =>
                         Log.Error("OnRemoteFailure: {ex}", context.Failure);
                         if (context.Properties != null)
                         {
-                            foreach (var authenticationProperty in context.Properties.Items)
+                            foreach (var prop in context.Properties.Items)
                             {
-                                Log.Information("{Function} Property Key: {Key}, Value {Value}", "OnRemote",
-                                    authenticationProperty.Key, authenticationProperty.Value);
+                                Log.Information("{Function} Prop Key {Key}, Value {Value}","OnRemoteFailure", prop.Key, prop.Value);
                             }
                         }
                         if (context.Failure.Message.Contains("Correlation failed"))
@@ -225,31 +233,43 @@ builder.Services.AddAuthentication(options =>
                     }
                 };
 
-                options.NonceCookie.SameSite = SameSiteMode.Lax;
-                options.CorrelationCookie.SameSite = SameSiteMode.Lax;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    NameClaimType = "name",
-                    RoleClaimType = ClaimTypes.Role,
-                    ValidateIssuer = true
-                };
+                options.NonceCookie.SameSite = SameSiteMode.None;
+                options.CorrelationCookie.SameSite = SameSiteMode.None;
+                //options.TokenValidationParameters = new TokenValidationParameters
+                //{
+                //    NameClaimType = "name",
+                //    RoleClaimType = ClaimTypes.Role,
+                //    ValidateIssuer = true
+                //};
             });
 
 
 var app = builder.Build();
+app.UseCors();
+app.UseForwardedHeaders();
 
-app.UseForwardedHeaders(new ForwardedHeadersOptions
+if (app.Environment.IsDevelopment())
 {
-    ForwardedHeaders = ForwardedHeaders.XForwardedProto
-});
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+    app.UseDeveloperExceptionPage();
+}
+else
 {
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    //app.UseHsts();
+    app.UseHsts();
 }
+//app.UseForwardedHeaders(new ForwardedHeadersOptions
+//{
+//    ForwardedHeaders = ForwardedHeaders.XForwardedProto
+//});
+
+//// Configure the HTTP request pipeline.
+//if (!app.Environment.IsDevelopment())
+//{
+//    app.UseExceptionHandler("/Home/Error");
+//    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+//    //app.UseHsts();
+//}
 
 Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHostEnvironment environment)
 {
@@ -269,7 +289,7 @@ Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHost
 
 //removed to stop redirection
 //app.UseHttpsRedirection();
-
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 if (configuration["sslcookies"] == "true")
@@ -282,6 +302,7 @@ if (configuration["sslcookies"] == "true")
 }
 
 app.UseRouting();
+app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -290,7 +311,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.UseCors();
+
 
 app.Run();
 
@@ -304,7 +325,7 @@ void CheckSameSite(HttpContext httpContext, CookieOptions options)
         //configure cookie policy to omit samesite=none when request is not https
         if (!httpContext.Request.IsHttps || DisallowsSameSiteNone(userAgent))
         {
-            options.SameSite = SameSiteMode.None;
+            options.SameSite = SameSiteMode.Unspecified;
         }
     }
 }

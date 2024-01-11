@@ -34,6 +34,7 @@ namespace TRE_API.Services
                 treData = new { tre = treData },
       
             };
+
             var settings = new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
