@@ -185,7 +185,8 @@ namespace TRE_API.Services
                 var projectmemberships = project.MemberDecisions.Where(x => x.Decision == Decision.Approved).ToList();
 
                 foreach (var membership in projectmemberships)
-                {
+                { 
+                    var tre_user = membership.User.Username;
                     DateTime membershipExpiryDate = membership.ProjectExpiryDate;
                     if (project != null)
                     {
@@ -197,7 +198,7 @@ namespace TRE_API.Services
                             project.ProjectExpiryDate = DateTime.UtcNow.AddDays(_opaSettings.ExpiryDelayDays);
 
                         }                      
-                        bool hasAccess = await _opaService.UserPermit(project.LocalProjectName, project, treName, treuser, selectedExpiryDate);
+                        bool hasAccess = await _opaService. .UserPermit(project.LocalProjectName, project, treName, treuser, selectedExpiryDate);
                     }
 
                 }

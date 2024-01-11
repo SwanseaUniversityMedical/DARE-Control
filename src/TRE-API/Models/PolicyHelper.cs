@@ -10,8 +10,8 @@
 
         private static void LoadPolicyFromFile()
         {
-            //reads content from Policy file
-            policy = File.ReadAllText("poicy.txt");
+        
+            policy = File.ReadAllText("policy.txt");
 
         }
         public static string GetPolicy()
