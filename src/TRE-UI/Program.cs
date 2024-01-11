@@ -51,6 +51,7 @@ builder.Services.AddScoped<CustomCookieEvent>();
 builder.Services.AddScoped<ITREClientHelper, TREClientHelper>();
 
 
+
 builder.Services.AddMvc().AddViewComponentsAsServices();
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
