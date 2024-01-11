@@ -388,7 +388,7 @@ namespace TRE_API
                                     Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == COMPLETE ");
                                     try
                                     {
-                                        result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Completed, "", "");
+                                        result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.DataOutRequested, "", "");
                                     }
                                     catch (Exception ex)
                                     {
