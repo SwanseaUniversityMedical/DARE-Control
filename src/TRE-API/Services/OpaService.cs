@@ -34,18 +34,18 @@ namespace TRE_API.Services
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
         static
-        public async Task<bool> UserPermit(string projectName, TreProject? treData, string treName,List<Tre?>? treuser, DateTime selectedexpirydate)
+        public async Task<bool> UserPermit(string projectId, string description,string treName,List<TreProject>? treprojectList,List<TreUser>? treuserList, DateTime selectedexpirydate)
         {
             var policy = PolicyHelper.GetPolicy();
         
-            var treUser = treuser.Select(treUser => new { name = treUser.AdminUsername, expiry = selectedexpirydate }).ToList();
+            //var treUser = treuser.Select(treUser => new { name = treUser.AdminUsername, expiry = selectedexpirydate }).ToList();
 
             var inputData= new
             {
                 input = new
                 {
-                    id = projectName,
-                    Description = treData.Description,
+                    id = projectId,
+                    Description = description,
                     trecount = 1,
                     tre  = new { name = treName, active = true },
                     users = new { treUser }

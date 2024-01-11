@@ -170,23 +170,24 @@ namespace TRE_API.Services
             await SyncMembershipDecisions();
 
             DateTime today = DateTime.Today;
-            var treprojects = _DbContext.Projects.Where(x => x.Decision == Decision.Approved).ToList();
-           
+         
             string treName = _configuration["TreName"];
 
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("trename", treName);
-
-            var treuser = _dareclientHelper.CallAPIWithoutModel<List<Tre?>>(
-                "/api/Tre/GetTreListByName/"+ treName).Result;
-
-            foreach (var project in treprojects)
+           var treprojectList = new List<TreProject>();
+           var treUserList = new List<string>();
+            foreach (var project in treprojectList)
             {
                 var projectmemberships = project.MemberDecisions.Where(x => x.Decision == Decision.Approved).ToList();
 
                 foreach (var membership in projectmemberships)
-                { 
-                    var tre_user = membership.User.Username;
+                {
+                    foreach (var user in projectmemberships)
+                    {
+                        var treprojexpiry = user.ProjectExpiryDate;
+
+                    }
+                    var treuser = membership.User;
+                   
                     DateTime membershipExpiryDate = membership.ProjectExpiryDate;
                     if (project != null)
                     {
@@ -197,8 +198,10 @@ namespace TRE_API.Services
                         {
                             project.ProjectExpiryDate = DateTime.UtcNow.AddDays(_opaSettings.ExpiryDelayDays);
 
-                        }                      
-                        bool hasAccess = await _opaService. .UserPermit(project.LocalProjectName, project, treName, treuser, selectedExpiryDate);
+                        }
+                        treUserList.Add(treuser.Username.);
+                        treprojectList.Add(project);
+                        bool hasAccess = await _opaService.UserPermit(project.Id.ToString(), project.Description, treName,treprojectList,treUserList,);
                     }
 
                 }
