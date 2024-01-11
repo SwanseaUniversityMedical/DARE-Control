@@ -55,7 +55,7 @@ builder.Services.AddMvc().AddViewComponentsAsServices();
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
-    options.MinimumSameSitePolicy = SameSiteMode.Lax;
+    options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
     options.OnAppendCookie = cookieContext =>
         CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
     options.OnDeleteCookie = cookieContext =>
@@ -69,6 +69,14 @@ var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddCors(options =>
 {
+    options.AddDefaultPolicy(
+        builder =>
+        {
+            builder
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
     options.AddPolicy(name: MyAllowSpecificOrigins,
         policy =>
         {
@@ -81,7 +89,8 @@ builder.Services.AddCors(options =>
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto |
+                               ForwardedHeaders.XForwardedHost;
 
     options.KnownNetworks.Clear();
     options.KnownProxies.Clear();
@@ -91,8 +100,8 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-
+    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
 })
             .AddCookie(o =>
@@ -160,6 +169,10 @@ builder.Services.AddAuthentication(options =>
                     OnRemoteFailure = context =>
                     {
                         Log.Error("OnRemoteFailure: {ex}", context.Failure);
+                        if (Log.)
+                        {
+                            
+                        }
                         if (context.Failure.Message.Contains("Correlation failed"))
                         {
                             Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", treKeyCloakSettings.TokenExpiredAddress);
