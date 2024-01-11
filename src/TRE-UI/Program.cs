@@ -55,7 +55,7 @@ builder.Services.AddMvc().AddViewComponentsAsServices();
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
-    options.MinimumSameSitePolicy = SameSiteMode.Lax;
+    options.MinimumSameSitePolicy = SameSiteMode.None;
     options.OnAppendCookie = cookieContext =>
         CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
     options.OnDeleteCookie = cookieContext =>
@@ -160,6 +160,14 @@ builder.Services.AddAuthentication(options =>
                     OnRemoteFailure = context =>
                     {
                         Log.Error("OnRemoteFailure: {ex}", context.Failure);
+                        if (context.Properties != null)
+                        {
+                            foreach (var authenticationProperty in context.Properties.Items)
+                            {
+                                Log.Information("{Function} Property Key: {Key}, Value {Value}", "OnRemote",
+                                    authenticationProperty.Key, authenticationProperty.Value);
+                            }
+                        }
                         if (context.Failure.Message.Contains("Correlation failed"))
                         {
                             Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", treKeyCloakSettings.TokenExpiredAddress);
@@ -217,8 +225,8 @@ builder.Services.AddAuthentication(options =>
                     }
                 };
 
-                options.NonceCookie.SameSite = SameSiteMode.Lax;
-                options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+                options.NonceCookie.SameSite = SameSiteMode.None;
+                options.CorrelationCookie.SameSite = SameSiteMode.None;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     NameClaimType = "name",
@@ -296,7 +304,7 @@ void CheckSameSite(HttpContext httpContext, CookieOptions options)
         //configure cookie policy to omit samesite=none when request is not https
         if (!httpContext.Request.IsHttps || DisallowsSameSiteNone(userAgent))
         {
-            options.SameSite = SameSiteMode.Lax;
+            options.SameSite = SameSiteMode.None;
         }
     }
 }
