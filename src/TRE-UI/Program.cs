@@ -55,7 +55,7 @@ builder.Services.AddMvc().AddViewComponentsAsServices();
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
-    options.MinimumSameSitePolicy = SameSiteMode.None;
+    options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
     options.OnAppendCookie = cookieContext =>
         CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
     options.OnDeleteCookie = cookieContext =>
@@ -296,7 +296,7 @@ void CheckSameSite(HttpContext httpContext, CookieOptions options)
         //configure cookie policy to omit samesite=none when request is not https
         if (!httpContext.Request.IsHttps || DisallowsSameSiteNone(userAgent))
         {
-            options.SameSite = SameSiteMode.None;
+            options.SameSite = SameSiteMode.Unspecified;
         }
     }
 }

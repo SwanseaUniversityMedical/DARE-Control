@@ -12,6 +12,7 @@ using BL.Models.Tes;
 using Newtonsoft.Json;
 using Serilog;
 using EasyNetQ.Management.Client.Model;
+using DARE_FrontEnd.Models;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -21,11 +22,16 @@ namespace DARE_FrontEnd.Controllers
         private readonly IDareClientHelper _clientHelper;
 
         private readonly FormIOSettings _formIOSettings;
-        public ProjectController(IDareClientHelper client, FormIOSettings formIo)
+
+
+        private readonly URLSettingsFrontEnd _URLSettingsFrontEnd;
+        public ProjectController(IDareClientHelper client, FormIOSettings formIo, URLSettingsFrontEnd URLSettingsFrontEnd)
         {
             _clientHelper = client;
 
             _formIOSettings = formIo;
+
+            _URLSettingsFrontEnd = URLSettingsFrontEnd;
 
         }
 
@@ -44,14 +50,19 @@ namespace DARE_FrontEnd.Controllers
             var userItems2 = users.Where(p => !project.Users.Select(x => x.Id).Contains(p.Id)).ToList();
             var treItems2 = tres.Where(p => !project.Tres.Select(x => x.Id).Contains(p.Id)).ToList();
 
+            
             var userItems = userItems2
-                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
+                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.FullName != "" ? p.FullName : p.Name })
                 .ToList();
             var treItems = treItems2
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
 
             var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
+             
+
+            ViewBag.minioendpoint = minioEndpoint?.Url;
+            ViewBag.URLBucket = _URLSettingsFrontEnd.MinioUrl;
 
             var projectView = new ProjectUserTre()
             {
