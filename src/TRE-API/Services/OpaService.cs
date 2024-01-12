@@ -66,7 +66,7 @@ namespace TRE_API.Services
 
             policyResponse.EnsureSuccessStatusCode();
 
-            EvaluatePolicyAndCreateProject(jsonInput, projectId).Wait();
+            EvaluatePolicyAndCreateProject(jsonInput, treProject.Id.ToString()).Wait();
 
             return true;
             }
