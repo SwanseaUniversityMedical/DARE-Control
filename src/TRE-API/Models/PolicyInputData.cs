@@ -10,13 +10,13 @@ namespace TRE_API.Models
 
         public int trecount { get; set; }
 
-        public TreInfo tre { get; set; }
+        public TreClass tre { get; set; }
 
         public List<UserExpiryInfo> users { get; set; }
-
-        public class TreData {
+    }
+        public class TreClass {
             public string name { get; set; }
             public bool active { get; set; }
         }
     }
-}
+

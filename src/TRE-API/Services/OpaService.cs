@@ -58,7 +58,7 @@ namespace TRE_API.Services
                     Id = projectId,
                     Description = description,
                     trecount = 1,
-                    tre = new TreData{ name = treName, active = true },
+                    tre = new TreClass{ name = treName, active = true },
                     users = userExpiryList 
             };
 
