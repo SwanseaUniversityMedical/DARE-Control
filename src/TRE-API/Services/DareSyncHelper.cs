@@ -177,8 +177,6 @@ namespace TRE_API.Services
            var userExpiryList = new List<UserExpiryInfo>();
            var treprojectList = new List<TreProject>();
 
-           var treUserList = new List<string>();
-
             foreach (var project in treprojectList)
             {
                 var projectmemberships = project.MemberDecisions.Where(x => x.Decision == Decision.Approved).ToList();
@@ -203,6 +201,7 @@ namespace TRE_API.Services
                             project.ProjectExpiryDate = DateTime.UtcNow.AddDays(_opaSettings.ExpiryDelayDays);
 
                         }
+
                         userExpiryList.Add(new UserExpiryInfo { name = treuser.Username, expiry = membership.ProjectExpiryDate});
                         treprojectList.Add(project);
                         bool hasAccess = await _opaService.LoadPolicyAsync(project.Id.ToString(), project.Description, treName,treprojectList,userExpiryList);
