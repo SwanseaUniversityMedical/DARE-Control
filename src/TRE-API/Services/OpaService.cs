@@ -33,24 +33,7 @@ namespace TRE_API.Services
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
-
-
-       //var response = await _httpClient.PostAsync(requestUri, content);
-       //     var resultjson = await response.Content.ReadAsStringAsync();
-       //     var responseObject = JsonConvert.DeserializeObject<CheckAccessResponse>(resultjson);
-       //     bool allow = responseObject?.Result?.Allow ?? false;
-       //     if (allow)
-       //     {
-       //         Log.Information("{Function}Opa User Access Allowed for:" + projectName, "CheckUserAccess");
-       //     }
-       //     else
-       //     {
-       //         Log.Information("{Function}Opa User Access Denied for:" + projectName, "CheckUserAccess");
-       //     }
-       //     return allow;
-       
         public async Task<bool> LoadPolicyAsync(string projectId, string description, string treName, List<TreProject>? treprojectList, List<UserExpiryInfo>? userExpiryList)
-
         {
             var policy = PolicyHelper.GetPolicy();
             var inputData = new PolicyInputData          
