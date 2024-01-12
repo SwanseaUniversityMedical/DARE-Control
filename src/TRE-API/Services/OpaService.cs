@@ -33,53 +33,48 @@ namespace TRE_API.Services
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
-        static
-        public async Task<bool> UserPermit(string projectId, string description,string treName,List<TreProject>? treprojectList,List<TreUser>? treuserList, DateTime selectedexpirydate)
+
+
+       //var response = await _httpClient.PostAsync(requestUri, content);
+       //     var resultjson = await response.Content.ReadAsStringAsync();
+       //     var responseObject = JsonConvert.DeserializeObject<CheckAccessResponse>(resultjson);
+       //     bool allow = responseObject?.Result?.Allow ?? false;
+       //     if (allow)
+       //     {
+       //         Log.Information("{Function}Opa User Access Allowed for:" + projectName, "CheckUserAccess");
+       //     }
+       //     else
+       //     {
+       //         Log.Information("{Function}Opa User Access Denied for:" + projectName, "CheckUserAccess");
+       //     }
+       //     return allow;
+       
+        public async Task<bool> LoadPolicyAsync(string projectId, string description, string treName, List<TreProject>? treprojectList, List<UserExpiryInfo>? userExpiryList)
+
         {
             var policy = PolicyHelper.GetPolicy();
-        
+
             //var treUser = treuser.Select(treUser => new { name = treUser.AdminUsername, expiry = selectedexpirydate }).ToList();
 
-            var inputData= new
+            var inputData = new
             {
                 input = new
                 {
                     id = projectId,
                     Description = description,
                     trecount = 1,
-                    tre  = new { name = treName, active = true },
-                    users = new { treUser }
+                    tre = new { name = treName, active = true },
+                    users = new { userExpiryList }
                 },
             };
-      
+
             var settings = new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
             string jsonInput = JsonConvert.SerializeObject(inputData, settings);
-            LoadPolicyAsync(policy, jsonInput);
-            EvaluatePolicyAndCreateProject(jsonInput, projectName).Wait();
 
-            var content = new StringContent(jsonInput, Encoding.UTF8, "application/json");
-            var requestUri = $"http://localhost:8181/v1/data/app/userpermit";
 
-            var response = await _httpClient.PostAsync(requestUri, content);
-            var resultjson = await response.Content.ReadAsStringAsync();
-            var responseObject = JsonConvert.DeserializeObject<CheckAccessResponse>(resultjson);
-            bool allow = responseObject?.Result?.Allow ?? false;
-            if (allow)
-            {
-                Log.Information("{Function}Opa User Access Allowed for:" + projectName, "CheckUserAccess");
-            }
-            else
-            {
-                Log.Information("{Function}Opa User Access Denied for:" + projectName, "CheckUserAccess");
-            }
-            return allow;
-        }
-        public async Task LoadPolicyAsync(string policy, string data)
-
-        {
             var policyContent = new StringContent(policy, Encoding.UTF8, "text/plain");
 
             var policyResponse = await _httpClient.PutAsync("/v1/policies/userpermit", policyContent);
@@ -87,14 +82,17 @@ namespace TRE_API.Services
             policyResponse.EnsureSuccessStatusCode();
 
             
-            policyContent = new StringContent(data, Encoding.UTF8, "application/json");
+            policyContent = new StringContent(jsonInput, Encoding.UTF8, "application/json");
 
             policyResponse = await _httpClient.PutAsync("/v1/data/dareprojectdata", policyContent);
 
             policyResponse.EnsureSuccessStatusCode();
 
+            EvaluatePolicyAndCreateProject(jsonInput, projectId).Wait();
+
+            return true;
         }
-        public async Task<string> EvaluatePolicyAndCreateProject(string input, string projectName)
+        public async Task<string> EvaluatePolicyAndCreateProject(string input, string projectId)
 
         {
             var inputContent = new StringContent(input, Encoding.UTF8, "application/json");
@@ -105,12 +103,12 @@ namespace TRE_API.Services
            
             // Checks if project does not exist
 
-            if (ShouldCreateProject(evaluationResult, projectName))
+            if (ShouldCreateProject(evaluationResult, projectId))
 
             {
                 // create project
                     
-                await CreateProjectAsync(projectName);
+                await CreateProjectAsync(projectId);
 
                 return "Project created";
             }

@@ -18,6 +18,7 @@ using System.Linq;
 using Amazon.Runtime.Internal.Transform;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using TRE_API.Models;
 
 namespace TRE_API.Services
 {
@@ -171,21 +172,24 @@ namespace TRE_API.Services
 
             DateTime today = DateTime.Today;
          
-            string treName = _configuration["TreName"];
+           string treName = _configuration["TreName"];
 
+           var userExpiryList = new List<UserExpiryInfo>();
            var treprojectList = new List<TreProject>();
+
            var treUserList = new List<string>();
+
             foreach (var project in treprojectList)
             {
                 var projectmemberships = project.MemberDecisions.Where(x => x.Decision == Decision.Approved).ToList();
 
                 foreach (var membership in projectmemberships)
                 {
-                    foreach (var user in projectmemberships)
-                    {
-                        var treprojexpiry = user.ProjectExpiryDate;
+                    //foreach (var user in projectmemberships)
+                    //{
+                    //    var treprojexpiry = user.ProjectExpiryDate;
 
-                    }
+                    //}
                     var treuser = membership.User;
                    
                     DateTime membershipExpiryDate = membership.ProjectExpiryDate;
@@ -199,9 +203,9 @@ namespace TRE_API.Services
                             project.ProjectExpiryDate = DateTime.UtcNow.AddDays(_opaSettings.ExpiryDelayDays);
 
                         }
-                        treUserList.Add(treuser.Username.);
+                        userExpiryList.Add(new UserExpiryInfo { name = treuser.Username, expiry = membership.ProjectExpiryDate});
                         treprojectList.Add(project);
-                        bool hasAccess = await _opaService.UserPermit(project.Id.ToString(), project.Description, treName,treprojectList,treUserList,);
+                        bool hasAccess = await _opaService.LoadPolicyAsync(project.Id.ToString(), project.Description, treName,treprojectList,userExpiryList);
                     }
 
                 }

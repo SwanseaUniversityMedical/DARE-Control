@@ -2,7 +2,7 @@
 {
     public class UserExpiryInfo
     {
-        public string Username { get; set; }
-        public DateTime ExpiryDate { get; set; }
+        public string name { get; set; }
+        public DateTime expiry { get; set; }
     }
 }
