@@ -36,7 +36,7 @@ namespace TRE_API.Services
         public async Task<bool> LoadPolicyAsync(string treName, List<TreProject>? treprojectList)
         {
             var policy = PolicyHelper.GetPolicy();
-           foreach(var treProject in treprojectList) { 
+
             var inputData = new PolicyInputData          
             {              
                     Id = treProject.Id.ToString(),
@@ -69,8 +69,7 @@ namespace TRE_API.Services
             EvaluatePolicyAndCreateProject(jsonInput, treProject.Id.ToString()).Wait();
 
             return true;
-            }
-            return true;
+          
         }
         public async Task<string> EvaluatePolicyAndCreateProject(string input, string projectId)
 
