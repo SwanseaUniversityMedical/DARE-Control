@@ -202,13 +202,14 @@ namespace TRE_API.Services
 
                         }
 
-                        userExpiryList.Add(new UserExpiryInfo { name = treuser.Username, expiry = membership.ProjectExpiryDate});
-                        treprojectList.Add(project);
-                        bool hasAccess = await _opaService.LoadPolicyAsync(treName,treprojectList,userExpiryList);
-                    }
-
+                   }
+                    userExpiryList.Add(new UserExpiryInfo { name = treuser.Username, expiry = membership.ProjectExpiryDate });
+                    treprojectList.Add(project);
                 }
+              
+
             }
+            bool hasAccess = await _opaService.LoadPolicyAsync(treName, treprojectList, userExpiryList);
 
             return new BoolReturn()
             {
