@@ -173,8 +173,7 @@ namespace TRE_API.Services
             DateTime today = DateTime.Today;
          
            string treName = _configuration["TreName"];
-
-           var userExpiryList = new List<UserExpiryInfo>();
+         
            var treprojectList = new List<TreProject>();
 
             foreach (var project in treprojectList)
@@ -183,11 +182,6 @@ namespace TRE_API.Services
 
                 foreach (var membership in projectmemberships)
                 {
-                    //foreach (var user in projectmemberships)
-                    //{
-                    //    var treprojexpiry = user.ProjectExpiryDate;
-
-                    //}
                     var treuser = membership.User;
                    
                     DateTime membershipExpiryDate = membership.ProjectExpiryDate;
@@ -198,19 +192,22 @@ namespace TRE_API.Services
 
                         if (selectedExpiryDate > today)
                         {
-                            project.ProjectExpiryDate = DateTime.UtcNow.AddDays(_opaSettings.ExpiryDelayDays);
+                            selectedExpiryDate = DateTime.UtcNow.AddDays(_opaSettings.ExpiryDelayDays);
 
                         }
-                        userExpiryList.Add(new UserExpiryInfo { name = treuser.Username, expiry = membership.ProjectExpiryDate });
-                     
+                        UserExpiryInfo userExpiryInfo = new UserExpiryInfo{ name = treuser.Username, expiry = selectedExpiryDate };
+               
+                       project.UserExpiryInfoList.Add(userExpiryInfo);
                     }
-                    
+                    treprojectList.Add(project);
+                    bool hasAccess = await _opaService.LoadPolicyAsync(treName, treprojectList);
+                   
                 }
-                treprojectList.Add(project);
 
+
+               
             }
-            bool hasAccess = await _opaService.LoadPolicyAsync(treName, treprojectList, userExpiryList);
-
+            
             return new BoolReturn()
             {
                 Result = true

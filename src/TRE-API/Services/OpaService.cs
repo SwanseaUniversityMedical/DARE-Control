@@ -33,7 +33,7 @@ namespace TRE_API.Services
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
-        public async Task<bool> LoadPolicyAsync(string treName, List<TreProject>? treprojectList, List<UserExpiryInfo>? userExpiryList)
+        public async Task<bool> LoadPolicyAsync(string treName, List<TreProject>? treprojectList)
         {
             var policy = PolicyHelper.GetPolicy();
            foreach(var treProject in treprojectList) { 
