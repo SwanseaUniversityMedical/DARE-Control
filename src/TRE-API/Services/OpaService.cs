@@ -53,19 +53,13 @@ namespace TRE_API.Services
 
         {
             var policy = PolicyHelper.GetPolicy();
-
-            //var treUser = treuser.Select(treUser => new { name = treUser.AdminUsername, expiry = selectedexpirydate }).ToList();
-
-            var inputData = new
-            {
-                input = new
-                {
-                    id = projectId,
+            var inputData = new PolicyInputData          
+            {              
+                    Id = projectId,
                     Description = description,
                     trecount = 1,
-                    tre = new { name = treName, active = true },
-                    users = new { userExpiryList }
-                },
+                    tre = new TreInfo{ name = treName, active = true },
+                    users = new userExpiryList 
             };
 
             var settings = new JsonSerializerSettings

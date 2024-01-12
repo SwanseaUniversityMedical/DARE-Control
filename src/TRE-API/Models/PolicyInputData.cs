@@ -8,15 +8,15 @@ namespace TRE_API.Models
 
         public string Description { get; set; }
 
-        public int TreCount { get; set; }
+        public int trecount { get; set; }
 
-        public TreInfo Tre { get; set; }
+        public TreInfo tre { get; set; }
 
-        public List<UserExpiryInfo> Users { get; set; }
+        public List<UserExpiryInfo> users { get; set; }
 
         public class TreInfo {
-            public string Name { get; set; }
-            public bool Active { get; set; }
+            public string name { get; set; }
+            public bool active { get; set; }
         }
     }
 }
