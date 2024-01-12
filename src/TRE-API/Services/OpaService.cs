@@ -58,8 +58,8 @@ namespace TRE_API.Services
                     Id = projectId,
                     Description = description,
                     trecount = 1,
-                    tre = new TreInfo{ name = treName, active = true },
-                    users = new userExpiryList 
+                    tre = new TreData{ name = treName, active = true },
+                    users = userExpiryList 
             };
 
             var settings = new JsonSerializerSettings

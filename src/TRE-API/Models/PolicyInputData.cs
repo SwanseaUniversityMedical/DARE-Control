@@ -14,7 +14,7 @@ namespace TRE_API.Models
 
         public List<UserExpiryInfo> users { get; set; }
 
-        public class TreInfo {
+        public class TreData {
             public string name { get; set; }
             public bool active { get; set; }
         }
