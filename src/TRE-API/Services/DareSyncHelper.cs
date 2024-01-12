@@ -201,12 +201,12 @@ namespace TRE_API.Services
                             project.ProjectExpiryDate = DateTime.UtcNow.AddDays(_opaSettings.ExpiryDelayDays);
 
                         }
-
-                   }
-                    userExpiryList.Add(new UserExpiryInfo { name = treuser.Username, expiry = membership.ProjectExpiryDate });
-                    treprojectList.Add(project);
+                        userExpiryList.Add(new UserExpiryInfo { name = treuser.Username, expiry = membership.ProjectExpiryDate });
+                     
+                    }
+                    
                 }
-              
+                treprojectList.Add(project);
 
             }
             bool hasAccess = await _opaService.LoadPolicyAsync(treName, treprojectList, userExpiryList);
