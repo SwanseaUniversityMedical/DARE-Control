@@ -174,9 +174,10 @@ namespace TRE_API.Services
          
            string treName = _configuration["TreName"];
          
-           var treprojectList = new List<TreProject>();
+           //var treprojectList = new List<TreProject>();
+            var treprojects = _DbContext.Projects.Where(x => x.Decision == Decision.Approved).ToList();
 
-            foreach (var project in treprojectList)
+            foreach (var project in treprojects)
             {
                 var projectmemberships = project.MemberDecisions.Where(x => x.Decision == Decision.Approved).ToList();
 
@@ -199,12 +200,10 @@ namespace TRE_API.Services
                
                        project.UserExpiryInfoList.Add(userExpiryInfo);
                     }
-                    treprojectList.Add(project);
-                    bool hasAccess = await _opaService.LoadPolicyAsync(treName, treprojectList);
-                   
+
+                    bool hasAccess = await _opaService.LoadPolicyAsync(treName,project);
+
                 }
-
-
                
             }
             
