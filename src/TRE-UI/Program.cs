@@ -181,7 +181,7 @@ builder.Services.AddAuthentication(options =>
                         {
                             foreach (var prop in context.Properties.Items)
                             {
-                                Log.Information("{Function} Prop Key {Key}, Value {Value}","OnRemoteFailure", prop.Key, prop.Value);
+                                Log.Information("{Function} Property Key {Key}, Value {Value}","OnRemoteFailure", prop.Key, prop.Value);
                             }
                         }
                         if (context.Failure.Message.Contains("Correlation failed"))
