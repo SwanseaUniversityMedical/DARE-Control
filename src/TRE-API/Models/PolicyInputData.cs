@@ -12,7 +12,7 @@ namespace TRE_API.Models
 
         public TreClass tre { get; set; }
 
-        public List<UserExpiryInfo> users { get; set; }
+        //public List<UserExpiryInfo> users { get; set; }
     }
         public class TreClass {
             public string name { get; set; }

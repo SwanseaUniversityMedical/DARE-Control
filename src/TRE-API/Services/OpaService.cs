@@ -33,17 +33,24 @@ namespace TRE_API.Services
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
-        public async Task<bool> LoadPolicyAsync(string treName, List<TreProject>? treproject)
+        public async Task<bool> LoadPolicyAsync(string treName, TreProject? treproject)
         {
             var policy = PolicyHelper.GetPolicy();
+            var userExpiryInfoList = treproject.UserExpiryInfoList.Select(user=> new UserExpiryInfo
+                {name = user.name,
+                expiry = user.expiry
+
+            }).ToList();
 
             var inputData = new PolicyInputData          
             {              
-                    Id = treProject.Id.ToString(),
-                    Description = treProject.Description,
+                    Id = treproject.Id.ToString(),
+                    Description = treproject.Description,
                     trecount = 1,
                     tre = new TreClass{ name = treName, active = true },
-                    users = userExpiryList 
+        
+                    //users =  userExpiryInfoList 
+                    
             };
            
             var settings = new JsonSerializerSettings
@@ -66,7 +73,7 @@ namespace TRE_API.Services
 
             policyResponse.EnsureSuccessStatusCode();
 
-            EvaluatePolicyAndCreateProject(jsonInput, treProject.Id.ToString()).Wait();
+            EvaluatePolicyAndCreateProject(jsonInput, treproject.Id.ToString()).Wait();
 
             return true;
           
