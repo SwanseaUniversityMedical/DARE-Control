@@ -288,6 +288,7 @@ if (configuration["sslcookies"] == "true")
     Log.Information("Enabling Secure SSL Cookies");
     app.UseCookiePolicy(new CookiePolicyOptions
     {
+        MinimumSameSitePolicy = SameSiteMode.None,
         Secure = CookieSecurePolicy.Always
     });
 }
