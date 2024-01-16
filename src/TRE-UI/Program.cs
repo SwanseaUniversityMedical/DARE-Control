@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.CookiePolicy;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
@@ -101,12 +102,12 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Clear();
 });
 
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
-{
-    options.Cookie.Name = ".AspNetCore.Session";
-    // other session options
-});
+//builder.Services.AddDistributedMemoryCache();
+//builder.Services.AddSession(options =>
+//{
+//    options.Cookie.Name = ".AspNetCore.Session";
+//    // other session options
+//});
     builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
 builder.Services.AddAuthentication(options =>
 {
@@ -121,6 +122,7 @@ builder.Services.AddAuthentication(options =>
                 o.EventsType = typeof(CustomCookieEvent);
                 o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 o.Cookie.SameSite = SameSiteMode.None;  // I ADDED THIS LINE!!!
+                
             })
   //          .AddCookie()
             .AddOpenIdConnect(options =>
@@ -192,12 +194,12 @@ builder.Services.AddAuthentication(options =>
                         if (context.Failure.Message.Contains("Correlation failed"))
                         {
                             Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", treKeyCloakSettings.TokenExpiredAddress);
-                            context.Response.Redirect(treKeyCloakSettings.TokenExpiredAddress);
+                            //context.Response.Redirect(treKeyCloakSettings.TokenExpiredAddress);
                         }
                         else
                         {
                             Log.Warning("call /Error/500");
-                            context.Response.Redirect("/Error/500");
+                            //context.Response.Redirect("/Error/500");
                         }
 
                         context.HandleResponse();
@@ -297,7 +299,8 @@ if (configuration["sslcookies"] == "true")
     app.UseCookiePolicy(new CookiePolicyOptions
     {
         MinimumSameSitePolicy = SameSiteMode.None,
-        Secure = CookieSecurePolicy.Always
+        //Secure = CookieSecurePolicy.Always
+        HttpOnly = HttpOnlyPolicy.Always
     });
 }
 
