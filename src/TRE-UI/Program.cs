@@ -282,7 +282,7 @@ else
 //app.UseHttpsRedirection();
 //app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+Log.Information("SSL Configured to {SSLCookies", configuration["sslcookies"]);
 if (configuration["sslcookies"] == "true")
 {
     Log.Information("Enabling Secure SSL Cookies");
