@@ -111,6 +111,7 @@ builder.Services.AddAuthentication(options =>
 })
             .AddCookie(o =>
             {
+                Log.Information("Adding special cookies");
                 o.SessionStore = new MemoryCacheTicketStore();
                 o.EventsType = typeof(CustomCookieEvent);
                 o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
