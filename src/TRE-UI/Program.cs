@@ -16,7 +16,14 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+ConfigurationManager configuration = builder.Configuration;
+IWebHostEnvironment environment = builder.Environment;
 
+Log.Logger = CreateSerilogLogger(configuration, environment);
+Log.Information("TRE-UI logging LastStatusUpdate.");
+try{
+
+builder.Host.UseSerilog();
 IdentityModelEventSource.ShowPII = true;
 
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(options => {
@@ -24,13 +31,10 @@ builder.Services.AddControllersWithViews().AddNewtonsoftJson(options => {
     options.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
 }).AddRazorRuntimeCompilation();
 
-ConfigurationManager configuration = builder.Configuration;
-IWebHostEnvironment environment = builder.Environment;
 
 string AppName = typeof(Program).Module.Name.Replace(".dll", "");
 
-Log.Logger = CreateSerilogLogger(configuration, environment);
-Log.Information("TRE-UI logging LastStatusUpdate.");
+
 
 
 
@@ -272,21 +276,7 @@ else
 //    //app.UseHsts();
 //}
 
-Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHostEnvironment environment)
-{
-    var seqServerUrl = configuration["Serilog:SeqServerUrl"];
-    var seqApiKey = configuration["Serilog:SeqApiKey"];
 
-    return new LoggerConfiguration()
-    .MinimumLevel.Verbose()
-    .Enrich.WithProperty("ApplicationContext", environment.ApplicationName)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.Seq(seqServerUrl, apiKey: seqApiKey)
-    .ReadFrom.Configuration(configuration)
-    .CreateLogger();
-
-}
 
 //removed to stop redirection
 //app.UseHttpsRedirection();
@@ -315,6 +305,33 @@ app.MapControllerRoute(
 
 
 app.Run();
+
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Program terminated unexpectedly ({ApplicationContext})!", "TreUI");
+}
+finally
+{
+    Log.Information("Stopping web ui V3 ({ApplicationContext})...", "TreUI");
+    Log.CloseAndFlush();
+}
+
+Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHostEnvironment environment)
+{
+    var seqServerUrl = configuration["Serilog:SeqServerUrl"];
+    var seqApiKey = configuration["Serilog:SeqApiKey"];
+
+    return new LoggerConfiguration()
+        .MinimumLevel.Verbose()
+        .Enrich.WithProperty("ApplicationContext", environment.ApplicationName)
+        .Enrich.FromLogContext()
+        .WriteTo.Console()
+        .WriteTo.Seq(seqServerUrl, apiKey: seqApiKey)
+        .ReadFrom.Configuration(configuration)
+        .CreateLogger();
+
+}
 
 #region SameSite Cookie Issue - https://community.auth0.com/t/correlation-failed-unknown-location-error-on-chrome-but-not-in-safari/40013/7
 
