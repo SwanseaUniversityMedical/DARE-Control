@@ -47,9 +47,8 @@ namespace TRE_API.Services
                     Id = treproject.Id.ToString(),
                     Description = treproject.Description,
                     trecount = 1,
-                    tre = new TreClass{ name = treName, active = true },
-        
-                    users =  userExpiryInfoList 
+                    tre = new TreClass{ name = treName, active = true, users = userExpiryInfoList },
+                        
                     
             };
            
