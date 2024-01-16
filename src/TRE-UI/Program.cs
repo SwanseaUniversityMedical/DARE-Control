@@ -280,7 +280,7 @@ else
 
 //removed to stop redirection
 //app.UseHttpsRedirection();
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 if (configuration["sslcookies"] == "true")
