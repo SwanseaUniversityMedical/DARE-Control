@@ -113,6 +113,8 @@ builder.Services.AddAuthentication(options =>
             {
                 o.SessionStore = new MemoryCacheTicketStore();
                 o.EventsType = typeof(CustomCookieEvent);
+                o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                o.Cookie.SameSite = SameSiteMode.None;  // I ADDED THIS LINE!!!
             })
   //          .AddCookie()
             .AddOpenIdConnect(options =>
