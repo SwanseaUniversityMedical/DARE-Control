@@ -1,4 +1,4 @@
-﻿using BL.Models.ViewModels;
+﻿using BL.Models;
 
 namespace TRE_API.Models
 {
@@ -12,11 +12,11 @@ namespace TRE_API.Models
 
         public TreClass tre { get; set; }
 
-        //public List<UserExpiryInfo> users { get; set; }
     }
         public class TreClass {
             public string name { get; set; }
             public bool active { get; set; }
-        }
+        public List<UserExpiryInfo> users { get; set; }
+    }
     }
 

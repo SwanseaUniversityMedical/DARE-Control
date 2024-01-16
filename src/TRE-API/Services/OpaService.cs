@@ -33,14 +33,14 @@ namespace TRE_API.Services
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
-        public async Task<bool> LoadPolicyAsync(string treName, TreProject? treproject)
+        public async Task<bool> LoadPolicyAsync(string treName, TreProject? treproject, List<UserExpiryInfo> userExpiryInfoList)
         {
             var policy = PolicyHelper.GetPolicy();
-            var userExpiryInfoList = treproject.UserExpiryInfoList.Select(user=> new UserExpiryInfo
-                {name = user.name,
-                expiry = user.expiry
+            //var userExpiryInfoList = treproject.UserExpiryInfoList.Select(user=> new UserExpiryInfo
+            //    {name = user.name,
+            //    expiry = user.expiry
 
-            }).ToList();
+            //}).ToList();
 
             var inputData = new PolicyInputData          
             {              
@@ -49,7 +49,7 @@ namespace TRE_API.Services
                     trecount = 1,
                     tre = new TreClass{ name = treName, active = true },
         
-                    //users =  userExpiryInfoList 
+                    users =  userExpiryInfoList 
                     
             };
            
