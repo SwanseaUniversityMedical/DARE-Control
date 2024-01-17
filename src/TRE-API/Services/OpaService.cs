@@ -60,7 +60,7 @@ namespace TRE_API.Services
             var opaUserList = await GetOpaUserLinkAsync();
             foreach (var user in opaUserList)
             {
-                if (user.Id == treproject.Id.ToString())
+                if (user.Id == treproject.Id.ToString() && user.tre.name == treName)
                 {
                     var dataContent = new StringContent(jsonInput, Encoding.UTF8, "application/json");
 
