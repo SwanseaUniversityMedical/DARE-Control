@@ -57,13 +57,21 @@ namespace TRE_API.Services
             await LoadData(jsonInput);
 
             var opaUserList = await GetOpaUserLinkAsync();
+            foreach (var user in opaUserList)
+            {
+                if (user.Id == treproject.Id.ToString())
+                {
+                    var dataContent = new StringContent(jsonInput, Encoding.UTF8, "application/json");
 
-            var updatedProjectJson = JsonConvert.SerializeObject(inputData, settings);
-            
+                    var response = await _httpClient.PutAsync("/v1/data/dareprojectdata/{user.Id}", dataContent);
+
+                    response.EnsureSuccessStatusCode();
+                }
+            }
             return true;
           
         }
-        private async Task<bool> GetOpaUserLinkAsync()
+        private async Task<List<PolicyInputData>> GetOpaUserLinkAsync()
 
         {
 
@@ -74,7 +82,8 @@ namespace TRE_API.Services
 
                 //Deserialize the response content into a list of UserExpiryInfo
                 var userList = JsonConvert.DeserializeObject<List<PolicyInputData>>(responseContent);
-                return true;
+               
+                return userList;
             }
             else
             {
@@ -90,10 +99,6 @@ namespace TRE_API.Services
             var dataContent = new StringContent(data, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PutAsync("/v1/data/dareprojectdata", dataContent);
-
-            dataContent = new StringContent(data, Encoding.UTF8, "application/json");
-
-            response = await _httpClient.PutAsync("/v1/data/dareprojectdata", dataContent);
 
             response.EnsureSuccessStatusCode();
 
