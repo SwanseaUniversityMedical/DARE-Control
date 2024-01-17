@@ -64,9 +64,13 @@ namespace TRE_API.Services
                 {
                     var dataContent = new StringContent(jsonInput, Encoding.UTF8, "application/json");
 
-                    var response = await _httpClient.PutAsync("/v1/data/dareprojectdata/{user.Id}", dataContent);
+                    var response = await _httpClient.PutAsync($"/v1/data/dareprojectdata/{user.Id}", dataContent);
 
                     response.EnsureSuccessStatusCode();
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var updatedInputData = JsonConvert.DeserializeObject<PolicyInputData>(responseData);
+               //update
+                
                 }
             }
             return true;
