@@ -73,7 +73,7 @@ namespace TRE_API.Services
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 //Deserialize the response content into a list of UserExpiryInfo
-                var userList = JsonConvert.DeserializeObject<List<UserExpiryInfo>>(responseContent);
+                var userList = JsonConvert.DeserializeObject<List<PolicyInputData>>(responseContent);
                 return true;
             }
             else
