@@ -35,7 +35,7 @@ namespace TRE_API.Services
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
-        public async Task<bool> LoadPolicyAsync(string treName, TreProject? treproject, List<UserExpiryInfo> userExpiryInfoList)
+        public async Task<bool> UpdateOpaListAsync(string treName, TreProject? treproject, List<UserExpiryInfo> userExpiryInfoList)
         {
          
             var inputData = new PolicyInputData          
@@ -63,7 +63,7 @@ namespace TRE_API.Services
             return true;
           
         }
-        private async Task<List<UserExpiryInfo>> GetOpaUserLinkAsync()
+        private async Task<bool> GetOpaUserLinkAsync()
 
         {
 
@@ -74,34 +74,34 @@ namespace TRE_API.Services
 
                 //Deserialize the response content into a list of UserExpiryInfo
                 var userList = JsonConvert.DeserializeObject<List<UserExpiryInfo>>(responseContent);
-                return userList;
+                return true;
             }
             else
             {
                 throw new Exception($"Failed to retrieve user list from opa.Status code:{response.StatusCode}");
             }
-        
+     
         }
 
         
-        private async Task<HttpResponseMessage> LoadData(string data)
+        private async Task<bool> LoadData(string data)
 
         {
             var dataContent = new StringContent(data, Encoding.UTF8, "application/json");
 
-            var Response = await _httpClient.PutAsync("/v1/data/dareprojectdata", dataContent);
+            var response = await _httpClient.PutAsync("/v1/data/dareprojectdata", dataContent);
 
             dataContent = new StringContent(data, Encoding.UTF8, "application/json");
 
-            Response = await _httpClient.PutAsync("/v1/data/dareprojectdata", dataContent);
+            response = await _httpClient.PutAsync("/v1/data/dareprojectdata", dataContent);
 
-            Response.EnsureSuccessStatusCode();
+            response.EnsureSuccessStatusCode();
 
-            return Response;
+            return true;
 
         }
 
-        private async Task<HttpResponseMessage> LoadPolicy()
+        private async Task<bool> LoadPolicy()
 
         {
             var policy = PolicyHelper.GetPolicy();
@@ -111,7 +111,7 @@ namespace TRE_API.Services
             var Response = await _httpClient.PutAsync("/v1/policies/userpermit", policyContent);
             Response.EnsureSuccessStatusCode();
 
-            return Response;
+            return true;
 
         }
 

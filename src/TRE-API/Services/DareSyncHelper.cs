@@ -201,7 +201,7 @@ namespace TRE_API.Services
                        userExpiryInfoList.Add(userExpiryInfo);
                     }
 
-                    bool hasAccess = await _opaService.LoadPolicyAsync(treName,project, userExpiryInfoList);
+                    bool hasAccess = await _opaService.UpdateOpaListAsync(treName,project, userExpiryInfoList);
 
                 }
                
