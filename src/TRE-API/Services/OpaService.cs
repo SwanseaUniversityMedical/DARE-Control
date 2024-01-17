@@ -36,12 +36,7 @@ namespace TRE_API.Services
         public async Task<bool> LoadPolicyAsync(string treName, TreProject? treproject, List<UserExpiryInfo> userExpiryInfoList)
         {
             var policy = PolicyHelper.GetPolicy();
-            //var userExpiryInfoList = treproject.UserExpiryInfoList.Select(user=> new UserExpiryInfo
-            //    {name = user.name,
-            //    expiry = user.expiry
-
-            //}).ToList();
-
+    
             var inputData = new PolicyInputData          
             {              
                     Id = treproject.Id.ToString(),
@@ -57,7 +52,8 @@ namespace TRE_API.Services
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
             string jsonInput = JsonConvert.SerializeObject(inputData, settings);
-           
+
+
 
             var policyContent = new StringContent(policy, Encoding.UTF8, "text/plain");
 
@@ -72,45 +68,34 @@ namespace TRE_API.Services
 
             policyResponse.EnsureSuccessStatusCode();
 
-            EvaluatePolicyAndCreateProject(jsonInput, treproject.Id.ToString()).Wait();
+            var opaUserList = await GetOpaUserLinkAsync();
+
+            var updatedProjectJson = JsonConvert.SerializeObject(inputData, settings);
 
             return true;
           
         }
-        public async Task<string> EvaluatePolicyAndCreateProject(string input, string projectId)
+        private async Task<List<UserExpiryInfo>> GetOpaUserLinkAsync()
 
         {
-            var inputContent = new StringContent(input, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync("/v1/data/app/userpermit", inputContent);
-            response.EnsureSuccessStatusCode();
 
-            var evaluationResult = await response.Content.ReadAsStringAsync();
-           
-            // Checks if project does not exist
-
-            if (ShouldCreateProject(evaluationResult, projectId))
-
+            var response = await _httpClient.GetAsync("/v1/data/dareprojectdata");
+            if (response.IsSuccessStatusCode)
             {
-                // create project
-                    
-                await CreateProjectAsync(projectId);
+                var responseContent = await response.Content.ReadAsStringAsync();
 
-                return "Project created";
+                //Deserialize the response content into a list of UserExpiryInfo
+                var userList = JsonConvert.DeserializeObject<List<UserExpiryInfo>>(responseContent);
+                return userList;
             }
             else
             {
-                return "Project already exists ";
+                throw new Exception($"Failed to retrieve user list from opa.Status code:{response.StatusCode}");
             }
-
+        
         }
 
-        private bool ShouldCreateProject(string evaluationResult, string projectName)
-
-        {
-
-            return !evaluationResult.Contains($"\"{projectName}\":");
-
-        }
+        
         private async Task CreateProjectAsync(string projectName)
 
         {
