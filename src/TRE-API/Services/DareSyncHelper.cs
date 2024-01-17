@@ -186,20 +186,18 @@ namespace TRE_API.Services
                     var treuser = membership.User;
                    
                     DateTime membershipExpiryDate = membership.ProjectExpiryDate;
-                    if (project != null)
-                    {
-                        DateTime projectExpiryDate = project.ProjectExpiryDate;
+                      DateTime projectExpiryDate = project.ProjectExpiryDate;
                         DateTime selectedExpiryDate = membershipExpiryDate < projectExpiryDate ? membershipExpiryDate : projectExpiryDate;
 
                         if (selectedExpiryDate > today)
                         {
-                            selectedExpiryDate = DateTime.UtcNow.AddDays(_opaSettings.ExpiryDelayDays);
+                            selectedExpiryDate = selectedExpiryDate.AddDays(_opaSettings.ExpiryDelayDays);
 
                         }
                         UserExpiryInfo userExpiryInfo = new UserExpiryInfo{ name = treuser.Username, expiry = selectedExpiryDate };
                
                        userExpiryInfoList.Add(userExpiryInfo);
-                    }
+                    
 
                     bool hasAccess = await _opaService.UpdateOpaListAsync(treName,project, userExpiryInfoList);
 

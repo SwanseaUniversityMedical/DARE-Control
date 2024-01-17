@@ -44,9 +44,9 @@ namespace TRE_API.Services
                     Id = treproject.Id.ToString(),
                     Description = treproject.Description,
                     trecount = 1,
-                    tre = new TreClass{ name = treName, active = true, users = userExpiryInfoList },
+                    tre = new List<TreClass> { new TreClass { name = treName, active = true, users = userExpiryInfoList }},
                         
-                    
+
             };          
             var settings = new JsonSerializerSettings
             {
@@ -55,12 +55,12 @@ namespace TRE_API.Services
             string jsonInput = JsonConvert.SerializeObject(inputData, settings);
 
             await LoadPolicy();
-            await LoadData(jsonInput);
+            
 
             var opaUserList = await GetOpaUserLinkAsync();
             foreach (var user in opaUserList)
             {
-                if (user.Id == treproject.Id.ToString() && user.tre.name == treName)
+                if (user.Id == treproject.Id.ToString() )
                 {
                     var dataContent = new StringContent(jsonInput, Encoding.UTF8, "application/json");
 
@@ -81,13 +81,9 @@ namespace TRE_API.Services
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
 
-                //Deserialize the response content into a list of UserExpiryInfo
+               
                 var userList = JsonConvert.DeserializeObject<List<PolicyInputData>>(responseContent);
-                //var settings = new JsonSerializerSettings
-                //{
-                //    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                //};
-                //string jsonInput = JsonConvert.SerializeObject(inputData, settings);
+              
                 return userList;
             }
             else

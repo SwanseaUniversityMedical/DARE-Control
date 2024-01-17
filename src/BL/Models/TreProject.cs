@@ -41,7 +41,7 @@ namespace BL.Models
         public string? OutputBucketTre { get; set; }
 
         public virtual List<TreAuditLog>? AuditLogs { get; set; }
-        //public virtual List<UserExpiryInfo>? UserExpiryInfoList { get; set; }
+        
         public string? OutputBucketSub { get; set; }
     }
     
