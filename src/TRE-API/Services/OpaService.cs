@@ -71,7 +71,7 @@ namespace TRE_API.Services
             var opaUserList = await GetOpaUserLinkAsync();
 
             var updatedProjectJson = JsonConvert.SerializeObject(inputData, settings);
-
+            
             return true;
           
         }
