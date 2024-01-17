@@ -18,6 +18,7 @@ using Build.Security.AspNetCore.Middleware.Dto;
 using TRE_API.Models;
 using Amazon.S3.Model;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace TRE_API.Services
 {
@@ -82,7 +83,11 @@ namespace TRE_API.Services
 
                 //Deserialize the response content into a list of UserExpiryInfo
                 var userList = JsonConvert.DeserializeObject<List<PolicyInputData>>(responseContent);
-               
+                //var settings = new JsonSerializerSettings
+                //{
+                //    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                //};
+                //string jsonInput = JsonConvert.SerializeObject(inputData, settings);
                 return userList;
             }
             else

@@ -1,2 +1,36 @@
-﻿package app.userpermit\r\n\r\nimport future.keywords.if\r\nimport future.keywords.in\r\n\r\ndefault allow := true\r\n\r\ndefault any_invalid_tre := false\r\n\r\ndefault any_valid_users := true\r\n\r\ndefault project_allow := true\r\n\r\ndefault any_is_user_allowed := true\r\n\r\ndefault any_is_tre_data_valid := true\r\n\r\nallow if {\r\n\tis_tre_data_valid(input.treData)\r\n\tis_user_allowed(input.userName)\r\n}\r\n\r\nis_tre_data_valid(treData) if {\r\n\ttreData != null\r\n\tcount(treData) > 0\r\n}\r\n\r\nis_user_allowed(userName) if {\r\n\tuserName != null\r\n\tcount(userName) > 0\r\n}\r\n\r\nproject_allow if {\r\n\tany_is_tre_data_valid\r\n\tany_is_user_allowed\r\n}\r\n
-         
+﻿package app.checkaccess
+
+import future.keywords.if
+import future.keywords.in
+
+default allow := false
+
+default any_invalid_tre := false
+
+default any_valid_users := true
+
+default project_allow := false
+
+default any_is_user_allowed := false
+
+default any_is_tre_data_valid := false
+
+allow if {
+	is_tre_data_valid(input.treData)
+	is_user_allowed(input.userName)
+}
+
+is_tre_data_valid(treData) if {
+	treData != null
+	count(treData) > 0
+}
+
+is_user_allowed(userName) if {
+	userName != null
+	count(userName) > 0
+}
+
+project_allow if {
+	any_is_tre_data_valid
+	any_is_user_allowed
+}
