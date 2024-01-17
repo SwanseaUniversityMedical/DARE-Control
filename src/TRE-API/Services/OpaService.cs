@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using BL.Services;
 using Build.Security.AspNetCore.Middleware.Dto;
 using TRE_API.Models;
+using Amazon.S3.Model;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TRE_API.Services
 {
@@ -35,8 +37,7 @@ namespace TRE_API.Services
         }
         public async Task<bool> LoadPolicyAsync(string treName, TreProject? treproject, List<UserExpiryInfo> userExpiryInfoList)
         {
-            var policy = PolicyHelper.GetPolicy();
-    
+         
             var inputData = new PolicyInputData          
             {              
                     Id = treproject.Id.ToString(),
@@ -45,28 +46,15 @@ namespace TRE_API.Services
                     tre = new TreClass{ name = treName, active = true, users = userExpiryInfoList },
                         
                     
-            };
-           
+            };          
             var settings = new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
             string jsonInput = JsonConvert.SerializeObject(inputData, settings);
 
-
-
-            var policyContent = new StringContent(policy, Encoding.UTF8, "text/plain");
-
-            var policyResponse = await _httpClient.PutAsync("/v1/policies/userpermit", policyContent);
-
-            policyResponse.EnsureSuccessStatusCode();
-
-            
-            policyContent = new StringContent(jsonInput, Encoding.UTF8, "application/json");
-
-            policyResponse = await _httpClient.PutAsync("/v1/data/dareprojectdata", policyContent);
-
-            policyResponse.EnsureSuccessStatusCode();
+            await LoadPolicy();
+            await LoadData(jsonInput);
 
             var opaUserList = await GetOpaUserLinkAsync();
 
@@ -96,13 +84,34 @@ namespace TRE_API.Services
         }
 
         
-        private async Task CreateProjectAsync(string projectName)
+        private async Task<HttpResponseMessage> LoadData(string data)
 
         {
-      
-            Console.WriteLine($"Creating project: {projectName}");
+            var dataContent = new StringContent(data, Encoding.UTF8, "application/json");
 
-            // adds project 
+            var Response = await _httpClient.PutAsync("/v1/data/dareprojectdata", dataContent);
+
+            dataContent = new StringContent(data, Encoding.UTF8, "application/json");
+
+            Response = await _httpClient.PutAsync("/v1/data/dareprojectdata", dataContent);
+
+            Response.EnsureSuccessStatusCode();
+
+            return Response;
+
+        }
+
+        private async Task<HttpResponseMessage> LoadPolicy()
+
+        {
+            var policy = PolicyHelper.GetPolicy();
+
+            var policyContent = new StringContent(policy, Encoding.UTF8, "text/plain");
+
+            var Response = await _httpClient.PutAsync("/v1/policies/userpermit", policyContent);
+            Response.EnsureSuccessStatusCode();
+
+            return Response;
 
         }
 
