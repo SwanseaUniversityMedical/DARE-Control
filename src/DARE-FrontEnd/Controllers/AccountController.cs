@@ -15,7 +15,6 @@ namespace DARE_FrontEnd.Controllers
     [Authorize]
     public class AccountController : Controller
     {
-
         public SubmissionKeyCloakSettings _keycloakSettings { get; set; }
 
         public AccountController(SubmissionKeyCloakSettings keycloakSettings)

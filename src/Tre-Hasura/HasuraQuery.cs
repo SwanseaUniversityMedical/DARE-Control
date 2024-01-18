@@ -89,7 +89,6 @@ namespace Tre_Hasura
             var SubDirectory = directory.CreateSubdirectory("data");
             File.WriteAllText(Path.Combine(SubDirectory.ToString(), $"data_{DateTime.UtcNow.Ticks}.json"), data);
         
-        
         }
 
 
@@ -121,7 +120,7 @@ namespace Tre_Hasura
                 Console.WriteLine(Result.StatusCode);
 
                 var Content = await Result.Content.ReadAsStringAsync();
-                Console.WriteLine(Content);
+                Console.WriteLine(Content.Length.ToString());
                 var data = Content;
 
                 return data;

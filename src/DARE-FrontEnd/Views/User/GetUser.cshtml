@@ -7,13 +7,17 @@
         Model.Organisation = "No Organisation";
     }
     
-    
+    if (Model.FullName == "" || Model.FullName == null)
+    {
+        Model.FullName = Model.Name;
+    }
 
 }
+
 <div class="container-lg mt-4 p-4 bg-white border-1 shadow-sm">
 <div class="d-flex align-items-center justify-content-between">
     <div>
-        <h1 class="fs-3 mb-0">@Model.Name</h1>
+        <h1 class="fs-3 mb-0">@Model.FullName</h1>
         <p class="text-muted mb-0">@Model.Organisation</p>
     </div>
 

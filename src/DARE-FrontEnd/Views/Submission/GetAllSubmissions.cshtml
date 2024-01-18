@@ -97,7 +97,13 @@
                         @submission.Project.Name
                     </td>
                     <td>
-                        @submission.SubmittedBy.Name
+                            @{
+                                if (submission.SubmittedBy.FullName == "" || submission.SubmittedBy.FullName == null)
+                                {
+                                    submission.SubmittedBy.FullName = submission.SubmittedBy.Name;
+                                }
+                            }
+                        @submission.SubmittedBy.FullName
                     </td>
                     <td>
                         @submission.StartTime

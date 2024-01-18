@@ -145,8 +145,13 @@
                         <ul class="list-group">
                             @foreach (var user in Model.Users)
                             {
+                                if (user.FullName == "" || user.FullName == null)
+                                {
+                                    user.FullName = user.Name;
+                                }
+
                                 <li class="list-group-item justify-content-between d-flex">
-                                    <a href="@Url.Action("GetUser", "User", new { id = user.Id })">@user.Name</a>
+                                    <a href="@Url.Action("GetUser", "User", new { id = user.Id })">@user.FullName</a>
                                     <a href="@Url.Action("RemoveUserFromProject", "Project",new{ProjectId=Model.Id,UserId=@user.Id})">
                                         <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove user from project"></span>
                                     </a>
