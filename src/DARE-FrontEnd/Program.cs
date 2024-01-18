@@ -226,10 +226,7 @@ builder.Services.AddAuthentication(options =>
                         {
                             Log.Information("Response Header {key} - {value}", header.Key, header.Value);
                         }
-
-
-
-
+                        
 
 
                         if (submissionKeyCloakSettings.UseRedirectURL)
