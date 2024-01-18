@@ -229,6 +229,7 @@ builder.Services.AddAuthentication(options =>
 
 
 
+
                         if (submissionKeyCloakSettings.UseRedirectURL)
                         {
                             context.ProtocolMessage.RedirectUri = submissionKeyCloakSettings.RedirectURL;
