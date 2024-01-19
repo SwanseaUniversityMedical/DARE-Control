@@ -47,20 +47,20 @@ namespace TRE_API.Services
                     tre = new List<TreClass> { new TreClass { name = treName, active = true, users = userExpiryInfoList }},
                         
 
-            };          
+            };
             var settings = new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
-            string jsonInput = JsonConvert.SerializeObject(inputData, settings);
+            string jsonInput = JsonConvert.SerializeObject(inputData,settings);
 
             await LoadPolicy();
-            
+         
 
             var opaUserList = await GetOpaUserLinkAsync();
             foreach (var user in opaUserList)
             {
-                if (user.Id == treproject.Id.ToString() )
+                if (user.Id == treproject.Id.ToString())
                 {
                     var dataContent = new StringContent(jsonInput, Encoding.UTF8, "application/json");
 
@@ -69,8 +69,8 @@ namespace TRE_API.Services
                     response.EnsureSuccessStatusCode();
                     var responseData = await response.Content.ReadAsStringAsync();
                     var updatedInputData = JsonConvert.DeserializeObject<PolicyInputData>(responseData);
-               //update 
-                
+                    //update 
+
                 }
             }
             return true;
@@ -85,9 +85,9 @@ namespace TRE_API.Services
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
 
-               
+
                 var userList = JsonConvert.DeserializeObject<List<PolicyInputData>>(responseContent);
-              
+         
                 return userList;
             }
             else

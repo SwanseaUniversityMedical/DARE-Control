@@ -17,7 +17,7 @@ namespace TRE_API.Models
             public string name { get; set; }
             public bool active { get; set; }
         public List<UserExpiryInfo> users { get; set; }
-      
+  
     }
     }
 

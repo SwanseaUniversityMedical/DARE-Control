@@ -172,7 +172,7 @@ namespace TRE_API.Services
 
             DateTime today = DateTime.Today;
          
-           string treName = _configuration["TreName"];
+        string treName = _configuration["TreName"];
          
            var userExpiryInfoList = new List<UserExpiryInfo>();
             var treprojects = _DbContext.Projects.Where(x => x.Decision == Decision.Approved).ToList();
