@@ -211,7 +211,7 @@ builder.Services.AddAuthentication(options =>
                         {
                             context.ProtocolMessage.RedirectUri = treKeyCloakSettings.RedirectURL;
                         }
-                        Log.Information("Redirect url is {Redirect}", context.ProtocolMessage.RedirectUri);
+                        Log.Information(context.ProtocolMessage.RedirectUri);
                         
                         await Task.FromResult(0);
                     }
