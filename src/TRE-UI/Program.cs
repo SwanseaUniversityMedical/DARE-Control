@@ -97,7 +97,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto |
                                ForwardedHeaders.XForwardedHost;
-
+    options.ForwardLimit = 2; //Limit number of proxy hops trusted
     options.KnownNetworks.Clear();
     options.KnownProxies.Clear();
 });
