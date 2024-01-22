@@ -119,29 +119,29 @@ builder.Services.AddAuthentication(options =>
             {
                 Log.Information("Adding special cookies");
                 o.SessionStore = new MemoryCacheTicketStore();
-                o.EventsType = typeof(CustomCookieEvent);
-                o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                o.Cookie.SameSite = SameSiteMode.None;  // I ADDED THIS LINE!!!
+                //o.EventsType = typeof(CustomCookieEvent);
+                //o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                //o.Cookie.SameSite = SameSiteMode.None;  // I ADDED THIS LINE!!!
                 
             })
   //          .AddCookie()
             .AddOpenIdConnect(options =>
             {
-                if (treKeyCloakSettings.Proxy)
-                {
-                    Console.WriteLine("TRE UI Proxy = " + treKeyCloakSettings.ProxyAddresURL);
-                    Console.WriteLine("TRE UI Proxy bypass = " + treKeyCloakSettings.BypassProxy);
-                    options.BackchannelHttpHandler = new HttpClientHandler
-                    {
-                        UseProxy = true,
-                        UseDefaultCredentials = true,
-                        Proxy = new WebProxy()
-                        {
-                            Address = new Uri(treKeyCloakSettings.ProxyAddresURL),
-                            BypassList = new[] { treKeyCloakSettings.BypassProxy }
-                        }
-                    };
-                }
+                //if (treKeyCloakSettings.Proxy)
+                //{
+                //    Console.WriteLine("TRE UI Proxy = " + treKeyCloakSettings.ProxyAddresURL);
+                //    Console.WriteLine("TRE UI Proxy bypass = " + treKeyCloakSettings.BypassProxy);
+                //    options.BackchannelHttpHandler = new HttpClientHandler
+                //    {
+                //        UseProxy = true,
+                //        UseDefaultCredentials = true,
+                //        Proxy = new WebProxy()
+                //        {
+                //            Address = new Uri(treKeyCloakSettings.ProxyAddresURL),
+                //            BypassList = new[] { treKeyCloakSettings.BypassProxy }
+                //        }
+                //    };
+                //}
 
                 
                 // URL of the Keycloak server
@@ -150,7 +150,7 @@ builder.Services.AddAuthentication(options =>
                 options.ClientId = treKeyCloakSettings.ClientId;
                 //// Client secret shared with Keycloak
                 options.ClientSecret = treKeyCloakSettings.ClientSecret;
-                options.MetadataAddress = treKeyCloakSettings.MetadataAddress;
+                //options.MetadataAddress = treKeyCloakSettings.MetadataAddress;
 
                 options.SaveTokens = true;
 
@@ -161,26 +161,35 @@ builder.Services.AddAuthentication(options =>
                 options.RequireHttpsMetadata = false;
                 options.GetClaimsFromUserInfoEndpoint = true;
                 options.Scope.Add("openid");
-                options.Scope.Add("profile");
-                options.Scope.Add("email");
+                //options.Scope.Add("profile");
+                //options.Scope.Add("email");
                 
                 options.SaveTokens = true;
                 options.ResponseType = OpenIdConnectResponseType.Code;
                 options.Events = new OpenIdConnectEvents
                 {
-                    OnAccessDenied = context =>
+                    OnTokenValidated = context =>
                     {
-                        Log.Error("{Function}: {ex}", "OnAccessDenied", context.AccessDeniedPath);
-                        context.HandleResponse();
-                        return context.Response.CompleteAsync();
+                        // Log the issuer claim from the token
+                        var issuer = context.Principal.FindFirst("iss")?.Value;
+                        Log.Information("Token Issuer: {Issuer}", issuer);
+                        var audience = context.Principal.FindFirst("aud")?.Value;
+                        Log.Information("Token Audience: {Audience}", audience);
+                        return Task.CompletedTask;
+                    },
+                    //OnAccessDenied = context =>
+                    //{
+                    //    Log.Error("{Function}: {ex}", "OnAccessDenied", context.AccessDeniedPath);
+                    //    context.HandleResponse();
+                    //    return context.Response.CompleteAsync();
 
-                    },
-                    OnAuthenticationFailed = context =>
-                    {
-                        Log.Error("{Function}: {ex}", "OnAuthFailed", context.Exception.Message);
-                        context.HandleResponse();
-                        return context.Response.CompleteAsync();
-                    },
+                    //},
+                    //OnAuthenticationFailed = context =>
+                    //{
+                    //    Log.Error("{Function}: {ex}", "OnAuthFailed", context.Exception.Message);
+                    //    context.HandleResponse();
+                    //    return context.Response.CompleteAsync();
+                    //},
                     OnRemoteFailure = context =>
                     {
                         Log.Error("OnRemoteFailure: {ex}", context.Failure);
