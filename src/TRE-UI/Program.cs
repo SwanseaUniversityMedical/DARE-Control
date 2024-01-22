@@ -51,7 +51,7 @@ builder.Services.AddHttpClient();
 
 
 //add services here
-builder.Services.AddScoped<CustomCookieEvent>();
+//builder.Services.AddScoped<CustomCookieEvent>();
 
 builder.Services.AddScoped<ITREClientHelper, TREClientHelper>();
 
@@ -69,7 +69,7 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 });
 
 
-JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+//JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -83,14 +83,14 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod()
                 .AllowAnyHeader();
         });
-    options.AddPolicy(name: MyAllowSpecificOrigins,
-        policy =>
-        {
-            policy.WithOrigins(configuration["TreAPISettings:Address"])
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials();
-        });
+    //options.AddPolicy(name: MyAllowSpecificOrigins,
+    //    policy =>
+    //    {
+    //        policy.WithOrigins(configuration["TreAPISettings:Address"])
+    //            .AllowAnyMethod()
+    //            .AllowAnyHeader()
+    //            .AllowCredentials();
+    //    });
 });
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -302,16 +302,16 @@ else
 //app.UseHttpsRedirection();
 app.UseStaticFiles();
 Log.Information("SSL Configured to {SSLCookies", configuration["sslcookies"]);
-if (configuration["sslcookies"] == "true")
-{
-    Log.Information("Enabling Secure SSL Cookies");
-    app.UseCookiePolicy(new CookiePolicyOptions
-    {
-        MinimumSameSitePolicy = SameSiteMode.None,
-        //Secure = CookieSecurePolicy.Always
-        HttpOnly = HttpOnlyPolicy.Always
-    });
-}
+//if (configuration["sslcookies"] == "true")
+//{
+//    Log.Information("Enabling Secure SSL Cookies");
+//    app.UseCookiePolicy(new CookiePolicyOptions
+//    {
+//        MinimumSameSitePolicy = SameSiteMode.None,
+//        //Secure = CookieSecurePolicy.Always
+//        HttpOnly = HttpOnlyPolicy.Always
+//    });
+//}
 
 app.UseRouting();
 app.UseCookiePolicy();
