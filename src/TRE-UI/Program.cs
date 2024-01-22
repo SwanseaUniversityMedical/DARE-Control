@@ -206,21 +206,21 @@ builder.Services.AddAuthentication(options =>
 
                         return context.Response.CompleteAsync();
                     },
-                    OnMessageReceived = context =>
-                    {
-                        string accessToken = context.Request.Query["access_token"];
-                        PathString path = context.HttpContext.Request.Path;
+                    //OnMessageReceived = context =>
+                    //{
+                    //    string accessToken = context.Request.Query["access_token"];
+                    //    PathString path = context.HttpContext.Request.Path;
 
-                        if (
-                            !string.IsNullOrEmpty(accessToken) &&
-                            path.StartsWithSegments("/api/SignalRHub")
-                        )
-                        {
-                            context.Token = accessToken;
-                        }
+                    //    if (
+                    //        !string.IsNullOrEmpty(accessToken) &&
+                    //        path.StartsWithSegments("/api/SignalRHub")
+                    //    )
+                    //    {
+                    //        context.Token = accessToken;
+                    //    }
 
-                        return Task.CompletedTask;
-                    },
+                    //    return Task.CompletedTask;
+                    //},
                     //OnRedirectToIdentityProvider = async context =>
                     //{
                     //    Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}", context.HttpContext.Connection.RemoteIpAddress);
