@@ -21,7 +21,7 @@ ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
 Log.Logger = CreateSerilogLogger(configuration, environment);
-Log.Information("TRE-UI v7 logging LastStatusUpdate.");
+Log.Information("TRE-UI v9 logging LastStatusUpdate.");
 try{
 
 builder.Host.UseSerilog();
@@ -282,22 +282,10 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-//app.UseForwardedHeaders(new ForwardedHeadersOptions
-//{
-//    ForwardedHeaders = ForwardedHeaders.XForwardedProto
-//});
 
-//// Configure the HTTP request pipeline.
-//if (!app.Environment.IsDevelopment())
-//{
-//    app.UseExceptionHandler("/Home/Error");
-//    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-//    //app.UseHsts();
-//}
-
-
+//Disable redirect if using http only site to prevent silent redirect to non existent https site
     var httpsRedirect = configuration["httpsRedirect"];
-//removed to stop redirection
+
     if (httpsRedirect != null && httpsRedirect.ToLower() == "true")
     {
         Log.Information("Turning on https Redirect");
@@ -307,9 +295,10 @@ else
     {
         Log.Information("Https redirect disabled. Http only");
     }
-//app.UseHttpsRedirection();
+
 app.UseStaticFiles();
-Log.Information("SSL Configured to {SSLCookies", configuration["sslcookies"]);
+
+//This is a biggy. If having issues with keycloak DISABLE THIS
     if (configuration["sslcookies"] == "true")
     {
         Log.Information("Enabling Secure SSL Cookies");
