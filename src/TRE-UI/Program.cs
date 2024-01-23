@@ -21,7 +21,7 @@ ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
 Log.Logger = CreateSerilogLogger(configuration, environment);
-Log.Information("TRE-UI v1 logging LastStatusUpdate.");
+Log.Information("TRE-UI v2 logging LastStatusUpdate.");
 try{
 
 builder.Host.UseSerilog();
@@ -51,7 +51,7 @@ builder.Services.AddHttpClient();
 
 
 //add services here
-//builder.Services.AddScoped<CustomCookieEvent>();
+builder.Services.AddScoped<CustomCookieEvent>();
 
 builder.Services.AddScoped<ITREClientHelper, TREClientHelper>();
 
@@ -119,7 +119,7 @@ builder.Services.AddAuthentication(options =>
             {
                 Log.Information("Adding special cookies");
                 o.SessionStore = new MemoryCacheTicketStore();
-                //o.EventsType = typeof(CustomCookieEvent);
+                o.EventsType = typeof(CustomCookieEvent);
                 //o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 //o.Cookie.SameSite = SameSiteMode.None;  // I ADDED THIS LINE!!!
                 
@@ -127,30 +127,30 @@ builder.Services.AddAuthentication(options =>
   //          .AddCookie()
             .AddOpenIdConnect(options =>
             {
-                //if (treKeyCloakSettings.Proxy)
-                //{
-                //    Console.WriteLine("TRE UI Proxy = " + treKeyCloakSettings.ProxyAddresURL);
-                //    Console.WriteLine("TRE UI Proxy bypass = " + treKeyCloakSettings.BypassProxy);
-                //    options.BackchannelHttpHandler = new HttpClientHandler
-                //    {
-                //        UseProxy = true,
-                //        UseDefaultCredentials = true,
-                //        Proxy = new WebProxy()
-                //        {
-                //            Address = new Uri(treKeyCloakSettings.ProxyAddresURL),
-                //            BypassList = new[] { treKeyCloakSettings.BypassProxy }
-                //        }
-                //    };
-                //}
+                if (treKeyCloakSettings.Proxy)
+                {
+                    Console.WriteLine("TRE UI Proxy = " + treKeyCloakSettings.ProxyAddresURL);
+                    Console.WriteLine("TRE UI Proxy bypass = " + treKeyCloakSettings.BypassProxy);
+                    options.BackchannelHttpHandler = new HttpClientHandler
+                    {
+                        UseProxy = true,
+                        UseDefaultCredentials = true,
+                        Proxy = new WebProxy()
+                        {
+                            Address = new Uri(treKeyCloakSettings.ProxyAddresURL),
+                            BypassList = new[] { treKeyCloakSettings.BypassProxy }
+                        }
+                    };
+                }
 
-                
+
                 // URL of the Keycloak server
                 options.Authority = treKeyCloakSettings.Authority;
                 //// Client configured in the Keycloak
                 options.ClientId = treKeyCloakSettings.ClientId;
                 //// Client secret shared with Keycloak
                 options.ClientSecret = treKeyCloakSettings.ClientSecret;
-                //options.MetadataAddress = treKeyCloakSettings.MetadataAddress;
+                options.MetadataAddress = treKeyCloakSettings.MetadataAddress;
 
                 options.SaveTokens = true;
 
