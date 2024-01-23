@@ -302,18 +302,18 @@ else
 //app.UseHttpsRedirection();
 app.UseStaticFiles();
 Log.Information("SSL Configured to {SSLCookies", configuration["sslcookies"]);
-//if (configuration["sslcookies"] == "true")
-//{
-//    Log.Information("Enabling Secure SSL Cookies");
-//    app.UseCookiePolicy(new CookiePolicyOptions
-//    {
-//        MinimumSameSitePolicy = SameSiteMode.None,
-//        //Secure = CookieSecurePolicy.Always
-//        HttpOnly = HttpOnlyPolicy.Always
-//    });
-//}
+    if (configuration["sslcookies"] == "true")
+    {
+        Log.Information("Enabling Secure SSL Cookies");
+        app.UseCookiePolicy(new CookiePolicyOptions
+        {
+            MinimumSameSitePolicy = SameSiteMode.None,
+            //Secure = CookieSecurePolicy.Always
+            HttpOnly = HttpOnlyPolicy.Always
+        });
+    }
 
-app.UseRouting();
+    app.UseRouting();
 app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
