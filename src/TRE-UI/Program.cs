@@ -127,21 +127,37 @@ builder.Services.AddAuthentication(options =>
   //          .AddCookie()
             .AddOpenIdConnect(options =>
             {
-                if (treKeyCloakSettings.Proxy)
+                if (treKeyCloakSettings.Proxy || treKeyCloakSettings.AutoTrustKeycloakCert)
                 {
-                    Console.WriteLine("TRE UI Proxy = " + treKeyCloakSettings.ProxyAddresURL);
-                    Console.WriteLine("TRE UI Proxy bypass = " + treKeyCloakSettings.BypassProxy);
-                    options.BackchannelHttpHandler = new HttpClientHandler
+                    var httpClientHandler = new HttpClientHandler();
+
+                    //This is vital if behind a proxy. Especially true for our proxy. Set this up correctly when
+                    //deploying behind proxy (some proxies are silent and don't need it)
+                    if (treKeyCloakSettings.Proxy)
                     {
-                        UseProxy = true,
-                        UseDefaultCredentials = true,
-                        Proxy = new WebProxy()
+                        Log.Information("{Function} Proxy = {Proxy}, Bypass = {Bypass}", "AddOpenIdConnect", treKeyCloakSettings.ProxyAddressURL);
+                        httpClientHandler.UseProxy = true;
+                        httpClientHandler.UseDefaultCredentials = true;
+                        httpClientHandler.Proxy = new WebProxy()
                         {
                             Address = new Uri(treKeyCloakSettings.ProxyAddresURL),
                             BypassList = new[] { treKeyCloakSettings.BypassProxy }
-                        }
-                    };
+                        };
+                    }
+                    //Sometimes we need to trust a self signed certificate or ignore ssl errors. In which case set 
+                    //AutoTrustKeycloakCert to true.It won't break to always set it to true but better to only do it 
+                    //when needed for security reasons
+                    if (treKeyCloakSettings.AutoTrustKeycloakCert)
+                    {
+                        Log.Information("{Function} Trust Keycloak Server ssl", "AddOpenIdConnect");
+                        httpClientHandler.ServerCertificateCustomValidationCallback =
+                            (sender, certificate, chain, sslPolicyErrors) => true;
+                    }
+
+                    options.BackchannelHttpHandler = httpClientHandler;
                 }
+
+                
 
 
                 // URL of the Keycloak server
@@ -259,12 +275,32 @@ builder.Services.AddAuthentication(options =>
 
                 options.NonceCookie.SameSite = SameSiteMode.None;
                 options.CorrelationCookie.SameSite = SameSiteMode.None;
-                //options.TokenValidationParameters = new TokenValidationParameters
-                //{
-                //    NameClaimType = "name",
-                //    RoleClaimType = ClaimTypes.Role,
-                //    ValidateIssuer = true
-                //};
+
+                //Need this to be instantiated before using
+                options.TokenValidationParameters = new TokenValidationParameters();
+
+
+                
+                options.TokenValidationParameters.NameClaimType = "name";
+                options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
+                if (!string.IsNullOrWhiteSpace(treKeyCloakSettings.ValidIssuer))
+                {
+                    Log.Information("{Function} Setting valid issuer {ValidIssuer}",
+                        "AddOpenIdConnect", treKeyCloakSettings.ValidIssuer);
+                    options.TokenValidationParameters.ValidateIssuer = true;
+                    options.TokenValidationParameters.ValidIssuer = treKeyCloakSettings.ValidIssuer;
+                    // Use ValidIssuers if there are multiple valid issuers. Edge case. Not likely to need this
+                    //but useful to know
+                    // ValidIssuers = new[] { "http://auth-hdpbc.healthbc.org/realms/HDP", "other-issuer" },
+                }
+
+                if (!string.IsNullOrWhiteSpace(treKeyCloakSettings.ValidAudience))
+                {
+                    Log.Information("{Function} Setting valid audience {ValidAudience}",
+                        "AddOpenIdConnect", treKeyCloakSettings.ValidAudience);
+                    options.TokenValidationParameters.ValidAudience = treKeyCloakSettings.ValidAudience;
+                }
+
             });
 
 
