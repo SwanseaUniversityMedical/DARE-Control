@@ -21,7 +21,7 @@ ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
 Log.Logger = CreateSerilogLogger(configuration, environment);
-Log.Information("TRE-UI logging LastStatusUpdate.");
+Log.Information("TRE-UI v1 logging LastStatusUpdate.");
 try{
 
 builder.Host.UseSerilog();
@@ -161,8 +161,8 @@ builder.Services.AddAuthentication(options =>
                 options.RequireHttpsMetadata = false;
                 options.GetClaimsFromUserInfoEndpoint = true;
                 options.Scope.Add("openid");
-                //options.Scope.Add("profile");
-                //options.Scope.Add("email");
+                options.Scope.Add("profile");
+                options.Scope.Add("email");
                 
                 options.SaveTokens = true;
                 options.ResponseType = OpenIdConnectResponseType.Code;
@@ -177,19 +177,19 @@ builder.Services.AddAuthentication(options =>
                         Log.Information("Token Audience: {Audience}", audience);
                         return Task.CompletedTask;
                     },
-                    //OnAccessDenied = context =>
-                    //{
-                    //    Log.Error("{Function}: {ex}", "OnAccessDenied", context.AccessDeniedPath);
-                    //    context.HandleResponse();
-                    //    return context.Response.CompleteAsync();
+                    OnAccessDenied = context =>
+                    {
+                        Log.Error("{Function}: {ex}", "OnAccessDenied", context.AccessDeniedPath);
+                        context.HandleResponse();
+                        return context.Response.CompleteAsync();
 
-                    //},
-                    //OnAuthenticationFailed = context =>
-                    //{
-                    //    Log.Error("{Function}: {ex}", "OnAuthFailed", context.Exception.Message);
-                    //    context.HandleResponse();
-                    //    return context.Response.CompleteAsync();
-                    //},
+                    },
+                    OnAuthenticationFailed = context =>
+                    {
+                        Log.Error("{Function}: {ex}", "OnAuthFailed", context.Exception.Message);
+                        context.HandleResponse();
+                        return context.Response.CompleteAsync();
+                    },
                     OnRemoteFailure = context =>
                     {
                         Log.Error("OnRemoteFailure: {ex}", context.Failure);
