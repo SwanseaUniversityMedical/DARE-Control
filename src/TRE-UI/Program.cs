@@ -296,9 +296,17 @@ else
 //}
 
 
-
+    var httpsRedirect = configuration["httpsRedirect"];
 //removed to stop redirection
-//app.UseHttpsRedirection();
+    if (httpsRedirect != null && httpsRedirect.ToLower() == "true")
+    {
+        Log.Information("Turning on https Redirect");
+        app.UseHttpsRedirection();
+    }
+    else
+    {
+        Log.Information("Https redirect disabled. Http only");
+    }
 //app.UseHttpsRedirection();
 app.UseStaticFiles();
 Log.Information("SSL Configured to {SSLCookies", configuration["sslcookies"]);
