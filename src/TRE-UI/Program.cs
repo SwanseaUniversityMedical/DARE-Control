@@ -14,13 +14,14 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.CookiePolicy;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
 Log.Logger = CreateSerilogLogger(configuration, environment);
-Log.Information("TRE-UI logging LastStatusUpdate.");
+Log.Information("TRE-UI v9 logging LastStatusUpdate.");
 try{
 
 builder.Host.UseSerilog();
@@ -96,13 +97,18 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto |
                                ForwardedHeaders.XForwardedHost;
-
+    options.ForwardLimit = 2; //Limit number of proxy hops trusted
     options.KnownNetworks.Clear();
     options.KnownProxies.Clear();
 });
 
-
-builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
+//builder.Services.AddDistributedMemoryCache();
+//builder.Services.AddSession(options =>
+//{
+//    options.Cookie.Name = ".AspNetCore.Session";
+//    // other session options
+//});
+    builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -111,8 +117,12 @@ builder.Services.AddAuthentication(options =>
 })
             .AddCookie(o =>
             {
+                Log.Information("Adding special cookies");
                 o.SessionStore = new MemoryCacheTicketStore();
                 o.EventsType = typeof(CustomCookieEvent);
+                //o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                //o.Cookie.SameSite = SameSiteMode.None;  // I ADDED THIS LINE!!!
+                
             })
   //          .AddCookie()
             .AddOpenIdConnect(options =>
@@ -133,7 +143,7 @@ builder.Services.AddAuthentication(options =>
                     };
                 }
 
-                
+
                 // URL of the Keycloak server
                 options.Authority = treKeyCloakSettings.Authority;
                 //// Client configured in the Keycloak
@@ -158,6 +168,15 @@ builder.Services.AddAuthentication(options =>
                 options.ResponseType = OpenIdConnectResponseType.Code;
                 options.Events = new OpenIdConnectEvents
                 {
+                    OnTokenValidated = context =>
+                    {
+                        // Log the issuer claim from the token
+                        var issuer = context.Principal.FindFirst("iss")?.Value;
+                        Log.Information("Token Issuer: {Issuer}", issuer);
+                        var audience = context.Principal.FindFirst("aud")?.Value;
+                        Log.Information("Token Audience: {Audience}", audience);
+                        return Task.CompletedTask;
+                    },
                     OnAccessDenied = context =>
                     {
                         Log.Error("{Function}: {ex}", "OnAccessDenied", context.AccessDeniedPath);
@@ -178,18 +197,18 @@ builder.Services.AddAuthentication(options =>
                         {
                             foreach (var prop in context.Properties.Items)
                             {
-                                Log.Information("{Function} Prop Key {Key}, Value {Value}","OnRemoteFailure", prop.Key, prop.Value);
+                                Log.Information("{Function} Property Key {Key}, Value {Value}","OnRemoteFailure", prop.Key, prop.Value);
                             }
                         }
                         if (context.Failure.Message.Contains("Correlation failed"))
                         {
                             Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", treKeyCloakSettings.TokenExpiredAddress);
-                            context.Response.Redirect(treKeyCloakSettings.TokenExpiredAddress);
+                            //context.Response.Redirect(treKeyCloakSettings.TokenExpiredAddress);
                         }
                         else
                         {
                             Log.Warning("call /Error/500");
-                            context.Response.Redirect("/Error/500");
+                            //context.Response.Redirect("/Error/500");
                         }
 
                         context.HandleResponse();
@@ -220,20 +239,20 @@ builder.Services.AddAuthentication(options =>
 
                         foreach (var header in context.HttpContext.Request.Headers)
                         {
-                             Log.Information("Request Header {key} - {value}", header.Key, header.Value);
+                            Log.Information("Request Header {key} - {value}", header.Key, header.Value);
                         }
 
                         foreach (var header in context.HttpContext.Response.Headers)
                         {
-                             Log.Information("Response Header {key} - {value}", header.Key, header.Value);
+                            Log.Information("Response Header {key} - {value}", header.Key, header.Value);
                         }
 
                         if (treKeyCloakSettings.UseRedirectURL)
                         {
                             context.ProtocolMessage.RedirectUri = treKeyCloakSettings.RedirectURL;
                         }
-                        Log.Information(context.ProtocolMessage.RedirectUri);
-                        
+                        Log.Information("Redirect Uri {Redirect}", context.ProtocolMessage.RedirectUri);
+
                         await Task.FromResult(0);
                     }
                 };
@@ -263,38 +282,40 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-//app.UseForwardedHeaders(new ForwardedHeadersOptions
-//{
-//    ForwardedHeaders = ForwardedHeaders.XForwardedProto
-//});
 
-//// Configure the HTTP request pipeline.
-//if (!app.Environment.IsDevelopment())
-//{
-//    app.UseExceptionHandler("/Home/Error");
-//    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-//    //app.UseHsts();
-//}
+//Disable redirect if using http only site to prevent silent redirect to non existent https site
+    var httpsRedirect = configuration["httpsRedirect"];
 
+    if (httpsRedirect != null && httpsRedirect.ToLower() == "true")
+    {
+        Log.Information("Turning on https Redirect");
+        app.UseHttpsRedirection();
+    }
+    else
+    {
+        Log.Information("Https redirect disabled. Http only");
+    }
 
-
-//removed to stop redirection
-//app.UseHttpsRedirection();
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-if (configuration["sslcookies"] == "true")
-{
-    Log.Information("Enabling Secure SSL Cookies");
-    app.UseCookiePolicy(new CookiePolicyOptions
+//This is a biggy. If having issues with keycloak DISABLE THIS
+    if (configuration["sslcookies"] == "true")
     {
-        Secure = CookieSecurePolicy.Always
-    });
-}
+        Log.Information("Enabling Secure SSL Cookies");
+        app.UseCookiePolicy(new CookiePolicyOptions
+        {
+            Secure = CookieSecurePolicy.Always
+        });
+    }
+    else
+    {
+        Log.Information("Disabling Secure SSL Cookies");
+        app.UseCookiePolicy();
+    }
 
-app.UseRouting();
-app.UseCookiePolicy();
-app.UseAuthentication();
+    app.UseRouting();
+    //app.UseCookiePolicy();
+    app.UseAuthentication();
 app.UseAuthorization();
 
 
