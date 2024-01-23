@@ -21,7 +21,7 @@ ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
 Log.Logger = CreateSerilogLogger(configuration, environment);
-Log.Information("TRE-UI v4 logging LastStatusUpdate.");
+Log.Information("TRE-UI v5 logging LastStatusUpdate.");
 try{
 
 builder.Host.UseSerilog();
@@ -312,10 +312,14 @@ Log.Information("SSL Configured to {SSLCookies", configuration["sslcookies"]);
             HttpOnly = HttpOnlyPolicy.Always
         });
     }
+    else
+    {
+        app.UseCookiePolicy();
+    }
 
     app.UseRouting();
-app.UseCookiePolicy();
-app.UseAuthentication();
+    //app.UseCookiePolicy();
+    app.UseAuthentication();
 app.UseAuthorization();
 
 
