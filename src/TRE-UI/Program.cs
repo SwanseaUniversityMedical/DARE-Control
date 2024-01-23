@@ -69,7 +69,7 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 });
 
 
-//JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -83,14 +83,14 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod()
                 .AllowAnyHeader();
         });
-    //options.AddPolicy(name: MyAllowSpecificOrigins,
-    //    policy =>
-    //    {
-    //        policy.WithOrigins(configuration["TreAPISettings:Address"])
-    //            .AllowAnyMethod()
-    //            .AllowAnyHeader()
-    //            .AllowCredentials();
-    //    });
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins(configuration["TreAPISettings:Address"])
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        });
 });
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
