@@ -362,7 +362,7 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
 {
     Authorization = new List<IDashboardAuthorizationFilter>()
     {
-        new LocalRequestsOnlyAuthorizationFilter(),
+        //new LocalRequestsOnlyAuthorizationFilter(),
         new  BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFilterOptions
         {
             RequireSsl = false,
