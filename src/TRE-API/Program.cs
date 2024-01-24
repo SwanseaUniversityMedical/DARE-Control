@@ -357,29 +357,38 @@ app.MapHub<SignalRService>("/signalRHub", options =>
 //Hangfire
 var jobSettings = new JobSettings();
 configuration.Bind(nameof(JobSettings), jobSettings);
+var extHangfire = configuration["EnableExternalHangfire"];
 
-app.UseHangfireDashboard("/hangfire", new DashboardOptions
+if (extHangfire != null && extHangfire.ToLower() == "true")
 {
-    Authorization = new List<IDashboardAuthorizationFilter>()
+    app.UseHangfireDashboard("/hangfire", new DashboardOptions
     {
-        //new LocalRequestsOnlyAuthorizationFilter(),
-        new  BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFilterOptions
+        Authorization = new List<IDashboardAuthorizationFilter>()
         {
-            RequireSsl = false,
-            SslRedirect = false,
-            LoginCaseSensitive = false,
-            Users = new[]
+            //new LocalRequestsOnlyAuthorizationFilter(),
+            new  BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFilterOptions
             {
-                new BasicAuthAuthorizationUser
+                RequireSsl = false,
+                SslRedirect = false,
+                LoginCaseSensitive = false,
+                Users = new[]
                 {
-                    Login = "admin",
-                    PasswordClear = "test",
+                    new BasicAuthAuthorizationUser
+                    {
+                        Login = "admin",
+                        PasswordClear = "password123",
+                    },
                 },
-            },
-        }),
-    },
-    //IsReadOnlyFunc = (DashboardContext context) => true,
-});
+            }),
+        },
+        //IsReadOnlyFunc = (DashboardContext context) => true,
+    });
+}
+else
+{
+    app.UseHangfireDashboard();
+}
+
 
 
 const string syncJobName = "Sync Projects and Membership";
