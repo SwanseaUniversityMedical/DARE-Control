@@ -266,7 +266,7 @@ try
                         context.ProtocolMessage.RedirectUri = dataEgressKeyCloakSettings.RedirectURL;
                     }
 
-                    Log.Information("Redirect Uri {Redirect}", context.ProtocolMessage.RedirectUri);
+                    Log.Information("Redirect Uri {Redirect} and should I use it = {UseIt}", context.ProtocolMessage.RedirectUri, dataEgressKeyCloakSettings.UseRedirectURL);
 
                     await Task.FromResult(0);
                 }
