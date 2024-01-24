@@ -23,6 +23,8 @@ using BL.Models.ViewModels;
 using BL.Rabbit;
 using Microsoft.Extensions.Options;
 using EasyNetQ;
+using Hangfire.Dashboard;
+using Hangfire.Dashboard.BasicAuthorization;
 using TRE_API.Models;
 using TREAPI.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -112,7 +114,10 @@ builder.Services.AddScoped<IDataEgressClientWithoutTokenHelper, DataEgressClient
 builder.Services.AddScoped<IHutchClientHelper, HutchClientHelper>();
 
 string hangfireConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddHangfire(config => { config.UsePostgreSqlStorage(hangfireConnectionString); });
+builder.Services.AddHangfire(config =>
+{
+    config.UsePostgreSqlStorage(hangfireConnectionString);
+});
 
 builder.Services.AddHangfireServer();
 var encryptionSettings = new EncryptionSettings();
@@ -352,8 +357,38 @@ app.MapHub<SignalRService>("/signalRHub", options =>
 //Hangfire
 var jobSettings = new JobSettings();
 configuration.Bind(nameof(JobSettings), jobSettings);
+var extHangfire = configuration["EnableExternalHangfire"];
 
-app.UseHangfireDashboard();
+if (extHangfire != null && extHangfire.ToLower() == "true")
+{
+    app.UseHangfireDashboard("/hangfire", new DashboardOptions
+    {
+        Authorization = new List<IDashboardAuthorizationFilter>()
+        {
+            //new LocalRequestsOnlyAuthorizationFilter(),
+            new  BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFilterOptions
+            {
+                RequireSsl = false,
+                SslRedirect = false,
+                LoginCaseSensitive = false,
+                Users = new[]
+                {
+                    new BasicAuthAuthorizationUser
+                    {
+                        Login = "admin",
+                        PasswordClear = "password123",
+                    },
+                },
+            }),
+        },
+        //IsReadOnlyFunc = (DashboardContext context) => true,
+    });
+}
+else
+{
+    app.UseHangfireDashboard();
+}
+
 
 
 const string syncJobName = "Sync Projects and Membership";

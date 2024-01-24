@@ -31,6 +31,10 @@ namespace BL.Models.Settings
         public string? ValidAudiences { get; set; }
         public string Server { get; set; }
         public string Realm { get; set; }
+        public bool AutoTrustKeycloakCert { get; set; }
+        public string ValidIssuer { get; set; }
+
+        public string ValidAudience { get; set; }
 
         public HttpClientHandler getProxyHandler {
             get
