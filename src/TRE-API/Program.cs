@@ -378,7 +378,7 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
             },
         }),
     },
-    IsReadOnlyFunc = (DashboardContext context) => true,
+    //IsReadOnlyFunc = (DashboardContext context) => true,
 });
 
 

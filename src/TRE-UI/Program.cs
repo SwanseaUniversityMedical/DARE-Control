@@ -135,7 +135,7 @@ builder.Services.AddAuthentication(options =>
                     //deploying behind proxy (some proxies are silent and don't need it)
                     if (treKeyCloakSettings.Proxy)
                     {
-                        Log.Information("{Function} Proxy = {Proxy}, Bypass = {Bypass}", "AddOpenIdConnect", treKeyCloakSettings.ProxyAddressURL);
+                        Log.Information("{Function} Proxy = {Proxy}, Bypass = {Bypass}", "AddOpenIdConnect", treKeyCloakSettings.ProxyAddresURL);
                         httpClientHandler.UseProxy = true;
                         httpClientHandler.UseDefaultCredentials = true;
                         httpClientHandler.Proxy = new WebProxy()
