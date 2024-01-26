@@ -422,9 +422,9 @@ namespace BL.Services
             }
             catch (Exception e)
             {
-                Log.Error(e, "{Function} Settings. Url {Url}, UseProxy {UseProxy}, ProxyAddr {ProxyAddr}, AccessKey {AccessKey}, SecretKey {SecretKey}",
+                Log.Error(e, "{Function} Settings. Url {Url}, UseProxy {UseProxy}, ProxyAddr {ProxyAddr}, AccessKey {AccessKey}, SecretKey {SecretKey}, Bucket {Bucket}, Object {Object}",
                     "GetCopyObject", _minioSettings.Url, _minioSettings.UesProxy,
-                    _minioSettings.ProxyAddresURL, _minioSettings.AccessKey, _minioSettings.SecretKey);
+                    _minioSettings.ProxyAddresURL, _minioSettings.AccessKey, _minioSettings.SecretKey, sourceBucketName, sourceObjectKey);
                 throw;
             }
 
