@@ -37,6 +37,11 @@ IWebHostEnvironment environment = builder.Environment;
 Log.Logger = CreateSerilogLogger(configuration, environment);
 Log.Information("TRE API logging LastStatusUpdate.");
 
+var minioSubSettings = new MinioSubSettings();
+configuration.Bind(nameof(MinioSubSettings), minioSubSettings);
+var testm = new MinioHelper(minioSubSettings);
+var asdasd = testm.GetCopyObject("nottinghamtest8626submission", "crate_version_3 1.zip").Result;
+builder.Services.AddSingleton(minioSubSettings);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
@@ -84,11 +89,7 @@ configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSetting
 builder.Services.AddSingleton(dataEgressKeyCloakSettings);
 
 
-var minioSubSettings = new MinioSubSettings();
-configuration.Bind(nameof(MinioSubSettings), minioSubSettings);
-//var testm = new MinioHelper(minioSubSettings);
-//var asdasd = testm.GetCopyObject("asdasd", "dfsdfs").Result;
-builder.Services.AddSingleton(minioSubSettings);
+
 
 var minioTRESettings = new MinioTRESettings();
 configuration.Bind(nameof(MinioTRESettings), minioTRESettings);
