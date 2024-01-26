@@ -404,10 +404,7 @@ namespace BL.Services
 
                 var amazonS3Client = GenerateAmazonS3Client();
 
-                Log.Information(
-                    "{Function} Settings. Url {Url}, UseProxy {UseProxy}, ProxyAddr {ProxyAddr}, AccessKey {AccessKey}, SecretKey {SecretKey}",
-                    "GetCopyObject", _minioSettings.Url, _minioSettings.UesProxy,
-                    _minioSettings.ProxyAddresURL, _minioSettings.AccessKey, _minioSettings.SecretKey);
+                
 
 
                 GetObjectRequest getObjectRequest = new GetObjectRequest
@@ -422,9 +419,9 @@ namespace BL.Services
             }
             catch (Exception e)
             {
-                Log.Error(e, "{Function} Settings. Url {Url}, UseProxy {UseProxy}, ProxyAddr {ProxyAddr}, AccessKey {AccessKey}, SecretKey {SecretKey}, Bucket {Bucket}, Object {Object}",
+                Log.Error(e, "{Function} Settings. Url {Url}, UseProxy {UseProxy}, ProxyAddr {ProxyAddr}, Bucket {Bucket}, Object {Object}",
                     "GetCopyObject", _minioSettings.Url, _minioSettings.UesProxy,
-                    _minioSettings.ProxyAddresURL, _minioSettings.AccessKey, _minioSettings.SecretKey, sourceBucketName, sourceObjectKey);
+                    _minioSettings.ProxyAddresURL, sourceBucketName, sourceObjectKey);
                 throw;
             }
 
