@@ -398,23 +398,35 @@ namespace BL.Services
 
         public async Task<GetObjectResponse> GetCopyObject(string sourceBucketName, string sourceObjectKey)
         {
-            var amazonS3Client = GenerateAmazonS3Client();
-
-            Log.Information(
-                "{Function} Settings. Url {Url}, UseProxy {UseProxy}, ProxyAddr {ProxyAddr}, AccessKey {AccessKey}, SecretKey {SecretKey}",
-                "GetCopyObject", _minioSettings.Url, _minioSettings.UesProxy,
-                _minioSettings.ProxyAddresURL, _minioSettings.AccessKey, _minioSettings.SecretKey);
-
-            GetObjectRequest getObjectRequest = new GetObjectRequest
+            try
             {
-                BucketName = sourceBucketName,
-                Key = sourceObjectKey
-            };
 
-            var getObjectResponse = amazonS3Client.GetObjectAsync(getObjectRequest).Result;
 
-            return getObjectResponse;
+                var amazonS3Client = GenerateAmazonS3Client();
 
+                Log.Information(
+                    "{Function} Settings. Url {Url}, UseProxy {UseProxy}, ProxyAddr {ProxyAddr}, AccessKey {AccessKey}, SecretKey {SecretKey}",
+                    "GetCopyObject", _minioSettings.Url, _minioSettings.UesProxy,
+                    _minioSettings.ProxyAddresURL, _minioSettings.AccessKey, _minioSettings.SecretKey);
+
+
+                GetObjectRequest getObjectRequest = new GetObjectRequest
+                {
+                    BucketName = sourceBucketName,
+                    Key = sourceObjectKey
+                };
+
+                var getObjectResponse = amazonS3Client.GetObjectAsync(getObjectRequest).Result;
+
+                return getObjectResponse;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "{Function} Settings. Url {Url}, UseProxy {UseProxy}, ProxyAddr {ProxyAddr}, AccessKey {AccessKey}, SecretKey {SecretKey}",
+                    "GetCopyObject", _minioSettings.Url, _minioSettings.UesProxy,
+                    _minioSettings.ProxyAddresURL, _minioSettings.AccessKey, _minioSettings.SecretKey);
+                throw;
+            }
 
         }
 

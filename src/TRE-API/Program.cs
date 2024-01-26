@@ -76,6 +76,7 @@ builder.Services.AddSingleton(HasuraSettings);
 
 var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
+
 builder.Services.AddSingleton(minioSettings);
 
 var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
@@ -85,6 +86,8 @@ builder.Services.AddSingleton(dataEgressKeyCloakSettings);
 
 var minioSubSettings = new MinioSubSettings();
 configuration.Bind(nameof(MinioSubSettings), minioSubSettings);
+//var testm = new MinioHelper(minioSubSettings);
+//var asdasd = testm.GetCopyObject("asdasd", "dfsdfs").Result;
 builder.Services.AddSingleton(minioSubSettings);
 
 var minioTRESettings = new MinioTRESettings();
