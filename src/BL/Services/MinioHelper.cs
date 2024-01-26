@@ -23,10 +23,6 @@ namespace BL.Services
         public MinioHelper(MinioSettings minioSettings)
         {
             _minioSettings = minioSettings;
-            Log.Information(
-                "{Function} Settings. Url {Url}, UseProxy {UseProxy}, ProxyAddr {ProxyAddr}, AccessKey {AccessKey}, SecretKey {SecretKey}",
-                "MinioHelper", minioSettings.Url, minioSettings.UesProxy,
-                _minioSettings.ProxyAddresURL, minioSettings.AccessKey, minioSettings.SecretKey);
         }
         public async Task<bool> CheckBucketExists(string bucketName = "")
         {
@@ -404,7 +400,10 @@ namespace BL.Services
         {
             var amazonS3Client = GenerateAmazonS3Client();
 
-
+            Log.Information(
+                "{Function} Settings. Url {Url}, UseProxy {UseProxy}, ProxyAddr {ProxyAddr}, AccessKey {AccessKey}, SecretKey {SecretKey}",
+                "GetCopyObject", _minioSettings.Url, _minioSettings.UesProxy,
+                _minioSettings.ProxyAddresURL, _minioSettings.AccessKey, _minioSettings.SecretKey);
 
             GetObjectRequest getObjectRequest = new GetObjectRequest
             {
