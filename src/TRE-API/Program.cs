@@ -86,8 +86,8 @@ builder.Services.AddSingleton(dataEgressKeyCloakSettings);
 
 var minioSubSettings = new MinioSubSettings();
 configuration.Bind(nameof(MinioSubSettings), minioSubSettings);
-//var testm = new MinioHelper(minioSubSettings);
-//var asdasd = testm.GetCopyObject("nottinghamtest8626submission", "crate_version_3 1.zip").Result;
+var testm = new MinioHelper(minioSubSettings);
+var asdasd = testm.GetCopyObject("nottinghamtest8626submission", "crate_version_3 1.zip").Result;
 builder.Services.AddSingleton(minioSubSettings);
 
 var minioTRESettings = new MinioTRESettings();
