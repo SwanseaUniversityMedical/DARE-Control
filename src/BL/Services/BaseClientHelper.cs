@@ -214,7 +214,7 @@ namespace BL.Services
                 }
             }
             
-            var apiClient = _httpClientFactory.CreateClient();
+            var apiClient = _httpClientFactory.CreateClient("nossl");
             
             if (!string.IsNullOrWhiteSpace(accessToken))
             {

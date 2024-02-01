@@ -309,7 +309,12 @@ void AddServices(WebApplicationBuilder builder)
 {
     ServicePointManager.ServerCertificateValidationCallback +=
         (sender, cert, chain, sslPolicyErrors) => true;
-    builder.Services.AddHttpClient();
+    //builder.Services.AddHttpClient();
+    builder.Services.AddHttpClient("nossl", m => { }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+    {
+        ServerCertificateCustomValidationCallback = (m, c, ch, e) => true
+    });
+
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSignalR();
