@@ -22,14 +22,17 @@ namespace BL.Services
         public string _requiredRole { get; set; }
         public string _password { get; set; }
         public string _username { get; set; }
+
+        public bool IgnoreSSL { get; set; }
         
 
-        public BaseClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, string address)
+        public BaseClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, string address, bool ignoreSSL)
         {
             _httpClientFactory = httpClientFactory;
             _httpContextAccessor = httpContextAccessor;
             _address = address;
-            
+
+            IgnoreSSL = ignoreSSL;
             
             _jsonSerializerOptions = new JsonSerializerOptions()
             {
@@ -200,7 +203,7 @@ namespace BL.Services
             var accessToken = "";
             if (_keycloakTokenHelper != null)
             {
-                accessToken = await  _keycloakTokenHelper.GetTokenForUser(_username, _password, _requiredRole);
+                accessToken = await _keycloakTokenHelper.GetTokenForUser(_username, _password, _requiredRole);
             }
             else
             {
@@ -213,9 +216,15 @@ namespace BL.Services
                     accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
                 }
             }
-            
-            var apiClient = _httpClientFactory.CreateClient("nossl");
-            
+
+            if (IgnoreSSL)
+            {
+                Log.Information("{Function} Using No SSL client", "CreateClientWithKeycloak");
+            }
+            var apiClient = IgnoreSSL
+                ? _httpClientFactory.CreateClient("nossl")
+                : _httpClientFactory.CreateClient();
+
             if (!string.IsNullOrWhiteSpace(accessToken))
             {
 
@@ -227,7 +236,7 @@ namespace BL.Services
             return apiClient;
         }
 
-        
+
 
         #region Helpers
 
