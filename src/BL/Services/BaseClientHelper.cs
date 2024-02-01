@@ -219,7 +219,7 @@ namespace BL.Services
 
             if (IgnoreSSL)
             {
-                Log.Information("{Function} Using No SSL client", "CreateClientWithKeycloak");
+                Log.Information("{Function} Using No SSL client for {Address}", "CreateClientWithKeycloak", _address);
             }
             var apiClient = IgnoreSSL
                 ? _httpClientFactory.CreateClient("nossl")
