@@ -215,6 +215,7 @@ namespace BL.Services
             }
             
             var apiClient = _httpClientFactory.CreateClient();
+            
             if (!string.IsNullOrWhiteSpace(accessToken))
             {
 

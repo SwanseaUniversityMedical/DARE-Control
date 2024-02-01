@@ -307,6 +307,8 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
 /// </summary>
 void AddServices(WebApplicationBuilder builder)
 {
+    ServicePointManager.ServerCertificateValidationCallback +=
+        (sender, cert, chain, sslPolicyErrors) => true;
     builder.Services.AddHttpClient();
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
