@@ -153,7 +153,8 @@ try
                     }
                 };
             }
-            Log.Information("settign up Redirect Uri {Redirect}", dataEgressKeyCloakSettings.RedirectUri);
+
+            Log.Information("settign up Redirect Uri {Redirect}", dataEgressKeyCloakSettings.RedirectURL);
             Log.Information("settign up Use Redirect URL {UseRedirectURL}", dataEgressKeyCloakSettings.UseRedirectURL);
             // URL of the Keycloak server
             options.Authority = dataEgressKeyCloakSettings.Authority;
