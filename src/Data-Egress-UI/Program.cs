@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using EasyNetQ.Management.Client.Model;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
@@ -152,8 +153,8 @@ try
                     }
                 };
             }
-
-
+            Log.Information("settign up Redirect Uri {Redirect}", dataEgressKeyCloakSettings.RedirectUri);
+            Log.Information("settign up Use Redirect URL {UseRedirectURL}", dataEgressKeyCloakSettings.UseRedirectURL);
             // URL of the Keycloak server
             options.Authority = dataEgressKeyCloakSettings.Authority;
             //// Client configured in the Keycloak
@@ -260,6 +261,8 @@ try
                     {
                         Log.Information("Response Header {key} - {value}", header.Key, header.Value);
                     }
+
+                    Log.Information("Use Redirect URL {UseRedirectURL}", dataEgressKeyCloakSettings.UseRedirectURL);
 
                     if (dataEgressKeyCloakSettings.UseRedirectURL)
                     {
