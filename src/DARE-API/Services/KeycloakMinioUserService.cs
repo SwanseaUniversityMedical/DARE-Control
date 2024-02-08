@@ -156,10 +156,10 @@ namespace DARE_API.Services
 
             var apiUrl = $"https://{baseUrl}/admin/realms/{realm}/users?username={userName}";
             Log.Information($"GetUserIDAsync apiUrl > {apiUrl}");
+            Log.Information($"GetUserIDAsync accessToken > {accessToken}");
             var response = await httpClient.GetAsync(apiUrl);
 
             var jsonString = await response.Content.ReadAsStringAsync();
-
 
             Log.Information($"GetUserIDAsync jsonString > {jsonString}");
 
