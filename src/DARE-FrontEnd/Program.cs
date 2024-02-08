@@ -259,6 +259,8 @@ builder.Services.AddAuthentication(options =>
                             Log.Information("Response Header {key} - {value}", header.Key, header.Value);
                         }
 
+                        Log.Information("Use Redirect URL {UseRedirectURL}", submissionKeyCloakSettings.UseRedirectURL);
+
                         if (submissionKeyCloakSettings.UseRedirectURL)
                         {
                             context.ProtocolMessage.RedirectUri = submissionKeyCloakSettings.RedirectURL;

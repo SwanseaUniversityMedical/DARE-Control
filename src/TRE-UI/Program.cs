@@ -252,6 +252,8 @@ try
                         Log.Information("Response Header {key} - {value}", header.Key, header.Value);
                     }
 
+                    Log.Information("Use Redirect URL {UseRedirectURL}", treKeyCloakSettings.UseRedirectURL);
+
                     if (treKeyCloakSettings.UseRedirectURL)
                     {
                         context.ProtocolMessage.RedirectUri = treKeyCloakSettings.RedirectURL;
