@@ -159,6 +159,9 @@ namespace DARE_API.Services
             var response = await httpClient.GetAsync(apiUrl);
 
             var jsonString = await response.Content.ReadAsStringAsync();
+
+            Log.Information($"GetUserIDAsync jsonString > {jsonString}");
+
             try
             {
                 
