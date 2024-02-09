@@ -15,14 +15,21 @@ using EasyNetQ.Management.Client.Model;
 using System.Threading;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using BL.Models.APISimpleTypeReturns;
+using Amazon.Util.Internal;
+using DARE_API.Services;
+using User = BL.Models.User;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SignalR;
+
 
 namespace DARE_API.Controllers
 {
 
     [ApiController]
     [Route("api/[controller]")]
-    
-    
+
+
     public class ProjectController : Controller
     {
 
@@ -48,22 +55,16 @@ namespace DARE_API.Controllers
         {
             try
             {
-           
+
                 Project project = JsonConvert.DeserializeObject<Project>(data.FormIoString);
                 //2023-06-01 14:30:00 use this as the datetime
                 project.Name = project.Name.Trim();
                 project.StartDate = project.StartDate.ToUniversalTime();
                 project.EndDate = project.EndDate.ToUniversalTime();
-
                 project.ProjectDescription = project.ProjectDescription.Trim();
-                project.MarkAsEmbargoed = project.MarkAsEmbargoed;
-                
-                
+               project.FormData = data.FormIoString;
                 
 
-                project.FormData = data.FormIoString;
-                project.Display = project.Display;
-                
                 if (_DbContext.Projects.Any(x => x.Name.ToLower() == project.Name.ToLower().Trim() && x.Id != project.Id))
                 {
 
@@ -74,7 +75,7 @@ namespace DARE_API.Controllers
                 {
                     project.SubmissionBucket = GenerateRandomName(project.Name.ToLower()) + "submission";
                     project.OutputBucket = GenerateRandomName(project.Name.ToLower()) + "output";
-                    var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, project.SubmissionBucket);
+                    var submissionBucket = await _minioHelper.CreateBucket(project.SubmissionBucket);
                     if (!submissionBucket)
                     {
                         Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SaveProject", project.SubmissionBucket);
@@ -87,7 +88,7 @@ namespace DARE_API.Controllers
                             Log.Error("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.", "SaveProject", project.SubmissionBucket);
                         }
                     }
-                    var outputBucket = await _minioHelper.CreateBucket(_minioSettings, project.OutputBucket);
+                    var outputBucket = await _minioHelper.CreateBucket(project.OutputBucket);
                     if (!outputBucket)
                     {
                         Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SaveProject", project.OutputBucket);
@@ -102,31 +103,31 @@ namespace DARE_API.Controllers
                         }
                     }
                 }
-               
+
+                var logtype = LogType.AddProject;
 
                 if (project.Id > 0)
                 {
                     if (_DbContext.Projects.Select(x => x.Id == project.Id).Any())
+                    {
                         _DbContext.Projects.Update(project);
+                        logtype = LogType.UpdateProject;
+                    }
                     else
-                       _DbContext.Projects.Add(project);
+                    {
+                        _DbContext.Projects.Add(project);
+                    }
                 }
-                else { 
+                else
+                {
                     _DbContext.Projects.Add(project);
 
                 }
-                var audit = new AuditLog()
-                {
-                    FormData = data.FormIoString,
-                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                    UserName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
-                    ProjectId = project.Id,           
-                    Date = DateTime.Now.ToUniversalTime()
-                };
-
-                _DbContext.AuditLogs.Add(audit);
-                Log.Information("{Function}:", "AuditLogs","SaveProject", "FormData: " + data.FormIoString + "ProjectId:" + project.Id  + @User?.FindFirst("name")?.Value);              
                 await _DbContext.SaveChangesAsync();
+                await ControllerHelpers.AddAuditLog(logtype, null, project, null, null, null, _httpContextAccessor, User, _DbContext);
+                
+                
+                
                 Log.Information("{Function} Projects added successfully", "CreateProject");
                 return project;
             }
@@ -139,6 +140,25 @@ namespace DARE_API.Controllers
             }
 
 
+        }
+
+        [Authorize(Roles = "dare-control-admin")]
+        [HttpPost("CheckUserExists")]
+        public async Task<ProjectUser?> CheckUserExists(ProjectUser model)
+        {
+            var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
+            var user = _DbContext.Users.FirstOrDefault(x => x.Id == model.UserId);
+            if (user == null)
+            {
+                return model;
+            }
+            var userId = await _keycloakMinioUserService.GetUserIDAsync(accessToken, user.Name.ToString());
+            if (userId == "")
+            {
+                var newUser=new ProjectUser();
+                return newUser;
+            }
+            return model;
         }
 
         [Authorize(Roles = "dare-control-admin")]
@@ -166,27 +186,11 @@ namespace DARE_API.Controllers
                     Log.Error("{Function} User {UserName} is already on {ProjectName}", "AddUserMembership", user.Name, project.Name);
                     return null;
                 }
-
+                
                 project.Users.Add(user);
-
-                var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
-                var attributeName = _minioSettings.AttributeName;
-
-                await _keycloakMinioUserService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.SubmissionBucket.ToLower() + "_policy");
-
-                await _keycloakMinioUserService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.OutputBucket.ToLower() + "_policy");
-                var audit = new AuditLog()
-                {
-                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                    UserName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
-                    ProjectId = project.Id,
-                    UserId = user.Id,
-                    Date = DateTime.Now.ToUniversalTime()
-                };
-                _DbContext.AuditLogs.Add(audit);
-                Log.Information("{Function}:", "AuditLogs","AddUserMembership", "UserId: " + user.Id + "ProjectId:" + project.Id + @User?.FindFirst("name")?.Value);
-
                 await _DbContext.SaveChangesAsync();
+                await ControllerHelpers.AddUserToMinioBucket(user, project, _httpContextAccessor, _minioSettings.AttributeName, _keycloakMinioUserService, User, _DbContext );
+                await ControllerHelpers.AddAuditLog(LogType.AddUserToProject, user, project, null, null, null, _httpContextAccessor, User, _DbContext);
                 Log.Information("{Function} Added User {UserName} to {ProjectName}", "AddUserMembership", user.Name, project.Name);
                 return model;
             }
@@ -198,6 +202,8 @@ namespace DARE_API.Controllers
 
 
         }
+
+        
 
         [Authorize(Roles = "dare-control-admin")]
         [HttpPost("RemoveUserMembership")]
@@ -225,26 +231,13 @@ namespace DARE_API.Controllers
                     return null;
                 }
 
-                project.Users.Remove(user);
-
-                var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
-                var attributeName = _minioSettings.AttributeName;
-                var attributeValue = project.Name.ToLower() + "_policy";
-
-                await _keycloakMinioUserService.RemoveMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.SubmissionBucket.ToLower() + "_policy");
-                await _keycloakMinioUserService.RemoveMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.OutputBucket.ToLower() + "_policy");
-                var audit = new AuditLog()
-                {
-                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                    UserName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
-                    ProjectId = project.Id,
-                    UserId = user.Id,
-                    Date = DateTime.Now.ToUniversalTime()
-                };
-                _DbContext.AuditLogs.Add(audit);
-                Log.Information("{Function}:", "AuditLogs", "RemoveUserMembership", "ProjectId:" + project.Id + " UserId:" + user.Id  + @User?.FindFirst("name")?.Value);
 
                 await _DbContext.SaveChangesAsync();
+                await ControllerHelpers.RemoveUserFromMinioBucket(user, project, _httpContextAccessor, _minioSettings.AttributeName, _keycloakMinioUserService, User, _DbContext);
+
+                await ControllerHelpers.AddAuditLog(LogType.RemoveUserFromProject, user, project, null, null, null, _httpContextAccessor, User, _DbContext);
+
+                
                 Log.Information("{Function} Added User {UserName} to {ProjectName}", "RemoveUserMembership", user.Name, project.Name);
                 return model;
             }
@@ -256,6 +249,8 @@ namespace DARE_API.Controllers
 
 
         }
+
+        
 
         [Authorize(Roles = "dare-control-admin")]
         [HttpPost("AddTreMembership")]
@@ -281,20 +276,12 @@ namespace DARE_API.Controllers
                 {
                     Log.Error("{Function} Tre {Tre} is already on {ProjectName}", "AddTreMembership", tre.Name, project.Name);
                     return null;
-                  }
+                }
 
                 project.Tres.Add(tre);
-                var audit = new AuditLog()
-                {
-                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                    UserName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
-                    ProjectId = project.Id,
-                    TreId = tre.Id,
-                    Date = DateTime.Now.ToUniversalTime()
-                };
-                _DbContext.AuditLogs.Add(audit);
-                Log.Information("{Function}:", "AuditLogs", "AddTreMembership", "ProjectId:" + project.Id + " TreId:" + tre.Id + @User?.FindFirst("name")?.Value);
+
                 await _DbContext.SaveChangesAsync();
+                await ControllerHelpers.AddAuditLog(LogType.AddTreToProject, null, project, tre, null, null, _httpContextAccessor, User, _DbContext);
                 Log.Information("{Function} Added Tre {Tre} to {ProjectName}", "AddTreMembership", tre.Name, project.Name);
                 return model;
             }
@@ -334,18 +321,9 @@ namespace DARE_API.Controllers
                 }
 
                 project.Tres.Remove(tre);
-                var audit = new AuditLog()
-                {
-                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                    UserName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First(),
-                    ProjectId = project.Id,
-                    TreId = tre.Id,
-                    Date = DateTime.Now.ToUniversalTime()
-                };
-                _DbContext.AuditLogs.Add(audit);
-                Log.Information("{Function}:", "AuditLogs", "RemoveTreMembership", "ProjectId:" + project.Id + " TreId:" + tre.Id + @User?.FindFirst("name")?.Value);
-
+                
                 await _DbContext.SaveChangesAsync();
+                await ControllerHelpers.AddAuditLog(LogType.RemoveTreFromProject, null, project, tre, null, null, _httpContextAccessor, User, _DbContext);
                 Log.Information("{Function} Added Tre {Tre} to {ProjectName}", "AddTreMembership", tre.Name, project.Name);
                 return model;
             }
@@ -391,9 +369,6 @@ namespace DARE_API.Controllers
                 //TODO - use User.Identity.IsAuthenticated to alter list returned : embargoed etc
 
                 var allProjects = _DbContext.Projects
-                    //.Include(x => x.Tres)
-                    //.Include(x => x.Submissions)
-                    //.Include(x => x.Users)
                     .ToList();
 
 
@@ -416,14 +391,8 @@ namespace DARE_API.Controllers
         {
             try
             {
-                
-                var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-                var tre = _DbContext.Tres.FirstOrDefault(x => x.AdminUsername.ToLower() == usersName.ToLower());
-                if (tre == null)
-                {
-                    throw new Exception("User " + usersName + " doesn't have a tre");
-                    
-                }
+
+                var tre = ControllerHelpers.GetUserTre(User, _DbContext);
 
                 var allProjects = tre.Projects;
 
@@ -439,13 +408,112 @@ namespace DARE_API.Controllers
 
         }
 
+        
+
+
+        [HttpPost("SyncTreProjectDecisions")]
+        [Authorize(Roles = "dare-tre-admin")]
+        public BoolReturn SyncTreProjectDecisions([FromBody] List<ProjectTreDecisionsDTO> decisions)
+        {
+            try
+            {
+                var result = new BoolReturn();
+                var tre = ControllerHelpers.GetUserTre(User, _DbContext);
+
+                foreach (var item in decisions)
+                {
+                    var dbproj = _DbContext.Projects.FirstOrDefault(x => x.Id == item.ProjectId);
+                    if (dbproj == null)
+                    {
+                        Log.Error($"no Projects with ID of {item.ProjectId}");
+                        continue;
+                    }
+                    var tredecision = _DbContext.ProjectTreDecisions.FirstOrDefault(x => x.SubmissionProj == dbproj && x.Tre == tre);
+                    if (tredecision == null)
+                    {
+                        tredecision = new ProjectTreDecision()
+                        {
+                            SubmissionProj = dbproj,
+                            Tre = tre,
+                        };
+                        _DbContext.ProjectTreDecisions.Add(tredecision);
+                    }
+                    tredecision.Decision = item.Decision;
+                }
+                _DbContext.SaveChanges();
+
+
+                result.Result = true;
+                Log.Information("{Function} Tre {TreName} decisions synched", "SyncTreProjectDecisions", tre.Name);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "SyncTreProjectDecisions");
+                throw;
+            }
+
+
+        }
+
+        [HttpPost("SyncTreMembershipDecisions")]
+        [Authorize(Roles = "dare-tre-admin")]
+        public BoolReturn SyncTreMembershipDecisions([FromBody] List<MembershipTreDecisionDTO> decisions)
+        {
+            try
+            {
+                var result = new BoolReturn();
+                var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+                var tre = ControllerHelpers.GetUserTre(User, _DbContext);
+
+                foreach (var item in decisions)
+                {
+                    var dbproj = _DbContext.Projects.First(x => x.Id == item.ProjectId);
+                    var dbuser = _DbContext.Users.First(x => x.Id == item.UserId);
+                    var tredecision = _DbContext.MembershipTreDecisions.FirstOrDefault(x => x.SubmissionProj == dbproj && x.User == dbuser && x.Tre == tre);
+                    if (tredecision == null)
+                    {
+                        tredecision = new MembershipTreDecision()
+                        {
+                            SubmissionProj = dbproj,
+                            User = dbuser,
+                            Tre = tre,
+                        };
+                        _DbContext.MembershipTreDecisions.Add(tredecision);
+                    }
+                    tredecision.Decision = item.Decision;
+                }
+                _DbContext.SaveChanges();
+
+
+                result.Result = true;
+                Log.Information("{Function} Tre {TreName} membership decisions synched", "SyncTreMembershipDecisions", tre.Name);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "SyncTreMembershipDecisions");
+                throw;
+            }
+
+
+        }
+
         [HttpGet("GetTresInProject")]
         [AllowAnonymous]
         public List<Tre> GetTresInProject(int projectId)
         {
-            List<Tre> tres = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Tres).ToList();
+            try
+            {
+                List<Tre> tres = _DbContext.Projects.Where(p => p.Id == projectId).SelectMany(p => p.Tres).ToList();
 
-            return tres;
+                return tres;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetTresInProject");
+                throw;
+            }
         }
 
         private static string GenerateRandomName(string prefix)
@@ -467,9 +535,17 @@ namespace DARE_API.Controllers
         [HttpPost("TestFetchAndStoreObject")]
         public async Task<IActionResult> TestFetchAndStoreObject(testFetch testf)
         {
-            await _minioHelper.FetchAndStoreObject(testf.url, _minioSettings, testf.bucketName, testf.key);
+            try
+            {
+                await _minioHelper.FetchAndStoreObject(testf.url, testf.bucketName, testf.key);
 
-            return Ok();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "TestFetchAandStoreObject");
+                throw;
+            }
         }
 
         [AllowAnonymous]
@@ -497,44 +573,109 @@ namespace DARE_API.Controllers
             var minioEndPoint = new MinioEndpoint()
             {
                 Url = _minioSettings.AdminConsole,
-            };  
+            };
 
             return minioEndPoint;
         }
 
-        [HttpGet("UploadToMinio")]
-        [AllowAnonymous]
-        public async Task<BoolReturn> UploadToMinio(string bucketName, string fileJson)
+        
+
+        [HttpPost("UploadToMinio")]
+        public async Task<BoolReturn> UploadToMinio(string bucketName, IFormFile file)
         {
-            IFormFile iFile = ConvertJsonToIFormFile(fileJson);
+            if (file == null || file.Length == 0)
+                return new BoolReturn() { Result = false };
 
-            var submissionBucket = await _minioHelper.UploadFileAsync(_minioSettings, iFile, bucketName, iFile.Name);
+            try
+            {
+                var submissionBucket = await _minioHelper.UploadFileAsync(file, bucketName, file.Name);
 
-            return new BoolReturn();
+
+                return new BoolReturn() { Result = true };
+            }
+            catch (Exception ex)
+            {
+                return new BoolReturn() { Result = false };
+            }
         }
+
 
         private IFormFile ConvertJsonToIFormFile(string fileJson)
         {
-            if (string.IsNullOrEmpty(fileJson))
-                return null;
-            var fileData = System.Text.Json.JsonSerializer.Deserialize<IFileData>(fileJson);
-
-            var bytes = Convert.FromBase64String(fileData.Content);
-
-            var fileName = fileData.FileName;
-            var contentType = fileData.ContentType;
-
-            var formFile = new FormFile(new MemoryStream(bytes), 0, bytes.Length, null, fileName)
+            try
             {
-                Headers = new HeaderDictionary(),
-                ContentType = contentType
-            };
+                if (string.IsNullOrEmpty(fileJson))
+                    return null;
+                var fileData = System.Text.Json.JsonSerializer.Deserialize<IFileData>(fileJson);
 
-            return formFile;
+                var bytes = Convert.FromBase64String(fileData.Content);
+
+                var fileName = fileData.FileName;
+                var contentType = fileData.ContentType;
+
+                var formFile = new FormFile(new MemoryStream(bytes), 0, bytes.Length, null, fileName)
+                {
+                    Headers = new HeaderDictionary(),
+                    ContentType = contentType
+                };
+
+                return formFile;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "ConvertJsonToIformFile");
+                throw;
+            }
+        }
+        [AllowAnonymous]
+        [HttpGet("GetSearchData")]
+        public List<Project> GetSearchData(string searchString)
+        {
+              try
+            {
+
+                //List<Project> searchResults = _DbContext.Projects
+                //    .Include(c => c.Users)
+                //    .Include(c => c.Submissions)
+                //     .Include(c => c.Tres)
+                //    .Where(c => c.Name.ToLower().Contains(searchString.Trim().ToLower()) ||
+                //    c.Users.Any(t => t.Name.ToLower().Contains(searchString.Trim().ToLower())) ||
+                //    c.Tres.Any(t => t.Name.ToLower().Contains(searchString.Trim().ToLower())) || c.Submissions.Any(s => s.TesName.Contains(searchString.Trim().ToLower()))).ToList();
+                string normalizedSearchString = $"%{searchString.Trim()}%";
+
+                List<Project> searchResults = _DbContext.Projects
+
+                    .Include(c => c.Users)
+
+                    .Include(c => c.Submissions)
+
+                    .Include(c => c.Tres)
+
+                    .Where(c => EF.Functions.Like(c.Name, normalizedSearchString) ||
+
+
+                                c.Users.Any(t => EF.Functions.Like(t.Name, normalizedSearchString)) ||
+
+                                c.Tres.Any(t => EF.Functions.Like(t.Name, normalizedSearchString)) ||
+
+                                c.Submissions.Any(s => EF.Functions.Like(s.TesName, normalizedSearchString))
+
+                    )
+
+                    .ToList();
+                Log.Information("{Function} Search Data retrieved successfully", "GetSearchData");
+                return searchResults.ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetSearchData");
+                throw;
+            }
+
         }
 
 
         //End
-
+        
     }
 }

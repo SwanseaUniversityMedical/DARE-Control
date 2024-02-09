@@ -1,5 +1,4 @@
 ﻿using Data_Egress_UI.Models;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +18,7 @@ using System.Xml.Linq;
 using System.Text.RegularExpressions;
 using BL.Models.Enums;
 using Microsoft.AspNetCore.StaticFiles;
+using Amazon.Runtime.Internal.Transform;
 
 namespace Data_Egress_UI.Controllers
 {
@@ -64,13 +64,21 @@ namespace Data_Egress_UI.Controllers
             return RedirectToAction("GetFiles", new { Id = Id });
         }
         [HttpPost]
-        public IActionResult GetEgress(EgressSubmission model)
+        public IActionResult GetEgress(EgressSubmission model, string submitButton)
         {
-            
-            var egress = _dataClientHelper.CallAPI<EgressSubmission, EgressSubmission>("/api/DataEgress/CompleteEgress/", model).Result;
+            if (submitButton == "SubmitButton")
+            {
+                var egress = _dataClientHelper.CallAPI<EgressSubmission, EgressSubmission>("/api/DataEgress/CompleteEgress/", model).Result;
 
-            return RedirectToAction("GetAllUnprocessedEgresses");
-            
+            }
+            else if (submitButton == "SaveButton")
+            {
+                var egress = _dataClientHelper.CallAPI<EgressSubmission, EgressSubmission>("/api/DataEgress/PartialEgress/", model).Result;
+
+            }
+
+            return RedirectToAction("GetAllEgresses", "Data", new { unprocessedonly = true });
+
         }
         public static string GetContentType(string fileName)
         {
@@ -88,12 +96,12 @@ namespace Data_Egress_UI.Controllers
         }
 
         [HttpGet]
-        public IActionResult DownloadFile(int? FileId)
+        public IActionResult DownloadFile(int? fileId)
         {
 
             var paramlist = new Dictionary<string, string>
             {
-                { "id", FileId.ToString() }
+                { "id", fileId.ToString() }
             };
 
             var egressFile = _dataClientHelper.CallAPIWithoutModel<EgressFile>("/api/DataEgress/GetEgressFile", paramlist).Result;
@@ -103,13 +111,27 @@ namespace Data_Egress_UI.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllEgresses()
+        public IActionResult GetAllEgresses(bool unprocessedonly)
         {
-            var egresses = _dataClientHelper.CallAPIWithoutModel<List<EgressSubmission>>("/api/DataEgress/GetAllEgresses/").Result;
+             
+            var paramlist = new Dictionary<string, string>();
+            if (unprocessedonly)
+            {
+                ViewBag.PageTitle = "Unprocessed Egresses";
+                paramlist.Add("unprocessedonly", true.ToString());
+                
+            }
+            else
+            {
+                ViewBag.PageTitle = "All Egresses";
+                paramlist.Add("unprocessedonly", false.ToString());
+                
+            }
 
-           
 
-           
+            List<EgressSubmission> egresses = _dataClientHelper
+                .CallAPIWithoutModel<List<EgressSubmission>>("/api/DataEgress/GetAllEgresses/", paramlist).Result;
+
             return View(egresses);
         }
 

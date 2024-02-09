@@ -9,7 +9,8 @@ namespace BL.Models
         public int Id { get; set; }
         [Display(Name = "Submission Id")]
         public int SubmissionProjectId { get; set; }
-        public string? UserName { get; set; }   
+        [Display(Name = "Username")]
+        public string? UserName { get; set; }
         public string? Password { get; set; }
 
         [Display(Name = "Submission Name")]
@@ -30,10 +31,18 @@ namespace BL.Models
         [Display(Name = "Date of Last Decision")]
         public DateTime LastDecisionDate { get; set; }
 
-        [Display(Name = "Submission Bucket for Tre Layer")]
+        [Display(Name = "Project Expiry Date")]
+        public DateTime ProjectExpiryDate { get; set; }
+
+        [Display(Name = "Submission Bucket for TRE Layer")]
         public string? SubmissionBucketTre { get; set; }
-        [Display(Name = "Output Bucket Out for Tre Layer")]
+		
+        [Display(Name = "Output Bucket Out for TRE Layer")]
         public string? OutputBucketTre { get; set; }
+
+        public virtual List<TreAuditLog>? AuditLogs { get; set; }
+
+        public string? OutputBucketSub { get; set; }
     }
     
 }

@@ -12,7 +12,6 @@ namespace DARE_FrontEnd.Controllers
     [Authorize(Roles = "dare-control-admin")]
     public class TreController : Controller
     {
-
         private readonly IDareClientHelper _clientHelper;
         
         private readonly FormIOSettings _formIOSettings;
@@ -33,7 +32,8 @@ namespace DARE_FrontEnd.Controllers
             {
                 
                 FormIoUrl = _formIOSettings.TreForm,
-                FormIoString = @"{""id"":0}"
+                FormIoString = @"{""id"":0}",
+                Id = treId
             };
 
             if (treId > 0)
@@ -87,6 +87,7 @@ namespace DARE_FrontEnd.Controllers
                 if (result.Error)
                     return BadRequest();
 
+                TempData["success"] = "Tre Save Successfully";
                 return Ok(result);
             }
             return BadRequest();

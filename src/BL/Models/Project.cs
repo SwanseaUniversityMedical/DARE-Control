@@ -16,12 +16,18 @@ namespace BL.Models
 
         public string ProjectDescription { get; set; }
 
+        public string? ProjectOwner { get; set; }
+        public string? ProjectContact { get; set; }
         public bool MarkAsEmbargoed { get; set; }
         public string? SubmissionBucket { get; set; }
         public string? OutputBucket { get; set; }
 
         
         public virtual List<Submission> Submissions { get; set; }
+        public virtual List<AuditLog>? AuditLogs { get; set; }
+
+        public virtual List<ProjectTreDecision> ProjectTreDecisions { get; set; }
+        public virtual List<MembershipTreDecision> MembershipTreDecision { get; set; }
 
     }
 

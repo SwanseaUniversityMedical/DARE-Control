@@ -10,6 +10,9 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using BL.Models.APISimpleTypeReturns;
 using BL.Models.Tes;
 using Newtonsoft.Json;
+using Serilog;
+using EasyNetQ.Management.Client.Model;
+using DARE_FrontEnd.Models;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -19,11 +22,16 @@ namespace DARE_FrontEnd.Controllers
         private readonly IDareClientHelper _clientHelper;
 
         private readonly FormIOSettings _formIOSettings;
-        public ProjectController(IDareClientHelper client, FormIOSettings formIo)
+
+
+        private readonly URLSettingsFrontEnd _URLSettingsFrontEnd;
+        public ProjectController(IDareClientHelper client, FormIOSettings formIo, URLSettingsFrontEnd URLSettingsFrontEnd)
         {
             _clientHelper = client;
 
             _formIOSettings = formIo;
+
+            _URLSettingsFrontEnd = URLSettingsFrontEnd;
 
         }
 
@@ -31,7 +39,7 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public IActionResult GetProject(int id)
         {
-            var users = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
+            var users = _clientHelper.CallAPIWithoutModel<List<BL.Models.User>>("/api/User/GetAllUsers/").Result;
             var tres = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Tre/GetAllTres/").Result;
 
             var paramlist = new Dictionary<string, string>();
@@ -42,14 +50,19 @@ namespace DARE_FrontEnd.Controllers
             var userItems2 = users.Where(p => !project.Users.Select(x => x.Id).Contains(p.Id)).ToList();
             var treItems2 = tres.Where(p => !project.Tres.Select(x => x.Id).Contains(p.Id)).ToList();
 
+            
             var userItems = userItems2
-                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
+                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.FullName != "" ? p.FullName : p.Name })
                 .ToList();
             var treItems = treItems2
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
 
             var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
+             
+
+            ViewBag.minioendpoint = minioEndpoint?.Url;
+            ViewBag.URLBucket = _URLSettingsFrontEnd.MinioUrl;
 
             var projectView = new ProjectUserTre()
             {
@@ -60,11 +73,13 @@ namespace DARE_FrontEnd.Controllers
                 StartDate = project.StartDate,
                 EndDate = project.EndDate,
                 ProjectDescription = project.ProjectDescription,
+                ProjectContact = project.ProjectContact,
+                ProjectOwner = project.ProjectOwner,
                 Tres = project.Tres,
                 SubmissionBucket = project.SubmissionBucket,
                 OutputBucket = project.OutputBucket,
                 MinioEndpoint = minioEndpoint.Url,
-                Submissions = project.Submissions,
+                Submissions = project.Submissions.Where(x => x.Parent == null).ToList(),
                 UserItemList = userItems,
                 TreItemList = treItems
             };
@@ -96,7 +111,7 @@ namespace DARE_FrontEnd.Controllers
         private ProjectUser GetProjectUserModel()
         {
             var projs = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
-            var users = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers/").Result;
+            var users = _clientHelper.CallAPIWithoutModel<List<BL.Models.User>>("/api/User/GetAllUsers/").Result;
 
             var projectItems = projs
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
@@ -174,7 +189,7 @@ namespace DARE_FrontEnd.Controllers
             {
                 FormIoUrl = _formIOSettings.ProjectForm,
                 FormIoString = @"{""id"":0}",
-
+                Id = projectId
             };
 
             if (projectId > 0)
@@ -230,7 +245,11 @@ namespace DARE_FrontEnd.Controllers
                 var result = await _clientHelper.CallAPI<FormData, Project?>("/api/Project/SaveProject", data);
 
                 if (result.Id == 0)
+                {
+                    TempData["error"] = "";
                     return BadRequest();
+                }
+                TempData["success"] = "Project Save Successfully";
 
                 return Ok(result);
             }
@@ -247,7 +266,7 @@ namespace DARE_FrontEnd.Controllers
             };
             var result =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/RemoveUserMembership", model);
-
+            TempData["success"] = "User Remove Successfully";
             return RedirectToAction("GetProject", new { id = projectId });
         }
 
@@ -261,7 +280,7 @@ namespace DARE_FrontEnd.Controllers
             };
             var result =
                 await _clientHelper.CallAPI<ProjectTre, ProjectTre?>("/api/Project/RemoveTreMembership", model);
-
+            TempData["success"] = "Tre Remove Successfully";
             return RedirectToAction("GetProject", new { id = projectId });
         }
 
@@ -269,6 +288,8 @@ namespace DARE_FrontEnd.Controllers
         public async Task<IActionResult> AddUserList(string ProjectId, string ItemList)
         {
             string[] arr = ItemList.Split(',');
+            List<string> userList = new List<string>();
+            bool addedUser = false;
             foreach (string s in arr)
             {
                 var model = new ProjectUser()
@@ -276,10 +297,33 @@ namespace DARE_FrontEnd.Controllers
                     ProjectId = Int32.Parse(ProjectId),
                     UserId = Int32.Parse(s)
                 };
-                var result =
+                var user =
+                await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/CheckUserExists", model);
+                if (user.UserId == 0)
+                {
+                    var paramList = new Dictionary<string, string>();
+                    paramList.Add("userId", s.ToString());
+                    var userInfo = _clientHelper.CallAPIWithoutModel<BL.Models.User?>("/api/User/GetUser/", paramList).Result;
+                    userList.Add(userInfo.Name);
+                }
+                else
+                {
+                    var response =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
+                    addedUser = true;
+                }
             }
-            return RedirectToAction("GetProject", new { id = ProjectId });
+            if (userList.Count > 0)
+            {
+                var listOfNoneExistingUser = string.Join(", ", userList);
+                TempData["error"] = listOfNoneExistingUser + "are not exist in keycloak. Need to Register";
+            }
+            if (addedUser)
+            {
+
+                TempData["success"] = "User Added Successfully";
+            }
+            return Ok();
         }
 
         [HttpPost]
@@ -297,6 +341,7 @@ namespace DARE_FrontEnd.Controllers
                 await _clientHelper.CallAPI<ProjectTre, ProjectTre?>("/api/Project/AddTreMembership",
                     model);
             }
+            TempData["success"] = "Tre Added Successfully";
             return RedirectToAction("GetProject", new { id = ProjectId });
         }
 
@@ -310,74 +355,6 @@ namespace DARE_FrontEnd.Controllers
                 UserId = userId
             };
             var result = _clientHelper.CallAPI<ProjectUser, ProjectUser?>("api/Project/IsUserOnProject", model);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> SubmissionWizerd(SubmissionTes model)
-        {
-            var listOfTre = "";
-            var imageUrl = "";
-
-            if (model.Tre == null)
-            {
-                var paramList = new Dictionary<string, string>();
-                paramList.Add("projectId", model.ProjectId.ToString());
-                var tre = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList).Result;
-                List<string> namesList = tre.Select(test => test.Name).ToList();
-                listOfTre = string.Join("|", namesList);
-            }
-            else
-            {
-                listOfTre = string.Join("|", model.Tre);
-            }
-
-            if (model.Option == "url")
-            {
-                imageUrl = model.Url;
-            }
-            else
-            {
-
-                var filestring = ConvertIFormFileToJson(model.File);
-
-                var jsonObject=JsonConvert.DeserializeObject<IFileData>(filestring);
-
-                var paramss = new Dictionary<string, string>();
-
-                paramss.Add("bucketName", model.SubmissionBucket);
-                paramss.Add("fileJson", filestring);
-
-                var uplodaResult = await _clientHelper.CallAPIWithoutModel<BoolReturn>("/api/Project/UploadToMinio", paramss);
-
-                var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
-
-                imageUrl = "http://" + minioEndpoint.Url + "/browser/" + model.SubmissionBucket + "/" + jsonObject.FileName;
-
-            }
-
-            var test = new TesTask()
-            {
-
-                Name = model.Name,
-                Executors = new List<TesExecutor>()
-                {
-                    new TesExecutor()
-                    {
-                        Image = imageUrl,
-
-                    }
-                },
-                Tags = new Dictionary<string, string>()
-                {
-                    { "project", model.Project },
-                    { "tres", listOfTre }
-                }
-
-            };
-
-            var result = _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test).Result;
-
-            return Json(new { success = true, message = "Data received successfully." });
         }
 
         public string ConvertIFormFileToJson(IFormFile formFile)

@@ -23,6 +23,11 @@ using BL.Models.ViewModels;
 using BL.Rabbit;
 using Microsoft.Extensions.Options;
 using EasyNetQ;
+using Hangfire.Dashboard;
+using Hangfire.Dashboard.BasicAuthorization;
+using TRE_API.Models;
+using TREAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,24 +55,53 @@ AddServices(builder);
 //Add Dependancies
 AddDependencies(builder, configuration);
 
+builder.Services.Configure<OPASettings>(configuration.GetSection("OPASettings"));
+builder.Services.AddTransient(opa => opa.GetService<IOptions<OPASettings>>().Value);
+builder.Services.AddScoped<OpaService>();
+
 builder.Services.Configure<RabbitMQSetting>(configuration.GetSection("RabbitMQ"));
 builder.Services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);
 var bus =
 builder.Services.AddSingleton(RabbitHutch.CreateBus($"host={configuration["RabbitMQ:HostAddress"]}:{int.Parse(configuration["RabbitMQ:PortNumber"])};virtualHost={configuration["RabbitMQ:VirtualHost"]};username={configuration["RabbitMQ:Username"]};password={configuration["RabbitMQ:Password"]}"));
-Task task = SetUpRabbitMQ.DoItAsync(configuration["RabbitMQ:HostAddress"], configuration["RabbitMQ:PortNumber"], configuration["RabbitMQ:VirtualHost"], configuration["RabbitMQ:Username"], configuration["RabbitMQ:Password"]);
+await SetUpRabbitMQ.DoItTreAsync(configuration["RabbitMQ:HostAddress"], configuration["RabbitMQ:PortNumber"], configuration["RabbitMQ:VirtualHost"], configuration["RabbitMQ:Username"], configuration["RabbitMQ:Password"]);
 
 var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
 builder.Services.AddSingleton(treKeyCloakSettings);
+
+
+var HasuraSettings = new HasuraSettings();
+configuration.Bind(nameof(HasuraSettings), HasuraSettings);
+builder.Services.AddSingleton(HasuraSettings);
+
+var minioSettings = new MinioSettings();
+configuration.Bind(nameof(MinioSettings), minioSettings);
+builder.Services.AddSingleton(minioSettings);
 
 var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
 configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
 builder.Services.AddSingleton(dataEgressKeyCloakSettings);
 
 
-var minioSettings = new MinioSettings();
-configuration.Bind(nameof(MinioSettings), minioSettings);
-builder.Services.AddSingleton(minioSettings);
+var minioSubSettings = new MinioSubSettings();
+configuration.Bind(nameof(MinioSubSettings), minioSubSettings);
+builder.Services.AddSingleton(minioSubSettings);
+
+var minioTRESettings = new MinioTRESettings();
+configuration.Bind(nameof(MinioTRESettings), minioTRESettings);
+builder.Services.AddSingleton(minioTRESettings);
+
+
+var AuthenticationSetting = new AuthenticationSettings();
+configuration.Bind(nameof(AuthenticationSetting), AuthenticationSetting);
+builder.Services.AddSingleton(AuthenticationSetting);
+
+var AgentSettings = new AgentSettings();
+configuration.Bind(nameof(AgentSettings), AgentSettings);
+builder.Services.AddSingleton(AgentSettings);
+
+
+
 
 builder.Services.AddHostedService<ConsumeInternalMessageService>();
 
@@ -80,7 +114,10 @@ builder.Services.AddScoped<IDataEgressClientWithoutTokenHelper, DataEgressClient
 builder.Services.AddScoped<IHutchClientHelper, HutchClientHelper>();
 
 string hangfireConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddHangfire(config => { config.UsePostgreSqlStorage(hangfireConnectionString); });
+builder.Services.AddHangfire(config =>
+{
+    config.UsePostgreSqlStorage(hangfireConnectionString);
+});
 
 builder.Services.AddHangfireServer();
 var encryptionSettings = new EncryptionSettings();
@@ -91,6 +128,8 @@ builder.Services.AddScoped<IDareSyncHelper, DareSyncHelper>();
 builder.Services.AddScoped<ISubmissionHelper, SubmissionHelper>();
 builder.Services.AddScoped<IDoSyncWork, DoSyncWork>();
 builder.Services.AddScoped<IDoAgentWork, DoAgentWork>();
+builder.Services.AddScoped<IHasuraService, HasuraService>();
+builder.Services.AddScoped<IHasuraAuthenticationService, HasuraAuthenticationService>();
 
 
 var TVP = new TokenValidationParameters
@@ -152,10 +191,9 @@ builder.Services.AddAuthentication(options =>
     });
 
 // - authorize here
-builder.Services.AddAuthorization(options =>
-{
 
-});
+  
+
 
 // Enable CORS
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -255,7 +293,8 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
 
     builder.Services.AddHttpContextAccessor();
 
-    builder.Services.AddScoped<IMinioHelper, MinioHelper>();
+    builder.Services.AddScoped<IMinioTreHelper, MinioTreHelper>();
+    builder.Services.AddScoped<IMinioSubHelper, MinioSubHelper>();
     builder.Services.AddScoped<ISignalRService, SignalRService>();
     builder.Services.AddMvc().AddControllersAsServices();
 
@@ -268,7 +307,19 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
 /// </summary>
 void AddServices(WebApplicationBuilder builder)
 {
+    ServicePointManager.ServerCertificateValidationCallback +=
+        (sender, cert, chain, sslPolicyErrors) => true;
     builder.Services.AddHttpClient();
+    var ignoreHutchSSL = configuration["IgnoreHutchSSL"];
+    if (ignoreHutchSSL != null && ignoreHutchSSL.ToLower() == "true")
+    {
+        builder.Services.AddHttpClient("nossl", m => { }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = (m, c, ch, e) => true
+        });
+    }
+    
+
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSignalR();
@@ -308,21 +359,73 @@ void AddServices(WebApplicationBuilder builder)
       ));
     }
 }
-
 //for SignalR
 app.UseCors();
 app.MapHub<SignalRService>("/signalRHub", options =>
 {
     options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
 }).RequireCors(MyAllowSpecificOrigins);
-app.UseHangfireDashboard();
-RecurringJob.AddOrUpdate<IDoSyncWork>(a => a.Execute(), Cron.MinuteInterval(10));
-RecurringJob.AddOrUpdate<IDoAgentWork>("Scan Submissions", a => a.Execute(), Cron.MinuteInterval(10));
+
+//Hangfire
+var jobSettings = new JobSettings();
+configuration.Bind(nameof(JobSettings), jobSettings);
+var extHangfire = configuration["EnableExternalHangfire"];
+
+if (extHangfire != null && extHangfire.ToLower() == "true")
+{
+    app.UseHangfireDashboard("/hangfire", new DashboardOptions
+    {
+        Authorization = new List<IDashboardAuthorizationFilter>()
+        {
+            //new LocalRequestsOnlyAuthorizationFilter(),
+            new  BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFilterOptions
+            {
+                RequireSsl = false,
+                SslRedirect = false,
+                LoginCaseSensitive = false,
+                Users = new[]
+                {
+                    new BasicAuthAuthorizationUser
+                    {
+                        Login = "admin",
+                        PasswordClear = "password123",
+                    },
+                },
+            }),
+        },
+        //IsReadOnlyFunc = (DashboardContext context) => true,
+    });
+}
+else
+{
+    app.UseHangfireDashboard();
+}
+
+
+
+const string syncJobName = "Sync Projects and Membership";
+if (jobSettings.syncSchedule == 0)
+    RecurringJob.RemoveIfExists(syncJobName);
+else
+    RecurringJob.AddOrUpdate<IDoSyncWork>(syncJobName, x => x.Execute(), Cron.MinuteInterval(jobSettings.syncSchedule));
+
+const string scanJobName = "Sync Submissions";
+if (jobSettings.scanSchedule == 0)
+    RecurringJob.RemoveIfExists(scanJobName);
+else
+    RecurringJob.AddOrUpdate<IDoAgentWork>(scanJobName,
+        x => x.Execute(),
+        Cron.MinuteInterval(jobSettings.scanSchedule));
+
+
+if (HasuraSettings.IsEnabled)
+{
+    RecurringJob.AddOrUpdate<IHasuraService>(a => a.Run(), Cron.HourInterval(4));
+}
+
 
 var port = app.Environment.WebRootPath;
-
-// Print the port number
 Console.WriteLine("Application is running on port: " + port);
+
+Log.Information($"minioTRESettings  Url> {minioTRESettings.Url}");
 app.Run();
-
-

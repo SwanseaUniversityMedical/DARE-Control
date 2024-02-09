@@ -1,89 +1,87 @@
-﻿
-@using BL.Models.Enums
+﻿@using BL.Models.Enums
 @model BL.Models.EgressSubmission
 
 @{
     ViewData["Title"] = "Egress Request";
-   
+
 
 }
 
-
-
 <div class="container-lg p-4">
     <div class="d-flex align-items-center justify-content-between">
-        <h1 class="fs-3 mb-0">Egress Request</h1>
-
-            
+        <h1 class="fs-3 mb-0"><span class="text-muted">Egress Request:</span> #@Model.SubmissionId</h1>
+        <span>
+            @Model.EgressStatusDisplay
+        </span>
     </div>
-        
+    <hr class="d-flex my-4">
     <div class="d-flex align-items-center justify-content-between">
-        <h2 class="mb-0 fw-bold hover-underline fs-5">
-            Submission Id: @Model.SubmissionId
-        </h2>
         <div>
-            <p class="text-muted small mb-0">File(s) Minio Bucket Location: @Model.OutputBucket</p>
-            <p class="my-4">
-
-                Status:  @Model.EgressStatusDisplay
-
-            </p>
+            <a href="@Model.OutputBucket" class="btn btn-sm btn-secondary">Minio Bucket</a>
             @if (Model.Status != EgressStatus.NotCompleted)
             {
                 <p class="text-muted fs-7 mt-4 mb-0">
                     Completed: @Model.Completed<span class="mx-2"></span>Reviewer: @Model.Reviewer
-                </p>    
+                </p>
             }
-            
-                
-
-
         </div>
-            
-           
-            
     </div>
     @using (Html.BeginForm("GetEgress", "Data", FormMethod.Post, new { id = "frmMain" }))
     {
-        @Html.HiddenFor(x => x.Id);
+        @Html.HiddenFor(x => x.Id)
+        ;
         <div class="form-group mb-4">
             @Html.ValidationSummary(false, "", new { @class = "text-danger" })
         </div>
+        <ul class="list-group list-group-flush">
         @for (int i = 0; i < Model.Files.Count; i++)
         {
+            
+                <li class="list-group-item">
+                    <div class="form-group">
+                        @Html.HiddenFor(x => x.Files[i].Id)
+                        @*@Html.LabelFor(x => x.Files[i].Name, new { @class = "form-label" })*@
 
-            <div class="form-group mb-4">
-                @Html.HiddenFor(x => x.Files[i].Id)
-                @Html.LabelFor(x => x.Files[i].Name, new { @class = "form-label" })
-                @Html.DisplayFor(x => x.Files[i].Name, new { @class = "form-control" })
-                <a href="@Url.Action("DownloadFile", "Data",new{FileId=@Model.Files[i].Id})" class="btn btn-sm btn-outline-info"><span class="small">Download</span></a>
-            </div>
-            <div>
-                @Html.LabelFor(x => x.Files[i].Status, new { @class = "form-label" })
-                @Html.RadioButtonFor(x => x.Files[i].Status, FileStatus.Approved)
-                @Html.Label(FileStatus.Approved.ToString())
-                @Html.RadioButtonFor(x => x.Files[i].Status, FileStatus.Rejected)
-                @Html.Label(FileStatus.Rejected.ToString())
-                @if (Model.Files[i].Status == FileStatus.Undecided)
-                {
-                    @Html.RadioButtonFor(x => x.Files[i].Status, FileStatus.Undecided)
-                    @Html.Label(FileStatus.Undecided.ToString())
-                }
-
-            </div>
+                        <a href="@Url.Action("DownloadFile", "Data",new{FileId=@Model.Files[i].Id})" class="btn btn-link">@Html.DisplayFor(x => x.Files[i].Name, new { @class = "form-control" }) <i class="ms-2 fa fa-download"></i></a>
+                   @* </div>*@
+@*                    <div class="form-group">
+*@                        <div class="form-check form-check-inline">
+                            @Html.RadioButtonFor(x => x.Files[i].Status, FileStatus.Approved, new { @class = "form-check-input"})
+                            @Html.Label(FileStatus.Approved.ToString())
+                        </div>
+                        <div class="form-check form-check-inline">
+                            @Html.RadioButtonFor(x => x.Files[i].Status, FileStatus.Rejected, new { @class = "form-check-input"})
+                            @Html.Label(FileStatus.Rejected.ToString())
+                        </div>
+                        <div class="form-check form-check-inline">
+                            @if (Model.Files[i].Status == FileStatus.Undecided)
+                            {
+                                @Html.RadioButtonFor(x => x.Files[i].Status, FileStatus.Undecided, new { @class = "form-check-input"})
+                                @Html.Label(FileStatus.Undecided.ToString())
+                            }
+                        </div>
+                    </div>
+                </li>
+            
+            
         }
-        <div class="hero-block-1">
-            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i>Complete</button>
+        </ul>
+        <div class="mt-4">
+            <button type="submit" name="submitButton" value="SubmitButton" class="btn btn-sm btn-primary">Complete &amp; Close Request</button>
+            <button type="submit" name="submitButton" value="SaveButton" class=" btn btn-sm btn-primary">Save</button>
+
+            
+            <a class="btn btn-sm btn-link">Cancel</a>
         </div>
     }
 </div>
 
-           
-   
 
 
-    
-    
-        
-        
-     
+
+
+
+
+
+
+

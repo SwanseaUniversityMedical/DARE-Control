@@ -3,7 +3,10 @@ version: '3.5'
 services:
   postgres:
     image: postgres
-    container_name: postgres
+    mem_limit: 2G
+    mem_reservation: 1G
+    cpus: 0.5
+    #container_name: postgres
     restart: always
     ports:
       - 32769:5432
@@ -14,8 +17,15 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password123
       - POSTGRES_DB=DARE-Control
+      - POSTGRES_DB=myCoolDataDB
+    networks:
+      - communicating
+
   rabbitmq:
     image: rabbitmq:3-management-alpine
+    mem_limit: 512M
+    mem_reservation: 256M
+    cpus: 0.5
     restart: unless-stopped
     container_name: 'rabbitmq'
     ports:
@@ -27,11 +37,19 @@ services:
         - rabbitmq:/var/lib/rabbitmq/
   adminer:
     image: adminer
+    mem_limit: 256M
+    mem_reservation: 128M
+    cpus: 0.1
     restart: always
     ports:
       - 8087:8080
+    networks:
+      - communicating
   minio:
     image: quay.io/minio/minio
+    mem_limit: 512M
+    mem_reservation: 256M
+    cpus: 0.1
     restart: always
     command: server /data --console-address ":9001"
     environment:
@@ -48,8 +66,33 @@ services:
     ports:
       - 9000:9000
       - 9001:9001
+  minio2:
+    image: quay.io/minio/minio
+    mem_limit: 512M
+    mem_reservation: 256M
+    cpus: 0.1
+    container_name: minio2
+    restart: always
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
+      - MINIO_IDENTITY_OPENID_CONFIG_URL=https://auth2.ukserp.ac.uk/realms/Dare-TRE/.well-known/openid-configuration
+      - MINIO_IDENTITY_OPENID_CLIENT_ID=Dare-TRE-Minio
+      - MINIO_IDENTITY_OPENID_CLIENT_SECRET=dZx08fCXVjonxBqg54CFvFv9MteoaqAT
+      - MINIO_IDENTITY_OPENID_DISPLAY_NAME=SSO_IDENTIFIER
+      - MINIO_IDENTITY_OPENID_SCOPES=openid
+      - MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC=on
+    volumes:
+      - minio2_data:/data
+    ports:
+      - 9002:9000
+      - 9003:9001
   seq:
     image: datalust/seq:latest
+    mem_limit: 2G
+    mem_reservation: 1G
+    cpus: 0.5
     container_name: seq
     restart: always
     ports:
@@ -58,6 +101,75 @@ services:
       - seq_data:/data
     environment:
       - ACCEPT_EULA=Y
+
+  opaservice:
+    image: openpolicyagent/opa:latest
+    restart: always
+    ports:
+      - 8181:8181 
+    command:
+      - "run"
+      - "--server"  
+    networks:
+      - communicating
+
+  #postgresHasura:
+  #  image: postgres:15
+  #  restart: always
+  #  ports:
+  #    - 32770:5432
+  #  volumes:
+  #    - postgresHasura:/var/lib/postgresql/data
+  #  environment:
+  #    POSTGRES_PASSWORD: postgrespassword
+
+  #graphql-engine:
+  #  image: hasura/graphql-engine
+  #  ports:
+  #    - "8080:8080"
+  #  restart: always
+  #  environment:
+  #    ## postgres database to store Hasura metadata
+  #    HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://postgres:password123@postgres:5432/postgres
+  #    ## this env var can be used to add the above postgres database to Hasura as a data source. this can be removed/updated based on your needs
+  #    PG_DATABASE_URL: postgres://postgres:password123@postgres:5432/postgres
+  #    ## enable the console served by server
+  #    HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
+  #    ## enable debugging mode. It is recommended to disable this in production
+  #    HASURA_GRAPHQL_DEV_MODE: "true"
+  #    HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+  #    ## uncomment next line to run console offline (i.e load console assets from server instead of CDN)
+  #    # HASURA_GRAPHQL_CONSOLE_ASSETS_DIR: /srv/console-assets
+  #    ## uncomment next line to set an admin secret
+  #    # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
+  #    HASURA_GRAPHQL_METADATA_DEFAULTS: '{"backend_configs":{"dataconnector":{"athena":{"uri":"http://data-connector-agent:8081/api/v1/athena"},"mariadb":{"uri":"http://data-connector-agent:8081/api/v1/mariadb"},"mysql8":{"uri":"http://data-connector-agent:8081/api/v1/mysql"},"oracle":{"uri":"http://data-connector-agent:8081/api/v1/oracle"},"snowflake":{"uri":"http://data-connector-agent:8081/api/v1/snowflake"}}}}'
+  #    POSTGRSS_LOGIN: 'postgres://postgres:password123@postgres:5432/myCoolDataDB'
+  #    HASURA_GRAPHQL_AUTH_HOOK: 'http://host.docker.internal:5269/api/HasuraAuthentication'
+  #    HASURA_GRAPHQL_ADMIN_SECRET: 'ohCOOl'
+  #  networks:
+  #    - communicating
+  #  depends_on:
+  #    data-connector-agent:
+  #      condition: service_healthy
+  #data-connector-agent:
+  #  image: hasura/graphql-data-connector
+  #  restart: always
+  #  ports:
+  #    - 8081:8081
+  #  environment:
+  #    QUARKUS_LOG_LEVEL: ERROR # FATAL, ERROR, WARN, INFO, DEBUG, TRACE
+  #    ## https://quarkus.io/guides/opentelemetry#configuration-reference
+  #    QUARKUS_OPENTELEMETRY_ENABLED: "false"
+  #    ## QUARKUS_OPENTELEMETRY_TRACER_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+  #  healthcheck:
+  #    test: ["CMD", "curl", "-f", "http://localhost:8081/api/v1/athena/health"]
+  #    interval: 5s
+  #    timeout: 10s
+  #    retries: 5
+  #    start_period: 5s
+  #  networks:
+  #    - communicating
+    
 #  control:
 #    image: harbor.ukserp.ac.uk/dare/control:1.0.0
 #    restart: always
@@ -71,7 +183,11 @@ services:
 volumes:
     postgres:
       driver: local
+    #postgresHasura:
+    #  driver: local
     minio_data:
+      driver: local
+    minio2_data:
       driver: local
     seq_data:
       driver: local
@@ -81,5 +197,6 @@ volumes:
 ######################################################
 # networks
 ######################################################      
-#networks:
-#    default:
+networks:
+  communicating:
+    driver: bridge

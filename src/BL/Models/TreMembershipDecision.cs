@@ -12,12 +12,16 @@ namespace BL.Models
         public virtual TreProject? Project { get; set; }
         public bool Archived { get; set; }
         public Decision Decision { get; set; }
+        [Display(Name = "Project Expiry Date")]
+        public DateTime ProjectExpiryDate { get; set; }
 
         [Display(Name = "Approved By")]
         public string? ApprovedBy { get; set; }
 
         [Display(Name = "Date of Last Decision")]
         public DateTime LastDecisionDate { get; set; }
+
+        public virtual List<TreAuditLog>? AuditLogs { get; set; }
     }
     
 }

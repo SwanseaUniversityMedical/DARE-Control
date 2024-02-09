@@ -1,10 +1,19 @@
 ﻿using BL.Models.APISimpleTypeReturns;
 using BL.Models;
+using BL.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using TRE_API.Repositories.DbContexts;
 using BL.Models.ViewModels;
 using BL.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using EasyNetQ.Management.Client.Model;
+using static Npgsql.PostgresTypes.PostgresCompositeType;
+using System.Runtime.Intrinsics.X86;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Sentry;
 
 namespace TRE_API.Services
 {
@@ -12,14 +21,14 @@ namespace TRE_API.Services
     {
         public ApplicationDbContext _DbContext { get; set; }
         public IDareClientWithoutTokenHelper _dareclientHelper { get; set; }
-        private readonly MinioSettings _minioSettings;
-        private readonly IMinioHelper _minioHelper;
-        public DareSyncHelper(ApplicationDbContext dbContext, IDareClientWithoutTokenHelper dareClient, MinioSettings minioSettings, IMinioHelper minioHelper)
+        
+        private readonly IMinioTreHelper _minioTreHelper;
+        public DareSyncHelper(ApplicationDbContext dbContext, IDareClientWithoutTokenHelper dareClient,  IMinioTreHelper minioTreHelper)
         {
             _DbContext = dbContext;
             _dareclientHelper = dareClient;
-            _minioSettings = minioSettings;
-            _minioHelper = minioHelper;
+            
+            _minioTreHelper = minioTreHelper;
         }
 
         public async Task<BoolReturn> SyncSubmissionWithTre()
@@ -32,6 +41,8 @@ namespace TRE_API.Services
                     Result = false
                 };
             }
+
+           
             var subprojs = await _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForTre");
             var dbprojs = _DbContext.Projects.ToList();
             var projectAdds = subprojs.Where(x => !_DbContext.Projects.Any(y => y.SubmissionProjectId == x.Id));
@@ -43,13 +54,14 @@ namespace TRE_API.Services
             {
                 var submission = project.SubmissionBucket.ToLower() + "tre";
                 var output = project.OutputBucket.ToLower() + "tre";
-                var submissionBucket = await _minioHelper.CreateBucket(_minioSettings, submission);
+                var submissionBucket = await _minioTreHelper.CreateBucket(submission);
                 if (!submissionBucket)
                 {
                     Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SyncSubmissionWithTre", submission);
                     submission = "";
                 }
-                var outputBucket = await _minioHelper.CreateBucket(_minioSettings, output);
+
+                var outputBucket = await _minioTreHelper.CreateBucket(output);
                 if (!outputBucket)
                 {
                     Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SyncSubmissionWithTre", output);
@@ -63,7 +75,7 @@ namespace TRE_API.Services
                     Description = project.ProjectDescription,
                     SubmissionBucketTre = submission,
                     OutputBucketTre = output,
-
+                    OutputBucketSub = project.OutputBucket.ToLower()
                 });
             }
 
@@ -145,10 +157,42 @@ namespace TRE_API.Services
             }
 
             await _DbContext.SaveChangesAsync();
+            await SyncProjectDecisions();
+            await SyncMembershipDecisions();
+
             return new BoolReturn()
             {
                 Result = true
             };
+
+        }
+
+        public async Task<bool> SyncProjectDecisions()
+        {
+
+            var dbprojs = _DbContext.Projects.ToList();            
+            var synclist = dbprojs.Select(x => new ProjectTreDecisionsDTO() { ProjectId = x.SubmissionProjectId, Decision = x.Decision }).ToList();
+            var result = await _dareclientHelper.CallAPI<List<ProjectTreDecisionsDTO>, BoolReturn>("/api/Project/SyncTreProjectDecisions", synclist);
+            
+
+
+            return result.Result;
+
+        }
+
+        public async Task<bool> SyncMembershipDecisions()
+        {
+
+            var dbMemberships = _DbContext.MembershipDecisions.ToList();
+
+
+
+            var synclist = dbMemberships.Select(x => new MembershipTreDecisionDTO() { ProjectId = x.Project.SubmissionProjectId, UserId = x.User.SubmissionUserId, Decision = x.Decision }).ToList();
+            var result = await _dareclientHelper.CallAPI<List<MembershipTreDecisionDTO>, BoolReturn>("/api/Project/SyncTreMembershipDecisions", synclist);
+
+
+
+            return result.Result;
 
         }
     }

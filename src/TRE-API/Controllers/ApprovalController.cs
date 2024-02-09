@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using BL.Models;
 using BL.Models.APISimpleTypeReturns;
 using BL.Models.Enums;
-using BL.Models.ViewModels;
 using Serilog;
 using Microsoft.Extensions.Options;
 using BL.Services;
@@ -14,11 +13,10 @@ using BL.Models.Tes;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Threading;
 
+
 namespace TRE_API.Controllers
 {
 
-    // 
-    
     [Route("api/[controller]")]
     [ApiController]
 
@@ -30,7 +28,8 @@ namespace TRE_API.Controllers
 
         public IDareSyncHelper _dareSyncHelper { get; set; }
 
-        public ApprovalController(IDareSyncHelper dareSyncHelper, ApplicationDbContext applicationDbContext, IHttpContextAccessor httpContextAccessor)
+        public ApprovalController(IDareSyncHelper dareSyncHelper, ApplicationDbContext applicationDbContext,
+            IHttpContextAccessor httpContextAccessor)
         {
             _dareSyncHelper = dareSyncHelper;
             _DbContext = applicationDbContext;
@@ -41,9 +40,17 @@ namespace TRE_API.Controllers
         [HttpGet("GetMemberships")]
         public List<TreMembershipDecision> GetMemberships(int projectId, bool showOnlyUnprocessed)
         {
-            return _DbContext.MembershipDecisions.Where(x =>
-                (projectId <= 0 || x.Project.Id == projectId) &&
-                (!showOnlyUnprocessed || x.Decision == Decision.Undecided)).ToList();
+            try
+            {
+                return _DbContext.MembershipDecisions.Where(x =>
+                    (projectId <= 0 || x.Project.Id == projectId) &&
+                    (!showOnlyUnprocessed || x.Decision == Decision.Undecided)).ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetMemberships");
+                throw;
+            }
         }
 
 
@@ -52,21 +59,46 @@ namespace TRE_API.Controllers
         [HttpGet("GetAllTreProjects")]
         public List<TreProject> GetAllTreProjects(bool showOnlyUnprocessed)
         {
-            return _DbContext.Projects.Where(x => !showOnlyUnprocessed || x.Decision == Decision.Undecided).ToList();
+            try
+            {
+                return _DbContext.Projects.Where(x => !showOnlyUnprocessed || x.Decision == Decision.Undecided)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetAllTreProjects");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetTreProject")]
         public TreProject GetTreProject(int projectId)
         {
-            return _DbContext.Projects.First(x => x.Id == projectId);
+            try
+            {
+                return _DbContext.Projects.First(x => x.Id == projectId);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetTreProject");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllActiveTreProjects")]
         public List<TreProject> GetAllActiveTreProjects()
         {
-            return _DbContext.Projects.Where(x => !x.Archived).ToList();
+            try
+            {
+                return _DbContext.Projects.Where(x => !x.Archived).ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetAllActiveTreProjects");
+                throw;
+            }
         }
 
 
@@ -74,133 +106,182 @@ namespace TRE_API.Controllers
         [HttpGet("GetAllTreUsers")]
         public List<TreUser> GetAllTreUsers()
         {
-            return _DbContext.Users.ToList();
+            try
+            {
+                return _DbContext.Users.ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetAllTreUsers");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllActiveTreUsers")]
         public List<TreUser> GetAllActiveTreUsers()
         {
-            return _DbContext.Users.Where(x => !x.Archived).ToList();
+            try
+            {
+                return _DbContext.Users.Where(x => !x.Archived).ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetAllActiveTreUsers");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllMembershipDecisions")]
         public List<TreMembershipDecision> GetAllMembershipDecisions()
         {
-            return _DbContext.MembershipDecisions.ToList();
+            try
+            {
+                return _DbContext.MembershipDecisions.ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetAllMembershipDecisions");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllActiveMembershipDecisions")]
         public List<TreMembershipDecision> GetAllActiveMembershipDecisions()
         {
-            return _DbContext.MembershipDecisions.Where(x => !x.Archived).ToList();
+            try
+            {
+                return _DbContext.MembershipDecisions.Where(x => !x.Archived).ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetAllActiveMembershipDecisions");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetAllUndecidedMembershipDecisions")]
         public List<TreMembershipDecision> GetAllUndecidedActiveMembershipDecisions()
         {
-            return _DbContext.MembershipDecisions.Where(x => !x.Archived && x.Decision  == Decision.Undecided)
-                .ToList();
+            try
+            {
+                return _DbContext.MembershipDecisions.Where(x => !x.Archived && x.Decision == Decision.Undecided)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetAllUndecidedActiveMembershipDecisions");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("UpdateProjects")]
         public async Task<List<TreProject>> UpdateProjects(List<TreProject> projects)
         {
-            var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-            if (string.IsNullOrWhiteSpace(approvedBy))
+            try
             {
-                approvedBy = "[Unknown]";
-            }
-            var resultList = new List<TreProject>();
-            var approvedDate = DateTime.Now.ToUniversalTime();
-            foreach (var treProject in projects)
-            {
-                var dbproj = _DbContext.Projects.First(x => x.Id == treProject.Id);
-                dbproj.LocalProjectName = treProject.LocalProjectName;
-
-                if (treProject.Password == null)
+                var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+                if (string.IsNullOrWhiteSpace(approvedBy))
                 {
-                    dbproj.Password = dbproj.Password;
-
-                }
-                else {
-                    dbproj.Password = treProject.Password;
-                }
-                if (treProject.UserName == null)
-                {
-                    dbproj.UserName = dbproj.UserName;
-
-                }
-                else
-                {
-                    dbproj.UserName = treProject.UserName;
+                    approvedBy = "[Unknown]";
                 }
 
-                if (treProject.Decision != dbproj.Decision)
+                var resultList = new List<TreProject>();
+                var approvedDate = DateTime.Now.ToUniversalTime();
+                foreach (var treProject in projects)
                 {
-                    dbproj.Decision = treProject.Decision;
-                    dbproj.ApprovedBy = approvedBy;
-                    dbproj.LastDecisionDate = approvedDate;
-                }
-                resultList.Add(dbproj);
+                    var dbproj = _DbContext.Projects.First(x => x.Id == treProject.Id);
+                    dbproj.LocalProjectName = treProject.LocalProjectName;
 
-                var audit = new TreAuditLog()
-                {
-                    Decision = "TreProject Decision:" + treProject.Decision.ToString(),
-                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                    ApprovedBy = approvedBy,                 
-                    Date = DateTime.Now.ToUniversalTime()
-                };
-                _DbContext.TreAuditLogs.Add(audit);
+                    if (treProject.Password != null)
+                    {
+
+                        dbproj.Password = treProject.Password;
+                    }
+
+                    if (treProject.UserName != null)
+                    {
+
+                        dbproj.UserName = treProject.UserName;
+                    }
+
+                    if (treProject.Decision != dbproj.Decision)
+                    {
+                        dbproj.Decision = treProject.Decision;
+                        dbproj.ApprovedBy = approvedBy;
+                        dbproj.LastDecisionDate = approvedDate;
+                    }
+        
+                        dbproj.ProjectExpiryDate = treProject.ProjectExpiryDate.ToUniversalTime();
+                    
+
+                    resultList.Add(dbproj);
+                    await _DbContext.SaveChangesAsync();
+                    await ControllerHelpers.AddTreAuditLog(dbproj, null, treProject.Decision == Decision.Approved,
+                        _DbContext, _httpContextAccessor, User);
+
+
+
+                    Log.Information("{Function}:", "AuditLogs", "Treproject Decision:" + treProject.Decision.ToString(),
+                        "ApprovedBy:" + approvedBy);
+                }
+
                 await _DbContext.SaveChangesAsync();
-                Log.Information("{Function}:", "AuditLogs", "Treproject Decision:" + treProject.Decision.ToString(), "ApprovedBy:" + approvedBy);
+                return resultList;
             }
-            await _DbContext.SaveChangesAsync();
-            return resultList;
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "UpdateProjects");
+                throw;
+            }
         }
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("UpdateMembershipDecisions")]
-        public async Task<List<TreMembershipDecision>> UpdateMembershipDecisions(List<TreMembershipDecision> membershipDecisions)
+        public async Task<List<TreMembershipDecision>> UpdateMembershipDecisions(
+            List<TreMembershipDecision> membershipDecisions)
         {
-            var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-            var returnResult = new List<TreMembershipDecision>();
-            if (string.IsNullOrWhiteSpace(approvedBy))
+            try
             {
-                approvedBy = "[Unknown]";
-            }
-
-            var approvedDate = DateTime.Now.ToUniversalTime();
-            foreach (var membershipDecision in membershipDecisions)
-            {
-                var dbMembership = _DbContext.MembershipDecisions.First(x => x.Id == membershipDecision.Id);
-                if (membershipDecision.Decision != dbMembership.Decision)
+                var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+                var returnResult = new List<TreMembershipDecision>();
+                if (string.IsNullOrWhiteSpace(approvedBy))
                 {
-                    dbMembership.Decision = membershipDecision.Decision;
-                    dbMembership.ApprovedBy = approvedBy;
-                    dbMembership.LastDecisionDate = approvedDate;
-                }           
-                returnResult.Add(dbMembership);
+                    approvedBy = "[Unknown]";
+                }
 
-                var audit = new TreAuditLog()
+                var approvedDate = DateTime.Now.ToUniversalTime();
+                foreach (var membershipDecision in membershipDecisions)
                 {
-                    Decision = "Membership Decision:" + membershipDecision.Decision.ToString(),
-                    IPaddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                    ApprovedBy = approvedBy,
-                    Date = DateTime.Now.ToUniversalTime()
-                };
-                _DbContext.TreAuditLogs.Add(audit);
+                    var dbMembership = _DbContext.MembershipDecisions.First(x => x.Id == membershipDecision.Id);
+                    if (membershipDecision.Decision != dbMembership.Decision)
+                    {
+                        dbMembership.Decision = membershipDecision.Decision;
+                        dbMembership.ApprovedBy = approvedBy;
+                        dbMembership.LastDecisionDate = approvedDate;
+                    }
+
+                    returnResult.Add(dbMembership);
+                    
+                    await _DbContext.SaveChangesAsync();
+                    await ControllerHelpers.AddTreAuditLog(null, dbMembership, dbMembership.Decision == Decision.Approved,
+                        _DbContext, _httpContextAccessor, User);
+                    
+
+                }
+
                 await _DbContext.SaveChangesAsync();
-                Log.Information("{Function}:", "AuditLogs", "Membership Decision:" + membershipDecision.Decision.ToString(), "ApprovedBy:" + approvedBy);
-
+                return returnResult;
             }
-
-            await _DbContext.SaveChangesAsync();
-            return returnResult; 
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "UpdateMembershipDecisions");
+                throw;
+            }
 
         }
 
@@ -208,9 +289,16 @@ namespace TRE_API.Controllers
         [HttpGet("SyncSubmissionWithTre")]
         public async Task<BoolReturn> SyncSubmissionWithTre()
         {
-            return await _dareSyncHelper.SyncSubmissionWithTre();
-            
+            try
+            {
+                return await _dareSyncHelper.SyncSubmissionWithTre();
 
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "SyncSubmissionWithTre");
+                throw;
+            }
         }
 
     }

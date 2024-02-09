@@ -25,7 +25,7 @@ namespace TRE_API.Repositories.DbContexts
 
         public void SeedData()
         {
-
+            return;
             try
             {
                 if (!_dbContext.KeycloakCredentials.Any(x => x.CredentialType == CredentialType.Submission))

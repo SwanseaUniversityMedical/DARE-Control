@@ -12,15 +12,15 @@ using TRE_API.Repositories.DbContexts;
 namespace TRE_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231011105713_initial")]
-    partial class initial
+    [Migration("20231123144041_nullble")]
+    partial class nullble
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.8")
+                .HasAnnotation("ProductVersion", "7.0.13")
                 .HasAnnotation("Proxies:ChangeTracking", false)
                 .HasAnnotation("Proxies:CheckEquality", false)
                 .HasAnnotation("Proxies:LazyLoading", true)
@@ -58,7 +58,6 @@ namespace TRE_API.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("description")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("name")
@@ -90,6 +89,10 @@ namespace TRE_API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("subid")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("teskid")
                         .IsRequired()
                         .HasColumnType("text");
@@ -107,19 +110,29 @@ namespace TRE_API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Approved")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("ApprovedBy")
                         .HasColumnType("text");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Decision")
-                        .HasColumnType("text");
-
                     b.Property<string>("IPaddress")
                         .HasColumnType("text");
 
+                    b.Property<int?>("MembershipDecisionId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ProjectId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("MembershipDecisionId");
+
+                    b.HasIndex("ProjectId");
 
                     b.ToTable("TreAuditLogs");
                 });
@@ -142,6 +155,9 @@ namespace TRE_API.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("LastDecisionDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ProjectExpiryDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("ProjectId")
@@ -185,11 +201,17 @@ namespace TRE_API.Migrations
                     b.Property<string>("LocalProjectName")
                         .HasColumnType("text");
 
+                    b.Property<string>("OutputBucketSub")
+                        .HasColumnType("text");
+
                     b.Property<string>("OutputBucketTre")
                         .HasColumnType("text");
 
                     b.Property<string>("Password")
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("ProjectExpiryDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SubmissionBucketTre")
                         .HasColumnType("text");
@@ -233,6 +255,82 @@ namespace TRE_API.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("TREAgent.Repositories.GeneratedRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GeneratedRole");
+                });
+
+            modelBuilder.Entity("TREAgent.Repositories.TokenToExpire", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("SubId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TokensToExpire");
+                });
+
+            modelBuilder.Entity("TRE_TESK.Models.RoleData", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DataToRoles");
+                });
+
+            modelBuilder.Entity("BL.Models.TreAuditLog", b =>
+                {
+                    b.HasOne("BL.Models.TreMembershipDecision", "MembershipDecision")
+                        .WithMany("AuditLogs")
+                        .HasForeignKey("MembershipDecisionId");
+
+                    b.HasOne("BL.Models.TreProject", "Project")
+                        .WithMany("AuditLogs")
+                        .HasForeignKey("ProjectId");
+
+                    b.Navigation("MembershipDecision");
+
+                    b.Navigation("Project");
+                });
+
             modelBuilder.Entity("BL.Models.TreMembershipDecision", b =>
                 {
                     b.HasOne("BL.Models.TreProject", "Project")
@@ -248,8 +346,15 @@ namespace TRE_API.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("BL.Models.TreMembershipDecision", b =>
+                {
+                    b.Navigation("AuditLogs");
+                });
+
             modelBuilder.Entity("BL.Models.TreProject", b =>
                 {
+                    b.Navigation("AuditLogs");
+
                     b.Navigation("MemberDecisions");
                 });
 

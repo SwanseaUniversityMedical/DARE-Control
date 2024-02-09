@@ -151,10 +151,11 @@
                         <div class="col-12">
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="UserList">
+                                    <caption>Users on project</caption>
                                     @foreach (var user in Model.UserItemList)
                                     {
                                         <tr>
-                                            <td><input type="checkbox" value="@user.Value" id="@user.Value" name="selectedUser" /></td>
+                                            <td><input type="checkbox" value="@user.Value" id="@user.Value" name="selectedUser"/></td>
                                             <td>@user.Text</td>
                                         </tr>
                                     }
@@ -183,10 +184,11 @@
                         <div class="col-12">
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="TreList">
+                                    <caption>List of tres on project</caption>
                                     @foreach (var tre in Model.TreItemList)
                                     {
                                         <tr>
-                                            <td><input type="checkbox" value="@tre.Value" id="Tre_@tre.Value" name="selectedTre" /></td>
+                                            <td><input type="checkbox" value="@tre.Value" id="Tre_@tre.Value" name="selectedTre"/></td>
                                             <td>@tre.Text</td>
                                         </tr>
                                     }

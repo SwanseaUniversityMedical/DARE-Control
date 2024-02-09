@@ -30,23 +30,15 @@ namespace Data_Egress_UI.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme
             }, new AuthenticationProperties
             {
-                RedirectUri = Url.Action("Login", "Home")
+                RedirectUri = Url.Action("GetAllEgresses", "Data", new {unprocessedonly = true})
             });
         }
 
-        //public async Task<IActionResult> Index()
-        //{
+      
 
-        //    var alreadyset = await _dataClientHelper.CallAPIWithoutModel<BoolReturn>("/api/TreCredentials/CheckCredentialsAreValid");
-        //    if (!alreadyset.Result)
-        //    {
-
-        //        return RedirectToAction("UpdateCredentials", "TreCredentials");
-        //    }
-        //    return View();
-        //}
         public async Task<IActionResult> Index()
         {
+            
             if (!HttpContext.User.Identity.IsAuthenticated)
             {
                 return Challenge(OpenIdConnectDefaults.AuthenticationScheme);
@@ -57,8 +49,8 @@ namespace Data_Egress_UI.Controllers
 
                 return RedirectToAction("UpdateCredentials", "TreCredentials");
             }
-            return View();
-            
+            return RedirectToAction("GetAllEgresses", "Data", new { unprocessedonly = true });
+
 
         }
 

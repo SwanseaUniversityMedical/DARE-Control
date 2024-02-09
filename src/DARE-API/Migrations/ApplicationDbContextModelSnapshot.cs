@@ -17,7 +17,7 @@ namespace DARE_API.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.8")
+                .HasAnnotation("ProductVersion", "7.0.13")
                 .HasAnnotation("Proxies:ChangeTracking", false)
                 .HasAnnotation("Proxies:CheckEquality", false)
                 .HasAnnotation("Proxies:LazyLoading", true)
@@ -36,16 +36,22 @@ namespace DARE_API.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("FormData")
+                    b.Property<string>("HistoricFormData")
                         .HasColumnType("text");
 
                     b.Property<string>("IPaddress")
                         .HasColumnType("text");
 
+                    b.Property<int>("LogType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("LoggedInUserName")
+                        .HasColumnType("text");
+
                     b.Property<int?>("ProjectId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("TestaskId")
+                    b.Property<int?>("SubmissionId")
                         .HasColumnType("integer");
 
                     b.Property<int?>("TreId")
@@ -54,12 +60,17 @@ namespace DARE_API.Migrations
                     b.Property<int?>("UserId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("UserName")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
-                    b.ToTable("AuditLogs", (string)null);
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("SubmissionId");
+
+                    b.HasIndex("TreId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AuditLogs");
                 });
 
             modelBuilder.Entity("BL.Models.HistoricStatus", b =>
@@ -89,7 +100,38 @@ namespace DARE_API.Migrations
 
                     b.HasIndex("SubmissionId");
 
-                    b.ToTable("HistoricStatuses", (string)null);
+                    b.ToTable("HistoricStatuses");
+                });
+
+            modelBuilder.Entity("BL.Models.MembershipTreDecision", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Decision")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("SubmissionProjId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("TreId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubmissionProjId");
+
+                    b.HasIndex("TreId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("MembershipTreDecisions");
                 });
 
             modelBuilder.Entity("BL.Models.Project", b =>
@@ -121,8 +163,14 @@ namespace DARE_API.Migrations
                     b.Property<string>("OutputBucket")
                         .HasColumnType("text");
 
+                    b.Property<string>("ProjectContact")
+                        .HasColumnType("text");
+
                     b.Property<string>("ProjectDescription")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProjectOwner")
                         .HasColumnType("text");
 
                     b.Property<DateTime>("StartDate")
@@ -133,7 +181,33 @@ namespace DARE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Projects", (string)null);
+                    b.ToTable("Projects");
+                });
+
+            modelBuilder.Entity("BL.Models.ProjectTreDecision", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Decision")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("SubmissionProjId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("TreId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubmissionProjId");
+
+                    b.HasIndex("TreId");
+
+                    b.ToTable("ProjectTreDecisions");
                 });
 
             modelBuilder.Entity("BL.Models.Submission", b =>
@@ -150,6 +224,9 @@ namespace DARE_API.Migrations
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FinalOutputFile")
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("LastStatusUpdate")
                         .HasColumnType("timestamp with time zone");
@@ -202,7 +279,7 @@ namespace DARE_API.Migrations
 
                     b.HasIndex("TreId");
 
-                    b.ToTable("Submissions", (string)null);
+                    b.ToTable("Submissions");
                 });
 
             modelBuilder.Entity("BL.Models.SubmissionFile", b =>
@@ -239,7 +316,7 @@ namespace DARE_API.Migrations
 
                     b.HasIndex("SubmissionId");
 
-                    b.ToTable("SubmissionFiles", (string)null);
+                    b.ToTable("SubmissionFiles");
                 });
 
             modelBuilder.Entity("BL.Models.Tre", b =>
@@ -271,7 +348,7 @@ namespace DARE_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tres", (string)null);
+                    b.ToTable("Tres");
                 });
 
             modelBuilder.Entity("BL.Models.User", b =>
@@ -282,6 +359,9 @@ namespace DARE_API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Biography")
+                        .HasColumnType("text");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
@@ -290,13 +370,20 @@ namespace DARE_API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Organisation")
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("ProjectTre", b =>
@@ -311,7 +398,7 @@ namespace DARE_API.Migrations
 
                     b.HasIndex("TresId");
 
-                    b.ToTable("ProjectTre", (string)null);
+                    b.ToTable("ProjectTre");
                 });
 
             modelBuilder.Entity("ProjectUser", b =>
@@ -326,7 +413,34 @@ namespace DARE_API.Migrations
 
                     b.HasIndex("UsersId");
 
-                    b.ToTable("ProjectUser", (string)null);
+                    b.ToTable("ProjectUser");
+                });
+
+            modelBuilder.Entity("BL.Models.AuditLog", b =>
+                {
+                    b.HasOne("BL.Models.Project", "Project")
+                        .WithMany("AuditLogs")
+                        .HasForeignKey("ProjectId");
+
+                    b.HasOne("BL.Models.Submission", "Submission")
+                        .WithMany("AuditLogs")
+                        .HasForeignKey("SubmissionId");
+
+                    b.HasOne("BL.Models.Tre", "Tre")
+                        .WithMany("AuditLogs")
+                        .HasForeignKey("TreId");
+
+                    b.HasOne("BL.Models.User", "User")
+                        .WithMany("AuditLogs")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Project");
+
+                    b.Navigation("Submission");
+
+                    b.Navigation("Tre");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BL.Models.HistoricStatus", b =>
@@ -338,6 +452,42 @@ namespace DARE_API.Migrations
                         .IsRequired();
 
                     b.Navigation("Submission");
+                });
+
+            modelBuilder.Entity("BL.Models.MembershipTreDecision", b =>
+                {
+                    b.HasOne("BL.Models.Project", "SubmissionProj")
+                        .WithMany("MembershipTreDecision")
+                        .HasForeignKey("SubmissionProjId");
+
+                    b.HasOne("BL.Models.Tre", "Tre")
+                        .WithMany("MembershipTreDecision")
+                        .HasForeignKey("TreId");
+
+                    b.HasOne("BL.Models.User", "User")
+                        .WithMany("MembershipTreDecision")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("SubmissionProj");
+
+                    b.Navigation("Tre");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BL.Models.ProjectTreDecision", b =>
+                {
+                    b.HasOne("BL.Models.Project", "SubmissionProj")
+                        .WithMany("ProjectTreDecisions")
+                        .HasForeignKey("SubmissionProjId");
+
+                    b.HasOne("BL.Models.Tre", "Tre")
+                        .WithMany("ProjectTreDecisions")
+                        .HasForeignKey("TreId");
+
+                    b.Navigation("SubmissionProj");
+
+                    b.Navigation("Tre");
                 });
 
             modelBuilder.Entity("BL.Models.Submission", b =>
@@ -414,11 +564,19 @@ namespace DARE_API.Migrations
 
             modelBuilder.Entity("BL.Models.Project", b =>
                 {
+                    b.Navigation("AuditLogs");
+
+                    b.Navigation("MembershipTreDecision");
+
+                    b.Navigation("ProjectTreDecisions");
+
                     b.Navigation("Submissions");
                 });
 
             modelBuilder.Entity("BL.Models.Submission", b =>
                 {
+                    b.Navigation("AuditLogs");
+
                     b.Navigation("Children");
 
                     b.Navigation("HistoricStatuses");
@@ -428,11 +586,21 @@ namespace DARE_API.Migrations
 
             modelBuilder.Entity("BL.Models.Tre", b =>
                 {
+                    b.Navigation("AuditLogs");
+
+                    b.Navigation("MembershipTreDecision");
+
+                    b.Navigation("ProjectTreDecisions");
+
                     b.Navigation("Submissions");
                 });
 
             modelBuilder.Entity("BL.Models.User", b =>
                 {
+                    b.Navigation("AuditLogs");
+
+                    b.Navigation("MembershipTreDecision");
+
                     b.Navigation("Submissions");
                 });
 #pragma warning restore 612, 618

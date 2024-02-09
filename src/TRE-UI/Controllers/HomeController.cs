@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using BL.Models;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace TRE_UI.Controllers
 {
@@ -37,9 +38,10 @@ namespace TRE_UI.Controllers
 
                 return RedirectToAction("UpdateCredentials", "DataEgressCredentials");
             }
-            return View();
+           return RedirectToAction("GetAllProjects", "Approval");
+            //return View();
         }
-     
+       
         public IActionResult LoginAfterTokenExpired()
         {
             return new SignOutResult(new[]
@@ -78,7 +80,7 @@ namespace TRE_UI.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
+        public IActionResult PrivacyPolicy()
         {
             return View();
         }

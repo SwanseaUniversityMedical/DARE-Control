@@ -1,4 +1,8 @@
-﻿namespace BL.Models.Settings
+﻿using System.Runtime;
+using System.Net;
+using Serilog;
+
+namespace BL.Models.Settings
 {
     public class BaseKeyCloakSettings
     {
@@ -17,7 +21,7 @@
 
         public string ProxyAddresURL { get; set; }
         public string TokenRefreshSeconds { get; set; }
-        
+
 
         public string RedirectURL { get; set; }
 
@@ -27,5 +31,23 @@
         public string? ValidAudiences { get; set; }
         public string Server { get; set; }
         public string Realm { get; set; }
+        public bool AutoTrustKeycloakCert { get; set; }
+        public string ValidIssuer { get; set; }
+
+        public string ValidAudience { get; set; }
+
+        public HttpClientHandler getProxyHandler {
+            get
+            {
+                Log.Information($"getProxyHandler ProxyAddresURL > {ProxyAddresURL} Proxy > {Proxy} ");
+                HttpClientHandler handler = new HttpClientHandler
+                {
+                    Proxy = new WebProxy(ProxyAddresURL,true), // Replace with your proxy server URL
+                    UseProxy = Proxy
+                };
+                return handler;
+            }
+        }
+
     }
 }

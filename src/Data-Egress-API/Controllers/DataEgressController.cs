@@ -1,7 +1,6 @@
 using BL.Models;
 using BL.Models.APISimpleTypeReturns;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Data_Egress_API.Repositories.DbContexts;
 using Castle.Components.DictionaryAdapter.Xml;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -26,19 +25,22 @@ namespace Data_Egress_API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    
-    
+
+
     public class DataEgressController : ControllerBase
     {
         private readonly ApplicationDbContext _DbContext;
-        private readonly MinioSettings _minioSettings;
+
         private readonly ITreClientWithoutTokenHelper _treClientHelper;
-        public DataEgressController(ApplicationDbContext repository, MinioSettings minioSettings, ITreClientWithoutTokenHelper treClientHelper)            
+        private readonly IMinioHelper _minioHelper;
+
+        public DataEgressController(ApplicationDbContext repository, ITreClientWithoutTokenHelper treClientHelper,
+            IMinioHelper minioHelper)
         {
             _DbContext = repository;
-            _minioSettings = minioSettings;
+            _minioHelper = minioHelper;
             _treClientHelper = treClientHelper;
-            
+
         }
 
         [Authorize(Roles = "data-egress-admin,dare-tre-admin")]
@@ -48,9 +50,9 @@ namespace Data_Egress_API.Controllers
             try
             {
                 var existingDataFiles = _DbContext.EgressSubmissions
-                .FirstOrDefault(d => d.SubmissionId == submission.SubmissionId);
+                    .FirstOrDefault(d => d.SubmissionId == submission.SubmissionId);
 
-                
+
                 if (existingDataFiles == null)
                 {
                     _DbContext.EgressSubmissions.Add(submission);
@@ -58,7 +60,7 @@ namespace Data_Egress_API.Controllers
                     {
                         submissionFile.Status = FileStatus.Undecided;
                     }
-                    
+
                     await _DbContext.SaveChangesAsync();
                     return new BoolReturn() { Result = true };
                 }
@@ -76,15 +78,25 @@ namespace Data_Egress_API.Controllers
 
         [Authorize(Roles = "data-egress-admin")]
         [HttpGet("GetAllEgresses")]
-        public List<EgressSubmission> GetAllEgresses()
+        public List<EgressSubmission> GetAllEgresses(bool unprocessedonly)
         {
             try
             {
-                var allFiles = _DbContext.EgressSubmissions.ToList();
+                if (unprocessedonly)
+                {
+                    var results = _DbContext.EgressSubmissions.ToList();
+                    Log.Information("{Function} All Egresses retrieved successfully", "GetAllEgresses");
+                    return results;
+                }
+                else
+                {
+                    var allUnprocessedFiles = _DbContext.EgressSubmissions.Where(x => x.Status == EgressStatus.NotCompleted)
+                        .ToList();
 
-                Log.Information("{Function} Files retrieved successfully", "GetAllEgresses");
-
-                return allFiles;
+                    Log.Information("{Function} All Unprocessed Egresses retrieved successfully", "GetAllEgresses");
+                    return allUnprocessedFiles;
+                }
+                
             }
             catch (Exception ex)
             {
@@ -92,6 +104,7 @@ namespace Data_Egress_API.Controllers
                 throw;
             }
         }
+
         [Authorize(Roles = "data-egress-admin")]
         [HttpGet("GetEgress")]
         public EgressSubmission GetEgress(int id)
@@ -99,7 +112,7 @@ namespace Data_Egress_API.Controllers
             try
             {
                 var returned = _DbContext.EgressSubmissions.First(x => x.Id == id);
-                
+
 
                 Log.Information("{Function} Files retrieved successfully", "GetEgress");
                 return returned;
@@ -112,6 +125,7 @@ namespace Data_Egress_API.Controllers
 
 
         }
+
         [Authorize(Roles = "data-egress-admin")]
         [HttpGet("GetEgressFile")]
         public EgressFile GetEgressFile(int id)
@@ -132,23 +146,9 @@ namespace Data_Egress_API.Controllers
 
 
         }
-        [Authorize(Roles = "data-egress-admin")]
-        [HttpGet("GetAllUnprocessedEgresses")]
-        public List<EgressSubmission> GetAllUnprocessedEgresses()
-        {
-            try
-            {
-                var allUnprocessedFiles = _DbContext.EgressSubmissions.Where(x => x.Status == EgressStatus.NotCompleted).ToList();
 
-                Log.Information("{Function} Files retrieved successfully", "GetAllUnprocessedEgresses");
-                return allUnprocessedFiles;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crashed", "GetAllUnprocessedEgresses");
-                throw;
-            }
-        }
+        
+
         [Authorize(Roles = "data-egress-admin")]
         [HttpPost("CompleteEgress")]
         public async Task<EgressSubmission> CompleteEgressAsync([FromBody] EgressSubmission egress)
@@ -160,11 +160,14 @@ namespace Data_Egress_API.Controllers
                 {
                     throw new Exception("Egress has already been completed");
                 }
-                var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).FirstOrDefault();
+
+                var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value)
+                    .FirstOrDefault();
                 if (string.IsNullOrWhiteSpace(approvedBy))
                 {
                     approvedBy = "[Unknown]";
                 }
+
                 var approvedDate = DateTime.Now.ToUniversalTime();
                 if (egress.Files.Any(x => x.Status == FileStatus.Undecided))
                 {
@@ -182,41 +185,24 @@ namespace Data_Egress_API.Controllers
                 {
                     dbegress.Status = EgressStatus.PartiallyApproved;
                 }
-                dbegress.Reviewer = approvedBy;
-                dbegress.Completed = approvedDate;
 
-                var backtotre = new EgressReview()
-                {
-                    subId = dbegress.SubmissionId,
-                    fileResults = new List<EgressResult>()
-                };
-                foreach (var file in egress.Files)
-                {
-                    backtotre.fileResults.Add(new EgressResult()
-                    {
-                        fileName = file.Name,
-                        approved = file.Status == FileStatus.Approved,
-                    });
-                    var egfile = dbegress.Files.First(x => x.Id == file.Id);
-                    egfile.Status = file.Status;
-                    egfile.LastUpdate = approvedDate;
-                    egfile.Reviewer = approvedBy;
-
-                }
+                var backtotre = ReviewFilesGuts(egress, dbegress, approvedBy, approvedDate);
 
                 var result =
-                    await _treClientHelper.CallAPI<EgressReview, Submission>("/api/Submission/EgressResults", backtotre);
+                    await _treClientHelper.CallAPI<EgressReview, Submission>("/api/Submission/EgressResults",
+                        backtotre);
                 await _DbContext.SaveChangesAsync();
 
-                
-                
-               
-                
 
 
 
 
-                Log.Information("{Function} Egress Completed for Submission {SubId}", "CompleteEgress", dbegress.SubmissionId);
+
+
+
+
+                Log.Information("{Function} Egress Completed for Submission {SubId}", "CompleteEgress",
+                    dbegress.SubmissionId);
                 return dbegress;
             }
             catch (Exception ex)
@@ -227,26 +213,99 @@ namespace Data_Egress_API.Controllers
 
         }
 
+        private static EgressReview ReviewFilesGuts(EgressSubmission egress, EgressSubmission dbegress,
+            string approvedBy,
+            DateTime approvedDate)
+        {
+            dbegress.Reviewer = approvedBy;
+            dbegress.Completed = approvedDate;
+
+            var backtotre = new EgressReview()
+            {
+                SubId = dbegress.SubmissionId,
+                FileResults = new List<EgressResult>(),
+                OutputBucket = dbegress.OutputBucket
+            };
+            foreach (var file in egress.Files)
+            {
+                var dbegressfile = dbegress.Files.First(x => x.Id == file.Id);
+                dbegressfile.Status = file.Status;
+                backtotre.FileResults.Add(new EgressResult()
+                {
+                    FileName = dbegressfile.Name,
+                    Approved = dbegressfile.Status == FileStatus.Approved,
+                });
+                var egfile = dbegress.Files.First(x => x.Id == file.Id);
+                egfile.Status = file.Status;
+                egfile.LastUpdate = approvedDate;
+                egfile.Reviewer = approvedBy;
+            }
+
+            return backtotre;
+        }
+
+        [Authorize(Roles = "data-egress-admin")]
+        [HttpPost("PartialEgress")]
+        public async Task<EgressSubmission> PartialEgressAsync([FromBody] EgressSubmission egress)
+        {
+
+            var dbegress = _DbContext.EgressSubmissions.First(x => x.Id == egress.Id);
+            if (dbegress.Status != EgressStatus.NotCompleted)
+            {
+                throw new Exception("Egress has already been completed");
+            }
+
+            var approvedBy =
+                (from x in User.Claims where x.Type == "preferred_username" select x.Value).FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(approvedBy))
+            {
+                approvedBy = "[Unknown]";
+            }
+
+            var approvedDate = DateTime.Now.ToUniversalTime();
+
+            var backtotre = ReviewFilesGuts(egress, dbegress, approvedBy, approvedDate);
+
+
+            await _DbContext.SaveChangesAsync();
+
+
+
+
+
+
+
+
+
+            Log.Information("{Function} Egress Completed for Submission {SubId}", "CompleteEgress",
+                dbegress.SubmissionId);
+            return dbegress;
+        }
+
+
+
         [Authorize(Roles = "data-egress-admin")]
         [HttpPost("UpdateFileData")]
         public EgressFile UpdateFileData(int fileId, FileStatus status)
         {
             try
             {
-                var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).FirstOrDefault();
+                var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value)
+                    .FirstOrDefault();
                 if (string.IsNullOrWhiteSpace(approvedBy))
                 {
                     approvedBy = "[Unknown]";
                 }
+
                 var approvedDate = DateTime.Now.ToUniversalTime();
 
                 var returned = _DbContext.EgressFiles.First(x => x.Id == fileId);
-                
-                    returned.Status = status;
-                    returned.Reviewer = approvedBy;
-                    returned.LastUpdate = approvedDate;
-                
-                
+
+                returned.Status = status;
+                returned.Reviewer = approvedBy;
+                returned.LastUpdate = approvedDate;
+
+
                 _DbContext.SaveChangesAsync();
                 Log.Information("{Function} File updated", "UpdateFileData");
                 return returned;
@@ -259,92 +318,7 @@ namespace Data_Egress_API.Controllers
 
         }
 
-        //[HttpPost("MarkEgressAsComplete")]
-        //public async Task<EgressSubmission> MarkEgressAsCompleteAsync(int id)
-        //{
-        //    try
-        //    {
-        //        var approvedBy = (from x in User.Claims where x.Type == "preferred_username" select x.Value).FirstOrDefault();
-        //        if (string.IsNullOrWhiteSpace(approvedBy))
-        //        {
-        //            approvedBy = "[Unknown]";
-        //        }
-        //        var approvedDate = DateTime.Now.ToUniversalTime();
 
-        //        var returned = _DbContext.EgressSubmissions.First(x => x.Id == id);
-        //        if (returned.Files.Any(x => x.Status == FileStatus.Undecided))
-        //        {
-        //            throw new Exception("Not all files reviewed");
-        //        }else if (returned.Files.All(x => x.Status == FileStatus.Rejected))
-        //        {
-        //            returned.Status = EgressStatus.FullyRejected;
-        //        }
-        //        else if (returned.Files.All(x => x.Status == FileStatus.Approved))
-        //        {
-        //            returned.Status = EgressStatus.FullyApproved;
-        //        }
-        //        else
-        //        {
-        //            returned.Status = EgressStatus.PartiallyApproved;
-        //        }
-
-        //        returned.Reviewer = approvedBy;
-        //        returned.Completed = approvedDate;
-
-
-        //        await _DbContext.SaveChangesAsync();
-        //        var backtotre = new EgressReview()
-        //        {
-        //            subId = returned.SubmissionId,
-        //            fileResults = new List<EgressResult>()
-        //        };
-        //        foreach (var file in returned.Files)
-        //        {
-        //            backtotre.fileResults.Add(new EgressResult()
-        //            {
-        //                fileName = file.Name,
-        //                approved = file.Status == FileStatus.Approved,
-        //            });
-        //        }
-
-        //        var result =
-        //            await _treClientHelper.CallAPI<EgressReview, Submission>("/api/Submission/EgressReview", backtotre);
-        //        return returned;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Log.Error(ex, "{Function} Crashed", "MarkEgressAsComplete");
-        //        throw;
-        //    }
-
-        //}
-
-        //[HttpGet("DataOut")]
-        //public async Task<BoolReturn> DataOutApproval(int submissionId)
-        //{ 
-        //    try
-        //    { 
-        //    var returned = _DbContext.DataEgressFiles.Where(x => x.SubmissionId == submissionId).ToList();
-
-        //    var paramlist = new Dictionary<string, string>();
-        //    paramlist.Add("submissionId", submissionId.ToString());
-        //        var submission = await _treClientHelper.CallAPI<List<SubmissionFile>, Submission>("/api/SendFileResultsToHUTCH/Submission/", returned,
-        //                paramlist).Result;
-        //        if (submission!= null)
-        //    {
-        //        return new BoolReturn() { Result = true };
-        //    }
-        //    else
-        //    {
-        //        return new BoolReturn() { Result = false };
-        //    }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Log.Error(ex, "{Function} Crashed", "DataOutApproval");
-        //        throw;
-        //    }
-        //}
 
         public static string GetContentType(string fileName)
         {
@@ -360,26 +334,20 @@ namespace Data_Egress_API.Controllers
             // If the content type cannot be determined, provide a default value
             return "application/octet-stream"; // This is a common default for unknown file types
         }
+
         [Authorize(Roles = "data-egress-admin")]
         [HttpGet("DownloadFile")]
-        public async Task<IActionResult> DownloadFileAsync(int fileId)
+        public async Task<IActionResult> DownloadFileAsync(int id)
         {
-            
-
-            var egressFile = _DbContext.EgressFiles.First(x => x.Id == fileId);
-            var request = new GetObjectRequest
+            try
             {
-                BucketName = egressFile.EgressSubmission.OutputBucket,
-                Key = egressFile.Name,
-            };
 
-            var amazonS3Client = GenerateAmazonS3Client(_minioSettings);
+                var egressFile = _DbContext.EgressFiles.First(x => x.Id == id);
 
-            var objectExists = await CheckObjectExists(_minioSettings, request.BucketName, request.Key);
 
-            if (objectExists)
-            {
-                var response = await amazonS3Client.GetObjectAsync(request);
+
+                var response =
+                    await _minioHelper.GetCopyObject(egressFile.EgressSubmission.OutputBucket, egressFile.Name);
 
                 using (var responseStream = response.ResponseStream)
                 {
@@ -390,63 +358,18 @@ namespace Data_Egress_API.Controllers
                     return File(fileBytes, GetContentType(egressFile.Name), egressFile.Name);
                 }
             }
-            else
+            catch (Exception ex)
             {
-                return NotFound("File not found");
+                Log.Error(ex, "{Function} Crashed", "DownloadFiles");
+                throw;
             }
 
         }
 
 
-        [Authorize(Roles = "data-egress-admin")]
-        [HttpGet("CheckObjectExists")]
-        public async Task<bool> CheckObjectExists(MinioSettings minioSettings, string bucketName, string objectKey)
-        {
-            var request = new GetObjectMetadataRequest
-            {
-                BucketName = bucketName,
-                Key = objectKey
-            };
 
-            var amazonS3Client = GenerateAmazonS3Client(minioSettings);
 
-            try
-            {
-                await amazonS3Client.GetObjectMetadataAsync(request);
-                Log.Warning($"{request.Key} Exists on {bucketName}.");
-                return true;
-            }
-            catch (AmazonS3Exception ex)
-            {
-                if (ex.StatusCode == HttpStatusCode.NotFound)
-                {
-                    Log.Warning($"{request.Key} Not Exists on {bucketName}.");
-                    return false;
-                }
-                else
-                {
-                    throw;
-                }
-            }
-        }
 
-        #region PrivateHelpers
-        private AmazonS3Config GenerateAmazonS3Config(MinioSettings minioSettings)
-        {
-            return new AmazonS3Config
-            {
-                RegionEndpoint = RegionEndpoint.USEast1, // MUST set this before setting ServiceURL and it should match the `MINIO_REGION` environment variable.
-                ServiceURL = $"http://{minioSettings.Url}", // replace http://localhost:9000 with URL of your MinIO server
-                ForcePathStyle = true, // MUST be true to work correctly with MinIO server
-            };
-        }
-
-        private AmazonS3Client GenerateAmazonS3Client(MinioSettings minioSettings)
-        {
-            var config = GenerateAmazonS3Config(minioSettings);
-            return new AmazonS3Client(minioSettings.AccessKey, minioSettings.SecretKey, config);
-        }
-        #endregion
     }
 
 }

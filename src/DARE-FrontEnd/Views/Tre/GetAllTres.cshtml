@@ -17,8 +17,9 @@
     <div class="row">
         <div class="col-xl-8 offset-xl-2 col-lg-10 offset-lg-1">
             <div class="table-responsive">
-                <table id="projectList" class="table table-bordered table-striped no-head" caption="List of TREs">
-                    <thead><tr><td>TRE</td></tr></thead>
+                <table id="projectList" class="table table-bordered table-striped no-head">
+                    <caption>List of TREs</caption>
+                    <thead><tr><th>TRE</th></tr></thead>
                     <tbody>
                         @foreach (var tre in Model)
                         {
@@ -32,9 +33,8 @@
                                                     @tre.Name
                                                 </h2>
                                             </a>
-                                            @*<p class="text-muted small mb-0">#@tre.Id</p>*@
                                         </div>
-                                        <a href="@Url.Action("SaveATre", "Tre",new{treId=tre.Id})" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
+                                        <a href="@Url.Action("SaveATre", "Tre", new { treId = tre.Id })" class="btn btn-sm btn-outline-primary"><span class="small">Edit</span></a>
                                     </div>
                                     <div class="">
                                         <a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })#projects" class="badge py-2 px-3 badge-lg bg-grey text-dark rounded-pill">
@@ -44,10 +44,12 @@
                                             Run @tre.Submissions.Count Submissions
                                         </a>
                                     </div>
-                                    <p class="mt-4 mb-0">
-                                        @tre.About
-                                        @*TRE Name has a rich history and we are constantly evolving to provide word-leading support for research communities to access, link and analyse routinely collected health and administrative data within a safe and secure remote access environment....*@
-                                    </p>
+                                    <div class="desription-wrapper">
+                                        <p class="mt-4 mb-0 description">
+                                            @tre.About
+                                        </p>
+                                    </div>
+                                    
                                 </td>
                             </tr>
                         }
@@ -56,5 +58,4 @@
             </div>
         </div>
     </div>
-    
 </div>

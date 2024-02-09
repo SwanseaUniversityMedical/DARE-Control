@@ -37,6 +37,7 @@ namespace Data_Egress_API.Controllers
         [HttpGet("CheckCredentialsAreValid")]
         public async Task<BoolReturn> CheckCredentialsAreValidAsync()
         {
+            try { 
             var result = new BoolReturn() { Result = false };
             var creds = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Tre);
             if (creds != null)
@@ -48,6 +49,12 @@ namespace Data_Egress_API.Controllers
             }
 
             return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "CheckCredentialsAreValid");
+                throw;
+            }
         }
 
         [Authorize(Roles = "data-egress-admin")]
@@ -73,7 +80,7 @@ namespace Data_Egress_API.Controllers
                     creds.CredentialType = CredentialType.Tre;
                     add = false;
                 }
-
+                creds.CredentialType = CredentialType.Tre;
                 creds.PasswordEnc = _encDecHelper.Encrypt(creds.PasswordEnc);
                 if (add)
                 {
