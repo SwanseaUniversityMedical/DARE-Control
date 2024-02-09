@@ -35,8 +35,12 @@
     </div>
 </div>
 <script>
-    window.onload = function () {
-        renderForm("@Model.FormIoUrl", @Html.Raw(Model.FormIoString), '/User/UserEditFormSubmission/@Url.ActionContext.RouteData.Values["id"]', false, 'formio', "/User/GetAllUsers");
+    var disableNameField = false;
+    if ('@Html.Raw(Model.FormIoString)' !== '{"id":0}') {
+        disableNameField = true;
+    }
 
+    window.onload = function () {
+        renderForm("@Model.FormIoUrl", @Html.Raw(Model.FormIoString), '/User/UserEditFormSubmission/@Url.ActionContext.RouteData.Values["id"]', false, 'formio', "/User/GetAllUsers", disableNameField);
     }
 </script>
