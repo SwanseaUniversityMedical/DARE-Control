@@ -5,7 +5,7 @@ namespace BL.Services
 {
     public class HutchClientHelper : BaseClientHelper, IHutchClientHelper
     {
-        public HutchClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, IConfiguration config) : base(httpClientFactory, httpContextAccessor, config["Hutch:APIAddress"])
+        public HutchClientHelper(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, IConfiguration config) : base(httpClientFactory, httpContextAccessor, config["Hutch:APIAddress"],  config["IgnoreHutchSSL"]?.ToLower() == "true")
         {
 
         }
