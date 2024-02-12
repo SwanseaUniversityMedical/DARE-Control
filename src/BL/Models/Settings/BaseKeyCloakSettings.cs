@@ -42,7 +42,7 @@ namespace BL.Models.Settings
                 Log.Information($"getProxyHandler ProxyAddresURL > {ProxyAddresURL} Proxy > {Proxy} ");
                 HttpClientHandler handler = new HttpClientHandler
                 {
-                    Proxy = new WebProxy(ProxyAddresURL,true), // Replace with your proxy server URL
+                    Proxy = string.IsNullOrWhiteSpace(ProxyAddresURL)? null : new WebProxy(ProxyAddresURL,true), // Replace with your proxy server URL
                     UseProxy = Proxy
                 };
                 return handler;
