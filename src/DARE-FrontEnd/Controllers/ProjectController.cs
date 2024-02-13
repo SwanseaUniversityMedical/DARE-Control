@@ -35,6 +35,23 @@ namespace DARE_FrontEnd.Controllers
 
         }
 
+        private bool IsUserOnProject(Project proj)
+        {
+            if (User.IsInRole("dare-control-admin"))
+            {
+                return true;
+            }
+
+            var usersName = "";
+            usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+            if (!string.IsNullOrWhiteSpace(usersName) &&
+                (from x in proj.Users where x.Name.ToLower().Trim() == usersName.ToLower().Trim() select x).Any())
+            {
+                return true;
+            }
+            return false;
+        }
+
         [AllowAnonymous]
         [HttpGet]
         public IActionResult GetProject(int id)
@@ -59,9 +76,9 @@ namespace DARE_FrontEnd.Controllers
                 .ToList();
 
             var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
-             
-
-            ViewBag.minioendpoint = minioEndpoint?.Url;
+            ViewBag.UserCanDoSubmissions = IsUserOnProject(project);
+            
+                ViewBag.minioendpoint = minioEndpoint?.Url;
             ViewBag.URLBucket = _URLSettingsFrontEnd.MinioUrl;
 
             var projectView = new ProjectUserTre()
