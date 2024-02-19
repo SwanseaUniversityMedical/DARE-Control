@@ -38,7 +38,12 @@
     </div>
 </div>
 <script>
+    var disableNameField = false;
+    if ('@Html.Raw(Model.FormIoString)' !== '{"id":0}') {
+        disableNameField = true;
+    }
+
     window.onload = function () {
-        renderForm("@Model.FormIoUrl", @Html.Raw(Model.FormIoString), '/Project/ProjectFormSubmission/@Url.ActionContext.RouteData.Values["id"]', false, 'formio', "/Project/GetAllProjects");
+        renderForm("@Model.FormIoUrl", @Html.Raw(Model.FormIoString), '/Project/ProjectFormSubmission/@Url.ActionContext.RouteData.Values["id"]', false, 'formio', "/Project/GetAllProjects", disableNameField);
     }
 </script>
