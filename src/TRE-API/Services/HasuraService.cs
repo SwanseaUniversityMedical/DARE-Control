@@ -165,7 +165,7 @@ namespace TREAPI.Services
             }
             catch (Exception ex)
             {
-               // Log.Error(ex.Message);
+                Log.Error(ex.Message);
 
             }
         }
@@ -199,7 +199,7 @@ namespace TREAPI.Services
             }
             catch (Exception ex)
             {
-                //Log.Error(ex.Message);
+                Log.Error(ex.Message);
 
             }
 
@@ -380,7 +380,7 @@ namespace TREAPI.Services
             }
             catch (Exception ex)
             {
-              //  Log.Error(ex.Message);
+               Log.Error(ex.Message);
 
             }
         }
