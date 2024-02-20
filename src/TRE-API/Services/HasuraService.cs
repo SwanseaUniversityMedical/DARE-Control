@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,6 +43,8 @@ namespace TREAPI.Services
             await SetUpDb(dbName, _hasuraSettings.EnvironmentVariableForDB);
             var Schemas = await this.Schemas(dbName);
 
+            Log.Debug("HasuraService > Run > Schemas" + string.Join(",", Schemas));
+
             if (Schemas.Any())
             {
 
@@ -50,6 +53,8 @@ namespace TREAPI.Services
 
                     var data = await TablesInSchemas(dbName, schema[0]);
                     var tables = data.Where(x => x[0] != "table_name");
+                    Log.Debug("HasuraService > Run > tables" + string.Join(",", tables));
+
                     foreach (var table in tables)
                     {
                         var successful = await TrackData(dbName, schema[0], table[0]);
@@ -160,7 +165,7 @@ namespace TREAPI.Services
             }
             catch (Exception ex)
             {
-                Log.Error(ex.Message);
+               // Log.Error(ex.Message);
 
             }
         }
@@ -194,7 +199,7 @@ namespace TREAPI.Services
             }
             catch (Exception ex)
             {
-                Log.Error(ex.Message);
+                //Log.Error(ex.Message);
 
             }
 
@@ -375,7 +380,7 @@ namespace TREAPI.Services
             }
             catch (Exception ex)
             {
-                Log.Error(ex.Message);
+              //  Log.Error(ex.Message);
 
             }
         }
