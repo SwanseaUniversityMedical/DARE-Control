@@ -1,4 +1,4 @@
-name: UI Container
+name: Egress UI Container
 
 on:
   pull_request:
