@@ -3,13 +3,13 @@ name: Egress UI Container
 on:
   pull_request:
     paths:
-      - 'src/DARE-Egress-UI/**'
+      - 'src/Data-Egress-UI/**'
       - 'src/BL/**'
   push:
     branches:
       - main
     paths:
-      - 'src/DARE-Egress-UI/**'
+      - 'src/Data-Egress-UI/**'
       - 'src/BL/**'
 
 permissions:
@@ -32,7 +32,7 @@ jobs:
       release-tag-format: 'DARE-Egress-UI-Container-${version}'
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
-      build-file: src/DARE-Egress-UI/Dockerfile
+      build-file: src/Data-Egress-UI/Dockerfile
       build-context: src
     secrets:
       cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
