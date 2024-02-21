@@ -1,4 +1,4 @@
-name: UI Container
+name: TRE API Container
 
 on:
   pull_request:
