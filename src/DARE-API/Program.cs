@@ -87,7 +87,7 @@ var TVP = new TokenValidationParameters
     ValidAudiences = submissionKeyCloakSettings.ValidAudiences.Trim().Split(',').ToList(),
     ValidIssuer = submissionKeyCloakSettings.Authority,
     ValidateIssuerSigningKey = true,
-    ValidateIssuer = false
+    ValidateIssuer = false,
     ValidateLifetime = true
 };
 Log.Information($"Check TokenValidationParams for Issuer {submissionKeyCloakSettings.Authority}");
