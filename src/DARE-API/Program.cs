@@ -90,6 +90,7 @@ var TVP = new TokenValidationParameters
     ValidateIssuer = true,
     ValidateLifetime = true
 };
+Log.Information($"Check TokenValidationParams for Issuer {submissionKeyCloakSettings.Authority}");
 
 builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
 
