@@ -1,4 +1,4 @@
-name: TRE API Container
+name: TRE Hasura Container
 
 on:
   pull_request:
