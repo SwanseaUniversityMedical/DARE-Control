@@ -20,6 +20,7 @@ using BL.Models.ViewModels;
 using System.Security.Claims;
 using System.Runtime;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -125,8 +126,38 @@ builder.Services.AddAuthentication(options =>
         options.IncludeErrorDetails = true;
 
         options.TokenValidationParameters = TVP;
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = context =>
+            {
+                // Log the issuer claim from the token
+                var issuer = context.Principal.FindFirst("iss")?.Value;
+                Log.Information("Token Issuer: {Issuer}", issuer);
+                var audience = context.Principal.FindFirst("aud")?.Value;
+                Log.Information("Token Audience: {Audience}", audience);
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = context =>
+            {
+                Log.Error("{Function}: {ex}", "OnAuthFailed", context.Exception.Message);
+                return context.Response.CompleteAsync();
+            },
+            OnMessageReceived = context =>
+            {
+                string accessToken = context.Request.Query["access_token"];
+                PathString path = context.HttpContext.Request.Path;
 
+                if (
+                    !string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/api/SignalRHub")
+                )
+                {
+                    context.Token = accessToken;
+                }
 
+                return Task.CompletedTask;
+            }
+        };
     });
 
 
