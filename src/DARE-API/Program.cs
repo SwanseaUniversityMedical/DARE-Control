@@ -128,6 +128,11 @@ builder.Services.AddAuthentication(options =>
         options.TokenValidationParameters = TVP;
         options.Events = new JwtBearerEvents
         {
+            OnForbidden = context =>
+            {
+                Log.Error("JWT Forbidden event: {event}", context.Request.Headers);
+                return context.Response.CompleteAsync();
+            },
             OnTokenValidated = context =>
             {
                 // Log the issuer claim from the token
@@ -140,6 +145,7 @@ builder.Services.AddAuthentication(options =>
             OnAuthenticationFailed = context =>
             {
                 Log.Error("{Function}: {ex}", "OnAuthFailed", context.Exception.Message);
+                Log.Error("Auth failed event: {event}", context.Request.Headers);
                 return context.Response.CompleteAsync();
             },
             OnMessageReceived = context =>
