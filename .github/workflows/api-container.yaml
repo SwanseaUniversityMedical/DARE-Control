@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   api-container:
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/pr-and-release-container.yaml@containers-v1.4.0
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/pr-and-release-container.yaml@containers-v1.4.1
     with:
       job-name: api-container
       registry: ${{ vars.HARBOR_REGISTRY }}
