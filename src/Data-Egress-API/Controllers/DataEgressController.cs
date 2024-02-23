@@ -348,22 +348,6 @@ namespace Data_Egress_API.Controllers
 
                 var responseStream = response.ResponseStream;
 
-
-
-              //  MemoryStream memorystream = new MemoryStream();
-
-               // using (var responsestream = response.ResponseStream)
-              //  {
-               //     responsestream.CopyTo(memorystream);
-               // }
-
-
-                //var fileBytes = new byte[memorystream.Length];
-                //await memorystream.ReadAsync(fileBytes, 0, (int)responseStream.Length);
-   
-                //responseStream.Dispose();
-
-                // Create a FileContentResult and return it as the response
                 return File(responseStream, GetContentType(egressFile.Name), egressFile.Name);
                 
             }
