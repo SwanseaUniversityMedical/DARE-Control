@@ -125,7 +125,7 @@ namespace DARE_FrontEnd.Controllers
                 { "submissionId", subId.ToString() }
             };
 
-            var submission = _clientHelper.CallAPIWithoutModel<Submission>("/api/Submission/GetASubmission/", paramlist).Result;
+            var submission = _clientHelper.CallAPIWithoutModel<Submission>($"/api/Submission/GetASubmission/{subId}").Result;
             var file = await _clientHelper.CallAPIToGetFile(
                 "/api/Submission/DownloadFile", paramlist);
             
