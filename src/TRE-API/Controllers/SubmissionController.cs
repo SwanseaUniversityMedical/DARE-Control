@@ -299,8 +299,8 @@ namespace TRE_API.Controllers
                         Log.Information($"EgressResults with File.Approved > {File.Approved} File.FileName > {File.FileName} ");
                         if (File.Approved)
                         {
-                            var source = _minioTreHelper.GetCopyObject(review.OutputBucket,  File.FileName);
-                            var resultcopy = _minioSubHelper.CopyObjectToDestination(bucket.Bucket,  File.FileName, source.Result).Result;
+                            var source = await _minioTreHelper.GetCopyObject(review.OutputBucket,  File.FileName);
+                            var resultcopy = await _minioSubHelper.CopyObjectToDestination(bucket.Bucket, File.FileName, source);
                         }
                     }
 

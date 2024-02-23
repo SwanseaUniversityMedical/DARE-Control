@@ -104,7 +104,7 @@ namespace Data_Egress_UI.Controllers
                 { "id", fileId.ToString() }
             };
 
-            var egressFile = _dataClientHelper.CallAPIWithoutModel<EgressFile>("/api/DataEgress/GetEgressFile", paramlist).Result;
+            var egressFile = _dataClientHelper.CallAPIWithoutModel<EgressFile>($"/api/DataEgress/GetEgressFile/{fileId}").Result;
             var file = _dataClientHelper.CallAPIToGetFile(
                 "/api/DataEgress/DownloadFile", paramlist).Result;
             return  File(file, GetContentType(egressFile.Name), egressFile.Name);
