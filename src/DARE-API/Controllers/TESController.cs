@@ -157,6 +157,8 @@ namespace DARE_API.Controllers
         public virtual async Task<IActionResult> CreateTaskAsync([FromBody] TesTask tesTask,
             CancellationToken cancellationToken)
         {
+            Log.Information($"/v1/tasks route successfully entered");
+
             try
             {
                 var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();

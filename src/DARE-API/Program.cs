@@ -20,6 +20,7 @@ using BL.Models.ViewModels;
 using System.Security.Claims;
 using System.Runtime;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,9 +88,10 @@ var TVP = new TokenValidationParameters
     ValidAudiences = submissionKeyCloakSettings.ValidAudiences.Trim().Split(',').ToList(),
     ValidIssuer = submissionKeyCloakSettings.Authority,
     ValidateIssuerSigningKey = true,
-    ValidateIssuer = true,
+    ValidateIssuer = false,
     ValidateLifetime = true
 };
+Log.Information($"Check TokenValidationParams for Issuer {submissionKeyCloakSettings.Authority}");
 
 builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
 
@@ -124,8 +126,137 @@ builder.Services.AddAuthentication(options =>
         options.IncludeErrorDetails = true;
 
         options.TokenValidationParameters = TVP;
+        options.Events = new JwtBearerEvents
+        {
+            OnForbidden = context =>
+            {
+                Log.Information("ONFORBIDDEN START");
+                Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}",
+                    context.HttpContext.Connection.RemoteIpAddress);
+                Log.Information("HttpContext.Connection.RemotePort : {RemotePort}",
+                    context.HttpContext.Connection.RemotePort);
+                Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
+                Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
 
+                foreach (var header in context.HttpContext.Request.Headers)
+                {
+                    Log.Information("Request Header {key} - {value}", header.Key, header.Value);
+                }
 
+                foreach (var header in context.HttpContext.Response.Headers)
+                {
+                    Log.Information("Response Header {key} - {value}", header.Key, header.Value);
+                }
+                Log.Information("ONFORBIDDEN END");
+                return context.Response.CompleteAsync();
+            },
+            OnTokenValidated = context =>
+            {
+                Log.Information("ONTOKENVALIDATED START");
+                Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}",
+                    context.HttpContext.Connection.RemoteIpAddress);
+                Log.Information("HttpContext.Connection.RemotePort : {RemotePort}",
+                    context.HttpContext.Connection.RemotePort);
+                Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
+                Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
+
+                foreach (var header in context.HttpContext.Request.Headers)
+                {
+                    Log.Information("Request Header {key} - {value}", header.Key, header.Value);
+                }
+
+                foreach (var header in context.HttpContext.Response.Headers)
+                {
+                    Log.Information("Response Header {key} - {value}", header.Key, header.Value);
+                }
+                Log.Information("ONTOKENVALIDATED END");
+                // Log the issuer claim from the token
+                var issuer = context.Principal.FindFirst("iss")?.Value;
+                Log.Information("Token Issuer: {Issuer}", issuer);
+                var audience = context.Principal.FindFirst("aud")?.Value;
+                Log.Information("Token Audience: {Audience}", audience);
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = context =>
+            {
+                Log.Information("ONAUTHFAILED START");
+                Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}",
+                    context.HttpContext.Connection.RemoteIpAddress);
+                Log.Information("HttpContext.Connection.RemotePort : {RemotePort}",
+                    context.HttpContext.Connection.RemotePort);
+                Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
+                Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
+
+                foreach (var header in context.HttpContext.Request.Headers)
+                {
+                    Log.Information("Request Header {key} - {value}", header.Key, header.Value);
+                }
+
+                foreach (var header in context.HttpContext.Response.Headers)
+                {
+                    Log.Information("Response Header {key} - {value}", header.Key, header.Value);
+                }
+                Log.Information("ONAUTHFAILED END");
+                Log.Error("{Function}: {ex}", "OnAuthFailed", context.Exception.Message);
+                Log.Error("Auth failed event: {event}", context.Request.Headers);
+                return context.Response.CompleteAsync();
+            },
+            OnMessageReceived = context =>
+            {
+                Log.Information("ONMESSAGERECEIVED START");
+                Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}",
+                    context.HttpContext.Connection.RemoteIpAddress);
+                Log.Information("HttpContext.Connection.RemotePort : {RemotePort}",
+                    context.HttpContext.Connection.RemotePort);
+                Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
+                Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
+
+                foreach (var header in context.HttpContext.Request.Headers)
+                {
+                    Log.Information("Request Header {key} - {value}", header.Key, header.Value);
+                }
+
+                foreach (var header in context.HttpContext.Response.Headers)
+                {
+                    Log.Information("Response Header {key} - {value}", header.Key, header.Value);
+                }
+                Log.Information("ONMESSAGERECEVIED END");
+                string accessToken = context.Request.Query["access_token"];
+                PathString path = context.HttpContext.Request.Path;
+
+                if (
+                    !string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/api/SignalRHub")
+                )
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            },
+            OnChallenge = context =>
+            {
+                Log.Information("ONCHALLENGE START");
+                Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}",
+                    context.HttpContext.Connection.RemoteIpAddress);
+                Log.Information("HttpContext.Connection.RemotePort : {RemotePort}",
+                    context.HttpContext.Connection.RemotePort);
+                Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
+                Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
+
+                foreach (var header in context.HttpContext.Request.Headers)
+                {
+                    Log.Information("Request Header {key} - {value}", header.Key, header.Value);
+                }
+
+                foreach (var header in context.HttpContext.Response.Headers)
+                {
+                    Log.Information("Response Header {key} - {value}", header.Key, header.Value);
+                }
+                Log.Information("ONCHALLENGE END");
+                return Task.CompletedTask;
+            }
+        };
     });
 
 

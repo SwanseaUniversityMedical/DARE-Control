@@ -127,7 +127,7 @@ namespace Data_Egress_API.Controllers
         }
 
         [Authorize(Roles = "data-egress-admin")]
-        [HttpGet("GetEgressFile")]
+        [HttpGet("GetEgressFile/{id}")]
         public EgressFile GetEgressFile(int id)
         {
             try
@@ -344,19 +344,12 @@ namespace Data_Egress_API.Controllers
 
                 var egressFile = _DbContext.EgressFiles.First(x => x.Id == id);
 
+                var response = await _minioHelper.GetCopyObject(egressFile.EgressSubmission.OutputBucket, egressFile.Name);
 
+                var responseStream = response.ResponseStream;
 
-                var response =
-                    await _minioHelper.GetCopyObject(egressFile.EgressSubmission.OutputBucket, egressFile.Name);
-
-                using (var responseStream = response.ResponseStream)
-                {
-                    var fileBytes = new byte[responseStream.Length];
-                    await responseStream.ReadAsync(fileBytes, 0, (int)responseStream.Length);
-
-                    // Create a FileContentResult and return it as the response
-                    return File(fileBytes, GetContentType(egressFile.Name), egressFile.Name);
-                }
+                return File(responseStream, GetContentType(egressFile.Name), egressFile.Name);
+                
             }
             catch (Exception ex)
             {
