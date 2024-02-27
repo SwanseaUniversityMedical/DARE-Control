@@ -267,11 +267,12 @@ namespace TRE_API.Controllers
                 {
                     _subHelper.UpdateStatusForTre(review.SubId.ToString(), StatusType.DataOutApproved, "");
                 }
-                bool secure = !_minioTreSettings.Url.ToLower().StartsWith("http://");
+                var realurl = string.IsNullOrWhiteSpace(_minioTreSettings.HutchURLOverride) ? _minioTreSettings.Url : _minioTreSettings.HutchURLOverride;
+                bool secure = !realurl.ToLower().StartsWith("http://");
                 var bucket = _subHelper.GetOutputBucketGutsSub(review.SubId, true);
                 ApprovalResult hutchPayload = new ApprovalResult()
                 {
-                    Host = _minioTreSettings.Url.Replace("https://", "").Replace("http://", ""),
+                    Host = realurl.Replace("https://", "").Replace("http://", ""),
                     Bucket = bucket.Bucket,
                     Path = bucket.Path,
                     Secure = secure,
