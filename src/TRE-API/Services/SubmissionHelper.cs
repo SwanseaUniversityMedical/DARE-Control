@@ -161,7 +161,7 @@ namespace TRE_API.Services
                 {
                     Bucket = project.SubmissionBucketTre,
                     Path = fileName,
-                    Host = _realurl.Replace("http://","").Replace("https://", ""),
+                    Host = realurl.Replace("http://","").Replace("https://", ""),
                     Secure = secure
                 }
                 
