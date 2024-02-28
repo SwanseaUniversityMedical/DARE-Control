@@ -424,7 +424,7 @@ namespace TRE_API
                                     Log.Information("{Function} *** added file from outputBucket *** {file} ", "CheckTESK", s3Object.Key);
                                     files.Add(s3Object.Key);
                                 }
-
+                                _subHelper.UpdateStatusForTre(subId.ToString(), StatusType.DataOutRequested, "");
                                 Log.Information($"  FilesReadyForReview files {files.Count} ");
                                 _subHelper.FilesReadyForReview(new ReviewFiles()
                                 {
