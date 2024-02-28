@@ -143,7 +143,8 @@ namespace TRE_API.Services
             Uri uri = new Uri(submission.DockerInputLocation);
             string fileName = Path.GetFileName(uri.LocalPath);
             var project = _dbContext.Projects.First(x => x.SubmissionProjectId == submission.Project.Id);
-            bool secure = !_minioTreSettings.Url.ToLower().StartsWith("http://");
+            var realurl = string.IsNullOrWhiteSpace(_minioTreSettings.HutchURLOverride) ? _minioTreSettings.Url : _minioTreSettings.HutchURLOverride;
+            bool secure = !realurl.ToLower().StartsWith("http://");
             var job = new SubmitJobModel()
             {
                 SubId = submission.Id.ToString(),
@@ -160,7 +161,7 @@ namespace TRE_API.Services
                 {
                     Bucket = project.SubmissionBucketTre,
                     Path = fileName,
-                    Host = _minioTreSettings.Url.Replace("http://","").Replace("https://", ""),
+                    Host = realurl.Replace("http://","").Replace("https://", ""),
                     Secure = secure
                 }
                 
