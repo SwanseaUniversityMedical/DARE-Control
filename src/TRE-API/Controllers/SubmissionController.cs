@@ -287,6 +287,7 @@ namespace TRE_API.Controllers
 
                 if (_agentSettings.UseTESK == false)
                 {
+                    Log.Information("{Function} Minio url sent {Url} bucket {Bucket}, path {path}", "EgressReview", hutchPayload.Host, hutchPayload.Bucket, hutchPayload.Path);
                     //Not sure what the return type is
                     var HUTCHres =
                         await _hutchHelper.CallAPI<ApprovalResult, APIReturn>($"/api/jobs/{review.SubId}/approval",
