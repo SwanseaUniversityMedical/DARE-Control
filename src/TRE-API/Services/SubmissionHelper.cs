@@ -172,7 +172,7 @@ namespace TRE_API.Services
                 { "statusType", StatusType.SendingSubmissionToHutch.ToString() },
                 { "description", "" }
             };
-
+            Log.Information("{Function} Minio url sent {Url} bucket {Bucket}, path {path}", "SendSubmissionToHutch", job.CrateSource.Host, job.CrateSource.Bucket, job.CrateSource.Path);
             var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams).Result;
             var res = _hutchHelper.CallAPI<SubmitJobModel, JobStatusModel>($"/api/jobs/", job).Result;
 
