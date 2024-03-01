@@ -113,6 +113,7 @@ namespace TRE_API.Services
         {
             try
             {
+                Log.Information("{Function} Getting Bucket info", "GetOutputBucketInfo")
                 var i = 1;
                 var submission = _dareHelper
                     .CallAPIWithoutModel<Submission>($"/api/Submission/GetASubmission/{subId}")
