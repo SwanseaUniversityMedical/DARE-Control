@@ -27,8 +27,8 @@ namespace TRE_API.Services
         bool IsUserApprovedOnProject(int projectId, int userId);
         List<Submission>? GetWaitingSubmissionForTre();
         void SendSumissionToHUTCH(Submission submission);
-        List<Submission>? GetRequestCancelSubsForTre();
-        OutputBucketInfo GetOutputBucketGuts(string subId, bool hostnameonly);
+        List<Submission>? GetRequestCancelSubsForTre(); 
+        OutputBucketInfo GetOutputBucketGuts(string subId, bool hostnameonly, bool useExternal);
         APIReturn? CloseSubmissionForTre(string subId, StatusType statusType, string? description, string? finalFile);
 
         BoolReturn FilesReadyForReview(ReviewFiles review, string Bucketname);
@@ -107,10 +107,14 @@ namespace TRE_API.Services
             }
         }
 
-        public OutputBucketInfo GetOutputBucketGuts(string subId, bool hostnameonly)
+
+        //Use external is if something like hutch needs minio's external url and isn't sitting on same machine
+        public OutputBucketInfo GetOutputBucketGuts(string subId, bool hostnameonly, bool useExternal)
         {
             try
             {
+                Log.Information("{Function} Getting Bucket info", "GetOutputBucketInfo");
+                var i = 1;
                 var submission = _dareHelper
                     .CallAPIWithoutModel<Submission>($"/api/Submission/GetASubmission/{subId}")
                     .Result;
@@ -120,7 +124,11 @@ namespace TRE_API.Services
                     .Select(x => x.OutputBucketTre);
 
                 var outputBucket = bucket.FirstOrDefault();
-
+                var realurl = string.IsNullOrWhiteSpace(_minioTreSettings.HutchURLOverride) ? _minioTreSettings.Url : _minioTreSettings.HutchURLOverride;
+                if (!useExternal)
+                {
+                    realurl = _minioTreSettings.Url;
+                }
                 bool secure = !_minioTreSettings.Url.ToLower().StartsWith("http://");
                 return new OutputBucketInfo()
                 {
@@ -128,7 +136,7 @@ namespace TRE_API.Services
                     SubId = submission.Id.ToString(),
                     Path = "sub" + subId + "/",
                     Secure = secure,
-                    Host = hostnameonly ? _minioTreSettings.Url.Replace("https://", "").Replace("http://","") : _minioTreSettings.Url
+                    Host = hostnameonly ? realurl.Replace("https://", "").Replace("http://","") : realurl
                 };
             }
             catch (Exception ex)
@@ -172,7 +180,7 @@ namespace TRE_API.Services
                 { "statusType", StatusType.SendingSubmissionToHutch.ToString() },
                 { "description", "" }
             };
-
+            Log.Information("{Function} Minio url sent {Url} bucket {Bucket}, path {path}", "SendSubmissionToHutch", job.CrateSource.Host, job.CrateSource.Bucket, job.CrateSource.Path);
             var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams).Result;
             var res = _hutchHelper.CallAPI<SubmitJobModel, JobStatusModel>($"/api/jobs/", job).Result;
 
