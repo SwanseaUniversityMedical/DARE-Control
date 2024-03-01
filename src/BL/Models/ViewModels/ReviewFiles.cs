@@ -13,5 +13,7 @@ namespace BL.Models.ViewModels
         
         public List<string> Files { get; set; }
 
+        public string tesId { get; set; }
+
     }
 }

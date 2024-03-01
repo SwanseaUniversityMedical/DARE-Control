@@ -259,7 +259,8 @@ namespace TRE_API.Services
                 SubmissionId = review.SubId,
                 OutputBucket = Bucketname,
                 Status = EgressStatus.NotCompleted,
-                Files = new List<EgressFile>()
+                Files = new List<EgressFile>(),
+                tesId = review.tesId
             };
 
             foreach (var reviewFile in review.Files)

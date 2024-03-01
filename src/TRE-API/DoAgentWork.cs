@@ -14,38 +14,9 @@ using Microsoft.Extensions.Hosting;
 using Hangfire;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Security.Policy;
-using Microsoft.EntityFrameworkCore;
-
-using System.Threading.Tasks;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
 using BL.Services;
-using Microsoft.AspNetCore.SignalR;
-using Castle.Components.DictionaryAdapter.Xml;
-using Microsoft.Extensions.Configuration;
-using BL.Models;
-using BL.Models.APISimpleTypeReturns;
-using BL.Models.Enums;
-using BL.Models.ViewModels;
-using BL.Models.Tes;
-using BL.Rabbit;
-using Microsoft.Extensions.DependencyInjection;
-using EasyNetQ;
-using Newtonsoft.Json;
-using Serilog;
-using Microsoft.Extensions.Hosting;
-using Hangfire;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Security.Policy;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
-using TRE_API.Repositories.DbContexts;
-using TRE_API.Services;
-using BL.Services;
-using Microsoft.AspNetCore.SignalR;
-using Newtonsoft.Json.Linq;
 using TREAgent.Repositories;
 using System.Net.Http.Json;
 using TRE_API.Models;
@@ -429,7 +400,8 @@ namespace TRE_API
                                 _subHelper.FilesReadyForReview(new ReviewFiles()
                                 {
                                     SubId = subId.ToString(),
-                                    Files = files
+                                    Files = files,
+                                    tesId = tesId.ToString(),
                                 }, outputBucketGood);
 
                             }
