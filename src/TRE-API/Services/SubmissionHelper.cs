@@ -107,6 +107,8 @@ namespace TRE_API.Services
             }
         }
 
+
+        //Use external is if something like hutch needs minio's external url and isn't sitting on same machine
         public OutputBucketInfo GetOutputBucketGuts(string subId, bool hostnameonly, bool useExternal)
         {
             try
