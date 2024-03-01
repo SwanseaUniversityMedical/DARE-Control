@@ -113,7 +113,7 @@ namespace TRE_API.Services
         {
             try
             {
-
+                var i = 1;
                 var submission = _dareHelper
                     .CallAPIWithoutModel<Submission>($"/api/Submission/GetASubmission/{subId}")
                     .Result;
