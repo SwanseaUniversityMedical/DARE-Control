@@ -22,6 +22,10 @@ namespace BL.Models
         public string? Reviewer { get; set; }
         public virtual List<EgressFile> Files { get; set; }
 
+        public string? tesId { get; set; }
+
+        public string? Name { get; set; } 
+
         public string EgressStatusDisplay
         {
             get
@@ -31,6 +35,21 @@ namespace BL.Models
                 var displayAttribute = memberInfo.FirstOrDefault()?.GetCustomAttribute<DisplayAttribute>();
 
                 return displayAttribute?.Name ?? Status.ToString();
+            }
+        }
+
+        public string EgressID
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(tesId))
+                {
+                    return SubmissionId;
+                }
+                else
+                {
+                    return tesId;
+                }
             }
         }
     }
