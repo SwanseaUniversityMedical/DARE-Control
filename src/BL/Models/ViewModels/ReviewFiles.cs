@@ -15,5 +15,7 @@ namespace BL.Models.ViewModels
 
         public string tesId { get; set; }
 
+        public string Name { get; set; }
+
     }
 }

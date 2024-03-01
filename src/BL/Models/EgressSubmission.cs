@@ -24,6 +24,8 @@ namespace BL.Models
 
         public string? tesId { get; set; }
 
+        public string? Name { get; set; } 
+
         public string EgressStatusDisplay
         {
             get

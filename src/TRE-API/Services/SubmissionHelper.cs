@@ -268,7 +268,8 @@ namespace TRE_API.Services
                 OutputBucket = Bucketname,
                 Status = EgressStatus.NotCompleted,
                 Files = new List<EgressFile>(),
-                tesId = review.tesId
+                tesId = review.tesId,
+                Name = review.Name,
             };
 
             foreach (var reviewFile in review.Files)

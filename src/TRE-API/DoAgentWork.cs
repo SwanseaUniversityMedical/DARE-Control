@@ -29,7 +29,7 @@ namespace TRE_API
     public interface IDoAgentWork
     {
         void Execute();
-        Task CheckTESK(string taskID, int subId, string tesId, string outputBucket);
+        Task CheckTESK(string taskID, int subId, string tesId, string outputBucket, string NameTes);
         void ClearJob(string jobname);
         Task testing(string toRun, string Role);
     }
@@ -151,13 +151,13 @@ namespace TRE_API
             {
                 var stringdata = JsonConvert.SerializeObject(tesMessage);
                 Log.Information("{Function} tesMessage is not null runhing CreateTESK {tesMessage}", "Execute", stringdata);
-                CreateTESK(stringdata, 99, "123COOOLLL", OutputBucket);
+                CreateTESK(stringdata, 99, "123COOOLLL", OutputBucket, "cool DEBUG NAME");
             }
 
  
         }
 
-        public string CreateTESK(string jsonContent, int subId, string tesId, string outputBucket)
+        public string CreateTESK(string jsonContent, int subId, string tesId, string outputBucket, string Tesname)
         {
 
             Log.Information("{Function} {jsonContent} runhing CreateTESK ", "CreateTESK", jsonContent);
@@ -207,7 +207,7 @@ namespace TRE_API
                     var responseObj = JsonConvert.DeserializeObject<ResponseModel>(responseBody);
                     string id = responseObj.id;
 
-                    RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTESK(id, subId, tesId, outputBucket),
+                    RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTESK(id, subId, tesId, outputBucket, Tesname),
                         Cron.MinuteInterval(1));
 
                     _dbContext.Add(new TeskAudit() { message = jsonContent, teskid = tesId, subid = subId.ToString() });
@@ -229,7 +229,7 @@ namespace TRE_API
             public string id { get; set; }
         }
 
-        public async Task CheckTESK(string taskID, int subId, string tesId, string outputBucket)
+        public async Task CheckTESK(string taskID, int subId, string tesId, string outputBucket, string NameTes)
         {
             try
             {
@@ -402,6 +402,7 @@ namespace TRE_API
                                     SubId = subId.ToString(),
                                     Files = files,
                                     tesId = tesId.ToString(),
+                                    Name = NameTes
                                 }, outputBucketGood);
 
                             }
@@ -648,7 +649,8 @@ namespace TRE_API
                                 {
                                     var stringdata = JsonConvert.SerializeObject(tesMessage);
                                     Log.Information("{Function} tesMessage is not null runhing CreateTESK {tesMessage}", "Execute", stringdata);
-                                    CreateTESK(stringdata, aSubmission.Id, aSubmission.TesId, OutputBucket);
+                                    
+                                    CreateTESK(stringdata, aSubmission.Id, aSubmission.TesId, OutputBucket, tesMessage.Name);
                                 }
 
                             }
