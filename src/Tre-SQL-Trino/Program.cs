@@ -6,17 +6,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 
-
 Console.WriteLine("TREFX SQL Runner Module : Trino");
 
 // Tre-SQL-Trino.exe "--Query=select * from \"profileForm\"" --Output=data.csv
 
 string trinoUrl = "http://trino-server:8080/v1/statement";
-
 var Token = "";
-
 var OutputFilename = "data.csv";
-
 var Query = "SELECT * FROM \"profileForm\"";
 
 foreach (var arg in args)
@@ -31,6 +27,11 @@ foreach (var arg in args)
     if (arg.StartsWith("--Token_"))
     {
         Token = arg.Replace("--Token_", "");
+    }
+
+    if (arg.StartsWith("--Connection"))
+    {
+        trinoUrl = arg.Replace("--Connection=", "");
     }
 
     if (arg.StartsWith("--Query"))

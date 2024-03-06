@@ -8,10 +8,9 @@ Console.WriteLine("TREFX SQL Runner Module : Postgress");
 // Tre-SQL-PG.exe "--Query=select * from \"profileForm\"" --Output=data.csv
 
 var Token = "";
-
 var OutputFilename = "data.csv";
-
 var Query = "SELECT * FROM \"profileForm\"";
+string connectionString = "Host=localhost:5432;Username=admin;Password=admin;Database=assets3";
 
 foreach (var arg in args)
 {
@@ -27,6 +26,11 @@ foreach (var arg in args)
         Token = arg.Replace("--Token_", "");
     }
 
+    if (arg.StartsWith("--Connection"))
+    {
+        connectionString = arg.Replace("--Connection=", "");
+    }
+
     if (arg.StartsWith("--Query"))
     {
         Query = arg.Replace("--Query=", "");
@@ -37,8 +41,6 @@ foreach (var arg in args)
 Console.WriteLine("Query > " + Query);
 Console.WriteLine("Token > " + Token);
 Console.WriteLine("Output > " + OutputFilename);
-
-string connectionString = "Host=localhost:5432;Username=admin;Password=admin;Database=assets3";
 
 ExportToCsv(connectionString, Query, OutputFilename);
 
