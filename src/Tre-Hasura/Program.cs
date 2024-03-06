@@ -8,7 +8,7 @@ using static System.Formats.Asn1.AsnWriter;
 using Tre_Hasura.Models;
 
 
-Console.WriteLine("Hello, World!");
+Console.WriteLine("TREFX Hashura Runner");
 var configuration = GetConfiguration();
 
 using IHost host = Host.CreateDefaultBuilder(args).ConfigureServices
