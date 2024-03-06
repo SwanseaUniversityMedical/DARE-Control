@@ -13,7 +13,7 @@ namespace Data_Egress_API.Services
         public TreClientWithoutTokenHelper(IHttpClientFactory httpClientFactory,
             IHttpContextAccessor httpContextAccessor, IConfiguration config, ApplicationDbContext db,
              IEncDecHelper encDec, TreKeyCloakSettings settings) : base(httpClientFactory, httpContextAccessor,
-            config["TreAPISettings:Address"])
+            config["TreAPISettings:Address"], false)
         {
             CredDb = db;
             _keycloakTokenHelper = new KeycloakTokenHelper(settings.BaseUrl, settings.ClientId, settings.ClientSecret, settings.Proxy, settings.ProxyAddresURL);

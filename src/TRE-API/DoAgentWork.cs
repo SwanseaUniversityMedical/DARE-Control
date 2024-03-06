@@ -14,38 +14,9 @@ using Microsoft.Extensions.Hosting;
 using Hangfire;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Security.Policy;
-using Microsoft.EntityFrameworkCore;
-
-using System.Threading.Tasks;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
 using BL.Services;
-using Microsoft.AspNetCore.SignalR;
-using Castle.Components.DictionaryAdapter.Xml;
-using Microsoft.Extensions.Configuration;
-using BL.Models;
-using BL.Models.APISimpleTypeReturns;
-using BL.Models.Enums;
-using BL.Models.ViewModels;
-using BL.Models.Tes;
-using BL.Rabbit;
-using Microsoft.Extensions.DependencyInjection;
-using EasyNetQ;
-using Newtonsoft.Json;
-using Serilog;
-using Microsoft.Extensions.Hosting;
-using Hangfire;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Security.Policy;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
-using TRE_API.Repositories.DbContexts;
-using TRE_API.Services;
-using BL.Services;
-using Microsoft.AspNetCore.SignalR;
-using Newtonsoft.Json.Linq;
 using TREAgent.Repositories;
 using System.Net.Http.Json;
 using TRE_API.Models;
@@ -58,7 +29,7 @@ namespace TRE_API
     public interface IDoAgentWork
     {
         void Execute();
-        Task CheckTESK(string taskID, int subId, string tesId, string outputBucket);
+        Task CheckTESK(string taskID, int subId, string tesId, string outputBucket, string NameTes);
         void ClearJob(string jobname);
         Task testing(string toRun, string Role);
     }
@@ -180,13 +151,13 @@ namespace TRE_API
             {
                 var stringdata = JsonConvert.SerializeObject(tesMessage);
                 Log.Information("{Function} tesMessage is not null runhing CreateTESK {tesMessage}", "Execute", stringdata);
-                CreateTESK(stringdata, 99, "123COOOLLL", OutputBucket);
+                CreateTESK(stringdata, 99, "123COOOLLL", OutputBucket, "cool DEBUG NAME");
             }
 
  
         }
 
-        public string CreateTESK(string jsonContent, int subId, string tesId, string outputBucket)
+        public string CreateTESK(string jsonContent, int subId, string tesId, string outputBucket, string Tesname)
         {
 
             Log.Information("{Function} {jsonContent} runhing CreateTESK ", "CreateTESK", jsonContent);
@@ -236,7 +207,7 @@ namespace TRE_API
                     var responseObj = JsonConvert.DeserializeObject<ResponseModel>(responseBody);
                     string id = responseObj.id;
 
-                    RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTESK(id, subId, tesId, outputBucket),
+                    RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTESK(id, subId, tesId, outputBucket, Tesname),
                         Cron.MinuteInterval(1));
 
                     _dbContext.Add(new TeskAudit() { message = jsonContent, teskid = tesId, subid = subId.ToString() });
@@ -258,7 +229,7 @@ namespace TRE_API
             public string id { get; set; }
         }
 
-        public async Task CheckTESK(string taskID, int subId, string tesId, string outputBucket)
+        public async Task CheckTESK(string taskID, int subId, string tesId, string outputBucket, string NameTes)
         {
             try
             {
@@ -388,7 +359,7 @@ namespace TRE_API
                                     Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == COMPLETE ");
                                     try
                                     {
-                                        result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Completed, "", "");
+                                        result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.DataOutRequested, "", "");
                                     }
                                     catch (Exception ex)
                                     {
@@ -424,12 +395,14 @@ namespace TRE_API
                                     Log.Information("{Function} *** added file from outputBucket *** {file} ", "CheckTESK", s3Object.Key);
                                     files.Add(s3Object.Key);
                                 }
-
+                                _subHelper.UpdateStatusForTre(subId.ToString(), StatusType.DataOutRequested, "");
                                 Log.Information($"  FilesReadyForReview files {files.Count} ");
                                 _subHelper.FilesReadyForReview(new ReviewFiles()
                                 {
                                     SubId = subId.ToString(),
-                                    Files = files
+                                    Files = files,
+                                    tesId = tesId.ToString(),
+                                    Name = NameTes
                                 }, outputBucketGood);
 
                             }
@@ -676,7 +649,8 @@ namespace TRE_API
                                 {
                                     var stringdata = JsonConvert.SerializeObject(tesMessage);
                                     Log.Information("{Function} tesMessage is not null runhing CreateTESK {tesMessage}", "Execute", stringdata);
-                                    CreateTESK(stringdata, aSubmission.Id, aSubmission.TesId, OutputBucket);
+                                    
+                                    CreateTESK(stringdata, aSubmission.Id, aSubmission.TesId, OutputBucket, tesMessage.Name);
                                 }
 
                             }

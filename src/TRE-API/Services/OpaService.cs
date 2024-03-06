@@ -34,6 +34,7 @@ namespace TRE_API.Services
                 treData = new { tre = treData },
       
             };
+
             var settings = new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
@@ -42,6 +43,7 @@ namespace TRE_API.Services
             var content = new StringContent(jsonInput, Encoding.UTF8, "application/json");
             var requestUri = $"http://localhost:8181/v1/data/app/checkaccess";
          ;
+
             var response = await _httpClient.PostAsync(requestUri,content);
             var resultjson = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject(resultjson);

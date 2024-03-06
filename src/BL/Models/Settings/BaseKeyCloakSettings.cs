@@ -31,6 +31,10 @@ namespace BL.Models.Settings
         public string? ValidAudiences { get; set; }
         public string Server { get; set; }
         public string Realm { get; set; }
+        public bool AutoTrustKeycloakCert { get; set; }
+        public string ValidIssuer { get; set; }
+
+        public string ValidAudience { get; set; }
 
         public HttpClientHandler getProxyHandler {
             get
@@ -38,7 +42,7 @@ namespace BL.Models.Settings
                 Log.Information($"getProxyHandler ProxyAddresURL > {ProxyAddresURL} Proxy > {Proxy} ");
                 HttpClientHandler handler = new HttpClientHandler
                 {
-                    Proxy = new WebProxy(ProxyAddresURL,true), // Replace with your proxy server URL
+                    Proxy = string.IsNullOrWhiteSpace(ProxyAddresURL)? null : new WebProxy(ProxyAddresURL,true), // Replace with your proxy server URL
                     UseProxy = Proxy
                 };
                 return handler;

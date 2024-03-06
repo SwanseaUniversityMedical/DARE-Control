@@ -72,7 +72,7 @@ namespace TRE_API.Services
                 var submission = _dareHelper
                     .CallAPIWithoutModel<Submission>($"/api/Submission/GetASubmission/{outcome.SubId}")
                     .Result;
-                var sourceBucket = _subHelper.GetOutputBucketGuts(outcome.SubId,false);
+                var sourceBucket = _subHelper.GetOutputBucketGuts(outcome.SubId,false, false);
 
 
                 var paramlist2 = new Dictionary<string, string>();

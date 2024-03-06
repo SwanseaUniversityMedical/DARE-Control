@@ -381,21 +381,16 @@ namespace DARE_API.Controllers
         {
             try
             {
-
+                Log.Debug($"DownloadFileAsync submissionId > {submissionId}");
                 var submission = _DbContext.Submissions.First(x => x.Id == submissionId);
 
 
-
+                Log.Debug($"DownloadFileAsync submission.Project.OutputBucket > {submission.Project.OutputBucket} submission.FinalOutputFile > {submission.FinalOutputFile} "  );
                 var response = await _minioHelper.GetCopyObject(submission.Project.OutputBucket, submission.FinalOutputFile);
 
-                using (var responseStream = response.ResponseStream)
-                {
-                    var fileBytes = new byte[responseStream.Length];
-                    await responseStream.ReadAsync(fileBytes, 0, (int)responseStream.Length);
-
-                    // Create a FileContentResult and return it as the response
-                    return File(fileBytes, GetContentType(submission.FinalOutputFile), submission.FinalOutputFile);
-                }
+            
+                var responseStream = response.ResponseStream;
+                return File(responseStream, GetContentType(submission.FinalOutputFile), submission.FinalOutputFile);
             }
             catch (Exception ex)
             {

@@ -12,6 +12,7 @@ using BL.Models.Tes;
 using Newtonsoft.Json;
 using Serilog;
 using EasyNetQ.Management.Client.Model;
+using DARE_FrontEnd.Models;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -21,12 +22,34 @@ namespace DARE_FrontEnd.Controllers
         private readonly IDareClientHelper _clientHelper;
 
         private readonly FormIOSettings _formIOSettings;
-        public ProjectController(IDareClientHelper client, FormIOSettings formIo)
+
+
+        private readonly URLSettingsFrontEnd _URLSettingsFrontEnd;
+        public ProjectController(IDareClientHelper client, FormIOSettings formIo, URLSettingsFrontEnd URLSettingsFrontEnd)
         {
             _clientHelper = client;
 
             _formIOSettings = formIo;
 
+            _URLSettingsFrontEnd = URLSettingsFrontEnd;
+
+        }
+
+        private bool IsUserOnProject(Project proj)
+        {
+            if (User.IsInRole("dare-control-admin"))
+            {
+                return true;
+            }
+
+            var usersName = "";
+            usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+            if (!string.IsNullOrWhiteSpace(usersName) &&
+                (from x in proj.Users where x.Name.ToLower().Trim() == usersName.ToLower().Trim() select x).Any())
+            {
+                return true;
+            }
+            return false;
         }
 
         [AllowAnonymous]
@@ -44,14 +67,19 @@ namespace DARE_FrontEnd.Controllers
             var userItems2 = users.Where(p => !project.Users.Select(x => x.Id).Contains(p.Id)).ToList();
             var treItems2 = tres.Where(p => !project.Tres.Select(x => x.Id).Contains(p.Id)).ToList();
 
+            
             var userItems = userItems2
-                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
+                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.FullName != "" ? p.FullName : p.Name })
                 .ToList();
             var treItems = treItems2
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
 
             var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
+            ViewBag.UserCanDoSubmissions = IsUserOnProject(project);
+            
+                ViewBag.minioendpoint = minioEndpoint?.Url;
+            ViewBag.URLBucket = _URLSettingsFrontEnd.MinioUrl;
 
             var projectView = new ProjectUserTre()
             {

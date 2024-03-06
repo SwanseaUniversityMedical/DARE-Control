@@ -13,11 +13,11 @@ namespace TRE_UI.Controllers
     public class AccountController : Controller
     {
 
-        public SubmissionKeyCloakSettings _keycloakSettings { get; set; }
+        //public SubmissionKeyCloakSettings _keycloakSettings { get; set; }
 
-        public AccountController(SubmissionKeyCloakSettings keycloakSettings)
+        public AccountController()//SubmissionKeyCloakSettings keycloakSettings)
         {
-            _keycloakSettings = keycloakSettings;
+          //  _keycloakSettings = keycloakSettings;
         }
 
         public IActionResult Login()

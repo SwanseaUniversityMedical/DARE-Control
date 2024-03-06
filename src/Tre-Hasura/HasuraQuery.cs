@@ -70,9 +70,14 @@ namespace Tre_Hasura
 
             }
 
-            Query = Regex.Replace(Query, @"\r\n?|\n", " "); //no new lines in json
+            Query = Regex.Replace(Query, @"\t|\r|\n", " "); //no new lines in json
 
-            Query = @"{ ""query"": """ + Query + @""" }";
+            var Payload = new Payload()
+            {
+                query = Query
+            };
+
+            Query = JsonConvert.SerializeObject(Payload);
             Console.WriteLine("Query > " + Query);
             Console.WriteLine("Token > " + Token);
             Console.WriteLine("URL > " + URL);
@@ -84,9 +89,14 @@ namespace Tre_Hasura
             var SubDirectory = directory.CreateSubdirectory("data");
             File.WriteAllText(Path.Combine(SubDirectory.ToString(), $"data_{DateTime.UtcNow.Ticks}.json"), data);
         
-        
         }
 
+
+        public class Payload
+        {
+            public string query { get; set; }
+
+        }
 
         public class ReturnData
         {
@@ -110,7 +120,7 @@ namespace Tre_Hasura
                 Console.WriteLine(Result.StatusCode);
 
                 var Content = await Result.Content.ReadAsStringAsync();
-                Console.WriteLine(Content);
+                Console.WriteLine(Content.Length.ToString());
                 var data = Content;
 
                 return data;

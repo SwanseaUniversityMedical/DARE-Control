@@ -408,7 +408,7 @@ namespace BL.Services
                 Key = sourceObjectKey
             };
 
-            var getObjectResponse = amazonS3Client.GetObjectAsync(getObjectRequest).Result;
+            var getObjectResponse = await amazonS3Client.GetObjectAsync(getObjectRequest);
 
             return getObjectResponse;
 

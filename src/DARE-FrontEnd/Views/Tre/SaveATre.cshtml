@@ -37,8 +37,13 @@
     </div>
 </div>
 <script>
+    var disableNameField = false;
+    if ('@Html.Raw(Model.FormIoString)' !== '{"id":0}') {
+        disableNameField = true;
+    }
+
     window.onload = function () {
-        renderForm("@Model.FormIoUrl", @Html.Raw(Model.FormIoString), '/Tre/TreFormSubmission/@Url.ActionContext.RouteData.Values["id"]', false, 'formio', "/Tre/GetAllTres");
+        renderForm("@Model.FormIoUrl", @Html.Raw(Model.FormIoString), '/Tre/TreFormSubmission/@Url.ActionContext.RouteData.Values["id"]', false, 'formio', "/Tre/GetAllTres", disableNameField);
     }
 
 </script>

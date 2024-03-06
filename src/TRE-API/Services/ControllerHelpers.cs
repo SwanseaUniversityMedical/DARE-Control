@@ -71,6 +71,7 @@ namespace TRE_API.Services
                     creds.PasswordEnc, requiredrole);
                 if (string.IsNullOrWhiteSpace(token))
                 {
+                    Log.Information($"UpdateCredentials creds.Valid = false  for {creds.UserName}");
                     creds.Valid = false;
                     return creds;
                 }

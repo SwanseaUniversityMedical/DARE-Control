@@ -25,6 +25,7 @@ using var scope = host.Services.CreateScope();
 
 var services = scope.ServiceProvider;
 
+
 try
 {
     await services.GetRequiredService<IHasuraQuery>().Run(args);

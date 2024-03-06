@@ -1,4 +1,4 @@
-function renderForm(layOutURLOrString, formData, submitFuction, ReadOnly = false, divId = "FormId", redirectOverrideUrl) {
+function renderForm(layOutURLOrString, formData, submitFuction, ReadOnly = false, divId = "FormId", redirectOverrideUrl, disabledFields = false) {
     renderForm.draftSubmissionData = "";
     var formReference
 
@@ -22,7 +22,7 @@ function renderForm(layOutURLOrString, formData, submitFuction, ReadOnly = false
         if (layOutURLOrString.startsWith("http") == false) {
             layOut = JSON.parse(layOutURLOrString);
         }
-        Formio.createForm(document.getElementById(divId), layOut).then(function (form) {
+        Formio.createForm(document.getElementById(divId), layOut, { "disabled": { "Name": disabledFields } }).then(function (form) {
             form.submission = {
                 data: formData
             };

@@ -155,7 +155,7 @@ namespace TRE_API.Controllers
         {
             try
             {
-                var outputInfo = _subHelper.GetOutputBucketGuts(subId, true);
+                var outputInfo = _subHelper.GetOutputBucketGuts(subId, true, true);
                 
 
                 return StatusCode(200, outputInfo);
@@ -189,7 +189,7 @@ namespace TRE_API.Controllers
             try
             {
                 _subHelper.UpdateStatusForTre(review.SubId, StatusType.DataOutRequested, "");
-                var bucket = _subHelper.GetOutputBucketGuts(review.SubId, false);
+                var bucket = _subHelper.GetOutputBucketGuts(review.SubId, false, false);
                 var egsub = new EgressSubmission()
                 {
                     SubmissionId = review.SubId,
@@ -267,11 +267,12 @@ namespace TRE_API.Controllers
                 {
                     _subHelper.UpdateStatusForTre(review.SubId.ToString(), StatusType.DataOutApproved, "");
                 }
-                bool secure = !_minioTreSettings.Url.ToLower().StartsWith("http://");
+                var realurl = string.IsNullOrWhiteSpace(_minioTreSettings.HutchURLOverride) ? _minioTreSettings.Url : _minioTreSettings.HutchURLOverride;
+                bool secure = !realurl.ToLower().StartsWith("http://");
                 var bucket = _subHelper.GetOutputBucketGutsSub(review.SubId, true);
                 ApprovalResult hutchPayload = new ApprovalResult()
                 {
-                    Host = _minioTreSettings.Url.Replace("https://", "").Replace("http://", ""),
+                    Host = realurl.Replace("https://", "").Replace("http://", ""),
                     Bucket = bucket.Bucket,
                     Path = bucket.Path,
                     Secure = secure,
@@ -286,6 +287,7 @@ namespace TRE_API.Controllers
 
                 if (_agentSettings.UseTESK == false)
                 {
+                    Log.Information("{Function} Minio url sent {Url} bucket {Bucket}, path {path}", "EgressReview", hutchPayload.Host, hutchPayload.Bucket, hutchPayload.Path);
                     //Not sure what the return type is
                     var HUTCHres =
                         await _hutchHelper.CallAPI<ApprovalResult, APIReturn>($"/api/jobs/{review.SubId}/approval",
@@ -299,8 +301,8 @@ namespace TRE_API.Controllers
                         Log.Information($"EgressResults with File.Approved > {File.Approved} File.FileName > {File.FileName} ");
                         if (File.Approved)
                         {
-                            var source = _minioTreHelper.GetCopyObject(review.OutputBucket,  File.FileName);
-                            var resultcopy = _minioSubHelper.CopyObjectToDestination(bucket.Bucket,  File.FileName, source.Result).Result;
+                            var source = await _minioTreHelper.GetCopyObject(review.OutputBucket,  File.FileName);
+                            var resultcopy = await _minioSubHelper.CopyObjectToDestination(bucket.Bucket, File.FileName, source);
                         }
                     }
 

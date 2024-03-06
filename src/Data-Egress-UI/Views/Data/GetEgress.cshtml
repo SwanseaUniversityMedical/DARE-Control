@@ -9,7 +9,7 @@
 
 <div class="container-lg p-4">
     <div class="d-flex align-items-center justify-content-between">
-        <h1 class="fs-3 mb-0"><span class="text-muted">Egress Request:</span> #@Model.SubmissionId</h1>
+        <h1 class="fs-3 mb-0"><span class="text-muted">Egress Request:</span> #@Model.EgressID name @Model.Name</h1>
         <span>
             @Model.EgressStatusDisplay
         </span>
@@ -43,9 +43,9 @@
                         @*@Html.LabelFor(x => x.Files[i].Name, new { @class = "form-label" })*@
 
                         <a href="@Url.Action("DownloadFile", "Data",new{FileId=@Model.Files[i].Id})" class="btn btn-link">@Html.DisplayFor(x => x.Files[i].Name, new { @class = "form-control" }) <i class="ms-2 fa fa-download"></i></a>
-                    </div>
-                    <div class="form-group">
-                        <div class="form-check form-check-inline">
+                   @* </div>*@
+@*                    <div class="form-group">
+*@                        <div class="form-check form-check-inline">
                             @Html.RadioButtonFor(x => x.Files[i].Status, FileStatus.Approved, new { @class = "form-check-input"})
                             @Html.Label(FileStatus.Approved.ToString())
                         </div>

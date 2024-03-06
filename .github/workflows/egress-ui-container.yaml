@@ -1,0 +1,41 @@
+name: Egress UI Container
+
+on:
+  pull_request:
+    paths:
+      - 'src/Data-Egress-UI/**'
+      - 'src/BL/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/Data-Egress-UI/**'
+      - 'src/BL/**'
+
+permissions:
+  contents: write
+  pull-requests: read
+  actions: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  egress-ui-container:
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/pr-and-release-container.yaml@v1.4.2-containers
+    with:
+      job-name: egress-ui-container
+      registry: ${{ vars.HARBOR_REGISTRY }}
+      registry-user: ${{ vars.HARBOR_USER }}
+      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-egress-ui
+      release-tag-format: 'DARE-Egress-UI-Container-${version}'
+      cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      build-file: src/Data-Egress-UI/Dockerfile
+      build-context: src
+    secrets:
+      cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      cosign-password: ${{ secrets.COSIGN_PASSWORD }}
+      registry-token: ${{ secrets.HARBOR_TOKEN }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}

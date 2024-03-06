@@ -7,241 +7,359 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.Net;
-
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.CookiePolicy;
 
 var builder = WebApplication.CreateBuilder(args);
-
-IdentityModelEventSource.ShowPII = true;
-
-builder.Services.AddControllersWithViews().AddNewtonsoftJson(options => {
-    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-    options.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
-}).AddRazorRuntimeCompilation();
-
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
-string AppName = typeof(Program).Module.Name.Replace(".dll", "");
-
 Log.Logger = CreateSerilogLogger(configuration, environment);
 Log.Information("TRE-UI logging LastStatusUpdate.");
+try
+{
+    builder.Host.UseSerilog();
+    IdentityModelEventSource.ShowPII = true;
+
+    builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+        options.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
+    }).AddRazorRuntimeCompilation();
 
 
+    string AppName = typeof(Program).Module.Name.Replace(".dll", "");
 
 
 // -- authentication here
-var treKeyCloakSettings = new TreKeyCloakSettings();
-configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
-builder.Services.AddSingleton(treKeyCloakSettings);
+    var treKeyCloakSettings = new TreKeyCloakSettings();
+    configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
+    builder.Services.AddSingleton(treKeyCloakSettings);
 
 
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddHttpClient();
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddHttpClient();
 
 
 //add services here
-builder.Services.AddScoped<CustomCookieEvent>();
+    builder.Services.AddScoped<CustomCookieEvent>();
 
-builder.Services.AddScoped<ITREClientHelper, TREClientHelper>();
-
-
-builder.Services.AddMvc().AddViewComponentsAsServices();
-
-builder.Services.Configure<CookiePolicyOptions>(options =>
-{
-    options.MinimumSameSitePolicy = SameSiteMode.None;
-    options.OnAppendCookie = cookieContext =>
-        CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
-    options.OnDeleteCookie = cookieContext =>
-        CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
-});
+    builder.Services.AddScoped<ITREClientHelper, TREClientHelper>();
 
 
-JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+    builder.Services.AddMvc().AddViewComponentsAsServices();
 
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+    builder.Services.Configure<CookiePolicyOptions>(options =>
+    {
+        options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
+        options.OnAppendCookie = cookieContext =>
+            CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
+        options.OnDeleteCookie = cookieContext =>
+            CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
+    });
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(name: MyAllowSpecificOrigins,
-        policy =>
+
+    JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
+    var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(
+            builder =>
+            {
+                builder
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        options.AddPolicy(name: MyAllowSpecificOrigins,
+            policy =>
+            {
+                policy.WithOrigins(configuration["TreAPISettings:Address"])
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+            });
+    });
+
+    builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    {
+        options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto |
+                                   ForwardedHeaders.XForwardedHost;
+        options.ForwardLimit = 2; //Limit number of proxy hops trusted
+        options.KnownNetworks.Clear();
+        options.KnownProxies.Clear();
+    });
+
+
+    builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
+    builder.Services.AddAuthentication(options =>
         {
-            policy.WithOrigins(configuration["TreAPISettings:Address"])
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials();
-        });
-});
-
-builder.Services.Configure<ForwardedHeadersOptions>(options =>
-{
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-
-    options.KnownNetworks.Clear();
-    options.KnownProxies.Clear();
-});
-
-
-builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-
-    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-})
-            .AddCookie(o =>
+            options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+        })
+        .AddCookie(o =>
+        {
+            o.SessionStore = new MemoryCacheTicketStore();
+            o.EventsType = typeof(CustomCookieEvent);
+        })
+        .AddOpenIdConnect(options =>
+        {
+            if (treKeyCloakSettings.Proxy || treKeyCloakSettings.AutoTrustKeycloakCert)
             {
-                o.SessionStore = new MemoryCacheTicketStore();
-                o.EventsType = typeof(CustomCookieEvent);
-            })
-  //          .AddCookie()
-            .AddOpenIdConnect(options =>
-            {
+                var httpClientHandler = new HttpClientHandler();
+
+                //This is vital if behind a proxy. Especially true for our proxy. Set this up correctly when
+                //deploying behind proxy (some proxies are silent and don't need it)
                 if (treKeyCloakSettings.Proxy)
                 {
-                    Console.WriteLine("TRE UI Proxy = " + treKeyCloakSettings.ProxyAddresURL);
-                    Console.WriteLine("TRE UI Proxy bypass = " + treKeyCloakSettings.BypassProxy);
-                    options.BackchannelHttpHandler = new HttpClientHandler
+                    Log.Information("{Function} Proxy = {Proxy}, Bypass = {Bypass}", "AddOpenIdConnect",
+                        treKeyCloakSettings.ProxyAddresURL);
+                    httpClientHandler.UseProxy = true;
+                    httpClientHandler.UseDefaultCredentials = true;
+                    httpClientHandler.Proxy = new WebProxy()
                     {
-                        UseProxy = true,
-                        UseDefaultCredentials = true,
-                        Proxy = new WebProxy()
-                        {
-                            Address = new Uri(treKeyCloakSettings.ProxyAddresURL),
-                            BypassList = new[] { treKeyCloakSettings.BypassProxy }
-                        }
+                        Address = new Uri(treKeyCloakSettings.ProxyAddresURL),
+                        BypassList = new[] { treKeyCloakSettings.BypassProxy }
                     };
                 }
 
-                
-                // URL of the Keycloak server
-                options.Authority = treKeyCloakSettings.Authority;
-                //// Client configured in the Keycloak
-                options.ClientId = treKeyCloakSettings.ClientId;
-                //// Client secret shared with Keycloak
-                options.ClientSecret = treKeyCloakSettings.ClientSecret;
-                options.MetadataAddress = treKeyCloakSettings.MetadataAddress;
-
-                options.SaveTokens = true;
-
-                options.ResponseType = OpenIdConnectResponseType.Code; //Configuration["Oidc:ResponseType"];
-                                                                       // For testing we disable https (should be true for production)
-                options.RemoteSignOutPath = treKeyCloakSettings.RemoteSignOutPath;
-                options.SignedOutRedirectUri = treKeyCloakSettings.SignedOutRedirectUri;
-                options.RequireHttpsMetadata = false;
-                options.GetClaimsFromUserInfoEndpoint = true;
-                options.Scope.Add("openid");
-                options.Scope.Add("profile");
-                options.Scope.Add("email");
-                
-                options.SaveTokens = true;
-                options.ResponseType = OpenIdConnectResponseType.Code;
-                options.Events = new OpenIdConnectEvents
+                //Sometimes we need to trust a self signed certificate or ignore ssl errors. In which case set 
+                //AutoTrustKeycloakCert to true.It won't break to always set it to true but better to only do it 
+                //when needed for security reasons
+                if (treKeyCloakSettings.AutoTrustKeycloakCert)
                 {
-                    OnAccessDenied = context =>
+                    Log.Information("{Function} Trust Keycloak Server ssl", "AddOpenIdConnect");
+                    httpClientHandler.ServerCertificateCustomValidationCallback =
+                        (sender, certificate, chain, sslPolicyErrors) => true;
+                }
+
+                options.BackchannelHttpHandler = httpClientHandler;
+            }
+
+
+            // URL of the Keycloak server
+            options.Authority = treKeyCloakSettings.Authority;
+            //// Client configured in the Keycloak
+            options.ClientId = treKeyCloakSettings.ClientId;
+            //// Client secret shared with Keycloak
+            options.ClientSecret = treKeyCloakSettings.ClientSecret;
+            options.MetadataAddress = treKeyCloakSettings.MetadataAddress;
+
+            options.SaveTokens = true;
+
+            options.ResponseType = OpenIdConnectResponseType.Code; //Configuration["Oidc:ResponseType"];
+            // For testing we disable https (should be true for production)
+            options.RemoteSignOutPath = treKeyCloakSettings.RemoteSignOutPath;
+            options.SignedOutRedirectUri = treKeyCloakSettings.SignedOutRedirectUri;
+            options.RequireHttpsMetadata = false;
+            options.GetClaimsFromUserInfoEndpoint = true;
+            options.Scope.Add("openid");
+            options.Scope.Add("profile");
+            options.Scope.Add("email");
+
+            options.SaveTokens = true;
+            options.ResponseType = OpenIdConnectResponseType.Code;
+            options.Events = new OpenIdConnectEvents
+            {
+                OnTokenValidated = context =>
+                {
+                    // Log the issuer claim from the token
+                    var issuer = context.Principal.FindFirst("iss")?.Value;
+                    Log.Information("Token Issuer: {Issuer}", issuer);
+                    var audience = context.Principal.FindFirst("aud")?.Value;
+                    Log.Information("Token Audience: {Audience}", audience);
+                    return Task.CompletedTask;
+                },
+                OnAccessDenied = context =>
+                {
+                    Log.Error("{Function}: {ex}", "OnAccessDenied", context.AccessDeniedPath);
+                    context.HandleResponse();
+                    return context.Response.CompleteAsync();
+                },
+                OnAuthenticationFailed = context =>
+                {
+                    Log.Error("{Function}: {ex}", "OnAuthFailed", context.Exception.Message);
+                    context.HandleResponse();
+                    return context.Response.CompleteAsync();
+                },
+                OnRemoteFailure = context =>
+                {
+                    Log.Error("OnRemoteFailure: {ex}", context.Failure);
+                    if (context.Properties != null)
                     {
-                        Log.Error("{Function}: {ex}", "OnAccessDenied", context.AccessDeniedPath);
-                        context.HandleResponse();
-                        return context.Response.CompleteAsync();
-
-                    },
-                    OnAuthenticationFailed = context =>
-                    {
-                        Log.Error("{Function}: {ex}", "OnAuthFailed", context.Exception.Message);
-                        context.HandleResponse();
-                        return context.Response.CompleteAsync();
-                    },
-                    OnRemoteFailure = context =>
-                    {
-                        Log.Error("OnRemoteFailure: {ex}", context.Failure);
-                        if (context.Failure.Message.Contains("Correlation failed"))
+                        foreach (var prop in context.Properties.Items)
                         {
-                            Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}", treKeyCloakSettings.TokenExpiredAddress);
-                            context.Response.Redirect(treKeyCloakSettings.TokenExpiredAddress);
+                            Log.Information("{Function} Property Key {Key}, Value {Value}", "OnRemoteFailure", prop.Key,
+                                prop.Value);
                         }
-                        else
-                        {
-                            Log.Warning("call /Error/500");
-                            context.Response.Redirect("/Error/500");
-                        }
-
-                        context.HandleResponse();
-
-                        return context.Response.CompleteAsync();
-                    },
-                    OnMessageReceived = context =>
-                    {
-                        string accessToken = context.Request.Query["access_token"];
-                        PathString path = context.HttpContext.Request.Path;
-
-                        if (
-                            !string.IsNullOrEmpty(accessToken) &&
-                            path.StartsWithSegments("/api/SignalRHub")
-                        )
-                        {
-                            context.Token = accessToken;
-                        }
-
-                        return Task.CompletedTask;
-                    },
-                    OnRedirectToIdentityProvider = async context =>
-                    {
-                        Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}", context.HttpContext.Connection.RemoteIpAddress);
-                        Log.Information("HttpContext.Connection.RemotePort : {RemotePort}", context.HttpContext.Connection.RemotePort);
-                        Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
-                        Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
-
-                        foreach (var header in context.HttpContext.Request.Headers)
-                        {
-                             Log.Information("Request Header {key} - {value}", header.Key, header.Value);
-                        }
-
-                        foreach (var header in context.HttpContext.Response.Headers)
-                        {
-                             Log.Information("Response Header {key} - {value}", header.Key, header.Value);
-                        }
-
-                        if (treKeyCloakSettings.UseRedirectURL)
-                        {
-                            context.ProtocolMessage.RedirectUri = treKeyCloakSettings.RedirectURL;
-                        }
-                        Log.Information(context.ProtocolMessage.RedirectUri);
-                        
-                        await Task.FromResult(0);
                     }
-                };
 
-                options.NonceCookie.SameSite = SameSiteMode.None;
-                options.CorrelationCookie.SameSite = SameSiteMode.None;
-                options.TokenValidationParameters = new TokenValidationParameters
+                    if (context.Failure.Message.Contains("Correlation failed"))
+                    {
+                        Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}",
+                            treKeyCloakSettings.TokenExpiredAddress);
+                        //context.Response.Redirect(treKeyCloakSettings.TokenExpiredAddress);
+                    }
+                    else
+                    {
+                        Log.Warning("call /Error/500");
+                        //context.Response.Redirect("/Error/500");
+                    }
+
+                    context.HandleResponse();
+
+                    return context.Response.CompleteAsync();
+                },
+                OnMessageReceived = context =>
                 {
-                    NameClaimType = "name",
-                    RoleClaimType = ClaimTypes.Role,
-                    ValidateIssuer = true
-                };
-            });
+                    string accessToken = context.Request.Query["access_token"];
+                    PathString path = context.HttpContext.Request.Path;
+
+                    if (
+                        !string.IsNullOrEmpty(accessToken) &&
+                        path.StartsWithSegments("/api/SignalRHub")
+                    )
+                    {
+                        context.Token = accessToken;
+                    }
+
+                    return Task.CompletedTask;
+                },
+                OnRedirectToIdentityProvider = async context =>
+                {
+                    Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}",
+                        context.HttpContext.Connection.RemoteIpAddress);
+                    Log.Information("HttpContext.Connection.RemotePort : {RemotePort}",
+                        context.HttpContext.Connection.RemotePort);
+                    Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
+                    Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
+
+                    foreach (var header in context.HttpContext.Request.Headers)
+                    {
+                        Log.Information("Request Header {key} - {value}", header.Key, header.Value);
+                    }
+
+                    foreach (var header in context.HttpContext.Response.Headers)
+                    {
+                        Log.Information("Response Header {key} - {value}", header.Key, header.Value);
+                    }
+
+                    if (treKeyCloakSettings.UseRedirectURL)
+                    {
+                        context.ProtocolMessage.RedirectUri = treKeyCloakSettings.RedirectURL;
+                    }
+
+                    Log.Information("Redirect Uri {Redirect}", context.ProtocolMessage.RedirectUri);
+
+                    await Task.FromResult(0);
+                }
+            };
+
+            options.NonceCookie.SameSite = SameSiteMode.None;
+            options.CorrelationCookie.SameSite = SameSiteMode.None;
+
+            //Need this to be instantiated before using
+            options.TokenValidationParameters = new TokenValidationParameters();
 
 
-var app = builder.Build();
+            options.TokenValidationParameters.NameClaimType = "name";
+            options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
+            if (!string.IsNullOrWhiteSpace(treKeyCloakSettings.ValidIssuer))
+            {
+                Log.Information("{Function} Setting valid issuer {ValidIssuer}",
+                    "AddOpenIdConnect", treKeyCloakSettings.ValidIssuer);
+                options.TokenValidationParameters.ValidateIssuer = true;
+                options.TokenValidationParameters.ValidIssuer = treKeyCloakSettings.ValidIssuer;
+                // Use ValidIssuers if there are multiple valid issuers. Edge case. Not likely to need this
+                //but useful to know
+                // ValidIssuers = new[] { "http://auth-hdpbc.healthbc.org/realms/HDP", "other-issuer" },
+            }
 
-app.UseForwardedHeaders(new ForwardedHeadersOptions
-{
-    ForwardedHeaders = ForwardedHeaders.XForwardedProto
-});
+            if (!string.IsNullOrWhiteSpace(treKeyCloakSettings.ValidAudience))
+            {
+                Log.Information("{Function} Setting valid audience {ValidAudience}",
+                    "AddOpenIdConnect", treKeyCloakSettings.ValidAudience);
+                options.TokenValidationParameters.ValidAudience = treKeyCloakSettings.ValidAudience;
+            }
+        });
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    //app.UseHsts();
+
+    var app = builder.Build();
+    app.UseCors();
+    app.UseForwardedHeaders();
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
+    else
+    {
+        app.UseExceptionHandler("/Home/Error");
+        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+        app.UseHsts();
+    }
+
+//Disable redirect if using http only site to prevent silent redirect to non existent https site
+    var httpsRedirect = configuration["httpsRedirect"];
+
+    if (httpsRedirect != null && httpsRedirect.ToLower() == "true")
+    {
+        Log.Information("Turning on https Redirect");
+        app.UseHttpsRedirection();
+    }
+    else
+    {
+        Log.Information("Https redirect disabled. Http only");
+    }
+
+    app.UseStaticFiles();
+
+//This is a biggy. If having issues with keycloak DISABLE THIS
+    if (configuration["sslcookies"] == "true")
+    {
+        Log.Information("Enabling Secure SSL Cookies");
+        app.UseCookiePolicy(new CookiePolicyOptions
+        {
+            Secure = CookieSecurePolicy.Always
+        });
+    }
+    else
+    {
+        Log.Information("Disabling Secure SSL Cookies");
+        app.UseCookiePolicy();
+    }
+
+    app.UseRouting();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+
+    app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
+
+
+    app.Run();
 }
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Program terminated unexpectedly ({ApplicationContext})!", "TreUI");
+}
+finally
+{
+    Log.Information("Stopping web ui ({ApplicationContext})...", "TreUI");
+    Log.CloseAndFlush();
+}
+
 
 Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHostEnvironment environment)
 {
@@ -249,44 +367,16 @@ Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHost
     var seqApiKey = configuration["Serilog:SeqApiKey"];
 
     return new LoggerConfiguration()
-    .MinimumLevel.Verbose()
-    .Enrich.WithProperty("ApplicationContext", environment.ApplicationName)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.Seq(seqServerUrl, apiKey: seqApiKey)
-    .ReadFrom.Configuration(configuration)
-    .CreateLogger();
-
+        .MinimumLevel.Verbose()
+        .Enrich.WithProperty("ApplicationContext", environment.ApplicationName)
+        .Enrich.FromLogContext()
+        .WriteTo.Console()
+        .WriteTo.Seq(seqServerUrl, apiKey: seqApiKey)
+        .ReadFrom.Configuration(configuration)
+        .CreateLogger();
 }
 
-//removed to stop redirection
-//app.UseHttpsRedirection();
-
-app.UseStaticFiles();
-
-if (configuration["sslcookies"] == "true")
-{
-    Log.Information("Enabling Secure SSL Cookies");
-    app.UseCookiePolicy(new CookiePolicyOptions
-    {
-        Secure = CookieSecurePolicy.Always
-    });
-}
-
-app.UseRouting();
-app.UseAuthentication();
-app.UseAuthorization();
-
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
-app.UseCors();
-
-app.Run();
-
-#region SameSite Cookie Issue - https://community.auth0.com/t/correlation-failed-unknown-location-error-on-chrome-but-not-in-safari/40013/7
+#region SameSite Cookie Issue - https: //community.auth0.com/t/correlation-failed-unknown-location-error-on-chrome-but-not-in-safari/40013/7
 
 void CheckSameSite(HttpContext httpContext, CookieOptions options)
 {
@@ -296,7 +386,7 @@ void CheckSameSite(HttpContext httpContext, CookieOptions options)
         //configure cookie policy to omit samesite=none when request is not https
         if (!httpContext.Request.IsHttps || DisallowsSameSiteNone(userAgent))
         {
-            options.SameSite = SameSiteMode.None;
+            options.SameSite = SameSiteMode.Unspecified;
         }
     }
 }
@@ -345,6 +435,5 @@ bool DisallowsSameSiteNone(string userAgent)
 
     return false;
 }
-
 
 #endregion
