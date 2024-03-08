@@ -5,10 +5,10 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["src/Tre-SQL-Trino/Tre-SQL-Trino.csproj", "src/Tre-SQL-Trino/"]
-RUN dotnet restore "src/Tre-SQL-Trino/Tre-SQL-Trino.csproj"
+COPY ["Tre-SQL-Trino/Tre-SQL-Trino.csproj", "Tre-SQL-Trino/"]
+RUN dotnet restore "Tre-SQL-Trino/Tre-SQL-Trino.csproj"
 COPY . .
-WORKDIR "/src/src/Tre-SQL-Trino"
+WORKDIR "/src/Tre-SQL-Trino"
 RUN dotnet build "Tre-SQL-Trino.csproj" -c Release -o /app/build
 
 FROM build AS publish

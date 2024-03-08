@@ -5,10 +5,10 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["src/Tre-SQL-PG/Tre-SQL-PG.csproj", "src/Tre-SQL-PG/"]
-RUN dotnet restore "src/Tre-SQL-PG/Tre-SQL-PG.csproj"
+COPY ["Tre-SQL-PG/Tre-SQL-PG.csproj", "Tre-SQL-PG/"]
+RUN dotnet restore "Tre-SQL-PG/Tre-SQL-PG.csproj"
 COPY . .
-WORKDIR "/src/src/Tre-SQL-PG"
+WORKDIR "/src/Tre-SQL-PG"
 RUN dotnet build "Tre-SQL-PG.csproj" -c Release -o /app/build
 
 FROM build AS publish
