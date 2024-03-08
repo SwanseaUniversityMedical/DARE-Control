@@ -234,8 +234,8 @@ namespace TRE_API
             try
             {
                 Log.Information("{Function} Check TESK : {TaskId},  TES : {TesId}, sub: {SubId}", "CheckTESK", taskID, tesId, subId);
-                string url = "https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks/" + taskID + "?view=basic";
-
+                string url = _AgentSettings.TESKAPIURL + "/" + taskID + "?view=basic";
+                             
                 HttpClientHandler handler = new HttpClientHandler();
 
                 if (_AgentSettings.Proxy)
