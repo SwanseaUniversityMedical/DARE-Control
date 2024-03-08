@@ -650,7 +650,7 @@ namespace TRE_API
                                     var stringdata = JsonConvert.SerializeObject(tesMessage);
                                     Log.Information("{Function} tesMessage is not null runhing CreateTESK {tesMessage}", "Execute", stringdata);
                                     
-                                    CreateTESK(stringdata, aSubmission.Id, aSubmission.TesId, OutputBucket, tesMessage.Name);
+                                    CreateTESK(stringdata, aSubmission.Id, aSubmission.TesId, OutputBucket, aSubmission.TesName);
                                 }
 
                             }
