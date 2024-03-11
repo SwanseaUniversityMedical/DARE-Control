@@ -1,0 +1,39 @@
+name: TRE SQL PG Container
+
+on:
+  pull_request:
+    paths:
+      - 'src/Tre-SQL-PG/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/Tre-SQL-PG/**'
+
+permissions:
+  contents: write
+  pull-requests: read
+  actions: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  tre-pg-container:
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/pr-and-release-container.yaml@v1.4.2-containers
+    with:
+      job-name: tre-sqlpg-container
+      registry: ${{ vars.HARBOR_REGISTRY }}
+      registry-user: ${{ vars.HARBOR_USER }}
+      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-sqlpg
+      release-tag-format: 'DARE-TRE-SQLPG-Container-${version}'
+      cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      build-file: src/Tre-SQL-PG/Dockerfile
+      build-context: src
+    secrets:
+      cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      cosign-password: ${{ secrets.COSIGN_PASSWORD }}
+      registry-token: ${{ secrets.HARBOR_TOKEN }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}

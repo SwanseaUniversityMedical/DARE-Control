@@ -1,0 +1,39 @@
+name: TRE SQL Trino Container
+
+on:
+  pull_request:
+    paths:
+      - 'src/Tre-SQL-Trino/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/Tre-SQL-Trino/**'
+
+permissions:
+  contents: write
+  pull-requests: read
+  actions: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  tre-trino-container:
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/pr-and-release-container.yaml@v1.4.2-containers
+    with:
+      job-name: tre-sqltrino-container
+      registry: ${{ vars.HARBOR_REGISTRY }}
+      registry-user: ${{ vars.HARBOR_USER }}
+      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-sqltrino
+      release-tag-format: 'DARE-TRE-SQLTRINO-Container-${version}'
+      cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
+      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      build-file: src/Tre-SQL-Trino/Dockerfile
+      build-context: src
+    secrets:
+      cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      cosign-password: ${{ secrets.COSIGN_PASSWORD }}
+      registry-token: ${{ secrets.HARBOR_TOKEN }}
+      slack-token: ${{ secrets.SLACK_TOKEN }}
