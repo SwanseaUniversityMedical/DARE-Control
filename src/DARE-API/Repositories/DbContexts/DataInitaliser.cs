@@ -214,6 +214,7 @@ namespace DARE_API.Repositories.DbContexts
 
                 var submissionUserAttribute = _userService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.SubmissionBucket.ToLower() + "_policy").Result;
                 var outputUserAttribute = _userService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.OutputBucket.ToLower() + "_policy").Result;
+                
                 project.Users.Add(user);
             }
         }
