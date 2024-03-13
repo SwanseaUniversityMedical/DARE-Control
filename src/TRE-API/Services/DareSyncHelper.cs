@@ -77,6 +77,7 @@ namespace TRE_API.Services
                     OutputBucketTre = output,
                     OutputBucketSub = project.OutputBucket.ToLower()
                 });
+
             }
 
             foreach (var treProject in projectArchives)
