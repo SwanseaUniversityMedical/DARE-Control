@@ -52,6 +52,7 @@ namespace TRE_API.Services
                 dbprojs.Where(x => x.Archived && subprojs.Any(y => y.Id == x.SubmissionProjectId));
             foreach (var project in projectAdds)
             {
+
                 var submission = project.SubmissionBucket.ToLower() + "tre".Replace("_", "");
                 var output = project.OutputBucket.ToLower() + "tre".Replace("_", "");
                 var submissionBucket = await _minioTreHelper.CreateBucket(submission);
