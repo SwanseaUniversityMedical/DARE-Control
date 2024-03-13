@@ -133,8 +133,8 @@ namespace DARE_API.Repositories.DbContexts
 
             if (proj == null)
             {
-                var submission = GenerateRandomName(name.ToLower()) + "submission";
-                var output = GenerateRandomName(name.ToLower()) + "output";
+                var submission = GenerateRandomName(name.ToLower()) + "submission".Replace("_", "");
+                var output = GenerateRandomName(name.ToLower()) + "output".Replace("_", "");
                 var submissionBucket = _minioHelper.CreateBucket(submission.ToLower()).Result;
                 var submistionBucketPolicy = _minioHelper.CreateBucketPolicy(submission.ToLower()).Result;
                 var outputBucket = _minioHelper.CreateBucket(output.ToLower()).Result;
