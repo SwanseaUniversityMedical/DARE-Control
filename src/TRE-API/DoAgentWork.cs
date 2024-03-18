@@ -23,6 +23,8 @@ using TRE_API.Models;
 using Castle.Components.DictionaryAdapter.Xml;
 using System;
 using System.Net;
+using Microsoft.EntityFrameworkCore;
+using BL.Models.Settings;
 
 namespace TRE_API
 {
@@ -48,6 +50,8 @@ namespace TRE_API
         private readonly IDareClientWithoutTokenHelper _dareHelper;
         private readonly AgentSettings _AgentSettings;
         private readonly MinioSettings _minioSettings;
+        private readonly IKeyCloakService _keyCloakService;
+        private readonly TreKeyCloakSettings _TreKeyCloakSettings;
 
 
         public DoAgentWork(IServiceProvider serviceProvider,
@@ -58,7 +62,9 @@ namespace TRE_API
             IHasuraAuthenticationService hasuraAuthenticationService,
             IDareClientWithoutTokenHelper dareHelper,
             AgentSettings AgentSettings,
-            MinioSettings minioSettings)
+            MinioSettings minioSettings,
+            IKeyCloakService keyCloakService,
+            TreKeyCloakSettings TreKeyCloakSettings)
         {
             _serviceProvider = serviceProvider;
             _dbContext = dbContext;
@@ -78,6 +84,9 @@ namespace TRE_API
 
             _minioTreHelper = minioTreHelper;
             _minioSubHelper = minioSubHelper;
+
+            _keyCloakService = keyCloakService;
+            _TreKeyCloakSettings = TreKeyCloakSettings;
         }
 
         public async Task testing(string toRun, string Role)
@@ -434,7 +443,7 @@ namespace TRE_API
         }
 
         // Method executed upon hangfire job
-        public void Execute()
+        public async void Execute()
         {
             Log.Information("{Function} DoAgentWork ruinng", "Execute");
             // control use of dependency injection
@@ -592,7 +601,10 @@ namespace TRE_API
 
                                 var role = aSubmission.Project.Name; //TODO Check
 
-                                var Token = _hasuraAuthenticationService.GetNewToken(role);
+
+                                var Acount =  _dbContext.ProjectAcount.FirstOrDefault(x => x.Name == role);
+
+                                var Token = await _keyCloakService.GenAccessTokenSimple(Acount.Name, Acount.Pass, _TreKeyCloakSettings.TokenRefreshSeconds);
 
 
 

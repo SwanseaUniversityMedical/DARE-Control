@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using BL.Models.Tes;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Threading;
-
+using TRE_API.Models;
 
 namespace TRE_API.Controllers
 {
@@ -25,15 +25,19 @@ namespace TRE_API.Controllers
 
         private readonly ApplicationDbContext _DbContext;
         protected readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IKeyCloakService _IKeyCloakService;
+        private readonly Features _Features;
 
         public IDareSyncHelper _dareSyncHelper { get; set; }
 
         public ApprovalController(IDareSyncHelper dareSyncHelper, ApplicationDbContext applicationDbContext,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor, IKeyCloakService IKeyCloakService, Features Features)
         {
             _dareSyncHelper = dareSyncHelper;
             _DbContext = applicationDbContext;
             _httpContextAccessor = httpContextAccessor;
+            _IKeyCloakService = IKeyCloakService;
+            _Features = Features;
         }
 
         [Authorize(Roles = "dare-tre-admin")]
@@ -215,16 +219,28 @@ namespace TRE_API.Controllers
                         dbproj.ApprovedBy = approvedBy;
                         dbproj.LastDecisionDate = approvedDate;
                     }
-        
-                        dbproj.ProjectExpiryDate = treProject.ProjectExpiryDate.ToUniversalTime();
-                    
+
+                    dbproj.ProjectExpiryDate = treProject.ProjectExpiryDate.ToUniversalTime();
+
 
                     resultList.Add(dbproj);
                     await _DbContext.SaveChangesAsync();
                     await ControllerHelpers.AddTreAuditLog(dbproj, null, treProject.Decision == Decision.Approved,
                         _DbContext, _httpContextAccessor, User);
+                    if (_Features.GenerateAcounts)
+                    {
+                        var acc = _DbContext.ProjectAcount.FirstOrDefault(x => x.Name == dbproj.SubmissionProjectName);
 
+                        if (dbproj.Decision == Decision.Approved && acc == null)
+                        {
+                            await _IKeyCloakService.DoGenAccount(dbproj.SubmissionProjectName);
+                        }
+                        else if (acc != null && dbproj.Decision != Decision.Approved)
+                        {
+                            await _IKeyCloakService.DeleteUser(dbproj.SubmissionProjectName);
+                        }
 
+                    }
 
                     Log.Information("{Function}:", "AuditLogs", "Treproject Decision:" + treProject.Decision.ToString(),
                         "ApprovedBy:" + approvedBy);
