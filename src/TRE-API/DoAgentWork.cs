@@ -598,19 +598,16 @@ namespace TRE_API
                                 var arr = new HttpClient();
 
 
-
                                 var role = aSubmission.Project.Name; //TODO Check
 
 
                                 var Acount =  _dbContext.ProjectAcount.FirstOrDefault(x => x.Name == role);
 
-                                var Token = await _keyCloakService.GenAccessTokenSimple(Acount.Name, Acount.Pass, _TreKeyCloakSettings.TokenRefreshSeconds);
+                                var TokenIN = await _keyCloakService.GenAccessTokenSimple(Acount.Name, Acount.Pass, _TreKeyCloakSettings.TokenRefreshSeconds);
 
-
+                                var Token = TokenIN.access_token;
 
                                 var projectId = aSubmission.Project.Id;
-
-
 
                                 var OutputBucket = _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects.First(x => x.SubmissionProjectId == projectId).OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
                                                                                                                                                               //it need the file name?? (key-name)
