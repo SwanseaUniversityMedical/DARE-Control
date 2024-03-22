@@ -1,0 +1,46 @@
+version: "3.9"
+services:
+  trino:
+    container_name: trino
+    ports:
+      - "8080:8080"
+    image: "trinodb/trino:443"
+    volumes:
+      - ./trino/etc:/etc/trino
+
+  postgres:
+    ports:
+      - "5432:5432"
+    image: postgres:11
+    container_name: postgres
+    environment:
+      POSTGRES_USER: dbt-trino
+      POSTGRES_PASSWORD: dbt-trino 
+
+  adminer:
+    image: adminer
+    mem_limit: 256M
+    mem_reservation: 128M
+    cpus: 0.1
+    restart: always
+    ports:
+      - 8234:8080
+
+  opaservice:
+    container_name: opa
+    image: openpolicyagent/opa:latest
+    restart: always
+    ports:
+      - 8181:8181 
+    command:
+      - "run"
+      - "--server" 
+      - "-c"
+      - "config.yaml"
+    volumes:
+      - ./opa/config.yaml:/config.yaml
+      
+
+networks:
+  default:
+    driver: bridge

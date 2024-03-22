@@ -100,6 +100,10 @@ var AgentSettings = new AgentSettings();
 configuration.Bind(nameof(AgentSettings), AgentSettings);
 builder.Services.AddSingleton(AgentSettings);
 
+var Features = new Features();
+configuration.Bind(nameof(Features), Features);
+builder.Services.AddSingleton(Features);
+
 
 
 
@@ -130,7 +134,7 @@ builder.Services.AddScoped<IDoSyncWork, DoSyncWork>();
 builder.Services.AddScoped<IDoAgentWork, DoAgentWork>();
 builder.Services.AddScoped<IHasuraService, HasuraService>();
 builder.Services.AddScoped<IHasuraAuthenticationService, HasuraAuthenticationService>();
-
+builder.Services.AddScoped<IKeyCloakService, KeyCloakService>();
 
 var TVP = new TokenValidationParameters
 {
@@ -410,12 +414,6 @@ else
     RecurringJob.AddOrUpdate<IDoSyncWork>(syncJobName, x => x.Execute(), Cron.MinuteInterval(jobSettings.syncSchedule));
 
 const string scanJobName = "Sync Submissions";
-if (jobSettings.scanSchedule == 0)
-    RecurringJob.RemoveIfExists(scanJobName);
-else
-    RecurringJob.AddOrUpdate<IDoAgentWork>(scanJobName,
-        x => x.Execute(),
-        Cron.MinuteInterval(jobSettings.scanSchedule));
 
 
 if (HasuraSettings.IsEnabled)

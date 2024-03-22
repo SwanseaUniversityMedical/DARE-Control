@@ -1,6 +1,7 @@
 ﻿
 using BL.Models;
 using Microsoft.EntityFrameworkCore;
+using TRE_API.Models;
 using TRE_TESK.Models;
 using TREAgent.Repositories;
 
@@ -36,6 +37,8 @@ namespace TRE_API.Repositories.DbContexts
         public DbSet<GeneratedRole> GeneratedRole { get; set; }
 
         public DbSet<RoleData> DataToRoles { get; set; }
+
+        public DbSet<ProjectAcount> ProjectAcount { get; set; }
 
     }
 }
