@@ -38,18 +38,15 @@ namespace BL.Models
             }
         }
 
-        public string EgressID
+        public string EgressID()
         {
-            get
+            if (string.IsNullOrEmpty(tesId))
             {
-                if (string.IsNullOrEmpty(tesId))
-                {
-                    return SubmissionId;
-                }
-                else
-                {
-                    return tesId;
-                }
+                return SubmissionId;
+            }
+            else
+            {
+                return tesId;
             }
         }
     }
