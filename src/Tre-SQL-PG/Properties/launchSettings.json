@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Tre-SQL-PG": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}
