@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   tre-ui-container:
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/pr-and-release-container.yaml@v1.4.2-containers
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/pr-and-release-container.yaml@v1.6.0-containers
     with:
       job-name: tre-ui-container
       registry: ${{ vars.HARBOR_REGISTRY }}
