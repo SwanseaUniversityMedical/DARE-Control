@@ -14,10 +14,19 @@ FROM trinodb/trino:422
 WORKDIR /workspace
 
 # Copy entrypoint script
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+#COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 
 # Make entrypoint script executable
-RUN chmod +x /usr/local/bin/entrypoint.sh
+#RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Set entrypoint
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+#ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Copy entrypoint script
+COPY entrypoint.sh /tmp/entrypoint.sh
+
+# Make entrypoint script executable
+RUN chmod +x /tmp/entrypoint.sh
+
+# Set entrypoint
+ENTRYPOINT ["/tmp/entrypoint.sh"]
