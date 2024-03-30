@@ -1,5 +1,5 @@
 # Use a base image with Trino CLI installed
-FROM openjdk:11-jre-slim
+FROM openjdk:11.0.16-jre-slim
 #FROM trinodb/trino:422
 
 # Install Trino CLI
