@@ -24,10 +24,10 @@ WORKDIR /workspace
 
 
 # Copy entrypoint script
-COPY entrypoint.sh ~/entrypoint.sh
+COPY entrypoint.sh /home/trino/entrypoint.sh
 
 # Make entrypoint script executable
-#RUN chmod +x ~/entrypoint.sh
+RUN chmod +x /home/trino/entrypoint.sh
 
 # Set entrypoint
-ENTRYPOINT ["~/entrypoint.sh"]
+ENTRYPOINT ["/home/trino/entrypoint.sh"]
