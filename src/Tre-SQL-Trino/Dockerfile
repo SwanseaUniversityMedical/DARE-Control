@@ -13,6 +13,8 @@ FROM trinodb/trino:422
 # Set working directory
 WORKDIR /workspace
 
+USER root:root
+
 # Copy entrypoint script
 #COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 
@@ -28,6 +30,8 @@ COPY entrypoint.sh /home/trino/entrypoint.sh
 
 # Make entrypoint script executable
 RUN chmod +x /home/trino/entrypoint.sh
+
+USER trino:trino
 
 # Set entrypoint
 ENTRYPOINT ["/home/trino/entrypoint.sh"]
