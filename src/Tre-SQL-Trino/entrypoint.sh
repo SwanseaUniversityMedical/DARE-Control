@@ -8,4 +8,7 @@ fi
 
 
 # Execute Trino CLI command to run SQL statement and output CSV
-trino --server "$TRINO_SERVER_URL" --execute "$SQL_STATEMENT" --output-format CSV > /tmp/result.csv
+trino --server "$TRINO_SERVER_URL" --execute "$SQL_STATEMENT" --output-format CSV > ~/result.csv
+
+ls -la ~/
+
