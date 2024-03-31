@@ -27,7 +27,7 @@ WORKDIR /workspace
 COPY entrypoint.sh ~/entrypoint.sh
 
 # Make entrypoint script executable
-RUN chmod +x ~/entrypoint.sh
+#RUN chmod +x ~/entrypoint.sh
 
 # Set entrypoint
 ENTRYPOINT ["~/entrypoint.sh"]
