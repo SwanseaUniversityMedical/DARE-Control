@@ -1,12 +1,12 @@
-name: Egress API Container
+name: Main UI Container
 
 on:
   pull_request:
     # Ignore PRs on branches specifically intended for other assets
     branches-ignore:
+      - '*/egress-api-container*'
       - '*/egress-ui-container*'
       - '*/main-api-container*'
-      - '*/main-ui-container*'
       - '*/tre-api-container*'
       - '*/tre-ui-container*'
       - '*/tre-hasura-container*'
@@ -14,8 +14,8 @@ on:
       - '*/tre-sql-trino-container*'
     # Only consider PRs that change files for this asset, including ci scripts
     paths:
-      - '.github/workflows/egress-api-container.yaml'
-      - 'src/Data-Egress-API/**'
+      - '.github/workflows/main-ui-container.yaml'
+      - 'src/DARE-FrontEnd/**'
       - 'src/BL/**'
     # Make sure all workflows that are "required checks" for a given
     # branch protection rule have the same paths: and branches-ignore:
@@ -24,13 +24,13 @@ on:
   push:
     # Only release off of release and maintenance branches for this asset
     branches:
-      - 'maintenance/egress-api-container/[0-9]+.x.x'
-      - 'maintenance/egress-api-container/[0-9]+.[0-9]+.x'
+      - 'maintenance/main-ui-container/[0-9]+.x.x'
+      - 'maintenance/main-ui-container/[0-9]+.[0-9]+.x'
       - 'main'
     # Only consider pushes that change files for this asset, including ci scripts
     paths:
-      - '.github/workflows/egress-api-container.yaml'
-      - 'src/Data-Egress-API/**'
+      - '.github/workflows/main-ui-container.yaml'
+      - 'src/DARE-FrontEnd/**'
       - 'src/BL/**'
 
 permissions:
@@ -46,21 +46,22 @@ concurrency:
 jobs:
   # Job name must be unique across repo to target
   # branch protection rules "required checks" properly!
-  egress-api-container:
+  main-ui-container:
     uses: SwanseaUniversityMedical/workflows/.github/workflows/pr-and-release-container.yaml@v1.9.1-containers
     with:
-      job-name: egress-api-container
+      job-name: main-ui-container
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_USER }}
-      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-egress-api
-      release-tag-format: 'DARE-Egress-API-Container-${version}'
+      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-main-ui
+      release-tag-format: 'DARE-Control-UI-Container-${version}'
       release-branches: |
         [
-          'maintenance/egress-api-container/[0-9]+\.([0-9]+|x)\.x',
+          'maintenance/main-ui-container/[0-9]+\.([0-9]+|x)\.x',
           'main'
-        ]cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
+        ]
+      cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       slack-channel: ${{ vars.SLACK_CHANNEL }}
-      build-file: src/Data-Egress-API/Dockerfile
+      build-file: src/DARE-FrontEnd/Dockerfile
       build-context: src
     secrets:
       cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
