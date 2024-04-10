@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   tre-pg-container:
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/pr-and-release-container.yaml@v1.6.0-containers
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/pr-and-release-container.yaml@v1.8.1-containers
     with:
       job-name: tre-sqlpg-container
       registry: ${{ vars.HARBOR_REGISTRY }}
