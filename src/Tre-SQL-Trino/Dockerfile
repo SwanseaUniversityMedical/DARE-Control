@@ -1,6 +1,6 @@
 # Use a base image with Trino CLI installed
 #FROM openjdk:11-jre-slim
-FROM trinodb/trino:422
+FROM trinodb/trino:444
 
 # Install Trino CLI
 #RUN apt-get update && \
