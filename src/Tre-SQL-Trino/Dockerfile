@@ -1,20 +1,37 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+# Use a base image with Trino CLI installed
+#FROM openjdk:11-jre-slim
+FROM trinodb/trino:422
 
-FROM mcr.microsoft.com/dotnet/runtime:7.0 AS base
-WORKDIR /app
+# Install Trino CLI
+#RUN apt-get update && \
+#    apt-get install -y wget && \
+#    wget https://repo1.maven.org/maven2/io/trino/trino-cli/440/trino-cli-440-executable.jar -O /usr/local/bin/trino && \
+#    chmod +x /usr/local/bin/trino && \
+#    apt-get remove -y wget && \
+#    apt-get clean
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
-WORKDIR /src
-COPY ["Tre-SQL-Trino/Tre-SQL-Trino.csproj", "Tre-SQL-Trino/"]
-RUN dotnet restore "Tre-SQL-Trino/Tre-SQL-Trino.csproj"
-COPY . .
-WORKDIR "/src/Tre-SQL-Trino"
-RUN dotnet build "Tre-SQL-Trino.csproj" -c Release -o /app/build
+# Set working directory
+WORKDIR /workspace
 
-FROM build AS publish
-RUN dotnet publish "Tre-SQL-Trino.csproj" -c Release -o /app/publish /p:UseAppHost=false
+USER root:root
 
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Tre-SQL-Trino.dll"]
+# Copy entrypoint script
+#COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+
+# Make entrypoint script executable
+#RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Set entrypoint
+#ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+
+# Copy entrypoint script
+COPY entrypoint.sh /home/trino/entrypoint.sh
+
+# Make entrypoint script executable
+RUN chmod +x /home/trino/entrypoint.sh
+
+USER trino:trino
+
+# Set entrypoint
+ENTRYPOINT ["/home/trino/entrypoint.sh"]
