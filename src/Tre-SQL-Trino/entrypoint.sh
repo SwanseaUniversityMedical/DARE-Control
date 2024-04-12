@@ -8,7 +8,7 @@ fi
 
 
 # Execute Trino CLI command to run SQL statement and output CSV
-trino --server "$TRINO_SERVER_URL" --execute "$SQL_STATEMENT" --access-token "$ACCESS_TOKEN" --output-format CSV > ~/result.csv
+trino --server "$TRINO_SERVER_URL" --execute "$SQL_STATEMENT" --access-token "$ACCESS_TOKEN" --insecure --output-format CSV > ~/result.csv
 
 ls -la ~/
 
