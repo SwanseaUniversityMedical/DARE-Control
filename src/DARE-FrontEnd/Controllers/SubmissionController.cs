@@ -1,4 +1,5 @@
-﻿using BL.Models;
+﻿using Amazon.Runtime.Internal.Transform;
+using BL.Models;
 using BL.Models.Tes;
 using BL.Models.ViewModels;
 using BL.Services;
@@ -198,7 +199,7 @@ namespace DARE_FrontEnd.Controllers
 
             // Add the executor to your data source (e.g., a list)
             model.Executors ??= new List<Executors>();
-            model.Executors.Add(new Executors { Image = image, Command = command });
+            model.Executors.Add(new Executors { Image = image, Env = command });
 
             var serializedModel = JsonConvert.SerializeObject(model);
             HttpContext.Response.Cookies.Append("AddiSubmissionWizard", serializedModel);
@@ -230,12 +231,17 @@ namespace DARE_FrontEnd.Controllers
                         First = false;
                         continue;
                     }
-                    List<string> commandList = ex.Command.Split(',').ToList();
+                    List<string> EnvList = ex.Env.Split(',').ToList();
                     var exet = new TesExecutor()
                     {
-                        Image = ex.Image,
-                        Command = commandList
+                        Image = ex.Image
                     };
+                    foreach (var ENV in EnvList)
+                    {
+                        var vales = ENV.Split("=");
+                        exet.Env[vales[0]] = vales[1];
+                    }
+                    
                     tesExecutors.Add(exet);
                 }
             }
@@ -294,14 +300,11 @@ namespace DARE_FrontEnd.Controllers
                 var QueryExecutor = new TesExecutor()
                 {
                     Image = _URLSettingsFrontEnd.QueryImage,
-                    Command = new List<string>
-                        {
-                            "/usr/bin/dotnet",
-                            "/app/Tre-Hasura.dll",
-                            "--Query_" + model.Query
-                        }
+                    Env = new Dictionary<string, string>()
+                    {
+                        { "SQL_STATEMENT", model.Query }
+                    }
                 };
-
 
 
                 if (test.Executors == null)

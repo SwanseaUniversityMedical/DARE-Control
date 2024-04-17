@@ -116,6 +116,10 @@ services:
       - communicating
     volumes:
       - ./OPASettings/config.yaml:/config.yaml
+  
+   # command:
+   #   - "run" 
+   #   - "stuff/bundle.tar.gz"
       
     #command:
     #  - "build" 
@@ -124,10 +128,10 @@ services:
     #  - "stuff/"
     #  - "-o"
     #  - "stuff/bundle.tar.gz"
-    #networks:
-    #  - communicating
-    #volumes:
-    #  - ./OPASettings:/stuff:rw
+    networks:
+      - communicating
+    volumes:
+      - ./OPASettings:/stuff:rw
       
   #postgresHasura:
   #  image: postgres:15

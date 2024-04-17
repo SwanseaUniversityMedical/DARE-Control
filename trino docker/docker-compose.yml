@@ -3,11 +3,13 @@ services:
   trino:
     container_name: trino
     ports:
-      - "8080:8080"
-    image: "trinodb/trino:443"
+      - "8943:8943"
+    image: "trinodb/trino:444"
     volumes:
       - ./trino/etc:/etc/trino
-
+      - ./trino/etc/RootCA.pem:/etc/clustercoord.pem
+    networks:
+      - default
   postgres:
     ports:
       - "5432:5432"
@@ -16,7 +18,11 @@ services:
     environment:
       POSTGRES_USER: dbt-trino
       POSTGRES_PASSWORD: dbt-trino 
-
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - default
   adminer:
     image: adminer
     mem_limit: 256M
@@ -25,7 +31,8 @@ services:
     restart: always
     ports:
       - 8234:8080
-
+    networks:
+      - default
   opaservice:
     container_name: opa
     image: openpolicyagent/opa:latest
@@ -37,10 +44,37 @@ services:
       - "--server" 
       - "-c"
       - "config.yaml"
+      - "--log-level=debug"
     volumes:
       - ./opa/config.yaml:/config.yaml
-      
-
+      - ./opa/log.properties:/etc/log.properties
+    networks:
+      - default
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    command: start-dev
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres
+      DB_DATABASE: keycloak
+      DB_USER: dbt-trino
+      DB_PASSWORD: dbt-trino
+      KEYCLOAK_LOGLEVEL: DEBUG
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      ROOT_LOGLEVEL: DEBUG
+    ports:
+      - 8065:8080
+      - 8443:8443
+    depends_on:
+      - postgres
+    networks:
+      - default
+volumes:
+  postgres:
+    driver: local
+    
+    
 networks:
   default:
     driver: bridge

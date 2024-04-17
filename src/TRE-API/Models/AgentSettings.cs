@@ -18,5 +18,8 @@
 
         public string TESKAPIURL { get; set; }
         public string URLHasuraToAdd { get; set; }
+
+
+        public string CATALOG { get; set; }
     }
 }

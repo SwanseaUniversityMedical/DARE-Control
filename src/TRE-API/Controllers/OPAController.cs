@@ -29,6 +29,9 @@ using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
 using System.Text.RegularExpressions;
 using System.Reflection;
+using System.Security.Policy;
+using Build.Security.AspNetCore.Middleware.Dto;
+using BL.Models.Settings;
 
 namespace OPA.Controllers
 {
@@ -42,23 +45,56 @@ namespace OPA.Controllers
         private readonly IDareClientWithoutTokenHelper _dareHelper;
         private readonly OpaService _opaService;
         private readonly OPASettings _opaSettings;
-        public OPAController(IDareClientWithoutTokenHelper helper, ApplicationDbContext applicationDbContext, OpaService opaservice, OPASettings opasettings)
+        private readonly IKeyCloakService _IKeyCloakService;
+        private readonly TreKeyCloakSettings _TreKeyCloakSettings;
+
+        public OPAController(IDareClientWithoutTokenHelper helper, ApplicationDbContext applicationDbContext, OpaService opaservice, OPASettings opasettings, IKeyCloakService iKeyCloakService, TreKeyCloakSettings TreKeyCloakSettings)
         {
             _dareHelper = helper;
             _DbContext = applicationDbContext;
             _opaService = opaservice;
             _opaSettings = opasettings;
+            _IKeyCloakService = iKeyCloakService;
+            _TreKeyCloakSettings = TreKeyCloakSettings;
         }
 
 
 
 
-        public void CreateBundle(string dataJsonContent, string rego, string outputDirectory)
+        private void CreateBundle(string dataJsonContent, string rego, string outputDirectory, string Name)
         {
-            // Create a _ folder and add the _data.json file with the serialized data
-            string dataJsonPath = Path.Combine(outputDirectory, "data.json");
+            if (Directory.Exists(Path.Combine(outputDirectory)))
+            {
+                Directory.Delete(Path.Combine(outputDirectory), true);
+            }
+            
             Directory.CreateDirectory(Path.Combine(outputDirectory));
+            //2021-09-30 14:50:23
+            var manifest = @"{
+  ""revision"": """ +  string.Format("{0:yyyy-MM-dd HH:mm:ss}" , DateTime.UtcNow)  + @""",
+  ""roots"": [""play"", ""data/play""]
+}";
 
+            var manifestPath  = Path.Combine(outputDirectory, ".manifest");
+            System.IO.File.Delete(manifestPath);
+
+            using (FileStream dataJsonStream = new FileStream(manifestPath, FileMode.Create))
+            {
+                using (StreamWriter jsonWriter = new StreamWriter(dataJsonStream))
+                {
+                    jsonWriter.Write(manifest);
+                }
+            }
+
+
+
+            Directory.CreateDirectory(Path.Combine(outputDirectory,"data"));
+            Directory.CreateDirectory(Path.Combine(outputDirectory,"data", Name));
+
+
+            // Create a _ folder and add the _data.json file with the serialized data
+            string dataJsonPath = Path.Combine(outputDirectory, "data", Name, "data.json");
+            System.IO.File.Delete(dataJsonPath);
             using (FileStream dataJsonStream = new FileStream(dataJsonPath, FileMode.Create))
             {
                 using (StreamWriter jsonWriter = new StreamWriter(dataJsonStream))
@@ -67,12 +103,11 @@ namespace OPA.Controllers
                 }
             }
 
-            Directory.CreateDirectory(Path.Combine(outputDirectory, "stuff"));
+            Directory.CreateDirectory(Path.Combine(outputDirectory, "policies"));
+            Directory.CreateDirectory(Path.Combine(outputDirectory, "policies", Name));
 
-
-
-            // Create a discovery.rego file in the _ folder
-            string discoveryRegoPath = Path.Combine(outputDirectory, "stuff", "discovery.rego");
+            string discoveryRegoPath = Path.Combine(outputDirectory, "policies", Name, $"allow.rego");
+            System.IO.File.Delete(discoveryRegoPath);
             using (FileStream regoStream = new FileStream(discoveryRegoPath, FileMode.Create))
             {
                 using (StreamWriter regoWriter = new StreamWriter(regoStream))
@@ -81,22 +116,20 @@ namespace OPA.Controllers
                 }
             }
 
-            string bundleTarPath = Path.Combine(outputDirectory, "..", "tarme", "bundle.tar");
-           // ZipFile.CreateFromDirectory(outputDirectory, bundleTarPath);
-
-            string bundleTarPathgz = Path.Combine(outputDirectory, "..", "tarme", "bundle.tar.gz");
-            //ZipFile.CreateFromDirectory(Path.Combine(outputDirectory, "..", "tarme"), bundleTarPathgz);
-
+            string bundleTarPath = Path.Combine(outputDirectory, "..", "output", "bundle.tar");
             
-
-
+            string bundleTarPathgz = Path.Combine(outputDirectory, "..", "output", "bundle.tar.gz");
+            Directory.CreateDirectory(Path.Combine(outputDirectory, "..", "output"));
+            if (System.IO.File.Exists(bundleTarPathgz))
+            {
+                System.IO.File.Delete(bundleTarPathgz);
+            }
+            
             Stream outStream = System.IO.File.Create(bundleTarPathgz);
             Stream gzoStream = new GZipOutputStream(outStream);
             TarArchive tarArchive = TarArchive.CreateOutputTarArchive(gzoStream);
 
-            // Note that the RootPath is currently case sensitive and must be forward slashes e.g. "c:/temp"
-            // and must not end with a slash, otherwise cuts off first char of filename
-            // This is scheduled for fix in next release
+
             tarArchive.RootPath = outputDirectory.Replace('\\', '/');
             if (tarArchive.RootPath.EndsWith("/"))
                 tarArchive.RootPath = tarArchive.RootPath.Remove(tarArchive.RootPath.Length - 1);
@@ -106,14 +139,12 @@ namespace OPA.Controllers
             tarArchive.Close();
         }
 
+
         private void AddDirectoryFilesToTar(TarArchive tarArchive, string sourceDirectory, bool recurse)
         {
-            // Optionally, write an entry for the directory itself.
-            // Specify false for recursion here if we will add the directory's files individually.
             TarEntry tarEntry = TarEntry.CreateEntryFromFile(sourceDirectory);
             tarArchive.WriteEntry(tarEntry, false);
 
-            // Write each file to the tar.
             string[] filenames = Directory.GetFiles(sourceDirectory);
             foreach (string filename in filenames)
             {
@@ -130,40 +161,101 @@ namespace OPA.Controllers
         }
 
 
+        [HttpPost("TokenPlease/{pass}/{name}")]
+
+        public async Task<IActionResult> TokenPlease(string pass, string name)
+        {
+            return Ok(await _IKeyCloakService.GenAccessTokenSimple(name, pass, _TreKeyCloakSettings.TokenRefreshSeconds));
+
+        }
+
+        [HttpPost("UpdateOPA")]
+
+        public async Task<IActionResult> UpdateOPA()
+        {
+            var httpClient = new HttpClient();
+
+            var url = _opaSettings.OPAPolicyUploadURL;
+
+            var apiClient = new HttpClient();
+            var requestMessage = new HttpRequestMessage(HttpMethod.Put, url);
+            var requestContent = new StringContent(
+                @"package play
+import rego.v1
+import input
+
+default allow := false
+
+allow if {
+    input.action.operation in [""ExecuteQuery"",""AccessCatalog""]
+}
+
+allow if {
+    input.action.operation in [""ExecuteQuery"",""AccessCatalog"", ""SelectFromColumns""]
+    input.context.identity.user == input.action.resource.table.schemaName
+}
+
+
+
+", Encoding.UTF8, "application/json");
+
+            var response = await apiClient.PutAsync(url, requestContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Get the response content as a string
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine($"Response{ responseContent}");
+            }
+            else
+            {
+
+                Console.WriteLine($"Error { (int)response.StatusCode}- { response.ReasonPhrase}");
+            }
+            return Ok();
+        }
+
+
         [HttpGet("BundleGet/{ServiceName}/{Resource}")]
         public async Task<IActionResult> BundleGet(string ServiceName, string Resource)
         {
+            string path = Path.Combine( Assembly.GetEntryAssembly()?.Location.Replace("TRE-API.dll",""), "..", "gen" ).Replace('\\', '/');
+            try
+            {
 
-
-            var  data = @"
-package play
+                var data = @"package play
 import rego.v1
 import input
-default allow = false
+
+default allow := false
 
 allow if {
-   print(""input"", input)
-   input.identity.user == input.resource.table.schemaName
+    input.action.operation in [""ExecuteQuery"",""AccessCatalog""]
 }
+
+allow if {
+    input.action.operation in [""ExecuteQuery"",""AccessCatalog"", ""SelectFromColumns""]
+    input.context.identity.user == input.action.resource.table.schemaName
+}
+
+
+
 ";
-           // CreateBundle(@"{""cool"" : 2}", data, @"C:/Users/john.vaughan/Desktop/stuff/llm");
+              
+                CreateBundle(@"{""play"" : 2}", data, path, "play");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.Message);
+            }
 
-          //  var value = System.IO.File.ReadAllBytes("C:/Users/john.vaughan/Desktop/bundle.tar.gz");
+            var Outpath = Path.Combine(path.Replace("gen", "output"), "bundle.tar.gz").Replace('\\', '/');
 
-
-          //  var bytedata = CompressString(data);
-
-           // var putput = DecompressToString(bytedata);
-
-            var tar = Assembly.GetExecutingAssembly().GetManifestResourceNames()
-                .Where(x => x.ToLower().Contains($".tar.gz".ToLower()));
-
-            var tarStream = GetType()
-                     .Assembly
-                     .GetManifestResourceStream(tar.First());
+            var value = System.IO.File.ReadAllBytes(Outpath);
 
 
-            return File(tarStream, "application/gzip");
+            return File(value, "application/gzip");
 
         }
 

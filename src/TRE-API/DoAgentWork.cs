@@ -89,6 +89,7 @@ namespace TRE_API
             _TreKeyCloakSettings = TreKeyCloakSettings;
         }
 
+
         public async Task testing(string toRun, string Role)
         {
 
@@ -506,8 +507,6 @@ namespace TRE_API
                         }
                         else
                         {
-
-
                             try
                             {
                                 if (useTESK == false)
@@ -561,14 +560,11 @@ namespace TRE_API
                                     IBus rabbit = scope.ServiceProvider.GetRequiredService<IBus>();
                                     EasyNetQ.Topology.Exchange exchangeObject =
                                         rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Submission, "topic");
-                                    rabbit.Advanced.Publish(exchangeObject, RoutingConstants.ProcessSub, false,
-                                        new Message<TesTask>(tesMessage));
+                                    rabbit.Advanced.Publish(exchangeObject, RoutingConstants.ProcessSub, false, new Message<TesTask>(tesMessage));
                                 }
                                 catch (Exception e)
                                 {
-                                    
                                     Log.Error(e, "{Function} Send rabbit failed for sub {SubId}", "Execute", aSubmission.Id);
-
                                     processedOK = false;
                                 }
                             }
@@ -631,18 +627,15 @@ namespace TRE_API
                                 foreach (var Executor in tesMessage.Executors)
                                 {
                                     Log.Information("Executor.Image > " + Executor.Image);
-                                    // "--URL_http://192.168.70.84:8080"
+
                                     if (Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken))
                                     {
-                                        Executor.Command.Add("--Token_" + Token);
-                                        Executor.Command.Add("--URL_" + _AgentSettings.URLHasuraToAdd);
+                                        Executor.Env["TRINO_SERVER_URL"] = _AgentSettings.URLHasuraToAdd;
+                                        Executor.Env["ACCESS_TOKEN"] = Token;
+                                        Executor.Env["USER_NAME"] = Acount.Name;
+                                        Executor.Env["SCHEMA"] = Acount.Name; //# for now
+                                        Executor.Env["CATALOG"] = _AgentSettings.CATALOG;
                                     }
-
-                                    //if (Executor.Env == null)
-                                    //{
-                                    //    Executor.Env = new Dictionary<string, string>();
-                                    //}
-                                    //Executor.Env["HASURAAuthenticationToken"] = Token;
                                 }
 
                                 _dbContext.TokensToExpire.Add(new TokenToExpire()
@@ -677,9 +670,7 @@ namespace TRE_API
                                     Log.Error(e,"{Function} Error sending record outcome to submission layer for sub {SubId}", "Execute", aSubmission.Id);
                                     processedOK = false;
                                 }
-
                             }
-
                         }
                     }
                     catch (Exception e)

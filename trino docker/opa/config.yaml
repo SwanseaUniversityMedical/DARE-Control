@@ -3,6 +3,11 @@ services:
     url: https://host.docker.internal:7157/api/OPA/BundleGet
     allow_insecure_tls : true
 
-discovery:
-  service: acmecorp
-  resource: /example/discovery.tar.gz
+bundles:
+  authz:
+    service: acmecorp
+    resource: somedir/bundle.tar.gz
+    persist: true
+    polling:
+      min_delay_seconds: 60
+      max_delay_seconds: 120

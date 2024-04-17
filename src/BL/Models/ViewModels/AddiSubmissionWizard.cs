@@ -38,6 +38,6 @@ namespace BL.Models.ViewModels
     public class Executors
     {
         public string Image { get; set; }
-        public string Command { get; set; }
+        public string Env { get; set; }
     }
 }

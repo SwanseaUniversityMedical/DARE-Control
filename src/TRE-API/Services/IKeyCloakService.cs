@@ -133,7 +133,6 @@ namespace TRE_API.Services
 
             var tokenRequestBody = new FormUrlEncodedContent(new Dictionary<string, string>
             {
-                {"grant_type", "refresh_token"},
                 {"client_id", "admin-cli"},
                 {"username", adminName},
                 {"password", adminPassword},

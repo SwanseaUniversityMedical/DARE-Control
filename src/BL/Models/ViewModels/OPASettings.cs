@@ -7,6 +7,7 @@ namespace BL.Models.ViewModels
         public double ExpiryDelayMinutes { get; set; }
         public bool UseRealExpiry { get; set; }
 
+        public string OPAPolicyUploadURL { get; set; }
     }
 }
 
