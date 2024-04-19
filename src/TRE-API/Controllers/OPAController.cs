@@ -67,15 +67,15 @@ namespace OPA.Controllers
             {
                 Directory.Delete(Path.Combine(outputDirectory), true);
             }
-            
+
             Directory.CreateDirectory(Path.Combine(outputDirectory));
             //2021-09-30 14:50:23
             var manifest = @"{
-  ""revision"": """ +  string.Format("{0:yyyy-MM-dd HH:mm:ss}" , DateTime.UtcNow)  + @""",
+  ""revision"": """ + string.Format("{0:yyyy-MM-dd HH:mm:ss}", DateTime.UtcNow) + @""",
   ""roots"": [""play"", ""data/play""]
 }";
 
-            var manifestPath  = Path.Combine(outputDirectory, ".manifest");
+            var manifestPath = Path.Combine(outputDirectory, ".manifest");
             System.IO.File.Delete(manifestPath);
 
             using (FileStream dataJsonStream = new FileStream(manifestPath, FileMode.Create))
@@ -88,8 +88,8 @@ namespace OPA.Controllers
 
 
 
-            Directory.CreateDirectory(Path.Combine(outputDirectory,"data"));
-            Directory.CreateDirectory(Path.Combine(outputDirectory,"data", Name));
+            Directory.CreateDirectory(Path.Combine(outputDirectory, "data"));
+            Directory.CreateDirectory(Path.Combine(outputDirectory, "data", Name));
 
 
             // Create a _ folder and add the _data.json file with the serialized data
@@ -117,14 +117,14 @@ namespace OPA.Controllers
             }
 
             string bundleTarPath = Path.Combine(outputDirectory, "..", "output", "bundle.tar");
-            
+
             string bundleTarPathgz = Path.Combine(outputDirectory, "..", "output", "bundle.tar.gz");
             Directory.CreateDirectory(Path.Combine(outputDirectory, "..", "output"));
             if (System.IO.File.Exists(bundleTarPathgz))
             {
                 System.IO.File.Delete(bundleTarPathgz);
             }
-            
+
             Stream outStream = System.IO.File.Create(bundleTarPathgz);
             Stream gzoStream = new GZipOutputStream(outStream);
             TarArchive tarArchive = TarArchive.CreateOutputTarArchive(gzoStream);
@@ -206,14 +206,83 @@ allow if {
                 // Get the response content as a string
                 var responseContent = await response.Content.ReadAsStringAsync();
 
-                Console.WriteLine($"Response{ responseContent}");
+                Console.WriteLine($"Response{responseContent}");
             }
             else
             {
 
-                Console.WriteLine($"Error { (int)response.StatusCode}- { response.ReasonPhrase}");
+                Console.WriteLine($"Error {(int)response.StatusCode}- {response.ReasonPhrase}");
             }
             return Ok();
+        }
+
+        public class dataMoled
+        {
+            public bool valid { get; set; }
+            public long expires { get; set; }
+        }
+
+        [HttpGet("BundleGetv2/{ServiceName}/{Resource}")]
+        public async Task<IActionResult> BundleGetv2(string ServiceName, string Resource)
+        {
+            DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            Dictionary<string, Dictionary<string, Dictionary<string, dataMoled>>> dataDictionary = new Dictionary<string, Dictionary<string, Dictionary<string, dataMoled>>>();
+            foreach (var User in _DbContext.Users.ToList()) //note could be optimised
+            {
+                var sub = _DbContext.Projects.FirstOrDefault(x => x.SubmissionProjectId == User.SubmissionUserId);
+
+                if (sub == null) continue;
+                if (sub.ProjectExpiryDate < DateTime.UtcNow) continue;
+
+                
+                long epochSeconds = (sub.ProjectExpiryDate - epochStart).Ticks / TimeSpan.TicksPerSecond;
+                long epochNanoseconds = epochSeconds * 1000000000;
+
+                dataDictionary["UserAccess"][User.Username][sub.SubmissionProjectName] = new dataMoled
+                { 
+                    valid = true,
+                    expires = epochNanoseconds,
+                };
+            }
+
+
+            string path = Path.Combine(Assembly.GetEntryAssembly()?.Location.Replace("TRE-API.dll", ""), "..", "genv2").Replace('\\', '/');
+            try
+            {
+
+                var data = @"package play
+import rego.v1
+import input
+
+default allow := false
+
+allow if {
+    input.action.operation in [""ExecuteQuery"",""AccessCatalog""]
+
+}
+
+allow if {
+    
+    input.action.operation in [""ExecuteQuery"",""AccessCatalog"", ""SelectFromColumns""]
+    data.UserAccess[input.context.identity.user][input.action.resource.table.schemaName].valid
+    data.UserAccess[input.context.identity.user][input.action.resource.table.schemaName].expires > time.now_ns()
+}
+";
+
+                CreateBundle(JsonConvert.SerializeObject(dataDictionary), data, path, "play");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.Message);
+            }
+
+            var Outpath = Path.Combine(path.Replace("genv2", "output"), "bundle.tar.gz").Replace('\\', '/');
+
+            var value = System.IO.File.ReadAllBytes(Outpath);
+
+
+            return File(value, "application/gzip");
+
         }
 
 
@@ -235,12 +304,10 @@ allow if {
 }
 
 allow if {
+    print( time.now_ns() )
     input.action.operation in [""ExecuteQuery"",""AccessCatalog"", ""SelectFromColumns""]
     input.context.identity.user == input.action.resource.table.schemaName
 }
-
-
-
 ";
               
                 CreateBundle(@"{""play"" : 2}", data, path, "play");
@@ -253,6 +320,14 @@ allow if {
             var Outpath = Path.Combine(path.Replace("gen", "output"), "bundle.tar.gz").Replace('\\', '/');
 
             var value = System.IO.File.ReadAllBytes(Outpath);
+
+
+            DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            long epochSeconds = (new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc) - epochStart).Ticks / TimeSpan.TicksPerSecond;
+            long epochNanoseconds = epochSeconds * 1000000000;
+            //epochNanoseconds = 1713438780069266781;
+            //DateTime deadlineUtc = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddTicks((epochNanoseconds / 1000000000) * TimeSpan.TicksPerSecond);
+            //Console.WriteLine("Deadline UTC: " + deadlineUtc.ToString("o"));
 
 
             return File(value, "application/gzip");

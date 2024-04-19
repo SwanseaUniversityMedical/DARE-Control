@@ -33,6 +33,8 @@ namespace BL.Models
         public StatusType Status { get; set; }
         public string? StatusDescription { get; set; }
 
+        public string? QueryToken { get; set; }
+
         public string GetTotalDisplayTime()
         {
             var end = EndTime == DateTime.MinValue ? (DateTime.Now).ToUniversalTime() : EndTime;

@@ -48,8 +48,7 @@ namespace TRE_API.Services
             var projectAdds = subprojs.Where(x => !_DbContext.Projects.Any(y => y.SubmissionProjectId == x.Id));
             var projectArchives =
                 dbprojs.Where(x => !subprojs.Any(y => y.Id == x.SubmissionProjectId));
-            var projectUnarchives =
-                dbprojs.Where(x => x.Archived && subprojs.Any(y => y.Id == x.SubmissionProjectId));
+            var projectUnarchives = dbprojs.Where(x => x.Archived && subprojs.Any(y => y.Id == x.SubmissionProjectId));
             foreach (var project in projectAdds)
             {
 

@@ -599,14 +599,17 @@ namespace TRE_API
 
                                 var Acount =  _dbContext.ProjectAcount.FirstOrDefault(x => x.Name == role);
 
-                                var TokenIN = await _keyCloakService.GenAccessTokenSimple(Acount.Name, Acount.Pass, _TreKeyCloakSettings.TokenRefreshSeconds);
+                                //var TokenIN = await _keyCloakService.GenAccessTokenSimple(Acount.Name, Acount.Pass, _TreKeyCloakSettings.TokenRefreshSeconds);
 
-                                var Token = TokenIN.access_token;
+                                var Token = aSubmission.QueryToken;
 
                                 var projectId = aSubmission.Project.Id;
 
                                 var OutputBucket = _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects.First(x => x.SubmissionProjectId == projectId).OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
-                                                                                                                                                              //it need the file name?? (key-name)
+
+
+
+                                //it need the file name?? (key-name)
 
                                 if (tesMessage.Outputs == null)
                                 {
@@ -632,8 +635,8 @@ namespace TRE_API
                                     {
                                         Executor.Env["TRINO_SERVER_URL"] = _AgentSettings.URLHasuraToAdd;
                                         Executor.Env["ACCESS_TOKEN"] = Token;
-                                        Executor.Env["USER_NAME"] = Acount.Name;
-                                        Executor.Env["SCHEMA"] = Acount.Name; //# for now
+                                        Executor.Env["USER_NAME"] = aSubmission.SubmittedBy.Name;
+                                        Executor.Env["SCHEMA"] = aSubmission.Project.Name;
                                         Executor.Env["CATALOG"] = _AgentSettings.CATALOG;
                                     }
                                 }

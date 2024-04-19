@@ -14,6 +14,9 @@ using NuGet.Common;
 using Serilog;
 using System;
 using static System.Net.Mime.MediaTypeNames;
+using DARE_FrontEnd.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -23,12 +26,15 @@ namespace DARE_FrontEnd.Controllers
         private readonly IDareClientHelper _clientHelper;
         private readonly IConfiguration _configuration;
         private readonly URLSettingsFrontEnd _URLSettingsFrontEnd; 
+        private readonly IKeyCloakService _IKeyCloakService;
 
-        public SubmissionController(IDareClientHelper client, IConfiguration configuration, URLSettingsFrontEnd URLSettingsFrontEnd)
+
+        public SubmissionController(IDareClientHelper client, IConfiguration configuration, URLSettingsFrontEnd URLSettingsFrontEnd, IKeyCloakService IKeyCloakService)
         {
             _clientHelper = client;
             _configuration = configuration;
             _URLSettingsFrontEnd = URLSettingsFrontEnd;
+            _IKeyCloakService = IKeyCloakService;
         }
 
       
@@ -343,8 +349,10 @@ namespace DARE_FrontEnd.Controllers
                         };
             }
 
+            var context = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            var Token = await _IKeyCloakService.RefreshUserToken(context);
 
-            var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test);
+            var result = await _clientHelper.CallAPI<TesTask, TesTask?>($"/v1/tasks/{Token}", test);
 
             return RedirectToAction("GetProject", "Project", new { id = model.ProjectId });
         }

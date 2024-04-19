@@ -1,6 +1,6 @@
 services:
   acmecorp:
-    url: https://host.docker.internal:7157/api/OPA/BundleGet
+    url: https://host.docker.internal:7157/api/OPA/BundleGetv2
     allow_insecure_tls : true
 
 bundles:
