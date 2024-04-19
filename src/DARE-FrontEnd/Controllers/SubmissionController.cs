@@ -300,6 +300,10 @@ namespace DARE_FrontEnd.Controllers
                 var QueryExecutor = new TesExecutor()
                 {
                     Image = _URLSettingsFrontEnd.QueryImage,
+                    Command = new List<string>()
+                    {
+                        "/home/trino/entrypoint.sh"
+                    },
                     Env = new Dictionary<string, string>()
                     {
                         { "SQL_STATEMENT", model.Query }
