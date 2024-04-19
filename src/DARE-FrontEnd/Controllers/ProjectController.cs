@@ -43,7 +43,7 @@ namespace DARE_FrontEnd.Controllers
             }
 
             var usersName = "";
-            usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
+            usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).FirstOrDefault()
             if (!string.IsNullOrWhiteSpace(usersName) &&
                 (from x in proj.Users where x.Name.ToLower().Trim() == usersName.ToLower().Trim() select x).Any())
             {
