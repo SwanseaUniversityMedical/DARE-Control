@@ -41,7 +41,7 @@ namespace DARE_FrontEnd.Controllers
             {
                 return true;
             }
-
+            //NO CHANGE
             var usersName = "";
             usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).FirstOrDefault();
             if (!string.IsNullOrWhiteSpace(usersName) &&
