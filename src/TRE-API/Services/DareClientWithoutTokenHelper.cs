@@ -22,7 +22,7 @@ namespace TRE_API.Services
             {
                 _username = creds.UserName;
                 _password = encDec.Decrypt(creds.PasswordEnc);
-                _requiredRole = "dare-tre-admin";
+                _requiredRole = "dare-control-admin";
             }
         }
 
