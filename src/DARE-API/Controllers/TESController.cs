@@ -24,6 +24,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using DARE_API.Services.Contract;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace DARE_API.Controllers
 {
@@ -36,6 +37,8 @@ namespace DARE_API.Controllers
     public class TaskServiceApiController : ControllerBase
     {
 
+
+        private readonly IKeyCloakService _IKeyCloakService;
         private readonly ApplicationDbContext _DbContext;
         private readonly IBus _rabbit;
         protected readonly IHttpContextAccessor _httpContextAccessor;
@@ -57,12 +60,13 @@ namespace DARE_API.Controllers
         /// <param name="repository">The main <see cref="ApplicationDbContext"/> database repository</param>
         /// <param name="rabbit">The main <see cref="IBus"/> easynet q sender</param>
         public TaskServiceApiController(ApplicationDbContext repository, IBus rabbit, IHttpContextAccessor httpContextAccessor, 
-            IKeyclockTokenAPIHelper IKeyclockTokenAPIHelper)
+            IKeyclockTokenAPIHelper IKeyclockTokenAPIHelper, IKeyCloakService IKeyCloakService)
         {
             _DbContext = repository;
             _rabbit = rabbit;
             _httpContextAccessor = httpContextAccessor;
             _IKeyclockTokenAPIHelper = IKeyclockTokenAPIHelper;
+            _IKeyCloakService = IKeyCloakService;
         }
         
         /// <summary>
@@ -156,11 +160,11 @@ namespace DARE_API.Controllers
         /// <response code="200"></response>
         [HttpPost]
         [Authorize]
-        [Route("/v1/tasks/{Token}")]
+        [Route("/v1/tasks")]
         [ValidateModelState]
         [SwaggerOperation("CreateTask")]
         [SwaggerResponse(statusCode: 200, type: typeof(TesCreateTaskResponse), description: "")]
-        public virtual async Task<IActionResult> CreateTaskAsync([FromBody] TesTask tesTask, string Token,
+        public virtual async Task<IActionResult> CreateTaskAsync([FromBody] TesTask tesTask,
             CancellationToken cancellationToken)
         {
             Log.Information($"/v1/tasks route successfully entered");
@@ -305,7 +309,8 @@ namespace DARE_API.Controllers
                     return BadRequest("No valid tres for this project " + project + ".");
                 }
 
-
+                var Token = HttpContext.Request.Headers["Authorization"];
+              
                 var sub = new Submission()
                 {
                     DockerInputLocation = tesTask.Executors.First().Image,

@@ -356,7 +356,7 @@ namespace DARE_FrontEnd.Controllers
             var context = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             var Token = await _IKeyCloakService.RefreshUserToken(context);
 
-            var result = await _clientHelper.CallAPI<TesTask, TesTask?>($"/v1/tasks/{Token}", test);
+            var result = await _clientHelper.CallAPI<TesTask, TesTask?>($"/v1/tasks", test);
 
             return RedirectToAction("GetProject", "Project", new { id = model.ProjectId });
         }
