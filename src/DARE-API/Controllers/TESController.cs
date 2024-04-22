@@ -308,9 +308,6 @@ namespace DARE_API.Controllers
                 {
                     return BadRequest("No valid tres for this project " + project + ".");
                 }
-
-                var Token = HttpContext.Request.Headers["Authorization"];
-              
                 var sub = new Submission()
                 {
                     DockerInputLocation = tesTask.Executors.First().Image,
@@ -321,9 +318,7 @@ namespace DARE_API.Controllers
                     SubmittedBy = user,
                     TesName = tesTask.Name,
                     SourceCrate = tesTask.Executors.First().Image,
-                    QueryToken = Token
                 };
-
 
 
                 _DbContext.Submissions.Add(sub);
