@@ -35,6 +35,7 @@ RUN chmod +x /home/trino/entrypoint.sh
 RUN mkdir -p /data
 RUN chmod 777 /data
 RUN chown -R trino:trino /data
+RUN chown trino:trino /home/trino/entrypoint.sh
 
 USER trino:trino
 
