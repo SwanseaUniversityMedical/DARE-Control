@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 
 # Check if required environment variables are provided
 if [[ -z "$TRINO_SERVER_URL" || -z "$SQL_STATEMENT" ]]; then
