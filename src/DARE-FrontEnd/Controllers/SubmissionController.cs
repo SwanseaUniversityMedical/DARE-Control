@@ -209,6 +209,10 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<ActionResult> AddiSubmissionWizard(AddiSubmissionWizard model, string Executors, string TreData,string selectedTre)
         {
+            try
+            {
+
+            
             var listOfTre = "";
 
             var paramlist = new Dictionary<string, string>();
@@ -344,6 +348,12 @@ namespace DARE_FrontEnd.Controllers
             var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test);
 
             return RedirectToAction("GetProject", "Project", new { id = model.ProjectId });
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "{Function} Boom crash", "AddiSubmissionWizard");
+                throw;
+            }
         }
     }
 }
