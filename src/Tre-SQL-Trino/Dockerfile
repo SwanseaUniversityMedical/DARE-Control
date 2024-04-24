@@ -31,6 +31,10 @@ COPY entrypoint.sh /home/trino/entrypoint.sh
 # Make entrypoint script executable
 RUN chmod +x /home/trino/entrypoint.sh
 
+# Make target for output data
+RUN mkdir -p /data
+RUN chmod 777 /data
+
 USER trino:trino
 
 # Set entrypoint
