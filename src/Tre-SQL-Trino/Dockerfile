@@ -34,6 +34,7 @@ RUN chmod +x /home/trino/entrypoint.sh
 # Make target for output data
 RUN mkdir -p /data
 RUN chmod 777 /data
+RUN chown -R trino:trino /data
 
 USER trino:trino
 
