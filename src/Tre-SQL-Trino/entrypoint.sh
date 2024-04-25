@@ -1,5 +1,7 @@
 #!/bin/bash
 
+sleep 30000
+
 # Check if required environment variables are provided
 if [[ -z "$TRINO_SERVER_URL" || -z "$SQL_STATEMENT" || -z "$LOCATION" ]]; then
     echo "Please provide TRINO_SERVER_URL, SQL_STATEMENT and LOCATION environment variables."
