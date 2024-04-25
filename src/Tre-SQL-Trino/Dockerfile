@@ -25,14 +25,24 @@ USER root:root
 # Set entrypoint
 #ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
-
 # Copy entrypoint script
-COPY entrypoint.sh /home/trino/entrypoint.sh
+COPY entrypoint.sh /workspace/entrypoint.sh
 
 # Make entrypoint script executable
-RUN chmod +x /home/trino/entrypoint.sh
+RUN chmod +x /workspace/entrypoint.sh
 
 USER trino:trino
 
 # Set entrypoint
-ENTRYPOINT ["/home/trino/entrypoint.sh"]
+ENTRYPOINT ["/workspace/entrypoint.sh"]
+
+# Copy entrypoint script
+#COPY entrypoint.sh /home/trino/entrypoint.sh
+
+# Make entrypoint script executable
+#RUN chmod +x /home/trino/entrypoint.sh
+
+#USER trino:trino
+
+# Set entrypoint
+#ENTRYPOINT ["/home/trino/entrypoint.sh"]
