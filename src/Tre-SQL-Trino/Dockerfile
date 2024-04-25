@@ -16,9 +16,6 @@ WORKDIR /workspace
 
 USER root:root
 
-RUN mkdir /home/trino/data
-RUN chmod 777 /home/trino/data
-RUN chown trino:trino /home/trino/data
 
 # Copy entrypoint script
 #COPY entrypoint.sh /usr/local/bin/entrypoint.sh
@@ -36,6 +33,8 @@ COPY entrypoint.sh /home/trino/entrypoint.sh
 RUN chmod +x /home/trino/entrypoint.sh
 
 USER trino:trino
+
+RUN mkdir /home/trino/data
 
 # Set entrypoint
 ENTRYPOINT ["/home/trino/entrypoint.sh"]
