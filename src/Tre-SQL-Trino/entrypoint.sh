@@ -5,7 +5,7 @@ if [[ -z "$TRINO_SERVER_URL" ]]; then
 fi
 
 if [[ -z "$LOCATION" ]]; then
-    export LOCATION="/data/result.csv"
+    export LOCATION="/workspace/data/result.csv"
 fi
 
 # Check if required environment variables are provided
