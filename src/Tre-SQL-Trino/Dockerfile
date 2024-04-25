@@ -13,6 +13,9 @@ FROM trinodb/trino:422
 
 # Set working directory
 WORKDIR /workspace
+RUN mkdir /data
+RUN chown trino:trino /data
+RUN chown trino/trino /workspace
 
 USER root:root
 
@@ -25,7 +28,6 @@ RUN chmod +x /workspace/entrypoint.sh
 USER trino:trino
 
 RUN mkdir /workspace/data
-RUN mkdir /data
 
 # Set entrypoint
 ENTRYPOINT ["/workspace/entrypoint.sh"]
