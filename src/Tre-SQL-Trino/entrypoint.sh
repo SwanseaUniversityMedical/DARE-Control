@@ -16,3 +16,4 @@ trino --server "$TRINO_SERVER_URL" --execute "$SQL_STATEMENT" --output-format CS
 
 cd ~/
 pwd
+ls -la ~/
