@@ -10,11 +10,6 @@ FROM trinodb/trino:422
 #    apt-get remove -y wget && \
 #    apt-get clean
 
-# Make target for output data
-RUN mkdir -p /home/trino/data
-RUN chmod 777 /home/trino/data
-RUN chown -R trino:trino /home/trino/data
-
 
 # Set working directory
 WORKDIR /workspace
@@ -36,8 +31,6 @@ COPY entrypoint.sh /home/trino/entrypoint.sh
 
 # Make entrypoint script executable
 RUN chmod +x /home/trino/entrypoint.sh
-
-
 
 USER trino:trino
 
