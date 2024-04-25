@@ -10,28 +10,26 @@ FROM trinodb/trino:422
 #    apt-get remove -y wget && \
 #    apt-get clean
 
+
 # Set working directory
 WORKDIR /workspace
 
 USER root:root
 
-# Copy entrypoint script
-#COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-
-# Make entrypoint script executable
-#RUN chmod +x /usr/local/bin/entrypoint.sh
-
-# Set entrypoint
-#ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-
+RUN mkdir -p /data && chown trino:trino /data
+RUN chown trino:trino /workspace
 
 # Copy entrypoint script
-COPY entrypoint.sh /home/trino/entrypoint.sh
+COPY entrypoint.sh /workspace/entrypoint.sh
+COPY entrypoint.sh /workspace/runsql.sh
 
 # Make entrypoint script executable
-RUN chmod +x /home/trino/entrypoint.sh
+RUN chmod +x /workspace/entrypoint.sh
+RUN chmod +x /workspace/runsql.sh
 
 USER trino:trino
 
+RUN mkdir -p /workspace/data
+
 # Set entrypoint
-ENTRYPOINT ["/home/trino/entrypoint.sh"]
+ENTRYPOINT ["/workspace/entrypoint.sh"]
