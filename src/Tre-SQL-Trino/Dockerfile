@@ -19,7 +19,7 @@ RUN chown -R trino:trino /home/trino/data
 # Set working directory
 WORKDIR /workspace
 
-USER root:root
+#USER root:root
 
 # Copy entrypoint script
 #COPY entrypoint.sh /usr/local/bin/entrypoint.sh
