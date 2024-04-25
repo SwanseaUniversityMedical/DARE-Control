@@ -16,9 +16,8 @@ WORKDIR /workspace
 
 USER root:root
 
-RUN mkdir -p /data
-RUN chown trino:trino /data
-RUN chown trino/trino /workspace
+RUN mkdir -p /data && chown trino:trino /data
+RUN chown trino:trino /workspace
 
 # Copy entrypoint script
 COPY entrypoint.sh /workspace/entrypoint.sh
