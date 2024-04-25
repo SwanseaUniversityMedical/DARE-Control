@@ -238,7 +238,7 @@ allow if {
                 long epochSeconds = (sub.ProjectExpiryDate - epochStart).Ticks / TimeSpan.TicksPerSecond;
                 long epochNanoseconds = epochSeconds * 1000000000;
 
-                dataDictionary["UserAccess"][User.Username][sub.SubmissionProjectName] = new dataMoled
+                dataDictionary["UserAccess"][sub.SubmissionProjectName + User.Username][sub.SubmissionProjectName] = new dataMoled
                 { 
                     valid = true,
                     expires = epochNanoseconds,

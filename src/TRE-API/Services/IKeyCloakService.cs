@@ -68,7 +68,7 @@ namespace TRE_API.Services
                 {
                     Name = Usercode,
                     Email = email,
-                    Pass = pass
+                    Pass = _encDecHelper.Encrypt(pass)
                 });
 
                 _DbContext.SaveChanges();
@@ -248,16 +248,21 @@ namespace TRE_API.Services
 
             user.credentials.Add(new Credentials()
             {
-                value = pass
+                value = pass,
+                temporary = "false",
             });
 
+ 
 
             string jsonBody = JsonConvert.SerializeObject(user);
 
             using (HttpContent content = new StringContent(jsonBody, Encoding.UTF8, "application/json"))
             {
                 HttpResponseMessage response = await client.PostAsync(url, content);
-                Log.Information(" MakeAccounts content >" + await response.Content.ReadAsStringAsync());
+
+                var Contentdata = await response.Content.ReadAsStringAsync();
+
+                Log.Information(" MakeAccounts content >" + Contentdata);
                 if (response.IsSuccessStatusCode)
                 {
                     Log.Information("User created successfully.");
@@ -309,6 +314,8 @@ namespace TRE_API.Services
             public string enabled { get; set; }
             public string username { get; set; }
             public List<Credentials> credentials { get; set; } = new List<Credentials>();
+
+            public List<string> requiredActions { get; set; } = new List<string>();
         }
 
 

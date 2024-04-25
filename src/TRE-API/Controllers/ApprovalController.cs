@@ -27,17 +27,19 @@ namespace TRE_API.Controllers
         protected readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IKeyCloakService _IKeyCloakService;
         private readonly Features _Features;
+        private readonly IEncDecHelper _encDecHelper;
 
         public IDareSyncHelper _dareSyncHelper { get; set; }
 
         public ApprovalController(IDareSyncHelper dareSyncHelper, ApplicationDbContext applicationDbContext,
-            IHttpContextAccessor httpContextAccessor, IKeyCloakService IKeyCloakService, Features Features)
+            IHttpContextAccessor httpContextAccessor, IKeyCloakService IKeyCloakService, Features Features, IEncDecHelper encDecHelper)
         {
             _dareSyncHelper = dareSyncHelper;
             _DbContext = applicationDbContext;
             _httpContextAccessor = httpContextAccessor;
             _IKeyCloakService = IKeyCloakService;
             _Features = Features;
+            _encDecHelper = encDecHelper;
         }
 
         [Authorize(Roles = "dare-tre-admin")]
@@ -276,6 +278,24 @@ namespace TRE_API.Controllers
                     var dbMembership = _DbContext.MembershipDecisions.First(x => x.Id == membershipDecision.Id);
                     if (membershipDecision.Decision != dbMembership.Decision)
                     {
+
+                        if (_Features.GenerateAcounts)
+                        {
+                            var name = dbMembership.Project.SubmissionProjectName + dbMembership.User.Username;
+
+                            var acc = _DbContext.ProjectAcount.FirstOrDefault(x => x.Name == name);
+
+                            if (membershipDecision.Decision == Decision.Approved && acc == null)
+                            {
+                                await _IKeyCloakService.DoGenAccount(name);
+                            }
+                            else if (acc != null && membershipDecision.Decision != Decision.Approved)
+                            {
+                                await _IKeyCloakService.DeleteUser(acc.Name);
+                            }
+
+                        }
+
                         dbMembership.Decision = membershipDecision.Decision;
                         dbMembership.ApprovedBy = approvedBy;
                         dbMembership.LastDecisionDate = approvedDate;

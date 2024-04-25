@@ -52,6 +52,8 @@ namespace TRE_API
         private readonly MinioSettings _minioSettings;
         private readonly IKeyCloakService _keyCloakService;
         private readonly TreKeyCloakSettings _TreKeyCloakSettings;
+        private readonly IEncDecHelper _encDecHelper;
+
 
 
         public DoAgentWork(IServiceProvider serviceProvider,
@@ -64,7 +66,9 @@ namespace TRE_API
             AgentSettings AgentSettings,
             MinioSettings minioSettings,
             IKeyCloakService keyCloakService,
-            TreKeyCloakSettings TreKeyCloakSettings)
+            TreKeyCloakSettings TreKeyCloakSettings,
+            IEncDecHelper encDecHelper
+            )
         {
             _serviceProvider = serviceProvider;
             _dbContext = dbContext;
@@ -87,6 +91,7 @@ namespace TRE_API
 
             _keyCloakService = keyCloakService;
             _TreKeyCloakSettings = TreKeyCloakSettings;
+            _encDecHelper = encDecHelper;
         }
 
 
@@ -595,11 +600,11 @@ namespace TRE_API
 
 
                                 var role = aSubmission.Project.Name; //TODO Check
+                            
 
+                                var Acount =  _dbContext.ProjectAcount.FirstOrDefault(x => x.Name == aSubmission.Project.Name + aSubmission.SubmittedBy.Name );
 
-                                var Acount =  _dbContext.ProjectAcount.FirstOrDefault(x => x.Name == role);
-
-                                //var TokenIN = await _keyCloakService.GenAccessTokenSimple(Acount.Name, Acount.Pass, _TreKeyCloakSettings.TokenRefreshSeconds);
+                                var TokenIN = await _keyCloakService.GenAccessTokenSimple(Acount.Name, _encDecHelper.Decrypt(Acount.Pass), _TreKeyCloakSettings.TokenRefreshSeconds);
 
                                 var Token = aSubmission.QueryToken;
 
