@@ -1,11 +1,11 @@
 #!/bin/bash
 
-if [ -z "$TRINO_SERVER_URL" ]; then
+if [[ -z "$TRINO_SERVER_URL" ]]; then
     export TRINO_SERVER_URL="http://192.168.70.92:8090"
 fi
 
-if [ -z "$LOCATION" ]; then
-    export LOCATION="/data"
+if [[ -z "$LOCATION" ]]; then
+    export LOCATION="/data/result.csv"
 fi
 
 # Check if required environment variables are provided
