@@ -14,7 +14,7 @@ FROM trinodb/trino:422
 # Set working directory
 WORKDIR /workspace
 
-#USER root:root
+USER root:root
 
 # Copy entrypoint script
 #COPY entrypoint.sh /usr/local/bin/entrypoint.sh
