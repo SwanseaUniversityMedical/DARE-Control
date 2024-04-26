@@ -16,6 +16,7 @@ using EasyNetQ;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services.SignalR;
 using static TRE_API.Controllers.SubmissionController;
+using TRE_API.Models;
 
 
 namespace TRE_API.Services
@@ -44,7 +45,9 @@ namespace TRE_API.Services
         private readonly IBus _rabbit;
         private readonly IDataEgressClientWithoutTokenHelper _dataEgressHelper;
         private readonly IMinioTreHelper _minioTreHelper;
- 
+        private readonly AgentSettings _agentSettings;
+
+        
 
         public string _hutchDbServer { get; set; }
         public string _hutchDbPort { get; set; }
@@ -59,7 +62,9 @@ namespace TRE_API.Services
             IConfiguration config,
             MinioTRESettings minioTreSettings,
             IDataEgressClientWithoutTokenHelper dataEgressHelper,
-            IMinioTreHelper minioTreHelper)
+            IMinioTreHelper minioTreHelper,
+            AgentSettings agentSettings
+            )
         {
             
             _dareHelper = helper;
@@ -73,6 +78,7 @@ namespace TRE_API.Services
 
             _dataEgressHelper = dataEgressHelper;
             _minioTreHelper = minioTreHelper;
+            _agentSettings = agentSettings;
 
         }
         public OutputBucketInfo GetOutputBucketGutsSub(string subId, bool hostnameonly)
@@ -81,14 +87,24 @@ namespace TRE_API.Services
             {
                 var submission = _dareHelper
                     .CallAPIWithoutModel<Submission>($"/api/Submission/GetASubmission/{subId}")
-                    .Result;
+                .Result;
 
+                string? outputBucket = "";
 
-                var bucket = _dbContext.Projects
+                if (_agentSettings.UseTESK == false)
+                {
+                    outputBucket = _dbContext.Projects
                     .Where(x => x.SubmissionProjectId == submission.Project.Id)
-                    .Select(x => x.OutputBucketTre);
+                    .Select(x => x.OutputBucketTre).FirstOrDefault();
+                }
+                else
+                {
+                    outputBucket = _dbContext.Projects
+                   .Where(x => x.SubmissionProjectId == submission.Project.Id)
+                   .Select(x => x.OutputBucketSub).FirstOrDefault();
+                }
 
-                var outputBucket = bucket.FirstOrDefault();
+      
 
                 bool secure = !_minioTreSettings.Url.ToLower().StartsWith("http://");
                 return new OutputBucketInfo()
