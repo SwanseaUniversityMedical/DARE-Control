@@ -101,7 +101,7 @@ namespace TRE_API.Services
                 {
                     outputBucket = _dbContext.Projects
                    .Where(x => x.SubmissionProjectId == submission.Project.Id)
-                   .Select(x => x.OutputBucketTre).FirstOrDefault();
+                   .Select(x => x.OutputBucketSub).FirstOrDefault();
                 }
 
       
