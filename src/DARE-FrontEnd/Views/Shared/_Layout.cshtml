@@ -397,6 +397,13 @@
 
             $('#submissionModal1').modal('show');
         });
+
+        $("#showModalButton3").click(function () {
+            var message = $('#showModalButton3').data('message');
+            $('#modalContent').text(message);
+            $('#submissionModal2').modal('show');
+        });
+
     </script>
 
    @* <script>
@@ -524,6 +531,89 @@
                 
                 formData.append('Executors', JSON.stringify(executorData));
                 
+                formData.append('SQL', "true");
+
+
+                $.ajax({
+                    url: '@Url.Action("AddiSubmissionWizard", "Submission")',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (result) {
+                        location.reload();
+                        console.log(result);
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            });
+        });
+
+
+        $(document).ready(function () {
+            $('#frmMain3').submit(function (e) {
+                e.preventDefault();
+                debugger;
+
+                var executorData = [];
+                $('#executorsTable tbody tr').each(function () {
+                    var image = $(this).find('td:eq(0)')[0].children[0];
+                    var command = $(this).find('td:eq(1)')[0].children[0].children[0].children[0].children;
+
+                    var commands = []
+
+                    for (const child of command) {
+                        if (child.className == "badge rounded-pill text-light bg-primary") {
+                            console.log(child.textContent);
+                            commands.push(child.textContent)
+
+                        }
+                    }
+                    var env = $(this).find('td:eq(2)')[0].children[0].children[0].children[0].children;
+
+                    var envs = []
+
+                    for (const child of env) {
+                        if (child.className == "badge rounded-pill text-light bg-primary") {
+                            console.log(child.textContent);
+                            envs.push(child.textContent)
+                        }
+                    }
+                    executorData.push({ Image: image.value, Command: commands, ENV: envs });
+                });
+
+
+                //var treData = [];
+                //$('.col-md-6.mb-4 .form-check-input').each(function () {
+                //    var name = $(this).siblings('input[type="hidden"]').val();
+                //    var isSelected = $(this).prop('checked');
+                //    treData.push({ Name: name, IsSelected: isSelected });
+                //});
+
+                var treData = [];
+                var anyCheckboxSelected = false;
+
+                $('.col-md-6.mb-4 .form-check-input').each(function () {
+                    var name = $(this).siblings('input[type="hidden"]').val();
+                    var isSelected = $(this).prop('checked');
+
+                    if (isSelected) {
+                        anyCheckboxSelected = true;
+                    }
+
+                    treData.push({ Name: name, IsSelected: isSelected });
+                });
+
+                var formData = new FormData($(this)[0]);
+
+
+                formData.append('Executors', JSON.stringify(executorData));
+
+                formData.append('SQL', "false");
+
+
                 $.ajax({
                     url: '@Url.Action("AddiSubmissionWizard", "Submission")',
                     type: 'POST',
