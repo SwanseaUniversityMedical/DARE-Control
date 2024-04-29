@@ -278,7 +278,7 @@ namespace DARE_FrontEnd.Controllers
 
                     var QueryExecutor = new TesExecutor()
                     {
-                        Image = _URLSettingsFrontEnd.QueryImage,
+                        Image = _URLSettingsFrontEnd.QueryImageGraphQL,
                         Command = new List<string>
                         {
                             "/usr/bin/dotnet",
@@ -290,7 +290,7 @@ namespace DARE_FrontEnd.Controllers
 
                     if (SQL == "true")
                     {
-                        QueryExecutor.Image = _URLSettingsFrontEnd.QueryImage;
+                        QueryExecutor.Image = _URLSettingsFrontEnd.QueryImageSQL;
                         QueryExecutor.Command = new List<string>()
                         {
                             "/bin/bash",
