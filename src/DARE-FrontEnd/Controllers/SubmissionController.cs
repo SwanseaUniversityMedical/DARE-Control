@@ -183,7 +183,7 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddiSubmissionWizard(AddiSubmissionWizard model, string Executors, string TreData,string selectedTre)
+        public async Task<ActionResult> AddiSubmissionWizard(AddiSubmissionWizard model, string Executors)
         {
             try
             {
@@ -222,8 +222,9 @@ namespace DARE_FrontEnd.Controllers
                 }
             }
 
+            var TreDataTreData = model.TreRadios.Where( x =>x.IsSelected == true).ToList();
 
-            if (selectedTre == "null")
+            if (TreDataTreData.Count == 0)
             {
                 var paramList = new Dictionary<string, string>();
                 paramList.Add("projectId", model.ProjectId.ToString());

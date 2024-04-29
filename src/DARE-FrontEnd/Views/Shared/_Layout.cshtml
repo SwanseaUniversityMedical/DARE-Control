@@ -518,17 +518,11 @@
 
                     treData.push({ Name: name, IsSelected: isSelected });
                 });
-
-                var treRadiosData = anyCheckboxSelected ? treData : null;
-
                 
                 var formData = new FormData($(this)[0]);
 
                 
                 formData.append('Executors', JSON.stringify(executorData));
-                formData.append('TreData', JSON.stringify(treData));
-                formData.append('selectedTre', treRadiosData);
-
                 
                 $.ajax({
                     url: '@Url.Action("AddiSubmissionWizard", "Submission")',
