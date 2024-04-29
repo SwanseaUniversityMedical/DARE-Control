@@ -178,30 +178,6 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public IActionResult AddExecutors(string image, string command)
         {
-            //var model = HttpContext.Session.GetString("AddiSubmissionWizard");
-            //var addiSubmissionWizard = string.IsNullOrEmpty(model)
-            //    ? new AddiSubmissionWizard()
-            //    : JsonConvert.DeserializeObject<AddiSubmissionWizard>(model);
-
-
-            //addiSubmissionWizard.Executors ??= new List<Executors>();
-            //addiSubmissionWizard.Executors.Add(new Executors { Image = image, Command = command });
-
-            //HttpContext.Session.SetString("AddiSubmissionWizard", JsonConvert.SerializeObject(addiSubmissionWizard));
-
-            //return Json(new { success = true });
-
-            var modelJson = HttpContext.Request.Cookies["AddiSubmissionWizard"];
-            var model = string.IsNullOrEmpty(modelJson)
-                ? new AddiSubmissionWizard()
-                : JsonConvert.DeserializeObject<AddiSubmissionWizard>(modelJson);
-
-            // Add the executor to your data source (e.g., a list)
-            model.Executors ??= new List<Executors>();
-            model.Executors.Add(new Executors { Image = image, Command = command });
-
-            var serializedModel = JsonConvert.SerializeObject(model);
-            HttpContext.Response.Cookies.Append("AddiSubmissionWizard", serializedModel);
 
             return Json(new { success = true });
         }
@@ -212,7 +188,7 @@ namespace DARE_FrontEnd.Controllers
             try
             {
 
-            
+             
             var listOfTre = "";
 
             var paramlist = new Dictionary<string, string>();
@@ -229,16 +205,18 @@ namespace DARE_FrontEnd.Controllers
                 List<Executors> executorsList = JsonConvert.DeserializeObject<List<Executors>>(Executors);
                 foreach (var ex in executorsList)
                 {
-                    if (First)
-                    {
-                        First = false;
-                        continue;
-                    }
-                    List<string> commandList = ex.Command.Split(',').ToList();
+                    Dictionary<string,string> EnvVars = new Dictionary<string, string>();
+                        foreach (var anENV in ex.ENV) {
+                            var keyval = anENV.Split('=', 2);
+                            EnvVars[keyval[0]] = keyval[1];
+                            
+                        }
+  
                     var exet = new TesExecutor()
                     {
                         Image = ex.Image,
-                        Command = commandList
+                        Command = ex.Command,
+                        Env = EnvVars
                     };
                     tesExecutors.Add(exet);
                 }
