@@ -638,7 +638,7 @@ namespace TRE_API
 
                                     if (Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken))
                                     {
-                                        Executor.Env["TRINO_SERVER_URL"] = _AgentSettings.URLHasuraToAdd;
+                                        Executor.Env["TRINO_SERVER_URL"] = _AgentSettings.URLTrinoToAdd;
                                         Executor.Env["ACCESS_TOKEN"] = Token;
                                         Executor.Env["USER_NAME"] = aSubmission.SubmittedBy.Name;
                                         Executor.Env["SCHEMA"] = aSubmission.Project.Name;
