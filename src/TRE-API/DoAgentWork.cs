@@ -145,16 +145,12 @@ namespace TRE_API
             });
             _dbContext.SaveChanges();
 
-
-
             if (tesMessage is not null)
             {
                 var stringdata = JsonConvert.SerializeObject(tesMessage);
                 Log.Information("{Function} tesMessage is not null runhing CreateTESK {tesMessage}", "Execute", stringdata);
                 CreateTESK(stringdata, 99, "123COOOLLL", OutputBucket, "cool DEBUG NAME");
             }
-
- 
         }
 
         public string CreateTESK(string jsonContent, int subId, string tesId, string outputBucket, string Tesname)
@@ -311,11 +307,12 @@ namespace TRE_API
                                             _dbContext.TokensToExpire.Remove(Token);
                                             _hasuraAuthenticationService.ExpirerToken(Token.Token);
                                         }
-
+                                        ClearJob(taskID);
                                         _dbContext.SaveChanges();
                                         break;
                                     case "EXECUTOR_ERROR":
-                                        statusMessage = StatusType.Cancelled;
+                                        statusMessage = StatusType.Failed;
+                                        ClearJob(taskID);
                                         Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
                                         Log.Information("{Function} *** EXECUTOR_ERROR remove Token *** {Token} ", "CheckTESK", Token);
 
@@ -326,10 +323,11 @@ namespace TRE_API
                                         }
 
                                         _dbContext.SaveChanges();
-
+                                       
                                         break;
                                     case "SYSTEM_ERROR":
-                                        statusMessage = StatusType.Cancelled;
+                                        statusMessage = StatusType.Failed;
+                                        ClearJob(taskID);
                                         Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
                                         Log.Information("{Function} *** SYSTEM_ERROR remove Token *** {Token} ", "CheckTESK", Token);
 
@@ -340,7 +338,10 @@ namespace TRE_API
                                         }
 
                                         _dbContext.SaveChanges();
-
+                                        
+                                        break;
+                                    default:
+                                        ClearJob(taskID);
                                         break;
                                 }
 
@@ -357,6 +358,7 @@ namespace TRE_API
                                 if (status.state == "COMPLETE")
                                 {
                                     Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == COMPLETE ");
+                                    ClearJob(taskID);
                                     try
                                     {
                                         result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.DataOutRequested, "", "");
@@ -369,6 +371,7 @@ namespace TRE_API
                                 else if (status.state == "EXECUTER_ERROR" || status.state == "SYSTEM_ERROR")
                                 {
                                     Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == EXECUTER_ERROR or SYSTEM_ERROR ");
+                                    ClearJob(taskID);
                                     try
                                     {
                                         result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Failed, "", "");
@@ -416,7 +419,7 @@ namespace TRE_API
                     else
                     {
                         Log.Error("{Function} HTTP Request {url} failed with status code {code}", "CheckTESK", url, response.StatusCode);
-
+                        ClearJob(taskID);
                     }
                 }
             }
