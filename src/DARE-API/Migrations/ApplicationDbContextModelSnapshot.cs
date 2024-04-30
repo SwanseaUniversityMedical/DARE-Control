@@ -240,6 +240,9 @@ namespace DARE_API.Migrations
                     b.Property<int>("ProjectId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("QueryToken")
+                        .HasColumnType("text");
+
                     b.Property<string>("SourceCrate")
                         .IsRequired()
                         .HasColumnType("text");
@@ -371,7 +374,6 @@ namespace DARE_API.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("FullName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Name")

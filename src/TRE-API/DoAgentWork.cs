@@ -23,6 +23,8 @@ using TRE_API.Models;
 using Castle.Components.DictionaryAdapter.Xml;
 using System;
 using System.Net;
+using Microsoft.EntityFrameworkCore;
+using BL.Models.Settings;
 
 namespace TRE_API
 {
@@ -48,6 +50,10 @@ namespace TRE_API
         private readonly IDareClientWithoutTokenHelper _dareHelper;
         private readonly AgentSettings _AgentSettings;
         private readonly MinioSettings _minioSettings;
+        private readonly IKeyCloakService _keyCloakService;
+        private readonly TreKeyCloakSettings _TreKeyCloakSettings;
+        private readonly IEncDecHelper _encDecHelper;
+
 
 
         public DoAgentWork(IServiceProvider serviceProvider,
@@ -58,7 +64,11 @@ namespace TRE_API
             IHasuraAuthenticationService hasuraAuthenticationService,
             IDareClientWithoutTokenHelper dareHelper,
             AgentSettings AgentSettings,
-            MinioSettings minioSettings)
+            MinioSettings minioSettings,
+            IKeyCloakService keyCloakService,
+            TreKeyCloakSettings TreKeyCloakSettings,
+            IEncDecHelper encDecHelper
+            )
         {
             _serviceProvider = serviceProvider;
             _dbContext = dbContext;
@@ -78,7 +88,12 @@ namespace TRE_API
 
             _minioTreHelper = minioTreHelper;
             _minioSubHelper = minioSubHelper;
+
+            _keyCloakService = keyCloakService;
+            _TreKeyCloakSettings = TreKeyCloakSettings;
+            _encDecHelper = encDecHelper;
         }
+
 
         public async Task testing(string toRun, string Role)
         {
@@ -434,7 +449,7 @@ namespace TRE_API
         }
 
         // Method executed upon hangfire job
-        public void Execute()
+        public async void Execute()
         {
             Log.Information("{Function} DoAgentWork ruinng", "Execute");
             // control use of dependency injection
@@ -497,8 +512,6 @@ namespace TRE_API
                         }
                         else
                         {
-
-
                             try
                             {
                                 if (useTESK == false)
@@ -552,14 +565,11 @@ namespace TRE_API
                                     IBus rabbit = scope.ServiceProvider.GetRequiredService<IBus>();
                                     EasyNetQ.Topology.Exchange exchangeObject =
                                         rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Submission, "topic");
-                                    rabbit.Advanced.Publish(exchangeObject, RoutingConstants.ProcessSub, false,
-                                        new Message<TesTask>(tesMessage));
+                                    rabbit.Advanced.Publish(exchangeObject, RoutingConstants.ProcessSub, false, new Message<TesTask>(tesMessage));
                                 }
                                 catch (Exception e)
                                 {
-                                    
                                     Log.Error(e, "{Function} Send rabbit failed for sub {SubId}", "Execute", aSubmission.Id);
-
                                     processedOK = false;
                                 }
                             }
@@ -589,19 +599,22 @@ namespace TRE_API
                                 var arr = new HttpClient();
 
 
-
                                 var role = aSubmission.Project.Name; //TODO Check
+                            
 
-                                var Token = _hasuraAuthenticationService.GetNewToken(role);
+                                var Acount =  _dbContext.ProjectAcount.FirstOrDefault(x => x.Name == aSubmission.Project.Name + aSubmission.SubmittedBy.Name );
 
+                                var TokenIN = await _keyCloakService.GenAccessTokenSimple(Acount.Name, _encDecHelper.Decrypt(Acount.Pass), _TreKeyCloakSettings.TokenRefreshSeconds);
 
+                                var Token = aSubmission.QueryToken;
 
                                 var projectId = aSubmission.Project.Id;
 
-
-
                                 var OutputBucket = _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects.First(x => x.SubmissionProjectId == projectId).OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
-                                                                                                                                                              //it need the file name?? (key-name)
+
+
+
+                                //it need the file name?? (key-name)
 
                                 if (tesMessage.Outputs == null)
                                 {
@@ -622,18 +635,15 @@ namespace TRE_API
                                 foreach (var Executor in tesMessage.Executors)
                                 {
                                     Log.Information("Executor.Image > " + Executor.Image);
-                                    // "--URL_http://192.168.70.84:8080"
+
                                     if (Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken))
                                     {
-                                        Executor.Command.Add("--Token_" + Token);
-                                        Executor.Command.Add("--URL_" + _AgentSettings.URLHasuraToAdd);
+                                        Executor.Env["TRINO_SERVER_URL"] = _AgentSettings.URLTrinoToAdd;
+                                        Executor.Env["ACCESS_TOKEN"] = Token;
+                                        Executor.Env["USER_NAME"] = aSubmission.SubmittedBy.Name;
+                                        Executor.Env["SCHEMA"] = aSubmission.Project.Name;
+                                        Executor.Env["CATALOG"] = _AgentSettings.CATALOG;
                                     }
-
-                                    //if (Executor.Env == null)
-                                    //{
-                                    //    Executor.Env = new Dictionary<string, string>();
-                                    //}
-                                    //Executor.Env["HASURAAuthenticationToken"] = Token;
                                 }
 
                                 _dbContext.TokensToExpire.Add(new TokenToExpire()
@@ -668,9 +678,7 @@ namespace TRE_API
                                     Log.Error(e,"{Function} Error sending record outcome to submission layer for sub {SubId}", "Execute", aSubmission.Id);
                                     processedOK = false;
                                 }
-
                             }
-
                         }
                     }
                     catch (Exception e)

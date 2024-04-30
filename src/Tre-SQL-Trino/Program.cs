@@ -10,7 +10,7 @@ Console.WriteLine("TREFX SQL Runner Module : Trino");
 
 // Tre-SQL-Trino.exe "--Query=select * from \"profileForm\"" --Output=data.csv
 
-string trinoUrl = "http://trino-server:8080/v1/statement";
+string trinoUrl = "http://localhost:8080/v1/statement";
 var Token = "";
 var OutputFilename = "data.csv";
 var Query = "SELECT * FROM \"profileForm\"";
@@ -61,7 +61,7 @@ static async Task ExportToCsv(string trinoUrl, string sqlQuery, string csvFilePa
 
         var requestContent = new StringContent(JsonConvert.SerializeObject(requestBody));
         requestContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-
+        //client.DefaultRequestHeaders.Add("X-Trino-User", userName);
         using (var response = await httpClient.PostAsync(trinoUrl, requestContent))
         {
             response.EnsureSuccessStatusCode();
