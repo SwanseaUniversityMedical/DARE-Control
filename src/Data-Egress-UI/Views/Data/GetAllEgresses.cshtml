@@ -28,6 +28,7 @@
                 <thead>
                 <tr>
                     <th>Submission ID</th>
+                    <th>Root Submission ID</th>
                     <th>Submission Name</th>
                     <th>Number of Files</th>
                     <th>Status</th>
@@ -44,6 +45,9 @@
                                     @egressSubmission.EgressID()
                                 </h2>
                             </a>
+                        </td>
+                        <td>
+                            @egressSubmission.tesId
                         </td>
                         <td>
                             @egressSubmission.Name
