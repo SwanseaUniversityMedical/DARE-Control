@@ -21,6 +21,10 @@ using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Json;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using DARE_API.Services.Contract;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace DARE_API.Controllers
 {
@@ -33,6 +37,8 @@ namespace DARE_API.Controllers
     public class TaskServiceApiController : ControllerBase
     {
 
+
+        private readonly IKeyCloakService _IKeyCloakService;
         private readonly ApplicationDbContext _DbContext;
         private readonly IBus _rabbit;
         protected readonly IHttpContextAccessor _httpContextAccessor;
@@ -46,17 +52,21 @@ namespace DARE_API.Controllers
             { TesView.FULL, new JsonSerializerSettings { ContractResolver = FullTesTaskContractResolver.Instance } }
         };
 
+        private readonly IKeyclockTokenAPIHelper _IKeyclockTokenAPIHelper;
+
         /// <summary>
         /// Contruct a <see cref="TaskServiceApiController"/>
         /// </summary>
         /// <param name="repository">The main <see cref="ApplicationDbContext"/> database repository</param>
         /// <param name="rabbit">The main <see cref="IBus"/> easynet q sender</param>
-        public TaskServiceApiController(ApplicationDbContext repository, IBus rabbit, IHttpContextAccessor httpContextAccessor)
+        public TaskServiceApiController(ApplicationDbContext repository, IBus rabbit, IHttpContextAccessor httpContextAccessor, 
+            IKeyclockTokenAPIHelper IKeyclockTokenAPIHelper, IKeyCloakService IKeyCloakService)
         {
             _DbContext = repository;
             _rabbit = rabbit;
             _httpContextAccessor = httpContextAccessor;
-
+            _IKeyclockTokenAPIHelper = IKeyclockTokenAPIHelper;
+            _IKeyCloakService = IKeyCloakService;
         }
         
         /// <summary>
@@ -299,7 +309,8 @@ namespace DARE_API.Controllers
                     return BadRequest("No valid tres for this project " + project + ".");
                 }
 
-
+                var Token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+                Token = Token.Replace("Bearer ", "");
                 var sub = new Submission()
                 {
                     DockerInputLocation = tesTask.Executors.First().Image,
@@ -310,6 +321,7 @@ namespace DARE_API.Controllers
                     SubmittedBy = user,
                     TesName = tesTask.Name,
                     SourceCrate = tesTask.Executors.First().Image,
+                    QueryToken = Token
                 };
 
 
@@ -535,7 +547,7 @@ namespace DARE_API.Controllers
         {
             try { 
             var decodedPageToken =
-                pageToken is not null ? Encoding.UTF8.GetString(Base64UrlTextEncoder.Decode(pageToken)) : null;
+                pageToken is not null ? Encoding.UTF8.GetString(Microsoft.AspNetCore.Authentication.Base64UrlTextEncoder.Decode(pageToken)) : null;
 
             if (pageSize < 1 || pageSize > 2047)
             {
@@ -561,7 +573,7 @@ namespace DARE_API.Controllers
 
 
             var nextPageToken = finalList.continuation;
-            var encodedNextPageToken = nextPageToken is not null ? Base64UrlTextEncoder.Encode(Encoding.UTF8.GetBytes(nextPageToken)) : null;
+            var encodedNextPageToken = nextPageToken is not null ? Microsoft.AspNetCore.Authentication.Base64UrlTextEncoder.Encode(Encoding.UTF8.GetBytes(nextPageToken)) : null;
             var response = new TesListTasksResponse { Tasks = tesTasks.ToList(), NextPageToken = encodedNextPageToken };
 
             return TesJsonResult(response, view);

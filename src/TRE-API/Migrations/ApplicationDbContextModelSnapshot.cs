@@ -289,6 +289,31 @@ namespace TRE_API.Migrations
                     b.ToTable("TokensToExpire");
                 });
 
+            modelBuilder.Entity("TRE_API.Models.ProjectAcount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Pass")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProjectAcount");
+                });
+
             modelBuilder.Entity("TRE_TESK.Models.RoleData", b =>
                 {
                     b.Property<int>("Id")

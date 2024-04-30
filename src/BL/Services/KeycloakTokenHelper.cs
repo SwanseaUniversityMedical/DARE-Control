@@ -36,13 +36,15 @@ namespace BL.Services
             string clientSecret = _clientSecret;
 
             Log.Information($"GetTokenForUser _proxyUrl > {_proxyUrl} UseProxy > {_useProxy}");
-
-            // Create an HttpClientHandler with proxy settings
-            HttpClientHandler handler = new HttpClientHandler
+            HttpClientHandler handler = new HttpClientHandler();
+            handler.UseProxy = _useProxy;
+            if (_useProxy)
             {
-                Proxy = new WebProxy(_proxyUrl), // Replace with your proxy server URL
-                UseProxy = _useProxy
-            };
+                // Create an HttpClientHandler with proxy settings
+                handler.Proxy = new WebProxy(_proxyUrl); // Replace with your proxy server URL
+                
+            }
+           
 
             // Create an HttpClient with the handler
             return await KeycloakCommon.GetTokenForUserGuts(username, password, requiredRole, handler, keycloakBaseUrl, clientId, clientSecret);

@@ -16,15 +16,14 @@ namespace TRE_API.Services
         {
             CredDb = db;
             _keycloakTokenHelper = new KeycloakTokenHelper(settings.BaseUrl, settings.ClientId, settings.ClientSecret, settings.Proxy, settings.ProxyAddresURL);
+
             var creds = db.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Submission);
             if (creds != null)
             {
                 _username = creds.UserName;
                 _password = encDec.Decrypt(creds.PasswordEnc);
-                _requiredRole = "dare-tre-admin";
+                _requiredRole = "dare-control-admin";
             }
-
-
         }
 
         public bool CheckCredsAreAvailable()

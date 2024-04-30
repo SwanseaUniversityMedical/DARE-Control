@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  Tre-SQL-Trino:
+    image: harbor.ukserp.ac.uk/dare-trefx/control-tre-sqltrino:pr-596-7ce4358
+    environment:
+      - TRINO_SERVER_URL=https://host.docker.internal:8943
+      - SQL_STATEMENT=SELECT * FROM "cool"
+      - ACCESS_TOKEN=eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5Mnh2NHZEaWp3WXN5a0NOWE12TF9raHhYRGRjT2NZbk4zdGp6TXdUTEZVIn0.eyJleHAiOjE3MTMyNzg5MTMsImlhdCI6MTcxMzI3ODYxMywianRpIjoiMzM3ZTU0OWItMjI0ZC00ODIwLTliZjgtNzIxOTI5ODM2NmFjIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDY1L3JlYWxtcy9BRERJIiwic3ViIjoiYm9iIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwic2Vzc2lvbl9zdGF0ZSI6IjBmZjAyMjFhLWIzNDgtNDBiYi04ODZlLTQ5YmFjZmE0MmI5MiIsImFjciI6IjEiLCJzY29wZSI6InByb2ZpbGUgZW1haWwiLCJzaWQiOiIwZmYwMjIxYS1iMzQ4LTQwYmItODg2ZS00OWJhY2ZhNDJiOTIiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6ImJvYiBib2IgZm9yIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYm9iIiwiZ2l2ZW5fbmFtZSI6ImJvYiIsImZhbWlseV9uYW1lIjoiYm9iIGZvciIsImVtYWlsIjoiYm9iQGJvYi5ib2IifQ.wMl_q-vmnMxpPXkwzQlUjzBOBHnseLjA_OyHbBVIZS6hNKEkh0LJppmTDf6xLatNZl6NGXeac9ey-7gRdI0ttYZXG_-K6gu--ICrk49I3bF26gKJ4a1Q2kW1G38bdhyQbx1_oovaMnVDgwRfWDPGTXCMfpLqKaz41U8Sj-NU7rqexFQmjkwgrs-_Y9b_wp7orxiEsZy3S45JtciGprNXJ1mJII112AcxAUum5MNum7VuJUhNr6EL1NPPRItadakn6KNwn9umEVtzue7AympSBki6pZimekWDrZioh2TzNm_qa0VnVuOaEnSRDpn1pKFUjGg-qllGKrwFc1q8Yzczfg
+      - USER_NAME=bob
+      - SCHEMA=bob
+      - CATALOG=postgresql
+    volumes:
+      - ./result.csv:/home/trino/result.csv
+#/v1/statement

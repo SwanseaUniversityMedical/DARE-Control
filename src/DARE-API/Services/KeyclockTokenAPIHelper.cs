@@ -7,12 +7,16 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using BL.Models.ViewModels;
 using BL.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.Authentication;
 
 namespace DARE_API.Services
 {
     public class KeyclockTokenAPIHelper : IKeyclockTokenAPIHelper
     {
         public SubmissionKeyCloakSettings _settings { get; set; }
+
 
         public KeyclockTokenAPIHelper(SubmissionKeyCloakSettings settings)
         {
@@ -29,7 +33,6 @@ namespace DARE_API.Services
             return await KeycloakCommon.GetTokenForUserGuts(username, password, requiredRole, proxyhandler, keycloakBaseUrl, clientId, clientSecret);
         }
 
-        
     }
     
 }

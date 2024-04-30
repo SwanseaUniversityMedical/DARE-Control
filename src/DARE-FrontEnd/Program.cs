@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Authentication;
 using Newtonsoft.Json;
 using DARE_FrontEnd.Models;
+using DARE_FrontEnd.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 IdentityModelEventSource.ShowPII = true;
@@ -62,6 +63,7 @@ builder.Services.AddScoped<CustomCookieEvent>();
 
 builder.Services.AddScoped<IDareClientHelper, DareClientHelper>();
 
+builder.Services.AddScoped<IKeyCloakService, KeyCloakService>();
 
 builder.Services.AddMvc().AddViewComponentsAsServices();
 
