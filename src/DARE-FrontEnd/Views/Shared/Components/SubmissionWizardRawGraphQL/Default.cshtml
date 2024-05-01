@@ -7,7 +7,7 @@
 
 
 
-@using (Html.BeginForm("", "", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain2" }))
+@using (Html.BeginForm("", "", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain3" }))
 {
     @Html.HiddenFor(x => x.ProjectId)
     {
@@ -63,7 +63,7 @@
                     <thead>
                         <tr>
                             <th class="col-md-5">Image</th>
-                            <th class="col-md-7">Environment Variables</th>
+                            <th class="col-md-7">Command</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -73,9 +73,9 @@
                             </td>
                             <td class="border-0">
                                 <div class="d-flex align-items-start justify-content-between">
-                                    <div class="w-100 me-2">
-                                        <input type="text" id="environmentvariables" name="environmentvariables" class="form-control" data-role="tagsinput" />
-                                        <p><small class="form-text text-muted">Separate environment variables with Enter ↵ key, example Envvar=myVal </small></p>
+                                    <div class="w-100 me-2" id="CommandBOX">
+                                        <input type="text" id="Command" name="Command" class="form-control" data-role="tagsinput" />
+                                        <p><small class="form-text text-muted">Type in your Command then press Enter ↵ key</small></p>
                                     </div>
                                     <a href="#" id="addCommandButton" class="btn btn-sm btn-secondary">Add</a>
                                 </div>

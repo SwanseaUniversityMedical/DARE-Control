@@ -3,6 +3,8 @@
     public class URLSettingsFrontEnd
     {
         public string MinioUrl { get; set; }
-        public string QueryImage { get; set; }
+        public string QueryImageGraphQL { get; set; }
+
+        public string QueryImageSQL { get; set; }
     }
 }
