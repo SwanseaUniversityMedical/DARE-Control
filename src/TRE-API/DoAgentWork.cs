@@ -380,6 +380,7 @@ namespace TRE_API
                                     {
                                         Log.Error(ex.ToString());
                                     }
+                                    ClearJob(taskID);
                                 }
                                 else if (status.state == "EXECUTER_ERROR" || status.state == "SYSTEM_ERROR")
                                 {
@@ -392,6 +393,7 @@ namespace TRE_API
                                     {
                                         Log.Error(ex.ToString());
                                     }
+                                    ClearJob(taskID);
                                 }
                             }
                             Log.Information($" Checking status ");

@@ -182,159 +182,145 @@ namespace DARE_FrontEnd.Controllers
             };
             return View(test);
         }
-        [HttpPost]
-        public IActionResult AddExecutors(string image, string command)
-        {
-            //var model = HttpContext.Session.GetString("AddiSubmissionWizard");
-            //var addiSubmissionWizard = string.IsNullOrEmpty(model)
-            //    ? new AddiSubmissionWizard()
-            //    : JsonConvert.DeserializeObject<AddiSubmissionWizard>(model);
 
 
-            //addiSubmissionWizard.Executors ??= new List<Executors>();
-            //addiSubmissionWizard.Executors.Add(new Executors { Image = image, Command = command });
-
-            //HttpContext.Session.SetString("AddiSubmissionWizard", JsonConvert.SerializeObject(addiSubmissionWizard));
-
-            //return Json(new { success = true });
-
-            var modelJson = HttpContext.Request.Cookies["AddiSubmissionWizard"];
-            var model = string.IsNullOrEmpty(modelJson)
-                ? new AddiSubmissionWizard()
-                : JsonConvert.DeserializeObject<AddiSubmissionWizard>(modelJson);
-
-            // Add the executor to your data source (e.g., a list)
-            model.Executors ??= new List<Executors>();
-            model.Executors.Add(new Executors { Image = image, Env = command });
-
-            var serializedModel = JsonConvert.SerializeObject(model);
-            HttpContext.Response.Cookies.Append("AddiSubmissionWizard", serializedModel);
-
-            return Json(new { success = true });
-        }
 
         [HttpPost]
-        public async Task<ActionResult> AddiSubmissionWizard(AddiSubmissionWizard model, string Executors, string TreData,string selectedTre)
+        public async Task<ActionResult> AddiSubmissionWizard(AddiSubmissionWizard model, string Executors, string SQL)
         {
             try
             {
 
-            
-            var listOfTre = "";
 
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("projectId", model.ProjectId.ToString());
-            var project = await _clientHelper.CallAPIWithoutModel<BL.Models.Project?>(
-                "/api/Project/GetProject/", paramlist);
+                var listOfTre = "";
 
-            var test = new TesTask();
-            var tesExecutors = new List<TesExecutor>();
+                var paramlist = new Dictionary<string, string>();
+                paramlist.Add("projectId", model.ProjectId.ToString());
+                var project = await _clientHelper.CallAPIWithoutModel<BL.Models.Project?>(
+                    "/api/Project/GetProject/", paramlist);
 
-            if (string.IsNullOrEmpty(Executors) == false && Executors != "null")
-            {
-                bool First = true;
-                List<Executors> executorsList = JsonConvert.DeserializeObject<List<Executors>>(Executors);
-                foreach (var ex in executorsList)
+                var test = new TesTask();
+                var tesExecutors = new List<TesExecutor>();
+
+                if (string.IsNullOrEmpty(Executors) == false && Executors != "null")
                 {
-                    if (First)
+                    bool First = true;
+                    List<Executors> executorsList = JsonConvert.DeserializeObject<List<Executors>>(Executors);
+                    foreach (var ex in executorsList)
                     {
-                        First = false;
-                        continue;
+                        Dictionary<string, string> EnvVars = new Dictionary<string, string>();
+                        foreach (var anENV in ex.ENV)
+                        {
+                            var keyval = anENV.Split('=', 2);
+                            EnvVars[keyval[0]] = keyval[1];
+
+                        }
+
+                        var exet = new TesExecutor()
+                        {
+                            Image = ex.Image,
+                            Command = ex.Command,
+                            Env = EnvVars
+                        };
+                        tesExecutors.Add(exet);
                     }
-                    List<string> EnvList = ex.Env.Split(',').ToList();
-                    var exet = new TesExecutor()
+                }
+
+                var TreDataTreData = model.TreRadios.Where(x => x.IsSelected == true).ToList();
+
+                if (TreDataTreData.Count == 0)
+                {
+                    var paramList = new Dictionary<string, string>();
+                    paramList.Add("projectId", model.ProjectId.ToString());
+                    var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList);
+                    List<string> namesList = tre.Select(test => test.Name).ToList();
+                    listOfTre = string.Join("|", namesList);
+                }
+                else
+                {
+                    listOfTre = string.Join("|", model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
+                }
+
+
+
+                test = new TesTask();
+
+                if (string.IsNullOrEmpty(model.RawInput) == false)
+                {
+                    test = JsonConvert.DeserializeObject<TesTask>(model.RawInput);
+                }
+
+
+
+
+
+                if (string.IsNullOrEmpty(model.TESName) == false)
+                {
+                    test.Name = model.TESName;
+                }
+
+                if (string.IsNullOrEmpty(model.TESDescription) == false)
+                {
+                    test.Description = model.TESDescription;
+                }
+
+                if (tesExecutors.Count > 0)
+                {
+                    if (test.Executors == null || test.Executors.Count == 0)
                     {
-                        Image = ex.Image
+                        test.Executors = tesExecutors;
+                    }
+                    else
+                    {
+                        test.Executors.AddRange(tesExecutors);
+                    }
+                }
+
+                if (string.IsNullOrEmpty(model.Query) == false)
+                {
+
+                    var QueryExecutor = new TesExecutor()
+                    {
+                        Image = _URLSettingsFrontEnd.QueryImageGraphQL,
+                        Command = new List<string>
+                        {
+                            "/usr/bin/dotnet",
+                            "/app/Tre-Hasura.dll",
+                            "--Query_" + model.Query
+                        }
                     };
-                    foreach (var ENV in EnvList)
+
+
+                    if (SQL == "true")
                     {
-                        var vales = ENV.Split("=");
-                        exet.Env[vales[0]] = vales[1];
+                        QueryExecutor.Image = _URLSettingsFrontEnd.QueryImageSQL;
+                        QueryExecutor.Command = new List<string>()
+                        {
+                            "/bin/bash",
+                            "/workspace/entrypoint.sh"
+                        };
+                        QueryExecutor.Env = new Dictionary<string, string>()
+                        {
+                            ["SQL_STATEMENT"] = model.Query,
+                            ["LOCATION"] = "/workspace/data/results.csv",
+                        };
                     }
-                    
-                    tesExecutors.Add(exet);
-                }
-            }
 
 
-            if (selectedTre == "null")
-            {
-                var paramList = new Dictionary<string, string>();
-                paramList.Add("projectId", model.ProjectId.ToString());
-                var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList);
-                List<string> namesList = tre.Select(test => test.Name).ToList();
-                listOfTre = string.Join("|", namesList);
-            }
-            else
-            {
-                listOfTre = string.Join("|", model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
-            }
-
-
-
-            test = new TesTask();
-
-            if (string.IsNullOrEmpty(model.RawInput) == false)
-            {
-                test = JsonConvert.DeserializeObject<TesTask>(model.RawInput);
-            }
-
-
-
-        
-
-            if (string.IsNullOrEmpty(model.TESName) == false)
-            {
-                test.Name = model.TESName; 
-            }
-
-            if (string.IsNullOrEmpty(model.TESDescription) == false)
-            {
-                test.Description = model.TESDescription;
-            }
-
-            if (tesExecutors.Count > 0)
-            {
-                if (test.Executors == null || test.Executors.Count == 0)
-                {
-                    test.Executors = tesExecutors;
-                }
-                else
-                {
-                    test.Executors.AddRange(tesExecutors);
-                }
-            }
-
-            if (string.IsNullOrEmpty(model.Query) == false)
-            {
-                var QueryExecutor = new TesExecutor()
-                {
-                    Image = _URLSettingsFrontEnd.QueryImage,
-                    Command = new List<string>()
+                    if (test.Executors == null)
                     {
-                        "/home/trino/entrypoint.sh"
-                    },
-                    Env = new Dictionary<string, string>()
-                    {
-                        { "SQL_STATEMENT", model.Query }
+                        test.Executors = new List<TesExecutor>();
+                        test.Executors.Add(QueryExecutor);
                     }
-                };
-
-
-                if (test.Executors == null)
-                {
-                    test.Executors = new List<TesExecutor>();
-                    test.Executors.Add(QueryExecutor);
+                    else
+                    {
+                        test.Executors.Insert(0, QueryExecutor);
+                    }
                 }
-                else
-                {
-                    test.Executors.Insert(0, QueryExecutor);
-                }
-            }
 
-            if (test.Outputs == null || test.Outputs.Count == 0)
-            {
-                test.Outputs = new List<TesOutput>()
+                if (test.Outputs == null || test.Outputs.Count == 0)
+                {
+                    test.Outputs = new List<TesOutput>()
                 {
                     new TesOutput()
                     {
@@ -346,23 +332,25 @@ namespace DARE_FrontEnd.Controllers
 
                     }
                 };
-            }
+                }
 
-            if (test.Tags == null || test.Tags.Count == 0)
-            {
-                test.Tags = new Dictionary<string, string>()
+                if (test.Tags == null || test.Tags.Count == 0)
+                {
+                    test.Tags = new Dictionary<string, string>()
                         {
                             { "project", project.Name },
                             { "tres", listOfTre }
                         };
-            }
+                }
 
-            var context = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            var Token = await _IKeyCloakService.RefreshUserToken(context);
+				var context = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+				var Token = await _IKeyCloakService.RefreshUserToken(context);
 
-            var result = await _clientHelper.CallAPI<TesTask, TesTask?>($"/v1/tasks", test);
 
-            return RedirectToAction("GetProject", "Project", new { id = model.ProjectId });
+                var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test);
+
+
+                return RedirectToAction("GetProject", "Project", new { id = model.ProjectId });
             }
             catch (Exception e)
             {
