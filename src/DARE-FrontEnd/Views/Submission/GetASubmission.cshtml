@@ -18,7 +18,7 @@
 <div class="d-flex align-items-center justify-content-between mb-2">
     <div>
         <h1 class="fs-3 mb-0">@Model.Submission.TesName</h1>
-        <p class="font-monospace text-muted small mb-0">Submission ID: @Model.Submission.Id</p>
+        <p class="font-monospace text-muted small mb-0"> @Model.GetALlIDs() </p>
         <div class="mt-3 mb-3 d-flex gap-4">
             <div><i class="fa-solid fa-folder-open text-muted me-1"></i> <a href="@Url.Action("GetProject", "Project", new { id = Model.Submission.Project.Id })">@Model.Submission.Project.Name</a></div>
             <div><i class="fa-solid fa-user text-muted me-1"></i> <a href="@Url.Action("GetUser", "User", new { id = @Model.Submission.SubmittedBy.Id })">@Model.Submission.SubmittedBy.FullName</a></div>
@@ -28,8 +28,7 @@
     @{
         var overallStatus = Model.Submission.Status;
         if (overallStatus == BL.Models.Enums.StatusType.Completed)
-        {
-                
+        {   
             <h6 class="mb-0">
                 <span class="badge bg-success rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Completed: @Model.Submission.EndTime">
                     <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
@@ -191,11 +190,26 @@
         <caption>List of Tre Child Submissions</caption>
         <thead>
         <tr class="row">
-            <th class="col-2"></th>
+            <th class="col-2"
+            </th>
             @{
                 foreach (var child in Model.Submission.Children)
                 {
-                    <th class="col">@child.Tre?.Name.ToString()</th>
+                    <th class="col">
+                        @child.Tre?.Name.ToString() ID @child.Id.ToString()
+                        @if (child.Tre.IsOnline())
+                        {
+                            <span class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 ms-3">
+                                <i class="fa-solid fa-check-circle me-1"></i> Online
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 ms-3">
+                                <i class="fa-solid fa-ban me-1"></i> Offline
+                            </span>
+                        }
+                    </th>
                 }
             }
         </tr>

@@ -19,5 +19,18 @@ namespace BL.Models
         public virtual List<MembershipTreDecision> MembershipTreDecision { get; set; }
         public virtual List<AuditLog>? AuditLogs { get; set; }
 
+
+        public bool IsOnline()
+        {
+            TimeSpan timeSinceLastUpdate = DateTime.Now - LastHeartBeatReceived;
+            var isOnline = false;
+            if (timeSinceLastUpdate.TotalMinutes < 30)
+            {
+                isOnline = true;
+            }
+            return isOnline;
+                
+        }
+
     }
 }
