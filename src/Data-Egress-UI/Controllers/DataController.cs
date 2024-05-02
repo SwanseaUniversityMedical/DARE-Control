@@ -110,24 +110,30 @@ namespace Data_Egress_UI.Controllers
             return  File(file, GetContentType(egressFile.Name), egressFile.Name);
         }
 
-        [HttpGet]
-        public IActionResult GetAllEgresses(bool unprocessedonly)
-        {
-             
-            var paramlist = new Dictionary<string, string>();
-            if (unprocessedonly)
-            {
-                ViewBag.PageTitle = "Unprocessed Egresses";
-                paramlist.Add("unprocessedonly", true.ToString());
-                
-            }
-            else
-            {
-                ViewBag.PageTitle = "All Egresses";
-                paramlist.Add("unprocessedonly", false.ToString());
-                
-            }
 
+        [HttpGet]
+        public IActionResult GetAllEgressesuUnprocessed()
+        {
+
+            var paramlist = new Dictionary<string, string>();
+          
+            ViewBag.PageTitle = "Unprocessed Egresses";
+            paramlist.Add("unprocessedonly", true.ToString());
+
+        
+            List<EgressSubmission> egresses = _dataClientHelper.CallAPIWithoutModel<List<EgressSubmission>>("/api/DataEgress/GetAllEgresses/", paramlist).Result;
+
+            return View(egresses);
+        }
+
+        [HttpGet]
+        public IActionResult GetAllEgresses()
+        {
+
+            var paramlist = new Dictionary<string, string>();
+
+            ViewBag.PageTitle = "All Egresses";
+            paramlist.Add("unprocessedonly", false.ToString());
 
             List<EgressSubmission> egresses = _dataClientHelper
                 .CallAPIWithoutModel<List<EgressSubmission>>("/api/DataEgress/GetAllEgresses/", paramlist).Result;
