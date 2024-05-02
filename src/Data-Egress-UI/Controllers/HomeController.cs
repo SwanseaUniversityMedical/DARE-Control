@@ -49,7 +49,7 @@ namespace Data_Egress_UI.Controllers
 
                 return RedirectToAction("UpdateCredentials", "TreCredentials");
             }
-            return RedirectToAction("GetAllEgresses", "Data", new { unprocessedonly = true });
+            return RedirectToAction("GetAllEgressesuUnprocessed", "Data");
 
 
         }

@@ -321,17 +321,21 @@ namespace DARE_FrontEnd.Controllers
                 if (test.Outputs == null || test.Outputs.Count == 0)
                 {
                     test.Outputs = new List<TesOutput>()
-                {
-                    new TesOutput()
                     {
-                        Url = "",
-                        Name = "aName",
-                        Description = "ADescription",
-                        Path = "/app/data",
-                        Type = TesFileType.DIRECTORYEnum,
+                        new TesOutput()
+                        {
+                            Url = "",
+                            Name = "aName",
+                            Description = "ADescription",
+                            Path = "/app/data",
+                            Type = TesFileType.DIRECTORYEnum,
 
+                        }
+                    };
+                    if (SQL == "true")
+                    {
+                        test.Outputs[0].Path = "/workspace/data";
                     }
-                };
                 }
 
                 if (test.Tags == null || test.Tags.Count == 0)

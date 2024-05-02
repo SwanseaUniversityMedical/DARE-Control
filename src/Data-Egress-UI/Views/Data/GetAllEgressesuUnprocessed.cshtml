@@ -11,7 +11,7 @@
         </div>
         <ul class="nav nav-underline border-bottom my-4 egress-menu">
             <li class="nav-item" role="presentation">
-            @Html.ActionLink("Unprocessed Requests", "GetAllEgressesuUnprocessed", new {@class="nav-link text-dark"})
+                @Html.ActionLink("Unprocessed Requests", "GetAllEgressesuUnprocessed", new {@class="nav-link text-dark"})
             </li>
             <li class="nav-item" role="presentation">
                 @Html.ActionLink("All Requests", "GetAllEgresses", new { @class = "nav-link text-dark" })
@@ -23,7 +23,6 @@
                 <thead>
                 <tr>
                     <th>Submission ID</th>
-                    <th>Root Submission ID</th>
                     <th>Submission Name</th>
                     <th>Number of Files</th>
                     <th>Status</th>
@@ -40,9 +39,6 @@
                                     @egressSubmission.EgressID()
                                 </h2>
                             </a>
-                        </td>
-                        <td>
-                            @egressSubmission.tesId
                         </td>
                         <td>
                             @egressSubmission.Name
