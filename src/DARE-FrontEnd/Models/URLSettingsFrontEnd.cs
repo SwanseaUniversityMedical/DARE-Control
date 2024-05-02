@@ -6,7 +6,5 @@
         public string QueryImageGraphQL { get; set; }
 
         public string QueryImageSQL { get; set; }
-
-        public string APIURLSwagger { get; set; }
     }
 }

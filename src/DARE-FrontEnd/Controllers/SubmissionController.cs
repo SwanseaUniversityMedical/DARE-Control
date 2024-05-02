@@ -41,7 +41,7 @@ namespace DARE_FrontEnd.Controllers
 
         public IActionResult Instructions()
         {
-            var url = _URLSettingsFrontEnd.APIURLSwagger;
+            var url = _configuration["DareAPISettings:HelpAddress"];
             return View(model:url);
         }
 
