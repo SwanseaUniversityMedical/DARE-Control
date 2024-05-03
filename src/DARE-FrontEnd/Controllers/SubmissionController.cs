@@ -113,7 +113,7 @@ namespace DARE_FrontEnd.Controllers
 
                 var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", TesTask);
 
-                return RedirectToAction("GetProject", "Project", new { id = model.ProjectId });
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -191,7 +191,7 @@ namespace DARE_FrontEnd.Controllers
             try
             {
 
-
+             
                 var listOfTre = "";
 
                 var paramlist = new Dictionary<string, string>();
@@ -350,7 +350,7 @@ namespace DARE_FrontEnd.Controllers
                 var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test);
 
 
-                return RedirectToAction("GetProject", "Project", new { id = model.ProjectId });
+                return Ok();
             }
             catch (Exception e)
             {
