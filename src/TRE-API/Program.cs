@@ -415,6 +415,14 @@ else
 
 const string scanJobName = "Sync Submissions";
 
+if (jobSettings.scanSchedule == 0)
+    RecurringJob.RemoveIfExists(scanJobName);
+else
+    RecurringJob.AddOrUpdate<IDoAgentWork>(scanJobName,
+        x =>  x.Execute().Wait(),
+        Cron.MinuteInterval(jobSettings.scanSchedule));
+
+
 
 if (HasuraSettings.IsEnabled)
 {
