@@ -104,6 +104,67 @@ namespace DARE_FrontEnd.Controllers
             return View(projectView);
         }
 
+        public IActionResult SubmissionProjectSQL(int id)
+        {
+           
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("projectId", id.ToString());
+            var project = _clientHelper.CallAPIWithoutModel<Project?>(
+                "/api/Project/GetProject/", paramlist).Result;
+
+            ViewBag.UserCanDoSubmissions = IsUserOnProject(project);
+
+            var projectView = new ProjectUserTre()
+            {
+                Id = project.Id,
+                Name = project.Name
+            };
+
+            return View(projectView);
+        }
+
+
+        public IActionResult SubmissionProjectGraphQL(int id)
+        {
+
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("projectId", id.ToString());
+            var project = _clientHelper.CallAPIWithoutModel<Project?>(
+                "/api/Project/GetProject/", paramlist).Result;
+
+            ViewBag.UserCanDoSubmissions = IsUserOnProject(project);
+
+            var projectView = new ProjectUserTre()
+            {
+                Id = project.Id,
+                Name = project.Name
+            };
+
+            return View(projectView);
+        }
+
+        public IActionResult SubmissionProjectCrate(int id)
+        {
+
+            var paramlist = new Dictionary<string, string>();
+            paramlist.Add("projectId", id.ToString());
+            var project = _clientHelper.CallAPIWithoutModel<Project?>(
+                "/api/Project/GetProject/", paramlist).Result;
+
+            ViewBag.UserCanDoSubmissions = IsUserOnProject(project);
+
+            var projectView = new ProjectUserTre()
+            {
+                Id = project.Id,
+                Name = project.Name
+            };
+
+            return View(projectView);
+        }
+
+
+
+
         [HttpGet]
         [AllowAnonymous]
         public IActionResult GetAllProjects()
