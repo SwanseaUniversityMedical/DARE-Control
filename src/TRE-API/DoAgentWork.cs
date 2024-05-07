@@ -30,7 +30,7 @@ namespace TRE_API
 {
     public interface IDoAgentWork
     {
-        void Execute();
+        Task Execute();
         Task CheckTESK(string taskID, int subId, string tesId, string outputBucket, string NameTes);
         void ClearJob(string jobname);
         Task testing(string toRun, string Role);
@@ -451,7 +451,7 @@ namespace TRE_API
         }
 
         // Method executed upon hangfire job
-        public async void Execute()
+        public async Task Execute()
         {
             Log.Information("{Function} DoAgentWork ruinng", "Execute");
             // control use of dependency injection
