@@ -608,7 +608,7 @@ namespace TRE_API
 
                                 var TokenIN = await _keyCloakService.GenAccessTokenSimple(Acount.Name, _encDecHelper.Decrypt(Acount.Pass), _TreKeyCloakSettings.TokenRefreshSeconds);
 
-                                var Token = aSubmission.QueryToken;
+                                var Token = TokenIN.access_token;
 
                                 var projectId = aSubmission.Project.Id;
 
