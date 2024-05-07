@@ -1,0 +1,13 @@
+﻿@using BL.Models.ViewModels
+@model BL.Models.ViewModels.ProjectUserTre
+@{
+    string pageName = Model.Name;
+
+    ViewData["Title"] = @pageName;
+    int pId = Model.Id;
+}
+
+@if (ViewBag.UserCanDoSubmissions)
+{
+    @await Component.InvokeAsync("SubmissionWizerd", new {projectId=pId})
+}
