@@ -541,7 +541,7 @@
                     contentType: false,
                     processData: false,
                     success: function (result) {
-                        location.reload();
+                        window.location.href = "/Project/GetProject/" + this.data.get("ProjectId");
                         console.log(result);
                     },
                     error: function (error) {
@@ -621,7 +621,7 @@
                     contentType: false,
                     processData: false,
                     success: function (result) {
-                        location.reload();
+                        window.location.href = "/Project/GetProject/" + this.data.get("ProjectId");
                         console.log(result);
                     },
                     error: function (error) {

@@ -114,17 +114,17 @@
                 {
                     <div class="d-flex align-items-center mb-3">
 
-                        <a class="btn btn-primary btn-sm d-flex align-items-center mb-3 text-decoration-none" id="showModalButton">
+                        <a class="btn btn-primary btn-sm d-flex align-items-center mb-3 text-decoration-none" href="@Url.Action("SubmissionProjectCrate", "Project",  new { id = pId })">
                             <i class="fa fa-table-columns align-middle me-2"></i>
-                            <span>Submit with Crate Submission Wizard</span>
+                            <span>Submit with Crate Submission Wizard </span>
                         </a>
 
-                        <a class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" id="showModalButton2">
+                        <a class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" href="@Url.Action("SubmissionProjectSQL", "Project",  new { id = pId })">
                             <i class="fa fa-table-columns align-middle me-2"></i>
-                            <span>Submit with SQL TES Wizard</span>
+                            <span >Submit with SQL TES Wizard </span>
                         </a>
 
-                        <a class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" id="showModalButton3">
+                        <a class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" href="@Url.Action("SubmissionProjectGraphQL", "Project",  new { id = pId })">
                             <i class="fa fa-table-columns align-middle me-2"></i>
                             <span>Submit with GraphQL TES Wizard</span>
                         </a>
