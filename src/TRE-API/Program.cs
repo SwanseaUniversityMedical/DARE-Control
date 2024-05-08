@@ -420,6 +420,7 @@ if (jobSettings.scanSchedule == 0)
 else
     RecurringJob.AddOrUpdate<IDoAgentWork>(scanJobName,
         x => x.Execute(),
+
         Cron.MinuteInterval(jobSettings.scanSchedule));
 
 
