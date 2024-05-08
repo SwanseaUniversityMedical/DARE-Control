@@ -85,7 +85,7 @@
                         @submission.SubmittedBy.Name
                     </td>
                     <td>
-                        @submission.StartTime
+                        @submission.GetFormattedStartDate();
                     </td>
                     <td>
                         <a href="@Url.Action("GetASubmission", "Submission", new { id = linkid })" class="btn btn-sm btn-outline-primary">

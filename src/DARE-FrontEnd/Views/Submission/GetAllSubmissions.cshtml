@@ -106,7 +106,7 @@
                         @submission.SubmittedBy.FullName
                     </td>
                     <td>
-                        @submission.StartTime
+                            @submission.GetFormattedStartDate()
                     </td>
                     <td>
                         <a href="@Url.Action("GetASubmission", "Submission", new { id = submission.Id })" class="btn btn-sm btn-outline-primary">
