@@ -74,8 +74,8 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public async Task<IActionResult> GetProject(int id)
         {
-            var users = _clientHelper.CallAPIWithoutModel<List<BL.Models.User>>("/api/User/GetAllUsers/");
-            var tres = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Tre/GetAllTres/");
+            var users = _clientHelper.CallAPIWithoutModel<List<BL.Models.UserGetProjectModel>>("/api/User/GetAllUsersUI/");
+            var tres = _clientHelper.CallAPIWithoutModel<List<TreGetProjectModel>>("/api/Tre/GetAllTresUI/");
             var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());

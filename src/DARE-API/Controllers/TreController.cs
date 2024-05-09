@@ -101,6 +101,32 @@ namespace DARE_API.Controllers
             }
         }
 
+        [HttpGet("GetAllTresUI")]
+        [AllowAnonymous]
+        public async Task<List<TreGetProjectModel>> GetAllTresUI()
+        {
+            try
+            {
+                var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
+                var allTres = new List<TreGetProjectModel>();
+                foreach ( var tre in _DbContext.Tres)
+                {
+                    allTres.Add(new TreGetProjectModel(tre, 0, false));
+                }
+
+                Log.Information("{Function} Tres retrieved successfully", "GetAllTres");
+                return allTres;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetAllTres");
+                throw;
+            }
+
+
+        }
+
+
         [HttpGet("GetAllTres")]
         [AllowAnonymous]
         public async Task<List<Tre>> GetAllTres()

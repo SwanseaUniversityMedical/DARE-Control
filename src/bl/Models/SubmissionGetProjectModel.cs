@@ -116,7 +116,7 @@ namespace BL.Models
     public class UserGetProjectModel
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         public string? FullName { get; set; }
 
@@ -147,12 +147,16 @@ namespace BL.Models
         {
 
         }
-        public TreGetProjectModel(Tre Tre, int ProjectId )
+        public TreGetProjectModel(Tre Tre, int ProjectId, bool DoProjectTreDecision = true)
         {
             Id = Tre.Id;
             Name = Tre.Name;
-            ProjectTreDecision = new TreDecisionsGetProjectModel();
-            ProjectTreDecision.Decision = Tre.ProjectTreDecisions.Where(x => x.SubmissionProj.Id == ProjectId).OrderByDescending(x => x.Id).FirstOrDefault().Decision;
+            if (DoProjectTreDecision)
+            {
+                ProjectTreDecision = new TreDecisionsGetProjectModel();
+                ProjectTreDecision.Decision = Tre.ProjectTreDecisions.Where(x => x.SubmissionProj.Id == ProjectId).OrderByDescending(x => x.Id).FirstOrDefault().Decision;
+            }
+          
         }
     }
 
