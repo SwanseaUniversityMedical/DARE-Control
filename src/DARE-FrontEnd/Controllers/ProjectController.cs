@@ -74,8 +74,7 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public async Task<IActionResult> GetProject(int id)
         {
-            var users = _clientHelper.CallAPIWithoutModel<List<BL.Models.UserGetProjectModel>>("/api/User/GetAllUsersUI/");
-            var tres = _clientHelper.CallAPIWithoutModel<List<TreGetProjectModel>>("/api/Tre/GetAllTresUI/");
+
             var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());
@@ -84,10 +83,6 @@ namespace DARE_FrontEnd.Controllers
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            await users;
-            Log.Error("users took ElapsedMilliseconds" + stopwatch.ElapsedMilliseconds);
-            await tres;
-            Log.Error("tres took ElapsedMilliseconds" + stopwatch.ElapsedMilliseconds);
             await projectawait;
             Log.Error("projectawait took ElapsedMilliseconds" + stopwatch.ElapsedMilliseconds);
             await minioEndpoint;
@@ -95,10 +90,9 @@ namespace DARE_FrontEnd.Controllers
             stopwatch.Stop();
             var project = projectawait.Result;
 
-            var userItems2 = users.Result.Where(p => !project.Users.Select(x => x.Id).Contains(p.Id)).ToList();
-            var treItems2 = tres.Result.Where(p => !project.Tres.Select(x => x.Id).Contains(p.Id)).ToList();
+            var userItems2 = project.Users;
+            var treItems2 = project.Tres;
 
-            
             var userItems = userItems2
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.FullName != "" ? p.FullName : p.Name })
                 .ToList();
