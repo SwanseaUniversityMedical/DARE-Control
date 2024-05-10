@@ -10,10 +10,14 @@
 {
     @Html.HiddenFor(x => x.ProjectId)
     {
-        <div class="modal-body">
+        <div class="container-lg p-4">
+        <div class="d-flex align-items-center justify-content-between">         
+         <div class="my-5">
             <div class="form-group">
+                 <h1 class="fs-3 mb-0">
                 @Html.LabelFor(x => x.ProjectName,new {@class="form-label fw-bold"})
                 @Html.DisplayFor(x => x.ProjectName, new {@class="form-control"})
+                </h1>             
             </div>
             <div class="mb-4">
                 @Html.LabelFor(x => x.TESName,new {@class="form-label fw-bold"})
@@ -91,16 +95,18 @@
 
             <div id="uploadedFileField" class="form-group">
                 @Html.LabelFor(x => x.File, new {@class="form-label fw-bold"})
-                @Html.TextBoxFor(m => m.File, new { type = "file", @class="form-control" })
+                @Html.TextBoxFor(m => m.File, new { type = "file", @class="form-control" })       
 
             </div>
-        </div>
-
-        <div class="modal-footer">
+          <div class="d-flex align-items-center mt-4">
             <div class="hero-block-1">
 
                 <button type="button" class="btn btn-sm btn-link" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-sm btn-primary">Submit</button>
+            </div>
+        </div>
+
+                </div>
             </div>
         </div>
     }
