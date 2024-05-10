@@ -10,6 +10,7 @@ using NuGet.Protocol;
 using System.Linq;
 using Serilog;
 using Microsoft.CodeAnalysis.Elfie.Diagnostics;
+using DARE_FrontEnd.Models;
 
 namespace DARE_FrontEnd.Controllers
 {
