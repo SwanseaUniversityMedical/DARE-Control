@@ -60,12 +60,10 @@ namespace DARE_API.Controllers
                 //2023-06-01 14:30:00 use this as the datetime
            
 
-                string input = "Hello World! 123";
+                string input = project.Name.Trim();
                 string pattern = @"[^a-zA-Z0-9]"; // exclude everything but letters and numbers
                 string result = Regex.Replace(input, pattern, "");
-
-
-                project.Name = project.Name.Trim();
+                project.Name = result;
                 project.StartDate = project.StartDate.ToUniversalTime();
                 project.EndDate = project.EndDate.ToUniversalTime();
                 project.ProjectDescription = project.ProjectDescription.Trim();
