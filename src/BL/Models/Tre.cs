@@ -1,4 +1,6 @@
 ﻿
+using BL.Models.Helpers;
+
 namespace BL.Models
 {
     public class Tre: BaseModel
@@ -22,7 +24,7 @@ namespace BL.Models
 
         public bool IsOnline()
         {
-            TimeSpan timeSinceLastUpdate = DateTime.Now - LastHeartBeatReceived;
+            TimeSpan timeSinceLastUpdate = DateTime.UtcNow - LastHeartBeatReceived;
             var isOnline = false;
             if (timeSinceLastUpdate.TotalMinutes < 30)
             {
@@ -30,6 +32,13 @@ namespace BL.Models
             }
             return isOnline;
                 
+        }
+
+        public string GetTotalDisplayTime()
+        {
+            var end = (DateTime.Now).ToUniversalTime();
+            var data = TimeHelper.GetDisplayTime(LastHeartBeatReceived, end);
+            return data;
         }
 
     }
