@@ -414,6 +414,12 @@ namespace TRE_API
                                 }
                                 _subHelper.UpdateStatusForTre(subId.ToString(), StatusType.DataOutRequested, "");
                                 Log.Information($"  FilesReadyForReview files {files.Count} ");
+                                if (files.Count == 0) 
+                                {
+                                    _subHelper.UpdateStatusForTre(subId.ToString(), StatusType.DataOutApprovalRejected, " No Files to review ");
+                                    return;
+                                }
+
                                 _subHelper.FilesReadyForReview(new ReviewFiles()
                                 {
                                     SubId = subId.ToString(),
