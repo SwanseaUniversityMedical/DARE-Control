@@ -171,24 +171,29 @@ namespace DARE_API.Controllers
 
             try
             {
+                Log.Information("{Function} Step 1", "CreateTaskAsync");
                 var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
 
                 var user = _DbContext.Users.FirstOrDefault(x => x.Name.ToLower() == usersName.ToLower());
 
+                Log.Information("{Function} Step 2", "CreateTaskAsync");
                 if (user == null)
                 {
+                    Log.Information("{Function} Step 3", "CreateTaskAsync");
                     return BadRequest(
                         "User " + usersName + " doesn't exist");
                 }
 
                 if (!string.IsNullOrWhiteSpace(tesTask.Id))
                 {
+                    Log.Information("{Function} Step 4", "CreateTaskAsync");
                     return BadRequest(
                         "Id should not be included by the client in the request; the server is responsible for generating a unique Id.");
                 }
 
                 if (string.IsNullOrWhiteSpace(tesTask.Executors?.FirstOrDefault()?.Image))
                 {
+                    Log.Information("{Function} Step 5", "CreateTaskAsync");
                     return BadRequest("Docker container image name is required.");
                 }
 
@@ -196,6 +201,7 @@ namespace DARE_API.Controllers
                 {
                     if (!input.Path.StartsWith('/'))
                     {
+                        Log.Information("{Function} Step 6", "CreateTaskAsync");
                         return BadRequest("Input paths in the container must be absolute paths.");
                     }
                 }
@@ -204,6 +210,7 @@ namespace DARE_API.Controllers
                 {
                     if (!output.Path.StartsWith('/'))
                     {
+                        Log.Information("{Function} Step 7", "CreateTaskAsync");
                         return BadRequest("Output paths in the container must be absolute paths.");
                     }
                 }
@@ -217,6 +224,7 @@ namespace DARE_API.Controllers
 
                     if (keys.Count > 1 && keys.Select(k => k?.ToLowerInvariant()).Distinct().Count() != keys.Count)
                     {
+                        Log.Information("{Function} Step 8", "CreateTaskAsync");
                         return BadRequest("Duplicate backend_parameters were specified");
                     }
 
@@ -240,6 +248,7 @@ namespace DARE_API.Controllers
                     if (tesTask.Resources?.BackendParametersStrict == true
                         && unsupportedKeys.Count > 0)
                     {
+                        Log.Information("{Function} Step 9", "CreateTaskAsync");
                         return BadRequest(
                             $"backend_parameters_strict is set to true and unsupported backend_parameters were specified: {string.Join(",", unsupportedKeys)}");
                     }
@@ -253,6 +262,7 @@ namespace DARE_API.Controllers
                 //TODO: Implement IsDockerThere
                 if (!IsDockerThere(exec.Image))
                 {
+                    Log.Information("{Function} Step 10", "CreateTaskAsync");
                     return BadRequest("Crate Location " + exec.Image + " doesn't exist");
                 }
 
@@ -262,36 +272,40 @@ namespace DARE_API.Controllers
                     .FirstOrDefault();
                 if (string.IsNullOrWhiteSpace(project))
                 {
+                    Log.Information("{Function} Step 11", "CreateTaskAsync");
                     return BadRequest("Tags must contain key project.");
                 }
-
+                Log.Information("{Function} Step 12", "CreateTaskAsync");
                 var trestr = tesTask.Tags.Where(x => x.Key.ToLower() == "tres").Select(x => x.Value).FirstOrDefault();
                 List<string> tres = new List<string>();
                 if (!string.IsNullOrWhiteSpace(trestr))
                 {
                     tres = trestr.Split('|').Select(x => x.ToLower()).ToList();
                 }
-
+                Log.Information("{Function} Step 13", "CreateTaskAsync");
                 var dbproj = _DbContext.Projects.FirstOrDefault(x => x.Name.ToLower() == project.ToLower());
 
                 if (dbproj == null)
                 {
+                    Log.Information("{Function} Step 14", "CreateTaskAsync");
                     return BadRequest("Project " + project + " doesn't exist.");
                 }
 
 
                 if (!IsUserOnProject(dbproj, usersName))
                 {
+                    Log.Information("{Function} Step 15", "CreateTaskAsync");
                     return BadRequest("User " + User.Identity.Name + "isn't on project " + project + ".");
                 }
 
                 if (tres.Count > 0 && !AreTresOnProject(dbproj, tres))
                 {
+                    Log.Information("{Function} Step 17", "CreateTaskAsync");
                     return BadRequest("One or more of the tres are not authorised for this project " + project + ".");
                 }
 
                 var dbtres = new List<BL.Models.Tre>();
-
+                Log.Information("{Function} Step 18", "CreateTaskAsync");
                 if (tres.Count == 0)
                 {
                     dbtres = dbproj.Tres;
@@ -306,11 +320,13 @@ namespace DARE_API.Controllers
 
                 if (dbtres.Count == 0)
                 {
+                    Log.Information("{Function} Step 19", "CreateTaskAsync");
                     return BadRequest("No valid tres for this project " + project + ".");
                 }
 
                 var Token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
                 Token = Token.Replace("Bearer ", "");
+                Log.Information("{Function} Step 20", "CreateTaskAsync");
                 var sub = new Submission()
                 {
                     DockerInputLocation = tesTask.Executors.First().Image,
@@ -325,14 +341,17 @@ namespace DARE_API.Controllers
                 };
 
 
-
+                Log.Information("{Function} Step 21", "CreateTaskAsync");
                 _DbContext.Submissions.Add(sub);
+                Log.Information("{Function} Step 22", "CreateTaskAsync");
                 await _DbContext.SaveChangesAsync(cancellationToken);
+                Log.Information("{Function} Step 23", "CreateTaskAsync");
                 tesTask.Id = sub.Id.ToString();
                 sub.TesId = tesTask.Id;
                 var tesstring = JsonConvert.SerializeObject(tesTask);
                 sub.TesJson = tesstring;
                 await _DbContext.SaveChangesAsync(cancellationToken);
+                Log.Information("{Function} Step 24", "CreateTaskAsync");
 
                 try
                 {
@@ -342,15 +361,16 @@ namespace DARE_API.Controllers
 
                     _rabbit.Advanced.Publish(exch, RoutingConstants.ProcessSub, false, new Message<int>(sub.Id));
                     await ControllerHelpers.AddAuditLog(LogType.CreateSubmission, user, dbproj, null, sub, null, _httpContextAccessor, User, _DbContext);
-                    
 
-                   
+                    Log.Information("{Function} Step 25", "CreateTaskAsync");
+
                     Log.Debug("{Function} Creating task with id {Id} state {State}", "CreateTaskAsync", tesTask.Id,
                         tesTask.State);
 
                 }
                 catch (Exception ex)
                 {
+                    Log.Error(ex, "{Function} Step 26", "CreateTaskAsync");
                     UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.Failed, ex.Message);
                     await _DbContext.SaveChangesAsync(cancellationToken);
 
@@ -360,12 +380,13 @@ namespace DARE_API.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "{Function} Step 27", "CreateTaskAsync");
                 Log.Error(ex, "{Function} Crashed", "CreateTESTaskAsync");
                 throw;
             }
 
-           
 
+            Log.Information("{Function} Step 28 ID {Id}", "CreateTaskAsync", tesTask.Id);
             return StatusCode(200, new TesCreateTaskResponse { Id = tesTask.Id });
 
         }
