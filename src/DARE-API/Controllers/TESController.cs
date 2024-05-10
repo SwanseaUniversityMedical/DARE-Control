@@ -376,6 +376,7 @@ namespace DARE_API.Controllers
 
                    
                     throw;
+
                 }
             }
             catch (Exception ex)
