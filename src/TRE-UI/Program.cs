@@ -41,6 +41,11 @@ try
     configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
     builder.Services.AddSingleton(treKeyCloakSettings);
 
+    var UIName = new BL.Models.UIName();
+    configuration.Bind(nameof(UIName), UIName);
+    builder.Services.AddSingleton(UIName);
+
+    
 
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddHttpClient();

@@ -54,6 +54,11 @@ var URLSettingsFrontEnd = new URLSettingsFrontEnd();
 configuration.Bind(nameof(URLSettingsFrontEnd), URLSettingsFrontEnd);
 builder.Services.AddSingleton(URLSettingsFrontEnd);
 
+    
+var UIName = new BL.Models.UIName();
+configuration.Bind(nameof(UIName), UIName);
+builder.Services.AddSingleton(UIName);
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
 
