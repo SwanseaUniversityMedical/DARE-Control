@@ -55,7 +55,7 @@ configuration.Bind(nameof(URLSettingsFrontEnd), URLSettingsFrontEnd);
 builder.Services.AddSingleton(URLSettingsFrontEnd);
 
     
-var UIName = new BL.Models.UIName();
+var UIName = new DARE_FrontEnd.Models.UIName();
 configuration.Bind(nameof(UIName), UIName);
 builder.Services.AddSingleton(UIName);
 
