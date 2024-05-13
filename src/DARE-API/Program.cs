@@ -199,6 +199,7 @@ builder.Services.AddAuthentication(options =>
                 Log.Information("ONAUTHFAILED END");
                 Log.Error("{Function}: {ex}", "OnAuthFailed", context.Exception.Message);
                 Log.Error("Auth failed event: {event}", context.Request.Headers);
+                context.Response.StatusCode = 401;
                 return context.Response.CompleteAsync();
             },
             OnMessageReceived = context =>
@@ -319,6 +320,7 @@ using (var scope = app.Services.CreateScope())
     if (configuration.GetValue<bool>("Testdata"))
         initialiser.SeedData();
 }
+
 
 
 //app.UseHttpsRedirection();

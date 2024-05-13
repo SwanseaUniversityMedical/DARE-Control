@@ -20,8 +20,8 @@ using DARE_API.Services;
 using User = BL.Models.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.SignalR;
-
 
 namespace DARE_API.Controllers
 {
@@ -58,7 +58,12 @@ namespace DARE_API.Controllers
 
                 Project project = JsonConvert.DeserializeObject<Project>(data.FormIoString);
                 //2023-06-01 14:30:00 use this as the datetime
-                project.Name = project.Name.Trim();
+           
+
+                string input = project.Name.Trim();
+                string pattern = @"[^a-zA-Z0-9]"; // exclude everything but letters and numbers
+                string result = Regex.Replace(input, pattern, "");
+                project.Name = result;
                 project.StartDate = project.StartDate.ToUniversalTime();
                 project.EndDate = project.EndDate.ToUniversalTime();
                 project.ProjectDescription = project.ProjectDescription.Trim();
@@ -336,6 +341,31 @@ namespace DARE_API.Controllers
 
         }
 
+
+        [AllowAnonymous]
+        [HttpGet("GetProjectUI")]
+        public SubmissionGetProjectModel? GetProjectUI(int projectId)
+        {
+            try
+            {
+                var returned = _DbContext.Projects.Find(projectId);
+                if (returned == null)
+                {
+                    return null;
+                }
+
+                Log.Information("{Function} Project retrieved successfully", "GetProject");
+                return new SubmissionGetProjectModel(returned);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetProject");
+                throw;
+            }
+
+
+        }
+
         [AllowAnonymous]
         [HttpGet("GetProject")]
         public Project? GetProject(int projectId)
@@ -460,6 +490,9 @@ namespace DARE_API.Controllers
         [Authorize(Roles = "dare-tre-admin")]
         public BoolReturn SyncTreMembershipDecisions([FromBody] List<MembershipTreDecisionDTO> decisions)
         {
+            var aresult = new BoolReturn();
+            aresult.Result = true;
+            return aresult;
             try
             {
                 var result = new BoolReturn();

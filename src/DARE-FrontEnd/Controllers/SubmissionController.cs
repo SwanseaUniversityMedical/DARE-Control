@@ -208,6 +208,8 @@ namespace DARE_FrontEnd.Controllers
                     List<Executors> executorsList = JsonConvert.DeserializeObject<List<Executors>>(Executors);
                     foreach (var ex in executorsList)
                     {
+                        if (string.IsNullOrEmpty(ex.Image)) continue;
+
                         Dictionary<string, string> EnvVars = new Dictionary<string, string>();
                         foreach (var anENV in ex.ENV)
                         {
