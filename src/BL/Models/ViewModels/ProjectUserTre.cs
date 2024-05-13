@@ -7,8 +7,8 @@ namespace BL.Models.ViewModels
     public class ProjectUserTre
     {
         public int Id { get; set; }
-        public virtual List<User> Users { get; set; }
-        public virtual List<Tre> Tres { get; set; }
+        public virtual List<UserGetProjectModel> Users { get; set; }
+        public virtual List<TreGetProjectModel> Tres { get; set; }
         public string FormData { get; set; }
         public string FormIoUrl { get; set; }
         public string Name { get; set; }
@@ -22,7 +22,7 @@ namespace BL.Models.ViewModels
         public string? MinioEndpoint { get; set; }
 
         [JsonIgnore]
-        public virtual List<Submission> Submissions { get; set; }
+        public virtual List<SubmissionsGetProjectModel> Submissions { get; set; }
 
         [JsonIgnore]
         public IEnumerable<SelectListItem>? TreItemList { get; set; }

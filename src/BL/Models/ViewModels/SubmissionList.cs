@@ -8,6 +8,7 @@ namespace BL.Models.ViewModels
 {
     public class SubmissionList
     {
+        public List<SubmissionsGetProjectModel> SubmissionsGetProjectModel { get; set; }
         public List<Submission> Submissions { get; set; }
         public bool UseParent { get; set; }
     }

@@ -139,7 +139,7 @@
                 }
 
 
-                @await Html.PartialAsync("_SubmissionList", new SubmissionList(){Submissions  = Model.Submissions.Where(x => x.Parent == null).ToList(), UseParent = false})
+                @await Html.PartialAsync("_SubmissionList", new SubmissionList(){SubmissionsGetProjectModel  = Model.Submissions.Where(x => x.HasParent == false).ToList(), UseParent = false})
 
             </div>
             <div class="tab-pane fade" id="userMembership" role="tabpanel" aria-labelledby="people">
@@ -189,38 +189,28 @@
                                         var doesNotHaveDecision = true;
                                     }
                                     <span class="d-flex align-items-center">
-                                        @foreach (var decision in tre.ProjectTreDecisions.Where(x => x.SubmissionProj.Id == Model.Id))
+                                        @if (tre.ProjectTreDecision.Decision == BL.Models.Enums.Decision.Approved)
                                         {
+                                            doesNotHaveDecision = false;
+                                            <span class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 me-3">
+                                                <i class="fa-solid fa-check-circle me-1"></i> @tre.ProjectTreDecision.Decision.ToString()
+                                            </span>
+                                        }
+                                        else if (tre.ProjectTreDecision.Decision == BL.Models.Enums.Decision.Undecided)
+                                        {
+                                            doesNotHaveDecision = false;
 
+                                            <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 me-3">
+                                                <i class="fa-solid fa-circle-notch fa-spin me-1"></i> @tre.ProjectTreDecision.Decision.ToString()
+                                            </span>
+                                        }
+                                        else if (tre.ProjectTreDecision.Decision == BL.Models.Enums.Decision.Rejected)
+                                        {
+                                            doesNotHaveDecision = false;
 
-
-
-
-                                            @if (decision.Decision == BL.Models.Enums.Decision.Approved)
-                                            {
-                                                doesNotHaveDecision = false;
-                                                <span class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 me-3">
-                                                    <i class="fa-solid fa-check-circle me-1"></i> @decision.Decision.ToString()
-                                                </span>
-                                            }
-                                            else if (decision.Decision == BL.Models.Enums.Decision.Undecided)
-                                            {
-                                                doesNotHaveDecision = false;
-
-                                                <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 me-3">
-                                                    <i class="fa-solid fa-circle-notch fa-spin me-1"></i> @decision.Decision.ToString()
-                                                </span>
-                                            }
-                                            else if (decision.Decision == BL.Models.Enums.Decision.Rejected)
-                                            {
-                                                doesNotHaveDecision = false;
-
-                                                <span class="badge  px-2 badge-sm bg-danger text-light rounded-pill m-0 me-3">
-                                                    <i class="fa-solid fa-close me-1"></i> @decision.Decision.ToString()
-                                                </span>
-                                            }
-
-
+                                            <span class="badge  px-2 badge-sm bg-danger text-light rounded-pill m-0 me-3">
+                                                <i class="fa-solid fa-close me-1"></i> @tre.ProjectTreDecision.Decision.ToString()
+                                            </span>
                                         }
 
                                         @if (doesNotHaveDecision == true)
@@ -315,42 +305,6 @@
                 <button type="button" class="btn btn-sm btn-link" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-sm btn-primary" onclick="SaveTreList(@Model.Id)">Add</button>
             </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade bd-tre-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="submissionModal">
-    <div class="modal-dialog modal-md shadow-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Create Submission</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            @await Component.InvokeAsync("SubmissionWizerd", new {projectId=pId})
-        </div>
-    </div>
-</div>
-
-<div class="modal fade bd-tre-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="submissionModal1">
-    <div class="modal-dialog modal-lg shadow-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Create Submission</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            @await Component.InvokeAsync("SubmissionWizardRaw", new {projectId=pId})
-        </div>
-    </div>
-</div>
-
-<div class="modal fade bd-tre-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="submissionModal2">
-    <div class="modal-dialog modal-lg shadow-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Create Submission</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            @await Component.InvokeAsync("SubmissionWizardRawGraphQL", new {projectId=pId})
         </div>
     </div>
 </div>

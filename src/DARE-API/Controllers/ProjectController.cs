@@ -341,6 +341,31 @@ namespace DARE_API.Controllers
 
         }
 
+
+        [AllowAnonymous]
+        [HttpGet("GetProjectUI")]
+        public SubmissionGetProjectModel? GetProjectUI(int projectId)
+        {
+            try
+            {
+                var returned = _DbContext.Projects.Find(projectId);
+                if (returned == null)
+                {
+                    return null;
+                }
+
+                Log.Information("{Function} Project retrieved successfully", "GetProject");
+                return new SubmissionGetProjectModel(returned);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "GetProject");
+                throw;
+            }
+
+
+        }
+
         [AllowAnonymous]
         [HttpGet("GetProject")]
         public Project? GetProject(int projectId)
@@ -465,6 +490,9 @@ namespace DARE_API.Controllers
         [Authorize(Roles = "dare-tre-admin")]
         public BoolReturn SyncTreMembershipDecisions([FromBody] List<MembershipTreDecisionDTO> decisions)
         {
+            var aresult = new BoolReturn();
+            aresult.Result = true;
+            return aresult;
             try
             {
                 var result = new BoolReturn();
