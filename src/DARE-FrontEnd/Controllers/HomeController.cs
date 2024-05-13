@@ -10,6 +10,7 @@ using NuGet.Protocol;
 using System.Linq;
 using Serilog;
 using Microsoft.CodeAnalysis.Elfie.Diagnostics;
+using DARE_FrontEnd.Models;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -20,11 +21,14 @@ namespace DARE_FrontEnd.Controllers
 
         private readonly IDareClientHelper _clientHelper;
         private readonly IConfiguration _configuration;
+        private readonly UIName _UIName;
 
-        public HomeController(IDareClientHelper client, IConfiguration configuration)
+
+        public HomeController(IDareClientHelper client, IConfiguration configuration, UIName uIName)
         {
             _clientHelper = client;
             _configuration = configuration;
+            _UIName = uIName;
         }
 
         public IActionResult Index()
@@ -33,6 +37,9 @@ namespace DARE_FrontEnd.Controllers
             ViewBag.getAllSubs = 0;
             ViewBag.getAllUsers = 0;
             ViewBag.getAllTres = 0;
+            ViewBag.UIName = _UIName.Name;
+
+
             try
             {
                 var getAllProj = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects").Result;

@@ -20,8 +20,8 @@ using DARE_API.Services;
 using User = BL.Models.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.SignalR;
-
 
 namespace DARE_API.Controllers
 {
@@ -58,7 +58,12 @@ namespace DARE_API.Controllers
 
                 Project project = JsonConvert.DeserializeObject<Project>(data.FormIoString);
                 //2023-06-01 14:30:00 use this as the datetime
-                project.Name = project.Name.Trim();
+           
+
+                string input = project.Name.Trim();
+                string pattern = @"[^a-zA-Z0-9]"; // exclude everything but letters and numbers
+                string result = Regex.Replace(input, pattern, "");
+                project.Name = result;
                 project.StartDate = project.StartDate.ToUniversalTime();
                 project.EndDate = project.EndDate.ToUniversalTime();
                 project.ProjectDescription = project.ProjectDescription.Trim();

@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using BL.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
@@ -35,7 +36,7 @@ try
     var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
     configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
     builder.Services.AddSingleton(dataEgressKeyCloakSettings);
-
+    
 
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddHttpClient();
@@ -45,7 +46,6 @@ try
     builder.Services.AddScoped<CustomCookieEvent>();
 
     builder.Services.AddScoped<IDataEgressClientHelper, DataEgressClientHelper>();
-
 
     builder.Services.AddMvc().AddViewComponentsAsServices();
 

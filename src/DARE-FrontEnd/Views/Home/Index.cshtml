@@ -6,6 +6,7 @@
     var getAllUsers = @ViewBag.getAllUsers;
     var getAllTres = @ViewBag.getAllTres;
     var searchResults = @ViewBag.SearchResults;
+    var Name = @ViewBag.UIName;
     ViewData["Title"] = "Home";
 }
 
@@ -75,10 +76,10 @@
 </div>
 <div class="container my-5">
     <div class="col-lg-8 mx-auto">
-        <h3 class="text-center mb-4">About TRE FX</h3>
+        <h3 class="text-center mb-4">About @Name</h3>
 
-        <p>TRE FX was developed by UKRI's DARE UK to support fast and efficient sharing, linkage, and advanced analysis of sensitive data in an ethical and secure manner.</p>
-        <p>TRE FX allows approved researchers to work with a ‘federated’ network of trusted research environments (TREs) by querying the data held by different TREs from one location - meaning the data doesn't have to be joined or moved from its secure location and the researcher saves time by submitting a query once for multiple TREs.</p>
+        <p>@Name was developed by UKRI's DARE UK to support fast and efficient sharing, linkage, and advanced analysis of sensitive data in an ethical and secure manner.</p>
+        <p>@Name allows approved researchers to work with a ‘federated’ network of trusted research environments (TREs) by querying the data held by different TREs from one location - meaning the data doesn't have to be joined or moved from its secure location and the researcher saves time by submitting a query once for multiple TREs.</p>
         <p>The platform adopts a transparent approach and is open for the public to see what research is being conducted across the different TREs and also opens up the possibility of more collaboration in the research community.</p>
     </div>
 </div>
