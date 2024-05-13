@@ -11,8 +11,10 @@ using Serilog;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.RegularExpressions;
 using TRE_API.Models;
 using TRE_API.Repositories.DbContexts;
+using System.Text.RegularExpressions;
 
 namespace TRE_API.Services
 {
@@ -61,14 +63,15 @@ namespace TRE_API.Services
 
             var Usercode = Uers;
             var email = $"{Uers}@chi.swan.ac.uk";
-            var Result = await GenAccount(email, Usercode, pass);
+            var data = new GenAccountData() { Email = email, Name = Usercode, Password = pass };
+            var Result = await GenAccount(data);
             if (Result)
             {
                 _DbContext.ProjectAcount.Add(new ProjectAcount()
                 {
-                    Name = Usercode,
-                    Email = email,
-                    Pass = _encDecHelper.Encrypt(pass)
+                    Name = data.Name,
+                    Email = data.Email,
+                    Pass = _encDecHelper.Encrypt(data.Password)
                 });
 
                 _DbContext.SaveChanges();
@@ -105,6 +108,13 @@ namespace TRE_API.Services
         public class TokenRoles
         {
             public List<string> roles { get; set; }
+        }
+
+        public class GenAccountData
+        {
+            public string Name { get; set; }
+            public string Password { get; set; }   
+            public string Email { get; set; }
         }
 
 
@@ -152,7 +162,7 @@ namespace TRE_API.Services
 
 
 
-        public async Task<bool> GenAccount(string Email, string username, string Password)
+        public async Task<bool> GenAccount(GenAccountData GenAccountData)
         {
             var domain = _TreKeyCloakSettings.BaseUrl.Replace("/realms/Dare-TRE", "");
             var realm = _TreKeyCloakSettings.Realm;
@@ -165,7 +175,7 @@ namespace TRE_API.Services
 
             // Get an access token from Keycloak using admin credentials
             var token = await GetAccessTokenAsync(domain, realm, adminName, adminPassword, "120");
-            var didit = await MakeAccounts(domain, realm, token.access_token, Email, username, Password);
+            var didit = await MakeAccounts(domain, realm, token.access_token, GenAccountData);
 
             if (didit)
             {
@@ -220,7 +230,7 @@ namespace TRE_API.Services
             response.EnsureSuccessStatusCode();
         }
 
-        async Task<bool> MakeAccounts(string domain, string realm, string accessToken, string email, string username, string pass)
+        async Task<bool> MakeAccounts(string domain, string realm, string accessToken, GenAccountData GenAccountData)
         {
             var url = "";
             if (domain.Contains("http"))
@@ -236,19 +246,25 @@ namespace TRE_API.Services
             var client = new HttpClient(GetHttpClientHandler());
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+ 
+
+            string input = GenAccountData.Name;
+            string pattern = @"[^a-zA-Z0-9]"; // exclude everything but letters and numbers
+            string result = Regex.Replace(input, pattern, "");
+            GenAccountData.Name = result;
 
             NewUserData user = new NewUserData
             {
                 firstName = "",
                 lastName = "",
-                email = email,
+                email = GenAccountData.Email,
                 enabled = "true",
-                username = username
+                username = GenAccountData.Name
             };
 
             user.credentials.Add(new Credentials()
             {
-                value = pass,
+                value = GenAccountData.Password,
                 temporary = "false",
             });
 
