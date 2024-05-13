@@ -128,10 +128,10 @@ services:
     #  - "stuff/"
     #  - "-o"
     #  - "stuff/bundle.tar.gz"
-    networks:
-      - communicating
-    volumes:
-      - ./OPASettings:/stuff:rw
+    #networks:
+    #  - communicating
+    #volumes:
+    #  - ./OPASettings:/stuff:rw
       
   #postgresHasura:
   #  image: postgres:15
