@@ -116,6 +116,29 @@ namespace DARE_API.Controllers
 
 
         [AllowAnonymous]
+        [HttpGet("GetAllUsersUI")]
+        public List<UserGetProjectModel> GetAllUsersUI()
+        {
+            try
+            {
+                List<UserGetProjectModel> allUsers = new List<UserGetProjectModel>();
+                foreach (var user in _DbContext.Users)
+                {
+
+                    allUsers.Add(new UserGetProjectModel(user));
+                }
+
+                Log.Information("{Function} Users retrieved successfully", "GetAllUsers");
+                return allUsers;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "GetAllUsers");
+                throw;
+            }
+        }
+
+        [AllowAnonymous]
         [HttpGet("GetAllUsers")]
         public List<User> GetAllUsers()
         {
@@ -133,8 +156,6 @@ namespace DARE_API.Controllers
                 Log.Error(ex, "{Function} Crash", "GetAllUsers");
                 throw;
             }
-
-            
         }
        
         [Authorize(Roles = "dare-control-admin")]

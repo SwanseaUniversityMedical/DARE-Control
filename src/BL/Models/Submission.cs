@@ -38,8 +38,14 @@ namespace BL.Models
         public string GetTotalDisplayTime()
         {
             var end = EndTime == DateTime.MinValue ? (DateTime.Now).ToUniversalTime() : EndTime;
+            var data = TimeHelper.GetDisplayTime(StartTime, end);
+            return data;
+        }
 
-            return TimeHelper.GetDisplayTime(StartTime, end);
+        public string GetFormattedStartDate()
+        {
+            var date = StartTime.ToString("yyyy/MM/dd:HH:mm:ss");
+            return date;
         }
 
         public string GetCurrentStatusDisplayTime()

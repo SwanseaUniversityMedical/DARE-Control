@@ -1,9 +1,11 @@
-﻿<!DOCTYPE html>
+﻿@using DARE_FrontEnd.Models;
+@inject UIName UIName
+<!DOCTYPE html>
 <html lang="en" class="h-100">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" shrink-to-fit="no" />
-    <title>@ViewData["Title"] | TRE FX</title>
+    <title>@ViewData["Title"] - @UIName.Name</title>
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -36,7 +38,7 @@
                             <span></span>
                         </span>
                     </button>
-                    <a class="navbar-brand me-sm-5 me-2 fw-bold" asp-area="" asp-controller="Home" asp-action="Index">TRE FX</a>
+                    <a class="navbar-brand me-sm-5 me-2 fw-bold" asp-area="" asp-controller="Home" asp-action="Index">@UIName.Name</a>
                 </div>
                 <div class="navbar-collapse collapse">
                     <ul class="navbar-nav flex-grow-1">
@@ -139,7 +141,7 @@
                         <a class="nav-link text-light" href="https://dareuk.org.uk/contact/" target="_blank" rel="noopener">Contact Us</a>
                     </li>
                 </ul>
-                <p class="text-light mt-md-0 mt-5 mb-0">&copy; DARE UK - TRE FX 2023. All rights reserved.</p>
+                <p class="text-light mt-md-0 mt-5 mb-0">&copy; DARE UK - @UIName.Name 2023. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -170,7 +172,8 @@
                 null,
                 null,
                 { orderable: false }
-            ]
+            ],
+            order: [[4, 'desc']]
         });
         $('#launch-button').on('click', function () {
 

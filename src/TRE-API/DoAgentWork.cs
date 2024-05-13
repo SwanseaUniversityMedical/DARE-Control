@@ -30,7 +30,7 @@ namespace TRE_API
 {
     public interface IDoAgentWork
     {
-        void Execute();
+        Task Execute();
         Task CheckTESK(string taskID, int subId, string tesId, string outputBucket, string NameTes);
         void ClearJob(string jobname);
         Task testing(string toRun, string Role);
@@ -414,6 +414,12 @@ namespace TRE_API
                                 }
                                 _subHelper.UpdateStatusForTre(subId.ToString(), StatusType.DataOutRequested, "");
                                 Log.Information($"  FilesReadyForReview files {files.Count} ");
+                                if (files.Count == 0) 
+                                {
+                                    _subHelper.UpdateStatusForTre(subId.ToString(), StatusType.DataOutApprovalRejected, " No Files to review ");
+                                    return;
+                                }
+
                                 _subHelper.FilesReadyForReview(new ReviewFiles()
                                 {
                                     SubId = subId.ToString(),
@@ -451,7 +457,7 @@ namespace TRE_API
         }
 
         // Method executed upon hangfire job
-        public async void Execute()
+        public async Task Execute()
         {
             Log.Information("{Function} DoAgentWork ruinng", "Execute");
             // control use of dependency injection
@@ -608,7 +614,7 @@ namespace TRE_API
 
                                 var TokenIN = await _keyCloakService.GenAccessTokenSimple(Acount.Name, _encDecHelper.Decrypt(Acount.Pass), _TreKeyCloakSettings.TokenRefreshSeconds);
 
-                                var Token = aSubmission.QueryToken;
+                                var Token = TokenIN.access_token;
 
                                 var projectId = aSubmission.Project.Id;
 

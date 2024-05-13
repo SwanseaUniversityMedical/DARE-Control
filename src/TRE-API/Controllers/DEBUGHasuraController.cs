@@ -71,7 +71,7 @@ namespace TRE_API.Controllers
             Log.Information("DoAgentWork");
             try
             {
-                _iDoAgentWork.Execute();
+                await _iDoAgentWork.Execute();
                 return StatusCode(200);
             }
             catch (Exception ex)

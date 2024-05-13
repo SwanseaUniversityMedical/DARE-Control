@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 using Serilog;
 using EasyNetQ.Management.Client.Model;
 using DARE_FrontEnd.Models;
+using System.Diagnostics;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -35,6 +36,23 @@ namespace DARE_FrontEnd.Controllers
 
         }
 
+        private bool IsUserOnProject(SubmissionGetProjectModel proj)
+        {
+            if (User.IsInRole("dare-control-admin"))
+            {
+                return true;
+            }
+
+            var usersName = "";
+            usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(usersName) &&
+                (from x in proj.Users where x.Name.ToLower().Trim() == usersName.ToLower().Trim() select x).Any())
+            {
+                return true;
+            }
+            return false;
+        }
+
         private bool IsUserOnProject(Project proj)
         {
             if (User.IsInRole("dare-control-admin"))
@@ -54,20 +72,27 @@ namespace DARE_FrontEnd.Controllers
 
         [AllowAnonymous]
         [HttpGet]
-        public IActionResult GetProject(int id)
+        public async Task<IActionResult> GetProject(int id)
         {
-            var users = _clientHelper.CallAPIWithoutModel<List<BL.Models.User>>("/api/User/GetAllUsers/").Result;
-            var tres = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Tre/GetAllTres/").Result;
 
+            var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());
-            var project = _clientHelper.CallAPIWithoutModel<Project?>(
-                "/api/Project/GetProject/", paramlist).Result;
+            var projectawait = _clientHelper.CallAPIWithoutModel<SubmissionGetProjectModel>(
+                "/api/Project/GetProjectUI/", paramlist);
 
-            var userItems2 = users.Where(p => !project.Users.Select(x => x.Id).Contains(p.Id)).ToList();
-            var treItems2 = tres.Where(p => !project.Tres.Select(x => x.Id).Contains(p.Id)).ToList();
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            await projectawait;
+            Log.Error("projectawait took ElapsedMilliseconds" + stopwatch.ElapsedMilliseconds);
+            await minioEndpoint;
+            Log.Error("minioEndpoint took ElapsedMilliseconds" + stopwatch.ElapsedMilliseconds);
+            stopwatch.Stop();
+            var project = projectawait.Result;
 
-            
+            var userItems2 = project.Users;
+            var treItems2 = project.Tres;
+
             var userItems = userItems2
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.FullName != "" ? p.FullName : p.Name })
                 .ToList();
@@ -75,10 +100,10 @@ namespace DARE_FrontEnd.Controllers
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
 
-            var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
+           
             ViewBag.UserCanDoSubmissions = IsUserOnProject(project);
             
-                ViewBag.minioendpoint = minioEndpoint?.Url;
+            ViewBag.minioendpoint = minioEndpoint.Result.Url;
             ViewBag.URLBucket = _URLSettingsFrontEnd.MinioUrl;
 
             var projectView = new ProjectUserTre()
@@ -95,12 +120,13 @@ namespace DARE_FrontEnd.Controllers
                 Tres = project.Tres,
                 SubmissionBucket = project.SubmissionBucket,
                 OutputBucket = project.OutputBucket,
-                MinioEndpoint = minioEndpoint.Url,
-                Submissions = project.Submissions.Where(x => x.Parent == null).ToList(),
+                MinioEndpoint = minioEndpoint.Result.Url,
+                Submissions = project.Submissions.Where(x => x.HasParent == false).ToList(),
                 UserItemList = userItems,
                 TreItemList = treItems
             };
-
+        
+            Log.Error("View(projectView) took ElapsedMilliseconds" + stopwatch.ElapsedMilliseconds);
             return View(projectView);
         }
 
@@ -283,32 +309,6 @@ namespace DARE_FrontEnd.Controllers
             return View(formData);
         }
 
-        [HttpGet]
-        public IActionResult GetProjectBuckets(int id)
-        {
-            var paramlist = new Dictionary<string, string>();
-            paramlist.Add("projectId", id.ToString());
-            var project = _clientHelper.CallAPIWithoutModel<Project?>(
-                "/api/Project/GetProject/", paramlist).Result;
-
-            var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
-
-            var projectView = new ProjectUserTre()
-            {
-                Id = project.Id,
-                FormData = project.FormData,
-                Name = project.Name,
-                Users = project.Users,
-                StartDate = project.StartDate,
-                EndDate = project.EndDate,
-                Tres = project.Tres,
-                SubmissionBucket = project.SubmissionBucket,
-                OutputBucket = project.OutputBucket,
-                MinioEndpoint = minioEndpoint.Url
-            };
-
-            return View(projectView);
-        }
 
         [HttpPost]
         public async Task<IActionResult> ProjectFormSubmission([FromBody] object arg, int id)
