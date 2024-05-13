@@ -264,14 +264,12 @@ namespace DARE_API.Controllers
                 {
                     return BadRequest("Tags must contain key project.");
                 }
-
                 var trestr = tesTask.Tags.Where(x => x.Key.ToLower() == "tres").Select(x => x.Value).FirstOrDefault();
                 List<string> tres = new List<string>();
                 if (!string.IsNullOrWhiteSpace(trestr))
                 {
                     tres = trestr.Split('|').Select(x => x.ToLower()).ToList();
                 }
-
                 var dbproj = _DbContext.Projects.FirstOrDefault(x => x.Name.ToLower() == project.ToLower());
 
                 if (dbproj == null)
@@ -291,7 +289,6 @@ namespace DARE_API.Controllers
                 }
 
                 var dbtres = new List<BL.Models.Tre>();
-
                 if (tres.Count == 0)
                 {
                     dbtres = dbproj.Tres;
@@ -325,7 +322,6 @@ namespace DARE_API.Controllers
                 };
 
 
-
                 _DbContext.Submissions.Add(sub);
                 await _DbContext.SaveChangesAsync(cancellationToken);
                 tesTask.Id = sub.Id.ToString();
@@ -333,7 +329,7 @@ namespace DARE_API.Controllers
                 var tesstring = JsonConvert.SerializeObject(tesTask);
                 sub.TesJson = tesstring;
                 await _DbContext.SaveChangesAsync(cancellationToken);
-
+                
                 try
                 {
 
@@ -342,9 +338,8 @@ namespace DARE_API.Controllers
 
                     _rabbit.Advanced.Publish(exch, RoutingConstants.ProcessSub, false, new Message<int>(sub.Id));
                     await ControllerHelpers.AddAuditLog(LogType.CreateSubmission, user, dbproj, null, sub, null, _httpContextAccessor, User, _DbContext);
-                    
 
-                   
+                    
                     Log.Debug("{Function} Creating task with id {Id} state {State}", "CreateTaskAsync", tesTask.Id,
                         tesTask.State);
 
@@ -356,6 +351,7 @@ namespace DARE_API.Controllers
 
                    
                     throw;
+
                 }
             }
             catch (Exception ex)
@@ -364,7 +360,6 @@ namespace DARE_API.Controllers
                 throw;
             }
 
-           
 
             return StatusCode(200, new TesCreateTaskResponse { Id = tesTask.Id });
 
