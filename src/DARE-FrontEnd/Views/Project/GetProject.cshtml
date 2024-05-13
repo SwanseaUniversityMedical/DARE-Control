@@ -113,34 +113,25 @@
                 @if (ViewBag.UserCanDoSubmissions)
                 {
                     <div class="d-flex align-items-center mb-3">
-
-                        <a class="btn btn-primary btn-sm d-flex align-items-center mb-3 text-decoration-none" href="@Url.Action("SubmissionProjectCrate", "Project",  new { id = pId })">
-                            <i class="fa fa-table-columns align-middle me-2"></i>
-                            <span>Submit with Crate Submission Wizard </span>
-                        </a>
-
-                        <a class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" href="@Url.Action("SubmissionProjectSQL", "Project",  new { id = pId })">
-                            <i class="fa fa-table-columns align-middle me-2"></i>
-                            <span >Submit with SQL TES Wizard </span>
-                        </a>
-
-                        <a class="btn btn-link btn-sm d-flex align-items-center mb-3 text-decoration-none" href="@Url.Action("SubmissionProjectGraphQL", "Project",  new { id = pId })">
-                            <i class="fa fa-table-columns align-middle me-2"></i>
-                            <span>Submit with GraphQL TES Wizard</span>
-                        </a>
-
+                        <div class="dropdown">
+                            <button class="btn btn-primary btn-sm d-flex align-items-center mb-3  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa fa-table-columns align-middle me-2"></i>
+                                <span>Create Submission </span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                <li><a class="dropdown-item" href="@Url.Action("SubmissionProjectCrate", "Project",  new { id = pId })">Crate Wizard</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("SubmissionProjectSQL", "Project",  new { id = pId })">SQL TES Wizard</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("SubmissionProjectGraphQL", "Project",  new { id = pId })">GraphQL TES Wizard</a></li>
+                            </ul>
+                        </div>
                         <a asp-controller="Submission" asp-action="Instructions" class="btn btn-link btn-sm d-flex align-items-center mb-3 me-2 text-decoration-none">
                             <i class="fa fa-info-circle align-middle me-2"></i>
                             <span>Submit with API</span>
                         </a>
 
                     </div>
-                    <hr class="d-flex my-4">
                 }
-
-
                 @await Html.PartialAsync("_SubmissionList", new SubmissionList(){Submissions  = Model.Submissions.Where(x => x.Parent == null).ToList(), UseParent = false})
-
             </div>
             <div class="tab-pane fade" id="userMembership" role="tabpanel" aria-labelledby="people">
                 @if (User.IsInRole("dare-control-admin"))
