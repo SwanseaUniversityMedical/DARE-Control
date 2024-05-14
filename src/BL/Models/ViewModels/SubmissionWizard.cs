@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -47,6 +48,12 @@ namespace BL.Models.ViewModels
 
         [Display(Name = "Tes to run")]
         public string? TesRun { get; set; }
+
+        public virtual List<Submission> Submissions { get; set; }
+
+        public IEnumerable<SelectListItem>? TreItemList { get; set; }
+
+        public IEnumerable<SelectListItem>? UserItemList { get; set; }
     }
 
     public class TreInfo

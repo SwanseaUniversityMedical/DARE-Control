@@ -6,7 +6,11 @@
 }
 
 
-<partial name="../Shared/_ProjectNav" />
+
+@{
+    Html.RenderPartial("~/VShared/_ProjectNav", Model);
+}
+
 @using (Html.BeginForm("", "", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain2" }))
 {
     @Html.HiddenFor(x => x.ProjectId)

@@ -33,6 +33,8 @@ namespace BL.Models.ViewModels
         public string? RawInput { get; set; }
 
         public string? Query { get; set; }
+      
+
 
     }
     public class Executors
