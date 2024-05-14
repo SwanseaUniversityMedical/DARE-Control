@@ -1,6 +1,7 @@
 ﻿using BL.Models.ViewModels;
 using BL.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace DARE_FrontEnd.ViewComponents
 {
@@ -34,12 +35,26 @@ namespace DARE_FrontEnd.ViewComponents
                 };
                 treInfoList.Add(treInfo);
             }
+
+            var userItems2 = project.Users;
+            var treItems2 = project.Tres;
+
+            var userItems = userItems2
+                    .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.FullName != "" ? p.FullName : p.Name })
+                    .ToList();
+            var treItems = treItems2
+                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
+                .ToList();
+
             var model = new AddiSubmissionWizard()
             {
                 ProjectId = project.Id,
                 ProjectName = project.Name,
                 SelectTresOptions = project.Tres.Select(x => x.Name).ToList(),
-                TreRadios = treInfoList
+                TreRadios = treInfoList,
+                Submissions = project.Submissions.ToList(),
+                UserItemList = userItems,
+                TreItemList = treItems
             };
             return View(model);
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -33,7 +34,13 @@ namespace BL.Models.ViewModels
         public string? RawInput { get; set; }
 
         public string? Query { get; set; }
-      
+
+        public virtual List<Submission> Submissions { get; set; }
+
+        public IEnumerable<SelectListItem>? TreItemList { get; set; }
+
+        public IEnumerable<SelectListItem>? UserItemList { get; set; }
+
 
 
     }

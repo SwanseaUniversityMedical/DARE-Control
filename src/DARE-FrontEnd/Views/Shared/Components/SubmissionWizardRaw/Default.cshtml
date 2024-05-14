@@ -5,12 +5,7 @@
     ViewData["Title"] = "Submission Wizard";
 }
 
-
-
-@{
-    Html.RenderPartial("~/VShared/_ProjectNav", Model);
-}
-
+<partial name="../Shared/_ProjectNav" />
 @using (Html.BeginForm("", "", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain2" }))
 {
     @Html.HiddenFor(x => x.ProjectId)
