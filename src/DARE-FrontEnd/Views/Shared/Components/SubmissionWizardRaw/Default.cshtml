@@ -6,10 +6,9 @@
 }
 
 <partial name="../Shared/_ProjectNav" />
-@using (Html.BeginForm("", "", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain2" }))
-{
-    @Html.HiddenFor(x => x.ProjectId)
+@using (Html.BeginForm("SubmissionWizard", "Submission", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain" }))
     {
+    @Html.HiddenFor(x => x.ProjectId)
         <h1 class="fs-4 mt-5">
             SQL TES Wizard<br>
         </h1>
@@ -120,7 +119,7 @@
         </div>
 
     }
-}
+
 
 
 

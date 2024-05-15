@@ -7,10 +7,10 @@
 
 
 <partial name="../Shared/_ProjectNav" />
-@using (Html.BeginForm("", "", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain3" }))
+@using (Html.BeginForm("SubmissionWizard", "Submission", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain" }))
 {
     @Html.HiddenFor(x => x.ProjectId)
-    {
+    
         <h1 class="fs-4 mt-5">
             GraphQL TES Wizard<br>
         </h1>
@@ -119,7 +119,7 @@
             <a href="/Project/GetProject/@Model.ProjectId#submissions" class="btn btn-sm btn-link">Cancel</a>
         </div>
     }
-}
+
 
 
 
