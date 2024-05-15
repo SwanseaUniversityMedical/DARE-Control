@@ -6,7 +6,7 @@
 }
 
 <partial name="../Shared/_ProjectNav" />
-@using (Html.BeginForm("AddiSubmissionWizard", "Submission", FormMethod.Post))
+@using (Html.BeginForm("", "", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain2" }))
     {
     @Html.HiddenFor(x => x.ProjectId)
     {
@@ -113,9 +113,8 @@
             @Html.TextAreaFor(m => m.RawInput, new {@class="form-control"})
         </div>
 
-
         <div class="d-flex align-items-center mt-5">
-            <button type="button" class="btn btn-sm btn-primary" id="frmMain3">Submit</button>
+            <button type="submit" class="btn btn-sm btn-primary">Submit</button>
             <a href="/Project/GetProject/@Model.ProjectId#submissions" class="btn btn-sm btn-link">Cancel</a>
         </div>
 

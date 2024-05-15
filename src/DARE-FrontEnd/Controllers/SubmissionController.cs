@@ -50,7 +50,6 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<IActionResult> SubmissionWizard(SubmissionWizard model)
         {
-            var a = 0;
             try
             {
                 var listOfTre = "";
@@ -189,7 +188,6 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<ActionResult> AddiSubmissionWizard(AddiSubmissionWizard model, string Executors, string SQL)
         {
-            var a = 0;
             try
             {
 

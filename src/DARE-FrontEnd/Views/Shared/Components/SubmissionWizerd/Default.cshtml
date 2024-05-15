@@ -5,7 +5,8 @@
     ViewData["Title"] = "Submission Wizard";
 }
 
-<form action="https://localhost:7220/Submission/SubmissionWizard" method="post">
+@using (Html.BeginForm("", "", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain" }))
+{
 
     @Html.HiddenFor(x => x.ProjectId)
       
@@ -98,14 +99,13 @@
                     </div>
                     <div class="d-flex align-items-center mt-5">
                         <div class="hero-block-1">
-                        <button type="button" class="btn btn-sm btn-primary" id="submitButton">Submit</button>
+                        <button type="submit" class="btn btn-sm btn-primary">Submit</button>
                             <a href="/Project/GetProject/@Model.ProjectId#submissions" class="btn btn-sm btn-link">Cancel</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-</form>
-
+}
 
 
