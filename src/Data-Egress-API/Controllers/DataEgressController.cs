@@ -20,6 +20,7 @@ using System.Net.Mime;
 using Data_Egress_API.Services;
 using Microsoft.AspNetCore.StaticFiles;
 using Sentry.PlatformAbstractions;
+using DARE_Egress.Services;
 
 namespace Data_Egress_API.Controllers
 {
@@ -33,14 +34,19 @@ namespace Data_Egress_API.Controllers
 
         private readonly ITreClientWithoutTokenHelper _treClientHelper;
         private readonly IMinioHelper _minioHelper;
+        private readonly IDareEmailService _IDareEmailService;
+        private readonly IKeyCloakService _IKeyCloakService;
+        private readonly EmailSettings _EmailSettings;
+
 
         public DataEgressController(ApplicationDbContext repository, ITreClientWithoutTokenHelper treClientHelper,
-            IMinioHelper minioHelper)
+            IMinioHelper minioHelper, IDareEmailService iDareEmailService, EmailSettings emailSettings)
         {
             _DbContext = repository;
             _minioHelper = minioHelper;
             _treClientHelper = treClientHelper;
-
+            _IDareEmailService = iDareEmailService;
+            _EmailSettings = emailSettings;
         }
 
         [Authorize(Roles = "data-egress-admin,dare-tre-admin")]
@@ -62,6 +68,27 @@ namespace Data_Egress_API.Controllers
                     }
 
                     await _DbContext.SaveChangesAsync();
+                    try
+                    {
+                        var Emails = await _IKeyCloakService.GetEmailsOfAccountWithRole("data-egress-admin");
+
+                        if (string.IsNullOrEmpty(_EmailSettings.EmailOverride) == false)
+                        {
+                            Emails = new List<string>() { _EmailSettings.EmailOverride };
+                        }
+
+                        foreach (var email in Emails)
+                        {
+                            var body = $" files are ready to review with subID {submission.Id} Name {submission.Name}";
+                            await _IDareEmailService.EmailTo(email, body, body, false);
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.ToString());
+                    }                  
+                    
                     return new BoolReturn() { Result = true };
                 }
                 else

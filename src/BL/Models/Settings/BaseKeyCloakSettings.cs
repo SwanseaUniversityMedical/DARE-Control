@@ -8,7 +8,7 @@ namespace BL.Models.Settings
     {
 
         public string Authority { get; set; }
-
+        public string RootUrl { get; set; }
         public string BaseUrl { get; set; }
         public string ClientId { get; set; }
         public string ClientSecret { get; set; }

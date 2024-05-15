@@ -35,13 +35,14 @@ namespace DARE_API.Controllers
         private readonly ApplicationDbContext _DbContext;
         private readonly IBus _rabbit;
         private readonly IMinioHelper _minioHelper;
+        private readonly IDareEmailService _IDareEmailService;
 
-
-        public SubmissionController(ApplicationDbContext repository, IBus rabbit, IMinioHelper minioHelper)
+        public SubmissionController(ApplicationDbContext repository, IBus rabbit, IMinioHelper minioHelper, IDareEmailService IDareEmailService)
         {
             _DbContext = repository;
             _rabbit = rabbit;
             _minioHelper = minioHelper;
+            _IDareEmailService = IDareEmailService;
 
 
         }
@@ -122,6 +123,36 @@ namespace DARE_API.Controllers
             }
 
             UpdateSubmissionStatus.UpdateStatusNoSave(sub, statusType, description);
+
+            if (statusType 
+                is StatusType.DataOutApprovalRejected
+                or StatusType.InvalidUser 
+                or StatusType.InvalidSubmission 
+                or StatusType.TreCrateValidationFailed
+                or StatusType.TRERejectedProject
+                or StatusType.TRENotAuthorisedForProject
+                or StatusType.TransferToPodFailed
+                or StatusType.UserNotOnProject
+                or StatusType.SubmissionReceived
+                or StatusType.PodProcessingFailed
+                or StatusType.Failure
+                or StatusType.Failed
+                or StatusType.Cancelled
+                or StatusType.CancellingChildren
+                or StatusType.RequestCancellation
+                )
+            {
+                var text = $"Your Submission with ID {sub.Id} Failed with {statusType.ToString()}!";
+                _IDareEmailService.EmailTo(sub.SubmittedBy.Email, text, text, false);
+            }
+            else if (statusType
+                is StatusType.Complete
+                or StatusType.Completed)
+            {
+                var text = $"Your Submission with ID {sub.Id} has completed!";
+                _IDareEmailService.EmailTo(sub.SubmittedBy.Email, text, text, false);
+            }
+
             return sub;
         }
 

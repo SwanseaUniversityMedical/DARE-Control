@@ -21,6 +21,9 @@ using System.Security.Claims;
 using System.Runtime;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using NETCore.MailKit.Extensions;
+using NETCore.MailKit.Infrastructure.Internal;
+using BL.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,7 +81,9 @@ var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
 
-
+var emailSettings = new EmailSettings();
+configuration.Bind(nameof(emailSettings), emailSettings);
+builder.Services.AddSingleton(emailSettings);
 
 
 builder.Services.AddHostedService<ConsumeInternalMessageService>();
@@ -96,6 +101,22 @@ Log.Information($"Check TokenValidationParams for Issuer {submissionKeyCloakSett
 builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
 
 
+builder.Services.AddMailKit(optionBuilder =>
+{
+    optionBuilder.UseMailKit(new MailKitOptions
+    {
+        Server = emailSettings.Host,
+        Port = emailSettings.Port,
+        SenderName = emailSettings.FromDisplayName,
+        SenderEmail = emailSettings.FromAddress,
+
+        // can be optional with no authentication 
+        //Account = Configuration["Account"],
+        //Password = Configuration["Password"],
+        // enable ssl or tls
+        Security = emailSettings.EnableSSL
+    });
+});
 
 builder.Services.AddAuthentication(options =>
 {
@@ -366,6 +387,8 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
     builder.Services.AddScoped<IKeycloakMinioUserService, KeycloakMinioUserService>();
     builder.Services.AddScoped<IKeyclockTokenAPIHelper, KeyclockTokenAPIHelper>();
     builder.Services.AddScoped<IKeyCloakService, KeyCloakService>();
+    builder.Services.AddScoped<IDareEmailService, DareEmailService>();
+    
 
 
 }
