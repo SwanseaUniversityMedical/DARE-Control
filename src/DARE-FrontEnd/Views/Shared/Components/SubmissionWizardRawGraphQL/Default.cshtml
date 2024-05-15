@@ -7,10 +7,10 @@
 
 
 <partial name="../Shared/_ProjectNav" />
-@using (Html.BeginForm("SubmissionWizard", "Submission", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain" }))
+@using (Html.BeginForm("SubmissionWizard", "Submission", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     @Html.HiddenFor(x => x.ProjectId)
-    
+{
         <h1 class="fs-4 mt-5">
             GraphQL TES Wizard<br>
         </h1>
@@ -115,10 +115,11 @@
         </div>
 
         <div class="d-flex align-items-center mt-5">
-            <button type="button" class="btn btn-sm btn-primary">Submit</button>
+            <button type="button" class="btn btn-sm btn-primary" id="frmMain3">Submit</button>
             <a href="/Project/GetProject/@Model.ProjectId#submissions" class="btn btn-sm btn-link">Cancel</a>
         </div>
     }
+}
 
 
 
