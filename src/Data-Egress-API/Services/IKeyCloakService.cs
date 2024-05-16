@@ -54,7 +54,7 @@ namespace Data_Egress_API.Services
 
             var adminName = creds.UserName;
 
-            var adminPassword = (creds.PasswordEnc); //_encDecHelper.Decrypt
+            var adminPassword = _encDecHelper.Decrypt(creds.PasswordEnc);
 
 
             // Get an access token from Keycloak using admin credentials
