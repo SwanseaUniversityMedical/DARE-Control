@@ -53,8 +53,8 @@ namespace TRE_API
         private readonly IKeyCloakService _keyCloakService;
         private readonly TreKeyCloakSettings _TreKeyCloakSettings;
         private readonly IEncDecHelper _encDecHelper;
-
-
+        private readonly Features _Features;
+        
 
         public DoAgentWork(IServiceProvider serviceProvider,
             ApplicationDbContext dbContext,
@@ -67,7 +67,8 @@ namespace TRE_API
             MinioSettings minioSettings,
             IKeyCloakService keyCloakService,
             TreKeyCloakSettings TreKeyCloakSettings,
-            IEncDecHelper encDecHelper
+            IEncDecHelper encDecHelper,
+            Features Features
             )
         {
             _serviceProvider = serviceProvider;
@@ -92,6 +93,7 @@ namespace TRE_API
             _keyCloakService = keyCloakService;
             _TreKeyCloakSettings = TreKeyCloakSettings;
             _encDecHelper = encDecHelper;
+            _Features = Features;
         }
 
 
@@ -605,16 +607,20 @@ namespace TRE_API
 
                                 Log.Information("{Function}  SEND TO TESK ", "Execute");
                                 var arr = new HttpClient();
-
+                                var Token = "";
 
                                 var role = aSubmission.Project.Name; //TODO Check
-                            
 
-                                var Acount =  _dbContext.ProjectAcount.FirstOrDefault(x => x.Name == aSubmission.Project.Name + aSubmission.SubmittedBy.Name );
+                                if (_Features.GenerateAcounts)
+                                {
+                                    var Acount = _dbContext.ProjectAcount.FirstOrDefault(x => x.Name == aSubmission.Project.Name + aSubmission.SubmittedBy.Name);
 
-                                var TokenIN = await _keyCloakService.GenAccessTokenSimple(Acount.Name, _encDecHelper.Decrypt(Acount.Pass), _TreKeyCloakSettings.TokenRefreshSeconds);
+                                    var TokenIN = await _keyCloakService.GenAccessTokenSimple(Acount.Name, _encDecHelper.Decrypt(Acount.Pass), _TreKeyCloakSettings.TokenRefreshSeconds);
 
-                                var Token = TokenIN.access_token;
+
+
+                                    Token = TokenIN.access_token;
+                                }
 
                                 var projectId = aSubmission.Project.Id;
 
