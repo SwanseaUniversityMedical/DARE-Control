@@ -337,8 +337,9 @@
     </script>
 
     <script>
-        $("#submitButton").click(function () {
-            //debugger;
+        $("#frmMain").submit(function (e) {
+            e.preventDefault();
+            debugger;
             var selectedOptions = [];
             $("#treDropdown option:selected").each(function () {
                 selectedOptions.push($(this).val());
