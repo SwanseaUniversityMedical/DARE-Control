@@ -5,11 +5,11 @@
     ViewData["Title"] = "Submission Wizard";
 }
 
-@using (Html.BeginForm("", "", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain" }))
+@using (Html.BeginForm("SubmissionWizard", "Submission", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
 
     @Html.HiddenFor(x => x.ProjectId)
-      
+     { 
         <div class="container-lg mt-4 p-4 bg-white border-1 shadow-sm">
             <partial name="../Shared/_ProjectNav" />
             <div class="row mt-5">
@@ -107,5 +107,5 @@
             </div>
         </div>
 }
-
+}
 
