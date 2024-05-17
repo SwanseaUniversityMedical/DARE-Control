@@ -15,6 +15,10 @@ using BL.Models.ViewModels;
 
 using Microsoft.AspNetCore.Http.Connections;
 using Data_Egress_API.Services;
+using DARE_Egress.Services;
+using NETCore.MailKit.Extensions;
+using NETCore.MailKit.Infrastructure.Internal;
+using BL.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
@@ -52,7 +56,9 @@ var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
 
-
+var emailSettings = new EmailSettings();
+configuration.Bind(nameof(emailSettings), emailSettings);
+builder.Services.AddSingleton(emailSettings);
 
 var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
@@ -60,6 +66,9 @@ builder.Services.AddSingleton(treKeyCloakSettings);
 builder.Services.AddScoped<ITreClientWithoutTokenHelper, TreClientWithoutTokenHelper>();
 builder.Services.AddScoped<IMinioHelper, MinioHelper>();
 
+builder.Services.AddScoped<IDareEmailService, DareEmailService>();
+
+builder.Services.AddScoped<IKeyCloakService, KeyCloakService>();
 
 
 var encryptionSettings = new EncryptionSettings();
@@ -84,6 +93,23 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
     options.KnownNetworks.Clear();
     options.KnownProxies.Clear();
+});
+
+builder.Services.AddMailKit(optionBuilder =>
+{
+    optionBuilder.UseMailKit(new MailKitOptions
+    {
+        Server = emailSettings.Host,
+        Port = emailSettings.Port,
+        SenderName = emailSettings.FromDisplayName,
+        SenderEmail = emailSettings.FromAddress,
+
+        // can be optional with no authentication 
+        //Account = Configuration["Account"],
+        //Password = Configuration["Password"],
+        // enable ssl or tls
+        Security = emailSettings.EnableSSL
+    });
 });
 
 builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
@@ -151,7 +177,6 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
     var initialiser = new DataInitaliser(db, encDec);
     initialiser.SeedData();
-
 }
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions

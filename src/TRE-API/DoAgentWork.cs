@@ -53,8 +53,8 @@ namespace TRE_API
         private readonly IKeyCloakService _keyCloakService;
         private readonly TreKeyCloakSettings _TreKeyCloakSettings;
         private readonly IEncDecHelper _encDecHelper;
-
-
+        private readonly Features _Features;
+        
 
         public DoAgentWork(IServiceProvider serviceProvider,
             ApplicationDbContext dbContext,
@@ -67,7 +67,8 @@ namespace TRE_API
             MinioSettings minioSettings,
             IKeyCloakService keyCloakService,
             TreKeyCloakSettings TreKeyCloakSettings,
-            IEncDecHelper encDecHelper
+            IEncDecHelper encDecHelper,
+            Features Features
             )
         {
             _serviceProvider = serviceProvider;
@@ -92,6 +93,7 @@ namespace TRE_API
             _keyCloakService = keyCloakService;
             _TreKeyCloakSettings = TreKeyCloakSettings;
             _encDecHelper = encDecHelper;
+            _Features = Features;
         }
 
 
@@ -605,16 +607,23 @@ namespace TRE_API
 
                                 Log.Information("{Function}  SEND TO TESK ", "Execute");
                                 var arr = new HttpClient();
-
+                                var Token = "";
 
                                 var role = aSubmission.Project.Name; //TODO Check
-                            
 
-                                var Acount =  _dbContext.ProjectAcount.FirstOrDefault(x => x.Name == aSubmission.Project.Name + aSubmission.SubmittedBy.Name );
+                                if (_Features.GenerateAcounts && _Features.SQLAndNotGraphQL)
+                                {
+                                    var Acount = _dbContext.ProjectAcount.FirstOrDefault(x => x.Name == aSubmission.Project.Name + aSubmission.SubmittedBy.Name);
 
-                                var TokenIN = await _keyCloakService.GenAccessTokenSimple(Acount.Name, _encDecHelper.Decrypt(Acount.Pass), _TreKeyCloakSettings.TokenRefreshSeconds);
+                                    var TokenIN = await _keyCloakService.GenAccessTokenSimple(Acount.Name, _encDecHelper.Decrypt(Acount.Pass), _TreKeyCloakSettings.TokenRefreshSeconds);
 
-                                var Token = TokenIN.access_token;
+                                    Token = TokenIN.access_token;
+                                }
+
+                                if (_Features.SQLAndNotGraphQL == false)
+                                {
+                                    Token = _hasuraAuthenticationService.GetNewToken(role);
+                                }
 
                                 var projectId = aSubmission.Project.Id;
 
@@ -643,14 +652,25 @@ namespace TRE_API
                                 foreach (var Executor in tesMessage.Executors)
                                 {
                                     Log.Information("Executor.Image > " + Executor.Image);
-
-                                    if (Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken))
+                                    if (_Features.SQLAndNotGraphQL)
                                     {
-                                        Executor.Env["TRINO_SERVER_URL"] = _AgentSettings.URLTrinoToAdd;
-                                        Executor.Env["ACCESS_TOKEN"] = Token;
-                                        Executor.Env["USER_NAME"] = aSubmission.SubmittedBy.Name;
-                                        Executor.Env["SCHEMA"] = aSubmission.Project.Name;
-                                        Executor.Env["CATALOG"] = _AgentSettings.CATALOG;
+                                        if (Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken))
+                                        {
+                                            Executor.Env["TRINO_SERVER_URL"] = _AgentSettings.URLTrinoToAdd;
+                                            Executor.Env["ACCESS_TOKEN"] = Token;
+                                            Executor.Env["USER_NAME"] = aSubmission.SubmittedBy.Name;
+                                            Executor.Env["SCHEMA"] = aSubmission.Project.Name;
+                                            Executor.Env["CATALOG"] = _AgentSettings.CATALOG;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (Executor.Image.Contains(_AgentSettings.ImageNameToAddToTokenGraphQL))
+                                        {
+                                            Executor.Command.Add("--Token_" + Token);
+                                            Executor.Command.Add("--URL_" + _AgentSettings.URLHasuraToAdd);
+                                        }
+                                        
                                     }
                                 }
 
