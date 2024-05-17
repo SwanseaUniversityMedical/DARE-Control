@@ -5,106 +5,107 @@
     ViewData["Title"] = "Submission Wizard";
 }
 
-
-@using (Html.BeginForm("GetAllProjects", "Project", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmMain" }))
+@using (Html.BeginForm("SubmissionWizard", "Submission", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
+
     @Html.HiddenFor(x => x.ProjectId)
-    {
-        <div class="modal-body">
-            <div class="form-group">
-                @Html.LabelFor(x => x.ProjectName,new {@class="form-label fw-bold"})
-                @Html.DisplayFor(x => x.ProjectName, new {@class="form-control"})
-            </div>
-            <div class="mb-4">
-                @Html.LabelFor(x => x.TESName,new {@class="form-label fw-bold"})
-                @Html.TextBoxFor(x => x.TESName, new {@class="form-control"})
-            </div>
-            <div class="col-md-6 mb-4">
-                <div class="form-label fw-bold">Select TREs</div>
-                @*@Html.LabelFor(x => x.Tres,new {@class="form-label fw-bold"})
-                @Html.ListBoxFor(x => x.Tres, Model.SelectTresOptions.Select(y => new SelectListItem(y, y)), new { @class = "form-select" })*@
-                @for (var i = 0; i < Model.TreRadios.Count(); i++)
-                {
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="form-check">
-                            @Html.HiddenFor(x => x.TreRadios[i].Name)
-                            @Html.CheckBoxFor(x=>x.TreRadios[i].IsSelected, new {@class = "form-check-input"})
-                            <label class="form-check-label" for="flexCheckDefault">
-                                @Model.TreRadios[i].Name
-                            </label>
-                        </div>
-                        @if (Model.TreRadios[i].IsOnline)
-                        {
-                            <span class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 ms-3">
-                                <i class="fa-solid fa-check-circle me-1"></i> Online
-                            </span>
-                        }
-                        else
-                        {
-                            <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 ms-3">
-                                <i class="fa-solid fa-ban me-1"></i> Offline
-                            </span>
-                        }
+     { 
+        <div class="container-lg mt-4 p-4 bg-white border-1 shadow-sm">
+            <partial name="../Shared/_ProjectNav" />
+            <div class="row mt-5">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <h1 class="fs-4 mb-0">
+                            Crate Wizard<br>
+                        </h1>
                     </div>
-                }
-                @*<div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" checked>
-                    <label class="form-check-label" for="flexCheckDefault">
-                        TRE Name
-                    </label>
-                    <span class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 ms-3">
-                        <i class="fa-solid fa-check-circle me-1"></i> Online
-                    </span>
+                    <div class="mb-4">
+                        @Html.LabelFor(x => x.TESName,new {@class="form-label fw-bold"})
+                        @Html.TextBoxFor(x => x.TESName, new {@class="form-control"})
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label class="fw-bold">Select TREs</label>
+                        @*@Html.LabelFor(x => x.Tres,new {@class="form-label fw-bold"})
+                @Html.ListBoxFor(x => x.Tres, Model.SelectTresOptions.Select(y => new SelectListItem(y, y)), new { @class = "form-select" })*@
+                        @for (var i = 0; i < Model.TreRadios.Count(); i++)
+                        {
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="form-check">
+                                    @Html.HiddenFor(x => x.TreRadios[i].Name)
+                                    @Html.CheckBoxFor(x=>x.TreRadios[i].IsSelected, new {@class = "form-check-input"})
+                                    <label class="form-check-label" for="flexCheckDefault">
+                                        @Model.TreRadios[i].Name
+                                    </label>
+                                </div>
+                                @if (Model.TreRadios[i].IsOnline)
+                                {
+                                    <span class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 ms-3">
+                                        <i class="fa-solid fa-check-circle me-1"></i> Online
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 ms-3">
+                                        <i class="fa-solid fa-ban me-1"></i> Offline
+                                    </span>
+                                }
+                            </div>
+                        }
+                        @if (Model.TreRadios.Count() < 1)
+                        {
+                            <p class="text-danger">No available TREs</p>
+                        }
+                        @*<div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" checked>
+                <label class="form-check-label" for="flexCheckDefault">
+                TRE Name
+                </label>
+                <span class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 ms-3">
+                <i class="fa-solid fa-check-circle me-1"></i> Online
+                </span>
                 </div>
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault2" checked>
-                    <label class="form-check-label" for="flexCheckDefault2">
-                        TRE Name
-                    </label>
-                    <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 ms-3">
-                        <i class="fa-solid fa-ban me-1"></i> Offline
-                    </span>
+                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault2" checked>
+                <label class="form-check-label" for="flexCheckDefault2">
+                TRE Name
+                </label>
+                <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 ms-3">
+                <i class="fa-solid fa-ban me-1"></i> Offline
+                </span>
                 </div>*@
-            </div>
-            <div class="mb-4">
+                    </div>
+                    <div class="mb-4">
 
-                @Html.LabelFor(x => x.OriginOption, new {@class="form-label fw-bold"} )
-                <div class="form-check">
-                    @Html.RadioButtonFor(x => x.OriginOption, CrateOrigin.FileUpload, new {@class="form-check-input"})
-                    @Html.Label(Helpers.PrettyCrateOrigin(CrateOrigin.FileUpload), Helpers.PrettyCrateOrigin(CrateOrigin.FileUpload), new {@class="form-check-label"})
+                        @Html.LabelFor(x => x.OriginOption, new {@class="form-label fw-bold"} )
+                        <div class="form-check">
+                            @Html.RadioButtonFor(x => x.OriginOption, CrateOrigin.FileUpload, new {@class="form-check-input"})
+                            @Html.Label(Helpers.PrettyCrateOrigin(CrateOrigin.FileUpload), Helpers.PrettyCrateOrigin(CrateOrigin.FileUpload), new {@class="form-check-label"})
+                        </div>
+                        <div class="form-check">
+                            @Html.RadioButtonFor(x => x.OriginOption, CrateOrigin.External, new {@class="form-check-input"})
+                            @Html.Label(Helpers.PrettyCrateOrigin(CrateOrigin.External), Helpers.PrettyCrateOrigin(CrateOrigin.External), new {@class="form-check-label"})
+                        </div>
+                    </div>
+                    <div id="externalUrlField" class="form-group" style="display:none;">
+                        @Html.LabelFor(x => x.ExternalURL,new {@class="form-label fw-bold"})
+                        @Html.TextBoxFor(x => x.ExternalURL,new {@class="form-control"})
+
+                    </div>
+
+                    <div id="uploadedFileField" class="form-group">
+                        @Html.LabelFor(x => x.File, new {@class="form-label fw-bold"})
+                        @Html.TextBoxFor(m => m.File, new { type = "file", @class="form-control" })
+
+                    </div>
+                    <div class="d-flex align-items-center mt-5">
+                        <div class="hero-block-1">
+                        <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+                            <a href="/Project/GetProject/@Model.ProjectId#submissions" class="btn btn-sm btn-link">Cancel</a>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-check">
-                    @Html.RadioButtonFor(x => x.OriginOption, CrateOrigin.External, new {@class="form-check-input"})
-                    @Html.Label(Helpers.PrettyCrateOrigin(CrateOrigin.External), Helpers.PrettyCrateOrigin(CrateOrigin.External), new {@class="form-check-label"})
-                </div>
-
-
-
-
-
-            </div>
-            <div id="externalUrlField" class="form-group" style="display:none;">
-                @Html.LabelFor(x => x.ExternalURL,new {@class="form-label fw-bold"})
-                @Html.TextBoxFor(x => x.ExternalURL,new {@class="form-control"})
-
-            </div>
-
-            <div id="uploadedFileField" class="form-group">
-                @Html.LabelFor(x => x.File, new {@class="form-label fw-bold"})
-                @Html.TextBoxFor(m => m.File, new { type = "file", @class="form-control" })
-
             </div>
         </div>
-
-        <div class="modal-footer">
-            <div class="hero-block-1">
-
-                <button type="button" class="btn btn-sm btn-link" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-sm btn-primary">Submit</button>
-            </div>
-        </div>
-    }
 }
-
-
+}
 
