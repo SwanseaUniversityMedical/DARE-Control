@@ -17,5 +17,7 @@ namespace BL.Models
         public HashSet<string> EmailsToIgnor { get; set; }
 
         public string EmailOverride  { get; set; }
+
+        public bool Enabled { get; set; }
     }
 }
