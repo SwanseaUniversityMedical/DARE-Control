@@ -37,7 +37,10 @@ namespace Data_Egress_UI.Controllers
         [HttpGet]
         public IActionResult GetAllUnprocessedEgresses()
         {
-            var unprocessedfiles = _dataClientHelper.CallAPIWithoutModel<List<EgressSubmission>>("/api/DataEgress/GetAllUnprocessedEgresses/").Result;
+            var paramlist = new Dictionary<string, string>();
+
+            paramlist.Add("unprocessedonly", true.ToString());
+            var unprocessedfiles = _dataClientHelper.CallAPIWithoutModel<List<EgressSubmission>>("/api/DataEgress/GetAllEgresses/", paramlist).Result;
            
             return View(unprocessedfiles);
 
@@ -112,7 +115,7 @@ namespace Data_Egress_UI.Controllers
 
 
         [HttpGet]
-        public IActionResult GetAllEgressesuUnprocessed()
+        public async Task<IActionResult> GetAllEgressesuUnprocessed()
         {
 
             var paramlist = new Dictionary<string, string>();
@@ -121,7 +124,7 @@ namespace Data_Egress_UI.Controllers
             paramlist.Add("unprocessedonly", true.ToString());
 
         
-            List<EgressSubmission> egresses = _dataClientHelper.CallAPIWithoutModel<List<EgressSubmission>>("/api/DataEgress/GetAllEgresses/", paramlist).Result;
+            List<EgressSubmission>? egresses  = await _dataClientHelper.CallAPIWithoutModel<List<EgressSubmission>>("/api/DataEgress/GetAllEgresses/", paramlist);
 
             return View(egresses);
         }
