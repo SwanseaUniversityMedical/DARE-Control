@@ -109,7 +109,7 @@ namespace Data_Egress_API.Controllers
         {
             try
             {
-                if (unprocessedonly)
+                if (unprocessedonly == false)
                 {
                     var results = _DbContext.EgressSubmissions.ToList();
                     Log.Information("{Function} All Egresses retrieved successfully", "GetAllEgresses");
