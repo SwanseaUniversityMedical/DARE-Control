@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  opaservice:
+    container_name: opa_tests
+    image: openpolicyagent/opa:latest
+    ports:
+      - 9090:8181 
+    command:
+      - "test"
+      - "testting" 
+      - "-v"
+    volumes:
+      - ./opa/config.yaml:/config.yaml
+      - ./opa/log.properties:/etc/log.properties
+      - ./rego:/testting
+
+

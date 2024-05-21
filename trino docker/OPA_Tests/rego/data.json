@@ -1,0 +1,14 @@
+{
+    "Perms": [{
+            "Project": "sail0675v",
+            "Group": "SAIL_0675_Developer",
+            "PermType": "rw",
+            "Object": ""
+        }
+    ],
+    "GroupMembers": [{
+            "Group": "SAIL_0675_Developer",
+            "Username": "rawlinga"
+        }
+    ]
+}
