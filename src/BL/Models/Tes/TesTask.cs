@@ -298,7 +298,7 @@ namespace BL.Models.Tes
         public static bool operator ==(TesTask left, TesTask right)
             => Equals(left, right);
 
-        public static bool operator !=(TesTask left, TesTask right)
+        public static bool operator !=(TesTask left, TesTask? right)
             => !Equals(left, right);
 
 #pragma warning restore 1591
