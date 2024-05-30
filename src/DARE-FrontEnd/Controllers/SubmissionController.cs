@@ -112,8 +112,9 @@ namespace DARE_FrontEnd.Controllers
 
 
                 var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", TesTask);
-
-                return Ok();
+                
+                return RedirectToAction("GetASubmission", new { id = result.Id });
+                //return Ok();
             }
             catch (Exception ex)
             {
