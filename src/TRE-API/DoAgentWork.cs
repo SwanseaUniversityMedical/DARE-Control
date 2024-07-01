@@ -533,7 +533,7 @@ namespace TRE_API
                                         .FirstOrDefault(x => x.SubmissionProjectId == aSubmission.Project.Id);
 
                                     var destinationBucket = subProj.SubmissionBucketTre;
-                                    Log.Information("{Function} Copying {File} from {From} to {To}", "Execute", scope, destinationBucket);
+                                    Log.Information("{Function} Copying {File} from {From} to {To}", "Execute", fileName, sourceBucket, destinationBucket);
                                     var source = _minioSubHelper.GetCopyObject(sourceBucket, fileName);
                                     var resultcopy = _minioTreHelper
                                         .CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
