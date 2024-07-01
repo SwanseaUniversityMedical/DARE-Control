@@ -247,35 +247,52 @@ namespace BL.Services
                 }
             }
         }
+
         public async Task<bool> FetchAndStoreObject(string url, string bucketName, string key)
         {
-            using (var httpClient = new HttpClient())
+            try
             {
-                var response = await httpClient.GetAsync(url);
-                response.EnsureSuccessStatusCode();
 
-                var contentBytes = await response.Content.ReadAsByteArrayAsync();
 
-                var amazonS3Client = GenerateAmazonS3Client();
-
-                using (var transferUtility = new TransferUtility(amazonS3Client))
+                using (var httpClient = new HttpClient())
                 {
-                    await transferUtility.UploadAsync(new MemoryStream(contentBytes), bucketName, key);
-                }
-            }
+                    Log.Information("{Funtion} Step 1","FetchAndStoreObject");
+                    var response = await httpClient.GetAsync(url);
+                    response.EnsureSuccessStatusCode();
+                    Log.Information("{Funtion} Step 2", "FetchAndStoreObject");
+                    var contentBytes = await response.Content.ReadAsByteArrayAsync();
 
-            return true;
+                    var amazonS3Client = GenerateAmazonS3Client();
+                    Log.Information("{Funtion} Step 3", "FetchAndStoreObject");
+                    using (var transferUtility = new TransferUtility(amazonS3Client))
+                    {
+                        Log.Information("{Funtion} Step 4", "FetchAndStoreObject");
+                        await transferUtility.UploadAsync(new MemoryStream(contentBytes), bucketName, key);
+                        Log.Information("{Funtion} Step 5", "FetchAndStoreObject");
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "{Function} It went wrong", "FetchAndStoreObject");
+                throw;
+            }
         }
 
         public async Task<bool> RabbitExternalObject(MQFetchFile msgBytes)
         {
             if (msgBytes == null)
             {
+                Log.Information("{Function} Empty message", "RabbitExternalObject");
                 return false;
             }
             else
             {
+                Log.Information("{Function} Fetching", "RabbitExternalObject");
                 await FetchAndStoreObject(msgBytes.Url, msgBytes.BucketName, msgBytes.Key);
+                Log.Information("{Function} Fetched", "RabbitExternalObject");
                 return true;
             }
         }
