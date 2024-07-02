@@ -283,6 +283,7 @@ namespace BL.Services
 
         public async Task<bool> RabbitExternalObject(MQFetchFile msgBytes)
         {
+
             if (msgBytes == null)
             {
                 Log.Information("{Function} Empty message", "RabbitExternalObject");
