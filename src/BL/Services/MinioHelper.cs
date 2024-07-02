@@ -272,6 +272,7 @@ namespace BL.Services
                         Proxy = proxy,
                         UseProxy = true
                     };
+                    Log.Information("{Function} Using proxy {Proxy}", "FetchAndStoreObject", _minioSettings.ProxyAddresURLForExternalFetch);
                 }
                 else
                 {
@@ -280,6 +281,7 @@ namespace BL.Services
                         
                         UseProxy = false
                     };
+                    Log.Information("{Function} Not Using proxy", "FetchAndStoreObject");
                 }
                 
 
