@@ -14,6 +14,7 @@ using Newtonsoft.Json;
 using Serilog;
 using System;
 using System.Net;
+using System.Text;
 
 namespace BL.Services
 {
@@ -248,6 +249,16 @@ namespace BL.Services
             }
         }
 
+        public static string StreamToString(Stream stream)
+        {
+            stream.Position = 0;
+            using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+
+
         public async Task<bool> FetchAndStoreObject(string url, string bucketName, string key)
         {
             try
@@ -256,8 +267,14 @@ namespace BL.Services
 
                 using (var httpClient = new HttpClient())
                 {
-                    Log.Information("{Funtion} Step 1","FetchAndStoreObject");
+                    
+                    Log.Information("{Funtion} Step 1 url {Url}","FetchAndStoreObject", url);
                     var response = await httpClient.GetAsync(url);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        Log.Information("{Function} Step 1.5 {Code} {Content}","FetchAndStoreObject", response.StatusCode.ToString(), StreamToString(response.Content.ReadAsStreamAsync().Result));
+                    }
+                    
                     response.EnsureSuccessStatusCode();
                     Log.Information("{Funtion} Step 2", "FetchAndStoreObject");
                     var contentBytes = await response.Content.ReadAsByteArrayAsync();
