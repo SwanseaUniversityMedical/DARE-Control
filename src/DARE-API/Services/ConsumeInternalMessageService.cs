@@ -90,16 +90,16 @@ namespace DARE_API.Services
                     {
 
                     }
-
+                    Log.Information("{Function} Crate loc {Crate}", "Process", sub.DockerInputLocation);
                     if (uri != null)
                     {
                         
                         string fileName = Path.GetFileName(uri.LocalPath);
+                        Log.Information("{Function} Full file loc {File}, Incoming URL {URL}, our minio {Minio}", "Process", fileName, uri.Host + ":" + uri.Port, _minioSettings.AdminConsole);
                         messageMQ.Key = fileName;
                         if (uri.Host + ":" + uri.Port != _minioSettings.AdminConsole)
                         {
                             Log.Information("{Function} Copying external", "Process");
-                            
                             _minioHelper.RabbitExternalObject(messageMQ);
 
 
@@ -108,6 +108,7 @@ namespace DARE_API.Services
                                 Url = _minioSettings.AdminConsole,
                             };
                             messageMQ.Url = "http://" + minioEndpoint.Url + "/browser/" + messageMQ.BucketName + "/" + messageMQ.Key;
+                            Log.Information("{Function} New url {URL}", "Process", messageMQ.Url);
                         }
                     }
                    
