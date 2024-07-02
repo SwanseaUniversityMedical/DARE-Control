@@ -275,7 +275,9 @@ namespace BL.Services
             }
             else
             {
-                await FetchAndStoreObject(msgBytes.Url, msgBytes.BucketName, msgBytes.Key);
+                Log.Information("{Function} Fetching", "RabbitExternalObject");
+                await FetchAndStoreObject(msgBytes.OriginalUrl, msgBytes.BucketName, msgBytes.Key);
+                Log.Information("{Function} Fetched", "RabbitExternalObject");
                 return true;
             }
         }

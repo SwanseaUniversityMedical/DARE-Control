@@ -76,6 +76,7 @@ namespace DARE_API.Services
                 
 
                 var messageMQ = new MQFetchFile();
+                messageMQ.OriginalUrl = sub.DockerInputLocation;
                 messageMQ.Url = sub.SourceCrate;
                 messageMQ.BucketName = sub.Project.SubmissionBucket;
 
@@ -97,6 +98,8 @@ namespace DARE_API.Services
                         messageMQ.Key = fileName;
                         if (uri.Host + ":" + uri.Port != _minioSettings.AdminConsole)
                         {
+                            Log.Information("{Function} Copying external", "Process");
+                            
                             _minioHelper.RabbitExternalObject(messageMQ);
 
 
