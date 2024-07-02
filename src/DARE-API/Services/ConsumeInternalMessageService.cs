@@ -76,6 +76,7 @@ namespace DARE_API.Services
                 
 
                 var messageMQ = new MQFetchFile();
+                messageMQ.OriginalUrl = sub.DockerInputLocation;
                 messageMQ.Url = sub.SourceCrate;
                 messageMQ.BucketName = sub.Project.SubmissionBucket;
 
