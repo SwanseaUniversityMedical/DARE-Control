@@ -270,7 +270,7 @@ namespace BL.Services
                     handler = new HttpClientHandler
                     {
                         Proxy = proxy,
-                        UseProxy = false
+                        UseProxy = true
                     };
                 }
                 else
@@ -290,24 +290,21 @@ namespace BL.Services
                 using (var httpClient = new HttpClient(handler))
                 {
 
-                    Log.Information("{Funtion} Step 1 url {Url}","FetchAndStoreObject", url);
+                    
                     var response = await httpClient.GetAsync(url);
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        Log.Information("{Function} Step 1.5 {Code} {Content}","FetchAndStoreObject", response.StatusCode.ToString(), StreamToString(response.Content.ReadAsStreamAsync().Result));
-                    }
+                    
                     
                     response.EnsureSuccessStatusCode();
-                    Log.Information("{Funtion} Step 2", "FetchAndStoreObject");
+                    
                     var contentBytes = await response.Content.ReadAsByteArrayAsync();
 
                     var amazonS3Client = GenerateAmazonS3Client();
-                    Log.Information("{Funtion} Step 3", "FetchAndStoreObject");
+                    
                     using (var transferUtility = new TransferUtility(amazonS3Client))
                     {
-                        Log.Information("{Funtion} Step 4", "FetchAndStoreObject");
+                    
                         await transferUtility.UploadAsync(new MemoryStream(contentBytes), bucketName, key);
-                        Log.Information("{Funtion} Step 5", "FetchAndStoreObject");
+                    
                     }
                 }
 
