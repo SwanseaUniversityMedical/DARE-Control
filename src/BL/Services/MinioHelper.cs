@@ -265,9 +265,19 @@ namespace BL.Services
             {
 
 
-                using (var httpClient = new HttpClient())
+                var proxy = new System.Net.WebProxy("http://192.168.10.15:8080");
+
+                // Configure the HttpClientHandler to use the proxy
+                var handler = new HttpClientHandler
                 {
-                    
+                    Proxy = proxy,
+                    UseProxy = true
+                };
+
+                // Create the HttpClient with the handler
+                using (var httpClient = new HttpClient(handler))
+                {
+
                     Log.Information("{Funtion} Step 1 url {Url}","FetchAndStoreObject", url);
                     var response = await httpClient.GetAsync(url);
                     if (!response.IsSuccessStatusCode)
