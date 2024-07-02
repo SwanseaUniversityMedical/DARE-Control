@@ -263,16 +263,28 @@ namespace BL.Services
         {
             try
             {
-
-
-                var proxy = new System.Net.WebProxy("http://192.168.10.15:8080");
+                HttpClientHandler handler;
+                if (!string.IsNullOrWhiteSpace(_minioSettings.ProxyAddresURLForExternalFetch))
+                {
+                    var proxy = new System.Net.WebProxy(_minioSettings.ProxyAddresURLForExternalFetch);
+                    handler = new HttpClientHandler
+                    {
+                        Proxy = proxy,
+                        UseProxy = false
+                    };
+                }
+                else
+                {
+                    handler = new HttpClientHandler
+                    {
+                        
+                        UseProxy = false
+                    };
+                }
+                
 
                 // Configure the HttpClientHandler to use the proxy
-                var handler = new HttpClientHandler
-                {
-                    Proxy = proxy,
-                    UseProxy = true
-                };
+                
 
                 // Create the HttpClient with the handler
                 using (var httpClient = new HttpClient(handler))
