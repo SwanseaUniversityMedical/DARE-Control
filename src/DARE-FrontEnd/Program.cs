@@ -186,10 +186,10 @@ builder.Services.AddAuthentication(options =>
                     OnTokenValidated = context =>
                     {
                         // Log the issuer claim from the token
-                        var issuer = context.Principal.FindFirst("iss")?.Value;
-                        Log.Information("Token Issuer: {Issuer}", issuer);
-                        var audience = context.Principal.FindFirst("aud")?.Value;
-                        Log.Information("Token Audience: {Audience}", audience);
+                        //var issuer = context.Principal.FindFirst("iss")?.Value;
+                        //Log.Information("Token Issuer: {Issuer}", issuer);
+                        //var audience = context.Principal.FindFirst("aud")?.Value;
+                        //Log.Information("Token Audience: {Audience}", audience);
                         return Task.CompletedTask;
                     },
                     OnAccessDenied = context =>
@@ -249,29 +249,29 @@ builder.Services.AddAuthentication(options =>
                     },
                     OnRedirectToIdentityProvider = async context =>
                     {
-                        Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}",
-                            context.HttpContext.Connection.RemoteIpAddress);
-                        Log.Information("HttpContext.Connection.RemotePort : {RemotePort}",
-                            context.HttpContext.Connection.RemotePort);
-                        Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
-                        Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
+                        //Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}",
+                        //    context.HttpContext.Connection.RemoteIpAddress);
+                        //Log.Information("HttpContext.Connection.RemotePort : {RemotePort}",
+                        //    context.HttpContext.Connection.RemotePort);
+                        //Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
+                        //Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
 
-                        foreach (var header in context.HttpContext.Request.Headers)
-                        {
-                            Log.Information("Request Header {key} - {value}", header.Key, header.Value);
-                        }
+                        //foreach (var header in context.HttpContext.Request.Headers)
+                        //{
+                        //    Log.Information("Request Header {key} - {value}", header.Key, header.Value);
+                        //}
 
-                        foreach (var header in context.HttpContext.Response.Headers)
-                        {
-                            Log.Information("Response Header {key} - {value}", header.Key, header.Value);
-                        }
+                        //foreach (var header in context.HttpContext.Response.Headers)
+                        //{
+                        //    Log.Information("Response Header {key} - {value}", header.Key, header.Value);
+                        //}
 
-                        if (submissionKeyCloakSettings.UseRedirectURL)
-                        {
-                            context.ProtocolMessage.RedirectUri = submissionKeyCloakSettings.RedirectURL;
-                        }
+                        //if (submissionKeyCloakSettings.UseRedirectURL)
+                        //{
+                        //    context.ProtocolMessage.RedirectUri = submissionKeyCloakSettings.RedirectURL;
+                        //}
 
-                        Log.Information("Redirect Uri {Redirect}", context.ProtocolMessage.RedirectUri);
+                        //Log.Information("Redirect Uri {Redirect}", context.ProtocolMessage.RedirectUri);
 
                         await Task.FromResult(0);
                     }

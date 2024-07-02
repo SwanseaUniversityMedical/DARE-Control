@@ -18,6 +18,8 @@ namespace BL.Models.ViewModels
 
         public bool UesProxy { get; set; }
         public string ProxyAddresURL { get; set; }
+        
+        public string ProxyAddresURLForExternalFetch { get; set; }
 
         public string BypassProxy { get; set; }
     }

@@ -263,39 +263,48 @@ namespace BL.Services
         {
             try
             {
-
-
-                var proxy = new System.Net.WebProxy("http://192.168.10.15:8080");
+                HttpClientHandler handler;
+                if (!string.IsNullOrWhiteSpace(_minioSettings.ProxyAddresURLForExternalFetch))
+                {
+                    var proxy = new System.Net.WebProxy(_minioSettings.ProxyAddresURLForExternalFetch);
+                    handler = new HttpClientHandler
+                    {
+                        Proxy = proxy,
+                        UseProxy = true
+                    };
+                }
+                else
+                {
+                    handler = new HttpClientHandler
+                    {
+                        
+                        UseProxy = false
+                    };
+                }
+                
 
                 // Configure the HttpClientHandler to use the proxy
-                var handler = new HttpClientHandler
-                {
-                    Proxy = proxy,
-                    UseProxy = true
-                };
+                
 
                 // Create the HttpClient with the handler
                 using (var httpClient = new HttpClient(handler))
                 {
 
-                    Log.Information("{Funtion} Step 1 url {Url}","FetchAndStoreObject", url);
+                    
                     var response = await httpClient.GetAsync(url);
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        Log.Information("{Function} Step 1.5 {Code} {Content}","FetchAndStoreObject", response.StatusCode.ToString(), StreamToString(response.Content.ReadAsStreamAsync().Result));
-                    }
+                    
                     
                     response.EnsureSuccessStatusCode();
-                    Log.Information("{Funtion} Step 2", "FetchAndStoreObject");
+                    
                     var contentBytes = await response.Content.ReadAsByteArrayAsync();
 
                     var amazonS3Client = GenerateAmazonS3Client();
-                    Log.Information("{Funtion} Step 3", "FetchAndStoreObject");
+                    
                     using (var transferUtility = new TransferUtility(amazonS3Client))
                     {
-                        Log.Information("{Funtion} Step 4", "FetchAndStoreObject");
+                    
                         await transferUtility.UploadAsync(new MemoryStream(contentBytes), bucketName, key);
-                        Log.Information("{Funtion} Step 5", "FetchAndStoreObject");
+                    
                     }
                 }
 
