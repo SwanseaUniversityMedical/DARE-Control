@@ -39,7 +39,7 @@ jobs:
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_USER }}
       registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-sqlpg
-      release-tag-format: 'DARE-TRE-SQLPG-Container-${version}'
+      release-tag-format: '${version}-DARE-TRE-SQLPG-Container'
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       build-file: src/Tre-SQL-PG/Dockerfile
       build-context: src
