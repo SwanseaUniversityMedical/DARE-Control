@@ -41,7 +41,7 @@ jobs:
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_USER }}
       registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-main-ui
-      release-tag-format: '${version}-DARE-Control-UI-Container'
+      release-tag-format: 'DARE-Control-UI-Container-${version}'
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       build-file: src/DARE-FrontEnd/Dockerfile
       build-context: src

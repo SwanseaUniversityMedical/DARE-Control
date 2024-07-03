@@ -41,7 +41,7 @@ jobs:
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_USER }}
       registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-egress-api
-      release-tag-format: '${version}-DARE-Egress-API-Container'
+      release-tag-format: 'DARE-Egress-API-Container-${version}'
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       build-file: src/Data-Egress-API/Dockerfile
       build-context: src
