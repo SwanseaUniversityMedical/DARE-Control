@@ -2,16 +2,6 @@ name: Egress API Container
 
 on:
   pull_request:
-    # Ignore PRs on branches specifically intended for other assets
-    branches-ignore:
-      - '*/egress-ui-container*'
-      - '*/main-api-container*'
-      - '*/main-ui-container*'
-      - '*/tre-api-container*'
-      - '*/tre-ui-container*'
-      - '*/tre-hasura-container*'
-      - '*/tre-sql-pg-container*'
-      - '*/tre-sql-trino-container*'
     # Only consider PRs that change files for this asset, including ci scripts
     paths:
       - '.github/workflows/egress-api-container.yaml'
@@ -24,8 +14,6 @@ on:
   push:
     # Only release off of release and maintenance branches for this asset
     branches:
-      - 'maintenance/egress-api-container/[0-9]+.x.x'
-      - 'maintenance/egress-api-container/[0-9]+.[0-9]+.x'
       - 'main'
     # Only consider pushes that change files for this asset, including ci scripts
     paths:
@@ -41,7 +29,7 @@ permissions:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   # Needed to generate releases safely
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # Job name must be unique across repo to target
@@ -53,17 +41,10 @@ jobs:
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_USER }}
       registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-egress-api
-      release-tag-format: 'DARE-Egress-API-Container-${version}'
-      release-branches: |
-        [
-          'maintenance/egress-api-container/[0-9]+\.([0-9]+|x)\.x',
-          'main'
-        ]cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
-      slack-channel: ${{ vars.SLACK_CHANNEL }}
+      release-tag-format: '${version}-DARE-Egress-API-Container'
       build-file: src/Data-Egress-API/Dockerfile
       build-context: src
     secrets:
       cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
       cosign-password: ${{ secrets.COSIGN_PASSWORD }}
       registry-token: ${{ secrets.HARBOR_TOKEN }}
-      slack-token: ${{ secrets.SLACK_TOKEN }}
