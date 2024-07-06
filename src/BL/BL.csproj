@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aws4RequestSigner" Version="1.0.3" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.300.4" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.310.2" />
     <PackageReference Include="EasyNetQ.Management.Client" Version="2.0.0" />
     <PackageReference Include="IdentityModel" Version="6.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.2.0" />
