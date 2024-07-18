@@ -11,6 +11,7 @@ on:
       - 'src/DARE-FrontEnd/**'
       - 'src/TRE-API/**'
       - 'src/Tre-Hasura/**'
+      - 'src/Tre-SQL-PG/**'
       - 'src/BL/**'
     # Make sure all workflows that are "required checks" for a given
     # branch protection rule have the same paths: and branches-ignore:
@@ -29,6 +30,7 @@ on:
       - 'src/DARE-FrontEnd/**'
       - 'src/TRE-API/**'
       - 'src/Tre-Hasura/**'
+      - 'src/Tre-SQL-PG/**'
       - 'src/BL/**'
 permissions:
   contents: write
@@ -146,6 +148,23 @@ jobs:
       release-info: ${{ needs.setup-containers.outputs.release-info }}
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       build-file: src/Tre-Hasura/Dockerfile
+      build-context: src
+    secrets:
+      cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      cosign-password: ${{ secrets.COSIGN_PASSWORD }}
+      registry-token: ${{ secrets.HARBOR_TOKEN }}
+
+  tre-sql-pg-container:
+    needs: setup-containers
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v1.0.0-bulk-containers
+    with:
+      job-name: tre-sql-pg-container
+      registry: ${{ vars.HARBOR_REGISTRY }}
+      registry-user: ${{ vars.HARBOR_USER }}
+      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-sqlpg
+      release-info: ${{ needs.setup-containers.outputs.release-info }}
+      cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
+      build-file: src/Tre-SQL-PG/Dockerfile
       build-context: src
     secrets:
       cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
