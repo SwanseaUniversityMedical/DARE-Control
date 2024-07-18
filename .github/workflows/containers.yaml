@@ -1,4 +1,4 @@
-name: Build multiple containers
+name: Build containers
 
 on:
   pull_request:
