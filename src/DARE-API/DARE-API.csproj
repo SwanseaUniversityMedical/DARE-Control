@@ -13,7 +13,7 @@
   <ItemGroup>
     <PackageReference Include="EasyNetQ" Version="7.6.0" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.300.4" />
-    <PackageReference Include="EasyNetQ.Management.Client" Version="2.0.0" />
+    <PackageReference Include="EasyNetQ.Management.Client" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.13" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.13" />
