@@ -107,7 +107,9 @@ namespace DARE_API.Services
                             {
                                 Url = _minioSettings.AdminConsole,
                             };
-                            messageMQ.Url = "http://" + minioEndpoint.Url + "/browser/" + messageMQ.BucketName + "/" + messageMQ.Key;
+
+                            //Do not add http. It should already have it
+                            messageMQ.Url = /*"http://" +*/ minioEndpoint.Url + "/browser/" + messageMQ.BucketName + "/" + messageMQ.Key;
                             Log.Information("{Function} New url {URL}", "Process", messageMQ.Url);
                         }
                     }
