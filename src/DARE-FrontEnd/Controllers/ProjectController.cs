@@ -84,9 +84,9 @@ namespace DARE_FrontEnd.Controllers
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             await projectawait;
-            Log.Error("projectawait took ElapsedMilliseconds" + stopwatch.ElapsedMilliseconds);
+            //Log.Error("projectawait took ElapsedMilliseconds" + stopwatch.ElapsedMilliseconds);
             await minioEndpoint;
-            Log.Error("minioEndpoint took ElapsedMilliseconds" + stopwatch.ElapsedMilliseconds);
+            //Log.Error("minioEndpoint took ElapsedMilliseconds" + stopwatch.ElapsedMilliseconds);
             stopwatch.Stop();
             var project = projectawait.Result;
 
@@ -126,7 +126,7 @@ namespace DARE_FrontEnd.Controllers
                 TreItemList = treItems
             };
         
-            Log.Error("View(projectView) took ElapsedMilliseconds" + stopwatch.ElapsedMilliseconds);
+            //Log.Error("View(projectView) took ElapsedMilliseconds" + stopwatch.ElapsedMilliseconds);
             return View(projectView);
         }
 
