@@ -95,9 +95,9 @@ namespace DARE_API.Services
                     {
                         
                         string fileName = Path.GetFileName(uri.LocalPath);
-                        Log.Information("{Function} Full file loc {File}, Incoming URL {URL}, our minio {Minio}", "Process", fileName, uri.Scheme + ":\\" + uri.Host + ":" + uri.Port, _minioSettings.AdminConsole);
+                        Log.Information("{Function} Full file loc {File}, Incoming URL {URL}, our minio {Minio}", "Process", fileName, uri.Scheme.ToLower() + "://" + uri.Host.ToLower() + ":" + uri.Port, _minioSettings.AdminConsole.ToLower());
                         messageMQ.Key = fileName;
-                        if (uri.Scheme + "://" + uri.Host + ":" + uri.Port != _minioSettings.AdminConsole)
+                        if (uri.Scheme.ToLower() + "://" + uri.Host.ToLower() + ":" + uri.Port != _minioSettings.AdminConsole.ToLower())
                         {
                             Log.Information("{Function} Copying external", "Process");
                             _minioHelper.RabbitExternalObject(messageMQ);
