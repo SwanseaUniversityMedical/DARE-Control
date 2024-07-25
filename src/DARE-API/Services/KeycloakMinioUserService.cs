@@ -166,7 +166,7 @@ namespace DARE_API.Services
             var jsonString = await response.Content.ReadAsStringAsync();
             try
             {
-                
+                Log.Information("{Function} JSONString {JSONString}","GetUserIDAsync", jsonString);
                 var jsonObject = JsonConvert.DeserializeObject<List<MinioStuff>>(jsonString);
                 foreach (var item in jsonObject)
                 {
