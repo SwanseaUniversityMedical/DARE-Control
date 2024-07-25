@@ -162,7 +162,7 @@ namespace DARE_API.Services
             try
             {
                 
-                JArray jsonObject = JsonConvert.DeserializeObject<JArray>(jsonString);
+                var jsonObject = JsonConvert.DeserializeObject<JArray>(jsonString);
                 foreach (var item in jsonObject)
                 {
                     if (item["username"].ToString().ToLower() == userName.ToLower())
