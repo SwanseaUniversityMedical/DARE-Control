@@ -147,6 +147,11 @@ namespace DARE_API.Services
                 throw;
             }
         }
+
+        public class MinioStuff{
+            public string username { get; set; }
+            public string id { get; set; }
+        }
         public async Task<string> GetUserIDAsync(string accessToken, string userName)
         {
             var baseUrl = _submissionKeyCloakSettings.Server;
@@ -162,12 +167,12 @@ namespace DARE_API.Services
             try
             {
                 
-                var jsonObject = JsonConvert.DeserializeObject<JArray>(jsonString);
+                var jsonObject = JsonConvert.DeserializeObject<List<MinioStuff>>(jsonString);
                 foreach (var item in jsonObject)
                 {
-                    if (item["username"].ToString().ToLower() == userName.ToLower())
+                    if (item.username.ToString().ToLower() == userName.ToLower())
                     {
-                        return item["id"].ToString();
+                        return item.id.ToString();
                     }
                 }
 
