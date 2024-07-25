@@ -87,8 +87,8 @@ namespace DARE_FrontEnd.Controllers
                         var uplodaResultTest = await _clientHelper.CallAPIToSendFile<APIReturn>("/api/Project/UploadToMinio", "file", model.File, paramss);
                     }
                     var minioEndpoint = await _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
-
-                    imageUrl = "http://" + minioEndpoint.Url + "/browser/" + project.SubmissionBucket + "/" + model.File.FileName;
+                    //Don't add http:// minioEndpoint.Url already has it. And if not it should!
+                    imageUrl = /*"http://" +*/ minioEndpoint.Url + "/browser/" + project.SubmissionBucket + "/" + model.File.FileName;
 
                 }
 
