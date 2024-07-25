@@ -151,10 +151,18 @@ namespace BL.Models
         {
             Id = Tre.Id;
             Name = Tre.Name;
+        
             if (DoProjectTreDecision)
             {
                 ProjectTreDecision = new TreDecisionsGetProjectModel();
-                ProjectTreDecision.Decision = Tre.ProjectTreDecisions.Where(x => x.SubmissionProj.Id == ProjectId).OrderByDescending(x => x.Id).FirstOrDefault().Decision;
+                var localdec = Tre.ProjectTreDecisions
+                    .Where(x => x.SubmissionProj != null && x.SubmissionProj.Id == ProjectId).MaxBy(x => x.Id);
+                if (localdec != null)
+                {
+                    Decision decision = localdec.Decision;
+                    ProjectTreDecision.Decision = decision;
+                }
+                
             }
           
         }
