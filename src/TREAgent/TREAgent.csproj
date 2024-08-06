@@ -41,7 +41,7 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="5.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="Serilog.Sinks.Seq" Version="5.2.3" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.33.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.36.0" />
   </ItemGroup>
 
   <ItemGroup>
