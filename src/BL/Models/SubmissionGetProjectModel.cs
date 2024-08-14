@@ -52,7 +52,9 @@ namespace BL.Models
             OutputBucket = Project.OutputBucket;
             Users = new List<UserGetProjectModel>();
             UsersNotInProject = new List<UserGetProjectModel>();
-            foreach (var user in UsersAll)
+           
+
+            foreach (var user in UsersAll.ToArray())
             {
                 if (Project.Users.Contains(user))
                 {
@@ -67,8 +69,9 @@ namespace BL.Models
 
             Tres = new List<TreGetProjectModel>();
             TresNotInProject = new List<TreGetProjectModel>();
+    
 
-            foreach (var tre in TREsALL)
+            foreach (var tre in TREsALL.ToArray())
             {
                 if (Project.Tres.Contains(tre))
                 {
