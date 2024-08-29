@@ -4,7 +4,7 @@ services:
     container_name: trino
     ports:
       - "8943:8943"
-    image: "trinodb/trino:444"
+    image: "trinodb/trino:455"
     volumes:
       - ./trino/etc:/etc/trino
       - ./trino/etc/RootCA.pem:/etc/clustercoord.pem
