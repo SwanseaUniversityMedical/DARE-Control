@@ -160,7 +160,7 @@ namespace BL.Services
                 return res;
             }
             catch (Exception ex) {
-                Log.Error(ex, "{Function} Crash", "ClientHelperRequestAsync");
+                Log.Error(ex, "{Function} Crash with Endpoint {Enpoint}", "ClientHelperRequestAsync", endPoint);
                 throw;
             }
         }
