@@ -112,6 +112,7 @@ namespace BL.Services
         {
             try
             {
+                Log.Information("{Function} Calling {Address}", "ClientHelperRequestAsync", endPoint);
                 var usetoken = true;
                 if (string.IsNullOrEmpty(endPoint)) return new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.BadRequest };
                 
@@ -204,12 +205,12 @@ namespace BL.Services
             var accessToken = "";
             if (_keycloakTokenHelper != null)
             {
-                Log.Information("{Function} First step. Creds are there? {Creds} with username {Username}, Password {Password} and role {Role}", "DareClienCreateClientWithKeycloaktWithoutTokenHelper", _username, _password, _requiredRole);
+                //Log.Information("{Function} First step. Creds are there? {Creds} with username {Username}, Password {Password} and role {Role}", "DareClienCreateClientWithKeycloaktWithoutTokenHelper", _username, _password, _requiredRole);
                 accessToken = await _keycloakTokenHelper.GetTokenForUser(_username, _password, _requiredRole);
             }
             else
             {
-                Log.Information("{Function} Should not be here. Creds are there? {Creds} with username {Username}, Password {Password} and role {Role}", "DareClienCreateClientWithKeycloaktWithoutTokenHelper", _username, _password, _requiredRole);
+                //Log.Information("{Function} Should not be here. Creds are there? {Creds} with username {Username}, Password {Password} and role {Role}", "DareClienCreateClientWithKeycloaktWithoutTokenHelper", _username, _password, _requiredRole);
                 if (_httpContextAccessor.HttpContext == null)
                 {
                     accessToken = "";
