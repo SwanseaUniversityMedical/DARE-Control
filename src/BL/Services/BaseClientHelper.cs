@@ -204,10 +204,12 @@ namespace BL.Services
             var accessToken = "";
             if (_keycloakTokenHelper != null)
             {
+                Log.Information("{Function} First step. Creds are there? {Creds} with username {Username}, Password {Password} and role {Role}", "DareClienCreateClientWithKeycloaktWithoutTokenHelper", _username, _password, _requiredRole);
                 accessToken = await _keycloakTokenHelper.GetTokenForUser(_username, _password, _requiredRole);
             }
             else
             {
+                Log.Information("{Function} Should not be here. Creds are there? {Creds} with username {Username}, Password {Password} and role {Role}", "DareClienCreateClientWithKeycloaktWithoutTokenHelper", _username, _password, _requiredRole);
                 if (_httpContextAccessor.HttpContext == null)
                 {
                     accessToken = "";
