@@ -112,7 +112,7 @@ namespace BL.Services
         {
             try
             {
-                Log.Information("{Function} Calling {Address}", "ClientHelperRequestAsync", endPoint);
+                //Log.Information("{Function} Calling {Address}", "ClientHelperRequestAsync", endPoint);
                 var usetoken = true;
                 if (string.IsNullOrEmpty(endPoint)) return new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.BadRequest };
                 
