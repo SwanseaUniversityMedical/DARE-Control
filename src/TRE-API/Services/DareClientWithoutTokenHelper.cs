@@ -25,7 +25,7 @@ namespace TRE_API.Services
                 _password = encDec.Decrypt(creds.PasswordEnc);
                 _requiredRole = "dare-tre-admin";
             }
-            Log.Information("{Function} Creds are there? {Creds} with username {Username}, Password {Password} and role {Role}", "DareClientWithoutTokenHelper", _username, _password, _requiredRole);
+            //Log.Information("{Function} Creds are there? {Creds} with username {Username}, Password {Password} and role {Role}", "DareClientWithoutTokenHelper", _username, _password, _requiredRole);
         }
 
         public bool CheckCredsAreAvailable()
