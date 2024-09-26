@@ -16,7 +16,7 @@
     <PackageReference Include="Duende.AccessTokenManagement" Version="2.0.3" />
     <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" Version="2.0.3" />
     <PackageReference Include="bootstrap" Version="5.3.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.20" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="7.0.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.13">
