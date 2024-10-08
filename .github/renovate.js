@@ -26,7 +26,7 @@ module.exports = {
   updateNotScheduled: false,
   timezone: "Europe/London",
   schedule: [
-    "anytime"
+    "at any time"
   ],
 
   // This setting helps handle breaking changes to Renovate bot when its version changes.
