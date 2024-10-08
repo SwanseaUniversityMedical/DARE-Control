@@ -13,7 +13,7 @@ services:
   postgres:
     ports:
       - "5432:5432"
-    image: postgres:11
+    image: postgres:17
     container_name: postgres
     environment:
       POSTGRES_USER: dbt-trino
