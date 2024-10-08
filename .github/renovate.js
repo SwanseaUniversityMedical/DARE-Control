@@ -52,7 +52,7 @@ module.exports = {
   
   packageRules: [
     {
-      matchUpdateTypes: ["minor", "patch"],
+      //matchUpdateTypes: ["minor", "patch"],
       matchPackageNames: ["*"],
       groupName: "all dependencies",
       groupSlug: "all"
