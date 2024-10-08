@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "agent.fullname" . }}-tre
+  labels:
+    {{- include "agent.treLabels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "agent.treSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "agent.treSelectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "agent.treServiceAccountName" . }}-tre
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: tre-api
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.tre.api.image.repository }}:{{ .Values.tre.api.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.tre.api.image.pullPolicy }}
+          ports:
+            - name: http-api
+              containerPort: 80
+              protocol: TCP
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http-api
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http-api
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            {{- include "agent.commonEnvVars" . | nindent 12 }}
+            {{- include "agent.egressKeycloakSettings" . | nindent 12 }}
+            {{- include "agent.treKeycloakSettings" . | nindent 12 }}
+            {{- include "agent.submissionKeycloakSettings" . | nindent 12 }}
+            {{- include "agent.agentSettings" . | nindent 12 }}
+            {{- include "agent.treMinioSettings" . | nindent 12 }}
+            {{- include "agent.submissionMinioSettings" . | nindent 12 }}
+            - name: ConnectionStrings__DefaultConnection
+              value: "Server={{ .Values.externalPostgres.host }};Port={{ .Values.externalPostgres.port }};Database=DARE-Control;Include Error Detail=true;User Id={{ .Values.externalPostgres.username }};Password={{ .Values.externalPostgres.password }};"
+            - name: DareAPISettings__Address
+              value: "{{ .Values.submission.config.apiUrl }}"
+            - name: EnableExternalHangfire
+              value: "{{ .Values.tre.config.externalHangfire }}"
+            - name: TreName
+              value: "{{ .Values.tre.config.name }}"
+            - name: JobSettings__scanSchedule
+              value: "{{ .Values.tre.config.job.schedule.scan }}"
+            - name: JobSettings__syncSchedule
+              value: "{{ .Values.tre.config.job.schedule.sync }}"
+
+        - name: tre-ui
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.tre.ui.image.repository }}:{{ .Values.tre.ui.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.tre.ui.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            {{- include "agent.commonEnvVars" . | nindent 12 }}
+            {{- include "agent.treKeycloakSettings" . | nindent 12 }}
+            - name: sslcookies
+              value: "{{ .Values.tre.config.useSslCookies }}"
+            - name: httpsRedirect
+              value: "{{ .Values.tre.config.httpsRedirect }}"
+            - name: TreAPISettings__Address
+              value: "http://{{ include "agent.fullname" . }}-tre-api:{{ .Values.tre.api.service.port }}"
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

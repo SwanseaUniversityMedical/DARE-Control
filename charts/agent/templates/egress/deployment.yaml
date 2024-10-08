@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "agent.fullname" . }}-egress
+  labels:
+    {{- include "agent.egressLabels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "agent.egressSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "agent.egressSelectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "agent.egressServiceAccountName" . }}-egress
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: egress-api
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.egress.api.image.repository }}:{{ .Values.egress.api.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.egress.api.image.pullPolicy }}
+          ports:
+            - name: http-api
+              containerPort: 80
+              protocol: TCP
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http-api
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http-api
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            {{- include "agent.commonEnvVars" . | nindent 12 }}
+            {{- include "agent.egressKeycloakSettings" . | nindent 12 }}
+            {{- include "agent.treKeycloakSettings" . | nindent 12 }}
+            {{- include "agent.submissionKeycloakSettings" . | nindent 12 }}
+            - name: ConnectionStrings__DefaultConnection
+              value: "Server={{ .Values.externalPostgres.host }};Port={{ .Values.externalPostgres.port }};Database=DATA-Egress;Include Error Detail=true;User Id={{ .Values.externalPostgres.username }};Password={{ .Values.externalPostgres.password }};"
+            - name: MinioSettings__Url
+              value: "{{ .Values.egress.config.minio.url }}"
+            - name: MinioSettings__AccessKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.egress.config.minio.authSecret.name }}
+                  key: {{ .Values.egress.config.minio.authSecret.accessKeyRef }}
+            - name: MinioSettings__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.egress.config.minio.authSecret.name }}
+                  key: {{ .Values.egress.config.minio.authSecret.secretKeyRef }}
+            - name: MinioSettings__BucketName
+              value: "{{ .Values.egress.config.minio.bucketName }}"
+            - name: MinioSettings__AdminConsole
+              value: "{{ .Values.egress.config.minio.adminConsole }}"
+            - name: TreAPISettings__Address
+              value: "http://{{ include "agent.fullname" . }}-tre-api:{{ .Values.tre.api.service.port }}"
+        - name: egress-ui
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.egress.ui.image.repository }}:{{ .Values.egress.ui.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.egress.ui.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            {{- include "agent.commonEnvVars" . | nindent 12 }}
+            {{- include "agent.egressKeycloakSettings" . | nindent 12 }}
+            - name: sslcookies
+              value: "{{ .Values.egress.config.useSslCookies }}"
+            - name: httpsRedirect
+              value: "{{ .Values.egress.config.httpsRedirect }}"
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
