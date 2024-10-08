@@ -22,7 +22,7 @@ services:
       - communicating
 
   rabbitmq:
-    image: rabbitmq:3-management-alpine
+    image: rabbitmq:4-management-alpine
     mem_limit: 512M
     mem_reservation: 256M
     cpus: 0.5
