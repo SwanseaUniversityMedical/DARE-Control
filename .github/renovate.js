@@ -2,7 +2,7 @@ module.exports = {
 
   // Uncomment dryRun to test exotic config options without spamming dozens of
   // pull requests onto a repo that you would then need to clean up...
-  //dryRun: "full",
+  dryRun: "full",
 
   // Inherit default config options
   extends: ["config:base"],
@@ -48,7 +48,7 @@ module.exports = {
   packageRules: [
     {
       matchUpdateTypes: ["minor", "patch"],
-      matchPackageNames: ["**"],
+      matchPackageNames: ["/.*/"],
       groupName: "all dependencies",
       groupSlug: "all"
     }
