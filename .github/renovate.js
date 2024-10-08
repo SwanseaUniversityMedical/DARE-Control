@@ -6,7 +6,7 @@ module.exports = {
 
   // Inherit default config options
   //extends: ["config:base"],
-  //configMigration: true,
+  configMigration: true,
 
   // Force use of Conventional Commit messages to avoid Renovate not detecting them
   semanticCommits: "enabled",
