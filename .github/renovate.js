@@ -45,4 +45,13 @@ module.exports = {
   repositories: [
     "SwanseaUniversityMedical/DARE-Control",
   ],
+
+  packageRules: [
+    {
+      matchUpdateTypes: ["minor", "patch"],
+      matchPackagePatterns: [".*"],
+      groupName: "all dependencies",
+      groupSlug: "all"
+    }
+  ],
 };
