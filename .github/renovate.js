@@ -49,7 +49,7 @@ module.exports = {
   packageRules: [
     {
       matchUpdateTypes: ["minor", "patch"],
-      matchPackagePatterns: [".*"],
+      matchPackageNames: ["**"],
       groupName: "all dependencies",
       groupSlug: "all"
     }
