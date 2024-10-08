@@ -45,12 +45,13 @@ module.exports = {
     "SwanseaUniversityMedical/DARE-Control",
   ],
 
-  branchPrefix: "renovate-deps/",
-
+  branchPrefix: "upgrade/",
+  separateMajorMinor: false,
+  
   packageRules: [
     {
-      matchUpdateTypes: ["minor", "patch"],
-      matchPackageNames: ["**"],
+      //matchUpdateTypes: ["minor", "patch"],
+      matchPackageNames: ["*"],
       groupName: "all dependencies",
       groupSlug: "all"
     }
