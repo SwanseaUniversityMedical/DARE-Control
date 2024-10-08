@@ -45,7 +45,7 @@ module.exports = {
     "SwanseaUniversityMedical/DARE-Control",
   ],
 
-  branchPrefix: "renovate-deps",
+  branchPrefix: "renovate-deps/",
 
   packageRules: [
     {
