@@ -5,8 +5,8 @@ module.exports = {
   dryRun: "full",
 
   // Inherit default config options
-  extends: ["config:base"],
-  configMigration: true,
+  //extends: ["config:base"],
+  //configMigration: true,
 
   // Force use of Conventional Commit messages to avoid Renovate not detecting them
   semanticCommits: "enabled",
@@ -48,9 +48,10 @@ module.exports = {
   packageRules: [
     {
       matchUpdateTypes: ["minor", "patch"],
-      matchPackageNames: ["/.*/"],
+      matchPackageNames: ["**"],
       groupName: "all dependencies",
-      groupSlug: "all"
+      groupSlug: "all",
+      enabled: true
     }
   ],
 };
