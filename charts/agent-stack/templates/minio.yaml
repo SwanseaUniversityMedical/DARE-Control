@@ -1,0 +1,156 @@
+{{- if .Values.minio.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: minio
+  namespace: {{ .Release.Namespace }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: {{ .Values.global.argo.project}}
+  destination:
+    server: {{ .Values.global.argo.destinationServer }}
+    namespace: {{ .Release.Namespace }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+  source:
+    repoURL: {{ .Values.minio.repoUrl }}
+    chart: {{ .Values.minio.chart }}
+    targetRevision: {{ .Values.minio.chartVersion }}
+    helm:
+      valuesObject:
+        secrets:
+          existingSecret: {{ .Values.agent.helmValues.egress.config.minio.authSecret.name }}
+
+        tenant:
+          name: {{ .Values.minio.tenantName }}
+          configuration:
+            name: {{ .Values.agent.helmValues.egress.config.minio.authSecret.name }}
+
+          pools:
+            - servers: {{ .Values.minio.firstPool.servers }}
+              name: pool-0
+              volumesPerServer: {{ .Values.minio.firstPool.volumesPerServer }}
+              size: {{ .Values.minio.firstPool.size }}
+              {{- if .Values.minio.firstPool.storageClassName }}
+              storageClassName: {{ .Values.minio.firstPool.storageClassName }}
+              {{- end }}
+              {{- if .Values.minio.firstPool.storageTierNodeLabel }}
+              nodeSelector: 
+                hiru.io/storage-tier: "{{ .Values.minio.firstPool.storageTierNodeLabel }}"
+              {{- end }}
+              resources: 
+                requests:
+                  cpu: "1"
+                  memory: "1Gi"
+                limits:
+                  cpu: "4"
+                  memory: "4Gi"
+              containerSecurityContext:
+                runAsUser: 1000
+                runAsGroup: 1000
+                runAsNonRoot: true
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+                seccompProfile:
+                  type: "RuntimeDefault"
+            {{- if .Values.minio.extraPools -}}
+            {{- range $i, $value := .Values.minio.extraPools }}
+            - servers: {{ $value.servers }}
+              name: pool-{{ add $i 1 }}
+              volumesPerServer: {{ $value.volumesPerServer }}
+              size: {{ $value.size }}
+              storageClassName: {{ $value.storageClassName }}
+              nodeSelector: 
+                hiru.io/storage-tier: "{{ $value.storageTierNodeLabel }}"
+              resources: 
+                requests:
+                  cpu: "4"
+                  memory: "4Gi"
+                limits:
+                  cpu: "8"
+                  memory: "8Gi"
+              containerSecurityContext:
+                runAsUser: 1000
+                runAsGroup: 1000
+                runAsNonRoot: true
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+                seccompProfile:
+                  type: "RuntimeDefault"
+            {{- end }}
+            {{- end }}
+
+          # metrics:
+          #   enabled: true
+
+          buckets:
+            - name: {{ .Values.agent.helmValues.egress.config.minio.bucketName }}
+
+          env:
+            # - name: MINIO_PROMETHEUS_AUTH_TYPE
+            #   value: public
+            # - name: MINIO_PROMETHEUS_URL
+            #   value: "{{ .Values.global.monitoring.prometheusEndpoint }}"
+            # - name: CONSOLE_PROMETHEUS_URL
+            #   value: "{{ .Values.global.monitoring.prometheusEndpoint }}"
+            # - name: MINIO_PROMETHEUS_JOB_ID
+            #   value: "scrapeConfig/{{ .Values.global.monitoring.prometheusNamespace }}/{{ .Values.global.namespace }}-minio-job"
+            # - name: PROMETHEUS_NAMESPACE
+            #   value: "{{ .Values.global.monitoring.prometheusNamespace }}"
+            # - name: PROMETHEUS_NAME
+            #   value: "prometheus-operator-kube-p-prometheus"
+            - name: MINIO_IDENTITY_OPENID_CONFIG_URL_PRIMARY_IAM
+              value: "{{ .Values.global.oidc.authority }}/.well-known/openid-configuration"
+            - name: MINIO_IDENTITY_OPENID_DISPLAY_NAME_PRIMARY_IAM
+              value: "SSO_IDENTIFIER"
+            - name: MINIO_IDENTITY_OPENID_SCOPES_PRIMARY_IAM
+              value: "openid,email"
+            - name: MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC_PRIMARY_IAM
+              value: "on"
+            - name: GC
+              value: "10"
+
+          prometheusOperator: false
+
+        {{- if .Values.minio.ingress.enabled }}
+        ingress:
+          api:
+            enabled: true
+            ingressClassName: "{{ .Values.global.network.ingress.className }}"
+            annotations: 
+              cert-manager.io/cluster-issuer: "{{ .Values.global.network.certificate.clusterIssuer }}"
+              nginx.ingress.kubernetes.io/proxy-body-size: "0"
+              nginx.ingress.kubernetes.io/secure-backends: "true"
+              nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+            tls: 
+              - hosts:
+                - minio-api.{{ .Values.global.network.ingress.host }}
+                secretName: minioapi-ingress-tls
+            host: minio-api.{{ .Values.global.network.ingress.host }}
+            path: /
+            pathType: Prefix
+
+          console:
+            enabled: true
+            ingressClassName: "{{ .Values.global.network.ingress.className }}"
+            annotations: 
+              cert-manager.io/cluster-issuer: "{{ .Values.global.network.certificate.clusterIssuer }}"
+              nginx.ingress.kubernetes.io/proxy-body-size: "0"
+              nginx.ingress.kubernetes.io/secure-backends: "true"
+              nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+            tls: 
+              - hosts:
+                - minio.{{ .Values.global.network.ingress.host }}
+                secretName: minio-ingress-tls
+            host: minio.{{ .Values.global.network.ingress.host }}
+            path: /
+            pathType: Prefix
+        {{- end }}
+{{- end }}

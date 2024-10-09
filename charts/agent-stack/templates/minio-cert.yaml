@@ -1,0 +1,44 @@
+{{- if .Values.minio.enabled }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: minio-tls-secret
+  namespace: {{ .Release.Namespace }}
+spec:
+  # Secret names are always required.
+  secretName: minio-tls-secret
+  duration: 2160h0m0s #90d
+  renewBefore: 360h0m0s #15d
+  subject:
+    organizations:
+      - serp
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  usages:
+    - server auth
+    - digital signature
+    - client auth
+    - key encipherment
+  dnsNames:
+    - "minio.{{ .Values.global.ingress.host }}"
+    - "minio"
+    - "minio.{{ .Release.Namespace }}"
+    - "minio.{{ .Release.Namespace }}.svc"
+    - "minio.{{ .Release.Namespace }}.svc.cluster.local"
+    - "{{ .Values.minio.tenantName }}-hl"
+    - "{{ .Values.minio.tenantName }}-hl.{{ .Release.Namespace }}"
+    - "{{ .Values.minio.tenantName }}-hl.{{ .Release.Namespace }}.svc"
+    - "{{ .Values.minio.tenantName }}-hl.{{ .Release.Namespace }}.svc.cluster.local"
+    - "*.{{ .Values.minio.tenantName }}-hl.{{ .Release.Namespace }}.svc.cluster.local"
+    - "*.{{ .Release.Namespace }}.svc.cluster.local"
+    # we use this as a cheat/workaround to get it to trust the keycloak ca for oidc
+    - {{ include "agent-deploy.oidcHost" . }}
+  ipAddresses:
+    - 127.0.0.1
+  issuerRef:
+    name: {{ .Values.global.network.certificate.clusterIssuer }}
+    kind: ClusterIssuer
+    group: cert-manager.io
+{{- end }}

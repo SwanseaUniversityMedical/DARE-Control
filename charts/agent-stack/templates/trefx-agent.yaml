@@ -1,0 +1,83 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: trefx-agent
+  namespace: {{ .Release.Namespace }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: {{ .Values.global.argo.project }}
+  destination:
+    namespace: {{ .Release.Namespace }}
+    server: {{ .Values.global.argo.destinationServer }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+  source:
+    repoURL: {{ .Values.agent.repoUrl }}
+    chart: {{ .Values.agent.chart }}
+    targetRevision: {{ .Values.agent.chartVersion }}
+    helm:
+      values: |
+        egress:
+          config:
+          {{- .Values.agent.helmValues.egress.config | toYaml | nindent 12 }}
+
+          ui:
+            ingress:
+              enabled: {{ .Values.agent.helmValues.egress.ui.ingress.enabled }}
+              className: {{ .Values.global.network.ingress.className }}
+              annotations: 
+                cert-manager.io/cluster-issuer: "{{ .Values.global.network.certificate.clusterIssuer }}"
+              host: {{ .Values.agent.helmValues.egress.ui.ingress.host }}
+              tls:
+                - hosts:
+                  - {{ .Values.agent.helmValues.egress.ui.ingress.host }}
+                  secretName: egress-ui-tls-secret
+
+            service:
+            {{- .Values.agent.helmValues.egress.ui.service | toYaml | nindent 14 }}
+
+        tre:
+          config:
+          {{- .Values.agent.helmValues.tre.config | toYaml | nindent 12 }}
+
+          ui:
+            ingress:
+              enabled: {{ .Values.agent.helmValues.tre.ui.ingress.enabled }}
+              className: {{ .Values.global.network.ingress.className }}
+              annotations: 
+                cert-manager.io/cluster-issuer: "{{ .Values.global.network.certificate.clusterIssuer }}"
+              host: {{ .Values.agent.helmValues.tre.ui.ingress.host }}
+              tls:
+                - hosts:
+                  - {{ .Values.agent.helmValues.tre.ui.ingress.host }}
+                  secretName: tre-ui-tls-secret
+
+            service:
+            {{- .Values.agent.helmValues.tre.ui.service | toYaml | nindent 14 }}
+
+        submission:
+          config: 
+          {{- .Values.agent.helmValues.submission.config | toYaml | nindent 12 }}
+
+        externalPostgres:
+          enabled: true
+          host: "postgresql-rw"
+          username: "postgres"
+          password: "{{ .Values.agent.helmValues.postgres.password }}"
+
+        rabbitmq:
+          host: "http://rabbitmq"
+          username: {{ .Values.agent.helmValues.rabbitmq.username }}
+          passwordSecret:
+            name: {{ .Values.agent.helmValues.rabbitmq.passwordSecret.name }}
+            key: {{ .Values.agent.helmValues.rabbitmq.passwordSecret.key }}
+
+        seq:
+          enabled: true
+          url: "http://seq:5341"

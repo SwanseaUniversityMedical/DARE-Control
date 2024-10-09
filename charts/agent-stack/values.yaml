@@ -1,0 +1,188 @@
+global:
+  argo: 
+    destinationServer: https://kubernetes.default.svc
+    project: default
+  network:
+    certificate:
+      clusterIssuer: "ca-issuer"
+    ingress:
+      className: "nginx"
+      host: "trefx.serp.ac.uk"
+  oidc:
+    # this is the keycloak used to log into the egress minio
+    authority: ""
+  
+hasura:
+  enabled: true
+  repoUrl: 'https://hasura.github.io/helm-charts'
+  chart: hasura-enterprise-stack
+  chartVersion: 0.7.0
+    
+  helmValues: 
+    global:
+      connector:
+        graphql:
+          enabled: true
+
+    graphql-engine:
+      postgres:
+        enabled: true
+
+      service:
+        type: ClusterIP
+
+      config:
+        metadataOnly: false
+        authHook: "http://trefx-agent-tre-api:81/api/HasuraAuthentication"
+        enabledLogTypes: "startup, http-log, webhook-log, websocket-log, query-log"
+
+seq:
+  enabled: true
+  repoUrl: 'https://helm.datalust.co'
+  chart: seq
+  chartVersion: 2024.1.1
+  helmValues: {}
+
+minio:
+  enabled: true
+  repoUrl: 'https://operator.min.io/'
+  chart: tenant
+  chartVersion: "5.0.13"
+
+  # set the name of the secret with the minio config in agent.helmValues.egress.config.minio.authSecret.name
+  # configSecretName: "minio-env-config"
+
+  tenantName: "trefx-agent"
+  firstPool:
+    servers: 4
+    volumesPerServer: 1
+    size: 10Gi
+    storageClassName: directpv-min-io-tier2
+    storageTierNodeLabel: "2"
+
+  extraPools: []
+    # - servers: 2
+    #   volumesPerServer: 1
+    #   size: 1000Gi
+    #   storageClassName: directpv-min-io-tier9
+    #   storageTierNodeLabel: "woo"
+
+  ingress:
+    enabled: true
+
+agentPostgres:
+  enabled: true
+  instances: 1
+  version: "16.1"
+  size: 10Gi
+  storageClassName: ceph-block
+  postgresUserSecretName: agent-postgres-secret
+
+rabbitmq:
+  enabled: true
+  storageClassName: ceph-block
+  storageSize: 5Gi
+
+agent:
+  repoUrl: ''
+  chart: agent
+  chartVersion: 0.1.0
+  helmValues: 
+    egress:
+      config:
+        keycloak:
+          baseUrl: ""
+          realm: ""
+          clientAuthSecret:
+            name: "egressKeycloakClient"
+            idKey: "clientId"
+            secretKey: "clientSecret"
+          validAudiences: "Data-Egress-UI,Data-Egress-API"
+        minio:
+          url: "https://minio"
+          authSecret:
+            name: "minio-env-config"
+            accessKeyRef: "accessKey"
+            secretKeyRef: "secretKey"
+          bucketName: "outbucket"
+          adminConsole: "https://minio.trefx.serp.ac.uk"
+
+      ui:
+        # TODO find a nice way of letting them specify ui image and tag
+        ingress:
+          enabled: true
+          host: ""
+
+        service:
+          type: ClusterIP
+          port: 80
+
+    tre:
+      config:
+        name: "MYTRE"
+        keycloak:
+          baseUrl: ""
+          realm: ""
+          clientAuthSecret:
+            name: "treKeycloakClient"
+            idKey: "clientId"
+            secretKey: "clientSecret"
+          validAudiences: ""
+
+        # this is a separate minio to the one deployed alongside the agent?
+        minio:
+          url: "https://minio"
+          authSecret:
+            name: "minio-env-config"
+            accessKeyRef: "accessKey"
+            secretKeyRef: "secretKey"
+          bucketName: ""
+          adminConsole: ""
+
+        agent:
+          tesk:
+            apiUrl: ""
+          hasura:
+            externalAddress: ""
+            internalAddress: ""
+            adminPassword: ""
+
+      ui:
+        # TODO find a nice way of letting them specify ui image and tag
+        ingress:
+          enabled: true
+          host: ""
+
+        service: 
+          type: ClusterIP
+          port: 80
+
+    submission:
+      config:
+        apiUrl: ""
+        keycloak:
+          baseUrl: ""
+          realm: ""
+          clientAuthSecret:
+            name: ""
+            idKey: "clientId"
+            secretKey: "clientSecret"
+          validAudiences: ""
+
+        minio:
+          url: ""
+          authSecret:
+            name: ""
+            accessKeyRef: "accessKey"
+            secretKeyRef: "secretKey"
+          bucketName: ""
+          adminConsole: ""
+
+    postgres:
+      password: "my-temp-pg-pass"
+
+    rabbitmq:
+      username: "myuser"
+      passwordSecret:
+        name: "rabbitmqauth"
+        key: "password"
