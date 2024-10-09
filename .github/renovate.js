@@ -44,6 +44,8 @@ module.exports = {
   repositories: [
     "SwanseaUniversityMedical/DARE-Control",
   ],
+
+  branchPrefix: "upgrade/",
   
   packageRules: [
     {
@@ -59,7 +61,6 @@ module.exports = {
       matchUpdateTypes: ["minor", "patch"]
     },
     {
-      matchPackagePatterns: [".*"],
       matchUpdateTypes: ["major"],
       dependencyDashboardApproval: true
     }
