@@ -46,6 +46,8 @@ module.exports = {
   ],
 
   branchPrefix: "upgrade/",
+
+  ignorePaths: ["charts/**"],
   
   packageRules: [
     {
