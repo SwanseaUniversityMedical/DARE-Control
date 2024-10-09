@@ -65,6 +65,12 @@ module.exports = {
       groupSlug: "serilog-minor-patch",
       matchPackagePatterns: [".*serilog.*"],
       matchUpdateTypes: ["minor", "patch"]
+    },
+    {
+      groupName: "serilog major dependencies",
+      groupSlug: "serilog-major",
+      matchPackagePatterns: [".*serilog.*"],
+      matchUpdateTypes: ["major"]
     }
   ]
 };
