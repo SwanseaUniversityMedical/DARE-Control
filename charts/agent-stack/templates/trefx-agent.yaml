@@ -81,3 +81,9 @@ spec:
         seq:
           enabled: true
           url: "http://seq:5341"
+
+        {{- with .Values.agent.helmValues.resources }}
+        
+        resources:
+          {{- . | toYaml | nindent 10 }}
+        {{- end }}
