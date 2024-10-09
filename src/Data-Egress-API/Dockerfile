@@ -21,10 +21,14 @@ RUN dotnet publish "Data-Egress-API.csproj" -c Release -o /app/publish /p:UseApp
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Data-Egress-API.dll"]
 
 COPY rootca.pem /usr/local/share/ca-certificates/chi-ansible.crt
-
 RUN chmod 644 /usr/local/share/ca-certificates/*.crt && \
 	update-ca-certificates
+
+ENV APP_USER app_user
+RUN useradd -r $APP_USER
+USER $APP_USER
+
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "Data-Egress-API.dll"]
