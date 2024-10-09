@@ -29,6 +29,7 @@ RUN chmod 644 /usr/local/share/ca-certificates/*.crt && \
 ENV APP_USER app_user
 RUN useradd -r $APP_USER
 USER $APP_USER
+ENV COMPlus_EnableDiagnostics=0
 
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Data-Egress-API.dll"]
