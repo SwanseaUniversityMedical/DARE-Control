@@ -5,8 +5,8 @@ module.exports = {
   dryRun: "full",
 
   // Inherit default config options
-  //extends: ["config:base"],
-  //configMigration: true,
+  extends: ["config:base"],
+  configMigration: true,
 
   // Force use of Conventional Commit messages to avoid Renovate not detecting them
   semanticCommits: "enabled",
@@ -46,16 +46,13 @@ module.exports = {
   ],
 
   branchPrefix: "upgrade/",
-  //separateMajorMinor: false,
-  groupName: "sigh",
-  groupSlug: "sigh",
-
+  
   packageRules: [
     {
-      groupName: "all non-major dependencies",
+      groupName: "all ungrouped non-major dependencies",
       groupSlug: "all-minor-patch",
       matchPackagePatterns: [".*"],
-      //matchUpdateTypes: ["minor", "patch"]
+      matchUpdateTypes: ["minor", "patch"]
     }
   ]
 };
