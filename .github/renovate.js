@@ -67,10 +67,9 @@ module.exports = {
       matchUpdateTypes: ["minor", "patch"]
     },
     {
-      groupName: "serilog major dependencies",
-      groupSlug: "serilog-major",
-      matchPackagePatterns: [".*serilog.*"],
-      matchUpdateTypes: ["major"]
+      matchPackagePatterns: [".*"],
+      matchUpdateTypes: ["major"],
+      branchPrefix: "upgrade-major/",
     }
   ]
 };
