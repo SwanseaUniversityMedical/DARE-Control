@@ -49,9 +49,15 @@ module.exports = {
   
   packageRules: [
     {
-      groupName: "workflows",
-      groupSlug: "workflows",
+      groupName: "workflows non-major dependencies",
+      groupSlug: "workflows-minor-patch",
       matchPackagePatterns: ["SwanseaUniversityMedical\/workflows"],
+      matchUpdateTypes: ["minor", "patch"]
+    },
+    {
+      groupName: "serilog non-major dependencies",
+      groupSlug: "serilog-minor-patch",
+      matchPackagePatterns: ["serilog"],
       matchUpdateTypes: ["minor", "patch"]
     },
     {
