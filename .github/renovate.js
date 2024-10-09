@@ -44,8 +44,6 @@ module.exports = {
   repositories: [
     "SwanseaUniversityMedical/DARE-Control",
   ],
-
-  branchPrefix: "upgrade/",
   
   packageRules: [
     {
@@ -61,15 +59,9 @@ module.exports = {
       matchUpdateTypes: ["minor", "patch"]
     },
     {
-      groupName: "serilog non-major dependencies",
-      groupSlug: "serilog-minor-patch",
-      matchPackagePatterns: [".*serilog.*"],
-      matchUpdateTypes: ["minor", "patch"]
-    },
-    {
       matchPackagePatterns: [".*"],
       matchUpdateTypes: ["major"],
-      branchPrefix: "upgrade-major/",
+      dependencyDashboardApproval: true
     }
   ]
 };
