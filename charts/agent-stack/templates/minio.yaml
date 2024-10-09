@@ -94,18 +94,6 @@ spec:
             - name: {{ .Values.agent.helmValues.egress.config.minio.bucketName }}
 
           env:
-            # - name: MINIO_PROMETHEUS_AUTH_TYPE
-            #   value: public
-            # - name: MINIO_PROMETHEUS_URL
-            #   value: "{{ .Values.global.monitoring.prometheusEndpoint }}"
-            # - name: CONSOLE_PROMETHEUS_URL
-            #   value: "{{ .Values.global.monitoring.prometheusEndpoint }}"
-            # - name: MINIO_PROMETHEUS_JOB_ID
-            #   value: "scrapeConfig/{{ .Values.global.monitoring.prometheusNamespace }}/{{ .Values.global.namespace }}-minio-job"
-            # - name: PROMETHEUS_NAMESPACE
-            #   value: "{{ .Values.global.monitoring.prometheusNamespace }}"
-            # - name: PROMETHEUS_NAME
-            #   value: "prometheus-operator-kube-p-prometheus"
             - name: MINIO_IDENTITY_OPENID_CONFIG_URL_PRIMARY_IAM
               value: "{{ .Values.global.oidc.authority }}/.well-known/openid-configuration"
             - name: MINIO_IDENTITY_OPENID_DISPLAY_NAME_PRIMARY_IAM
