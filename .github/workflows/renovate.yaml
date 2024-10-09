@@ -17,7 +17,7 @@ jobs:
       group: light
 
     steps:
-      - uses: SwanseaUniversityMedical/workflows/.github/actions/renovate@v1.0.0-renovate
+      - uses: SwanseaUniversityMedical/workflows/.github/actions/renovate@renovate/renovatebot-github-action-40.x
         with:
           token: ${{ secrets.RENOVATE_TOKEN }}
           config: '.github/renovate.js'
