@@ -7,7 +7,7 @@ replicaCount: 1
 egress:
   api:
     image:
-      repository: harbor.ukserp.ac.uk:/dare-trefx/control-egress-api
+      repository: harbor.ukserp.ac.uk/dare-trefx/control-egress-api
       pullPolicy: IfNotPresent
       # Overrides the image tag whose default is the chart appVersion.
       tag: ""
@@ -155,7 +155,7 @@ tre:
 
   api:
     image:
-      repository: harbor.ukserp.ac.uk:/dare-trefx/control-tre-api
+      repository: harbor.ukserp.ac.uk/dare-trefx/control-tre-api
       pullPolicy: IfNotPresent
       # Overrides the image tag whose default is the chart appVersion.
       tag: ""
