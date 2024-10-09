@@ -51,13 +51,13 @@ module.exports = {
     {
       groupName: "all non-major dependencies",
       groupSlug: "all-minor-patch",
-      matchPackagePatterns: [".*"],
+      matchPackageNames: ["*"],
       matchUpdateTypes: ["minor", "patch"]
     },
     {
       groupName: "workflows non-major dependencies",
       groupSlug: "workflows-minor-patch",
-      matchPackagePatterns: ["SwanseaUniversityMedical\/workflows"],
+      matchPackageNames: ["SwanseaUniversityMedical/workflows"],
       matchUpdateTypes: ["minor", "patch"]
     },
     {
