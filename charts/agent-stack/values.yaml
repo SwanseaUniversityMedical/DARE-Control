@@ -57,8 +57,8 @@ minio:
     servers: 4
     volumesPerServer: 1
     size: 10Gi
-    storageClassName: directpv-min-io-tier2
-    storageTierNodeLabel: "2"
+    # storageClassName: directpv-min-io-tier2
+    # storageTierNodeLabel: "2"
 
   extraPools: []
     # - servers: 2
@@ -84,9 +84,9 @@ rabbitmq:
   storageSize: 5Gi
 
 agent:
-  repoUrl: ''
-  chart: agent
-  chartVersion: 0.1.0
+  repoUrl: 'harbor.ukserp.ac.uk/dare-trefx/chart'
+  chart: "trefx-agent"
+  chartVersion: "0.0.0-pr.849"
   helmValues: 
     egress:
       config:
