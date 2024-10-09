@@ -94,12 +94,12 @@ agent:
           baseUrl: ""
           realm: ""
           clientAuthSecret:
-            name: "egressKeycloakClient"
+            name: "egress-keycloak-client"
             idKey: "clientId"
             secretKey: "clientSecret"
           validAudiences: "Data-Egress-UI,Data-Egress-API"
         minio:
-          url: "https://minio"
+          url: "http://minio"
           authSecret:
             name: "minio-env-config"
             accessKeyRef: "accessKey"
@@ -124,27 +124,27 @@ agent:
           baseUrl: ""
           realm: ""
           clientAuthSecret:
-            name: "treKeycloakClient"
+            name: "tre-keycloak-client"
             idKey: "clientId"
             secretKey: "clientSecret"
-          validAudiences: ""
+          validAudiences: "Dare-TRE-API,Dare-TRE-UI"
 
         # this is a separate minio to the one deployed alongside the agent?
         minio:
-          url: "https://minio"
+          url: "http://minio"
           authSecret:
             name: "minio-env-config"
             accessKeyRef: "accessKey"
             secretKeyRef: "secretKey"
-          bucketName: ""
+          bucketName: "outbucket"
           adminConsole: ""
 
         agent:
           tesk:
-            apiUrl: ""
+            apiUrl: "http://tesk-api.tesk.svc.cluster.local:8080/ga4gh/tes/v1/tasks"
           hasura:
-            externalAddress: ""
-            internalAddress: ""
+            externalAddress: "http://hasura-graphql-engine.trefx.svc.cluster.local:8080"
+            internalAddress: "http://hasura-graphql-engine:8080"
             adminPassword: ""
 
       ui:
@@ -164,18 +164,18 @@ agent:
           baseUrl: ""
           realm: ""
           clientAuthSecret:
-            name: ""
+            name: "submission-keycloak-client"
             idKey: "clientId"
             secretKey: "clientSecret"
-          validAudiences: ""
+          validAudiences: "Dare-Control-UI,Dare-Control-API,Dare-Control-Minio"
 
         minio:
-          url: ""
+          url: "http://minio"
           authSecret:
-            name: ""
+            name: "minio-env-config"
             accessKeyRef: "accessKey"
             secretKeyRef: "secretKey"
-          bucketName: ""
+          bucketName: "outbuc"
           adminConsole: ""
 
     postgres:
