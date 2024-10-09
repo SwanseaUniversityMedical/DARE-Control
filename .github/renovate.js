@@ -47,8 +47,8 @@ module.exports = {
 
   branchPrefix: "upgrade/",
   //separateMajorMinor: false,
-  groupName: "all dependencies",
-  groupSlug: "all",
+  //groupName: "all dependencies",
+  //groupSlug: "all",
   
   // packageRules: [
   //   {
@@ -58,4 +58,18 @@ module.exports = {
   //     groupSlug: "all"
   //   }
   // ],
+
+  packageRules: [
+    {
+      groupName: "all non-major dependencies",
+      groupSlug: "all-minor-patch",
+      matchPackageNames: [
+        "*"
+      ],
+      matchUpdateTypes: [
+        "minor",
+        "patch"
+      ]
+    }
+  ]
 };
