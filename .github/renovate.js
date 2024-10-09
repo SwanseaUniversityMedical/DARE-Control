@@ -54,7 +54,7 @@ module.exports = {
     {
       groupName: "all non-major dependencies",
       groupSlug: "all-minor-patch",
-      matchPackageNames: ["*"],
+      matchPackagePatterns: [".*"],
       //matchUpdateTypes: ["minor", "patch"]
     }
   ]
