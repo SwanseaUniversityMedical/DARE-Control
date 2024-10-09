@@ -5,7 +5,7 @@ module.exports = {
   dryRun: "full",
 
   // Inherit default config options
-  extends: ["config:base"],
+  //extends: ["config:base"],
   configMigration: true,
 
   // Force use of Conventional Commit messages to avoid Renovate not detecting them
@@ -49,7 +49,13 @@ module.exports = {
   
   packageRules: [
     {
-      groupName: "all ungrouped non-major dependencies",
+      groupName: "workflows",
+      groupSlug: "workflows",
+      matchPackagePatterns: ["SwanseaUniversityMedical\/workflows"],
+      matchUpdateTypes: ["minor", "patch"]
+    },
+    {
+      groupName: "all non-major dependencies",
       groupSlug: "all-minor-patch",
       matchPackagePatterns: [".*"],
       matchUpdateTypes: ["minor", "patch"]
