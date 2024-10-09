@@ -41,6 +41,10 @@ spec:
 
             service:
             {{- .Values.agent.helmValues.egress.ui.service | toYaml | nindent 14 }}
+          
+          api:
+            image:
+              tag: "pr-849"
 
         tre:
           config:
@@ -83,7 +87,7 @@ spec:
           url: "http://seq:5341"
 
         {{- with .Values.agent.helmValues.resources }}
-        
+
         resources:
           {{- . | toYaml | nindent 10 }}
         {{- end }}
