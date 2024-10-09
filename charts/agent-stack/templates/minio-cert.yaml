@@ -22,7 +22,7 @@ spec:
     - client auth
     - key encipherment
   dnsNames:
-    - "minio.{{ .Values.global.ingress.host }}"
+    - "minio.{{ .Values.global.network.ingress.host }}"
     - "minio"
     - "minio.{{ .Release.Namespace }}"
     - "minio.{{ .Release.Namespace }}.svc"
