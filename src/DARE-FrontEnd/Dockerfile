@@ -22,6 +22,7 @@ RUN dotnet publish "DARE-FrontEnd.csproj" -c Release -o /app/publish /p:UseAppHo
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+ENV COMPlus_EnableDiagnostics=0
 ENTRYPOINT ["dotnet", "DARE-FrontEnd.dll"]
 
 COPY rootca.pem /usr/local/share/ca-certificates/chi-ansible.crt
