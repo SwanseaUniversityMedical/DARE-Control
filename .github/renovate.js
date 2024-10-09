@@ -2,10 +2,10 @@ module.exports = {
 
   // Uncomment dryRun to test exotic config options without spamming dozens of
   // pull requests onto a repo that you would then need to clean up...
-  dryRun: "full",
+  //dryRun: "full",
 
   // Inherit default config options
-  extends: ["config:base"],
+  //extends: ["config:base"], // <- causes weird monorepo groups
   configMigration: true,
 
   // Force use of Conventional Commit messages to avoid Renovate not detecting them
@@ -45,4 +45,27 @@ module.exports = {
   repositories: [
     "SwanseaUniversityMedical/DARE-Control",
   ],
+
+  branchPrefix: "upgrade/",
+
+  ignorePaths: ["charts/**"],
+  
+  packageRules: [
+    {
+      groupName: "all non-major dependencies",
+      groupSlug: "all-minor-patch",
+      matchPackageNames: ["*"],
+      matchUpdateTypes: ["minor", "patch"]
+    },
+    {
+      groupName: "workflows non-major dependencies",
+      groupSlug: "workflows-minor-patch",
+      matchPackageNames: ["SwanseaUniversityMedical/workflows"],
+      matchUpdateTypes: ["minor", "patch"]
+    },
+    {
+      matchUpdateTypes: ["major"],
+      dependencyDashboardApproval: true
+    }
+  ]
 };
