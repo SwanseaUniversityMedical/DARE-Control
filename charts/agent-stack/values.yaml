@@ -87,6 +87,7 @@ agent:
   repoUrl: 'harbor.ukserp.ac.uk/dare-trefx/chart'
   chart: "trefx-agent"
   chartVersion: "0.0.0-pr.849"
+  containerVersion: "pr-849"
   helmValues: 
     egress:
       config:

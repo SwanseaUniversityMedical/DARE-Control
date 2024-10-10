@@ -28,6 +28,9 @@ spec:
           {{- .Values.agent.helmValues.egress.config | toYaml | nindent 12 }}
 
           ui:
+            image:
+              tag: {{ .Values.agent.containerVersion }}
+
             ingress:
               enabled: {{ .Values.agent.helmValues.egress.ui.ingress.enabled }}
               className: {{ .Values.global.network.ingress.className }}
@@ -42,11 +45,18 @@ spec:
             service:
             {{- .Values.agent.helmValues.egress.ui.service | toYaml | nindent 14 }}
 
+          api:
+            image:
+              tag: {{ .Values.agent.containerVersion }}
+
         tre:
           config:
           {{- .Values.agent.helmValues.tre.config | toYaml | nindent 12 }}
 
           ui:
+            image:
+              tag: {{ .Values.agent.containerVersion }}
+
             ingress:
               enabled: {{ .Values.agent.helmValues.tre.ui.ingress.enabled }}
               className: {{ .Values.global.network.ingress.className }}
@@ -61,6 +71,10 @@ spec:
             service:
             {{- .Values.agent.helmValues.tre.ui.service | toYaml | nindent 14 }}
 
+          api:
+            image:
+              tag: {{ .Values.agent.containerVersion }}
+              
         submission:
           config: 
           {{- .Values.agent.helmValues.submission.config | toYaml | nindent 12 }}
