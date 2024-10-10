@@ -25,6 +25,7 @@ RUN dotnet publish "DARE-API.csproj" -c Release -o /app/publish /p:UseAppHost=fa
 
 FROM base AS final
 WORKDIR /app
+ENV COMPlus_EnableDiagnostics=0
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "DARE-API.dll"]
 

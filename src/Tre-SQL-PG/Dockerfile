@@ -17,4 +17,5 @@ RUN dotnet publish "Tre-SQL-PG.csproj" -c Release -o /app/publish /p:UseAppHost=
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+ENV COMPlus_EnableDiagnostics=0
 ENTRYPOINT ["dotnet", "Tre-SQL-PG.dll"]

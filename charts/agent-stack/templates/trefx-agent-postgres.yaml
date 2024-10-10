@@ -1,0 +1,35 @@
+{{- if .Values.agentPostgres.enabled }}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgresql
+  namespace: {{ .Release.Namespace }}
+spec:
+  instances: {{ .Values.agentPostgres.instances }}
+  imageName: ghcr.io/cloudnative-pg/postgresql:{{ .Values.agentPostgres.version }}
+
+  enableSuperuserAccess: true
+  superuserSecret: 
+    name: {{ .Values.agentPostgres.postgresUserSecretName }}
+
+  bootstrap:
+    initdb:
+      database: DATA-Egress
+      owner: postgres
+      secret:
+        name: {{ .Values.agentPostgres.postgresUserSecretName }}
+      postInitSQL:
+        - CREATE DATABASE "DARE-Control"
+
+  storage:
+    size: {{ .Values.agentPostgres.size }}
+    pvcTemplate:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: {{ .Values.agentPostgres.size }}
+
+  monitoring:
+    enablePodMonitor: false
+{{- end }}
