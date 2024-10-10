@@ -33,9 +33,21 @@ Create chart name and version as used by the chart label.
 {{/*
 Common labels - egress
 */}}
-{{- define "agent.egressLabels" -}}
+{{- define "agent.egressApiLabels" -}}
 helm.sh/chart: {{ include "agent.chart" . }}
-{{ include "agent.egressSelectorLabels" . }}
+{{ include "agent.egressApiSelectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Common labels - egress
+*/}}
+{{- define "agent.egressUiLabels" -}}
+helm.sh/chart: {{ include "agent.chart" . }}
+{{ include "agent.egressUiSelectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,9 +57,21 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Common labels - tre
 */}}
-{{- define "agent.treLabels" -}}
+{{- define "agent.treApiLabels" -}}
 helm.sh/chart: {{ include "agent.chart" . }}
-{{ include "agent.treSelectorLabels" . }}
+{{ include "agent.treApiSelectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Common labels - tre
+*/}}
+{{- define "agent.treUiLabels" -}}
+helm.sh/chart: {{ include "agent.chart" . }}
+{{ include "agent.treUiSelectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}

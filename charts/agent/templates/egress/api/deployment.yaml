@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "agent.fullname" . }}-egress-api
   labels:
-    {{- include "agent.egressLabels" . | nindent 4 }}
+    {{- include "agent.egressApiLabels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:

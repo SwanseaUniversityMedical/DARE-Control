@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ include "agent.fullname" . }}-egress-ui
   labels:
-    {{- include "agent.egressLabels" . | nindent 4 }}
+    {{- include "agent.egressUiLabels" . | nindent 4 }}
 spec:
   type: {{ .Values.egress.ui.service.type }}
   ports:

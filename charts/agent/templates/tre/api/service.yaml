@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ include "agent.fullname" . }}-tre-api
   labels:
-    {{- include "agent.treLabels" . | nindent 4 }}
+    {{- include "agent.treApiLabels" . | nindent 4 }}
 spec:
   type: {{ .Values.tre.api.service.type }}
   ports:

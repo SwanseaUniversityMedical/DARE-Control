@@ -17,7 +17,7 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-api
   labels:
-    {{- include "agent.treLabels" . | nindent 4 }}
+    {{- include "agent.treApiLabels" . | nindent 4 }}
   {{- with .Values.tre.api.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}

@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "agent.fullname" . }}-tre-api
   labels:
-    {{- include "agent.treLabels" . | nindent 4 }}
+    {{- include "agent.treApiLabels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
