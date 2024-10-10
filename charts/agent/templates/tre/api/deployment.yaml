@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "agent.fullname" . }}-tre
+  name: {{ include "agent.fullname" . }}-tre-api
   labels:
     {{- include "agent.treLabels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "agent.treSelectorLabels" . | nindent 6 }}
+      {{- include "agent.treApiSelectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -16,7 +16,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "agent.treSelectorLabels" . | nindent 8 }}
+        {{- include "agent.treApiSelectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -32,7 +32,7 @@ spec:
           image: "{{ .Values.tre.api.image.repository }}:{{ .Values.tre.api.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.tre.api.image.pullPolicy }}
           ports:
-            - name: http-api
+            - name: http
               containerPort: 80
               protocol: TCP
           # livenessProbe:
@@ -65,35 +65,6 @@ spec:
               value: "{{ .Values.tre.config.job.schedule.scan }}"
             - name: JobSettings__syncSchedule
               value: "{{ .Values.tre.config.job.schedule.sync }}"
-
-        - name: tre-ui
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.tre.ui.image.repository }}:{{ .Values.tre.ui.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.tre.ui.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: 80
-              protocol: TCP
-          # livenessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: http
-          # readinessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: http
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          env:
-            {{- include "agent.commonEnvVars" . | nindent 12 }}
-            {{- include "agent.treKeycloakSettings" . | nindent 12 }}
-            - name: sslcookies
-              value: "{{ .Values.tre.config.useSslCookies }}"
-            - name: httpsRedirect
-              value: "{{ .Values.tre.config.httpsRedirect }}"
-            - name: TreAPISettings__Address
-              value: "http://{{ include "agent.fullname" . }}-tre-api:{{ .Values.tre.api.service.port }}"
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

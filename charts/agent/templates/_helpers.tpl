@@ -57,16 +57,32 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Egress selector labels
 */}}
-{{- define "agent.egressSelectorLabels" -}}
-app.kubernetes.io/name: {{ include "agent.name" . }}-egress
+{{- define "agent.egressApiSelectorLabels" -}}
+app.kubernetes.io/name: {{ include "agent.name" . }}-egress-api
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Egress selector labels
+*/}}
+{{- define "agent.egressUiSelectorLabels" -}}
+app.kubernetes.io/name: {{ include "agent.name" . }}-egress-ui
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Tre selector labels
 */}}
-{{- define "agent.treSelectorLabels" -}}
-app.kubernetes.io/name: {{ include "agent.name" . }}-tre
+{{- define "agent.treApiSelectorLabels" -}}
+app.kubernetes.io/name: {{ include "agent.name" . }}-tre-api
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Tre selector labels
+*/}}
+{{- define "agent.treUiSelectorLabels" -}}
+app.kubernetes.io/name: {{ include "agent.name" . }}-tre-ui
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
