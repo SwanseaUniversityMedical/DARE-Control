@@ -240,6 +240,7 @@ try
                 },
                 OnRedirectToIdentityProvider = async context =>
                 {
+
                     //Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}",
                     //    context.HttpContext.Connection.RemoteIpAddress);
                     //Log.Information("HttpContext.Connection.RemotePort : {RemotePort}",
