@@ -40,7 +40,7 @@ try
     var treKeyCloakSettings = new TreKeyCloakSettings();
     configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
     builder.Services.AddSingleton(treKeyCloakSettings);
-
+    Log.Information("{Function} Step 1 Authority {Authority}",  treKeyCloakSettings.Authority);
     var UIName = new TRE_UI.Models.UIName();
     configuration.Bind(nameof(UIName), UIName);
     builder.Services.AddSingleton(UIName);
@@ -148,7 +148,7 @@ try
 
                 options.BackchannelHttpHandler = httpClientHandler;
             }
-
+            Log.Information("{Function} Step 2 Authority {Authority}", treKeyCloakSettings.Authority);
 
             // URL of the Keycloak server
             options.Authority = treKeyCloakSettings.Authority;
