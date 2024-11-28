@@ -193,6 +193,7 @@ builder.Services.AddAuthentication(options =>
         options.TokenValidationParameters = TVP;
 
     });
+
 Log.Information(
     "{Function} Authority {Authority}, MetaAddress {MetaAddress}, Audience {Audience}, ValidAudiences {ValidAudiences}",
     "Program", treKeyCloakSettings.Authority, treKeyCloakSettings.MetadataAddress, treKeyCloakSettings.ClientId,

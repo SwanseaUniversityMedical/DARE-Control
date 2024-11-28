@@ -198,6 +198,7 @@ try
                     context.HandleResponse();
                     return context.Response.CompleteAsync();
                 },
+
                 OnRemoteFailure = context =>
                 {
                     Log.Error("OnRemoteFailure: {ex}", context.Failure);
