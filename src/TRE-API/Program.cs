@@ -142,7 +142,7 @@ var TVP = new TokenValidationParameters
     ValidAudiences = treKeyCloakSettings.ValidAudiences.Trim().Split(',').ToList(),
     ValidIssuer = treKeyCloakSettings.Authority,
     ValidateIssuerSigningKey = true,
-    ValidateIssuer = true,
+    ValidateIssuer = false,
     ValidateLifetime = true
 };
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
