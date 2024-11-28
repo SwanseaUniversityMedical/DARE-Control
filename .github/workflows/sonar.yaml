@@ -1,0 +1,103 @@
+name: Scan DARE-Control
+
+on:
+  pull_request:
+    # Only consider PRs that change files for this asset, including ci scripts
+    paths:
+      - '.github/workflows/sonar.yaml'
+      - 'src/**'
+  push:
+    # Only release off of release and maintenance branches for this asset
+    branches:
+      - 'main'
+    # Only consider pushes that change files for this asset, including ci scripts.
+    paths:
+      - '.github/workflows/sonar.yaml'
+      - 'src/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # Cancel early on pull requests if new commits are added,
+  # Don't cancel on release pushes
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  main-ui-sonar:
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet.yaml@v1.0.5-sonar-dotnet
+    with:
+      project-name: "dare-control-ui"
+      project-file: "DARE-FrontEnd.csproj"
+      project-context: "src/DARE-FrontEnd"
+      sonar-url: ${{ vars.SONAR_URL }}
+    secrets:
+      sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+  main-api-sonar:
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet.yaml@v1.0.5-sonar-dotnet
+    with:
+      project-name: "dare-control-api"
+      project-file: "DARE-API.csproj"
+      project-context: "src/DARE-API"
+      sonar-url: ${{ vars.SONAR_URL }}
+    secrets:
+      sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+  tre-ui-sonar:
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet.yaml@v1.0.5-sonar-dotnet
+    with:
+      project-name: "dare-control-tre-ui"
+      project-file: "TRE-UI.csproj"
+      project-context: "src/TRE-UI"
+      sonar-url: ${{ vars.SONAR_URL }}
+    secrets:
+      sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+  tre-api-sonar:
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet.yaml@v1.0.5-sonar-dotnet
+    with:
+      project-name: "dare-control-tre-api"
+      project-file: "TRE-API.csproj"
+      project-context: "src/TRE-API"
+      sonar-url: ${{ vars.SONAR_URL }}
+    secrets:
+      sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+  tre-hasura-sonar:
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet.yaml@v1.0.5-sonar-dotnet
+    with:
+      project-name: "dare-control-tre-hasura"
+      project-file: "Tre-Hasura.csproj"
+      project-context: "src/Tre-Hasura"
+      sonar-url: ${{ vars.SONAR_URL }}
+    secrets:
+      sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+  tre-sql-pg-sonar:
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet.yaml@v1.0.5-sonar-dotnet
+    with:
+      project-name: "dare-control-tre-sql-pg"
+      project-file: "Tre-SQL-PG.csproj"
+      project-context: "src/Tre-SQL-PG"
+      sonar-url: ${{ vars.SONAR_URL }}
+    secrets:
+      sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+  tre-sql-trino-sonar:
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet.yaml@v1.0.5-sonar-dotnet
+    with:
+      project-name: "dare-control-tre-sql-trino"
+      project-file: "Tre-SQL-Trino.csproj"
+      project-context: "src/Tre-SQL-Trino"
+      sonar-url: ${{ vars.SONAR_URL }}
+    secrets:
+      sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+  bl-sonar:
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet.yaml@v1.0.5-sonar-dotnet
+    with:
+      project-name: "dare-control-bl"
+      project-file: "BL.csproj"
+      project-context: "src/BL"
+      sonar-url: ${{ vars.SONAR_URL }}
+    secrets:
+      sonar-token: ${{ secrets.SONAR_TOKEN }}
