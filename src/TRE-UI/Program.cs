@@ -149,7 +149,10 @@ try
                 options.BackchannelHttpHandler = httpClientHandler;
             }
             Log.Information("{Function} Step 2 Authority {Authority}", treKeyCloakSettings.Authority);
-
+            Log.Information(
+                "{Function} Authority {Authority}, MetaAddress {MetaAddress}, Audience {Audience}, ValidAudiences {ValidAudiences}, ClientSecret {Secret}",
+                "Program", treKeyCloakSettings.Authority, treKeyCloakSettings.MetadataAddress, treKeyCloakSettings.ClientId,
+                treKeyCloakSettings.ValidAudiences, treKeyCloakSettings.ClientSecret);
             // URL of the Keycloak server
             options.Authority = treKeyCloakSettings.Authority;
             //// Client configured in the Keycloak

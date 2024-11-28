@@ -186,14 +186,17 @@ builder.Services.AddAuthentication(options =>
         
         
         options.MetadataAddress = treKeyCloakSettings.MetadataAddress;
-
+        
         options.RequireHttpsMetadata = false; // dev only
         options.IncludeErrorDetails = true;
 
         options.TokenValidationParameters = TVP;
 
     });
-
+Log.Information(
+    "{Function} Authority {Authority}, MetaAddress {MetaAddress}, Audience {Audience}, ValidAudiences {ValidAudiences}",
+    "Program", treKeyCloakSettings.Authority, treKeyCloakSettings.MetadataAddress, treKeyCloakSettings.ClientId,
+    treKeyCloakSettings.ValidAudiences);
 // - authorize here
 
   
