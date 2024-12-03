@@ -45,7 +45,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options
     .UseNpgsql(
     builder.Configuration.GetConnectionString("DefaultConnection")
 ));
-
+if (configuration["SuppressAntiforgery"] != null && configuration["SuppressAntiforgery"].ToLower() == "true")
+{
+    Log.Warning("{Function} Disabling Anti Forgery token. Only do if testing", "Main");
+    builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
+}
 //Add Services
 AddServices(builder);
 

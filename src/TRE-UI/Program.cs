@@ -23,6 +23,11 @@ Log.Logger = CreateSerilogLogger(configuration, environment);
 Log.Information("TRE-UI logging LastStatusUpdate.");
 try
 {
+    if (configuration["SuppressAntiforgery"] != null && configuration["SuppressAntiforgery"].ToLower() == "true")
+    {
+        Log.Warning("{Function} Disabling Anti Forgery token. Only do if testing", "Main");
+        builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
+    }
     //builder.Host.UseSerilog();
     IdentityModelEventSource.ShowPII = true;
 
