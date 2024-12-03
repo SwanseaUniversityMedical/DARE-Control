@@ -28,6 +28,7 @@ using Hangfire.Dashboard.BasicAuthorization;
 using TRE_API.Models;
 using TREAPI.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,9 @@ if (configuration["SuppressAntiforgery"] != null && configuration["SuppressAntif
 {
     Log.Warning("{Function} Disabling Anti Forgery token. Only do if testing", "Main");
     builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo("/root/.aspnet/DataProtection-Keys"))
+        .DisableAutomaticKeyGeneration();
 }
 
 // Add services to the container.

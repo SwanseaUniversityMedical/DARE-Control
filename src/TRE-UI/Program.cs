@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
@@ -27,6 +28,9 @@ try
     {
         Log.Warning("{Function} Disabling Anti Forgery token. Only do if testing", "Main");
         builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
+        builder.Services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo("/root/.aspnet/DataProtection-Keys"))
+            .DisableAutomaticKeyGeneration();
     }
     //builder.Host.UseSerilog();
     IdentityModelEventSource.ShowPII = true;
