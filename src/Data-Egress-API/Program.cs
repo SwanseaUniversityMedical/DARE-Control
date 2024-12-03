@@ -19,6 +19,7 @@ using DARE_Egress.Services;
 using NETCore.MailKit.Extensions;
 using NETCore.MailKit.Infrastructure.Internal;
 using BL.Models;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
@@ -30,6 +31,9 @@ if (configuration["SuppressAntiforgery"] != null && configuration["SuppressAntif
 {
     Log.Warning("{Function} Disabling Anti Forgery token. Only do if testing", "Main");
     builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo("/root/.aspnet/DataProtection-Keys"))
+        .DisableAutomaticKeyGeneration();
 }
 // Add services to the container.
 

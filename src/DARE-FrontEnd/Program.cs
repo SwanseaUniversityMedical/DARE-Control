@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Authentication;
 using Newtonsoft.Json;
 using DARE_FrontEnd.Models;
 using DARE_FrontEnd.Services;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 IdentityModelEventSource.ShowPII = true;
@@ -67,7 +68,10 @@ if (configuration["SuppressAntiforgery"] != null && configuration["SuppressAntif
 {
     Log.Warning("{Function} Disabling Anti Forgery token. Only do if testing", "Main");
     builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
-}
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo("/root/.aspnet/DataProtection-Keys"))
+        .DisableAutomaticKeyGeneration();
+    }
 
     //add services here
     builder.Services.AddScoped<CustomCookieEvent>();
