@@ -63,10 +63,14 @@ builder.Services.AddSingleton(UIName);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
+if (configuration["SuppressAntiforgery"] != null && configuration["SuppressAntiforgery"].ToLower() == "true")
+{
+    Log.Warning("{Function} Disabling Anti Forgery token. Only do if testing", "Main");
+    builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
+}
 
-
-//add services here
-builder.Services.AddScoped<CustomCookieEvent>();
+    //add services here
+    builder.Services.AddScoped<CustomCookieEvent>();
 
 builder.Services.AddScoped<IDareClientHelper, DareClientHelper>();
 
