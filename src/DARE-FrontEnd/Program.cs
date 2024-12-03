@@ -28,8 +28,10 @@ IWebHostEnvironment environment = builder.Environment;
 Log.Logger = CreateSerilogLogger(configuration, environment);
 try
 {
-// Add services to the container.
-builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
+
+    builder.Host.UseSerilog();
+    // Add services to the container.
+    builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
 {
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
     options.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
@@ -249,29 +251,29 @@ builder.Services.AddAuthentication(options =>
                     },
                     OnRedirectToIdentityProvider = async context =>
                     {
-                        //Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}",
-                        //    context.HttpContext.Connection.RemoteIpAddress);
-                        //Log.Information("HttpContext.Connection.RemotePort : {RemotePort}",
-                        //    context.HttpContext.Connection.RemotePort);
-                        //Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
-                        //Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
+                        Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}",
+                            context.HttpContext.Connection.RemoteIpAddress);
+                        Log.Information("HttpContext.Connection.RemotePort : {RemotePort}",
+                            context.HttpContext.Connection.RemotePort);
+                        Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
+                        Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
 
-                        //foreach (var header in context.HttpContext.Request.Headers)
-                        //{
-                        //    Log.Information("Request Header {key} - {value}", header.Key, header.Value);
-                        //}
+                        foreach (var header in context.HttpContext.Request.Headers)
+                        {
+                            Log.Information("Request Header {key} - {value}", header.Key, header.Value);
+                        }
 
-                        //foreach (var header in context.HttpContext.Response.Headers)
-                        //{
-                        //    Log.Information("Response Header {key} - {value}", header.Key, header.Value);
-                        //}
+                        foreach (var header in context.HttpContext.Response.Headers)
+                        {
+                            Log.Information("Response Header {key} - {value}", header.Key, header.Value);
+                        }
 
-                        //if (submissionKeyCloakSettings.UseRedirectURL)
-                        //{
-                        //    context.ProtocolMessage.RedirectUri = submissionKeyCloakSettings.RedirectURL;
-                        //}
+                        if (submissionKeyCloakSettings.UseRedirectURL)
+                        {
+                            context.ProtocolMessage.RedirectUri = submissionKeyCloakSettings.RedirectURL;
+                        }
 
-                        //Log.Information("Redirect Uri {Redirect}", context.ProtocolMessage.RedirectUri);
+                        Log.Information("Redirect Uri {Redirect}", context.ProtocolMessage.RedirectUri);
 
                         await Task.FromResult(0);
                     }
