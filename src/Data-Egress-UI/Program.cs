@@ -44,6 +44,8 @@ try
 // -- authentication here
     var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
     configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
+    var demomode = configuration["DemoMode"].ToLower() == "true";
+    dataEgressKeyCloakSettings.IgnoreHttps = demomode;
     builder.Services.AddSingleton(dataEgressKeyCloakSettings);
     
 

@@ -75,8 +75,19 @@ await SetUpRabbitMQ.DoItTreAsync(configuration["RabbitMQ:HostAddress"], configur
 
 var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
+var demomode = configuration["DemoMode"].ToLower() == "true";
+treKeyCloakSettings.IgnoreHttps = demomode;
 builder.Services.AddSingleton(treKeyCloakSettings);
 
+var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
+configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
+dataEgressKeyCloakSettings.IgnoreHttps = demomode;
+builder.Services.AddSingleton(dataEgressKeyCloakSettings);
+
+var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
+configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
+submissionKeyCloakSettings.IgnoreHttps = demomode;
+builder.Services.AddSingleton(submissionKeyCloakSettings);
 
 var HasuraSettings = new HasuraSettings();
 configuration.Bind(nameof(HasuraSettings), HasuraSettings);
@@ -86,9 +97,7 @@ var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
 
-var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
-configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
-builder.Services.AddSingleton(dataEgressKeyCloakSettings);
+
 
 
 var minioSubSettings = new MinioSubSettings();
@@ -117,9 +126,7 @@ builder.Services.AddSingleton(Features);
 
 builder.Services.AddHostedService<ConsumeInternalMessageService>();
 
-var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
-configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
-builder.Services.AddSingleton(submissionKeyCloakSettings);
+
 
 builder.Services.AddScoped<IDareClientWithoutTokenHelper, DareClientWithoutTokenHelper>();
 builder.Services.AddScoped<IDataEgressClientWithoutTokenHelper, DataEgressClientWithoutTokenHelper>();

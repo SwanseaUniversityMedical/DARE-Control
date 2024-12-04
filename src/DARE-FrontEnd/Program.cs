@@ -47,7 +47,9 @@ Log.Information("Dare-FrontEnd logging LastStatusUpdate.");
 // -- authentication here
 var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
-builder.Services.AddSingleton(submissionKeyCloakSettings);
+var demomode = configuration["DemoMode"].ToLower() == "true";
+submissionKeyCloakSettings.IgnoreHttps = demomode;
+    builder.Services.AddSingleton(submissionKeyCloakSettings);
 
 var formIOSettings = new FormIOSettings();
 configuration.Bind(nameof(formIOSettings), formIOSettings);

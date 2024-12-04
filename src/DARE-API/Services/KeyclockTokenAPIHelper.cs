@@ -30,7 +30,7 @@ namespace DARE_API.Services
             var proxyhandler = _settings.getProxyHandler;
             Log.Information($"GetTokenForUser uesing proxyhandler _settings.Authority > {_settings.Authority}");
 
-            return await KeycloakCommon.GetTokenForUserGuts(username, password, requiredRole, proxyhandler, keycloakBaseUrl, clientId, clientSecret);
+            return await KeycloakCommon.GetTokenForUserGuts(username, password, requiredRole, proxyhandler, keycloakBaseUrl, clientId, clientSecret, _settings.IgnoreHttps);
         }
 
     }

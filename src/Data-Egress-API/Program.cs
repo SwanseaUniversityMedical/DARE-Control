@@ -58,7 +58,15 @@ AddDependencies(builder, configuration);
 
 var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
 configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
+var demomode = configuration["DemoMode"].ToLower() == "true";
+dataEgressKeyCloakSettings.IgnoreHttps = demomode;
 builder.Services.AddSingleton(dataEgressKeyCloakSettings);
+
+
+var treKeyCloakSettings = new TreKeyCloakSettings();
+configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
+treKeyCloakSettings.IgnoreHttps = demomode;
+builder.Services.AddSingleton(treKeyCloakSettings);
 
 var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
@@ -68,9 +76,7 @@ var emailSettings = new EmailSettings();
 configuration.Bind(nameof(emailSettings), emailSettings);
 builder.Services.AddSingleton(emailSettings);
 
-var treKeyCloakSettings = new TreKeyCloakSettings();
-configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
-builder.Services.AddSingleton(treKeyCloakSettings);
+
 builder.Services.AddScoped<ITreClientWithoutTokenHelper, TreClientWithoutTokenHelper>();
 builder.Services.AddScoped<IMinioHelper, MinioHelper>();
 

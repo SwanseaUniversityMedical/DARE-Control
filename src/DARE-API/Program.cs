@@ -78,6 +78,8 @@ await SetUpRabbitMQ.DoItSubmissionAsync(configuration["RabbitMQ:HostAddress"], c
 
 var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
+var demomode = configuration["DemoMode"].ToLower() == "true";
+submissionKeyCloakSettings.IgnoreHttps = demomode;
 builder.Services.AddSingleton(submissionKeyCloakSettings);
 
 builder.Services.Configure<KestrelServerOptions>(options =>
@@ -88,6 +90,7 @@ builder.Services.Configure<KestrelServerOptions>(options =>
 var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
+
 
 var emailSettings = new EmailSettings();
 configuration.Bind(nameof(emailSettings), emailSettings);

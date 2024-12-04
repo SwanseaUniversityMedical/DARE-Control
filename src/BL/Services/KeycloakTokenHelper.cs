@@ -15,15 +15,17 @@ namespace BL.Services
         public string _clientId { get; set; }
         public string _clientSecret { get; set; }
         public bool _useProxy { get; set; }
+        public bool _requireHttps { get; set; }
         public string _proxyUrl { get; set; }
 
-        public KeycloakTokenHelper(string keycloakBaseUrl, string clientId, string clientSecret, bool useProxy, string proxyurl)
+        public KeycloakTokenHelper(string keycloakBaseUrl, string clientId, string clientSecret, bool useProxy, string proxyurl, bool ignoreHttps)
         {
             _keycloakBaseUrl = keycloakBaseUrl;
             _clientId = clientId;
             _clientSecret = clientSecret;
             _useProxy = useProxy;
             _proxyUrl = proxyurl;
+            _requireHttps = !ignoreHttps;
         }
 
         public async Task<string> GetTokenForUser(string username, string password, string requiredRole)
@@ -47,7 +49,7 @@ namespace BL.Services
            
 
             // Create an HttpClient with the handler
-            return await KeycloakCommon.GetTokenForUserGuts(username, password, requiredRole, handler, keycloakBaseUrl, clientId, clientSecret);
+            return await KeycloakCommon.GetTokenForUserGuts(username, password, requiredRole, handler, keycloakBaseUrl, clientId, clientSecret, _requireHttps);
 
         }
     }
