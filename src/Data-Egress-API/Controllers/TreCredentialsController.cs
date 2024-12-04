@@ -29,7 +29,7 @@ namespace Data_Egress_API.Controllers
             _encDecHelper = encDec;
             _DbContext = applicationDbContext;
             _keycloakTokenHelper = new KeycloakTokenHelper(keycloakSettings.BaseUrl, keycloakSettings.ClientId,
-                keycloakSettings.ClientSecret, keycloakSettings.Proxy, keycloakSettings.ProxyAddresURL, keycloakSettings.IgnoreHttps);
+                keycloakSettings.ClientSecret, keycloakSettings.Proxy, keycloakSettings.ProxyAddresURL, keycloakSettings.DemoMode);
 
         }
 

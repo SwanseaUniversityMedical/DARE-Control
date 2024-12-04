@@ -76,17 +76,17 @@ await SetUpRabbitMQ.DoItTreAsync(configuration["RabbitMQ:HostAddress"], configur
 var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
 var demomode = configuration["DemoMode"].ToLower() == "true";
-treKeyCloakSettings.IgnoreHttps = demomode;
+treKeyCloakSettings.DemoMode = demomode;
 builder.Services.AddSingleton(treKeyCloakSettings);
 
 var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
 configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
-dataEgressKeyCloakSettings.IgnoreHttps = demomode;
+dataEgressKeyCloakSettings.DemoMode = demomode;
 builder.Services.AddSingleton(dataEgressKeyCloakSettings);
 
 var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
-submissionKeyCloakSettings.IgnoreHttps = demomode;
+submissionKeyCloakSettings.DemoMode = demomode;
 Log.Information("{Function} DemoMode {DemoMode}, DemoModeS {DemoS}", "Main", demomode, configuration["DemoMode"]);
 builder.Services.AddSingleton(submissionKeyCloakSettings);
 

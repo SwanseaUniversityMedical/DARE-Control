@@ -29,9 +29,9 @@ namespace DARE_API.Services
             string clientSecret = _settings.ClientSecret;
             var proxyhandler = _settings.getProxyHandler;
             
-            var requireHttps = !_settings.IgnoreHttps;
-            Log.Information("{Function}} 1 using proxyhandler _settings.Authority > {Authority}, requireHttps {RequireHttps}", "GetTokenForUser", _settings.Authority, requireHttps);
-            return await KeycloakCommon.GetTokenForUserGuts(username, password, requiredRole, proxyhandler, keycloakBaseUrl, clientId, clientSecret, requireHttps);
+            
+            Log.Information("{Function}} 1 using proxyhandler _settings.Authority > {Authority}, demoMode {demoMode}", "GetTokenForUser", _settings.Authority, _settings.DemoMode);
+            return await KeycloakCommon.GetTokenForUserGuts(username, password, requiredRole, proxyhandler, keycloakBaseUrl, clientId, clientSecret, _settings.DemoMode);
         }
 
     }
