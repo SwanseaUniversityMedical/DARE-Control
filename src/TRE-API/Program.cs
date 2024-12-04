@@ -87,6 +87,7 @@ builder.Services.AddSingleton(dataEgressKeyCloakSettings);
 var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
 submissionKeyCloakSettings.IgnoreHttps = demomode;
+Log.Information("{Function} DemoMode {DemoMode}, DemoModeS {DemoS}", "Main", demomode, configuration["DemoMode"]);
 builder.Services.AddSingleton(submissionKeyCloakSettings);
 
 var HasuraSettings = new HasuraSettings();
