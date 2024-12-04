@@ -73,6 +73,7 @@ namespace BL.Services
                     return "";
                 }
 
+
                 Log.Information("{Function} Token found with correct role {AdminRole} for User {Username}",
                     "GetTokenForUserGuts", requiredRole, username);
             }
