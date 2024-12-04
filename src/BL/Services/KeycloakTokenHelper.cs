@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Serilog;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using System.Runtime;
 
 namespace BL.Services
 {
@@ -44,10 +45,10 @@ namespace BL.Services
             {
                 // Create an HttpClientHandler with proxy settings
                 handler.Proxy = new WebProxy(_proxyUrl); // Replace with your proxy server URL
-                
-            }
-           
 
+            }
+
+            Log.Information("{Function}} 2  requireHttps {RequireHttps}", "GetTokenForUser", _requireHttps);
             // Create an HttpClient with the handler
             return await KeycloakCommon.GetTokenForUserGuts(username, password, requiredRole, handler, keycloakBaseUrl, clientId, clientSecret, _requireHttps);
 
