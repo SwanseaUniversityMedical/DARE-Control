@@ -59,13 +59,13 @@ AddDependencies(builder, configuration);
 var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
 configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
 var demomode = configuration["DemoMode"].ToLower() == "true";
-dataEgressKeyCloakSettings.IgnoreHttps = demomode;
+dataEgressKeyCloakSettings.DemoMode = demomode;
 builder.Services.AddSingleton(dataEgressKeyCloakSettings);
 
 
 var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
-treKeyCloakSettings.IgnoreHttps = demomode;
+treKeyCloakSettings.DemoMode = demomode;
 builder.Services.AddSingleton(treKeyCloakSettings);
 
 var minioSettings = new MinioSettings();

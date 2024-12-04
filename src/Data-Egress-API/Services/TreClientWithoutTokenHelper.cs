@@ -16,7 +16,7 @@ namespace Data_Egress_API.Services
             config["TreAPISettings:Address"], false)
         {
             CredDb = db;
-            _keycloakTokenHelper = new KeycloakTokenHelper(settings.BaseUrl, settings.ClientId, settings.ClientSecret, settings.Proxy, settings.ProxyAddresURL, settings.IgnoreHttps);
+            _keycloakTokenHelper = new KeycloakTokenHelper(settings.BaseUrl, settings.ClientId, settings.ClientSecret, settings.Proxy, settings.ProxyAddresURL, settings.DemoMode);
             var creds = db.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Tre);
             if (creds != null)
             {
