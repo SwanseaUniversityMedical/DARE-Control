@@ -22,7 +22,7 @@ ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
 Log.Logger = CreateSerilogLogger(configuration, environment);
-builder.Host.UseSerilog();
+//builder.Host.UseSerilog();
 Log.Information("Data-Egress-UI logging LastStatusUpdate.");
 try
 {
