@@ -17,10 +17,12 @@ using BL.Models;
 using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
+
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
 Log.Logger = CreateSerilogLogger(configuration, environment);
+builder.Host.UseSerilog();
 Log.Information("Data-Egress-UI logging LastStatusUpdate.");
 try
 {
