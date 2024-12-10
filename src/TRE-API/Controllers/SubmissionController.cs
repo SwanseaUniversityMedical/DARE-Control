@@ -188,29 +188,7 @@ namespace TRE_API.Controllers
         {
             try
             {
-                _subHelper.UpdateStatusForTre(review.SubId, StatusType.DataOutRequested, "");
-                var bucket = _subHelper.GetOutputBucketGuts(review.SubId, false, false);
-                var egsub = new EgressSubmission()
-                {
-                    SubmissionId = review.SubId,
-                    OutputBucket = bucket.Bucket,
-                    Status = EgressStatus.NotCompleted,
-                    Files = new List<EgressFile>()
-                };
-
-                foreach (var reviewFile in review.Files)
-                {
-                    egsub.Files.Add(new EgressFile()
-                    {
-                        Name = reviewFile,
-                        Status = FileStatus.Undecided
-                    });
-                }
-
-                var boolResult = _dataEgressHelper
-                    .CallAPI<EgressSubmission, BoolReturn>("/api/DataEgress/AddNewDataEgress/", egsub).Result;
-                _subHelper.UpdateStatusForTre(review.SubId, StatusType.DataOutApprovalBegun, "");
-
+                var boolResult = _subHelper.FilesReadyForReview(review);
                 return StatusCode(200, boolResult);
             }
             catch (Exception ex)
@@ -285,7 +263,17 @@ namespace TRE_API.Controllers
                     _subHelper.UpdateStatusForTre(review.SubId, StatusType.RequestingHutchDoesFinalPackaging, "");
                 }
 
-                if (_agentSettings.UseTESK == false)
+                if (_agentSettings.SimulateResults)
+                {
+                    var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Tre, "topic");
+                    var outcome = new FinalOutcome()
+                    {
+                        File = review.FileResults.First().FileName,
+                        SubId = review.SubId
+                    };
+                    _rabbit.Advanced.Publish(exch, RoutingConstants.ProcessFinalOutput, false, new Message<FinalOutcome>(outcome));
+                }
+                else if (_agentSettings.UseTESK == false)
                 {
                     Log.Information("{Function} Minio url sent {Url} bucket {Bucket}, path {path}", "EgressReview", hutchPayload.Host, hutchPayload.Bucket, hutchPayload.Path);
                     //Not sure what the return type is
@@ -366,6 +354,23 @@ namespace TRE_API.Controllers
             catch (Exception ex)
             {
                 Log.Error(ex, "{Function} Crash", "SendSubmissionToHUTCH");
+                throw;
+            }
+        }
+
+        [HttpPost("SimulateSubmissionProcessing")]
+        public IActionResult SimulateSubmissionProcessing(Submission sub)
+        {
+            try
+            {
+                //Update status of submission to "Sending to hutch"
+                _subHelper.SimulateSubmissionProcessing(sub);
+
+                return StatusCode(200);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crash", "SimulateSubmissionProcessing");
                 throw;
             }
         }

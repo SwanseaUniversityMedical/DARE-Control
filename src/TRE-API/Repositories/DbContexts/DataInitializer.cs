@@ -23,6 +23,48 @@ namespace TRE_API.Repositories.DbContexts
 
         }
 
+        public void SeedAllInOneData(string password)
+        {
+            
+            try
+            {
+                if (!_dbContext.KeycloakCredentials.Any(x => x.CredentialType == CredentialType.Submission))
+                {
+
+
+                    _dbContext.KeycloakCredentials.Add(new KeycloakCredentials()
+                    {
+                        UserName = "accessfromtretosubmission",
+                        CredentialType = CredentialType.Submission,
+                        PasswordEnc = _encDecHelper.Encrypt(password)
+                    });
+                    _dbContext.SaveChanges();
+                }
+
+                if (!_dbContext.KeycloakCredentials.Any(x => x.CredentialType == CredentialType.Egress))
+                {
+
+
+                    _dbContext.KeycloakCredentials.Add(new KeycloakCredentials()
+                    {
+                        UserName = "accessfromtretoegress",
+                        CredentialType = CredentialType.Egress,
+                        PasswordEnc = _encDecHelper.Encrypt(password)
+                    });
+                    _dbContext.SaveChanges();
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "{Function} Error seeding data", "SeedData");
+                throw;
+            }
+
+
+
+
+        }
+
         public void SeedData()
         {
             return;

@@ -25,6 +25,7 @@ namespace TRE_API.Services
     public interface ISubmissionHelper
     {
         APIReturn? UpdateStatusForTre(string subId, StatusType statusType, string? description);
+        void SimulateSubmissionProcessing(Submission submission);
         bool IsUserApprovedOnProject(int projectId, int userId);
         List<Submission>? GetWaitingSubmissionForTre();
         void SendSumissionToHUTCH(Submission submission);
@@ -33,6 +34,7 @@ namespace TRE_API.Services
         APIReturn? CloseSubmissionForTre(string subId, StatusType statusType, string? description, string? finalFile);
 
         BoolReturn FilesReadyForReview(ReviewFiles review, string Bucketname);
+        BoolReturn FilesReadyForReview(ReviewFiles review);
 
         OutputBucketInfo GetOutputBucketGutsSub(string subId, bool hostnameonly);
     }
@@ -81,6 +83,35 @@ namespace TRE_API.Services
             _agentSettings = agentSettings;
 
         }
+
+        public BoolReturn FilesReadyForReview(ReviewFiles review)
+        {
+            UpdateStatusForTre(review.SubId, StatusType.DataOutRequested, "");
+            var bucket = GetOutputBucketGuts(review.SubId, false, false);
+            var egsub = new EgressSubmission()
+            {
+                SubmissionId = review.SubId,
+                OutputBucket = bucket.Bucket,
+                Status = EgressStatus.NotCompleted,
+                Files = new List<EgressFile>()
+            };
+
+            foreach (var reviewFile in review.Files)
+            {
+                egsub.Files.Add(new EgressFile()
+                {
+                    Name = reviewFile,
+                    Status = FileStatus.Undecided
+                });
+            }
+
+            var boolResult = _dataEgressHelper
+                .CallAPI<EgressSubmission, BoolReturn>("/api/DataEgress/AddNewDataEgress/", egsub).Result;
+            UpdateStatusForTre(review.SubId, StatusType.DataOutApprovalBegun, "");
+            return boolResult;
+
+        }
+
         public OutputBucketInfo GetOutputBucketGutsSub(string subId, bool hostnameonly)
         {
             try
@@ -201,6 +232,54 @@ namespace TRE_API.Services
             var res = _hutchHelper.CallAPI<SubmitJobModel, JobStatusModel>($"/api/jobs/", job).Result;
 
             
+        }
+
+        public void SimulateSubmissionProcessing(Submission submission)
+        {
+            try
+            {
+
+
+                UpdateStatusForTre(submission.ToString(), StatusType.SendingSubmissionToHutch, "");
+                UpdateStatusForTre(submission.ToString(), StatusType.WaitingForCrate, "");
+                UpdateStatusForTre(submission.ToString(), StatusType.ValidatingCrate, "");
+                UpdateStatusForTre(submission.ToString(), StatusType.FetchingWorkflow, "");
+                UpdateStatusForTre(submission.ToString(), StatusType.StagingWorkflow, "");
+                UpdateStatusForTre(submission.ToString(), StatusType.ExecutingWorkflow, "");
+                UpdateStatusForTre(submission.ToString(), StatusType.PreparingOutputs, "");
+                UpdateStatusForTre(submission.ToString(), StatusType.TransferredForDataOut, "");
+
+                Uri uri = new Uri(submission.DockerInputLocation);
+                string fileName = Path.GetFileName(uri.LocalPath);
+
+                var destinationBucket = GetOutputBucketGuts(submission.Id.ToString(), false, false);
+                var subProj = _dbContext.Projects
+                    .FirstOrDefault(x => x.SubmissionProjectId == submission.Project.Id);
+                var sourceBucket = subProj.SubmissionBucketTre;
+                Log.Information("{Function} Copying {File} from {From} to {To}", "Execute", fileName, sourceBucket,
+                    destinationBucket);
+                var source = _minioTreHelper.GetCopyObject(sourceBucket, fileName);
+                var resultcopy = _minioTreHelper
+                    .CopyObjectToDestination(destinationBucket.Bucket, fileName, source.Result).Result;
+                Log.Information("{Function} Simulate submission for Id {Id} returned {Result}",
+                    "SimulateSubmissionProcessing", submission.Id, resultcopy);
+                var reviewFiles = new ReviewFiles()
+                {
+                    Files = new List<string>() { fileName },
+                    SubId = submission.Id.ToString(),
+                    tesId = submission.TesId
+                };
+                var result = FilesReadyForReview(reviewFiles);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "{Function} Something went wrong with submission {Id}", "SimulateSubmissionProcessing", submission.Id);
+                throw;
+            }
+
+
+
+
         }
 
         public APIReturn? UpdateStatusForTre(string subId, StatusType statusType, string? description)

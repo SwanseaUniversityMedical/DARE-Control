@@ -116,6 +116,7 @@ builder.Services.AddSingleton(AuthenticationSetting);
 
 var AgentSettings = new AgentSettings();
 configuration.Bind(nameof(AgentSettings), AgentSettings);
+AgentSettings.SimulateResults = demomode;
 builder.Services.AddSingleton(AgentSettings);
 
 var Features = new Features();
@@ -275,7 +276,11 @@ using (var scope = app.Services.CreateScope())
     var encDec = scope.ServiceProvider.GetRequiredService<IEncDecHelper>();
     db.Database.Migrate();
     var initialiser = new DataInitaliser(db, encDec);
-    initialiser.SeedData();
+    if (demomode)
+    {
+        initialiser.SeedAllInOneData(configuration["DemoModeDefaultP"]);
+    }
+    //initialiser.SeedData();
 
 }
 

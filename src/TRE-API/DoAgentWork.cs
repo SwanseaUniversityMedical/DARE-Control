@@ -469,10 +469,12 @@ namespace TRE_API
                 var useRabbit = _AgentSettings.UseRabbit;
                 var useHutch = _AgentSettings.UseHutch;
                 var useTESK = _AgentSettings.UseTESK;
+                var simulateResults = _AgentSettings.SimulateResults;
 
                 Log.Information("{Function} useRabbit {useRabbit}", "Execute", useRabbit);
                 Log.Information("{Function} useHutch {useHutch}", "Execute", useHutch);
                 Log.Information("{Function} useTESK {useTESK}", "Execute", useTESK);
+                Log.Information("{Function} Simulate Results {Simulate}", "Execute", simulateResults);
 
                 var cancelsubprojs = _subHelper.GetRequestCancelSubsForTre();
                 if (cancelsubprojs != null)
@@ -585,9 +587,23 @@ namespace TRE_API
                                 }
                             }
 
-                            // **************  SEND TO HUTCH
-                            if (useHutch)
+                            if (simulateResults)
                             {
+                                try
+                                {
+
+                                    _subHelper.SimulateSubmissionProcessing(aSubmission);
+
+                                }
+                                catch (Exception e)
+                                {
+                                    Log.Error(e, "{Function} Simulation failed for sub {SubId}", "Execute", aSubmission.Id);
+                                    processedOK = false;
+                                }
+                            }
+                            else if (useHutch)
+                            {
+                                // **************  SEND TO HUTCH
                                 // TODO for rest API
                                 try
                                 {
