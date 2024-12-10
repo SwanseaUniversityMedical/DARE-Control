@@ -190,7 +190,11 @@ using (var scope = app.Services.CreateScope())
     var encDec = scope.ServiceProvider.GetRequiredService<IEncDecHelper>();
     db.Database.Migrate();
     var initialiser = new DataInitaliser(db, encDec);
-    initialiser.SeedData();
+    if (demomode)
+    {
+        initialiser.SeedAllInOneData(configuration["DemoModeDefaultP"]);
+    }
+    //initialiser.SeedData();
 }
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions

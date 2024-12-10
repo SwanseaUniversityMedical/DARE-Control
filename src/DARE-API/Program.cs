@@ -348,8 +348,10 @@ using (var scope = app.Services.CreateScope())
 
     db.Database.Migrate();
     var initialiser = new DataInitaliser(miniosettings, miniohelper, db, keytoken, userService);
-
-    if (configuration.GetValue<bool>("Testdata"))
+    if (demomode)
+    {
+        initialiser.SeedAllInOneData();
+    }else if (configuration.GetValue<bool>("Testdata"))
         initialiser.SeedData();
 }
 
