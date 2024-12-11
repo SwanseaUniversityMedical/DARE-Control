@@ -157,10 +157,11 @@ namespace DARE_API.Services
             var baseUrl = _submissionKeyCloakSettings.Server;
             var realm = _submissionKeyCloakSettings.Realm;
             HttpClient httpClient = new HttpClient(_submissionKeyCloakSettings.getProxyHandler);
+            
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
+            
             var apiUrl = $"https://{baseUrl}/admin/realms/{realm}/users?username={userName}";
-
+            Log.Information("{Function} BaseUrl {BaseUrl} and API Url {ApiUrl}", "GetUserIDAsync", baseUrl, apiUrl);
             var response = await httpClient.GetAsync(apiUrl);
 
             var jsonString = await response.Content.ReadAsStringAsync();
