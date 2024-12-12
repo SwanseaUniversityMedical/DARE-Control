@@ -25,9 +25,10 @@ namespace DARE_API.Services
             {
                 var baseUrl = _submissionKeyCloakSettings.Server;
                 var realm = _submissionKeyCloakSettings.Realm;
+                var protocol = _submissionKeyCloakSettings.Protocol;
                 var attributeKey = "policy";
                 var userId = await GetUserIDAsync(accessToken, userName);
-                var userAttributesJson = await GetUserAttributesAsync(baseUrl, realm, accessToken, userId);
+                var userAttributesJson = await GetUserAttributesAsync(baseUrl, realm, accessToken, userId, protocol);
 
                 if (userAttributesJson != null)
                 {
@@ -56,7 +57,7 @@ namespace DARE_API.Services
                     string updatedUserData = user.ToString();
 
 
-                    bool updateResult = await UpdateUserAttributes(baseUrl, realm, userId, accessToken, updatedUserData);
+                    bool updateResult = await UpdateUserAttributes(baseUrl, realm, userId, accessToken, updatedUserData, protocol);
 
                     if (updateResult)
                     {
@@ -90,9 +91,10 @@ namespace DARE_API.Services
 
                 var baseUrl = _submissionKeyCloakSettings.Server;
                 var realm = _submissionKeyCloakSettings.Realm;
+                var protocol = _submissionKeyCloakSettings.Protocol;
                 var attributeKey = "policy";
                 var userId = await GetUserIDAsync(accessToken, userName);
-                var userAttributesJson = await GetUserAttributesAsync(baseUrl, realm, accessToken, userId);
+                var userAttributesJson = await GetUserAttributesAsync(baseUrl, realm, accessToken, userId, protocol);
 
                 if (userAttributesJson != null)
                 {
@@ -121,7 +123,7 @@ namespace DARE_API.Services
 
                     string updatedUserData = user.ToString();
 
-                    bool updateResult = await UpdateUserAttributes(baseUrl, realm, userId, accessToken, updatedUserData);
+                    bool updateResult = await UpdateUserAttributes(baseUrl, realm, userId, accessToken, updatedUserData, protocol);
 
                     if (updateResult)
                     {
@@ -156,11 +158,12 @@ namespace DARE_API.Services
         {
             var baseUrl = _submissionKeyCloakSettings.Server;
             var realm = _submissionKeyCloakSettings.Realm;
+            var protocol = _submissionKeyCloakSettings.Protocol;
             HttpClient httpClient = new HttpClient(_submissionKeyCloakSettings.getProxyHandler);
             
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             
-            var apiUrl = $"https://{baseUrl}/admin/realms/{realm}/users?username={userName}";
+            var apiUrl = $"{protocol}://{baseUrl}/admin/realms/{realm}/users?username={userName}";
             Log.Information("{Function} BaseUrl {BaseUrl} and API Url {ApiUrl}", "GetUserIDAsync", baseUrl, apiUrl);
             var response = await httpClient.GetAsync(apiUrl);
 
@@ -190,11 +193,11 @@ namespace DARE_API.Services
 
             return string.Empty;
         }
-        public async Task<string> GetUserAttributesAsync(string baseUrl, string realm, string accessToken, string userID)
+        public async Task<string> GetUserAttributesAsync(string baseUrl, string realm, string accessToken, string userID, string protocol)
         {
             using (var httpClient = new HttpClient(_submissionKeyCloakSettings.getProxyHandler))
             {
-                httpClient.BaseAddress = new Uri($"https://{baseUrl}/admin/realms/{realm}/users/{userID}");
+                httpClient.BaseAddress = new Uri($"{protocol}://{baseUrl}/admin/realms/{realm}/users/{userID}");
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
@@ -209,11 +212,11 @@ namespace DARE_API.Services
                 }
             }
         }
-        public async Task<bool> UpdateUserAttributes(string keycloakBaseUrl, string realm, string userId, string accessToken, string updatedUserData)
+        public async Task<bool> UpdateUserAttributes(string keycloakBaseUrl, string realm, string userId, string accessToken, string updatedUserData, string protocol)
         {
             using (var httpClient = new HttpClient(_submissionKeyCloakSettings.getProxyHandler))
             {
-                httpClient.BaseAddress = new Uri($"https://{keycloakBaseUrl}/admin/realms/{realm}/users/{userId}");
+                httpClient.BaseAddress = new Uri($"{protocol}://{keycloakBaseUrl}/admin/realms/{realm}/users/{userId}");
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
