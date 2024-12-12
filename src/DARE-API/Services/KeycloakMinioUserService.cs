@@ -164,6 +164,7 @@ namespace DARE_API.Services
             Log.Information("{Function} BaseUrl {BaseUrl} and API Url {ApiUrl}", "GetUserIDAsync", baseUrl, apiUrl);
             var response = await httpClient.GetAsync(apiUrl);
 
+
             var jsonString = await response.Content.ReadAsStringAsync();
             try
             {
