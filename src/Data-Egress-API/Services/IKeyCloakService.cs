@@ -50,7 +50,7 @@ namespace Data_Egress_API.Services
         public async Task<List<string>> GetEmailsOfAccountWithRole(string role)
         {
 
-            var creds = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Egress);
+            var creds = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Tre);
 
             var adminName = creds.UserName;
 
