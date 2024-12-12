@@ -86,7 +86,7 @@ namespace Data_Egress_API.Controllers
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(ex.ToString());
+                        Log.Error(ex,"{Function} Sending email error", "AddNewDataEgress");
                     }                  
                     
                     return new BoolReturn() { Result = true };

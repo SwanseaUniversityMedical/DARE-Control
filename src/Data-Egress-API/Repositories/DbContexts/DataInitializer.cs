@@ -41,7 +41,20 @@ namespace Data_Egress_API.Repositories.DbContexts
                     _dbContext.SaveChanges();
                 }
 
-               
+                if (!_dbContext.KeycloakCredentials.Any(x => x.CredentialType == CredentialType.Egress))
+                {
+
+
+                    _dbContext.KeycloakCredentials.Add(new KeycloakCredentials()
+                    {
+                        UserName = "globaladminuser",
+                        CredentialType = CredentialType.Egress,
+                        PasswordEnc = _encDecHelper.Encrypt(password)
+                    });
+                    _dbContext.SaveChanges();
+                }
+
+
 
 
             }

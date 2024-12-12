@@ -240,14 +240,14 @@ namespace TRE_API.Services
             {
 
 
-                UpdateStatusForTre(submission.ToString(), StatusType.SendingSubmissionToHutch, "");
-                UpdateStatusForTre(submission.ToString(), StatusType.WaitingForCrate, "");
-                UpdateStatusForTre(submission.ToString(), StatusType.ValidatingCrate, "");
-                UpdateStatusForTre(submission.ToString(), StatusType.FetchingWorkflow, "");
-                UpdateStatusForTre(submission.ToString(), StatusType.StagingWorkflow, "");
-                UpdateStatusForTre(submission.ToString(), StatusType.ExecutingWorkflow, "");
-                UpdateStatusForTre(submission.ToString(), StatusType.PreparingOutputs, "");
-                UpdateStatusForTre(submission.ToString(), StatusType.TransferredForDataOut, "");
+                UpdateStatusForTre(submission.Id.ToString(), StatusType.SendingSubmissionToHutch, "");
+                UpdateStatusForTre(submission.Id.ToString(), StatusType.WaitingForCrate, "");
+                UpdateStatusForTre(submission.Id.ToString(), StatusType.ValidatingCrate, "");
+                UpdateStatusForTre(submission.Id.ToString(), StatusType.FetchingWorkflow, "");
+                UpdateStatusForTre(submission.Id.ToString(), StatusType.StagingWorkflow, "");
+                UpdateStatusForTre(submission.Id.ToString(), StatusType.ExecutingWorkflow, "");
+                UpdateStatusForTre(submission.Id.ToString(), StatusType.PreparingOutputs, "");
+                UpdateStatusForTre(submission.Id.ToString(), StatusType.TransferredForDataOut, "");
 
                 Uri uri = new Uri(submission.DockerInputLocation);
                 string fileName = Path.GetFileName(uri.LocalPath);
