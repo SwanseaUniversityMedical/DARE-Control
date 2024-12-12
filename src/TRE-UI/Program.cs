@@ -51,7 +51,7 @@ try
     var demomode = configuration["DemoMode"].ToLower() == "true";
     treKeyCloakSettings.DemoMode = demomode;
     builder.Services.AddSingleton(treKeyCloakSettings);
-    Log.Information("{Function} Step 1 Authority {Authority}",  treKeyCloakSettings.Authority);
+    Log.Information("{Function} Step 1 Authority {Authority}","Main",  treKeyCloakSettings.Authority);
     var UIName = new TRE_UI.Models.UIName();
     configuration.Bind(nameof(UIName), UIName);
     builder.Services.AddSingleton(UIName);
