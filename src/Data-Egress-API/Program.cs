@@ -25,6 +25,7 @@ var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
+
 Log.Logger = CreateSerilogLogger(configuration, environment);
 Log.Information("Data_Egress API logging LastStatusUpdate.");
 if (configuration["SuppressAntiforgery"] != null && configuration["SuppressAntiforgery"].ToLower() == "true")
