@@ -22,6 +22,7 @@ namespace Data_Egress_API.Repositories.DbContexts
 
         }
 
+
         public void SeedAllInOneData(string password)
         {
             
