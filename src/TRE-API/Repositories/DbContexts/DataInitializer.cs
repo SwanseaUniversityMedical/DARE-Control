@@ -41,6 +41,19 @@ namespace TRE_API.Repositories.DbContexts
                     _dbContext.SaveChanges();
                 }
 
+                if (!_dbContext.KeycloakCredentials.Any(x => x.CredentialType == CredentialType.Tre))
+                {
+
+
+                    _dbContext.KeycloakCredentials.Add(new KeycloakCredentials()
+                    {
+                        UserName = "globaladminuser",
+                        CredentialType = CredentialType.Tre,
+                        PasswordEnc = _encDecHelper.Encrypt(password)
+                    });
+                    _dbContext.SaveChanges();
+                }
+
                 if (!_dbContext.KeycloakCredentials.Any(x => x.CredentialType == CredentialType.Egress))
                 {
 
