@@ -22,14 +22,18 @@ namespace Data_Egress_API.Controllers
         private readonly IEncDecHelper _encDecHelper;
         
         public KeycloakTokenHelper _keycloakTokenHelper { get; set; }
+        public KeycloakTokenHelper _egressKeycloakTokenHelper { get; set; }
 
 
-        public TreCredentialsController(ApplicationDbContext applicationDbContext, IEncDecHelper encDec, TreKeyCloakSettings keycloakSettings)
+        public TreCredentialsController(ApplicationDbContext applicationDbContext, IEncDecHelper encDec, TreKeyCloakSettings keycloakSettings, DataEgressKeyCloakSettings egressKeyCloakSettings)
         {
             _encDecHelper = encDec;
             _DbContext = applicationDbContext;
             _keycloakTokenHelper = new KeycloakTokenHelper(keycloakSettings.BaseUrl, keycloakSettings.ClientId,
                 keycloakSettings.ClientSecret, keycloakSettings.Proxy, keycloakSettings.ProxyAddresURL, keycloakSettings.DemoMode);
+
+            _egressKeycloakTokenHelper = new KeycloakTokenHelper(egressKeyCloakSettings.BaseUrl, egressKeyCloakSettings.ClientId,
+                egressKeyCloakSettings.ClientSecret, egressKeyCloakSettings.Proxy, egressKeyCloakSettings.ProxyAddresURL, egressKeyCloakSettings.DemoMode);
 
         }
 
@@ -68,7 +72,7 @@ namespace Data_Egress_API.Controllers
             var creds = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Egress);
             if (creds != null)
             {
-                var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
+                var token = await _egressKeycloakTokenHelper.GetTokenForUser(creds.UserName,
                     _encDecHelper.Decrypt(creds.PasswordEnc), "data-egress-admin");
                 result.Result = !string.IsNullOrWhiteSpace(token);
 
@@ -90,7 +94,7 @@ namespace Data_Egress_API.Controllers
             try
             {
                 creds.Valid = true;
-                var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
+                var token = await _egressKeycloakTokenHelper.GetTokenForUser(creds.UserName,
                     creds.PasswordEnc, "data-egress-admin");
                 if (string.IsNullOrWhiteSpace(token))
                 {
