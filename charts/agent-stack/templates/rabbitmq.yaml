@@ -1,0 +1,25 @@
+{{- if .Values.rabbitmq.enabled }}
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: rabbitmq
+  namespace: {{ .Release.Namespace }}
+spec:
+  persistence:
+    # storageClassName: {{ .Values.rabbitmq.storageClassName }}
+    storage: {{ .Values.rabbitmq.storageSize }}
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 2Gi
+    limits:
+      cpu: 500m
+      memory: 2Gi
+
+  secretBackend:
+    externalSecret:
+      name: {{ .Values.agent.helmValues.rabbitmq.passwordSecret.name }}
+
+{{- end }}
+
