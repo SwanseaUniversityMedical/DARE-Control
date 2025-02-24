@@ -28,6 +28,7 @@ RUN dotnet publish "TRE-UI.csproj" -c Release -o /app/publish /p:UseAppHost=fals
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+ENV COMPlus_EnableDiagnostics=0
 ENTRYPOINT ["dotnet", "TRE-UI.dll"]
 
 COPY rootca.pem /usr/local/share/ca-certificates/chi-ansible.crt
