@@ -2,7 +2,7 @@ name: Build containers
 
 on:
   pull_request:
-    # Only consider PRs that change files for this asset, including ci scripts
+    # Only consider PRs that change files for this asset, including ci scripts.
     paths:
       - '.github/workflows/containers.yaml'
       - 'src/**'
