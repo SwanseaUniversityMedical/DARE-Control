@@ -251,7 +251,7 @@ namespace TRE_API
             try
             {
                 Log.Information("{Function} Check TESK : {TaskId},  TES : {TesId}, sub: {SubId}", "CheckTESK", taskID, tesId, subId);
-                string url = _AgentSettings.TESKAPIURL + "/" + taskID + "?view=basic";
+                string url = _AgentSettings.TESKAPIURL + "/" + taskID + "?view=BASIC";
                              
                 HttpClientHandler handler = new HttpClientHandler();
 
