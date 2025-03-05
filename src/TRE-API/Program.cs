@@ -75,19 +75,20 @@ await SetUpRabbitMQ.DoItTreAsync(configuration["RabbitMQ:HostAddress"], configur
 
 var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
+var keycloakDemomode = configuration["KeycloakDemoMode"].ToLower() == "true";
 var demomode = configuration["DemoMode"].ToLower() == "true";
-treKeyCloakSettings.DemoMode = demomode;
+treKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
 builder.Services.AddSingleton(treKeyCloakSettings);
 
 var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
 configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
-dataEgressKeyCloakSettings.DemoMode = demomode;
+dataEgressKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
 builder.Services.AddSingleton(dataEgressKeyCloakSettings);
 
 var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
-submissionKeyCloakSettings.DemoMode = demomode;
-Log.Information("{Function} DemoMode {DemoMode}, DemoModeS {DemoS}", "Main", demomode, configuration["DemoMode"]);
+submissionKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
+Log.Information("{Function} KeycloakDemoMode {KeycloakDemoMode}, DemoMode {DemoS}", "Main", keycloakDemomode, demomode);
 builder.Services.AddSingleton(submissionKeyCloakSettings);
 
 var HasuraSettings = new HasuraSettings();
