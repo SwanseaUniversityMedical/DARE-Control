@@ -416,7 +416,7 @@ namespace DARE_API.Controllers
                 var submission = _DbContext.Submissions.First(x => x.Id == submissionId);
 
 
-                Log.Debug($"DownloadFileAsync submission.Project.OutputBucket > {submission.Project.OutputBucket} submission.FinalOutputFile > {submission.FinalOutputFile} "  );
+                Log.Information("{Function} Submission Out Bucket {OutputBucket} File {FinalOutputFile}", "DownloadFileAsync", submission.Project.OutputBucket, submission.FinalOutputFile);
                 var response = await _minioHelper.GetCopyObject(submission.Project.OutputBucket, submission.FinalOutputFile);
 
             
