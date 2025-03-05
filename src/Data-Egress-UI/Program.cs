@@ -46,8 +46,9 @@ try
 // -- authentication here
     var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
     configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
+    var keycloakDemomode = configuration["KeycloakDemoMode"].ToLower() == "true";
     var demomode = configuration["DemoMode"].ToLower() == "true";
-    dataEgressKeyCloakSettings.DemoMode = demomode;
+    dataEgressKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
     builder.Services.AddSingleton(dataEgressKeyCloakSettings);
     
 

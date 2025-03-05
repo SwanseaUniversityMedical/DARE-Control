@@ -13,10 +13,10 @@ namespace BL.Services
     public class KeycloakCommon
     {
         public static async Task<string> GetTokenForUserGuts(string username, string password, string requiredRole, HttpClientHandler proxyHandler,
-            string keycloakBaseUrl, string clientId, string clientSecret, bool demoMode)
+            string keycloakBaseUrl, string clientId, string clientSecret, bool keycloakDemoMode)
         {
 
-            Log.Information("{Function} keycloakBaseUrl > {BaseUrl} , DemoMode: {DemoMode}" , "GetTokenForUserGuts", keycloakBaseUrl, demoMode);
+            Log.Information("{Function} keycloakBaseUrl > {BaseUrl} , _keycloakDemoMode: {_keycloakDemoMode}" , "GetTokenForUserGuts", keycloakBaseUrl, keycloakDemoMode);
            // Log.Information("{Function} username > " + username + " password: " + password, "GetTokenForUserGuts");
             var client = new HttpClient(proxyHandler);
             var disco = await client.GetDiscoveryDocumentAsync(new DiscoveryDocumentRequest
@@ -24,8 +24,8 @@ namespace BL.Services
                 Address = keycloakBaseUrl,
                 Policy = new DiscoveryPolicy
                 {
-                    RequireHttps = !demoMode,
-                    ValidateEndpoints = !demoMode,
+                    RequireHttps = !keycloakDemoMode,
+                    ValidateEndpoints = !keycloakDemoMode,
                     ValidateIssuerName = false, // Keycloak may have a different issuer name format
                 }
             });

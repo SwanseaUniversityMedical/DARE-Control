@@ -59,14 +59,15 @@ AddDependencies(builder, configuration);
 
 var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
 configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
+var keycloakDemomode = configuration["KeycloakDemoMode"].ToLower() == "true";
 var demomode = configuration["DemoMode"].ToLower() == "true";
-dataEgressKeyCloakSettings.DemoMode = demomode;
+dataEgressKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
 builder.Services.AddSingleton(dataEgressKeyCloakSettings);
 
 
 var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
-treKeyCloakSettings.DemoMode = demomode;
+treKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
 builder.Services.AddSingleton(treKeyCloakSettings);
 
 var minioSettings = new MinioSettings();

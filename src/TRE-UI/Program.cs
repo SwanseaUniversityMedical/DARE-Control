@@ -48,8 +48,9 @@ try
 // -- authentication here
     var treKeyCloakSettings = new TreKeyCloakSettings();
     configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
+    var keycloakDemomode = configuration["KeycloakDemoMode"].ToLower() == "true";
     var demomode = configuration["DemoMode"].ToLower() == "true";
-    treKeyCloakSettings.DemoMode = demomode;
+    treKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
     builder.Services.AddSingleton(treKeyCloakSettings);
     Log.Information("{Function} Step 1 Authority {Authority}","Main",  treKeyCloakSettings.Authority);
     var UIName = new TRE_UI.Models.UIName();
