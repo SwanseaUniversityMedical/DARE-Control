@@ -22,7 +22,7 @@ namespace BL.Models.Settings
         public string ProxyAddresURL { get; set; }
         public string TokenRefreshSeconds { get; set; }
 
-        public bool DemoMode { get; set; }
+        public bool KeycloakDemoMode { get; set; }
         public string RedirectURL { get; set; }
 
         public bool UseRedirectURL { get; set; }

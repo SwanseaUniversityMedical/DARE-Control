@@ -78,8 +78,9 @@ await SetUpRabbitMQ.DoItSubmissionAsync(configuration["RabbitMQ:HostAddress"], c
 
 var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
+var keycloakDemomode = configuration["KeycloakDemoMode"].ToLower() == "true";
 var demomode = configuration["DemoMode"].ToLower() == "true";
-submissionKeyCloakSettings.DemoMode = demomode;
+submissionKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
 builder.Services.AddSingleton(submissionKeyCloakSettings);
 
 builder.Services.Configure<KestrelServerOptions>(options =>
