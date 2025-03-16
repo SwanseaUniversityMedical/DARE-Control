@@ -1,0 +1,13 @@
+services:
+  acmecorp:
+    url: https://host.docker.internal:7157/api/OPA/BundleGetv2
+    allow_insecure_tls : true
+
+bundles:
+  authz:
+    service: acmecorp
+    resource: somedir/bundle.tar.gz
+    persist: true
+    polling:
+      min_delay_seconds: 60
+      max_delay_seconds: 120
