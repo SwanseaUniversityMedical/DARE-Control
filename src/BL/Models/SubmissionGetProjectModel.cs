@@ -1,5 +1,6 @@
 ﻿using BL.Models.Enums;
 using BL.Models.Helpers;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,13 +28,17 @@ namespace BL.Models
 
         public virtual List<TreGetProjectModel> Tres { get; set; }
 
+        public virtual List<UserGetProjectModel> UsersNotInProject { get; set; }
+
+        public virtual List<TreGetProjectModel> TresNotInProject { get; set; }
+
         public virtual List<SubmissionsGetProjectModel> Submissions { get; set; }
         public SubmissionGetProjectModel()
         {
 
         }
 
-        public SubmissionGetProjectModel(Project Project)
+        public SubmissionGetProjectModel(Project Project, DbSet<User> UsersAll, DbSet<BL.Models.Tre> TREsALL)
         {
             Id = Project.Id;
             FormData = Project.FormData;
@@ -46,17 +51,38 @@ namespace BL.Models
             SubmissionBucket = Project.SubmissionBucket;
             OutputBucket = Project.OutputBucket;
             Users = new List<UserGetProjectModel>();
-            foreach (var item in Project.Users)
+            UsersNotInProject = new List<UserGetProjectModel>();
+           
+
+            foreach (var user in UsersAll.ToArray())
             {
-                Users.Add(new UserGetProjectModel(item));
+                if (Project.Users.Contains(user))
+                {
+                    Users.Add(new UserGetProjectModel(user));
+                }
+                else
+                {
+                    UsersNotInProject.Add(new UserGetProjectModel(user));
+                }
             }
+            
 
             Tres = new List<TreGetProjectModel>();
-            foreach (var item in Project.Tres)
-            {
-                Tres.Add(new TreGetProjectModel(item, Id));
-            }
+            TresNotInProject = new List<TreGetProjectModel>();
+    
 
+            foreach (var tre in TREsALL.ToArray())
+            {
+                if (Project.Tres.Contains(tre))
+                {
+                    Tres.Add(new TreGetProjectModel(tre, Id));
+                }
+                else
+                {
+                    TresNotInProject.Add(new TreGetProjectModel(tre, Id));
+                }
+            }
+     
             Submissions = new List<SubmissionsGetProjectModel>();
             foreach (var item in Project.Submissions)
             {
