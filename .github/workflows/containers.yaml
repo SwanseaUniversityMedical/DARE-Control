@@ -29,7 +29,7 @@ jobs:
   # Job name must be unique across repo to target
   # branch protection rules "required checks" properly!
   containers:
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/pr-and-release-repo.yaml@v1.0.5-repo
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/pr-and-release-repo.yaml@v2.0.1-repo
     with:
       job-name: containers
       release-tag-format: 'v${version}-containers'
