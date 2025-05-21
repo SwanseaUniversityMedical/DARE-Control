@@ -4,25 +4,17 @@ using BL.Models;
 using BL.Models.APISimpleTypeReturns;
 using BL.Models.Enums;
 using Serilog;
-using Microsoft.Extensions.Options;
 using BL.Services;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using BL.Models.Tes;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Threading;
 using TRE_API.Models;
 
 namespace TRE_API.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
-
     public class ApprovalController : Controller
     {
-
         private readonly ApplicationDbContext _DbContext;
         protected readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IKeyCloakService _IKeyCloakService;
@@ -32,7 +24,8 @@ namespace TRE_API.Controllers
         public IDareSyncHelper _dareSyncHelper { get; set; }
 
         public ApprovalController(IDareSyncHelper dareSyncHelper, ApplicationDbContext applicationDbContext,
-            IHttpContextAccessor httpContextAccessor, IKeyCloakService IKeyCloakService, Features Features, IEncDecHelper encDecHelper)
+            IHttpContextAccessor httpContextAccessor, IKeyCloakService IKeyCloakService, Features Features,
+            IEncDecHelper encDecHelper)
         {
             _dareSyncHelper = dareSyncHelper;
             _DbContext = applicationDbContext;
@@ -58,7 +51,6 @@ namespace TRE_API.Controllers
                 throw;
             }
         }
-
 
 
         [Authorize(Roles = "dare-tre-admin")]
@@ -205,13 +197,11 @@ namespace TRE_API.Controllers
 
                     if (treProject.Password != null)
                     {
-
-                        dbproj.Password = treProject.Password;
+                        dbproj.Password = _encDecHelper.Encrypt(treProject.Password);
                     }
 
                     if (treProject.UserName != null)
                     {
-
                         dbproj.UserName = treProject.UserName;
                     }
 
@@ -241,7 +231,6 @@ namespace TRE_API.Controllers
                         {
                             await _IKeyCloakService.DeleteUser(dbproj.SubmissionProjectName);
                         }
-
                     }
 
                     Log.Information("{Function}:", "AuditLogs", "Treproject Decision:" + treProject.Decision.ToString(),
@@ -278,7 +267,6 @@ namespace TRE_API.Controllers
                     var dbMembership = _DbContext.MembershipDecisions.First(x => x.Id == membershipDecision.Id);
                     if (membershipDecision.Decision != dbMembership.Decision)
                     {
-
                         if (_Features.GenerateAcounts)
                         {
                             var name = dbMembership.Project.SubmissionProjectName + dbMembership.User.Username;
@@ -293,7 +281,6 @@ namespace TRE_API.Controllers
                             {
                                 await _IKeyCloakService.DeleteUser(acc.Name);
                             }
-
                         }
 
                         dbMembership.Decision = membershipDecision.Decision;
@@ -302,12 +289,11 @@ namespace TRE_API.Controllers
                     }
 
                     returnResult.Add(dbMembership);
-                    
-                    await _DbContext.SaveChangesAsync();
-                    await ControllerHelpers.AddTreAuditLog(null, dbMembership, dbMembership.Decision == Decision.Approved,
-                        _DbContext, _httpContextAccessor, User);
-                    
 
+                    await _DbContext.SaveChangesAsync();
+                    await ControllerHelpers.AddTreAuditLog(null, dbMembership,
+                        dbMembership.Decision == Decision.Approved,
+                        _DbContext, _httpContextAccessor, User);
                 }
 
                 await _DbContext.SaveChangesAsync();
@@ -318,7 +304,6 @@ namespace TRE_API.Controllers
                 Log.Error(ex, "{Function} Crash", "UpdateMembershipDecisions");
                 throw;
             }
-
         }
 
         [Authorize(Roles = "dare-tre-admin")]
@@ -328,7 +313,6 @@ namespace TRE_API.Controllers
             try
             {
                 return await _dareSyncHelper.SyncSubmissionWithTre();
-
             }
             catch (Exception ex)
             {
@@ -336,6 +320,5 @@ namespace TRE_API.Controllers
                 throw;
             }
         }
-
     }
 }
