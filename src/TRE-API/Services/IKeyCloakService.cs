@@ -301,7 +301,7 @@ namespace TRE_API.Services
             {
                 handler.Proxy = new WebProxy()
                 {
-                    Address = new Uri(_TreKeyCloakSettings.ProxyAddresURL),
+                    Address = new Uri(_TreKeyCloakSettings.ProxyAddressURL),
                     BypassList = new[] { _TreKeyCloakSettings.BypassProxy }
                 };
                 handler.UseProxy = true;

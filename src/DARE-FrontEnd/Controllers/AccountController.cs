@@ -46,7 +46,7 @@ namespace DARE_FrontEnd.Controllers
             {
                 handler = new HttpClientHandler
                 {
-                    Proxy = new WebProxy(_keycloakSettings.ProxyAddresURL, true), // Replace with your proxy server URL
+                    Proxy = new WebProxy(_keycloakSettings.ProxyAddressURL, true), // Replace with your proxy server URL
                     UseProxy = _keycloakSettings.Proxy,
                 };
             }

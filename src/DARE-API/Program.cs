@@ -145,7 +145,7 @@ builder.Services.AddAuthentication(options =>
                 UseDefaultCredentials = true,
                 Proxy = new WebProxy()
                 {
-                    Address = new Uri(submissionKeyCloakSettings.ProxyAddresURL),
+                    Address = new Uri(submissionKeyCloakSettings.ProxyAddressURL),
                     BypassList = new[] { submissionKeyCloakSettings.BypassProxy }
                 }
             };

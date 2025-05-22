@@ -144,7 +144,7 @@ builder.Services.AddAuthentication(options =>
                 UseDefaultCredentials = true,
                 Proxy = new WebProxy()
                 {
-                    Address = new Uri(dataEgressKeyCloakSettings.ProxyAddresURL),
+                    Address = new Uri(dataEgressKeyCloakSettings.ProxyAddressURL),
                     BypassList = new[] { dataEgressKeyCloakSettings.BypassProxy }
                 }
             };

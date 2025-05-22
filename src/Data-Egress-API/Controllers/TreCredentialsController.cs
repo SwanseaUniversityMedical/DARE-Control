@@ -30,10 +30,10 @@ namespace Data_Egress_API.Controllers
             _encDecHelper = encDec;
             _DbContext = applicationDbContext;
             _keycloakTokenHelper = new KeycloakTokenHelper(keycloakSettings.BaseUrl, keycloakSettings.ClientId,
-                keycloakSettings.ClientSecret, keycloakSettings.Proxy, keycloakSettings.ProxyAddresURL, keycloakSettings.KeycloakDemoMode);
+                keycloakSettings.ClientSecret, keycloakSettings.Proxy, keycloakSettings.ProxyAddressURL, keycloakSettings.KeycloakDemoMode);
 
             _egressKeycloakTokenHelper = new KeycloakTokenHelper(egressKeyCloakSettings.BaseUrl, egressKeyCloakSettings.ClientId,
-                egressKeyCloakSettings.ClientSecret, egressKeyCloakSettings.Proxy, egressKeyCloakSettings.ProxyAddresURL, egressKeyCloakSettings.KeycloakDemoMode);
+                egressKeyCloakSettings.ClientSecret, egressKeyCloakSettings.Proxy, egressKeyCloakSettings.ProxyAddressURL, egressKeyCloakSettings.KeycloakDemoMode);
 
         }
 

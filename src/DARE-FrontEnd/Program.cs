@@ -163,12 +163,12 @@ builder.Services.AddAuthentication(options =>
                     if (submissionKeyCloakSettings.Proxy)
                     {
                         Log.Information("{Function} Proxy = {Proxy}, Bypass = {Bypass}", "AddOpenIdConnect",
-                            submissionKeyCloakSettings.ProxyAddresURL);
+                            submissionKeyCloakSettings.ProxyAddressURL);
                         httpClientHandler.UseProxy = true;
                         httpClientHandler.UseDefaultCredentials = true;
                         httpClientHandler.Proxy = new WebProxy()
                         {
-                            Address = new Uri(submissionKeyCloakSettings.ProxyAddresURL),
+                            Address = new Uri(submissionKeyCloakSettings.ProxyAddressURL),
                             BypassList = new[] { submissionKeyCloakSettings.BypassProxy }
                         };
                     }

@@ -73,7 +73,7 @@ namespace Data_Egress_API.Services
             var content = await response.Content.ReadAsStringAsync();
             Log.Information(" GetUserIdAsync content >" + content);
   
-            var uers = JsonConvert.DeserializeObject<List<User>>(content).Where(x => _EmailSettings.EmailsToIgnor.Contains( x.email) == false ).Select(x => x.email).ToList();
+            var uers = JsonConvert.DeserializeObject<List<User>>(content).Where(x => _EmailSettings.EmailsToIgnore.Contains( x.email) == false ).Select(x => x.email).ToList();
 
             return uers;
         }
@@ -155,7 +155,7 @@ namespace Data_Egress_API.Services
             {
                 handler.Proxy = new WebProxy()
                 {
-                    Address = new Uri(_DataEgressKeyCloakSettings.ProxyAddresURL),
+                    Address = new Uri(_DataEgressKeyCloakSettings.ProxyAddressURL),
                     BypassList = new[] { _DataEgressKeyCloakSettings.BypassProxy }
                 };
                 handler.UseProxy = true;

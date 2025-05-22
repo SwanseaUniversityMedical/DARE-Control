@@ -21,7 +21,7 @@ namespace TRE_API.Controllers
             _encDecHelper = encDec;
             _DbContext = applicationDbContext;
             _keycloakTokenHelper = new KeycloakTokenHelper(keycloakSettings.BaseUrl, keycloakSettings.ClientId,
-                keycloakSettings.ClientSecret, keycloakSettings.Proxy, keycloakSettings.ProxyAddresURL, keycloakSettings.KeycloakDemoMode);
+                keycloakSettings.ClientSecret, keycloakSettings.Proxy, keycloakSettings.ProxyAddressURL, keycloakSettings.KeycloakDemoMode);
         }
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("CheckCredentialsAreValid")]

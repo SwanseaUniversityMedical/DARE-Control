@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BL.Models
+﻿namespace BL.Models
 {
     public class EmailSettings
     {
@@ -14,9 +8,9 @@ namespace BL.Models
         public string FromAddress { get; set; }
         public string FromDisplayName { get; set; }
 
-        public HashSet<string> EmailsToIgnor { get; set; }
+        public HashSet<string> EmailsToIgnore { get; set; }
 
-        public string EmailOverride  { get; set; }
+        public string EmailOverride { get; set; }
 
         public bool Enabled { get; set; }
     }

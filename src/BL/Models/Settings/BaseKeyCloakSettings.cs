@@ -19,7 +19,7 @@ namespace BL.Models.Settings
 
         public string BypassProxy { get; set; }
 
-        public string ProxyAddresURL { get; set; }
+        public string ProxyAddressURL { get; set; }
         public string TokenRefreshSeconds { get; set; }
 
         public bool KeycloakDemoMode { get; set; }
@@ -40,10 +40,10 @@ namespace BL.Models.Settings
         public HttpClientHandler getProxyHandler {
             get
             {
-                Log.Information($"getProxyHandler ProxyAddresURL > {ProxyAddresURL} Proxy > {Proxy} ");
+                Log.Information($"getProxyHandler ProxyAddresURL > {ProxyAddressURL} Proxy > {Proxy} ");
                 HttpClientHandler handler = new HttpClientHandler
                 {
-                    Proxy = string.IsNullOrWhiteSpace(ProxyAddresURL)? null : new WebProxy(ProxyAddresURL,true), // Replace with your proxy server URL
+                    Proxy = string.IsNullOrWhiteSpace(ProxyAddressURL)? null : new WebProxy(ProxyAddressURL,true), // Replace with your proxy server URL
                     UseProxy = Proxy
                 };
                 return handler;
