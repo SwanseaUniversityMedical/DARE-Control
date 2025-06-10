@@ -1,6 +1,4 @@
 using BL.Models.Settings;
-
-using BL.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -17,7 +15,6 @@ using TRE_API.Services;
 using Newtonsoft.Json;
 using Hangfire;
 using Hangfire.PostgreSql;
-using Microsoft.AspNetCore.Hosting.Server.Features;
 using TRE_API;
 using BL.Models.ViewModels;
 using BL.Rabbit;
@@ -27,8 +24,8 @@ using Hangfire.Dashboard;
 using Hangfire.Dashboard.BasicAuthorization;
 using TRE_API.Models;
 using TREAPI.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.FeatureManagement;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,16 +45,17 @@ if (configuration["SuppressAntiforgery"] != null && configuration["SuppressAntif
 
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
-{
-    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-    options.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
-}
-); ;
+    {
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+        options.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
+    }
+);
+;
 builder.Services.AddDbContext<ApplicationDbContext>(options => options
     .UseLazyLoadingProxies(true)
     .UseNpgsql(
-    builder.Configuration.GetConnectionString("DefaultConnection")
-));
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    ));
 AddServices(builder);
 
 //Add Dependancies
@@ -70,8 +68,10 @@ builder.Services.AddScoped<OpaService>();
 builder.Services.Configure<RabbitMQSetting>(configuration.GetSection("RabbitMQ"));
 builder.Services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);
 var bus =
-builder.Services.AddSingleton(RabbitHutch.CreateBus($"host={configuration["RabbitMQ:HostAddress"]}:{int.Parse(configuration["RabbitMQ:PortNumber"])};virtualHost={configuration["RabbitMQ:VirtualHost"]};username={configuration["RabbitMQ:Username"]};password={configuration["RabbitMQ:Password"]}"));
-await SetUpRabbitMQ.DoItTreAsync(configuration["RabbitMQ:HostAddress"], configuration["RabbitMQ:PortNumber"], configuration["RabbitMQ:VirtualHost"], configuration["RabbitMQ:Username"], configuration["RabbitMQ:Password"]);
+    builder.Services.AddSingleton(RabbitHutch.CreateBus(
+        $"host={configuration["RabbitMQ:HostAddress"]}:{int.Parse(configuration["RabbitMQ:PortNumber"])};virtualHost={configuration["RabbitMQ:VirtualHost"]};username={configuration["RabbitMQ:Username"]};password={configuration["RabbitMQ:Password"]}"));
+await SetUpRabbitMQ.DoItTreAsync(configuration["RabbitMQ:HostAddress"], configuration["RabbitMQ:PortNumber"],
+    configuration["RabbitMQ:VirtualHost"], configuration["RabbitMQ:Username"], configuration["RabbitMQ:Password"]);
 
 var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
@@ -100,8 +100,6 @@ configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
 
 
-
-
 var minioSubSettings = new MinioSubSettings();
 configuration.Bind(nameof(MinioSubSettings), minioSubSettings);
 builder.Services.AddSingleton(minioSubSettings);
@@ -120,15 +118,11 @@ configuration.Bind(nameof(AgentSettings), AgentSettings);
 AgentSettings.SimulateResults = demomode;
 builder.Services.AddSingleton(AgentSettings);
 
-var Features = new Features();
-configuration.Bind(nameof(Features), Features);
-builder.Services.AddSingleton(Features);
-
-
+builder.Services.AddFeatureManagement(
+    builder.Configuration.GetSection("Features"));
 
 
 builder.Services.AddHostedService<ConsumeInternalMessageService>();
-
 
 
 builder.Services.AddScoped<IDareClientWithoutTokenHelper, DareClientWithoutTokenHelper>();
@@ -136,10 +130,7 @@ builder.Services.AddScoped<IDataEgressClientWithoutTokenHelper, DataEgressClient
 builder.Services.AddScoped<IHutchClientHelper, HutchClientHelper>();
 
 string hangfireConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddHangfire(config =>
-{
-    config.UsePostgreSqlStorage(hangfireConnectionString);
-});
+builder.Services.AddHangfire(config => { config.UsePostgreSqlStorage(hangfireConnectionString); });
 
 builder.Services.AddHangfireServer();
 var encryptionSettings = new EncryptionSettings();
@@ -175,17 +166,17 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
 
 builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
     .AddJwtBearer(options =>
     {
-        Console.WriteLine("TRE Keycloak use proxy = "+treKeyCloakSettings.Proxy.ToString());
+        Console.WriteLine("TRE Keycloak use proxy = " + treKeyCloakSettings.Proxy.ToString());
 
         if (treKeyCloakSettings.Proxy)
         {
-            Console.WriteLine("TRE API Proxy = "+ treKeyCloakSettings.ProxyAddresURL);
+            Console.WriteLine("TRE API Proxy = " + treKeyCloakSettings.ProxyAddresURL);
             Console.WriteLine("TRE API Proxy bypass = " + treKeyCloakSettings.BypassProxy);
             options.BackchannelHttpHandler = new HttpClientHandler
             {
@@ -198,18 +189,17 @@ builder.Services.AddAuthentication(options =>
                 }
             };
         }
+
         options.Authority = treKeyCloakSettings.Authority;
         options.Audience = treKeyCloakSettings.ClientId;
-        
-        
-        
+
+
         options.MetadataAddress = treKeyCloakSettings.MetadataAddress;
-        
+
         options.RequireHttpsMetadata = false; // dev only
         options.IncludeErrorDetails = true;
 
         options.TokenValidationParameters = TVP;
-
     });
 
 Log.Information(
@@ -218,22 +208,19 @@ Log.Information(
     treKeyCloakSettings.ValidAudiences);
 // - authorize here
 
-  
-
 
 // Enable CORS
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
-                      policy =>
-                      {
-                          policy.WithOrigins(configuration["TreAPISettings:Address"])
-                              .AllowAnyMethod()
-                              .AllowAnyHeader()
-                              .AllowCredentials();
-                      });
-    
+        policy =>
+        {
+            policy.WithOrigins(configuration["TreAPISettings:Address"])
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        });
 });
 
 var app = builder.Build();
@@ -245,16 +232,16 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 
 // Configure the HTTP request pipeline.
 
-    app.UseSwagger();
+app.UseSwagger();
 
-    app.UseSwaggerUI(c =>
-    {
-        c.EnableValidator(null);
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{environment.ApplicationName} v1");
-        c.OAuthClientId(treKeyCloakSettings.ClientId);
-        c.OAuthClientSecret(treKeyCloakSettings.ClientSecret);
-        c.OAuthAppName(treKeyCloakSettings.ClientId);
-    });
+app.UseSwaggerUI(c =>
+{
+    c.EnableValidator(null);
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{environment.ApplicationName} v1");
+    c.OAuthClientId(treKeyCloakSettings.ClientId);
+    c.OAuthClientSecret(treKeyCloakSettings.ClientSecret);
+    c.OAuthAppName(treKeyCloakSettings.ClientId);
+});
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -269,8 +256,6 @@ if (!app.Environment.IsDevelopment())
 }
 
 
-
-
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -282,7 +267,6 @@ using (var scope = app.Services.CreateScope())
         initialiser.SeedAllInOneData(configuration["DemoModeDefaultP"]);
     }
     //initialiser.SeedData();
-
 }
 
 
@@ -307,29 +291,25 @@ Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHost
     var seqApiKey = configuration["Serilog:SeqApiKey"];
 
 
-
     return new LoggerConfiguration()
-    .MinimumLevel.Verbose()
-    .Enrich.WithProperty("ApplicationContext", environment.ApplicationName)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.Seq(seqServerUrl, apiKey: seqApiKey)
-    .ReadFrom.Configuration(configuration)
-    .CreateLogger();
-
+        .MinimumLevel.Verbose()
+        .Enrich.WithProperty("ApplicationContext", environment.ApplicationName)
+        .Enrich.FromLogContext()
+        .WriteTo.Console()
+        .WriteTo.Seq(seqServerUrl, apiKey: seqApiKey)
+        .ReadFrom.Configuration(configuration)
+        .CreateLogger();
 }
+
 void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configuration)
 {
-
     builder.Services.AddHttpContextAccessor();
 
     builder.Services.AddScoped<IMinioTreHelper, MinioTreHelper>();
     builder.Services.AddScoped<IMinioSubHelper, MinioSubHelper>();
     builder.Services.AddScoped<ISignalRService, SignalRService>();
     builder.Services.AddMvc().AddControllersAsServices();
-
 }
-
 
 
 /// <summary>
@@ -348,7 +328,7 @@ void AddServices(WebApplicationBuilder builder)
             ServerCertificateCustomValidationCallback = (m, c, ch, e) => true
         });
     }
-    
+
 
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
@@ -356,45 +336,44 @@ void AddServices(WebApplicationBuilder builder)
 
     //TODO
     builder.Services.AddSwaggerGen(c =>
-    {
-
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = environment.ApplicationName, Version = "v1" });
-        var securityScheme = new OpenApiSecurityScheme
         {
-            Name = "JWT Authentication",
-            Description = "Enter JWT token.",
-            In = ParameterLocation.Header,
-            Type = SecuritySchemeType.Http,
-            Scheme = "bearer",
-            BearerFormat = "JWT",
-            Reference = new OpenApiReference
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = environment.ApplicationName, Version = "v1" });
+            var securityScheme = new OpenApiSecurityScheme
             {
-                Id = JwtBearerDefaults.AuthenticationScheme,
-                Type = ReferenceType.SecurityScheme
-            }
-        };
+                Name = "JWT Authentication",
+                Description = "Enter JWT token.",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                Reference = new OpenApiReference
+                {
+                    Id = JwtBearerDefaults.AuthenticationScheme,
+                    Type = ReferenceType.SecurityScheme
+                }
+            };
 
-        c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
-        c.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
-            { securityScheme, new string[] { } }
-        });
-    }
+            c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                { securityScheme, new string[] { } }
+            });
+        }
     );
 
     if (!string.IsNullOrEmpty(configuration.GetConnectionString("DefaultConnection")))
     {
         builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(
-          builder.Configuration.GetConnectionString("DefaultConnection")
-      ));
+            builder.Configuration.GetConnectionString("DefaultConnection")
+        ));
     }
 }
+
 //for SignalR
 app.UseCors();
-app.MapHub<SignalRService>("/signalRHub", options =>
-{
-    options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
-}).RequireCors(MyAllowSpecificOrigins);
+app.MapHub<SignalRService>("/signalRHub",
+        options => { options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling; })
+    .RequireCors(MyAllowSpecificOrigins);
 
 //Hangfire
 var jobSettings = new JobSettings();
@@ -408,7 +387,7 @@ if (extHangfire != null && extHangfire.ToLower() == "true")
         Authorization = new List<IDashboardAuthorizationFilter>()
         {
             //new LocalRequestsOnlyAuthorizationFilter(),
-            new  BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFilterOptions
+            new BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFilterOptions
             {
                 RequireSsl = false,
                 SslRedirect = false,
@@ -432,7 +411,6 @@ else
 }
 
 
-
 const string syncJobName = "Sync Projects and Membership";
 if (jobSettings.syncSchedule == 0)
     RecurringJob.RemoveIfExists(syncJobName);
@@ -446,9 +424,7 @@ if (jobSettings.scanSchedule == 0)
 else
     RecurringJob.AddOrUpdate<IDoAgentWork>(scanJobName,
         x => x.Execute(),
-
         Cron.MinuteInterval(jobSettings.scanSchedule));
-
 
 
 if (HasuraSettings.IsEnabled)
