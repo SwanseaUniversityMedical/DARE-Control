@@ -5,9 +5,10 @@ using BL.Models.APISimpleTypeReturns;
 using BL.Models.Enums;
 using Serilog;
 using BL.Services;
+using Microsoft.FeatureManagement;
+using TRE_API.Constants;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
-using TRE_API.Models;
 
 namespace TRE_API.Controllers
 {
@@ -18,21 +19,20 @@ namespace TRE_API.Controllers
         private readonly ApplicationDbContext _DbContext;
         protected readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IKeyCloakService _IKeyCloakService;
-        private readonly Features _Features;
         private readonly IEncDecHelper _encDecHelper;
-
         public IDareSyncHelper _dareSyncHelper { get; set; }
+        private readonly IFeatureManager _features;
 
         public ApprovalController(IDareSyncHelper dareSyncHelper, ApplicationDbContext applicationDbContext,
-            IHttpContextAccessor httpContextAccessor, IKeyCloakService IKeyCloakService, Features Features,
-            IEncDecHelper encDecHelper)
+            IHttpContextAccessor httpContextAccessor, IKeyCloakService IKeyCloakService,
+            IEncDecHelper encDecHelper, IFeatureManager features)
         {
             _dareSyncHelper = dareSyncHelper;
             _DbContext = applicationDbContext;
             _httpContextAccessor = httpContextAccessor;
             _IKeyCloakService = IKeyCloakService;
-            _Features = Features;
             _encDecHelper = encDecHelper;
+            _features = features;
         }
 
         [Authorize(Roles = "dare-tre-admin")]
@@ -219,7 +219,7 @@ namespace TRE_API.Controllers
                     await _DbContext.SaveChangesAsync();
                     await ControllerHelpers.AddTreAuditLog(dbproj, null, treProject.Decision == Decision.Approved,
                         _DbContext, _httpContextAccessor, User);
-                    if (_Features.GenerateAcounts)
+                    if (await _features.IsEnabledAsync(FeatureFlags.GenerateAccounts))
                     {
                         var acc = _DbContext.ProjectAcount.FirstOrDefault(x => x.Name == dbproj.SubmissionProjectName);
 
@@ -267,7 +267,7 @@ namespace TRE_API.Controllers
                     var dbMembership = _DbContext.MembershipDecisions.First(x => x.Id == membershipDecision.Id);
                     if (membershipDecision.Decision != dbMembership.Decision)
                     {
-                        if (_Features.GenerateAcounts)
+                        if (await _features.IsEnabledAsync(FeatureFlags.GenerateAccounts))
                         {
                             var name = dbMembership.Project.SubmissionProjectName + dbMembership.User.Username;
 
