@@ -26,6 +26,7 @@ using TRE_API.Models;
 using TREAPI.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.FeatureManagement;
+using TRE_API.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -76,7 +77,6 @@ await SetUpRabbitMQ.DoItTreAsync(configuration["RabbitMQ:HostAddress"], configur
 var treKeyCloakSettings = new TreKeyCloakSettings();
 configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
 var keycloakDemomode = configuration["KeycloakDemoMode"].ToLower() == "true";
-var demomode = configuration["DemoMode"].ToLower() == "true";
 treKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
 builder.Services.AddSingleton(treKeyCloakSettings);
 
@@ -88,7 +88,6 @@ builder.Services.AddSingleton(dataEgressKeyCloakSettings);
 var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
 submissionKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
-Log.Information("{Function} KeycloakDemoMode {KeycloakDemoMode}, DemoMode {DemoS}", "Main", keycloakDemomode, demomode);
 builder.Services.AddSingleton(submissionKeyCloakSettings);
 
 var HasuraSettings = new HasuraSettings();
@@ -115,7 +114,6 @@ builder.Services.AddSingleton(AuthenticationSetting);
 
 var AgentSettings = new AgentSettings();
 configuration.Bind(nameof(AgentSettings), AgentSettings);
-AgentSettings.SimulateResults = demomode;
 builder.Services.AddSingleton(AgentSettings);
 
 builder.Services.AddFeatureManagement(
@@ -260,13 +258,14 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var encDec = scope.ServiceProvider.GetRequiredService<IEncDecHelper>();
+    IFeatureManager featureManager = app.Services.GetRequiredService<IFeatureManager>();
     db.Database.Migrate();
     var initialiser = new DataInitaliser(db, encDec);
-    if (demomode)
+    if (await featureManager.IsEnabledAsync(FeatureFlags.DemoAllInOne))
     {
+        Log.Information("Demo mode is on, seeding data...");
         initialiser.SeedAllInOneData(configuration["DemoModeDefaultP"]);
     }
-    //initialiser.SeedData();
 }
 
 
@@ -312,9 +311,6 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
 }
 
 
-/// <summary>
-/// Add Services
-/// </summary>
 void AddServices(WebApplicationBuilder builder)
 {
     ServicePointManager.ServerCertificateValidationCallback +=
