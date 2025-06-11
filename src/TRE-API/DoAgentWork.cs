@@ -469,12 +469,14 @@ namespace TRE_API
                 var useRabbit = _AgentSettings.UseRabbit;
                 var useHutch = _AgentSettings.UseHutch;
                 var useTESK = _AgentSettings.UseTESK;
-                var simulateResults = _AgentSettings.SimulateResults;
 
                 Log.Information("{Function} useRabbit {useRabbit}", "Execute", useRabbit);
                 Log.Information("{Function} useHutch {useHutch}", "Execute", useHutch);
                 Log.Information("{Function} useTESK {useTESK}", "Execute", useTESK);
-                Log.Information("{Function} Simulate Results {Simulate}", "Execute", simulateResults);
+                if (await _features.IsEnabledAsync(FeatureFlags.DemoAllInOne))
+                {
+                    Log.Information("{Function} Demo Mode is on, simulating execution..", "Execute");
+                }
 
                 var cancelsubprojs = _subHelper.GetRequestCancelSubsForTre();
                 if (cancelsubprojs != null)
@@ -591,7 +593,7 @@ namespace TRE_API
                                 }
                             }
 
-                            if (simulateResults)
+                            if (await _features.IsEnabledAsync(FeatureFlags.DemoAllInOne))
                             {
                                 try
                                 {
@@ -629,7 +631,8 @@ namespace TRE_API
 
                                 var role = aSubmission.Project.Name; //TODO Check
 
-                                if (await _features.IsEnabledAsync(FeatureFlags.GenerateAccounts) && await _features.IsEnabledAsync(FeatureFlags.SqlAndNotGraphQl))
+                                if (await _features.IsEnabledAsync(FeatureFlags.GenerateAccounts) &&
+                                    await _features.IsEnabledAsync(FeatureFlags.SqlAndNotGraphQl))
                                 {
                                     var Acount = _dbContext.ProjectAcount.FirstOrDefault(x =>
                                         x.Name == aSubmission.Project.Name + aSubmission.SubmittedBy.Name);
