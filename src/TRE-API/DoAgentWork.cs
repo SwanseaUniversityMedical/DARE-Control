@@ -1,16 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
-using BL.Models;
-using BL.Models.APISimpleTypeReturns;
+﻿using BL.Models;
 using BL.Models.Enums;
 using BL.Models.ViewModels;
 using BL.Models.Tes;
 using BL.Rabbit;
-using Microsoft.Extensions.DependencyInjection;
 using EasyNetQ;
 using Newtonsoft.Json;
 using Serilog;
-
-using Microsoft.Extensions.Hosting;
 using Hangfire;
 using System.Net.Http.Headers;
 using System.Text;
@@ -18,13 +13,10 @@ using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
 using BL.Services;
 using TREAgent.Repositories;
-using System.Net.Http.Json;
 using TRE_API.Models;
-using Castle.Components.DictionaryAdapter.Xml;
-using System;
 using System.Net;
-using Microsoft.EntityFrameworkCore;
 using BL.Models.Settings;
+using TRE_API.Config;
 
 namespace TRE_API
 {

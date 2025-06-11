@@ -1,6 +1,4 @@
 using BL.Models.Settings;
-
-using BL.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -17,7 +15,6 @@ using TRE_API.Services;
 using Newtonsoft.Json;
 using Hangfire;
 using Hangfire.PostgreSql;
-using Microsoft.AspNetCore.Hosting.Server.Features;
 using TRE_API;
 using BL.Models.ViewModels;
 using BL.Rabbit;
@@ -26,9 +23,8 @@ using EasyNetQ;
 using Hangfire.Dashboard;
 using Hangfire.Dashboard.BasicAuthorization;
 using TRE_API.Models;
-using TREAPI.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
+using TRE_API.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,7 +1,6 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text.Json;
-using TRE_API.Models;
+using TRE_API.Config;
 using TRE_API.Repositories.DbContexts;
 using TRE_TESK.Models;
 

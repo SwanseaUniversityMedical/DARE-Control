@@ -1,8 +1,9 @@
-﻿namespace TRE_API.Models
+﻿namespace TRE_API.Config
 {
     public class HasuraSettings
     {
         public string HasuraURL { get; set; }
+
         public string HasuraAdminSecret { get; set; }
 
         public string EnvironmentVariableForDB { get; set; }

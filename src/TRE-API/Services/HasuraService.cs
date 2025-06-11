@@ -1,18 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Serilog;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
-using TRE_API.Models;
+using Newtonsoft.Json;
+using Serilog;
+using TRE_API.Config;
 using TRE_API.Repositories.DbContexts;
-using TRE_API.Services;
 using TREAgent.Repositories;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace TREAPI.Services
+namespace TRE_API.Services
 {
 
     public interface IHasuraService

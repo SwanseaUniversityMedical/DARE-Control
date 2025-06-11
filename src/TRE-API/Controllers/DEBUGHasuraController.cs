@@ -1,11 +1,6 @@
-﻿using BL.Models;
-using BL.Services;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Serilog;
-using Swashbuckle.AspNetCore.Annotations;
-using System.Data;
 using TRE_API.Services;
-using TREAPI.Services;
 
 namespace TRE_API.Controllers
 {
@@ -13,7 +8,6 @@ namespace TRE_API.Controllers
     [ApiController]
     public class DEBUGHasuraController : Controller
     {
-
         private readonly IHasuraService _iHasuraService;
 
         private readonly IDoSyncWork _iDoSyncWork;
@@ -21,7 +15,7 @@ namespace TRE_API.Controllers
         private readonly IKeyCloakService _IKeyCloakService;
 
         public DEBUGHasuraController(IHasuraService iHasuraService, IDoSyncWork iDoSyncWork,
-           IDoAgentWork iDoAgentWork, IKeyCloakService IKeyCloakService)
+            IDoAgentWork iDoAgentWork, IKeyCloakService IKeyCloakService)
         {
             _iHasuraService = iHasuraService;
             _iDoSyncWork = iDoSyncWork;
@@ -46,6 +40,7 @@ namespace TRE_API.Controllers
                 throw;
             }
         }
+
         [HttpPost]
         [Route("DoSyncWork")]
         public async Task<IActionResult> DoSyncWork()
@@ -67,7 +62,6 @@ namespace TRE_API.Controllers
         [Route("DoAgentWork")]
         public async Task<IActionResult> DoAgentWork()
         {
-
             Log.Information("DoAgentWork");
             try
             {
