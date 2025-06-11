@@ -5,4 +5,6 @@ public static class FeatureFlags
     public const string GenerateAccounts = nameof(GenerateAccounts);
 
     public const string SqlAndNotGraphQl = nameof(SqlAndNotGraphQl);
+
+    public const string DemoAllInOne = nameof(DemoAllInOne);
 }
