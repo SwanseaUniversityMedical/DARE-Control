@@ -110,7 +110,7 @@ namespace TRE_API.Services
 
                 string? outputBucket = "";
 
-                if (_agentSettings.UseTESK == false)
+                if (_agentSettings.UseTES == false)
                 {
                     outputBucket = _dbContext.Projects
                         .Where(x => x.SubmissionProjectId == submission.Project.Id)

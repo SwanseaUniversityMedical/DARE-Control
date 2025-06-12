@@ -186,7 +186,7 @@ namespace TRE_API
             using (var httpClient = new HttpClient(handler))
             {
                 // Define the URL for the POST request
-                string apiUrl = _AgentSettings.TESKAPIURL;
+                string apiUrl = _AgentSettings.TesApiUrl;
 
 
                 // Create a HttpRequestMessage with the HTTP method set to POST
@@ -243,7 +243,7 @@ namespace TRE_API
             try
             {
                 Log.Information("{Function} Check TESK : {TaskId},  TES : {TesId}, sub: {SubId}", "CheckTESK", taskID, tesId, subId);
-                string url = _AgentSettings.TESKAPIURL + "/" + taskID + "?view=BASIC";
+                string url = _AgentSettings.TesApiUrl + "/" + taskID + "?view=BASIC";
                              
                 HttpClientHandler handler = new HttpClientHandler();
 
@@ -460,7 +460,7 @@ namespace TRE_API
                 // OPTIONS
                 var useRabbit = _AgentSettings.UseRabbit;
                 var useHutch = _AgentSettings.UseHutch;
-                var useTESK = _AgentSettings.UseTESK;
+                var useTESK = _AgentSettings.UseTES;
                 var simulateResults = _AgentSettings.SimulateResults;
 
                 Log.Information("{Function} useRabbit {useRabbit}", "Execute", useRabbit);

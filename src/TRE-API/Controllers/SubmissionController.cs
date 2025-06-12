@@ -266,7 +266,7 @@ namespace TRE_API.Controllers
                     };
                     _rabbit.Advanced.Publish(exch, RoutingConstants.ProcessFinalOutput, false, new Message<FinalOutcome>(outcome));
                 }
-                else if (_agentSettings.UseTESK == false)
+                else if (_agentSettings.UseTES == false)
                 {
                     Log.Information("{Function} Minio url sent {Url} bucket {Bucket}, path {path}", "EgressReview", hutchPayload.Host, hutchPayload.Bucket, hutchPayload.Path);
                     //Not sure what the return type is
