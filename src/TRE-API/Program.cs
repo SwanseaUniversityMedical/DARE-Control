@@ -27,6 +27,7 @@ using TREAPI.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.FeatureManagement;
 using TRE_API.Constants;
+using Zeebe.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -116,9 +117,22 @@ var AgentSettings = new AgentSettings();
 configuration.Bind(nameof(AgentSettings), AgentSettings);
 builder.Services.AddSingleton(AgentSettings);
 
+var zeebeSettings = new ZeebeSettings();
+configuration.Bind(nameof(ZeebeSettings), zeebeSettings);
+builder.Services.AddSingleton(zeebeSettings);
+
+
+var zeebeClient = ZeebeClient.Builder()
+    .UseGatewayAddress(zeebeSettings.Address)
+    .UsePlainText()
+    .Build();
+
+builder.Services.AddSingleton<IZeebeClient>(zeebeClient);
+
+
+builder.Services.AddScoped<IZeebeDmnService, ZeebeDmnService>();
 builder.Services.AddFeatureManagement(
     builder.Configuration.GetSection("Features"));
-
 
 builder.Services.AddHostedService<ConsumeInternalMessageService>();
 
@@ -328,7 +342,7 @@ void AddServices(WebApplicationBuilder builder)
 
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSignalR();
+    builder.Services.AddSignalR(); 
 
     //TODO
     builder.Services.AddSwaggerGen(c =>
