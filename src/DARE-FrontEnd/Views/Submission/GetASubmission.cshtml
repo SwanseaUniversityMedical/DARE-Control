@@ -1,7 +1,6 @@
 ﻿@model BL.Models.ViewModels.SubmissionInfo
-@using BL.Models.ViewModels
 @using DARE_FrontEnd.Formatters;
-@using BL.Models.Enums
+
 
 @{
     string pageName = Model.Submission.TesName;
@@ -190,7 +189,7 @@
         <caption>List of Tre Child Submissions</caption>
         <thead>
         <tr class="row">
-            <th class="col-2"
+            <th class="col-2">
             </th>
             @{
                 foreach (var child in Model.Submission.Children)
