@@ -407,28 +407,28 @@ namespace DARE_API.Controllers
             return "application/octet-stream"; // This is a common default for unknown file types
         }
         
-        [HttpGet("DownloadFile")]
-        public async Task<IActionResult> DownloadFileAsync(int submissionId)
-        {
-            try
-            {
-                Log.Debug($"DownloadFileAsync submissionId > {submissionId}");
-                var submission = _DbContext.Submissions.First(x => x.Id == submissionId);
+        //[HttpGet("DownloadFile")]
+        //public async Task<IActionResult> DownloadFileAsync(int submissionId)
+        //{
+        //    try
+        //    {
+        //        Log.Debug($"DownloadFileAsync submissionId > {submissionId}");
+        //        var submission = _DbContext.Submissions.First(x => x.Id == submissionId);
                 
-                Log.Information("{Function} Submission Out Bucket {OutputBucket} File {FinalOutputFile}", "DownloadFileAsync", submission.Project.OutputBucket, submission.FinalOutputFile);
-                var response = await _minioHelper.GetCopyObject(submission.Project.OutputBucket, submission.FinalOutputFile);
+        //        Log.Information("{Function} Submission Out Bucket {OutputBucket} File {FinalOutputFile}", "DownloadFileAsync", submission.Project.OutputBucket, submission.FinalOutputFile);
+        //        var response = await _minioHelper.GetCopyObject(submission.Project.OutputBucket, submission.FinalOutputFile);
 
             
-                var responseStream = response.ResponseStream;
-                return File(responseStream, GetContentType(submission.FinalOutputFile), submission.FinalOutputFile);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crashed", "DownloadFiles");
-                throw;
-            }
+        //        var responseStream = response.ResponseStream;
+        //        return File(responseStream, GetContentType(submission.FinalOutputFile), submission.FinalOutputFile);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Log.Error(ex, "{Function} Crashed", "DownloadFiles");
+        //        throw;
+        //    }
 
-        }
+        //}
        
 
         [Authorize(Roles = "dare-control-admin")]
