@@ -1,0 +1,46 @@
+{
+  "id": "io.camunda.connectors.webhook.WebhookConnector.v1",
+  "name": "Webhook",
+  "type": "inbound",
+  "version": 1,
+  "description": "Starts a process via an HTTP webhook",
+  "properties": [
+    {
+      "type": "hidden",
+      "value": "io.camunda:webhook:1",
+      "binding": {
+        "type": "inbound.type"
+      }
+    },
+    {
+      "type": "string",
+      "label": "Webhook Context Path",
+      "value": "StartCredentials",
+      "binding": {
+        "type": "inbound.context"
+      }
+    },
+    {
+      "type": "string",
+      "label": "Method",
+      "value": "post",
+      "binding": {
+        "type": "inbound.method"
+      }
+    },
+    {
+      "type": "hidden",
+      "value": "NONE",
+      "binding": {
+        "type": "inbound.auth.type"
+      }
+    },
+    {
+      "type": "hidden",
+      "value": "disabled",
+      "binding": {
+        "type": "inbound.shouldValidateHmac"
+      }
+    }
+  ]
+}
