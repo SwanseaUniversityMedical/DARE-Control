@@ -9,7 +9,7 @@ using TRE_API.Services;
 
 namespace TRE_API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/tre-credentials/[controller]")]
     [ApiController]
     public class TRINOCredentialsController : Controller
     {
@@ -25,11 +25,5 @@ namespace TRE_API.Controllers
                 keycloakSettings.ClientSecret, keycloakSettings.Proxy, keycloakSettings.ProxyAddresURL, keycloakSettings.KeycloakDemoMode);
         }
 
-        [Authorize(Roles = "dare-tre-admin")]
-        [HttpGet("validate")]
-        public async Task<BoolReturn> CheckCredentialsAreValidAsync()
-        {
-            return await ControllerHelpers.CheckCredentialsAreValid(_keycloakTokenHelper, _encDecHelper, _DbContext, CredentialType.Submission);
-        }
     }
 }
