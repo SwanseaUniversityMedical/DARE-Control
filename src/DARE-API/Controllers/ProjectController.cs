@@ -236,12 +236,11 @@ namespace DARE_API.Controllers
                     return null;
                 }
 
-
+                project.Users.Remove(user);
                 await _DbContext.SaveChangesAsync();
                 await ControllerHelpers.RemoveUserFromMinioBucket(user, project, _httpContextAccessor, _minioSettings.AttributeName, _keycloakMinioUserService, User, _DbContext);
 
                 await ControllerHelpers.AddAuditLog(LogType.RemoveUserFromProject, user, project, null, null, null, _httpContextAccessor, User, _DbContext);
-
                 
                 Log.Information("{Function} Added User {UserName} to {ProjectName}", "RemoveUserMembership", user.Name, project.Name);
                 return model;
