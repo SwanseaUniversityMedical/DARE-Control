@@ -121,24 +121,7 @@ namespace DARE_FrontEnd.Controllers
                 Log.Error("SubmissionWizard > " + ex.ToString());
                 return BadRequest();
             }
-        }
-
-        //[HttpGet]
-        //public async Task<IActionResult> DownloadFileAsync(int subId)
-        //{
-
-
-        //    var paramlist = new Dictionary<string, string>
-        //    {
-        //        { "submissionId", subId.ToString() }
-        //    };
-
-        //    var submission = _clientHelper.CallAPIWithoutModel<Submission>($"/api/Submission/GetASubmission/{subId}").Result;
-        //    var file = await _clientHelper.CallAPIToGetFile(
-        //        "/api/Submission/DownloadFile", paramlist);
-            
-        //    return File(file, GetContentType(submission.FinalOutputFile), submission.FinalOutputFile);
-        //}
+        }       
 
         public static string GetContentType(string fileName)
         {
