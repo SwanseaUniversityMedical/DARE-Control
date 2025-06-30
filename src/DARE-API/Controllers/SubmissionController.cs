@@ -11,25 +11,16 @@ using EasyNetQ;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using BL.Rabbit;
-using Microsoft.AspNetCore.SignalR;
-using System.Reflection;
-using System.ComponentModel.DataAnnotations;
-using System.Numerics;
-using System.Xml.Linq;
 using BL.Services;
 using Microsoft.AspNetCore.StaticFiles;
 
 namespace DARE_API.Controllers
 {
-
-    [Route("api/[controller]")]
-    
-    [ApiController]
-    
-
     /// <summary>
     /// API endpoints for <see cref="Submission"/>s.
     /// </summary>
+    [Route("api/[controller]")]
+    [ApiController]
     public class SubmissionController : Controller
     {
         private readonly ApplicationDbContext _DbContext;
@@ -37,14 +28,13 @@ namespace DARE_API.Controllers
         private readonly IMinioHelper _minioHelper;
         private readonly IDareEmailService _IDareEmailService;
 
-        public SubmissionController(ApplicationDbContext repository, IBus rabbit, IMinioHelper minioHelper, IDareEmailService IDareEmailService)
+        public SubmissionController(ApplicationDbContext repository, IBus rabbit, IMinioHelper minioHelper,
+            IDareEmailService IDareEmailService)
         {
             _DbContext = repository;
             _rabbit = rabbit;
             _minioHelper = minioHelper;
             _IDareEmailService = IDareEmailService;
-
-
         }
 
 
@@ -56,7 +46,6 @@ namespace DARE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(List<Submission>), description: "")]
         public virtual IActionResult GetWaitingSubmissionsForTre()
         {
-
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
             var tre = ControllerHelpers.GetUserTre(User, _DbContext);
 
@@ -76,7 +65,6 @@ namespace DARE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(List<Submission>), description: "")]
         public virtual IActionResult GetRequestCancelSubsForTre()
         {
-
             var usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
             var tre = ControllerHelpers.GetUserTre(User, _DbContext);
 
@@ -96,10 +84,8 @@ namespace DARE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
         public IActionResult UpdateStatusForTre(string subId, StatusType statusType, string? description)
         {
-
             UpdateStatusForTreGuts(subId, statusType, description);
             _DbContext.SaveChanges();
-           
 
 
             return StatusCode(200, new APIReturn() { ReturnType = ReturnType.voidReturn });
@@ -124,30 +110,29 @@ namespace DARE_API.Controllers
 
             UpdateSubmissionStatus.UpdateStatusNoSave(sub, statusType, description);
 
-            if (statusType 
+            if (statusType
                 is StatusType.DataOutApprovalRejected
-                or StatusType.InvalidUser 
-                or StatusType.InvalidSubmission 
+                or StatusType.InvalidUser
+                or StatusType.InvalidSubmission
                 or StatusType.TreCrateValidationFailed
-                or StatusType.TRERejectedProject
-                or StatusType.TRENotAuthorisedForProject
+                or StatusType.TreAgentRejectedProject
+                or StatusType.TreNotAuthorisedForProject
                 or StatusType.TransferToPodFailed
                 or StatusType.UserNotOnProject
                 or StatusType.SubmissionReceived
-                or StatusType.PodProcessingFailed
+                or StatusType.ProcessingFailed
                 or StatusType.Failure
                 or StatusType.Failed
                 or StatusType.Cancelled
                 or StatusType.CancellingChildren
                 or StatusType.RequestCancellation
-                )
+               )
             {
                 var text = $"Your Submission with ID {sub.Id} Failed with {statusType.ToString()}!";
                 _IDareEmailService.EmailTo(sub.SubmittedBy.Email, text, text, false);
             }
             else if (statusType
-                is StatusType.Complete
-                or StatusType.Completed)
+                     is StatusType.Completed)
             {
                 var text = $"Your Submission with ID {sub.Id} has completed!";
                 _IDareEmailService.EmailTo(sub.SubmittedBy.Email, text, text, false);
@@ -162,7 +147,8 @@ namespace DARE_API.Controllers
         [ValidateModelState]
         [SwaggerOperation("CloseSubmissionForTre")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        public IActionResult CloseSubmissionForTre(string subId, StatusType statusType, string? finalFile, string? description)
+        public IActionResult CloseSubmissionForTre(string subId, StatusType statusType, string? finalFile,
+            string? description)
         {
             if (!UpdateSubmissionStatus.SubCompleteTypes.Contains(statusType) && statusType != StatusType.Failure)
             {
@@ -175,14 +161,14 @@ namespace DARE_API.Controllers
                 _DbContext.SaveChanges();
                 statusType = StatusType.Failed;
             }
+
             var sub = UpdateStatusForTreGuts(subId, statusType, description);
             sub.FinalOutputFile = finalFile;
             _DbContext.SaveChanges();
-            
+
             return StatusCode(200, new APIReturn() { ReturnType = ReturnType.voidReturn });
         }
 
-        
 
         [AllowAnonymous]
         [HttpGet("GetAllSubmissions")]
@@ -206,10 +192,11 @@ namespace DARE_API.Controllers
         [HttpGet("TestSubRabbitSendRemoveBeforeDeploy")]
         public void TestSubRabbitSendRemoveBeforeDeploy(int id)
         {
-            try { 
-            var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Submission, "topic");
+            try
+            {
+                var exch = _rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Submission, "topic");
 
-            _rabbit.Advanced.Publish(exch, RoutingConstants.ProcessSub, false, new Message<int>(id));
+                _rabbit.Advanced.Publish(exch, RoutingConstants.ProcessSub, false, new Message<int>(id));
             }
             catch (Exception ex)
             {
@@ -224,7 +211,6 @@ namespace DARE_API.Controllers
         {
             try
             {
-
                 var submission = _DbContext.Submissions.First(x => x.Id == submissionId);
 
                 Log.Information("{Function} Submission retrieved successfully", "GetASubmission");
@@ -255,8 +241,6 @@ namespace DARE_API.Controllers
                 StatusType.SubmissionReceived,
                 StatusType.SubmissionCrateValidated,
                 StatusType.SubmissionCrateValidationFailed,
-
-
             };
             Dictionary<int, List<StatusType>> stage1Dict = new Dictionary<int, List<StatusType>>();
             stage1Dict.Add(1, stage1List.statusTypeList);
@@ -267,17 +251,15 @@ namespace DARE_API.Controllers
             stage2List.stageNumber = 2;
             stage2List.statusTypeList = new List<StatusType>
             {
-                StatusType.TransferredToPod,
+                StatusType.TransferredToAgent,
                 StatusType.InvalidUser,
-                StatusType.TRENotAuthorisedForProject,
+                StatusType.TreNotAuthorisedForProject,
                 StatusType.AgentTransferringToPod,
                 StatusType.TransferToPodFailed,
                 StatusType.SendingSubmissionToHutch,
                 StatusType.TreCrateValidated,
                 StatusType.TreCrateValidationFailed,
                 StatusType.TreCrateValidated,
-
-
             };
             Dictionary<int, List<StatusType>> stage2Dict = new Dictionary<int, List<StatusType>>();
             stage2Dict.Add(2, stage2List.statusTypeList);
@@ -288,9 +270,9 @@ namespace DARE_API.Controllers
             stage3List.stageNumber = 3;
             stage3List.statusTypeList = new List<StatusType>
             {
-                StatusType.PodProcessing,
-                StatusType.PodProcessingComplete,
-                StatusType.PodProcessingFailed,
+                StatusType.Processing,
+                StatusType.ProcessingComplete,
+                StatusType.ProcessingFailed,
                 StatusType.WaitingForCrate,
                 StatusType.FetchingCrate,
                 StatusType.Queued,
@@ -304,11 +286,6 @@ namespace DARE_API.Controllers
                 StatusType.PackagingApprovedResults,
                 StatusType.Complete,
                 StatusType.Failure,
-
-
-
-
-
             };
             Dictionary<int, List<StatusType>> stage3Dict = new Dictionary<int, List<StatusType>>();
             stage3Dict.Add(3, stage3List.statusTypeList);
@@ -333,7 +310,7 @@ namespace DARE_API.Controllers
             stage5List.stageNumber = 5;
 
             stage5List.statusTypeList = UpdateSubmissionStatus.SubCompleteTypes;
-            
+
             Dictionary<int, List<StatusType>> stage5Dict = new Dictionary<int, List<StatusType>>();
             stage5Dict.Add(5, stage5List.statusTypeList);
             stage5List.stagesDict = stage5Dict;
@@ -357,41 +334,21 @@ namespace DARE_API.Controllers
                     StatusType.CancellationRequestSent,
                     StatusType.Cancelled,
                     StatusType.InvalidSubmission,
-                    StatusType.TRENotAuthorisedForProject,
+                    StatusType.TreNotAuthorisedForProject,
                     StatusType.DataOutApprovalRejected,
                     StatusType.SubmissionCrateValidationFailed,
                     StatusType.TreCrateValidationFailed,
                     StatusType.TransferToPodFailed,
-                    StatusType.PodProcessingFailed,
+                    StatusType.ProcessingFailed,
                     StatusType.Failed,
                     StatusType.Failure,
-
                 },
                 StageInfos = infoList.OrderBy(x => x.stageNumber).ToList()
             };
 
             return result;
-
         }
 
-        //[AllowAnonymous]
-        //[HttpGet("DifferentStages")]
-        //public Dictionary<int, StageInfo> DifferentStages()
-        //{
-
-        //    var stage1List = new StageInfo();
-        //    stage1List.stageName = "Submission Layer Validation";
-        //    stage1List.stageNumber = 1;
-        //    stage1List.statusTypeList = new List<StatusType>
-        //    {
-        //        StatusType.InvalidUser,
-        //        StatusType.UserNotOnProject,
-        //        StatusType.InvalidSubmission,
-        //        StatusType.SubmissionWaitingForCrateFormatCheck
-        //    };
-        //    return null;
-
-        //}
         public static string GetContentType(string fileName)
         {
             // Create a new FileExtensionContentTypeProvider
@@ -406,7 +363,7 @@ namespace DARE_API.Controllers
             // If the content type cannot be determined, provide a default value
             return "application/octet-stream"; // This is a common default for unknown file types
         }
-        
+
         [HttpGet("DownloadFile")]
         public async Task<IActionResult> DownloadFileAsync(int submissionId)
         {
@@ -414,11 +371,13 @@ namespace DARE_API.Controllers
             {
                 Log.Debug($"DownloadFileAsync submissionId > {submissionId}");
                 var submission = _DbContext.Submissions.First(x => x.Id == submissionId);
-                
-                Log.Information("{Function} Submission Out Bucket {OutputBucket} File {FinalOutputFile}", "DownloadFileAsync", submission.Project.OutputBucket, submission.FinalOutputFile);
-                var response = await _minioHelper.GetCopyObject(submission.Project.OutputBucket, submission.FinalOutputFile);
 
-            
+                Log.Information("{Function} Submission Out Bucket {OutputBucket} File {FinalOutputFile}",
+                    "DownloadFileAsync", submission.Project.OutputBucket, submission.FinalOutputFile);
+                var response =
+                    await _minioHelper.GetCopyObject(submission.Project.OutputBucket, submission.FinalOutputFile);
+
+
                 var responseStream = response.ResponseStream;
                 return File(responseStream, GetContentType(submission.FinalOutputFile), submission.FinalOutputFile);
             }
@@ -427,47 +386,47 @@ namespace DARE_API.Controllers
                 Log.Error(ex, "{Function} Crashed", "DownloadFiles");
                 throw;
             }
-
         }
-       
+
 
         [Authorize(Roles = "dare-control-admin")]
         [HttpPost("SaveSubmissionFiles")]
         public IActionResult SaveSubmissionFiles(int submissionId, List<SubmissionFile> submissionFiles)
         {
-            try { 
-            var existingSubmission = _DbContext.Submissions
-                .Include(d => d.SubmissionFiles)
-                .FirstOrDefault(d => d.Id == submissionId);
-
-            if (existingSubmission != null)
+            try
             {
-                foreach (var file in submissionFiles)
+                var existingSubmission = _DbContext.Submissions
+                    .Include(d => d.SubmissionFiles)
+                    .FirstOrDefault(d => d.Id == submissionId);
+
+                if (existingSubmission != null)
                 {
-                    var existingFile =
-                        existingSubmission.SubmissionFiles.FirstOrDefault(f =>
-                            f.TreBucketFullPath == file.TreBucketFullPath);
-                    if (existingFile != null)
+                    foreach (var file in submissionFiles)
                     {
-                        existingFile.Name = file.Name;
-                        existingFile.TreBucketFullPath = file.TreBucketFullPath;
-                        existingFile.SubmisionBucketFullPath = file.SubmisionBucketFullPath;
-                        existingFile.Status = file.Status;
-                        existingFile.Description = file.Description;
+                        var existingFile =
+                            existingSubmission.SubmissionFiles.FirstOrDefault(f =>
+                                f.TreBucketFullPath == file.TreBucketFullPath);
+                        if (existingFile != null)
+                        {
+                            existingFile.Name = file.Name;
+                            existingFile.TreBucketFullPath = file.TreBucketFullPath;
+                            existingFile.SubmisionBucketFullPath = file.SubmisionBucketFullPath;
+                            existingFile.Status = file.Status;
+                            existingFile.Description = file.Description;
+                        }
+                        else
+                        {
+                            existingSubmission.SubmissionFiles.Add(file);
+                        }
                     }
-                    else
-                    {
-                        existingSubmission.SubmissionFiles.Add(file);
-                    }
-                }
 
-                _DbContext.SaveChanges();
-                return Ok(existingSubmission);
-            }
-            else
-            {
-                return BadRequest();
-            }
+                    _DbContext.SaveChanges();
+                    return Ok(existingSubmission);
+                }
+                else
+                {
+                    return BadRequest();
+                }
             }
             catch (Exception ex)
             {

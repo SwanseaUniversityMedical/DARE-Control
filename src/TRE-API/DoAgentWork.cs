@@ -298,17 +298,17 @@ namespace TRE_API
                             using (var scope = _serviceProvider.CreateScope())
                             {
                                 TokenToExpire Token = null;
-                                var statusMessage = StatusType.TransferredToPod;
+                                var statusMessage = StatusType.TransferredToAgent;
                                 switch (status.state)
                                 {
                                     case "QUEUED":
-                                        statusMessage = StatusType.TransferredToPod;
+                                        statusMessage = StatusType.TransferredToAgent;
                                         break;
                                     case "RUNNING":
-                                        statusMessage = StatusType.PodProcessing;
+                                        statusMessage = StatusType.Processing;
                                         break;
                                     case "COMPLETE":
-                                        statusMessage = StatusType.PodProcessingComplete;
+                                        statusMessage = StatusType.ProcessingComplete;
 
                                         Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
                                         Log.Information("{Function} *** COMPLETE remove Token *** {Token} ",
@@ -724,7 +724,7 @@ namespace TRE_API
                                 try
                                 {
                                     var result = _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(),
-                                        StatusType.TransferredToPod, "");
+                                        StatusType.TransferredToAgent, "");
                                 }
                                 catch (Exception e)
                                 {

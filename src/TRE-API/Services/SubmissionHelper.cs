@@ -7,21 +7,12 @@ using Serilog;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services.SignalR;
 using static TRE_API.Controllers.SubmissionController;
-using BL.Models;
 using BL.Models.APISimpleTypeReturns;
-using BL.Models.Enums;
-using BL.Models.ViewModels;
-using BL.Services;
-using EasyNetQ;
-using TRE_API.Repositories.DbContexts;
-using TRE_API.Services.SignalR;
-using static TRE_API.Controllers.SubmissionController;
 using TRE_API.Models;
 
 
 namespace TRE_API.Services
 {
-
     public interface ISubmissionHelper
     {
         APIReturn? UpdateStatusForTre(string subId, StatusType statusType, string? description);
@@ -29,7 +20,7 @@ namespace TRE_API.Services
         bool IsUserApprovedOnProject(int projectId, int userId);
         List<Submission>? GetWaitingSubmissionForTre();
         void SendSumissionToHUTCH(Submission submission);
-        List<Submission>? GetRequestCancelSubsForTre(); 
+        List<Submission>? GetRequestCancelSubsForTre();
         OutputBucketInfo GetOutputBucketGuts(string subId, bool hostnameonly, bool useExternal);
         APIReturn? CloseSubmissionForTre(string subId, StatusType statusType, string? description, string? finalFile);
 
@@ -38,7 +29,8 @@ namespace TRE_API.Services
 
         OutputBucketInfo GetOutputBucketGutsSub(string subId, bool hostnameonly);
     }
-    public class SubmissionHelper: ISubmissionHelper
+
+    public class SubmissionHelper : ISubmissionHelper
     {
         private readonly IHutchClientHelper _hutchHelper;
         private readonly IDareClientWithoutTokenHelper _dareHelper;
@@ -49,7 +41,6 @@ namespace TRE_API.Services
         private readonly IMinioTreHelper _minioTreHelper;
         private readonly AgentSettings _agentSettings;
 
-        
 
         public string _hutchDbServer { get; set; }
         public string _hutchDbPort { get; set; }
@@ -66,9 +57,8 @@ namespace TRE_API.Services
             IDataEgressClientWithoutTokenHelper dataEgressHelper,
             IMinioTreHelper minioTreHelper,
             AgentSettings agentSettings
-            )
+        )
         {
-            
             _dareHelper = helper;
             _dbContext = dbContext;
             _rabbit = rabbit;
@@ -81,7 +71,6 @@ namespace TRE_API.Services
             _dataEgressHelper = dataEgressHelper;
             _minioTreHelper = minioTreHelper;
             _agentSettings = agentSettings;
-
         }
 
         public BoolReturn FilesReadyForReview(ReviewFiles review)
@@ -109,7 +98,6 @@ namespace TRE_API.Services
                 .CallAPI<EgressSubmission, BoolReturn>("/api/DataEgress/AddNewDataEgress/", egsub).Result;
             UpdateStatusForTre(review.SubId, StatusType.DataOutApprovalBegun, "");
             return boolResult;
-
         }
 
         public OutputBucketInfo GetOutputBucketGutsSub(string subId, bool hostnameonly)
@@ -118,24 +106,23 @@ namespace TRE_API.Services
             {
                 var submission = _dareHelper
                     .CallAPIWithoutModel<Submission>($"/api/Submission/GetASubmission/{subId}")
-                .Result;
+                    .Result;
 
                 string? outputBucket = "";
 
                 if (_agentSettings.UseTESK == false)
                 {
                     outputBucket = _dbContext.Projects
-                    .Where(x => x.SubmissionProjectId == submission.Project.Id)
-                    .Select(x => x.OutputBucketTre).FirstOrDefault();
+                        .Where(x => x.SubmissionProjectId == submission.Project.Id)
+                        .Select(x => x.OutputBucketTre).FirstOrDefault();
                 }
                 else
                 {
                     outputBucket = _dbContext.Projects
-                   .Where(x => x.SubmissionProjectId == submission.Project.Id)
-                   .Select(x => x.OutputBucketSub).FirstOrDefault();
+                        .Where(x => x.SubmissionProjectId == submission.Project.Id)
+                        .Select(x => x.OutputBucketSub).FirstOrDefault();
                 }
 
-      
 
                 bool secure = !_minioTreSettings.Url.ToLower().StartsWith("http://");
                 return new OutputBucketInfo()
@@ -144,7 +131,9 @@ namespace TRE_API.Services
                     SubId = submission.Id.ToString(),
                     Path = "sub" + subId + "/",
                     Secure = secure,
-                    Host = hostnameonly ? _minioTreSettings.Url.Replace("https://", "").Replace("http://", "") : _minioTreSettings.Url
+                    Host = hostnameonly
+                        ? _minioTreSettings.Url.Replace("https://", "").Replace("http://", "")
+                        : _minioTreSettings.Url
                 };
             }
             catch (Exception ex)
@@ -171,11 +160,14 @@ namespace TRE_API.Services
                     .Select(x => x.OutputBucketTre);
 
                 var outputBucket = bucket.FirstOrDefault();
-                var realurl = string.IsNullOrWhiteSpace(_minioTreSettings.HutchURLOverride) ? _minioTreSettings.Url : _minioTreSettings.HutchURLOverride;
+                var realurl = string.IsNullOrWhiteSpace(_minioTreSettings.HutchURLOverride)
+                    ? _minioTreSettings.Url
+                    : _minioTreSettings.HutchURLOverride;
                 if (!useExternal)
                 {
                     realurl = _minioTreSettings.Url;
                 }
+
                 bool secure = !_minioTreSettings.Url.ToLower().StartsWith("http://");
                 return new OutputBucketInfo()
                 {
@@ -183,7 +175,7 @@ namespace TRE_API.Services
                     SubId = submission.Id.ToString(),
                     Path = "sub" + subId + "/",
                     Secure = secure,
-                    Host = hostnameonly ? realurl.Replace("https://", "").Replace("http://","") : realurl
+                    Host = hostnameonly ? realurl.Replace("https://", "").Replace("http://", "") : realurl
                 };
             }
             catch (Exception ex)
@@ -198,12 +190,14 @@ namespace TRE_API.Services
             Uri uri = new Uri(submission.DockerInputLocation);
             string fileName = Path.GetFileName(uri.LocalPath);
             var project = _dbContext.Projects.First(x => x.SubmissionProjectId == submission.Project.Id);
-            var realurl = string.IsNullOrWhiteSpace(_minioTreSettings.HutchURLOverride) ? _minioTreSettings.Url : _minioTreSettings.HutchURLOverride;
+            var realurl = string.IsNullOrWhiteSpace(_minioTreSettings.HutchURLOverride)
+                ? _minioTreSettings.Url
+                : _minioTreSettings.HutchURLOverride;
             bool secure = !realurl.ToLower().StartsWith("http://");
             var job = new SubmitJobModel()
             {
                 SubId = submission.Id.ToString(),
-                
+
                 DataAccess = new DatabaseConnectionDetails()
                 {
                     Database = _hutchDbName,
@@ -216,10 +210,9 @@ namespace TRE_API.Services
                 {
                     Bucket = project.SubmissionBucketTre,
                     Path = fileName,
-                    Host = realurl.Replace("http://","").Replace("https://", ""),
+                    Host = realurl.Replace("http://", "").Replace("https://", ""),
                     Secure = secure
                 }
-                
             };
             var statusParams = new Dictionary<string, string>()
             {
@@ -227,25 +220,20 @@ namespace TRE_API.Services
                 { "statusType", StatusType.SendingSubmissionToHutch.ToString() },
                 { "description", "" }
             };
-            Log.Information("{Function} Minio url sent {Url} bucket {Bucket}, path {path}", "SendSubmissionToHutch", job.CrateSource.Host, job.CrateSource.Bucket, job.CrateSource.Path);
-            var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams).Result;
+            Log.Information("{Function} Minio url sent {Url} bucket {Bucket}, path {path}", "SendSubmissionToHutch",
+                job.CrateSource.Host, job.CrateSource.Bucket, job.CrateSource.Path);
+            var statusResult = _dareHelper
+                .CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams).Result;
             var res = _hutchHelper.CallAPI<SubmitJobModel, JobStatusModel>($"/api/jobs/", job).Result;
-
-            
         }
 
         public void SimulateSubmissionProcessing(Submission submission)
         {
             try
             {
-
-
-                UpdateStatusForTre(submission.Id.ToString(), StatusType.SendingSubmissionToHutch, "");
-                UpdateStatusForTre(submission.Id.ToString(), StatusType.WaitingForCrate, "");
-                UpdateStatusForTre(submission.Id.ToString(), StatusType.ValidatingCrate, "");
-                UpdateStatusForTre(submission.Id.ToString(), StatusType.FetchingWorkflow, "");
-                UpdateStatusForTre(submission.Id.ToString(), StatusType.StagingWorkflow, "");
-                UpdateStatusForTre(submission.Id.ToString(), StatusType.ExecutingWorkflow, "");
+                UpdateStatusForTre(submission.Id.ToString(), StatusType.WaitingForAgentToTransfer, "");
+                UpdateStatusForTre(submission.Id.ToString(), StatusType.TransferredToAgent, "");
+                UpdateStatusForTre(submission.Id.ToString(), StatusType.Processing, "");
                 UpdateStatusForTre(submission.Id.ToString(), StatusType.PreparingOutputs, "");
                 UpdateStatusForTre(submission.Id.ToString(), StatusType.TransferredForDataOut, "");
 
@@ -273,13 +261,10 @@ namespace TRE_API.Services
             }
             catch (Exception e)
             {
-                Log.Error(e, "{Function} Something went wrong with submission {Id}", "SimulateSubmissionProcessing", submission.Id);
+                Log.Error(e, "{Function} Something went wrong with submission {Id}", "SimulateSubmissionProcessing",
+                    submission.Id);
                 throw;
             }
-
-
-
-
         }
 
         public APIReturn? UpdateStatusForTre(string subId, StatusType statusType, string? description)
@@ -289,7 +274,9 @@ namespace TRE_API.Services
                 Log.Information($"UpdateStatusForTre subId {subId} statusType {statusType} description {description} ");
                 var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre",
                         new Dictionary<string, string>()
-                            { { "subId", subId }, { "statusType", statusType.ToString() }, { "description", description } })
+                        {
+                            { "subId", subId }, { "statusType", statusType.ToString() }, { "description", description }
+                        })
                     .Result;
                 return result;
             }
@@ -298,21 +285,24 @@ namespace TRE_API.Services
                 Log.Error(ex.ToString());
                 return null;
             }
-           
         }
 
-        public APIReturn? CloseSubmissionForTre(string subId, StatusType statusType, string? description, string? finalFile)
+        public APIReturn? CloseSubmissionForTre(string subId, StatusType statusType, string? description,
+            string? finalFile)
         {
-            Log.Information($"CloseSubmissionForTre subId {subId} statusType {statusType} description {description} finalFile {finalFile}");
+            Log.Information(
+                $"CloseSubmissionForTre subId {subId} statusType {statusType} description {description} finalFile {finalFile}");
             var result = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/CloseSubmissionForTre",
                     new Dictionary<string, string>()
-                        { { "subId", subId }, { "statusType", statusType.ToString() }, { "description", description }, {"finalFile", finalFile} })
+                    {
+                        { "subId", subId }, { "statusType", statusType.ToString() }, { "description", description },
+                        { "finalFile", finalFile }
+                    })
                 .Result;
 
             return result;
         }
 
-       
 
         public bool IsUserApprovedOnProject(int projectId, int userId)
         {
@@ -327,8 +317,6 @@ namespace TRE_API.Services
         {
             if (_dbContext.KeycloakCredentials.Any(x => x.CredentialType == CredentialType.Submission))
             {
-
-
                 var result =
                     _dareHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre")
                         .Result;
@@ -376,8 +364,10 @@ namespace TRE_API.Services
                 });
             }
 
-            Log.Information($"FilesReadyForReview egsub.Files.Count {egsub.Files.Count} egsub.OutputBucket {egsub.OutputBucket} ");
-            var boolResult = _dataEgressHelper.CallAPI<EgressSubmission, BoolReturn>("/api/DataEgress/AddNewDataEgress/", egsub).Result;
+            Log.Information(
+                $"FilesReadyForReview egsub.Files.Count {egsub.Files.Count} egsub.OutputBucket {egsub.OutputBucket} ");
+            var boolResult = _dataEgressHelper
+                .CallAPI<EgressSubmission, BoolReturn>("/api/DataEgress/AddNewDataEgress/", egsub).Result;
             return boolResult;
         }
     }
