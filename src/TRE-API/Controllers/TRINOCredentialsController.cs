@@ -9,7 +9,7 @@ using TRE_API.Services;
 
 namespace TRE_API.Controllers
 {
-    [Route("api/tre-credentials/[controller]")]
+    [Route("api/tre-credentials/trino")]
     [ApiController]
     public class TRINOCredentialsController : Controller
     {
