@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TRE_API.Controllers
 {
-    [Route("api/v1/vaultvredentials")]
+    [Route("api/v1/vaultcredentials")]
     [ApiController]
     [SwaggerTag("Vayktcredentials", "Manage Credentials")]
     [Produces("application/json")]
