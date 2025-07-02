@@ -12,7 +12,7 @@ namespace TRE_API.Controllers
     [SwaggerTag("Postgrescredentials", "Manage Postgres Database Credentials")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public class PostgrsCredentialsController : ControllerBase
+    public class PostgresCredentialsController : ControllerBase
     {
     }
 }
