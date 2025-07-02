@@ -7,7 +7,7 @@ namespace TRE_API.Controllers
     /// <summary>
     /// API controller for managing postgres credentials and authentication operations
     /// </summary>
-    [Route("api/v1/postgrescredentials")]
+    [Route("api/tre-credentials/postgres")]
     [ApiController]
     [SwaggerTag("Postgrescredentials", "Manage Postgres Database Credentials")]
     [Produces("application/json")]
