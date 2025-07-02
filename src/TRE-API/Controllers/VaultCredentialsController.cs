@@ -9,7 +9,7 @@ namespace TRE_API.Controllers
 {
     [Route("api/v1/vaultcredentials")]
     [ApiController]
-    [SwaggerTag("Vayktcredentials", "Manage Credentials")]
+    [SwaggerTag("Vaultcredentials", "Manage Credentials")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public class VaultCredentialsController : ControllerBase
