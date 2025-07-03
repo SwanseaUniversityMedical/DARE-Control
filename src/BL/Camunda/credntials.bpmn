@@ -26,13 +26,13 @@
     <bpmn:sequenceFlow id="Flow_15k7w43" sourceRef="Gateway_1pp07tw" targetRef="Activity_0kqf8jn" />
     <bpmn:businessRuleTask id="Activity_18jo02y" name="Credentials DMN">
       <bpmn:extensionElements>
-        <zeebe:calledDecision decisionId="Definitions_1vhy48r" resultVariable="dmnResult" />
+        <zeebe:calledDecision decisionId="CredentialsDMN" resultVariable="dmnResult" />
         <zeebe:ioMapping>
-          <zeebe:input source="project" target="project" />
-          <zeebe:input source="user" target="user" />
+          <zeebe:input source="=project" target="project" />
+          <zeebe:input source="=user" target="user" />
           <zeebe:input source="=tag" target="tag" />
-          <zeebe:input source="=InputCollection" target="InputCollection" />
-          <zeebe:output source="=dmnResult" target="OutputVariable_1am894q" />
+          <zeebe:input source="=InputCollections" target="InputCollection" />
+          <zeebe:output source="=dmnResult" target="CredentialsDMNResult" />
         </zeebe:ioMapping>
         <zeebe:properties />
       </bpmn:extensionElements>
@@ -83,7 +83,7 @@
       <bpmndi:BPMNShape id="Event_02j8grw_di" bpmnElement="StartCredentials">
         <dc:Bounds x="182" y="102" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="160" y="145" width="80" height="14" />
+          <dc:Bounds x="161" y="145" width="79" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0xzzpo0_di" bpmnElement="Flow_0xzzpo0">
