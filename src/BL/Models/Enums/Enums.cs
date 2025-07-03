@@ -14,10 +14,12 @@ namespace BL.Models.Enums
         WaitingForAgentToTransfer = 1,
 
         //Stage 2
-        [Display(Name = "Transferred To Agent")] TransferredToAgent = 2,
+        [Display(Name = "Transferred To Agent")]
+        TransferredToAgent = 2,
 
         //Stage 3
-        [Display(Name = "Processing Submission")] Processing = 3,
+        [Display(Name = "Processing Submission")]
+        Processing = 3,
 
         //Stage 3
         //Green
@@ -113,8 +115,7 @@ namespace BL.Models.Enums
 
         //Stage 3
         //Red
-        [Display(Name = "Processing Failed")]
-        ProcessingFailed = 25,
+        [Display(Name = "Processing Failed")] ProcessingFailed = 25,
 
         //Stage 1
         //Parent only
@@ -205,7 +206,7 @@ namespace BL.Models.Enums
         //Stage 5
         //Green
         //Parent Only
-        [Display(Name = "Complete but xnot all TREs returned a result")]
+        [Display(Name = "Complete but not all TREs returned a result")]
         PartialResult = 49,
     }
 
