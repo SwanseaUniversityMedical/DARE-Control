@@ -41,15 +41,21 @@
                         @{
                             var overallStatus = submission.Status;
                             if (overallStatus == BL.Models.Enums.StatusType.Completed)
-                            {
-
-                                <h6 class="mb-0">
-                                    <span class="badge bg-success rounded-pill d-inline-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="Completed: @submission.EndTime">
-                                        <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
-                                        <span>Completed</span>
-                                    </span>
-                                </h6>
-                            }
+                            {                                
+                                    var minio = @ViewBag.URLBucket;                                 
+                                    <h6 class="mb-0">
+                                        <a href="http://@minio/browser/@submission.Project.OutputBucket" target="_blank" rel="noopener">
+                                            <span class="badge bg-success rounded-pill d-inline-flex align-items-center pe-3" data-bs-toggle="tooltip" data-bs-title="Completed: @submission.EndTime">
+                                                <i class="fa-solid fa-circle-check fs-6 text-white me-2"></i>
+                                                <span class="text-start">
+                                                    <span class="mb-1">Completed</span>
+                                                    <span class="font-monospace small d-block">@submission.GetTotalDisplayTime()</span>
+                                                    <span class="font-monospace small d-block"><span class="small">Click to View Output Bucket</span></span>
+                                                </span>
+                                            </span>
+                                        </a>
+                                    </h6>
+                                }
                             else if (overallStatus == BL.Models.Enums.StatusType.Failed || overallStatus == StatusType.Cancelled)
                             {
                                 <h6 class="mb-0">
