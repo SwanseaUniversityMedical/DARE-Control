@@ -4,19 +4,12 @@ using Newtonsoft.Json;
 using Serilog;
 using System.Text;
 using BL.Models;
-using System;
 using BL.Models.Enums;
 using DARE_API.Repositories.DbContexts;
 using BL.Models.Tes;
 using BL.Models.ViewModels;
 using BL.Services;
-using EasyNetQ.Management.Client.Model;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using System.Text.Json.Nodes;
-using Microsoft.EntityFrameworkCore;
-using System.Threading;
-using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
+
 
 namespace DARE_API.Services
 {
@@ -51,13 +44,6 @@ namespace DARE_API.Services
                 Log.Error("{Function} ConsumeProcessForm:- Failed to subscribe due to error: {e}", "ExecuteAsync",
                     e.Message);
             }
-        }
-
-
-        //Implement proper check
-        private bool ValidateCreate(Submission sub)
-        {
-            return true;
         }
 
         private void Process(IMessage<int> message, MessageReceivedInfo info)
@@ -178,20 +164,6 @@ namespace DARE_API.Services
                 throw;
             }
         }
-
-        //private async Task ProcessFetchExternal(IMessage<byte[]> msgBytes,   MessageReceivedInfo info )
-        //{
-        //    try
-        //    {
-        //        var message = Encoding.UTF8.GetString(msgBytes.Body);
-        //        await _minioHelper.RabbitExternalObject(JsonConvert.DeserializeObject<MQFetchFile>(message));
-        //    }
-        //    catch (Exception e)
-        //    {
-
-        //        throw;
-        //    }
-        //}
 
 
         private T ConvertByteArrayToType<T>(byte[] byteArray)
