@@ -460,9 +460,6 @@ namespace TRE_API
                                     var resultcopy = _minioTreHelper
                                         .CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
                                 }
-
-                                _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(),
-                                    StatusType.TreWaitingForCrateFormatCheck, "");
                             }
                             catch (Exception ex)
                             {
