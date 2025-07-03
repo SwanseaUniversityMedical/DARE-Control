@@ -239,7 +239,6 @@ namespace DARE_API.Controllers
                 StatusType.SubmissionWaitingForCrateFormatCheck,
                 StatusType.Running,
                 StatusType.SubmissionReceived,
-                StatusType.SubmissionCrateValidated,
                 StatusType.SubmissionCrateValidationFailed,
             };
             Dictionary<int, List<StatusType>> stage1Dict = new Dictionary<int, List<StatusType>>();
@@ -257,9 +256,7 @@ namespace DARE_API.Controllers
                 StatusType.AgentTransferringToPod,
                 StatusType.TransferToPodFailed,
                 StatusType.SendingSubmissionToHutch,
-                StatusType.TreCrateValidated,
-                StatusType.TreCrateValidationFailed,
-                StatusType.TreCrateValidated,
+                StatusType.TreCrateValidationFailed
             };
             Dictionary<int, List<StatusType>> stage2Dict = new Dictionary<int, List<StatusType>>();
             stage2Dict.Add(2, stage2List.statusTypeList);

@@ -182,7 +182,7 @@ namespace BL.Models.Enums
 
         //Stage 1
         //Green
-        [Display(Name = "Crate Validated")] SubmissionCrateValidated = 44,
+        // [Display(Name = "Crate Validated")] SubmissionCrateValidated = 44,
 
         //Stage 1
         //Red
@@ -191,7 +191,7 @@ namespace BL.Models.Enums
 
         //Stage 2
         //Green
-        [Display(Name = "Crate Validated")] TreCrateValidated = 46,
+        // [Display(Name = "Crate Validated")] TreCrateValidated = 46,
 
         //Stage 2
         //Red

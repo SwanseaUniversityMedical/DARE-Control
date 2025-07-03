@@ -22,19 +22,19 @@ namespace DARE_API.Repositories.DbContexts
         private readonly ApplicationDbContext _dbContext;
         private readonly IKeyclockTokenAPIHelper _keyclockTokenAPIHelper;
         private readonly IKeycloakMinioUserService _userService;
-        public DataInitaliser(MinioSettings minioSettings, IMinioHelper minioHelper, ApplicationDbContext dbContext, IKeyclockTokenAPIHelper keyclockTokenAPIHelper, IKeycloakMinioUserService userService)
+
+        public DataInitaliser(MinioSettings minioSettings, IMinioHelper minioHelper, ApplicationDbContext dbContext,
+            IKeyclockTokenAPIHelper keyclockTokenAPIHelper, IKeycloakMinioUserService userService)
         {
             _minioSettings = minioSettings;
             _minioHelper = minioHelper;
             _dbContext = dbContext;
             _keyclockTokenAPIHelper = keyclockTokenAPIHelper;
             _userService = userService;
-
         }
 
         public void SeedAllInOneData()
         {
-
             //var token = _keyclockTokenAPIHelper.GetTokenForUser("minioadmin", "password123", "").Result;
             try
             {
@@ -49,24 +49,12 @@ namespace DARE_API.Repositories.DbContexts
                     AddMissingUser(testing, globaladmin);
                     _dbContext.SaveChanges();
                 }
-                
-               
-
-
-              
-               
-               
-               
             }
             catch (Exception e)
             {
                 Log.Error(e, "{Function} Error seeding data", "SeedAllInOneData");
                 throw;
             }
-
-
-
-
         }
 
         public void SeedData()
@@ -75,8 +63,6 @@ namespace DARE_API.Repositories.DbContexts
             var token = _keyclockTokenAPIHelper.GetTokenForUser("minioadmin", "password123", "").Result;
             try
             {
-
-
                 var head = CreateProject("Head");
                 var shoulders = CreateProject("Shoulders");
                 var knees = CreateProject("Knees");
@@ -92,7 +78,7 @@ namespace DARE_API.Repositories.DbContexts
                 //var mahadi = CreateUser("mahadi", "mahadi@chi.swan.ac.uk");
                 //var hazel = CreateUser("hazel", "hazel@chi.swan.ac.uk");
                 var testing = CreateUser("testing", "testing@chi.swan.ac.uk");
-               
+
 
                 var sail = CreateTre("SAIL", "sailtreapi");
                 var dpuk = CreateTre("DPUK", "dpuktreapi");
@@ -112,7 +98,7 @@ namespace DARE_API.Repositories.DbContexts
                 //AddMissingUser(head, patricia);
                 //AddMissingUser(head, hazel);
 
-                
+
                 AddMissingUser(head, testing);
                 AddMissingUser(shoulders, testing);
                 AddMissingUser(knees, testing);
@@ -160,10 +146,6 @@ namespace DARE_API.Repositories.DbContexts
                 Log.Error(e, "{Function} Error seeding data", "SeedData");
                 throw;
             }
-
-
-
-
         }
 
         private Project CreateProject(string name)
@@ -194,10 +176,9 @@ namespace DARE_API.Repositories.DbContexts
                 };
                 proj.FormData = JsonConvert.SerializeObject(proj);
                 _dbContext.Projects.Add(proj);
-
             }
-            return proj;
 
+            return proj;
         }
 
         private User CreateUser(string name, string email)
@@ -213,8 +194,8 @@ namespace DARE_API.Repositories.DbContexts
                 user.FormData = JsonConvert.SerializeObject(user);
                 _dbContext.Users.Add(user);
             }
-            return user;
 
+            return user;
         }
 
         private Tre CreateTre(string name, string adminUser)
@@ -231,8 +212,8 @@ namespace DARE_API.Repositories.DbContexts
                 tre.FormData = JsonConvert.SerializeObject(tre);
                 _dbContext.Tres.Add(tre);
             }
-            return tre;
 
+            return tre;
         }
 
         private void AddMissingTre(Project project, Tre tre)
@@ -251,9 +232,11 @@ namespace DARE_API.Repositories.DbContexts
                 var accessToken = _keyclockTokenAPIHelper.GetTokenForUser("minioadmin", "password123", "").Result;
                 var attributeName = _minioSettings.AttributeName;
 
-                var submissionUserAttribute = _userService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.SubmissionBucket.ToLower() + "_policy").Result;
-                var outputUserAttribute = _userService.SetMinioUserAttribute(accessToken, user.Name.ToString(), attributeName, project.OutputBucket.ToLower() + "_policy").Result;
-                
+                var submissionUserAttribute = _userService.SetMinioUserAttribute(accessToken, user.Name.ToString(),
+                    attributeName, project.SubmissionBucket.ToLower() + "_policy").Result;
+                var outputUserAttribute = _userService.SetMinioUserAttribute(accessToken, user.Name.ToString(),
+                    attributeName, project.OutputBucket.ToLower() + "_policy").Result;
+
                 project.Users.Add(user);
             }
         }
@@ -262,34 +245,33 @@ namespace DARE_API.Repositories.DbContexts
         {
             try
             {
-
-
                 if (_dbContext.Submissions.Any(x => x.TesName.ToLower() == name.ToLower()))
                 {
                     return;
                 }
+
                 string template = "{" +
-                              "\"id\":null," +
-                              "\"state\":0," +
-                              "\"name\":\"{name}\"," +
-                              "\"description\":null," +
-                              "\"inputs\":null," +
-                              "\"outputs\":null," +
-                              "\"resources\":null," +
-                              "\"executors\":[{" +
-                              "\"image\":\"\\\\\\\\minio\\\\justin1.crate\"," +
-                              "\"command\":null," +
-                              "\"workdir\":null," +
-                              "\"stdin\":null," +
-                              "\"stdout\":null," +
-                              "\"stderr\":null," +
-                              "\"env\":null" +
-                              "}]," +
-                              "\"volumes\":null," +
-                              "\"tags\":{\"project\":\"{project}\",\"tres\":\"{tres}\"}," +
-                              "\"logs\":null," +
-                              "\"creation_time\":null" +
-                              "}";
+                                  "\"id\":null," +
+                                  "\"state\":0," +
+                                  "\"name\":\"{name}\"," +
+                                  "\"description\":null," +
+                                  "\"inputs\":null," +
+                                  "\"outputs\":null," +
+                                  "\"resources\":null," +
+                                  "\"executors\":[{" +
+                                  "\"image\":\"\\\\\\\\minio\\\\justin1.crate\"," +
+                                  "\"command\":null," +
+                                  "\"workdir\":null," +
+                                  "\"stdin\":null," +
+                                  "\"stdout\":null," +
+                                  "\"stderr\":null," +
+                                  "\"env\":null" +
+                                  "}]," +
+                                  "\"volumes\":null," +
+                                  "\"tags\":{\"project\":\"{project}\",\"tres\":\"{tres}\"}," +
+                                  "\"logs\":null," +
+                                  "\"creation_time\":null" +
+                                  "}";
 
                 var tesString = template.Replace("{name}", name).Replace("{project}", project)
                     .Replace("{tres}", treStr);
@@ -310,7 +292,6 @@ namespace DARE_API.Repositories.DbContexts
                 };
 
 
-
                 _dbContext.Submissions.Add(sub);
                 _dbContext.SaveChanges();
                 tesTask.Id = sub.Id.ToString();
@@ -327,7 +308,6 @@ namespace DARE_API.Repositories.DbContexts
                 }
 
 
-
                 var dbTres = new List<BL.Models.Tre>();
 
                 if (tres.Count == 0)
@@ -341,13 +321,12 @@ namespace DARE_API.Repositories.DbContexts
                         dbTres.Add(dbProject.Tres.First(x => x.Name.ToLower() == tre.ToLower()));
                     }
                 }
-               // UpdateSubmissionStatus.UpdateStatus(sub, StatusType.WaitingForChildSubsToComplete, "");
+                // UpdateSubmissionStatus.UpdateStatus(sub, StatusType.WaitingForChildSubsToComplete, "");
 
                 foreach (var tre in dbTres)
                 {
                     _dbContext.Add(new Submission()
                     {
-
                         DockerInputLocation = tesTask.Executors.First().Image,
                         Project = dbProject,
                         Status = StatusType.WaitingForAgentToTransfer,
@@ -361,7 +340,6 @@ namespace DARE_API.Repositories.DbContexts
                         Tre = tre,
                         TesName = tesTask.Name,
                         SourceCrate = tesTask.Executors.First().Image,
-
                     });
                 }
 
@@ -373,256 +351,12 @@ namespace DARE_API.Repositories.DbContexts
                 throw;
             }
         }
-        private bool CreateHistoricStatus1(int subID)
-        {
-            var subcheck = _dbContext.HistoricStatuses.Count();
-            if (subcheck > 16)
-            {
-                return false;
-            }
-            else
-            {
-                var sub = _dbContext.Submissions.FirstOrDefault(x => x.Id == subID);
-                var status = new HistoricStatus()
-                {
-                    Start = DateTime.Now.ToUniversalTime(),
-                    End = DateTime.Now.ToUniversalTime(),
-                    Status = StatusType.InvalidUser,
-                    Submission = sub,
-                    StatusDescription = ""
-                };
 
-                if (sub != null)
-                {
-                    _dbContext.HistoricStatuses.Add(status);
-                    _dbContext.SaveChanges();
-                }
-
-                return true;
-            }
-
-
-        }
-        private bool CreateHistoricStatus2(int subID)
-        {
-            var subcheck = _dbContext.HistoricStatuses.Count();
-            if (subcheck > 16)
-            {
-                return false;
-            }
-            else
-            {
-                var sub = _dbContext.Submissions.FirstOrDefault(x => x.Id == subID);
-                var status = new HistoricStatus()
-                {
-                    Start = DateTime.Now.ToUniversalTime(),
-                    End = DateTime.Now.ToUniversalTime(),
-                    Status = StatusType.UserNotOnProject,
-                    Submission = sub,
-                    StatusDescription = ""
-                };
-
-                if (sub != null)
-                {
-                    _dbContext.HistoricStatuses.Add(status);
-                    _dbContext.SaveChanges();
-                }
-
-                return true;
-            }
-            
-
-        }
-        private bool CreateHistoricStatus3(int subID)
-        {
-            var subcheck = _dbContext.HistoricStatuses.Count();
-            if (subcheck > 16)
-            {
-                return false;
-            }
-            else
-            {
-                var sub = _dbContext.Submissions.FirstOrDefault(x => x.Id == subID);
-                var status = new HistoricStatus()
-                {
-                    Start = DateTime.Now.ToUniversalTime(),
-                    End = DateTime.Now.ToUniversalTime(),
-                    Status = StatusType.Completed,
-                    Submission = sub,
-                    StatusDescription = ""
-                };
-
-                if (sub != null)
-                {
-                    _dbContext.HistoricStatuses.Add(status);
-                    _dbContext.SaveChanges();
-                }
-
-                return true;
-            }
-
-
-        }
-        private bool CreateHistoricStatus4(int subID)
-        {
-            var subcheck = _dbContext.HistoricStatuses.Count();
-            if (subcheck > 16)
-            {
-                return false;
-            }
-            else
-            {
-                var sub = _dbContext.Submissions.FirstOrDefault(x => x.Id == subID);
-                var status = new HistoricStatus()
-                {
-                    Start = DateTime.Now.ToUniversalTime(),
-                    End = DateTime.Now.ToUniversalTime(),
-                    Status = StatusType.DataOutApproved,
-                    Submission = sub,
-                    StatusDescription = ""
-                };
-
-                if (sub != null)
-                {
-                    _dbContext.HistoricStatuses.Add(status);
-                    _dbContext.SaveChanges();
-                }
-
-                return true;
-            }
-
-
-        }
-        private bool CreateHistoricStatus5(int subID)
-        {
-            var subcheck = _dbContext.HistoricStatuses.Count();
-            if (subcheck > 16)
-            {
-                return false;
-            }
-            else
-            {
-                var sub = _dbContext.Submissions.FirstOrDefault(x => x.Id == subID);
-                var status = new HistoricStatus()
-                {
-                    Start = DateTime.Now.ToUniversalTime(),
-                    End = DateTime.Now.ToUniversalTime(),
-                    Status = StatusType.PodProcessingComplete,
-                    Submission = sub,
-                    StatusDescription = ""
-                };
-
-                if (sub != null)
-                {
-                    _dbContext.HistoricStatuses.Add(status);
-                    _dbContext.SaveChanges();
-                }
-
-                return true;
-            }
-
-
-        }
-
-        private bool CreateHistoricStatus6(int subID)
-        {
-            var subcheck = _dbContext.HistoricStatuses.Count();
-            if (subcheck > 16)
-            {
-                return false;
-            }
-            else
-            {
-                var sub = _dbContext.Submissions.FirstOrDefault(x => x.Id == subID);
-                var status = new HistoricStatus()
-                {
-                    Start = DateTime.Now.ToUniversalTime(),
-                    End = DateTime.Now.ToUniversalTime(),
-                    Status = StatusType.TransferredToPod,
-                    Submission = sub,
-                    StatusDescription = ""
-                };
-
-                if (sub != null)
-                {
-                    _dbContext.HistoricStatuses.Add(status);
-                    _dbContext.SaveChanges();
-                }
-
-                return true;
-            }
-
-
-        }
-
-        private bool CreateHistoricStatus7(int subID)
-        {
-            var subcheck = _dbContext.HistoricStatuses.Count();
-            if (subcheck > 16)
-            {
-                return false;
-            }
-            else
-            {
-                var sub = _dbContext.Submissions.FirstOrDefault(x => x.Id == subID);
-                var status = new HistoricStatus()
-                {
-                    Start = DateTime.Now.ToUniversalTime(),
-                    End = DateTime.Now.ToUniversalTime(),
-                    Status = StatusType.PodProcessing,
-                    Submission = sub,
-                    StatusDescription = ""
-                };
-
-                if (sub != null)
-                {
-                    _dbContext.HistoricStatuses.Add(status);
-                    _dbContext.SaveChanges();
-                }
-
-                return true;
-            }
-
-
-        }
-
-        private bool CreateHistoricStatus8(int subID)
-        {
-            var subcheck = _dbContext.HistoricStatuses.Count();
-            if (subcheck > 16)
-            {
-                return false;
-            }
-            else
-            {
-                var sub = _dbContext.Submissions.FirstOrDefault(x => x.Id == subID);
-                var status = new HistoricStatus()
-                {
-                    Start = DateTime.Now.ToUniversalTime(),
-                    End = DateTime.Now.ToUniversalTime(),
-                    Status = StatusType.CancellingChildren,
-                    Submission = sub,
-                    StatusDescription = ""
-                };
-
-                if (sub != null)
-                {
-                    _dbContext.HistoricStatuses.Add(status);
-                    _dbContext.SaveChanges();
-                }
-
-                return true;
-            }
-
-
-        }
         private string GenerateRandomName(string prefix)
         {
             Random random = new Random();
             string randomName = prefix + random.Next(1000, 9999);
             return randomName;
         }
-
-
     }
 }
