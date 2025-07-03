@@ -6,16 +6,12 @@
         <zeebe:property />
       </zeebe:properties>
     </bpmn:extensionElements>
-    <bpmn:exclusiveGateway id="Gateway_1pp07tw">
-      <bpmn:incoming>Flow_0xzzpo0</bpmn:incoming>
-      <bpmn:outgoing>Flow_15k7w43</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_0xzzpo0" sourceRef="Activity_18jo02y" targetRef="Gateway_1pp07tw" />
+    <bpmn:sequenceFlow id="Flow_0xzzpo0" sourceRef="Activity_18jo02y" targetRef="Activity_0kqf8jn" />
     <bpmn:callActivity id="Activity_0kqf8jn" name="Credentials dertermine">
       <bpmn:extensionElements>
         <zeebe:calledElement processId="Credentials_Determins_Subrpocess" propagateAllChildVariables="true" />
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_15k7w43</bpmn:incoming>
+      <bpmn:incoming>Flow_0xzzpo0</bpmn:incoming>
       <bpmn:multiInstanceLoopCharacteristics>
         <bpmn:extensionElements>
           <zeebe:loopCharacteristics inputCollection="=project" outputCollection="envList" outputElement="=project" />
@@ -23,7 +19,6 @@
         <bpmn:completionCondition xsi:type="bpmn:tFormalExpression">=project</bpmn:completionCondition>
       </bpmn:multiInstanceLoopCharacteristics>
     </bpmn:callActivity>
-    <bpmn:sequenceFlow id="Flow_15k7w43" sourceRef="Gateway_1pp07tw" targetRef="Activity_0kqf8jn" />
     <bpmn:businessRuleTask id="Activity_18jo02y" name="Credentials DMN">
       <bpmn:extensionElements>
         <zeebe:calledDecision decisionId="CredentialsDMN" resultVariable="dmnResult" />
@@ -69,13 +64,6 @@
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1tzymon">
-      <bpmndi:BPMNShape id="Gateway_1pp07tw_di" bpmnElement="Gateway_1pp07tw" isMarkerVisible="true">
-        <dc:Bounds x="445" y="95" width="50" height="50" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0kqf8jn_di" bpmnElement="Activity_0kqf8jn">
-        <dc:Bounds x="570" y="80" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_18jo02y_di" bpmnElement="Activity_18jo02y">
         <dc:Bounds x="310" y="80" width="100" height="80" />
         <bpmndi:BPMNLabel />
@@ -86,13 +74,13 @@
           <dc:Bounds x="161" y="145" width="79" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0kqf8jn_di" bpmnElement="Activity_0kqf8jn">
+        <dc:Bounds x="510" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0xzzpo0_di" bpmnElement="Flow_0xzzpo0">
         <di:waypoint x="410" y="120" />
-        <di:waypoint x="445" y="120" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_15k7w43_di" bpmnElement="Flow_15k7w43">
-        <di:waypoint x="495" y="120" />
-        <di:waypoint x="570" y="120" />
+        <di:waypoint x="510" y="120" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1bqmll1_di" bpmnElement="Flow_1bqmll1">
         <di:waypoint x="218" y="120" />
