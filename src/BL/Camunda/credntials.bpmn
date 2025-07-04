@@ -14,7 +14,7 @@
       <bpmn:incoming>Flow_0xzzpo0</bpmn:incoming>
       <bpmn:multiInstanceLoopCharacteristics>
         <bpmn:extensionElements>
-          <zeebe:loopCharacteristics inputCollection="=project" outputCollection="envList" outputElement="=project" />
+          <zeebe:loopCharacteristics inputCollection="=env" outputCollection="envList" outputElement="=project" />
         </bpmn:extensionElements>
         <bpmn:completionCondition xsi:type="bpmn:tFormalExpression">=project</bpmn:completionCondition>
       </bpmn:multiInstanceLoopCharacteristics>
@@ -23,11 +23,14 @@
       <bpmn:extensionElements>
         <zeebe:calledDecision decisionId="CredentialsDMN" resultVariable="dmnResult" />
         <zeebe:ioMapping>
-          <zeebe:input source="=project" target="project" />
-          <zeebe:input source="=user" target="user" />
-          <zeebe:input source="=tag" target="tag" />
-          <zeebe:input source="=InputCollections" target="InputCollection" />
+          <zeebe:input source="=InputCollections.project" target="project" />
+          <zeebe:input source="=InputCollections.user" target="user" />
+          <zeebe:input source="=InputCollections.tag" target="tag" />
+          <zeebe:input source="=InputCollections" target="InputCollections" />
           <zeebe:output source="=dmnResult" target="CredentialsDMNResult" />
+          <zeebe:output source="=env" target="env" />
+          <zeebe:output source="=value" target="value" />
+          <zeebe:output source="=path" target="path" />
         </zeebe:ioMapping>
         <zeebe:properties />
       </bpmn:extensionElements>
@@ -35,7 +38,7 @@
       <bpmn:outgoing>Flow_0xzzpo0</bpmn:outgoing>
       <bpmn:multiInstanceLoopCharacteristics>
         <bpmn:extensionElements>
-          <zeebe:loopCharacteristics inputCollection="=InputCollections" />
+          <zeebe:loopCharacteristics inputCollection="=InputCollections" inputElement="InputCollections" />
         </bpmn:extensionElements>
       </bpmn:multiInstanceLoopCharacteristics>
     </bpmn:businessRuleTask>
