@@ -352,5 +352,103 @@ namespace TRE_API.Controllers
                 throw;
             }
         }
+
+        #region ForTest
+
+        /// <summary>
+        /// create secret for minio
+        /// </summary>
+        /// <param name="accessKey">Access Key identifier</param>
+        /// <param name="secretKey">Secret Key identifier</param>
+        [HttpPost("create-minio-secret/{accessKey}/{secretKey}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> CreateSecretForMinio(
+            [FromRoute] string accessKey,
+            [FromRoute] string secretKey)
+        {
+            try
+            {
+                var result = await _minioSubHelper.CreateUserWithMcAsync(accessKey, secretKey);
+
+                if (result.Success)
+                {
+                    Log.Information("Secret for Minio Access Key {accessKey}, Secret Key {secretKey}", accessKey, secretKey);
+                    return Ok(new { Message = "Secret Created successfully" });
+                }
+
+                return NotFound(new { Message = "Failed to create secret for user" });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error creating secret for Access Key {accessKey}, Secret Key {secretKey}", accessKey, secretKey);
+                return StatusCode(500, new { Message = "Internal server error", Error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Set Policty to a secret
+        /// </summary>
+        /// <param name="accessKey">Access Key identifier</param>
+        /// <param name="policyName">Secret Key identifier</param>
+        [HttpPost("set-policy-minio-secret/{accessKey}/{policyName}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> SetpolicyForMinioSecrete(
+            [FromRoute] string accessKey,
+            [FromRoute] string policyName)
+        {
+            try
+            {
+                var result = await _minioSubHelper.SetUserPolicyAsync(accessKey, policyName);
+
+                if (result.Success)
+                {
+                    Log.Information("Set policy for Minio Access Key {accessKey}, Policy Key {policyName}", accessKey, policyName);
+                    return Ok(new { Message = "Policy set successfully" });
+                }
+
+                return NotFound(new { Message = "Failed to create secret for user" });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error Set policty for Access Key {accessKey}, Secret Key {policyName}", accessKey, policyName);
+                return StatusCode(500, new { Message = "Internal server error", Error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Remove secret for minio
+        /// </summary>
+        /// <param name="accessKey">Access Key identifier</param>
+        [HttpPost("remove-minio-secret/{accessKey}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> RemoveSecretForMinio(
+            [FromRoute] string accessKey)
+        {
+            try
+            {
+                var result = await _minioSubHelper.RemoveUserWithMcAsync(accessKey);
+
+                if (result.Success)
+                {
+                    Log.Information("Secret has been removed {accessKey}", accessKey);
+                    return Ok(new { Message = "Secret Removed successfully" });
+                }
+
+                return NotFound(new { Message = "Failed to remove secret for user" });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error removing secret for Access Key {secretKey}", accessKey);
+                return StatusCode(500, new { Message = "Internal server error", Error = ex.Message });
+            }
+        }
+
+        #endregion
     }
 }

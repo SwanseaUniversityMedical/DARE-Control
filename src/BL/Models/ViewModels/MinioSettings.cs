@@ -23,5 +23,6 @@ namespace BL.Models.ViewModels
         public string ProxyAddresURLForExternalFetch { get; set; }
 
         public string BypassProxy { get; set; }
+        public string ClientContainerName { get; set; }
     }
 }
