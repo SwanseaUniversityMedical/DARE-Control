@@ -231,8 +231,6 @@ namespace TRE_API.Services
         {
             try
             {
-                UpdateStatusForTre(submission.Id.ToString(), StatusType.WaitingForAgentToTransfer, "");
-                UpdateStatusForTre(submission.Id.ToString(), StatusType.TransferredToAgent, "");
                 UpdateStatusForTre(submission.Id.ToString(), StatusType.Processing, "");
                 UpdateStatusForTre(submission.Id.ToString(), StatusType.PreparingOutputs, "");
                 UpdateStatusForTre(submission.Id.ToString(), StatusType.TransferredForDataOut, "");
