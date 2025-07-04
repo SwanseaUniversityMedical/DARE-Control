@@ -13,6 +13,7 @@ using Minio.Exceptions;
 using Newtonsoft.Json;
 using Serilog;
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Text;
 
@@ -655,6 +656,184 @@ namespace BL.Services
                 return partSize;
             }
         }
+        #endregion
+
+        #region MinIO Client (mc) Command Approach
+
+        /// <summary>
+        /// Execute MinIO client command to create a user
+        /// </summary>
+        public async Task<MinIOOperationResult> CreateUserWithMcAsync(string accessKey, string secretKey)
+        {
+            try
+            {
+                var command = $"mc admin user add minio {accessKey} {secretKey}";
+                var result = await ExecuteMinIOClientCommand(command);
+
+                return new MinIOOperationResult
+                {
+                    Success = result.ExitCode == 0,
+                    Message = result.ExitCode == 0 ? "User created successfully" : result.Error,
+                    Output = result.Output
+                };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error creating user with mc command");
+                return new MinIOOperationResult
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        /// <summary>
+        /// Execute MinIO client command to set user policy
+        /// </summary>
+        public async Task<MinIOOperationResult> SetUserPolicyAsync(string accessKey, string policyName)
+        {
+            try
+            {
+                var command = $"mc admin policy attach minio {policyName} --user {accessKey}";
+                var result = await ExecuteMinIOClientCommand(command);
+
+                return new MinIOOperationResult
+                {
+                    Success = result.ExitCode == 0,
+                    Message = result.ExitCode == 0 ? "Policy attached successfully" : result.Error,
+                    Output = result.Output
+                };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error setting user policy");
+                return new MinIOOperationResult
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        /// <summary>
+        /// Execute MinIO client command to remove a user
+        /// </summary>
+        public async Task<MinIOOperationResult> RemoveUserWithMcAsync(string username)
+        {
+            try
+            {
+                var command = $"mc admin user remove minio {username}";
+                var result = await ExecuteMinIOClientCommand(command);
+
+                return new MinIOOperationResult
+                {
+                    Success = result.ExitCode == 0,
+                    Message = result.ExitCode == 0 ? "User removed successfully" : result.Error,
+                    Output = result.Output
+                };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error removing user with mc command");
+                return new MinIOOperationResult
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        /// <summary>
+        /// Execute MinIO client command in Docker container (Cross-platform)
+        /// </summary>
+        private async Task<CommandResult> ExecuteMinIOClientCommand(string command)
+        {
+            try
+            {
+                // Adjust container name based on your Docker Compose setup
+                var containerName = _minioSettings.ClientContainerName ?? "minio-client";
+                var dockerCommand = $"docker exec {containerName} {command}";
+
+                var processStartInfo = GetProcessStartInfo(dockerCommand);
+
+                using var process = new Process { StartInfo = processStartInfo };
+                process.Start();
+
+                var output = await process.StandardOutput.ReadToEndAsync();
+                var error = await process.StandardError.ReadToEndAsync();
+
+                await process.WaitForExitAsync();
+
+                Log.Information($"Command: {command}, ExitCode: {process.ExitCode}");
+                Log.Information($"Output: {output}");
+
+                if (!string.IsNullOrEmpty(error))
+                {
+                    Log.Warning($"Error: {error}");
+                }
+
+                return new CommandResult
+                {
+                    ExitCode = process.ExitCode,
+                    Output = output,
+                    Error = error
+                };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error executing MinIO client command");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get ProcessStartInfo based on the operating system
+        /// </summary>
+        private ProcessStartInfo GetProcessStartInfo(string command)
+        {
+            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+            {
+                // Windows - use cmd.exe
+                return new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c \"{command}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+            }
+            else
+            {
+                // Linux/macOS - use bash
+                return new ProcessStartInfo
+                {
+                    FileName = "/bin/bash",
+                    Arguments = $"-c \"{command}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+            }
+        }
+
+        public class MinIOOperationResult
+        {
+            public bool Success { get; set; }
+            public string Message { get; set; }
+            public string Output { get; set; }
+        }
+
+        public class CommandResult
+        {
+            public int ExitCode { get; set; }
+            public string Output { get; set; }
+            public string Error { get; set; }
+        }
+
         #endregion
     }
 }
