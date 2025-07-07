@@ -10,12 +10,15 @@ using TRE_API.Services;
 namespace TRE_API.Controllers
 {
     [Route("api/[controller]")]
+
     [ApiController]
     public class TRECredentialsController : Controller
     {
+
         private readonly ApplicationDbContext _DbContext;
         private readonly IEncDecHelper _encDecHelper;
         private readonly KeycloakTokenHelper _keycloakTokenHelper;
+
         public TRECredentialsController(ApplicationDbContext applicationDbContext, IEncDecHelper encDec, TreKeyCloakSettings keycloakSettings)
         {
             _encDecHelper = encDec;
@@ -23,6 +26,7 @@ namespace TRE_API.Controllers
             _keycloakTokenHelper = new KeycloakTokenHelper(keycloakSettings.BaseUrl, keycloakSettings.ClientId,
                 keycloakSettings.ClientSecret, keycloakSettings.Proxy, keycloakSettings.ProxyAddresURL, keycloakSettings.KeycloakDemoMode);
         }
+
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("CheckCredentialsAreValid")]
         public async Task<BoolReturn> CheckCredentialsAreValidAsync()
@@ -31,6 +35,7 @@ namespace TRE_API.Controllers
         }
         [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("UpdateCredentials")]
+
         public async Task<KeycloakCredentials> UpdateCredentials(KeycloakCredentials creds)
         {
             creds = await ControllerHelpers.UpdateCredentials(creds, _keycloakTokenHelper, _DbContext, _encDecHelper, CredentialType.Tre, "dare-tre-admin");
