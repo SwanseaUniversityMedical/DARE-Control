@@ -110,13 +110,7 @@ namespace BL.Models.Enums
         //Stage 5
         //Red
         [Display(Name = "Failed")]
-        Failed = 27,
-        //Stage 2
-        [Display(Name = "Sending submission to Hutch")]
-        SendingSubmissionToHutch = 28,
-        //Stage 4
-        [Display(Name = "Requesting Hutch packages up final output")]
-        RequestingHutchDoesFinalPackaging = 29,
+        Failed = 27,     
         //Stage 3
         [Display(Name = "Waiting for a Crate")]
         WaitingForCrate = 30,

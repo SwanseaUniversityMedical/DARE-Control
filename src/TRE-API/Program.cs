@@ -127,7 +127,6 @@ builder.Services.AddHostedService<ConsumeInternalMessageService>();
 
 builder.Services.AddScoped<IDareClientWithoutTokenHelper, DareClientWithoutTokenHelper>();
 builder.Services.AddScoped<IDataEgressClientWithoutTokenHelper, DataEgressClientWithoutTokenHelper>();
-builder.Services.AddScoped<IHutchClientHelper, HutchClientHelper>();
 
 string hangfireConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddHangfire(config => { config.UsePostgreSqlStorage(hangfireConnectionString); });
@@ -337,16 +336,7 @@ void AddServices(WebApplicationBuilder builder)
 {
     ServicePointManager.ServerCertificateValidationCallback +=
         (sender, cert, chain, sslPolicyErrors) => true;
-    builder.Services.AddHttpClient();
-    var ignoreHutchSSL = configuration["IgnoreHutchSSL"];
-    if (ignoreHutchSSL != null && ignoreHutchSSL.ToLower() == "true")
-    {
-        builder.Services.AddHttpClient("nossl", m => { }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-        {
-            ServerCertificateCustomValidationCallback = (m, c, ch, e) => true
-        });
-    }
-
+    builder.Services.AddHttpClient();   
 
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
