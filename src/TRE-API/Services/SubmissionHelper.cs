@@ -28,7 +28,7 @@ namespace TRE_API.Services
         void SimulateSubmissionProcessing(Submission submission);
         bool IsUserApprovedOnProject(int projectId, int userId);
         List<Submission>? GetWaitingSubmissionForTre();
-        void SendSumissionToHUTCH(Submission submission);
+        
         List<Submission>? GetRequestCancelSubsForTre(); 
         OutputBucketInfo GetOutputBucketGuts(string subId, bool hostnameonly, bool useExternal);
         APIReturn? CloseSubmissionForTre(string subId, StatusType statusType, string? description, string? finalFile);
@@ -39,8 +39,7 @@ namespace TRE_API.Services
         OutputBucketInfo GetOutputBucketGutsSub(string subId, bool hostnameonly);
     }
     public class SubmissionHelper: ISubmissionHelper
-    {
-        private readonly IHutchClientHelper _hutchHelper;
+    {      
         private readonly IDareClientWithoutTokenHelper _dareHelper;
         private readonly ApplicationDbContext _dbContext;
         private readonly MinioTRESettings _minioTreSettings;
@@ -48,19 +47,12 @@ namespace TRE_API.Services
         private readonly IDataEgressClientWithoutTokenHelper _dataEgressHelper;
         private readonly IMinioTreHelper _minioTreHelper;
         private readonly AgentSettings _agentSettings;
-
-        
-
-        public string _hutchDbServer { get; set; }
-        public string _hutchDbPort { get; set; }
-        public string _hutchDbName { get; set; }
-
+            
 
         public SubmissionHelper(ISignalRService signalRService,
             IDareClientWithoutTokenHelper helper,
             ApplicationDbContext dbContext,
-            IBus rabbit,
-            IHutchClientHelper hutchHelper,
+            IBus rabbit,            
             IConfiguration config,
             MinioTRESettings minioTreSettings,
             IDataEgressClientWithoutTokenHelper dataEgressHelper,
@@ -71,11 +63,7 @@ namespace TRE_API.Services
             
             _dareHelper = helper;
             _dbContext = dbContext;
-            _rabbit = rabbit;
-            _hutchHelper = hutchHelper;
-            _hutchDbName = config["Hutch:DbName"];
-            _hutchDbPort = config["Hutch:DbPort"];
-            _hutchDbServer = config["Hutch:DbServer"];
+            _rabbit = rabbit;           
             _minioTreSettings = minioTreSettings;
 
             _dataEgressHelper = dataEgressHelper;
@@ -153,9 +141,7 @@ namespace TRE_API.Services
                 throw;
             }
         }
-
-
-        //Use external is if something like hutch needs minio's external url and isn't sitting on same machine
+        
         public OutputBucketInfo GetOutputBucketGuts(string subId, bool hostnameonly, bool useExternal)
         {
             try
@@ -171,11 +157,7 @@ namespace TRE_API.Services
                     .Select(x => x.OutputBucketTre);
 
                 var outputBucket = bucket.FirstOrDefault();
-                var realurl = string.IsNullOrWhiteSpace(_minioTreSettings.HutchURLOverride) ? _minioTreSettings.Url : _minioTreSettings.HutchURLOverride;
-                if (!useExternal)
-                {
-                    realurl = _minioTreSettings.Url;
-                }
+                var realurl = _minioTreSettings.Url;               
                 bool secure = !_minioTreSettings.Url.ToLower().StartsWith("http://");
                 return new OutputBucketInfo()
                 {
@@ -191,56 +173,12 @@ namespace TRE_API.Services
                 Log.Error(ex, "{Function} Crash", "GetOutputBucketGuts");
                 throw;
             }
-        }
-
-        public void SendSumissionToHUTCH(Submission submission)
-        {
-            Uri uri = new Uri(submission.DockerInputLocation);
-            string fileName = Path.GetFileName(uri.LocalPath);
-            var project = _dbContext.Projects.First(x => x.SubmissionProjectId == submission.Project.Id);
-            var realurl = string.IsNullOrWhiteSpace(_minioTreSettings.HutchURLOverride) ? _minioTreSettings.Url : _minioTreSettings.HutchURLOverride;
-            bool secure = !realurl.ToLower().StartsWith("http://");
-            var job = new SubmitJobModel()
-            {
-                SubId = submission.Id.ToString(),
-                
-                DataAccess = new DatabaseConnectionDetails()
-                {
-                    Database = _hutchDbName,
-                    Hostname = _hutchDbServer,
-                    Username = project.UserName,
-                    Password = project.Password,
-                    Port = int.Parse(_hutchDbPort)
-                },
-                CrateSource = new FileStorageDetails()
-                {
-                    Bucket = project.SubmissionBucketTre,
-                    Path = fileName,
-                    Host = realurl.Replace("http://","").Replace("https://", ""),
-                    Secure = secure
-                }
-                
-            };
-            var statusParams = new Dictionary<string, string>()
-            {
-                { "subId", submission.Id.ToString() },
-                { "statusType", StatusType.SendingSubmissionToHutch.ToString() },
-                { "description", "" }
-            };
-            Log.Information("{Function} Minio url sent {Url} bucket {Bucket}, path {path}", "SendSubmissionToHutch", job.CrateSource.Host, job.CrateSource.Bucket, job.CrateSource.Path);
-            var StatusResult = _dareHelper.CallAPIWithoutModel<APIReturn>("/api/Submission/UpdateStatusForTre", statusParams).Result;
-            var res = _hutchHelper.CallAPI<SubmitJobModel, JobStatusModel>($"/api/jobs/", job).Result;
-
-            
-        }
+        }      
 
         public void SimulateSubmissionProcessing(Submission submission)
         {
             try
-            {
-
-
-                UpdateStatusForTre(submission.Id.ToString(), StatusType.SendingSubmissionToHutch, "");
+            {               
                 UpdateStatusForTre(submission.Id.ToString(), StatusType.WaitingForCrate, "");
                 UpdateStatusForTre(submission.Id.ToString(), StatusType.ValidatingCrate, "");
                 UpdateStatusForTre(submission.Id.ToString(), StatusType.FetchingWorkflow, "");
