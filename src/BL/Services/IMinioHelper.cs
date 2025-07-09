@@ -1,6 +1,7 @@
 ﻿using Amazon.S3.Model;
 using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
+using static BL.Services.MinioHelper;
 
 namespace BL.Services
 {
@@ -28,5 +29,8 @@ namespace BL.Services
         Task<bool> BucketPolicySetPublic(string bucketName);
 
         Task DeleteObject(string bucketName, string objectKey);
+        Task<MinIOOperationResult> CreateUserWithMcAsync(string accessKey, string secretKey);
+        Task<MinIOOperationResult> SetUserPolicyAsync(string accessKey, string policyName);
+        Task<MinIOOperationResult> RemoveUserWithMcAsync(string accessKey);
     }
 }
