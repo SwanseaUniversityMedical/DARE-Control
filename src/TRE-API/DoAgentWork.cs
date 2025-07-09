@@ -466,12 +466,10 @@ namespace TRE_API
             using (var scope = _serviceProvider.CreateScope())
             {
                 // OPTIONS
-                var useRabbit = _AgentSettings.UseRabbit;
-                var useHutch = _AgentSettings.UseHutch;
+                var useRabbit = _AgentSettings.UseRabbit;               
                 var useTESK = _AgentSettings.UseTESK;
 
-                Log.Information("{Function} useRabbit {useRabbit}", "Execute", useRabbit);
-                Log.Information("{Function} useHutch {useHutch}", "Execute", useHutch);
+                Log.Information("{Function} useRabbit {useRabbit}", "Execute", useRabbit);              
                 Log.Information("{Function} useTESK {useTESK}", "Execute", useTESK);
                 if (await _features.IsEnabledAsync(FeatureFlags.DemoAllInOne))
                 {
@@ -605,22 +603,7 @@ namespace TRE_API
                                         aSubmission.Id);
                                     processedOK = false;
                                 }
-                            }
-                            else if (useHutch)
-                            {
-                                // **************  SEND TO HUTCH
-                                // TODO for rest API
-                                try
-                                {
-                                    _subHelper.SendSumissionToHUTCH(aSubmission);
-                                }
-                                catch (Exception e)
-                                {
-                                    Log.Error(e, "{Function} Send HUTCH failed for sub {SubId}", "Execute",
-                                        aSubmission.Id);
-                                    processedOK = false;
-                                }
-                            }
+                            }                           
 
                             // **************  SEND TO TESK
                             if (useTESK)

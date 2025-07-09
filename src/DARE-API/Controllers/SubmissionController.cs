@@ -271,8 +271,7 @@ namespace DARE_API.Controllers
                 StatusType.InvalidUser,
                 StatusType.TRENotAuthorisedForProject,
                 StatusType.AgentTransferringToPod,
-                StatusType.TransferToPodFailed,
-                StatusType.SendingSubmissionToHutch,
+                StatusType.TransferToPodFailed,               
                 StatusType.TreCrateValidated,
                 StatusType.TreCrateValidationFailed,
                 StatusType.TreCrateValidated,
@@ -321,8 +320,7 @@ namespace DARE_API.Controllers
             {
                 StatusType.DataOutApprovalBegun,
                 StatusType.DataOutApprovalRejected,
-                StatusType.DataOutApproved,
-                StatusType.RequestingHutchDoesFinalPackaging
+                StatusType.DataOutApproved               
             };
             Dictionary<int, List<StatusType>> stage4Dict = new Dictionary<int, List<StatusType>>();
             stage4Dict.Add(4, stage4List.statusTypeList);

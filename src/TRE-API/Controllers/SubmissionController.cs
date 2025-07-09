@@ -20,8 +20,7 @@ namespace TRE_API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     public class SubmissionController : Controller
-    {
-        private readonly IHutchClientHelper _hutchHelper;
+    {       
         private readonly IBus _rabbit;
         private readonly ISubmissionHelper _subHelper;
         private readonly IMinioSubHelper _minioSubHelper;
@@ -30,16 +29,14 @@ namespace TRE_API.Controllers
         private readonly AgentSettings _agentSettings;
         private readonly IFeatureManager _features;
 
-        public SubmissionController(
-            IHutchClientHelper hutchHelper,
+        public SubmissionController(           
             IBus rabbit,
             ISubmissionHelper subHelper,
             IMinioSubHelper minioSubHelper,
             IMinioTreHelper minioTreHelper,
             MinioTRESettings minioTreSettings,
             AgentSettings agentSettings, IFeatureManager features)
-        {
-            _hutchHelper = hutchHelper;
+        {            
             _rabbit = rabbit;
             _subHelper = subHelper;
             _minioTreHelper = minioTreHelper;
@@ -98,11 +95,7 @@ namespace TRE_API.Controllers
                 StatusType = statusType,
                 SubId = subId,
                 Description = description
-            };
-            if (!EnumHelper.GetHutchAllowedStatusUpdates().Contains(subDetails.StatusType))
-            {
-                throw new Exception("Restricted StatusType");
-            }
+            };           
 
             try
             {
@@ -184,8 +177,7 @@ namespace TRE_API.Controllers
         public async Task<IActionResult> EgressResults([FromBody] EgressReview review)
         {
             try
-            {
-                Dictionary<string, bool> hutchRes = new Dictionary<string, bool>();
+            {               
                 ApprovalType approvalStatus;
                 var approvedCount = review.FileResults.Count(x => x.Approved);
                 var rejectedCount = review.FileResults.Count(x => !x.Approved);
@@ -201,12 +193,7 @@ namespace TRE_API.Controllers
                 else
                 {
                     approvalStatus = ApprovalType.PartiallyApproved;
-                }
-
-                foreach (var i in review.FileResults)
-                {
-                    hutchRes.Add(i.FileName, i.Approved);
-                }
+                }               
 
                 if (approvalStatus != ApprovalType.FullyApproved)
                 {
@@ -219,26 +206,8 @@ namespace TRE_API.Controllers
                 {
                     _subHelper.UpdateStatusForTre(review.SubId.ToString(), StatusType.DataOutApproved, "");
                 }
-
-                var realurl = string.IsNullOrWhiteSpace(_minioTreSettings.HutchURLOverride)
-                    ? _minioTreSettings.Url
-                    : _minioTreSettings.HutchURLOverride;
-                bool secure = !realurl.ToLower().StartsWith("http://");
-                var bucket = _subHelper.GetOutputBucketGutsSub(review.SubId, true);
-                ApprovalResult hutchPayload = new ApprovalResult()
-                {
-                    Host = realurl.Replace("https://", "").Replace("http://", ""),
-                    Bucket = bucket.Bucket,
-                    Path = bucket.Path,
-                    Secure = secure,
-                    Status = approvalStatus,
-                    FileResults = hutchRes
-                };
-                //Only send if fully approved
-                if (approvalStatus == ApprovalType.FullyApproved)
-                {
-                    _subHelper.UpdateStatusForTre(review.SubId, StatusType.RequestingHutchDoesFinalPackaging, "");
-                }
+              
+                var bucket = _subHelper.GetOutputBucketGutsSub(review.SubId, true);                            
 
                 if (await _features.IsEnabledAsync(FeatureFlags.DemoAllInOne))
                 {
@@ -250,16 +219,7 @@ namespace TRE_API.Controllers
                     };
                     _rabbit.Advanced.Publish(exch, RoutingConstants.ProcessFinalOutput, false,
                         new Message<FinalOutcome>(outcome));
-                }
-                else if (_agentSettings.UseTESK == false)
-                {
-                    Log.Information("{Function} Minio url sent {Url} bucket {Bucket}, path {path}", "EgressReview",
-                        hutchPayload.Host, hutchPayload.Bucket, hutchPayload.Path);
-                    //Not sure what the return type is
-                    var HUTCHres =
-                        await _hutchHelper.CallAPI<ApprovalResult, APIReturn>($"/api/jobs/{review.SubId}/approval",
-                            hutchPayload);
-                }
+                }               
                 else
                 {
                     Log.Information(
@@ -316,25 +276,7 @@ namespace TRE_API.Controllers
                 Log.Error(ex, "{Function} Crash", "FinalOutcomeSubmission");
                 throw;
             }
-        }
-
-
-        [HttpPost("SendSubmissionToHUTCH")]
-        public IActionResult SendSubmissionToHUTCH(Submission sub)
-        {
-            try
-            {
-                //Update status of submission to "Sending to hutch"
-                _subHelper.SendSumissionToHUTCH(sub);
-
-                return StatusCode(200);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crash", "SendSubmissionToHUTCH");
-                throw;
-            }
-        }
+        }       
 
         [HttpPost("SimulateSubmissionProcessing")]
         public IActionResult SimulateSubmissionProcessing(Submission sub)
