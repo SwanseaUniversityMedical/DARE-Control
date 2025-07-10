@@ -175,7 +175,7 @@ builder.Services.AddAuthentication(options =>
 
         if (treKeyCloakSettings.Proxy)
         {
-            Console.WriteLine("TRE API Proxy = " + treKeyCloakSettings.ProxyAddresURL);
+            Console.WriteLine("TRE API Proxy = " + treKeyCloakSettings.ProxyAddressUrl);
             Console.WriteLine("TRE API Proxy bypass = " + treKeyCloakSettings.BypassProxy);
             options.BackchannelHttpHandler = new HttpClientHandler
             {
@@ -183,7 +183,7 @@ builder.Services.AddAuthentication(options =>
                 UseDefaultCredentials = true,
                 Proxy = new WebProxy()
                 {
-                    Address = new Uri(treKeyCloakSettings.ProxyAddresURL),
+                    Address = new Uri(treKeyCloakSettings.ProxyAddressUrl),
                     BypassList = new[] { treKeyCloakSettings.BypassProxy }
                 }
             };

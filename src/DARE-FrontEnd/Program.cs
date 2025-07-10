@@ -163,12 +163,12 @@ builder.Services.AddAuthentication(options =>
                     if (submissionKeyCloakSettings.Proxy)
                     {
                         Log.Information("{Function} Proxy = {Proxy}, Bypass = {Bypass}", "AddOpenIdConnect",
-                            submissionKeyCloakSettings.ProxyAddresURL);
+                            submissionKeyCloakSettings.ProxyAddressUrl);
                         httpClientHandler.UseProxy = true;
                         httpClientHandler.UseDefaultCredentials = true;
                         httpClientHandler.Proxy = new WebProxy()
                         {
-                            Address = new Uri(submissionKeyCloakSettings.ProxyAddresURL),
+                            Address = new Uri(submissionKeyCloakSettings.ProxyAddressUrl),
                             BypassList = new[] { submissionKeyCloakSettings.BypassProxy }
                         };
                     }
@@ -279,9 +279,9 @@ builder.Services.AddAuthentication(options =>
                             Log.Information("Response Header {key} - {value}", header.Key, header.Value);
                         }
 
-                        if (submissionKeyCloakSettings.UseRedirectURL)
+                        if (submissionKeyCloakSettings.UseRedirectUrl)
                         {
-                            context.ProtocolMessage.RedirectUri = submissionKeyCloakSettings.RedirectURL;
+                            context.ProtocolMessage.RedirectUri = submissionKeyCloakSettings.RedirectUrl;
                         }
 
                         Log.Information("Redirect Uri {Redirect}", context.ProtocolMessage.RedirectUri);

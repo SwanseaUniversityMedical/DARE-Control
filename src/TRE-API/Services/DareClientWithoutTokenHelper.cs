@@ -1,7 +1,6 @@
 ﻿using BL.Models;
 using BL.Models.Settings;
 using BL.Services;
-using Serilog;
 using TRE_API.Repositories.DbContexts;
 
 namespace TRE_API.Services
@@ -16,7 +15,8 @@ namespace TRE_API.Services
             config["DareAPISettings:Address"], false)
         {
             CredDb = db;
-            _keycloakTokenHelper = new KeycloakTokenHelper(settings.BaseUrl, settings.ClientId, settings.ClientSecret, settings.Proxy, settings.ProxyAddresURL, settings.KeycloakDemoMode);
+            _keycloakTokenHelper = new KeycloakTokenHelper(settings.BaseUrl, settings.ClientId, settings.ClientSecret,
+                settings.Proxy, settings.ProxyAddressUrl, settings.KeycloakDemoMode);
 
             var creds = db.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Submission);
             if (creds != null)

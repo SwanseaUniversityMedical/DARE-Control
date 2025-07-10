@@ -1,12 +1,7 @@
-﻿using Amazon.Runtime.Internal.Transform;
-using BL.Models;
+﻿using BL.Models;
 using BL.Models.Settings;
 using BL.Services;
-using IdentityModel.Client;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Serilog;
 using System.Net;
 using System.Net.Http.Headers;
@@ -14,7 +9,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using TRE_API.Models;
 using TRE_API.Repositories.DbContexts;
-using System.Text.RegularExpressions;
 
 namespace TRE_API.Services
 {
@@ -301,7 +295,7 @@ namespace TRE_API.Services
             {
                 handler.Proxy = new WebProxy()
                 {
-                    Address = new Uri(_TreKeyCloakSettings.ProxyAddresURL),
+                    Address = new Uri(_TreKeyCloakSettings.ProxyAddressUrl),
                     BypassList = new[] { _TreKeyCloakSettings.BypassProxy }
                 };
                 handler.UseProxy = true;

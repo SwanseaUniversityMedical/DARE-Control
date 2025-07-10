@@ -130,12 +130,12 @@ try
                 if (dataEgressKeyCloakSettings.Proxy)
                 {
                     Log.Information("{Function} Proxy = {Proxy}, Bypass = {Bypass}", "AddOpenIdConnect",
-                        dataEgressKeyCloakSettings.ProxyAddresURL);
+                        dataEgressKeyCloakSettings.ProxyAddressUrl);
                     httpClientHandler.UseProxy = true;
                     httpClientHandler.UseDefaultCredentials = true;
                     httpClientHandler.Proxy = new WebProxy()
                     {
-                        Address = new Uri(dataEgressKeyCloakSettings.ProxyAddresURL),
+                        Address = new Uri(dataEgressKeyCloakSettings.ProxyAddressUrl),
                         BypassList = new[] { dataEgressKeyCloakSettings.BypassProxy }
                     };
                 }
@@ -161,7 +161,7 @@ try
                     UseDefaultCredentials = true,
                     Proxy = new WebProxy()
                     {
-                        Address = new Uri(dataEgressKeyCloakSettings.ProxyAddresURL),
+                        Address = new Uri(dataEgressKeyCloakSettings.ProxyAddressUrl),
                         BypassList = new[] { dataEgressKeyCloakSettings.BypassProxy }
                     }
                 };

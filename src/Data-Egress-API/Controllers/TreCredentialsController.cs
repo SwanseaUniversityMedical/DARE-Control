@@ -1,5 +1,4 @@
-﻿
-using BL.Models;
+﻿using BL.Models;
 using BL.Models.APISimpleTypeReturns;
 using BL.Models.Settings;
 using BL.Services;
@@ -12,29 +11,29 @@ using Data_Egress_API.Repositories.DbContexts;
 namespace Data_Egress_API.Controllers
 {
     [Route("api/[controller]")]
-    
-    
     [ApiController]
     public class TreCredentialsController : Controller
     {
-
         private readonly ApplicationDbContext _DbContext;
         private readonly IEncDecHelper _encDecHelper;
-        
+
         public KeycloakTokenHelper _keycloakTokenHelper { get; set; }
         public KeycloakTokenHelper _egressKeycloakTokenHelper { get; set; }
 
 
-        public TreCredentialsController(ApplicationDbContext applicationDbContext, IEncDecHelper encDec, TreKeyCloakSettings keycloakSettings, DataEgressKeyCloakSettings egressKeyCloakSettings)
+        public TreCredentialsController(ApplicationDbContext applicationDbContext, IEncDecHelper encDec,
+            TreKeyCloakSettings keycloakSettings, DataEgressKeyCloakSettings egressKeyCloakSettings)
         {
             _encDecHelper = encDec;
             _DbContext = applicationDbContext;
             _keycloakTokenHelper = new KeycloakTokenHelper(keycloakSettings.BaseUrl, keycloakSettings.ClientId,
-                keycloakSettings.ClientSecret, keycloakSettings.Proxy, keycloakSettings.ProxyAddresURL, keycloakSettings.KeycloakDemoMode);
+                keycloakSettings.ClientSecret, keycloakSettings.Proxy, keycloakSettings.ProxyAddressUrl,
+                keycloakSettings.KeycloakDemoMode);
 
-            _egressKeycloakTokenHelper = new KeycloakTokenHelper(egressKeyCloakSettings.BaseUrl, egressKeyCloakSettings.ClientId,
-                egressKeyCloakSettings.ClientSecret, egressKeyCloakSettings.Proxy, egressKeyCloakSettings.ProxyAddresURL, egressKeyCloakSettings.KeycloakDemoMode);
-
+            _egressKeycloakTokenHelper = new KeycloakTokenHelper(egressKeyCloakSettings.BaseUrl,
+                egressKeyCloakSettings.ClientId,
+                egressKeyCloakSettings.ClientSecret, egressKeyCloakSettings.Proxy,
+                egressKeyCloakSettings.ProxyAddressUrl, egressKeyCloakSettings.KeycloakDemoMode);
         }
 
 
@@ -51,7 +50,6 @@ namespace Data_Egress_API.Controllers
                     var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
                         _encDecHelper.Decrypt(creds.PasswordEnc), "data-egress-admin");
                     result.Result = !string.IsNullOrWhiteSpace(token);
-
                 }
 
                 return result;
@@ -67,18 +65,19 @@ namespace Data_Egress_API.Controllers
         [HttpGet("EgressCheckCredentialsAreValid")]
         public async Task<BoolReturn> EgressCheckCredentialsAreValidAsync()
         {
-            try { 
-            var result = new BoolReturn() { Result = false };
-            var creds = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Egress);
-            if (creds != null)
+            try
             {
-                var token = await _egressKeycloakTokenHelper.GetTokenForUser(creds.UserName,
-                    _encDecHelper.Decrypt(creds.PasswordEnc), "data-egress-admin");
-                result.Result = !string.IsNullOrWhiteSpace(token);
+                var result = new BoolReturn() { Result = false };
+                var creds = _DbContext.KeycloakCredentials.FirstOrDefault(
+                    x => x.CredentialType == CredentialType.Egress);
+                if (creds != null)
+                {
+                    var token = await _egressKeycloakTokenHelper.GetTokenForUser(creds.UserName,
+                        _encDecHelper.Decrypt(creds.PasswordEnc), "data-egress-admin");
+                    result.Result = !string.IsNullOrWhiteSpace(token);
+                }
 
-            }
-
-            return result;
+                return result;
             }
             catch (Exception ex)
             {
@@ -103,19 +102,20 @@ namespace Data_Egress_API.Controllers
                 }
 
                 var add = true;
-                var dbcred = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Egress);
+                var dbcred =
+                    _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Egress);
                 if (dbcred != null)
                 {
                     creds.Id = dbcred.Id;
                     creds.CredentialType = CredentialType.Egress;
                     add = false;
                 }
+
                 creds.CredentialType = CredentialType.Egress;
                 creds.PasswordEnc = _encDecHelper.Encrypt(creds.PasswordEnc);
                 if (add)
                 {
                     _DbContext.KeycloakCredentials.Add(creds);
-
                 }
                 else
                 {
@@ -157,12 +157,12 @@ namespace Data_Egress_API.Controllers
                     creds.CredentialType = CredentialType.Tre;
                     add = false;
                 }
+
                 creds.CredentialType = CredentialType.Tre;
                 creds.PasswordEnc = _encDecHelper.Encrypt(creds.PasswordEnc);
                 if (add)
                 {
                     _DbContext.KeycloakCredentials.Add(creds);
-
                 }
                 else
                 {

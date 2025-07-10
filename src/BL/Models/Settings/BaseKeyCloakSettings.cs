@@ -1,54 +1,53 @@
-﻿using System.Runtime;
-using System.Net;
+﻿using System.Net;
 using Serilog;
 
-namespace BL.Models.Settings
+namespace BL.Models.Settings;
+
+public class BaseKeyCloakSettings
 {
-    public class BaseKeyCloakSettings
+    public string Authority { get; set; } = string.Empty;
+    public string RootUrl { get; set; } = string.Empty;
+    public string BaseUrl { get; set; } = string.Empty;
+    public string ClientId { get; set; } = string.Empty;
+    public string ClientSecret { get; set; } = string.Empty;
+    public string RemoteSignOutPath { get; set; } = string.Empty;
+    public string SignedOutRedirectUri { get; set; } = string.Empty;
+    public string TokenExpiredAddress { get; set; } = string.Empty;
+    public bool Proxy { get; set; }
+
+    public string BypassProxy { get; set; } = string.Empty;
+
+    public string ProxyAddressUrl { get; set; } = string.Empty;
+    public string TokenRefreshSeconds { get; set; } = string.Empty;
+
+    public bool KeycloakDemoMode { get; set; }
+    public string RedirectUrl { get; set; } = string.Empty;
+
+    public bool UseRedirectUrl { get; set; }
+
+    public string MetadataAddress { get; set; } = string.Empty;
+    public string? ValidAudiences { get; set; }
+    public string Server { get; set; } = string.Empty;
+    public string Protocol { get; set; } = string.Empty;
+    public string Realm { get; set; } = string.Empty;
+    public bool AutoTrustKeycloakCert { get; set; }
+    public string ValidIssuer { get; set; } = string.Empty;
+
+    public string ValidAudience { get; set; } = string.Empty;
+
+    public HttpClientHandler GetProxyHandler
     {
-
-        public string Authority { get; set; }
-        public string RootUrl { get; set; }
-        public string BaseUrl { get; set; }
-        public string ClientId { get; set; }
-        public string ClientSecret { get; set; }
-        public string RemoteSignOutPath { get; set; }
-        public string SignedOutRedirectUri { get; set; }
-        public string TokenExpiredAddress { get; set; }
-        public bool Proxy { get; set; }
-
-        public string BypassProxy { get; set; }
-
-        public string ProxyAddresURL { get; set; }
-        public string TokenRefreshSeconds { get; set; }
-
-        public bool KeycloakDemoMode { get; set; }
-        public string RedirectURL { get; set; }
-
-        public bool UseRedirectURL { get; set; }
-
-        public string MetadataAddress { get; set; }
-        public string? ValidAudiences { get; set; }
-        public string Server { get; set; }
-        public string Protocol { get; set; }
-        public string Realm { get; set; }
-        public bool AutoTrustKeycloakCert { get; set; }
-        public string ValidIssuer { get; set; }
-
-        public string ValidAudience { get; set; }
-
-        public HttpClientHandler getProxyHandler {
-            get
+        get
+        {
+            Log.Information($"getProxyHandler ProxyAddressURL > {ProxyAddressUrl} Proxy > {Proxy} ");
+            HttpClientHandler handler = new HttpClientHandler
             {
-                Log.Information($"getProxyHandler ProxyAddresURL > {ProxyAddresURL} Proxy > {Proxy} ");
-                HttpClientHandler handler = new HttpClientHandler
-                {
-                    Proxy = string.IsNullOrWhiteSpace(ProxyAddresURL)? null : new WebProxy(ProxyAddresURL,true), // Replace with your proxy server URL
-                    UseProxy = Proxy
-                };
-                return handler;
-            }
+                Proxy = string.IsNullOrWhiteSpace(ProxyAddressUrl)
+                    ? null
+                    : new WebProxy(ProxyAddressUrl, true), // Replace with your proxy server URL
+                UseProxy = Proxy
+            };
+            return handler;
         }
-
     }
 }

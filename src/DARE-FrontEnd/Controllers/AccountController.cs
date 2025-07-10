@@ -3,9 +3,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Serilog;
-using System.IdentityModel.Tokens.Jwt;
 using BL.Models.Settings;
 using Newtonsoft.Json.Linq;
 using System.Net;
@@ -27,8 +25,6 @@ namespace DARE_FrontEnd.Controllers
         [Authorize]
         public async Task<IActionResult> NewTokenIssue()
         {
-
-
             var context = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             var result = "";
             //Refresh tokens are used once the access or ID tokens expire
@@ -46,7 +42,7 @@ namespace DARE_FrontEnd.Controllers
             {
                 handler = new HttpClientHandler
                 {
-                    Proxy = new WebProxy(_keycloakSettings.ProxyAddresURL, true), // Replace with your proxy server URL
+                    Proxy = new WebProxy(_keycloakSettings.ProxyAddressUrl, true), // Replace with your proxy server URL
                     UseProxy = _keycloakSettings.Proxy,
                 };
             }
@@ -56,14 +52,13 @@ namespace DARE_FrontEnd.Controllers
             var tokenEndpoint = $"{keycloakBaseUrl}/protocol/openid-connect/token";
             var tokenRequestBody = new FormUrlEncodedContent(new Dictionary<string, string>
             {
-                {"grant_type", "refresh_token"},
-                {"client_id", clientId},
-                {"client_secret", clientSecret},
-                {"refresh_token", refreshToken},
-                {"max_age", _keycloakSettings.TokenRefreshSeconds} // Set a longer max_age in seconds
+                { "grant_type", "refresh_token" },
+                { "client_id", clientId },
+                { "client_secret", clientSecret },
+                { "refresh_token", refreshToken },
+                { "max_age", _keycloakSettings.TokenRefreshSeconds } // Set a longer max_age in seconds
             });
 
-           
 
             var tokenResponse = await httpClient.PostAsync(tokenEndpoint, tokenRequestBody);
             var tokenResponseContent = await tokenResponse.Content.ReadAsStringAsync();
@@ -73,11 +68,13 @@ namespace DARE_FrontEnd.Controllers
                 var tokenJson = JObject.Parse(tokenResponseContent);
                 var newAccessToken = tokenJson["access_token"].ToString();
                 result = newAccessToken;
-                Log.Information("{Function} New Access Token with longer expiry: {newAccessToken}", "NewToken", newAccessToken);
+                Log.Information("{Function} New Access Token with longer expiry: {newAccessToken}", "NewToken",
+                    newAccessToken);
             }
             else
             {
-                Log.Error("{Function} Error refreshing token: {tokenResponseContent}", "NewToken", tokenResponseContent);
+                Log.Error("{Function} Error refreshing token: {tokenResponseContent}", "NewToken",
+                    tokenResponseContent);
             }
 
             var expirationDate = DateTime.Now.AddSeconds(int.Parse(_keycloakSettings.TokenRefreshSeconds));
@@ -87,7 +84,6 @@ namespace DARE_FrontEnd.Controllers
         }
 
 
-     
         public class TokenRoles
         {
             public List<string> roles { get; set; }
@@ -95,10 +91,11 @@ namespace DARE_FrontEnd.Controllers
 
         public IActionResult Login()
         {
-            if (!HttpContext.User.Identity.IsAuthenticated) 
+            if (!HttpContext.User.Identity.IsAuthenticated)
             {
                 return Challenge(OpenIdConnectDefaults.AuthenticationScheme);
             }
+
             return RedirectToAction("LoggedInUser", "Home");
         }
 
@@ -125,14 +122,11 @@ namespace DARE_FrontEnd.Controllers
                 RedirectUri = Url.Action("Login", "Account")
             });
         }
+
         public async Task<IActionResult> AccessDenied(string ReturnUrl)
         {
             var accessToken = await HttpContext.GetTokenAsync("access_token");
             return View();
         }
-
-
-       
-
     }
 }

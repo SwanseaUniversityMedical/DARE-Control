@@ -138,12 +138,12 @@ try
                 if (treKeyCloakSettings.Proxy)
                 {
                     Log.Information("{Function} Proxy = {Proxy}, Bypass = {Bypass}", "AddOpenIdConnect",
-                        treKeyCloakSettings.ProxyAddresURL);
+                        treKeyCloakSettings.ProxyAddressUrl);
                     httpClientHandler.UseProxy = true;
                     httpClientHandler.UseDefaultCredentials = true;
                     httpClientHandler.Proxy = new WebProxy()
                     {
-                        Address = new Uri(treKeyCloakSettings.ProxyAddresURL),
+                        Address = new Uri(treKeyCloakSettings.ProxyAddressUrl),
                         BypassList = new[] { treKeyCloakSettings.BypassProxy }
                     };
                 }

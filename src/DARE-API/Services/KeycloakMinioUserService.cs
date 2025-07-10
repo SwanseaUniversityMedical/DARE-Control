@@ -1,25 +1,23 @@
 ﻿using BL.Models.Settings;
-using BL.Models.ViewModels;
 using DARE_API.Services.Contract;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
-using System.IO;
 using System.Net.Http.Headers;
-using System.Runtime;
-using System.Text;
-using System.Net;
 
 namespace DARE_API.Services
 {
     public class KeycloakMinioUserService : IKeycloakMinioUserService
     {
-        public  SubmissionKeyCloakSettings _submissionKeyCloakSettings;
+        private readonly SubmissionKeyCloakSettings _submissionKeyCloakSettings;
+
         public KeycloakMinioUserService(SubmissionKeyCloakSettings submissionKeyCloakSettings)
         {
             _submissionKeyCloakSettings = submissionKeyCloakSettings;
         }
-        public async Task<bool> SetMinioUserAttribute(string accessToken, string userName, string attributeName, string attributeValueToAdd)
+
+        public async Task<bool> SetMinioUserAttribute(string accessToken, string userName, string attributeName,
+            string attributeValueToAdd)
         {
             try
             {
@@ -32,7 +30,6 @@ namespace DARE_API.Services
 
                 if (userAttributesJson != null)
                 {
-
                     JObject user = JObject.Parse(userAttributesJson);
 
                     if (user["attributes"] == null)
@@ -42,6 +39,7 @@ namespace DARE_API.Services
                         // Add the "attributes" object to the user object
                         user["attributes"] = attributes;
                     }
+
                     if (user["attributes"][attributeKey] != null)
                     {
                         var existingValues = user["attributes"][attributeKey].ToObject<JArray>();
@@ -57,7 +55,8 @@ namespace DARE_API.Services
                     string updatedUserData = user.ToString();
 
 
-                    bool updateResult = await UpdateUserAttributes(baseUrl, realm, userId, accessToken, updatedUserData, protocol);
+                    bool updateResult = await UpdateUserAttributes(baseUrl, realm, userId, accessToken, updatedUserData,
+                        protocol);
 
                     if (updateResult)
                     {
@@ -75,20 +74,18 @@ namespace DARE_API.Services
                     Log.Error("{Function} Failed to retrieve user attributes.", "SetMinioUserAttribute");
                     return true;
                 }
-
-
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }
-        public async Task<bool> RemoveMinioUserAttribute(string accessToken, string userName, string attributeName, string attributeValueToRemove)
+
+        public async Task<bool> RemoveMinioUserAttribute(string accessToken, string userName, string attributeName,
+            string attributeValueToRemove)
         {
             try
             {
-
                 var baseUrl = _submissionKeyCloakSettings.Server;
                 var realm = _submissionKeyCloakSettings.Realm;
                 var protocol = _submissionKeyCloakSettings.Protocol;
@@ -98,12 +95,10 @@ namespace DARE_API.Services
 
                 if (userAttributesJson != null)
                 {
-
                     JObject user = JObject.Parse(userAttributesJson);
 
                     if (user["attributes"][attributeKey] != null)
                     {
-
                         var existingValues = user["attributes"][attributeKey].ToObject<JArray>();
 
 
@@ -123,7 +118,8 @@ namespace DARE_API.Services
 
                     string updatedUserData = user.ToString();
 
-                    bool updateResult = await UpdateUserAttributes(baseUrl, realm, userId, accessToken, updatedUserData, protocol);
+                    bool updateResult = await UpdateUserAttributes(baseUrl, realm, userId, accessToken, updatedUserData,
+                        protocol);
 
                     if (updateResult)
                     {
@@ -141,28 +137,28 @@ namespace DARE_API.Services
                     Log.Error("{Function} Failed to retrieve user attributes.", "RemoveMinioUserAttribute");
                     return false;
                 }
-
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }
 
-        public class MinioStuff{
+        public class MinioStuff
+        {
             public string username { get; set; }
             public string id { get; set; }
         }
+
         public async Task<string> GetUserIDAsync(string accessToken, string userName)
         {
             var baseUrl = _submissionKeyCloakSettings.Server;
             var realm = _submissionKeyCloakSettings.Realm;
             var protocol = _submissionKeyCloakSettings.Protocol;
-            HttpClient httpClient = new HttpClient(_submissionKeyCloakSettings.getProxyHandler);
-            
+            HttpClient httpClient = new HttpClient(_submissionKeyCloakSettings.GetProxyHandler);
+
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            
+
             var apiUrl = $"{protocol}://{baseUrl}/admin/realms/{realm}/users?username={userName}";
             Log.Information("{Function} BaseUrl {BaseUrl} and API Url {ApiUrl}", "GetUserIDAsync", baseUrl, apiUrl);
             var response = await httpClient.GetAsync(apiUrl);
@@ -171,7 +167,7 @@ namespace DARE_API.Services
             var jsonString = await response.Content.ReadAsStringAsync();
             try
             {
-                Log.Information("{Function} JSONString {JSONString}","GetUserIDAsync", jsonString);
+                Log.Information("{Function} JSONString {JSONString}", "GetUserIDAsync", jsonString);
                 var jsonObject = JsonConvert.DeserializeObject<List<MinioStuff>>(jsonString);
                 foreach (var item in jsonObject)
                 {
@@ -186,16 +182,17 @@ namespace DARE_API.Services
             }
             catch (Exception ex)
             {
-
                 throw;
             }
 
 
             return string.Empty;
         }
-        public async Task<string> GetUserAttributesAsync(string baseUrl, string realm, string accessToken, string userID, string protocol)
+
+        public async Task<string> GetUserAttributesAsync(string baseUrl, string realm, string accessToken,
+            string userID, string protocol)
         {
-            using (var httpClient = new HttpClient(_submissionKeyCloakSettings.getProxyHandler))
+            using (var httpClient = new HttpClient(_submissionKeyCloakSettings.GetProxyHandler))
             {
                 httpClient.BaseAddress = new Uri($"{protocol}://{baseUrl}/admin/realms/{realm}/users/{userID}");
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -212,9 +209,11 @@ namespace DARE_API.Services
                 }
             }
         }
-        public async Task<bool> UpdateUserAttributes(string keycloakBaseUrl, string realm, string userId, string accessToken, string updatedUserData, string protocol)
+
+        public async Task<bool> UpdateUserAttributes(string keycloakBaseUrl, string realm, string userId,
+            string accessToken, string updatedUserData, string protocol)
         {
-            using (var httpClient = new HttpClient(_submissionKeyCloakSettings.getProxyHandler))
+            using (var httpClient = new HttpClient(_submissionKeyCloakSettings.GetProxyHandler))
             {
                 httpClient.BaseAddress = new Uri($"{protocol}://{keycloakBaseUrl}/admin/realms/{realm}/users/{userId}");
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -230,8 +229,8 @@ namespace DARE_API.Services
                     content2 = reader.ReadToEnd();
 
                     // Output the string content
-
                 }
+
                 return response.IsSuccessStatusCode;
             }
         }

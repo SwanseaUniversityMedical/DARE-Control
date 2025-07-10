@@ -4,7 +4,6 @@ using BL.Models.Settings;
 using BL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
 namespace TRE_API.Controllers
@@ -24,7 +23,7 @@ namespace TRE_API.Controllers
             _encDecHelper = encDec;
             _DbContext = applicationDbContext;
             _keycloakTokenHelper = new KeycloakTokenHelper(keycloakSettings.BaseUrl, keycloakSettings.ClientId,
-                keycloakSettings.ClientSecret, keycloakSettings.Proxy, keycloakSettings.ProxyAddresURL, keycloakSettings.KeycloakDemoMode);
+                keycloakSettings.ClientSecret, keycloakSettings.Proxy, keycloakSettings.ProxyAddressUrl, keycloakSettings.KeycloakDemoMode);
         }
 
         [Authorize(Roles = "dare-tre-admin")]

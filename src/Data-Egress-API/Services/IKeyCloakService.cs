@@ -1,32 +1,24 @@
-﻿using Amazon.Runtime.Internal.Transform;
-using BL.Models;
+﻿using BL.Models;
 using BL.Models.Settings;
 using BL.Services;
-using IdentityModel.Client;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Serilog;
 using System.Net;
 using System.Net.Http.Headers;
-using System.Text;
-using System.Text.RegularExpressions;
 using Data_Egress_API.Repositories.DbContexts;
-using System.Xml.Linq;
 
 namespace Data_Egress_API.Services
 {
     public interface IKeyCloakService
     {
-        Task<KeyCloakService.TokenResponse> GenAccessTokenSimple(string adminName, string adminPassword, string max_age);
+        Task<KeyCloakService.TokenResponse>
+            GenAccessTokenSimple(string adminName, string adminPassword, string max_age);
+
         Task<List<string>> GetEmailsOfAccountWithRole(string role);
     }
 
     public class KeyCloakService : IKeyCloakService
     {
-
-
         private readonly ApplicationDbContext _DbContext;
         protected readonly IHttpContextAccessor _httpContextAccessor;
 
@@ -49,7 +41,6 @@ namespace Data_Egress_API.Services
 
         public async Task<List<string>> GetEmailsOfAccountWithRole(string role)
         {
-
             var creds = _DbContext.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Egress);
 
             var adminName = creds.UserName;
@@ -65,20 +56,21 @@ namespace Data_Egress_API.Services
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             var url = "";
 
-            url = _DataEgressKeyCloakSettings.RootUrl + $"/admin/realms/{_DataEgressKeyCloakSettings.Realm}/roles/{role}/users";
+            url = _DataEgressKeyCloakSettings.RootUrl +
+                  $"/admin/realms/{_DataEgressKeyCloakSettings.Realm}/roles/{role}/users";
             Log.Information(" GetUserIdAsync url >" + url);
-            
-           
+
+
             var response = await client.GetAsync(url);
             var content = await response.Content.ReadAsStringAsync();
             Log.Information(" GetUserIdAsync content >" + content);
-  
-            var uers = JsonConvert.DeserializeObject<List<User>>(content).Where(x => _EmailSettings.EmailsToIgnor.Contains( x.email) == false ).Select(x => x.email).ToList();
+
+            var uers = JsonConvert.DeserializeObject<List<User>>(content)
+                .Where(x => _EmailSettings.EmailsToIgnor.Contains(x.email) == false).Select(x => x.email).ToList();
 
             return uers;
         }
 
-   
 
         public class TokenRoles
         {
@@ -88,16 +80,17 @@ namespace Data_Egress_API.Services
         public class GenAccountData
         {
             public string Name { get; set; }
-            public string Password { get; set; }   
+            public string Password { get; set; }
             public string Email { get; set; }
         }
 
 
         public async Task<TokenResponse> GenAccessTokenSimple(string adminName, string adminPassword, string max_age)
         {
-            return await GetAccessTokenAsync( adminName, adminPassword, max_age);
+            return await GetAccessTokenAsync(adminName, adminPassword, max_age);
         }
-        public async Task<TokenResponse> GetAccessTokenAsync( string adminName, string adminPassword, string max_age)
+
+        public async Task<TokenResponse> GetAccessTokenAsync(string adminName, string adminPassword, string max_age)
         {
             var url = _DataEgressKeyCloakSettings.BaseUrl + "/protocol/openid-connect/token";
 
@@ -106,11 +99,11 @@ namespace Data_Egress_API.Services
 
             var tokenRequestBody = new FormUrlEncodedContent(new Dictionary<string, string>
             {
-                {"client_id", "admin-cli"},
-                {"username", adminName},
-                {"password", adminPassword},
-                {"grant_type", "password"},
-                {"max_age", max_age } // Set a longer max_age in seconds
+                { "client_id", "admin-cli" },
+                { "username", adminName },
+                { "password", adminPassword },
+                { "grant_type", "password" },
+                { "max_age", max_age } // Set a longer max_age in seconds
             });
 
             var response = await client.PostAsync(url, tokenRequestBody);
@@ -145,8 +138,6 @@ namespace Data_Egress_API.Services
         }
 
 
-  
-
         public HttpClientHandler GetHttpClientHandler()
         {
             var handler = new HttpClientHandler();
@@ -155,7 +146,7 @@ namespace Data_Egress_API.Services
             {
                 handler.Proxy = new WebProxy()
                 {
-                    Address = new Uri(_DataEgressKeyCloakSettings.ProxyAddresURL),
+                    Address = new Uri(_DataEgressKeyCloakSettings.ProxyAddressUrl),
                     BypassList = new[] { _DataEgressKeyCloakSettings.BypassProxy }
                 };
                 handler.UseProxy = true;
@@ -190,7 +181,6 @@ namespace Data_Egress_API.Services
         }
 
 
-
         class Credentials
         {
             public string type { get; set; } = "password";
@@ -198,6 +188,5 @@ namespace Data_Egress_API.Services
 
             public string temporary { get; set; } = "true";
         }
-
     }
 }

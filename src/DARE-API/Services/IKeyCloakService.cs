@@ -40,7 +40,7 @@ namespace DARE_API.Services
             {
                 handler = new HttpClientHandler
                 {
-                    Proxy = new WebProxy(_SubmissionKeyCloakSettings.ProxyAddresURL, true), // Replace with your proxy server URL
+                    Proxy = new WebProxy(_SubmissionKeyCloakSettings.ProxyAddressUrl, true), // Replace with your proxy server URL
                     UseProxy = _SubmissionKeyCloakSettings.Proxy,
                 };
             }
