@@ -222,6 +222,34 @@ services:
       - communicating
     volumes:
       - ./OPASettings/config.yaml:/config.yaml
+  vault:
+    image: hashicorp/vault:latest
+    container_name: vault
+    mem_limit: 512M
+    mem_reservation: 256M
+    cpus: 0.2
+    restart: always
+    ports:
+      - "8200:8200"
+    environment:
+      - VAULT_DEV_ROOT_TOKEN_ID=dev-only-token
+      - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
+      - VAULT_ADDR=http://127.0.0.1:8200
+    volumes:
+      - vault_data:/vault/data
+      - vault_logs:/vault/logs
+      - ./vault-config:/vault/config:ro
+    cap_add:
+      - IPC_LOCK
+    networks:
+      - communicating
+    healthcheck:
+      test: ["CMD-SHELL", "vault status || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    command: ["vault", "server", "-dev", "-dev-root-token-id=dev-only-token"]
   
    # command:
    #   - "run" 
@@ -324,6 +352,10 @@ volumes:
     seq_data:
       driver: local
     rabbitmq:
+      driver: local
+    vault_data:
+      driver: local
+    vault_logs:
       driver: local
 
 ######################################################
