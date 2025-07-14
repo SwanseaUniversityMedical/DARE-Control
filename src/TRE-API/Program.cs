@@ -330,6 +330,7 @@ void AddVaultServices(WebApplicationBuilder builder, ConfigurationManager config
 
     // Register the Vault service
     builder.Services.AddScoped<IVaultCredentialsService, VaultCredentialsService>();
+    builder.Services.AddScoped<IPostgreSQLUserManagementService, PostgreSQLUserManagementService>();
 }
 
 void AddServices(WebApplicationBuilder builder)
