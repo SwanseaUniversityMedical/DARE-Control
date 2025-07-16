@@ -31,7 +31,6 @@
   <ItemGroup>
     <Folder Include="BPMNHandlers\" />
     <Folder Include="BPMNModels\" />
-    <Folder Include="Models\" />
   </ItemGroup>
 
 </Project>

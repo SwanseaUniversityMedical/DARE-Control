@@ -10,7 +10,7 @@ namespace Tre_Camunda.Extensions
 {
     public static class ServiceExtensions
     {
-        public static void AddBusinessServices(this IServiceCollection services, IConfiguration configuration) // add services here
+        public static void AddBusinessServices(this IServiceCollection services, IConfiguration configuration) 
         {
 
 
@@ -34,8 +34,8 @@ namespace Tre_Camunda.Extensions
             configuration.Bind(nameof(camundaSettings), camundaSettings);
             services.AddSingleton(camundaSettings);
 
-            services.AddHostedService<BpmnProcessDeployService>();
-            services.AddScoped<IBpmnService, BpmnService>();
+            services.AddHostedService<ProcessDeployService>();
+            services.AddScoped<IProcessModelService, ProcessModelService>();
 
             services.AddScoped<IServicedZeebeClient, ServicedZeebeClient>();
           

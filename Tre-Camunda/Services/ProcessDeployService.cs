@@ -4,34 +4,36 @@ using Tre_Camunda.Settings;
 
 namespace Tre_Camunda.Services
 {
-    public class BpmnProcessDeployService : IHostedService
+    public class ProcessDeployService : IHostedService
     {
-        private readonly IBpmnService _bpmnService;
+        private readonly IProcessModelService _processModelService;
         private readonly IHostEnvironment _env;
         private readonly CamundaSettings _camundaSettings;
 
-        public BpmnProcessDeployService(IBpmnService bpmnService, IHostEnvironment env, CamundaSettings camundaSettings)
+        public ProcessDeployService(IProcessModelService processModelService, IHostEnvironment env, CamundaSettings camundaSettings)
         {
-            _bpmnService = bpmnService;
-            _env = env;
+            _processModelService = processModelService;          
             _camundaSettings = camundaSettings;
+            _env = env;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            var mn = Environment.MachineName;
+
+            /* Check to see if used for local development only */
             bool test = _env.IsDevelopment();
-            test = true;
 
             if (test && _camundaSettings.Deploy)
             {
+                Log.Information("Starting process and decision model deployment...");
                 try
                 {
-                    await _bpmnService.DeployProcessDefinition();
+                    await _processModelService.DeployProcessDefinitionAndDecisionModels();
+                    Log.Information("Deployment completed successfully.");
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex.ToString());
+                    Log.Error("Failed Deployment" + ex.ToString());
                     throw;
                 }
             }
