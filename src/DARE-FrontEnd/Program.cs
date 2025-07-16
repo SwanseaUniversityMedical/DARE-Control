@@ -1,12 +1,8 @@
-
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.Net;
 using BL.Models.Services;
 using BL.Models.Settings;
-
-
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.IdentityModel.Logging;
 using Serilog;
@@ -29,349 +25,323 @@ IWebHostEnvironment environment = builder.Environment;
 Log.Logger = CreateSerilogLogger(configuration, environment);
 try
 {
-
     //builder.Host.UseSerilog();
     // Add services to the container.
     builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
-{
-    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-    options.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
-}
-).AddRazorRuntimeCompilation(); 
+        {
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            options.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
+        }
+    ).AddRazorRuntimeCompilation();
 
-Log.Information("Dare-FrontEnd logging LastStatusUpdate.");
-
-
+    Log.Information("Dare-FrontEnd logging LastStatusUpdate.");
 
 
 // -- authentication here
-var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
-configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
-var keycloakDemomode = configuration["KeycloakDemoMode"].ToLower() == "true";
-var demomode = configuration["DemoMode"].ToLower() == "true";
-    submissionKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
-    builder.Services.AddSingleton(submissionKeyCloakSettings);
+    builder.Services
+        .Configure<SubmissionKeyCloakSettings>(builder.Configuration.GetSection("SubmissionKeyCloakSettings"))
+        .Configure<FormIoSettings>(builder.Configuration.GetSection("FormIO"))
+        .Configure<URLSettingsFrontEnd>(builder.Configuration.GetSection("URLSettingsFrontEnd"))
+        .Configure<UIName>(builder.Configuration.GetSection("UIName"));
 
-var formIOSettings = new FormIOSettings();
-configuration.Bind(nameof(formIOSettings), formIOSettings);
-builder.Services.AddSingleton(formIOSettings);
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddHttpClient();
 
-var URLSettingsFrontEnd = new URLSettingsFrontEnd();
-configuration.Bind(nameof(URLSettingsFrontEnd), URLSettingsFrontEnd);
-builder.Services.AddSingleton(URLSettingsFrontEnd);
-
-    
-var UIName = new DARE_FrontEnd.Models.UIName();
-configuration.Bind(nameof(UIName), UIName);
-builder.Services.AddSingleton(UIName);
-
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddHttpClient();
-if (configuration["SuppressAntiforgery"] != null && configuration["SuppressAntiforgery"].ToLower() == "true")
-{
-    Log.Warning("{Function} Disabling Anti Forgery token. Only do if testing", "Main");
-    builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
-    builder.Services.AddDataProtection()
-        .PersistKeysToFileSystem(new DirectoryInfo("/root/.aspnet/DataProtection-Keys"))
-        .DisableAutomaticKeyGeneration();
+    if (configuration["SuppressAntiforgery"] != null && configuration["SuppressAntiforgery"].ToLower() == "true")
+    {
+        Log.Warning("{Function} Disabling Anti Forgery token. Only do if testing", "Main");
+        builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
+        builder.Services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo("/root/.aspnet/DataProtection-Keys"))
+            .DisableAutomaticKeyGeneration();
     }
 
     //add services here
     builder.Services.AddScoped<CustomCookieEvent>();
 
-builder.Services.AddScoped<IDareClientHelper, DareClientHelper>();
+    builder.Services.AddScoped<IDareClientHelper, DareClientHelper>();
 
-builder.Services.AddScoped<IKeyCloakService, KeyCloakService>();
+    builder.Services.AddScoped<IKeyCloakService, KeyCloakService>();
 
-builder.Services.AddMvc().AddViewComponentsAsServices();
+    builder.Services.AddMvc().AddViewComponentsAsServices();
 
-builder.Services.Configure<CookiePolicyOptions>(options =>
-{
-    options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
-    options.OnAppendCookie = cookieContext =>
-        CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
-    options.OnDeleteCookie = cookieContext =>
-        CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
-});
+    builder.Services.Configure<CookiePolicyOptions>(options =>
+    {
+        options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
+        options.OnAppendCookie = cookieContext =>
+            CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
+        options.OnDeleteCookie = cookieContext =>
+            CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
+    });
 
 
-
-builder.Services.AddAuthorization(options =>
-{
-   
-    //probably not needed
-    options.AddPolicy(
+    builder.Services.AddAuthorization(options =>
+    {
+        //probably not needed
+        options.AddPolicy(
             "admin",
             policyBuilder => policyBuilder.RequireAssertion(
                 context => context.User.HasClaim(claim =>
                     claim.Type == "groups"
                     && claim.Value.Contains("dare-control-admin"))));
-    options.AddPolicy(
-                "company",
-                policyBuilder => policyBuilder.RequireAssertion(
-                    context => context.User.HasClaim(claim =>
-                        claim.Type == "groups"
-                        && claim.Value.Contains("dare-control-company"))));
-    options.AddPolicy(
+        options.AddPolicy(
+            "company",
+            policyBuilder => policyBuilder.RequireAssertion(
+                context => context.User.HasClaim(claim =>
+                    claim.Type == "groups"
+                    && claim.Value.Contains("dare-control-company"))));
+        options.AddPolicy(
             "user",
             policyBuilder => policyBuilder.RequireAssertion(
                 context => context.User.HasClaim(claim =>
                     claim.Type == "groups"
                     && claim.Value.Contains("dare-control-user"))));
-    options.AddPolicy(
-          "admin",
-          policyBuilder => policyBuilder.RequireAssertion(
-              context => context.User.HasClaim(claim =>
-                  claim.Type == "groups"
-                  && claim.Value.Contains("dare-tre-admin"))));
-});
+        options.AddPolicy(
+            "admin",
+            policyBuilder => policyBuilder.RequireAssertion(
+                context => context.User.HasClaim(claim =>
+                    claim.Type == "groups"
+                    && claim.Value.Contains("dare-tre-admin"))));
+    });
 
 
-builder.Services.Configure<ForwardedHeadersOptions>(options =>
-{
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto |
-                               ForwardedHeaders.XForwardedHost;
-    options.ForwardLimit = 2; //Limit number of proxy hops trusted
-    options.KnownNetworks.Clear();
-    options.KnownProxies.Clear();
-});
-
+    builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    {
+        options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto |
+                                   ForwardedHeaders.XForwardedHost;
+        options.ForwardLimit = 2; //Limit number of proxy hops trusted
+        options.KnownNetworks.Clear();
+        options.KnownProxies.Clear();
+    });
 
 
     JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-})
-             
-             .AddCookie(o =>
-             {
-                 o.SessionStore = new MemoryCacheTicketStore();
-                 o.EventsType = typeof(CustomCookieEvent);
-             })
-            .AddOpenIdConnect(options =>
+    builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
+    builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+        })
+        .AddCookie(o =>
+        {
+            o.SessionStore = new MemoryCacheTicketStore();
+            o.EventsType = typeof(CustomCookieEvent);
+        })
+        .AddOpenIdConnect(options =>
+        {
+            var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
+            configuration.GetSection("SubmissionKeyCloakSettings").Bind(submissionKeyCloakSettings);
+
+            if (submissionKeyCloakSettings.Proxy || submissionKeyCloakSettings.AutoTrustKeycloakCert)
             {
-                if (submissionKeyCloakSettings.Proxy || submissionKeyCloakSettings.AutoTrustKeycloakCert)
-                {
-                    var httpClientHandler = new HttpClientHandler();
+                var httpClientHandler = new HttpClientHandler();
 
-                    //This is vital if behind a proxy. Especially true for our proxy. Set this up correctly when
-                    //deploying behind proxy (some proxies are silent and don't need it)
-                    if (submissionKeyCloakSettings.Proxy)
+                //This is vital if behind a proxy. Especially true for our proxy. Set this up correctly when
+                //deploying behind proxy (some proxies are silent and don't need it)
+                if (submissionKeyCloakSettings.Proxy)
+                {
+                    Log.Information("{Function} Proxy = {Proxy}", "AddOpenIdConnect",
+                        submissionKeyCloakSettings.ProxyAddressUrl);
+                    httpClientHandler.UseProxy = true;
+                    httpClientHandler.UseDefaultCredentials = true;
+                    httpClientHandler.Proxy = new WebProxy()
                     {
-                        Log.Information("{Function} Proxy = {Proxy}, Bypass = {Bypass}", "AddOpenIdConnect",
-                            submissionKeyCloakSettings.ProxyAddressUrl);
-                        httpClientHandler.UseProxy = true;
-                        httpClientHandler.UseDefaultCredentials = true;
-                        httpClientHandler.Proxy = new WebProxy()
+                        Address = new Uri(submissionKeyCloakSettings.ProxyAddressUrl),
+                        BypassList = new[] { submissionKeyCloakSettings.BypassProxy }
+                    };
+                }
+
+                //Sometimes we need to trust a self-signed certificate or ignore ssl errors. In which case set 
+                //AutoTrustKeycloakCert to true.It won't break to always set it to true but better to only do it 
+                //when needed for security reasons
+                if (submissionKeyCloakSettings.AutoTrustKeycloakCert)
+                {
+                    Log.Information("{Function} Trust Keycloak Server ssl", "AddOpenIdConnect");
+                    httpClientHandler.ServerCertificateCustomValidationCallback =
+                        (sender, certificate, chain, sslPolicyErrors) => true;
+                }
+
+                options.BackchannelHttpHandler = httpClientHandler;
+            }
+
+
+            // URL of the Keycloak server
+            options.Authority = submissionKeyCloakSettings.Authority;
+            // Client configured in the Keycloak
+            options.ClientId = submissionKeyCloakSettings.ClientId;
+            // Client secret shared with Keycloak
+            options.ClientSecret = submissionKeyCloakSettings.ClientSecret;
+
+            options.Events = new OpenIdConnectEvents
+            {
+                OnTokenValidated = _ => Task.CompletedTask,
+                OnAccessDenied = context =>
+                {
+                    Log.Error("{Function}: {ex}", "OnAccessDenied", context.AccessDeniedPath);
+                    context.HandleResponse();
+                    return context.Response.CompleteAsync();
+                },
+                OnAuthenticationFailed = context =>
+                {
+                    Log.Error("{Function}: {ex}", "OnAuthFailed", context.Exception.Message);
+                    context.HandleResponse();
+                    return context.Response.CompleteAsync();
+                },
+                OnRemoteFailure = context =>
+                {
+                    Log.Error("OnRemoteFailure: {ex}", context.Failure);
+                    if (context.Properties != null)
+                    {
+                        foreach (var prop in context.Properties.Items)
                         {
-                            Address = new Uri(submissionKeyCloakSettings.ProxyAddressUrl),
-                            BypassList = new[] { submissionKeyCloakSettings.BypassProxy }
-                        };
+                            Log.Information("{Function} Property Key {Key}, Value {Value}", "OnRemoteFailure", prop.Key,
+                                prop.Value);
+                        }
                     }
 
-                    //Sometimes we need to trust a self signed certificate or ignore ssl errors. In which case set 
-                    //AutoTrustKeycloakCert to true.It won't break to always set it to true but better to only do it 
-                    //when needed for security reasons
-                    if (submissionKeyCloakSettings.AutoTrustKeycloakCert)
+                    if (context.Failure.Message.Contains("Correlation failed"))
                     {
-                        Log.Information("{Function} Trust Keycloak Server ssl", "AddOpenIdConnect");
-                        httpClientHandler.ServerCertificateCustomValidationCallback =
-                            (sender, certificate, chain, sslPolicyErrors) => true;
+                        Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}",
+                            submissionKeyCloakSettings.TokenExpiredAddress);
+                        //context.Response.Redirect(treKeyCloakSettings.TokenExpiredAddress);
+                    }
+                    else
+                    {
+                        Log.Warning("call /Error/500");
+                        //context.Response.Redirect("/Error/500");
                     }
 
-                    options.BackchannelHttpHandler = httpClientHandler;
-                }
+                    context.HandleResponse();
 
-
-                // URL of the Keycloak server
-                options.Authority = submissionKeyCloakSettings.Authority;
-                //// Client configured in the Keycloak
-                options.ClientId = submissionKeyCloakSettings.ClientId;
-                //// Client secret shared with Keycloak
-                options.ClientSecret = submissionKeyCloakSettings.ClientSecret;
-
-                options.Events = new OpenIdConnectEvents
+                    return context.Response.CompleteAsync();
+                },
+                OnMessageReceived = context =>
                 {
-                    OnTokenValidated = context =>
+                    string accessToken = context.Request.Query["access_token"];
+                    PathString path = context.HttpContext.Request.Path;
+
+                    if (
+                        !string.IsNullOrEmpty(accessToken) &&
+                        path.StartsWithSegments("/api/SignalRHub")
+                    )
                     {
-                        // Log the issuer claim from the token
-                        //var issuer = context.Principal.FindFirst("iss")?.Value;
-                        //Log.Information("Token Issuer: {Issuer}", issuer);
-                        //var audience = context.Principal.FindFirst("aud")?.Value;
-                        //Log.Information("Token Audience: {Audience}", audience);
-                        return Task.CompletedTask;
-                    },
-                    OnAccessDenied = context =>
-                    {
-                        Log.Error("{Function}: {ex}", "OnAccessDenied", context.AccessDeniedPath);
-                        context.HandleResponse();
-                        return context.Response.CompleteAsync();
-                    },
-                    OnAuthenticationFailed = context =>
-                    {
-                        Log.Error("{Function}: {ex}", "OnAuthFailed", context.Exception.Message);
-                        context.HandleResponse();
-                        return context.Response.CompleteAsync();
-                    },
-                    OnRemoteFailure = context =>
-                    {
-                        Log.Error("OnRemoteFailure: {ex}", context.Failure);
-                        if (context.Properties != null)
-                        {
-                            foreach (var prop in context.Properties.Items)
-                            {
-                                Log.Information("{Function} Property Key {Key}, Value {Value}", "OnRemoteFailure", prop.Key,
-                                    prop.Value);
-                            }
-                        }
-
-                        if (context.Failure.Message.Contains("Correlation failed"))
-                        {
-                            Log.Warning("call TokenExpiredAddress {TokenExpiredAddress}",
-                                submissionKeyCloakSettings.TokenExpiredAddress);
-                            //context.Response.Redirect(treKeyCloakSettings.TokenExpiredAddress);
-                        }
-                        else
-                        {
-                            Log.Warning("call /Error/500");
-                            //context.Response.Redirect("/Error/500");
-                        }
-
-                        context.HandleResponse();
-
-                        return context.Response.CompleteAsync();
-                    },
-                    OnMessageReceived = context =>
-                    {
-                        string accessToken = context.Request.Query["access_token"];
-                        PathString path = context.HttpContext.Request.Path;
-
-                        if (
-                            !string.IsNullOrEmpty(accessToken) &&
-                            path.StartsWithSegments("/api/SignalRHub")
-                        )
-                        {
-                            context.Token = accessToken;
-                        }
-
-                        return Task.CompletedTask;
-                    },
-                    OnRedirectToIdentityProvider = async context =>
-                    {
-                        Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}",
-                            context.HttpContext.Connection.RemoteIpAddress);
-                        Log.Information("HttpContext.Connection.RemotePort : {RemotePort}",
-                            context.HttpContext.Connection.RemotePort);
-                        Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
-                        Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
-
-                        foreach (var header in context.HttpContext.Request.Headers)
-                        {
-                            Log.Information("Request Header {key} - {value}", header.Key, header.Value);
-                        }
-
-                        foreach (var header in context.HttpContext.Response.Headers)
-                        {
-                            Log.Information("Response Header {key} - {value}", header.Key, header.Value);
-                        }
-
-                        if (submissionKeyCloakSettings.UseRedirectUrl)
-                        {
-                            context.ProtocolMessage.RedirectUri = submissionKeyCloakSettings.RedirectUrl;
-                        }
-
-                        Log.Information("Redirect Uri {Redirect}", context.ProtocolMessage.RedirectUri);
-
-                        await Task.FromResult(0);
+                        context.Token = accessToken;
                     }
-                };
-                //options.MetadataAddress = submissionKeyCloakSettings.MetadataAddress;
-                Log.Information("{Function} Keycloak Settings Auth {Auth}, Client {Client}, Secret {Secret}, Meta {Meta}", "Main", submissionKeyCloakSettings.Authority, submissionKeyCloakSettings.ClientId, submissionKeyCloakSettings.ClientSecret, submissionKeyCloakSettings.MetadataAddress);
-                options.RequireHttpsMetadata = false;
-                options.SaveTokens = true;
-                options.Scope.Add("openid");
-                options.Scope.Add("profile");
-                options.Scope.Add("roles");
-                
-                options.GetClaimsFromUserInfoEndpoint = true;
 
-                if (string.IsNullOrEmpty(submissionKeyCloakSettings.MetadataAddress) == false)
+                    return Task.CompletedTask;
+                },
+                OnRedirectToIdentityProvider = async context =>
                 {
-                    options.MetadataAddress = submissionKeyCloakSettings.MetadataAddress;
+                    Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}",
+                        context.HttpContext.Connection.RemoteIpAddress);
+                    Log.Information("HttpContext.Connection.RemotePort : {RemotePort}",
+                        context.HttpContext.Connection.RemotePort);
+                    Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
+                    Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
+
+                    foreach (var header in context.HttpContext.Request.Headers)
+                    {
+                        Log.Information("Request Header {key} - {value}", header.Key, header.Value);
+                    }
+
+                    foreach (var header in context.HttpContext.Response.Headers)
+                    {
+                        Log.Information("Response Header {key} - {value}", header.Key, header.Value);
+                    }
+
+                    if (submissionKeyCloakSettings.UseRedirectUrl)
+                    {
+                        context.ProtocolMessage.RedirectUri = submissionKeyCloakSettings.RedirectUrl;
+                    }
+
+                    Log.Information("Redirect Uri {Redirect}", context.ProtocolMessage.RedirectUri);
+
+                    await Task.FromResult(0);
                 }
-                
+            };
+            //options.MetadataAddress = submissionKeyCloakSettings.MetadataAddress;
+            Log.Information("{Function} Keycloak Settings Auth {Auth}, Client {Client}, Secret {Secret}, Meta {Meta}",
+                "Main", submissionKeyCloakSettings.Authority, submissionKeyCloakSettings.ClientId,
+                submissionKeyCloakSettings.ClientSecret, submissionKeyCloakSettings.MetadataAddress);
+            options.RequireHttpsMetadata = false;
+            options.SaveTokens = true;
+            options.Scope.Add("openid");
+            options.Scope.Add("profile");
+            options.Scope.Add("roles");
 
-                options.ResponseType = OpenIdConnectResponseType.Code;
+            options.GetClaimsFromUserInfoEndpoint = true;
+
+            if (string.IsNullOrEmpty(submissionKeyCloakSettings.MetadataAddress) == false)
+            {
+                options.MetadataAddress = submissionKeyCloakSettings.MetadataAddress;
+            }
 
 
-                //Need this to be instantiated before using
-                options.TokenValidationParameters = new TokenValidationParameters();
+            options.ResponseType = OpenIdConnectResponseType.Code;
 
 
-                options.TokenValidationParameters.NameClaimType = "name";
-                options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
-                if (!string.IsNullOrWhiteSpace(submissionKeyCloakSettings.ValidIssuer))
-                {
-                    Log.Information("{Function} Setting valid issuer {ValidIssuer}",
-                        "AddOpenIdConnect", submissionKeyCloakSettings.ValidIssuer);
-                    options.TokenValidationParameters.ValidateIssuer = true;
-                    options.TokenValidationParameters.ValidIssuer = submissionKeyCloakSettings.ValidIssuer;
-                    // Use ValidIssuers if there are multiple valid issuers. Edge case. Not likely to need this
-                    //but useful to know
-                    // ValidIssuers = new[] { "http://auth-hdpbc.healthbc.org/realms/HDP", "other-issuer" },
-                }
+            //Need this to be instantiated before using
+            options.TokenValidationParameters = new TokenValidationParameters();
 
-                if (!string.IsNullOrWhiteSpace(submissionKeyCloakSettings.ValidAudience))
-                {
-                    Log.Information("{Function} Setting valid audience {ValidAudience}",
-                        "AddOpenIdConnect", submissionKeyCloakSettings.ValidAudience);
-                    options.TokenValidationParameters.ValidAudience = submissionKeyCloakSettings.ValidAudience;
-                }
+
+            options.TokenValidationParameters.NameClaimType = "name";
+            options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
+            if (!string.IsNullOrWhiteSpace(submissionKeyCloakSettings.ValidIssuer))
+            {
+                Log.Information("{Function} Setting valid issuer {ValidIssuer}",
+                    "AddOpenIdConnect", submissionKeyCloakSettings.ValidIssuer);
+                options.TokenValidationParameters.ValidateIssuer = true;
+                options.TokenValidationParameters.ValidIssuer = submissionKeyCloakSettings.ValidIssuer;
+                // Use ValidIssuers if there are multiple valid issuers. Edge case. Not likely to need this
+                //but useful to know
+                // ValidIssuers = new[] { "http://auth-hdpbc.healthbc.org/realms/HDP", "other-issuer" },
+            }
+
+            if (!string.IsNullOrWhiteSpace(submissionKeyCloakSettings.ValidAudience))
+            {
+                Log.Information("{Function} Setting valid audience {ValidAudience}",
+                    "AddOpenIdConnect", submissionKeyCloakSettings.ValidAudience);
+                options.TokenValidationParameters.ValidAudience = submissionKeyCloakSettings.ValidAudience;
+            }
+        });
+
+    var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(
+            builder =>
+            {
+                builder
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
             });
+        options.AddPolicy(name: MyAllowSpecificOrigins,
+            policy =>
+            {
+                policy.WithOrigins(configuration["DareAPISettings:Address"])
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+            });
+    });
 
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+    var app = builder.Build();
+    app.UseCors();
+    app.UseForwardedHeaders();
 
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(
-        builder =>
-        {
-            builder
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader();
-        });
-    options.AddPolicy(name: MyAllowSpecificOrigins,
-        policy =>
-        {
-            policy.WithOrigins(configuration["DareAPISettings:Address"])
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials();
-        });
-});
-
-var app = builder.Build();
-app.UseCors();
-app.UseForwardedHeaders();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseDeveloperExceptionPage();
-}
-else
-{
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-
-
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
+    else
+    {
+        app.UseExceptionHandler("/Home/Error");
+        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+        app.UseHsts();
+    }
 
 
     //Disable redirect if using http only site to prevent silent redirect to non existent https site
@@ -406,15 +376,15 @@ else
 
     app.UseRouting();
 
-app.UseAuthentication();
-app.UseAuthorization();
+    app.UseAuthentication();
+    app.UseAuthorization();
 
-app.UseCors();
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    app.UseCors();
+    app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.Run();
+    app.Run();
 }
 catch (Exception ex)
 {
@@ -425,6 +395,7 @@ finally
     Log.Information("Stopping web ui ({ApplicationContext})...", "Submission UI");
     Log.CloseAndFlush();
 }
+
 Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHostEnvironment environment)
 {
     var seqServerUrl = configuration["Serilog:SeqServerUrl"];
@@ -437,10 +408,9 @@ Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHost
         .WriteTo.Seq(seqServerUrl, apiKey: seqApiKey)
         .ReadFrom.Configuration(configuration)
         .CreateLogger();
-
 }
 
-#region SameSite Cookie Issue - https://community.auth0.com/t/correlation-failed-unknown-location-error-on-chrome-but-not-in-safari/40013/7
+#region SameSite Cookie Issue - https: //community.auth0.com/t/correlation-failed-unknown-location-error-on-chrome-but-not-in-safari/40013/7
 
 void CheckSameSite(HttpContext httpContext, CookieOptions options)
 {
@@ -499,6 +469,5 @@ bool DisallowsSameSiteNone(string userAgent)
 
     return false;
 }
-
 
 #endregion

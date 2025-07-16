@@ -1,10 +1,9 @@
 ﻿namespace BL.Models.Settings
 {
-    public class FormIOSettings
+    public class FormIoSettings
     {
-        public string TreForm { get; set; }
-        public string ProjectForm { get; set; }
-        
-        public string UserForm { get; set; }
+        public string TreForm { get; set; } = string.Empty;
+        public string ProjectForm { get; set; } = string.Empty;
+        public string UserForm { get; set; } = string.Empty;
     }
 }

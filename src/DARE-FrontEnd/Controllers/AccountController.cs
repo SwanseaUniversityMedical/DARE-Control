@@ -7,17 +7,18 @@ using Serilog;
 using BL.Models.Settings;
 using Newtonsoft.Json.Linq;
 using System.Net;
+using Microsoft.Extensions.Options;
 
 namespace DARE_FrontEnd.Controllers
 {
     [Authorize]
     public class AccountController : Controller
     {
-        public SubmissionKeyCloakSettings _keycloakSettings { get; set; }
+        private readonly SubmissionKeyCloakSettings _submissionKeyCloakSettings;
 
-        public AccountController(SubmissionKeyCloakSettings keycloakSettings)
+        public AccountController(IOptions<SubmissionKeyCloakSettings> submissionKeyCloakSettings)
         {
-            _keycloakSettings = keycloakSettings;
+            _submissionKeyCloakSettings = submissionKeyCloakSettings.Value;
         }
 
 
@@ -31,19 +32,20 @@ namespace DARE_FrontEnd.Controllers
             var currentAccessToken = context.Properties.GetTokenValue("access_token");
             var currentRefreshToken = context.Properties.GetTokenValue("refresh_token");
 
-            string keycloakBaseUrl = _keycloakSettings.BaseUrl;
-            string clientId = _keycloakSettings.ClientId;
-            string clientSecret = _keycloakSettings.ClientSecret;
+            string keycloakBaseUrl = _submissionKeyCloakSettings.BaseUrl;
+            string clientId = _submissionKeyCloakSettings.ClientId;
+            string clientSecret = _submissionKeyCloakSettings.ClientSecret;
             string refreshToken = currentRefreshToken;
 
             HttpClientHandler handler = new HttpClientHandler();
 
-            if (_keycloakSettings.Proxy)
+            if (_submissionKeyCloakSettings.Proxy)
             {
                 handler = new HttpClientHandler
                 {
-                    Proxy = new WebProxy(_keycloakSettings.ProxyAddressUrl, true), // Replace with your proxy server URL
-                    UseProxy = _keycloakSettings.Proxy,
+                    Proxy = new WebProxy(_submissionKeyCloakSettings.ProxyAddressUrl,
+                        true), // Replace with your proxy server URL
+                    UseProxy = _submissionKeyCloakSettings.Proxy,
                 };
             }
 
@@ -56,7 +58,7 @@ namespace DARE_FrontEnd.Controllers
                 { "client_id", clientId },
                 { "client_secret", clientSecret },
                 { "refresh_token", refreshToken },
-                { "max_age", _keycloakSettings.TokenRefreshSeconds } // Set a longer max_age in seconds
+                { "max_age", _submissionKeyCloakSettings.TokenRefreshSeconds } // Set a longer max_age in seconds
             });
 
 
@@ -77,7 +79,7 @@ namespace DARE_FrontEnd.Controllers
                     tokenResponseContent);
             }
 
-            var expirationDate = DateTime.Now.AddSeconds(int.Parse(_keycloakSettings.TokenRefreshSeconds));
+            var expirationDate = DateTime.Now.AddSeconds(int.Parse(_submissionKeyCloakSettings.TokenRefreshSeconds));
             ViewBag.AccessToken = result;
             ViewBag.TokenExpiryDate = expirationDate;
             return View();

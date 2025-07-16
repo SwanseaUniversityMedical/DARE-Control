@@ -5,15 +5,9 @@ using BL.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Authorization;
 using BL.Models.Settings;
-using Microsoft.AspNetCore.Http;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using BL.Models.APISimpleTypeReturns;
-using BL.Models.Tes;
-using Newtonsoft.Json;
-using Serilog;
-using EasyNetQ.Management.Client.Model;
 using DARE_FrontEnd.Models;
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -22,18 +16,16 @@ namespace DARE_FrontEnd.Controllers
     {
         private readonly IDareClientHelper _clientHelper;
 
-        private readonly FormIOSettings _formIOSettings;
+        private readonly FormIoSettings _formIoSettings;
+        
+        private readonly URLSettingsFrontEnd _urlSettings;
 
-
-        private readonly URLSettingsFrontEnd _URLSettingsFrontEnd;
-        public ProjectController(IDareClientHelper client, FormIOSettings formIo, URLSettingsFrontEnd URLSettingsFrontEnd)
+        public ProjectController(IDareClientHelper client, IOptions<FormIoSettings> formIo,
+            IOptions<URLSettingsFrontEnd> urlSettings)
         {
             _clientHelper = client;
-
-            _formIOSettings = formIo;
-
-            _URLSettingsFrontEnd = URLSettingsFrontEnd;
-
+            _formIoSettings = formIo.Value;
+            _urlSettings = urlSettings.Value;
         }
 
         private bool IsUserOnProject(SubmissionGetProjectModel proj)
@@ -50,6 +42,7 @@ namespace DARE_FrontEnd.Controllers
             {
                 return true;
             }
+
             return false;
         }
 
@@ -67,6 +60,7 @@ namespace DARE_FrontEnd.Controllers
             {
                 return true;
             }
+
             return false;
         }
 
@@ -74,7 +68,6 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public async Task<IActionResult> GetProject(int id)
         {
-
             var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());
@@ -96,17 +89,18 @@ namespace DARE_FrontEnd.Controllers
             var treItems2 = tres.Where(p => !project.Tres.Select(x => x.Id).Contains(p.Id)).ToList();
 
             var userItems = userItems2
-                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.FullName != "" ? p.FullName : p.Name })
+                .Select(p => new SelectListItem
+                    { Value = p.Id.ToString(), Text = p.FullName != "" ? p.FullName : p.Name })
                 .ToList();
             var treItems = treItems2
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
 
-           
+
             ViewBag.UserCanDoSubmissions = IsUserOnProject(project);
-            
+
             ViewBag.minioendpoint = minioEndpoint.Result.Url;
-            ViewBag.URLBucket = _URLSettingsFrontEnd.MinioUrl;
+            ViewBag.URLBucket = _urlSettings.MinioUrl;
 
             var projectView = new ProjectUserTre()
             {
@@ -127,27 +121,26 @@ namespace DARE_FrontEnd.Controllers
                 UserItemList = userItems,
                 TreItemList = treItems
             };
-        
+
             //Log.Error("View(projectView) took ElapsedMilliseconds" + stopwatch.ElapsedMilliseconds);
             return View(projectView);
         }
 
         public IActionResult SubmissionProjectSQL(int id)
         {
-           
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());
             var project = _clientHelper.CallAPIWithoutModel<SubmissionGetProjectModel>(
                 "/api/Project/GetProjectUI/", paramlist).Result;
 
-          
+
             ViewBag.UserCanDoSubmissions = IsUserOnProject(project);
 
             var projectView = new ProjectUserTre()
             {
                 Id = project.Id,
                 Name = project.Name,
-                Submissions = project.Submissions.Where(x => x.HasParent == false).ToList(), 
+                Submissions = project.Submissions.Where(x => x.HasParent == false).ToList(),
             };
 
             return View(projectView);
@@ -156,11 +149,10 @@ namespace DARE_FrontEnd.Controllers
 
         public IActionResult SubmissionProjectGraphQL(int id)
         {
-
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());
             var project = _clientHelper.CallAPIWithoutModel<SubmissionGetProjectModel>(
-            "/api/Project/GetProjectUI/", paramlist).Result;
+                "/api/Project/GetProjectUI/", paramlist).Result;
 
             ViewBag.UserCanDoSubmissions = IsUserOnProject(project);
 
@@ -176,11 +168,10 @@ namespace DARE_FrontEnd.Controllers
 
         public IActionResult SubmissionProjectCrate(int id)
         {
-
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());
             var project = _clientHelper.CallAPIWithoutModel<SubmissionGetProjectModel>(
-            "/api/Project/GetProjectUI/", paramlist).Result;
+                "/api/Project/GetProjectUI/", paramlist).Result;
 
             ViewBag.UserCanDoSubmissions = IsUserOnProject(project);
 
@@ -195,24 +186,17 @@ namespace DARE_FrontEnd.Controllers
         }
 
 
-
-
         [HttpGet]
         [AllowAnonymous]
         public IActionResult GetAllProjects()
         {
-
-
             var projects = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
             return View(projects);
-
-
         }
 
         [HttpGet]
         public IActionResult AddUserMembership()
         {
-
             var projmem = GetProjectUserModel();
             return View(projmem);
         }
@@ -242,7 +226,6 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public IActionResult AddTreMembership()
         {
-
             var projmem = GetProjectTreModel();
             return View(projmem);
         }
@@ -276,7 +259,6 @@ namespace DARE_FrontEnd.Controllers
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
             result = GetProjectUserModel();
             return View(result);
-
         }
 
         [HttpPost]
@@ -288,7 +270,6 @@ namespace DARE_FrontEnd.Controllers
             result = GetProjectTreModel();
 
             return View(result);
-
         }
 
 
@@ -297,7 +278,7 @@ namespace DARE_FrontEnd.Controllers
         {
             var formData = new FormData()
             {
-                FormIoUrl = _formIOSettings.ProjectForm,
+                FormIoUrl = _formIoSettings.ProjectForm,
                 FormIoString = @"{""id"":0}",
                 Id = projectId
             };
@@ -306,10 +287,12 @@ namespace DARE_FrontEnd.Controllers
             {
                 var paramList = new Dictionary<string, string>();
                 paramList.Add("projectId", projectId.ToString());
-                var project = _clientHelper.CallAPIWithoutModel<BL.Models.Project>("/api/Project/GetProject/", paramList).Result;
+                var project = _clientHelper
+                    .CallAPIWithoutModel<BL.Models.Project>("/api/Project/GetProject/", paramList).Result;
                 formData.FormIoString = project?.FormData;
 
-                formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""Id"":" + projectId.ToString(), StringComparison.CurrentCultureIgnoreCase);
+                formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""Id"":" + projectId.ToString(),
+                    StringComparison.CurrentCultureIgnoreCase);
             }
 
             return View(formData);
@@ -333,10 +316,12 @@ namespace DARE_FrontEnd.Controllers
                     TempData["error"] = "";
                     return BadRequest();
                 }
+
                 TempData["success"] = "Project Save Successfully";
 
                 return Ok(result);
             }
+
             return BadRequest();
         }
 
@@ -382,31 +367,34 @@ namespace DARE_FrontEnd.Controllers
                     UserId = Int32.Parse(s)
                 };
                 var user =
-                await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/CheckUserExists", model);
+                    await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/CheckUserExists", model);
                 if (user.UserId == 0)
                 {
                     var paramList = new Dictionary<string, string>();
                     paramList.Add("userId", s.ToString());
-                    var userInfo = _clientHelper.CallAPIWithoutModel<BL.Models.User?>("/api/User/GetUser/", paramList).Result;
+                    var userInfo = _clientHelper.CallAPIWithoutModel<BL.Models.User?>("/api/User/GetUser/", paramList)
+                        .Result;
                     userList.Add(userInfo.Name);
                 }
                 else
                 {
                     var response =
-                await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
+                        await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
                     addedUser = true;
                 }
             }
+
             if (userList.Count > 0)
             {
                 var listOfNoneExistingUser = string.Join(", ", userList);
                 TempData["error"] = listOfNoneExistingUser + "are not exist in keycloak. Need to Register";
             }
+
             if (addedUser)
             {
-
                 TempData["success"] = "User Added Successfully";
             }
+
             return Ok();
         }
 
@@ -422,9 +410,10 @@ namespace DARE_FrontEnd.Controllers
                     TreId = Int32.Parse(s)
                 };
                 var result =
-                await _clientHelper.CallAPI<ProjectTre, ProjectTre?>("/api/Project/AddTreMembership",
-                    model);
+                    await _clientHelper.CallAPI<ProjectTre, ProjectTre?>("/api/Project/AddTreMembership",
+                        model);
             }
+
             TempData["success"] = "Tre Added Successfully";
             return RedirectToAction("GetProject", new { id = ProjectId });
         }
@@ -468,6 +457,5 @@ namespace DARE_FrontEnd.Controllers
                 }
             }
         }
-
     }
 }

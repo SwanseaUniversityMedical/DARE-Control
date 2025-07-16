@@ -1,34 +1,24 @@
-﻿
-using BL.Models.APISimpleTypeReturns;
-using BL.Models;
+﻿using BL.Models;
 using Microsoft.AspNetCore.Authorization;
-
 using Microsoft.AspNetCore.Mvc;
 using BL.Services;
-using BL.Models.ViewModels;
-using NuGet.Protocol;
-using System.Linq;
 using Serilog;
-using Microsoft.CodeAnalysis.Elfie.Diagnostics;
 using DARE_FrontEnd.Models;
+using Microsoft.Extensions.Options;
 
 namespace DARE_FrontEnd.Controllers
 {
-
     [AllowAnonymous]
     public class HomeController : Controller
     {
-
         private readonly IDareClientHelper _clientHelper;
-        private readonly IConfiguration _configuration;
-        private readonly UIName _UIName;
+        private readonly UIName _uiName;
 
 
-        public HomeController(IDareClientHelper client, IConfiguration configuration, UIName uIName)
+        public HomeController(IDareClientHelper client, IOptions<UIName> uIName)
         {
             _clientHelper = client;
-            _configuration = configuration;
-            _UIName = uIName;
+            _uiName = uIName.Value;
         }
 
         public IActionResult Index()
@@ -37,7 +27,7 @@ namespace DARE_FrontEnd.Controllers
             ViewBag.getAllSubs = 0;
             ViewBag.getAllUsers = 0;
             ViewBag.getAllTres = 0;
-            ViewBag.UIName = _UIName.Name;
+            ViewBag.UIName = _uiName.Name;
 
 
             try
@@ -60,7 +50,6 @@ namespace DARE_FrontEnd.Controllers
             catch (Exception e)
             {
                 Log.Warning(e, "{Function} Unable to call api. Might just be initialisation issue");
-
             }
 
 
@@ -90,6 +79,7 @@ namespace DARE_FrontEnd.Controllers
                     ViewBag.SearchResults = "No search results found.";
                     //ViewBag.SearchString = "No Results found";
                 }
+
                 return View();
             }
         }
@@ -101,7 +91,8 @@ namespace DARE_FrontEnd.Controllers
             {
                 var paramlist = new Dictionary<string, string>();
                 paramlist.Add("searchString", searchString);
-                var results = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetSearchData/", paramlist).Result.ToList();
+                var results = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetSearchData/", paramlist)
+                    .Result.ToList();
                 return results;
             }
             catch (Exception ex)
@@ -110,22 +101,24 @@ namespace DARE_FrontEnd.Controllers
                 return null;
             }
         }
-       
+
 
         [Authorize]
         public IActionResult LoggedInUser()
         {
-            if(User.Identity.IsAuthenticated == false) {
+            if (User.Identity.IsAuthenticated == false)
+            {
                 return RedirectToAction("Index", "Home");
             }
 
-           
+
             var preferedUsername = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
-            
+
             var getAllProj = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects").Result;
             ViewBag.getAllProj = getAllProj;
 
-            var getAllSubs = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions").Result.Where(x => x.Parent == null).ToList();
+            var getAllSubs = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions")
+                .Result.Where(x => x.Parent == null).ToList();
             ViewBag.getAllSubs = getAllSubs.Count;
 
             var getAllUsers = _clientHelper.CallAPIWithoutModel<List<User>>("/api/User/GetAllUsers").Result;
@@ -136,7 +129,8 @@ namespace DARE_FrontEnd.Controllers
 
             var userOnProjList = new List<User>();
             var userOnProjListProj = new List<Project>();
-            var projectList = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects").Result.ToList();
+            var projectList = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects").Result
+                .ToList();
             foreach (var proj in projectList)
             {
                 foreach (var user in proj.Users)
@@ -149,6 +143,7 @@ namespace DARE_FrontEnd.Controllers
                     }
                 }
             }
+
             var userOnProjectsCount = userOnProjList.ToList().Count;
             ViewBag.userOnProjectCount = userOnProjectsCount;
 
@@ -157,15 +152,13 @@ namespace DARE_FrontEnd.Controllers
             var subList = getAllSubs;
             foreach (var sub in subList)
             {
-
-                    if (sub.SubmittedBy.Name == preferedUsername)
+                if (sub.SubmittedBy.Name == preferedUsername)
                 {
                     userWroteSubListSub.Add(sub);
                     userWroteSubList.Add(sub.SubmittedBy);
-                
                 }
-
             }
+
             var userWroteSubCount = userWroteSubList.ToList().Count;
             var distintProj = userOnProjListProj.Distinct();
             var distinctSub = userWroteSubListSub.Distinct();
@@ -178,23 +171,20 @@ namespace DARE_FrontEnd.Controllers
                 Projects = distintProj.ToList(),
 
                 Submissions = distinctSub.ToList(),
-        };
-            
+            };
+
             return View(userModel);
         }
-
-      
 
 
         public IActionResult TermsAndConditions()
         {
             return View();
         }
+
         public IActionResult PrivacyPolicy()
         {
             return View();
         }
     }
-
 }
-
