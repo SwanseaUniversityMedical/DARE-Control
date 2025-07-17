@@ -10,6 +10,16 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include=".env" />
+    <None Include="Camunda-docker\.env" />
+    <None Include="Camunda-docker\.optimize\environment-config.yaml" />
+    <None Include="Camunda-docker\.web-modeler\cluster-config-authentication-mode-identity.env" />
+    <None Include="Camunda-docker\.web-modeler\cluster-config-authentication-mode-none.env" />
+    <None Include="Camunda-docker\connector-secrets.txt" />
+    <None Include="Camunda-docker\docker-compose-core.yaml" />
+    <None Include="Camunda-docker\docker-compose-web-modeler.yaml" />
+    <None Include="Camunda-docker\docker-compose.yaml" />
+    <None Include="Camunda-docker\README.md" />
+    <None Include="Camunda-docker\templates\webhook.json.txt" />
     <None Include="connector-secrets.txt" />
     <None Include="docker-compose.override.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>

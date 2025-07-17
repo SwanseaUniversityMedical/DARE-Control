@@ -26,30 +26,32 @@ namespace DARE_API.Controllers
             _DbContext = applicationDbContext;
             _httpContextAccessor= httpContextAccessor;
 
-        }
+        }     
 
         [Authorize(Roles = "dare-control-admin")]
         [HttpPost("SaveTre")]
-        public async Task<Tre> SaveTre([FromBody] FormData data)
-        {           
+        public async Task<IActionResult> SaveTre([FromBody] FormData data)
+        {
             try
             {
                 Tre tre = JsonConvert.DeserializeObject<Tre>(data.FormIoString);
                 tre.Name = tre.Name?.Trim();
+
                 if (_DbContext.Tres.Any(x => x.Name.ToLower() == tre.Name.ToLower().Trim() && x.Id != tre.Id))
                 {
-                    
-                    return new Tre(){Error = true, ErrorMessage = "Another tre already exists with the same name"};
+                    return BadRequest("Another tre already exists with the same name");
                 }
-                
-                if  (_DbContext.Tres.Any(x => x.AdminUsername.ToLower() == tre.AdminUsername.ToLower() && x.Id != tre.Id))
+
+                if (_DbContext.Tres.Any(x => x.AdminUsername.ToLower() == tre.AdminUsername.ToLower() && x.Id != tre.Id))
                 {
-                    return new Tre() { Error = true, ErrorMessage = "Another tre already exists with the same TRE Admin Name" };
+                    return BadRequest("Another tre already exists with the same admin username");
                 }
-                if (_DbContext.Tres.Any(x => x.About.ToLower() == tre.About.ToLower() && x.Id != tre.Id))
+
+                if (_DbContext.Tres.Any(x => !string.IsNullOrWhiteSpace(x.About) && x.About.ToLower() == tre.About.ToLower() && x.Id != tre.Id))
                 {
-                    return new Tre() { Error = true, ErrorMessage = "Another tre already exists with the same TRE Admin Name" };
+                    return BadRequest("Another TRE already exists with the same about field");
                 }
+
                 tre.FormData = data.FormIoString;
 
                 var logtype = LogType.AddTre;
@@ -65,26 +67,21 @@ namespace DARE_API.Controllers
                         _DbContext.Tres.Add(tre);
                     }
                 }
-
-                else {
+                else
+                {
                     _DbContext.Tres.Add(tre);
                 }
                 await _DbContext.SaveChangesAsync();
                 await ControllerHelpers.AddAuditLog(logtype, null, null, tre, null, null, _httpContextAccessor, User, _DbContext);
-             
-                return tre;
 
+                return Ok(tre); 
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "{Function} Crashed", "SaveTre");
-
-                var errorTre = new Tre();
-                return errorTre;
-                throw;
+                return StatusCode(500, "An internal server error occurred");
             }
         }
-     
         [HttpGet("GetTresInProject/{projectId}")]
         [AllowAnonymous]
         public List<Tre> GetTresInProject(int projectId)
