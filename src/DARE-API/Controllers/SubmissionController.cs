@@ -114,7 +114,6 @@ namespace DARE_API.Controllers
                 is StatusType.DataOutApprovalRejected
                 or StatusType.InvalidUser
                 or StatusType.InvalidSubmission
-                or StatusType.TreCrateValidationFailed
                 or StatusType.TreAgentRejectedProject
                 or StatusType.TreNotAuthorisedForProject
                 or StatusType.TransferToPodFailed
@@ -236,10 +235,8 @@ namespace DARE_API.Controllers
                 StatusType.WaitingForChildSubsToComplete,
                 StatusType.WaitingForAgentToTransfer,
                 StatusType.UserNotOnProject,
-                StatusType.SubmissionWaitingForCrateFormatCheck,
                 StatusType.Running,
-                StatusType.SubmissionReceived,
-                StatusType.SubmissionCrateValidationFailed,
+                StatusType.SubmissionReceived
             };
             Dictionary<int, List<StatusType>> stage1Dict = new Dictionary<int, List<StatusType>>();
             stage1Dict.Add(1, stage1List.statusTypeList);
@@ -254,10 +251,7 @@ namespace DARE_API.Controllers
                 StatusType.InvalidUser,
                 StatusType.TreNotAuthorisedForProject,
                 StatusType.AgentTransferringToPod,
-                StatusType.TransferToPodFailed,               
-                StatusType.TreCrateValidated,
-                StatusType.TreCrateValidationFailed,
-                StatusType.TreCrateValidated,
+                StatusType.TransferToPodFailed
 
 
             };
@@ -273,10 +267,6 @@ namespace DARE_API.Controllers
                 StatusType.Processing,
                 StatusType.ProcessingComplete,
                 StatusType.ProcessingFailed,
-                StatusType.WaitingForCrate,
-                StatusType.FetchingCrate,
-                StatusType.Queued,
-                StatusType.ValidatingCrate,
                 StatusType.FetchingWorkflow,
                 StatusType.StagingWorkflow,
                 StatusType.ExecutingWorkflow,
@@ -335,8 +325,6 @@ namespace DARE_API.Controllers
                     StatusType.InvalidSubmission,
                     StatusType.TreNotAuthorisedForProject,
                     StatusType.DataOutApprovalRejected,
-                    StatusType.SubmissionCrateValidationFailed,
-                    StatusType.TreCrateValidationFailed,
                     StatusType.TransferToPodFailed,
                     StatusType.ProcessingFailed,
                     StatusType.Failed,

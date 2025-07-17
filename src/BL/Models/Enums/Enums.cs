@@ -80,10 +80,6 @@ namespace BL.Models.Enums
         //Red
         [Display(Name = "Cancelled")] Cancelled = 16,
 
-        //Stage 1
-        [Display(Name = "Waiting For Crate Format Check")]
-        SubmissionWaitingForCrateFormatCheck = 17,
-
         //Unused
         [Display(Name = "Validating User")] ValidatingUser = 18,
 
@@ -124,19 +120,7 @@ namespace BL.Models.Enums
         //Stage 5
         //Red
         [Display(Name = "Failed")]
-        Failed = 27,     
-        //Stage 3
-        [Display(Name = "Waiting for a Crate")]
-        WaitingForCrate = 30,
-
-        //Stage 3
-        [Display(Name = "Fetching Crate")] FetchingCrate = 31,
-
-        //Stage 3
-        [Display(Name = "Crate queued")] Queued = 32,
-
-        //Stage 3
-        [Display(Name = "Validating Crate")] ValidatingCrate = 33,
+        Failed = 27,
 
         //Stage 3
         [Display(Name = "Fetching workflow")] FetchingWorkflow = 34,
@@ -173,28 +157,6 @@ namespace BL.Models.Enums
         [Display(Name = "Submission has been received")]
         SubmissionReceived = 43,
 
-        //Stage 1
-        //Green
-        // [Display(Name = "Crate Validated")] SubmissionCrateValidated = 44,
-
-        //Stage 1
-        //Red
-        [Display(Name = "Crate Failed Validation")]
-        SubmissionCrateValidationFailed = 45,
-
-        //Stage 2
-        //Green
-        // [Display(Name = "Crate Validated")] TreCrateValidated = 46,
-
-        //Stage 2
-        //Red
-        [Display(Name = "Crate Failed Validation")]
-        TreCrateValidationFailed = 47,
-
-        //Stage 2
-        [Display(Name = "Waiting For Crate Format Check")]
-        TreWaitingForCrateFormatCheck = 48,
-
         //Stage 5
         //Green
         //Parent Only
@@ -223,28 +185,5 @@ namespace BL.Models.Enums
         [Display(Name = "Fully Approved")] FullyApproved = 1,
         [Display(Name = "Fully Rejected")] FullyRejected = 2,
         [Display(Name = "Partially Approved")] PartiallyApproved = 3
-    }
-
-    public class EnumHelper
-    {
-        public static List<StatusType> GetHutchAllowedStatusUpdates()
-        {
-            return new List<StatusType>()
-            {
-                StatusType.WaitingForCrate,
-                StatusType.FetchingCrate,
-                StatusType.Queued,
-                StatusType.ValidatingCrate,
-                StatusType.FetchingWorkflow,
-                StatusType.StagingWorkflow,
-                StatusType.ExecutingWorkflow,
-                StatusType.PreparingOutputs,
-                StatusType.DataOutRequested,
-                StatusType.TransferredForDataOut,
-                StatusType.PackagingApprovedResults,
-                StatusType.Completed,
-                StatusType.Failure
-            };
-        }
     }
 }

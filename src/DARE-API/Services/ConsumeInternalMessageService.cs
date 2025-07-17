@@ -96,9 +96,6 @@ namespace DARE_API.Services
                         }
                     }
 
-
-                    UpdateSubmissionStatus.UpdateStatusNoSave(sub, StatusType.SubmissionWaitingForCrateFormatCheck, "");
-
                     var dbproj = sub.Project;
                     var tesTask = JsonConvert.DeserializeObject<TesTask>(sub.TesJson);
 
