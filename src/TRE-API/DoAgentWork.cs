@@ -26,11 +26,7 @@ namespace TRE_API
         Task Execute();
         Task CheckTESK(string taskID, int subId, string tesId, string outputBucket, string NameTes);
         void ClearJob(string jobname);
-        Task testing(string toRun, string Role);
     }
-
-    // TESK : http://172.16.34.31:8080/    https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks
-
 
     public class DoAgentWork : IDoAgentWork
     {
@@ -89,82 +85,9 @@ namespace TRE_API
             _features = features;
         }
 
-
-        public async Task testing(string toRun, string Role)
+        public string CreateTesk(string jsonContent, int subId, string tesId, string outputBucket, string Tesname)
         {
-            //TesId
-
-            Console.WriteLine("Testing");
-            Log.Information("{Function}  SEND TO TESK ", "Execute");
-            var arr = new HttpClient();
-
-
-            var role = Role;
-
-            var Token = _hasuraAuthenticationService.GetNewToken(role);
-
-
-            var projectId = 1;
-
-
-            var OutputBucket = _AgentSettings.TESKOutputBucketPrefix +
-                               _dbContext.Projects.First(x => x.Id == projectId)
-                                   .OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
-            var tesMessage = JsonConvert.DeserializeObject<TesTask>(toRun); //it need the file name?? (key-name)
-
-            if (tesMessage.Outputs == null)
-            {
-                tesMessage.Outputs = new List<TesOutput> { };
-            }
-
-            //S3://bucket-name/key-name
-            foreach (var output in tesMessage.Outputs)
-            {
-                output.Url = OutputBucket;
-            }
-
-            if (tesMessage.Executors == null)
-            {
-                tesMessage.Executors = new List<TesExecutor>();
-            }
-
-            foreach (var Executor in tesMessage.Executors)
-            {
-                if (Executor.Image == "CustomerImages") //TODO
-                {
-                    for (int i = 0; i < Executor.Command.Count; i++)
-                    {
-                        Executor.Command[i] += "--" + Token;
-                    }
-                }
-
-                //if (Executor.Env == null)
-                //{
-                //    Executor.Env = new Dictionary<string, string>();
-                //}
-                //Executor.Env["HASURAAuthenticationToken"] = Token;
-            }
-
-            _dbContext.TokensToExpire.Add(new TokenToExpire()
-            {
-                SubId = 99,
-                Token = Token
-            });
-            _dbContext.SaveChanges();
-
-
-            if (tesMessage is not null)
-            {
-                var stringdata = JsonConvert.SerializeObject(tesMessage);
-                Log.Information("{Function} tesMessage is not null runhing CreateTESK {tesMessage}", "Execute",
-                    stringdata);
-                CreateTESK(stringdata, 99, "123COOOLLL", OutputBucket, "cool DEBUG NAME");
-            }
-        }
-
-        public string CreateTESK(string jsonContent, int subId, string tesId, string outputBucket, string Tesname)
-        {
-            Log.Information("{Function} {jsonContent} runhing CreateTESK ", "CreateTESK", jsonContent);
+            Log.Information("{Function} {jsonContent} running CreateTESK ", "CreateTesk", jsonContent);
 
             HttpClientHandler handler = new HttpClientHandler();
 
@@ -178,54 +101,51 @@ namespace TRE_API
             }
 
 
-            using (var httpClient = new HttpClient(handler))
+            using var httpClient = new HttpClient(handler);
+            // Define the URL for the POST request
+            string apiUrl = _AgentSettings.TESKAPIURL;
+            
+            // Create a HttpRequestMessage with the HTTP method set to POST
+            var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
+
+            // Set the headers
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Headers.TryAddWithoutValidation("Content-Type", "application/json");
+
+            // Attach the JSON string to the request's content
+            request.Content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+
+            // Send the POST request
+            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+
+            // Check the response status
+            if (response.IsSuccessStatusCode)
             {
-                // Define the URL for the POST request
-                string apiUrl = _AgentSettings.TESKAPIURL;
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                Log.Information("{Function} Request successful. Response: {Response}", "CreateTesk", responseBody);
+                Console.WriteLine("Request successful. Response:");
+                Console.WriteLine(responseBody);
+                Log.Information("Request successful. Response: {response}", responseBody);
 
 
-                // Create a HttpRequestMessage with the HTTP method set to POST
-                var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
+                var responseObj = JsonConvert.DeserializeObject<ResponseModel>(responseBody);
+                string id = responseObj.id;
 
-                // Set the headers
-                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                request.Headers.TryAddWithoutValidation("Content-Type", "application/json");
+                RecurringJob.AddOrUpdate<IDoAgentWork>(id,
+                    a => a.CheckTESK(id, subId, tesId, outputBucket, Tesname),
+                    Cron.MinuteInterval(1));
 
-                // Attach the JSON string to the request's content
-                request.Content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                _dbContext.Add(new TeskAudit() { message = jsonContent, teskid = tesId, subid = subId.ToString() });
+                _dbContext.SaveChanges();
 
+                return id;
+            }
+            else
+            {
+                Log.Error("{Function} Request failed with status code: {Code}", "CreateTESK", response.StatusCode);
 
-                // Send the POST request
-                HttpResponseMessage response = httpClient.SendAsync(request).Result;
-
-                // Check the response status
-                if (response.IsSuccessStatusCode)
-                {
-                    string responseBody = response.Content.ReadAsStringAsync().Result;
-                    Log.Information("{Function} Request successful. Response: {Response}", "CreateTESK", responseBody);
-                    Console.WriteLine("Request successful. Response:");
-                    Console.WriteLine(responseBody);
-                    Log.Information("Request successful. Response: {response}", responseBody);
-
-
-                    var responseObj = JsonConvert.DeserializeObject<ResponseModel>(responseBody);
-                    string id = responseObj.id;
-
-                    RecurringJob.AddOrUpdate<IDoAgentWork>(id,
-                        a => a.CheckTESK(id, subId, tesId, outputBucket, Tesname),
-                        Cron.MinuteInterval(1));
-
-                    _dbContext.Add(new TeskAudit() { message = jsonContent, teskid = tesId, subid = subId.ToString() });
-                    _dbContext.SaveChanges();
-
-                    return id;
-                }
-                else
-                {
-                    Log.Error("{Function} Request failed with status code: {Code}", "CreateTESK", response.StatusCode);
-
-                    return "";
-                }
+                return "";
             }
         }
 
@@ -298,17 +218,17 @@ namespace TRE_API
                             using (var scope = _serviceProvider.CreateScope())
                             {
                                 TokenToExpire Token = null;
-                                var statusMessage = StatusType.TransferredToPod;
+                                var statusMessage = StatusType.TransferredToAgent;
                                 switch (status.state)
                                 {
                                     case "QUEUED":
-                                        statusMessage = StatusType.TransferredToPod;
+                                        statusMessage = StatusType.TransferredToAgent;
                                         break;
                                     case "RUNNING":
-                                        statusMessage = StatusType.PodProcessing;
+                                        statusMessage = StatusType.Processing;
                                         break;
                                     case "COMPLETE":
-                                        statusMessage = StatusType.PodProcessingComplete;
+                                        statusMessage = StatusType.ProcessingComplete;
 
                                         Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
                                         Log.Information("{Function} *** COMPLETE remove Token *** {Token} ",
@@ -452,16 +372,10 @@ namespace TRE_API
             }
         }
 
-        //TODO Implement proper check
-        private bool ValidateCreate(Submission sub)
-        {
-            return true;
-        }
-
         // Method executed upon hangfire job
         public async Task Execute()
         {
-            Log.Information("{Function} DoAgentWork ruinng", "Execute");
+            Log.Information("{Function} DoAgentWork running", "Execute");
             // control use of dependency injection
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -474,6 +388,7 @@ namespace TRE_API
                 if (await _features.IsEnabledAsync(FeatureFlags.DemoAllInOne))
                 {
                     Log.Information("{Function} Demo Mode is on, simulating execution..", "Execute");
+                    
                 }
 
                 var cancelsubprojs = _subHelper.GetRequestCancelSubsForTre();
@@ -511,7 +426,7 @@ namespace TRE_API
                     {
                         Log.Information("{Function}Submission: {submission}", "Execute", aSubmission.Id);
 
-                        // Check user is allowed ont he project
+                        // Check user is allowed on the project
                         if (!_subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
                         {
                             Log.Error(
@@ -542,22 +457,6 @@ namespace TRE_API
                                     var source = _minioSubHelper.GetCopyObject(sourceBucket, fileName);
                                     var resultcopy = _minioTreHelper
                                         .CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
-                                }
-
-                                _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(),
-                                    StatusType.TreWaitingForCrateFormatCheck, "");
-                                if (ValidateCreate(aSubmission))
-                                {
-                                    _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(),
-                                        StatusType.TreCrateValidated,
-                                        "");
-                                }
-                                else
-                                {
-                                    _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(),
-                                        StatusType.SubmissionCrateValidationFailed, "");
-                                    _subHelper.CloseSubmissionForTre(aSubmission.Id.ToString(), StatusType.Failed, "",
-                                        "");
                                 }
                             }
                             catch (Exception ex)
@@ -696,7 +595,7 @@ namespace TRE_API
                                     Log.Information("{Function} tesMessage is not null runhing CreateTESK {tesMessage}",
                                         "Execute", stringdata);
 
-                                    CreateTESK(stringdata, aSubmission.Id, aSubmission.TesId, OutputBucket,
+                                    CreateTesk(stringdata, aSubmission.Id, aSubmission.TesId, OutputBucket,
                                         aSubmission.TesName);
                                 }
                             }
@@ -707,7 +606,7 @@ namespace TRE_API
                                 try
                                 {
                                     var result = _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(),
-                                        StatusType.TransferredToPod, "");
+                                        StatusType.TransferredToAgent, "");
                                 }
                                 catch (Exception e)
                                 {
