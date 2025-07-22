@@ -1,49 +1,75 @@
 using Microsoft.Extensions.Configuration;
-using Tre_Camunda.Models;
-using Tre_Camunda.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Serilog;
+using Tre_Camunda.Extensions;
+using Tre_Camunda.Settings;
 using Zeebe.Client;
 
-
-var builder = WebApplication.CreateBuilder(args);
-
-ConfigurationManager configuration = builder.Configuration;
-
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var zeebeSettings = new ZeebeSettings();
-configuration.Bind(nameof(ZeebeSettings), zeebeSettings);
-builder.Services.AddSingleton(zeebeSettings);
+using System.Reflection;
+using Zeebe.Client.Accelerator.Extensions;
 
 
-var zeebeClient = ZeebeClient.Builder()
-    .UseGatewayAddress(zeebeSettings.Address)
-    .UsePlainText()
-    .Build();
+var configuration = GetConfiguration();
+string AppName = typeof(Program).Module.Name.Replace(".dll", "");
 
-builder.Services.AddSingleton<IZeebeClient>(zeebeClient);
+Log.Logger = CreateSerilogLogger(configuration);
+Log.Information("Camunda logging Start.");
 
-
-builder.Services.AddScoped<IZeebeDmnService, ZeebeDmnService>();
-builder.Services.AddHostedService<DmnStartupService>();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+Serilog.ILogger CreateSerilogLogger(IConfiguration configuration)
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    var seqServerUrl = configuration["Serilog:SeqServerUrl"];
+    var seqApiKey = configuration["Serilog:SeqApiKey"];
+
+    if (seqServerUrl == null)
+    {
+        Log.Error("seqServerUrl is null");
+        seqServerUrl = "seqServerUrl == null";
+    }
+
+    return new LoggerConfiguration()
+    .MinimumLevel.Verbose()
+    .Enrich.WithProperty("ApplicationContext", AppName)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.Seq(seqServerUrl, apiKey: seqApiKey)
+    .ReadFrom.Configuration(configuration)
+    .CreateLogger();
+
 }
 
-app.UseHttpsRedirection();
+await Host.CreateDefaultBuilder(args)
+    .ConfigureServices(services =>
+    {
+        services.BootstrapZeebe(
+          configuration.GetSection("ZeebeBootstrap"),
+          Assembly.GetExecutingAssembly()
+      );
 
-app.UseAuthorization();
+        services.AddZeebeBuilders();
+        services.BootstrapZeebe(configuration.GetSection("ZeebeConfiguration"), typeof(Program).Assembly);
 
-app.MapControllers();
+        services.AddHttpClient();
+        services.AddBusinessServices(configuration);
+        services.ConfigureCamunda(configuration);
+        services.AddAuthServices(configuration);
 
-app.Run();
+
+    })
+    .Build()
+    .RunAsync();
+
+/// <summary>
+/// GetConfiguration
+/// </summary>
+IConfiguration GetConfiguration()
+{
+    var a = Directory.GetCurrentDirectory();
+    var builder = new ConfigurationBuilder()
+        .SetBasePath(Directory.GetCurrentDirectory())
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .AddJsonFile($"appsettings.development.json", optional: true, reloadOnChange: true)
+        .AddEnvironmentVariables();
+
+    return builder.Build();
+}
