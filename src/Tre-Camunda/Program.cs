@@ -51,8 +51,7 @@ await Host.CreateDefaultBuilder(args)
 
         services.AddHttpClient();
         services.AddBusinessServices(configuration);
-        services.ConfigureCamunda(configuration);
-        services.AddAuthServices(configuration);
+        services.ConfigureCamunda(configuration);        
 
 
     })

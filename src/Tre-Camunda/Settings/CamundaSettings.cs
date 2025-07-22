@@ -1,4 +1,4 @@
-﻿namespace SeRP_Forms_camunda.Settings
+﻿namespace Tre_Camunda.Settings
 {
     public class CamundaSettings
     {
