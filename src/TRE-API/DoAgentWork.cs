@@ -355,15 +355,7 @@ namespace TRE_API
                                 }
 
                                 APIReturn? result = null;
-                                try
-                                {
-                                    result = _subHelper.UpdateStatusForTre(subId.ToString(), statusMessage, "");
-                                }
-                                catch (Exception ex)
-                                {
-                                    Log.Error(ex.ToString());
-                                }
-
+                               
                                 if (status.state == "COMPLETE")
                                 {
                                     Log.Information(
@@ -395,6 +387,17 @@ namespace TRE_API
                                     }
 
                                     ClearJob(taskID);
+                                }
+                                else
+                                {
+                                    try
+                                    {
+                                        result = _subHelper.UpdateStatusForTre(subId.ToString(), statusMessage, "");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log.Error(ex.ToString());
+                                    }
                                 }
                             }
 
