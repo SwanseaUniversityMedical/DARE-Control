@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Zeebe.Client;
+using Tre_Camunda;
 
 namespace Tre_Camunda.Services
 {
@@ -15,34 +16,7 @@ namespace Tre_Camunda.Services
             _camunda = IServicedZeebeClient;
         }
 
-        //public async Task DeployProcessDefinition()
-        //{
-            
-        //    var bpmnModels = Assembly.GetExecutingAssembly().GetManifestResourceNames()
-        //        .Where(x => x.ToLower().Contains($".BPMNModels.".ToLower()));
-
-        //    Regex rx = new Regex(@"([a-zA-Z0-9])\w+(?=[.]bpmn)");
-
-        //    foreach (var model in bpmnModels)
-        //    {
-        //        var bpmnResourceStream = GetType()
-        //            .Assembly
-        //            .GetManifestResourceStream(model);
-        //        try
-        //        {
-        //            var name = rx.Match(model).Value;
-        //            Log.Information("Deploying process definition with name: " + name);
-        //            await _camunda.DeployModel(bpmnResourceStream, name + ".bpmn");
-        //            // + " - Deployment"
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            var name = rx.Match(model).Value;
-        //            Log.Error("Failed to deploy process definition with name: " + name + ", and error : " + e.ToString());
-        //            throw new ApplicationException("Failed to deploy process definition", e);
-        //        }
-        //    }
-        //}
+       
 
         public async Task DeployProcessDefinitionAndDecisionModels()
         {
@@ -57,7 +31,7 @@ namespace Tre_Camunda.Services
 
 
             var modelResources = Assembly.GetExecutingAssembly().GetManifestResourceNames()
-            .Where(x => x.ToLower().Contains(".bpmnmodels.") &&
+            .Where(x => x.ToLower().Contains(".processmodels.") &&
             (x.EndsWith(".bpmn", StringComparison.OrdinalIgnoreCase) ||
             x.EndsWith(".dmn", StringComparison.OrdinalIgnoreCase)))
             .ToList();

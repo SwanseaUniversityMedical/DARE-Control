@@ -10,6 +10,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="ProcessModels\credentials.dmn" />
+    <None Remove="ProcessModels\Credentials_Determins_Subrpocess.bpmn" />
+    <None Remove="ProcessModels\credntials.bpmn" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="ProcessModels\credentials.dmn" />
+    <EmbeddedResource Include="ProcessModels\Credentials_Determins_Subrpocess.bpmn" />
+    <EmbeddedResource Include="ProcessModels\credntials.bpmn" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
