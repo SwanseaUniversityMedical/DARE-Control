@@ -5,8 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Tre_Camunda</RootNamespace>
-    <UserSecretsId>f70c7047-bdd3-43f7-8794-b6462228e2ed</UserSecretsId>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <UserSecretsId>f70c7047-bdd3-43f7-8794-b6462228e2ed</UserSecretsId>    
   </PropertyGroup>
 
   <ItemGroup>
