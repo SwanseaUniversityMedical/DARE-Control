@@ -194,6 +194,14 @@ services:
     ports:
       - 9002:9000
       - 9003:9001
+  minio-client:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: /bin/sh
+    tty: true
+    environment:
+      - MC_HOST_minio=http://minio:minio123@minio:9000
   seq:
     image: datalust/seq:latest
     mem_limit: 2G
