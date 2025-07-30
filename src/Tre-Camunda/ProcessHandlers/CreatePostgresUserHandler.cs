@@ -8,6 +8,7 @@ using System.Text.Json;
 using BL.Models;
 using Tre_Camunda.Models;
 using Zeebe.Client.Impl.Commands;
+using BL.Services.Contract;
 
 
 namespace Tre_Camunda.ProcessHandlers
@@ -40,8 +41,8 @@ namespace Tre_Camunda.ProcessHandlers
                     var variables = JsonSerializer.Deserialize<Dictionary<string, object>>(job.Variables);
                     
                     var envListJson = variables["envList"]?.ToString();
-                    var envList = JsonSerializer.Deserialize<List<DmnResponse>>(envListJson);
-                    
+                    var envList = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(envListJson);
+
                     var credentialInfo = envList?.FirstOrDefault();
                     if (credentialInfo == null)
                     {
@@ -50,12 +51,12 @@ namespace Tre_Camunda.ProcessHandlers
                         throw new Exception(errorMsg);
                     }
 
-                    
-                    var username = credentialInfo.Result.ContainsKey("value")
-                        ? credentialInfo.Result["value"]?.ToString()
-                        : null;
 
-                    
+                    var username = credentialInfo.ContainsKey("value")?credentialInfo["value"]?.ToString()
+                    :credentialInfo.ContainsKey("username")
+                    ? credentialInfo["username"]?.ToString(): null;
+
+
                     var project = variables["project"]?.ToString();
                     var user = variables["user"]?.ToString();
 
