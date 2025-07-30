@@ -7,6 +7,8 @@ using Tre_Camunda.Services;
 using Tre_Camunda.Settings;
 using Zeebe.Client.Accelerator.Extensions;
 using Zeebe.Client.Accelerator.Abstractions;
+using BL.Services.Contract;
+using BL.Services;
 
 
 namespace Tre_Camunda.Extensions
@@ -31,7 +33,9 @@ namespace Tre_Camunda.Extensions
             services.AddHostedService<BpmnProcessDeployService>();
             services.AddScoped<IProcessModelService, ProcessModelService>();
 
-            services.AddScoped<IServicedZeebeClient, ServicedZeebeClient>();            
+            services.AddScoped<IServicedZeebeClient, ServicedZeebeClient>();
+
+            services.AddScoped<IPostgreSQLUserManagementService, PostgreSQLUserManagementService>();
 
         }
     }
