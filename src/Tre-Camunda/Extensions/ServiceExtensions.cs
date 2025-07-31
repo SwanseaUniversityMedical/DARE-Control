@@ -2,8 +2,13 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Tre_Camunda.ProcessHandlers;
 using Tre_Camunda.Services;
 using Tre_Camunda.Settings;
+using Zeebe.Client.Accelerator.Extensions;
+using Zeebe.Client.Accelerator.Abstractions;
+using BL.Services.Contract;
+using BL.Services;
 
 
 namespace Tre_Camunda.Extensions
@@ -13,11 +18,11 @@ namespace Tre_Camunda.Extensions
         public static void AddBusinessServices(this IServiceCollection services, IConfiguration configuration) // add services here
         {
 
-            
+
             services.AddHttpClient();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            
-        }      
+
+        }
 
         public static void ConfigureCamunda(this IServiceCollection services, IConfiguration configuration)
         {
@@ -30,39 +35,8 @@ namespace Tre_Camunda.Extensions
 
             services.AddScoped<IServicedZeebeClient, ServicedZeebeClient>();
 
-            /*/
-            services.AddCamundaWorker("Worker")
-                .AddHandler<StartTaskForUsers>()
-                .AddHandler<BlankTask>()
-                .AddHandler<RegisterUserTask>()
-                .AddHandler<CompleteUserTask>()
-                .AddHandler<RegisterNewTracking>()
-                .AddHandler<RegisterFinishTracking>()
-                .AddHandler<GetViewForFlow>()
-                .AddHandler<SaveFormData>()
-                .AddHandler<PullOutUserVariable>()
-                .AddHandler<EnterCode>()
-                .AddHandler<BlockRandomisation>()
-                .AddHandler<SendAbuseEmail>()
-                .AddHandler<DeleteAllData>()
-                .AddHandler<RenameTracking>()
-                .AddHandler<SignalRHandler>()
-                .AddHandler<SetUserVariable>()
-                .AddHandler<CalculatePregWeeks>()
-                .AddHandler<GenericEmail>()
-                .AddHandler<GenerateAnonymousID>()
-                .AddHandler<TestRegistration>()
-                .ConfigurePipeline(pipeline =>
-              {
-                  pipeline.Use(next => async context =>
-                  {
-                      Log.Information("Started processing of task {Id}", context.Task.Id);
-                      await next(context);
-                      Log.Information("Finished processing of task {Id}", context.Task.Id);
-                  });
-              });
-            /*/
-        }
+            services.AddScoped<IPostgreSQLUserManagementService, PostgreSQLUserManagementService>();
 
+        }
     }
 }
