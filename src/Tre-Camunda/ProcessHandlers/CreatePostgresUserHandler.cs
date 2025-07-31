@@ -93,25 +93,7 @@ namespace Tre_Camunda.ProcessHandlers
                     var result = await _postgreSQLUserManagementService.CreateUserAsync(createUserRequest);
 
                     if (result.Success)
-                    {
-
-                        //var credentialResponse = new DmnResponse
-                        //{
-                        //    DecisionId = credentialInfo.DecisionId ?? "postgres-credential-creation",
-                        //    Result = new Dictionary<string, object>
-                        //    {
-                        //        ["postgresUsername"] = username,
-                        //        ["postgresPassword"] = password,
-                        //        ["credentialType"] = "postgres",
-                        //        ["userId"] = user,
-                        //        ["project"] = project,
-                        //        ["expiresAt"] = DateTime.UtcNow.AddHours(24), //Not sure if this is correct
-                        //        ["createdAt"] = DateTime.UtcNow,
-                        //        ["status"] = "created",
-                        //        ["schemasGranted"] = schemaPermissions.Select(s => s.SchemaName).ToList()
-                        //    }
-                        //};
-
+                    {                      
 
                         var outputVariables = new Dictionary<string, object>
                         {
