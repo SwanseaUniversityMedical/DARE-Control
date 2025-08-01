@@ -16,9 +16,6 @@
             <h1 class="fs-3 mb-0">@Model.Name</h1>
             <p class="font-monospace text-muted small mb-0">#@Model.Id</p>
         </div>
-        @*<p class="badge py-2 px-3 badge-lg bg-warning text-dark rounded-pill m-0">
-        <i class="fa-solid fa-flag me-2"></i>Embargoed: @project.MarkAsEmbargoed
-        </p>*@
     </div>
     <div class="mt-4">
         <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
@@ -118,7 +115,8 @@
                                 <i class="fa fa-table-columns align-middle me-2"></i>
                                 <span>Create Submission </span>
                             </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">                              
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                <li><a class="dropdown-item" href="@Url.Action("SubmissionProjectDemo", "Project",  new { id = pId })">Demo TES Wizard</a></li>
                                 <li><a class="dropdown-item" href="@Url.Action("SubmissionProjectSQL", "Project",  new { id = pId })">SQL TES Wizard</a></li>
                                 <li><a class="dropdown-item" href="@Url.Action("SubmissionProjectGraphQL", "Project",  new { id = pId })">GraphQL TES Wizard</a></li>
                             </ul>

@@ -25,11 +25,12 @@ namespace DARE_FrontEnd.Controllers
     {
         private readonly IDareClientHelper _clientHelper;
         private readonly IConfiguration _configuration;
-        private readonly URLSettingsFrontEnd _URLSettingsFrontEnd; 
+        private readonly URLSettingsFrontEnd _URLSettingsFrontEnd;
         private readonly IKeyCloakService _IKeyCloakService;
 
 
-        public SubmissionController(IDareClientHelper client, IConfiguration configuration, URLSettingsFrontEnd URLSettingsFrontEnd, IKeyCloakService IKeyCloakService)
+        public SubmissionController(IDareClientHelper client, IConfiguration configuration,
+            URLSettingsFrontEnd URLSettingsFrontEnd, IKeyCloakService IKeyCloakService)
         {
             _clientHelper = client;
             _configuration = configuration;
@@ -37,12 +38,11 @@ namespace DARE_FrontEnd.Controllers
             _IKeyCloakService = IKeyCloakService;
         }
 
-      
 
         public IActionResult Instructions()
         {
             var url = _configuration["DareAPISettings:HelpAddress"];
-            return View(model:url);
+            return View(model: url);
         }
 
 
@@ -58,19 +58,21 @@ namespace DARE_FrontEnd.Controllers
                 paramlist.Add("projectId", model.ProjectId.ToString());
                 var project = await _clientHelper.CallAPIWithoutModel<BL.Models.Project?>(
                     "/api/Project/GetProject/", paramlist);
-   
+
 
                 if (model.TreRadios == null)
                 {
                     var paramList = new Dictionary<string, string>();
                     paramList.Add("projectId", model.ProjectId.ToString());
-                    var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList);
+                    var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/",
+                        paramList);
                     List<string> namesList = tre.Select(test => test.Name).ToList();
                     listOfTre = string.Join("|", namesList);
                 }
                 else
                 {
-                    listOfTre = string.Join("|", model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
+                    listOfTre = string.Join("|",
+                        model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
                 }
 
                 if (model.OriginOption == CrateOrigin.External)
@@ -84,35 +86,38 @@ namespace DARE_FrontEnd.Controllers
                     paramss.Add("bucketName", project.SubmissionBucket);
                     if (model.File != null)
                     {
-                        var uplodaResultTest = await _clientHelper.CallAPIToSendFile<APIReturn>("/api/Project/UploadToMinio", "file", model.File, paramss);
+                        var uplodaResultTest =
+                            await _clientHelper.CallAPIToSendFile<APIReturn>("/api/Project/UploadToMinio", "file",
+                                model.File, paramss);
                     }
-                    var minioEndpoint = await _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
-                    //Don't add http:// minioEndpoint.Url already has it. And if not it should!
-                    imageUrl = /*"http://" +*/ minioEndpoint.Url + "/browser/" + project.SubmissionBucket + "/" + model.File.FileName;
 
+                    var minioEndpoint =
+                        await _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
+                    //Don't add http:// minioEndpoint.Url already has it. And if not it should!
+                    imageUrl = /*"http://" +*/ minioEndpoint.Url + "/browser/" + project.SubmissionBucket + "/" +
+                                               model.File.FileName;
                 }
 
                 var TesTask = new TesTask()
                 {
                     Name = model.TESName,
                     Executors = new List<TesExecutor>()
+                    {
+                        new TesExecutor()
                         {
-                            new TesExecutor()
-                            {
-                                Image = imageUrl,
-
-                            }
-                        },
-                    Tags = new Dictionary<string, string>()
-                        {
-                            { "project", project.Name },
-                            { "tres", listOfTre }
+                            Image = imageUrl,
                         }
+                    },
+                    Tags = new Dictionary<string, string>()
+                    {
+                        { "project", project.Name },
+                        { "tres", listOfTre }
+                    }
                 };
 
 
                 var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", TesTask);
-                
+
                 return RedirectToAction("GetASubmission", new { id = result.Id });
                 //return Ok();
             }
@@ -121,7 +126,7 @@ namespace DARE_FrontEnd.Controllers
                 Log.Error("SubmissionWizard > " + ex.ToString());
                 return BadRequest();
             }
-        }       
+        }
 
         public static string GetContentType(string fileName)
         {
@@ -138,7 +143,7 @@ namespace DARE_FrontEnd.Controllers
             return "application/octet-stream"; // This is a common default for unknown file types
         }
 
-        [HttpGet] 
+        [HttpGet]
         public IActionResult GetAllSubmissions()
         {
             var minio = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
@@ -146,7 +151,8 @@ namespace DARE_FrontEnd.Controllers
             ViewBag.URLBucket = _URLSettingsFrontEnd.MinioUrl;
 
             List<Submission> displaySubmissionsList = new List<Submission>();
-            var res = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions/").Result.Where(x => x.Parent == null).ToList();
+            var res = _clientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetAllSubmissions/").Result
+                .Where(x => x.Parent == null).ToList();
 
             res = res.Where(x => x.Parent == null).ToList();
 
@@ -158,7 +164,7 @@ namespace DARE_FrontEnd.Controllers
         public IActionResult GetASubmission(int id)
         {
             var res = _clientHelper.CallAPIWithoutModel<Submission>($"/api/Submission/GetASubmission/{id}").Result;
-            
+
 
             var minio = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint").Result;
             ViewBag.minioendpoint = minio?.Url;
@@ -172,14 +178,67 @@ namespace DARE_FrontEnd.Controllers
         }
 
 
+        [HttpPost]
+        public async Task<ActionResult> SubmitDemoTes(AddiSubmissionWizard model, string Executors, string SQL)
+        {
+            try
+            {
+                var tres = "";
+                var paramlist = new Dictionary<string, string>();
+                paramlist.Add("projectId", model.ProjectId.ToString());
+                var project = await _clientHelper.CallAPIWithoutModel<BL.Models.Project?>(
+                    "/api/Project/GetProject/", paramlist) ?? throw new NullReferenceException("Project not found");
+                var treSelection = model.TreRadios.Where(x => x.IsSelected).ToList();
+                if (treSelection.Count == 0)
+                {
+                    var paramList = new Dictionary<string, string>();
+                    paramList.Add("projectId", model.ProjectId.ToString());
+                    var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/",
+                        paramList);
+                    List<string> namesList = tre.Select(test => test.Name).ToList();
+                    tres = string.Join("|", namesList);
+                }
+                else
+                {
+                    tres = string.Join("|",
+                        model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
+                }
+
+                var tesTask = new TesTask();
+                if (!string.IsNullOrWhiteSpace(model.JsonData))
+                {
+                    tesTask = JsonConvert.DeserializeObject<TesTask>(model.JsonData) ??
+                              throw new NullReferenceException("Json data not returned");
+                    if (tesTask.Tags == null || tesTask.Tags.Count == 0)
+                    {
+                        tesTask.Tags = new Dictionary<string, string>()
+                        {
+                            { "project", project.Name },
+                            { "tres", tres }
+                        };
+                    }
+                }
+
+                await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+                await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", tesTask);
+
+
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "{Function}  crash", "SubmitDemoTes");
+                throw new Exception("SubmissionWizard > " + e.ToString());
+            }
+        }
+
 
         [HttpPost]
         public async Task<ActionResult> AddiSubmissionWizard(AddiSubmissionWizard model, string Executors, string SQL)
         {
             try
             {
-
-             
                 var listOfTre = "";
 
                 var paramlist = new Dictionary<string, string>();
@@ -203,7 +262,6 @@ namespace DARE_FrontEnd.Controllers
                         {
                             var keyval = anENV.Split('=', 2);
                             EnvVars[keyval[0]] = keyval[1];
-
                         }
 
                         var exet = new TesExecutor()
@@ -222,15 +280,16 @@ namespace DARE_FrontEnd.Controllers
                 {
                     var paramList = new Dictionary<string, string>();
                     paramList.Add("projectId", model.ProjectId.ToString());
-                    var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/", paramList);
+                    var tre = await _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Project/GetTresInProject/",
+                        paramList);
                     List<string> namesList = tre.Select(test => test.Name).ToList();
                     listOfTre = string.Join("|", namesList);
                 }
                 else
                 {
-                    listOfTre = string.Join("|", model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
+                    listOfTre = string.Join("|",
+                        model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
                 }
-
 
 
                 test = new TesTask();
@@ -239,9 +298,6 @@ namespace DARE_FrontEnd.Controllers
                 {
                     test = JsonConvert.DeserializeObject<TesTask>(model.RawInput);
                 }
-
-
-
 
 
                 if (string.IsNullOrEmpty(model.TESName) == false)
@@ -268,7 +324,6 @@ namespace DARE_FrontEnd.Controllers
 
                 if (string.IsNullOrEmpty(model.Query) == false)
                 {
-
                     var QueryExecutor = new TesExecutor()
                     {
                         Image = _URLSettingsFrontEnd.QueryImageGraphQL,
@@ -319,7 +374,6 @@ namespace DARE_FrontEnd.Controllers
                             Description = "ADescription",
                             Path = "/app/data",
                             Type = TesFileType.DIRECTORYEnum,
-
                         }
                     };
                     if (SQL == "true")
@@ -331,14 +385,14 @@ namespace DARE_FrontEnd.Controllers
                 if (test.Tags == null || test.Tags.Count == 0)
                 {
                     test.Tags = new Dictionary<string, string>()
-                        {
-                            { "project", project.Name },
-                            { "tres", listOfTre }
-                        };
+                    {
+                        { "project", project.Name },
+                        { "tres", listOfTre }
+                    };
                 }
 
-				var context = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-				var Token = await _IKeyCloakService.RefreshUserToken(context);
+                var context = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                var Token = await _IKeyCloakService.RefreshUserToken(context);
 
 
                 var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test);
