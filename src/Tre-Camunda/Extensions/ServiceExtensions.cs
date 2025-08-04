@@ -30,6 +30,10 @@ namespace Tre_Camunda.Extensions
             configuration.Bind(nameof(camundaSettings), camundaSettings);
             services.AddSingleton(camundaSettings);
 
+            var ldapSettings = new LdapSettings();
+            configuration.Bind(nameof(ldapSettings), ldapSettings);
+            services.AddSingleton(ldapSettings);
+
             services.AddHostedService<BpmnProcessDeployService>();
             services.AddScoped<IProcessModelService, ProcessModelService>();
 
