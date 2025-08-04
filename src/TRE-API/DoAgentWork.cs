@@ -284,12 +284,12 @@ namespace TRE_API
                         }
 
                         _dbContext.SaveChanges();
-                        Log.Information("{Function} shouldReport {shouldReport} status {status}", "CheckTESK",
+                        Log.Information("{Function} shouldReport {shouldReport} status {status}", "CheckTES",
                             shouldReport, status.state);
                         if (shouldReport || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR" ||
                                              status.state == "SYSTEM_ERROR"))
                         {
-                            Log.Information("{Function} *** status change *** {State}", "CheckTESK", status.state);
+                            Log.Information("{Function} *** status change *** {State}", "CheckTES", status.state);
 
 
                             // send update
@@ -310,7 +310,7 @@ namespace TRE_API
 
                                         Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
                                         Log.Information("{Function} *** COMPLETE remove Token *** {Token} ",
-                                            "CheckTESK", Token);
+                                            "CheckTES", Token);
 
                                         if (Token != null)
                                         {
@@ -324,7 +324,7 @@ namespace TRE_API
                                         statusMessage = StatusType.Cancelled;
                                         Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
                                         Log.Information("{Function} *** EXECUTOR_ERROR remove Token *** {Token} ",
-                                            "CheckTESK", Token);
+                                            "CheckTES", Token);
 
                                         if (Token != null)
                                         {
@@ -339,7 +339,7 @@ namespace TRE_API
                                         statusMessage = StatusType.Cancelled;
                                         Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
                                         Log.Information("{Function} *** SYSTEM_ERROR remove Token *** {Token} ",
-                                            "CheckTESK", Token);
+                                            "CheckTES", Token);
 
                                         if (Token != null)
                                         {
@@ -414,7 +414,7 @@ namespace TRE_API
                                 foreach (var s3Object in data.S3Objects) //TODO is this right?
                                 {
                                     Log.Information("{Function} *** added file from outputBucket *** {file} ",
-                                        "CheckTESK", s3Object.Key);
+                                        "CheckTES", s3Object.Key);
                                     files.Add(s3Object.Key);
                                 }
 
@@ -437,11 +437,11 @@ namespace TRE_API
                             }
                         }
                         else
-                            Log.Information("{Function} No change", "CheckTESK");
+                            Log.Information("{Function} No change", "CheckTES");
                     }
                     else
                     {
-                        Log.Error("{Function} HTTP Request {url} failed with status code {code}", "CheckTESK", url,
+                        Log.Error("{Function} HTTP Request {url} failed with status code {code}", "CheckTES", url,
                             response.StatusCode);
                     }
                 }
