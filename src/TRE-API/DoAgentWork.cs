@@ -24,7 +24,7 @@ namespace TRE_API
     public interface IDoAgentWork
     {
         Task Execute();
-        Task CheckTESK(string taskID, int subId, string tesId, string outputBucket, string NameTes);
+        Task CheckTES(string taskID, int subId, string tesId, string outputBucket, string NameTes);
         void ClearJob(string jobname);
         Task testing(string toRun, string Role);
     }
@@ -212,20 +212,18 @@ namespace TRE_API
                     string id = responseObj.id;
 
                     RecurringJob.AddOrUpdate<IDoAgentWork>(id,
-                        a => a.CheckTESK(id, subId, tesId, outputBucket, Tesname),
-                        Cron.MinuteInterval(1));
+                        a => a.CheckTES(id, subId, tesId, outputBucket, Tesname),
+                        Cron.Minutely());
 
                     _dbContext.Add(new TeskAudit() { message = jsonContent, teskid = tesId, subid = subId.ToString() });
                     _dbContext.SaveChanges();
 
                     return id;
                 }
-                else
-                {
-                    Log.Error("{Function} Request failed with status code: {Code}", "CreateTESK", response.StatusCode);
 
-                    return "";
-                }
+                Log.Error("{Function} Request failed with status code: {Code}", "CreateTESK", response.StatusCode);
+
+                return "";
             }
         }
 
@@ -234,11 +232,11 @@ namespace TRE_API
             public string id { get; set; }
         }
 
-        public async Task CheckTESK(string taskID, int subId, string tesId, string outputBucket, string NameTes)
+        public async Task CheckTES(string taskID, int subId, string tesId, string outputBucket, string NameTes)
         {
             try
             {
-                Log.Information("{Function} Check TESK : {TaskId},  TES : {TesId}, sub: {SubId}", "CheckTESK", taskID,
+                Log.Information("{Function} Check TES : {TaskId},  TES : {TesId}, sub: {SubId}", "CheckTES", taskID,
                     tesId, subId);
                 string url = _AgentSettings.TESKAPIURL + "/" + taskID + "?view=BASIC";
 
@@ -256,7 +254,7 @@ namespace TRE_API
                 using (HttpClient client = new HttpClient(handler))
                 {
                     HttpResponseMessage response = client.GetAsync(url).Result;
-                    Log.Information("{Function} Response status {State}", "CheckTESK", response.StatusCode);
+                    Log.Information("{Function} Response status {State}", "CheckTES", response.StatusCode);
                     Console.WriteLine(response.StatusCode);
 
                     if (response.IsSuccessStatusCode)
@@ -288,8 +286,8 @@ namespace TRE_API
                         _dbContext.SaveChanges();
                         Log.Information("{Function} shouldReport {shouldReport} status {status}", "CheckTESK",
                             shouldReport, status.state);
-                        if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR" ||
-                                                     status.state == "SYSTEM_ERROR"))
+                        if (shouldReport || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR" ||
+                                             status.state == "SYSTEM_ERROR"))
                         {
                             Log.Information("{Function} *** status change *** {State}", "CheckTESK", status.state);
 
@@ -355,7 +353,7 @@ namespace TRE_API
                                 }
 
                                 APIReturn? result = null;
-                               
+
                                 if (status.state == "COMPLETE")
                                 {
                                     Log.Information(
@@ -372,10 +370,10 @@ namespace TRE_API
 
                                     ClearJob(taskID);
                                 }
-                                else if (status.state == "EXECUTER_ERROR" || status.state == "SYSTEM_ERROR")
+                                else if (status.state == "EXECUTOR_ERROR" || status.state == "SYSTEM_ERROR")
                                 {
                                     Log.Information(
-                                        $"  CloseSubmissionForTre with status.state subId {subId.ToString()} == EXECUTER_ERROR or SYSTEM_ERROR ");
+                                        $"  CloseSubmissionForTre with status.state subId {subId.ToString()} == EXECUTOR_ERROR or SYSTEM_ERROR ");
                                     try
                                     {
                                         result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Failed,
@@ -403,11 +401,10 @@ namespace TRE_API
 
                             Log.Information($" Checking status ");
                             // are we done ?
-                            if (status.state == "COMPLETE" || status.state == "EXECUTER_ERROR" ||
-                                status.state == "SYSTEM_ERROR")
+                            if (status.state == "COMPLETE")
                             {
                                 Log.Information(
-                                    $"  status.state == \"COMPLETE\" || status.state == \"EXECUTOR_ERROR\" or SYSTEM_ERROR ");
+                                    "status.state == COMPLETE");
 
                                 ClearJob(taskID);
                                 var outputBucketGood = outputBucket.Replace(_AgentSettings.TESKOutputBucketPrefix, "");
@@ -464,15 +461,15 @@ namespace TRE_API
         // Method executed upon hangfire job
         public async Task Execute()
         {
-            Log.Information("{Function} DoAgentWork ruinng", "Execute");
+            Log.Information("{Function} DoAgentWork running", "Execute");
             // control use of dependency injection
             using (var scope = _serviceProvider.CreateScope())
             {
                 // OPTIONS
-                var useRabbit = _AgentSettings.UseRabbit;               
+                var useRabbit = _AgentSettings.UseRabbit;
                 var useTESK = _AgentSettings.UseTESK;
 
-                Log.Information("{Function} useRabbit {useRabbit}", "Execute", useRabbit);              
+                Log.Information("{Function} useRabbit {useRabbit}", "Execute", useRabbit);
                 Log.Information("{Function} useTESK {useTESK}", "Execute", useTESK);
                 if (await _features.IsEnabledAsync(FeatureFlags.DemoAllInOne))
                 {
@@ -606,7 +603,7 @@ namespace TRE_API
                                         aSubmission.Id);
                                     processedOK = false;
                                 }
-                            }                           
+                            }
 
                             // **************  SEND TO TESK
                             if (useTESK)
