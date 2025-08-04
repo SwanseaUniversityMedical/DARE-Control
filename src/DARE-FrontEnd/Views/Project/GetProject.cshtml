@@ -1,14 +1,13 @@
 ﻿@using BL.Models.ViewModels
+@using Microsoft.Extensions.Configuration
 @model BL.Models.ViewModels.ProjectUserTre
 @{
     string pageName = Model.Name;
 
     ViewData["Title"] = @pageName;
     int pId = Model.Id;
-
 }
-
-
+@inject IConfiguration Configuration
 
 <div class="container-lg mt-4 p-4 bg-white border-1 shadow-sm">
     <div class="d-flex align-items-center justify-content-between">
@@ -20,10 +19,12 @@
     <div class="mt-4">
         <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
             <li class="nav-item" role="presentation">
-                <a href="#about" class="nav-link text-dark active" id="about" data-bs-toggle="tab" data-bs-target="#project" role="tab" aria-controls="Project" aria-selected="true">About</a>
+                <a href="#about" class="nav-link text-dark active" id="about" data-bs-toggle="tab"
+                   data-bs-target="#project" role="tab" aria-controls="Project" aria-selected="true">About</a>
             </li>
             <li class="nav-item" role="presentation">
-                <a href="#submissions" class="nav-link text-dark" id="submissions" data-bs-toggle="tab" data-bs-target="#submissions-tab" role="tab" aria-controls="submissions" aria-selected="false">
+                <a href="#submissions" class="nav-link text-dark" id="submissions" data-bs-toggle="tab"
+                   data-bs-target="#submissions-tab" role="tab" aria-controls="submissions" aria-selected="false">
                     <div class="d-flex justify-content-between align-items-center">
                         <span>Submissions</span>
                         <span class="badge bg-dark-blue rounded-pill ms-2">@Model.Submissions.Count</span>
@@ -31,7 +32,8 @@
                 </a>
             </li>
             <li class="nav-item" role="presentation">
-                <a href="#people" class="nav-link text-dark" id="people" data-bs-toggle="tab" data-bs-target="#userMembership" role="tab" aria-controls="User Membership" aria-selected="false">
+                <a href="#people" class="nav-link text-dark" id="people" data-bs-toggle="tab"
+                   data-bs-target="#userMembership" role="tab" aria-controls="User Membership" aria-selected="false">
                     <div class="d-flex justify-content-between align-items-center">
                         <span>People</span>
                         <span class="badge bg-dark-blue rounded-pill ms-2">@Model.Users.Count</span>
@@ -39,7 +41,8 @@
                 </a>
             </li>
             <li class="nav-item" role="presentation">
-                <a href="#tre" class="nav-link text-dark" id="treLink" data-bs-toggle="tab" data-bs-target="#tre" role="tab" aria-controls="Tre" aria-selected="false">
+                <a href="#tre" class="nav-link text-dark" id="treLink" data-bs-toggle="tab" data-bs-target="#tre"
+                   role="tab" aria-controls="Tre" aria-selected="false">
                     <div class="d-flex justify-content-between align-items-center">
                         <span>TREs</span>
                         <span class="badge bg-dark-blue rounded-pill ms-2">@Model.Tres.Count</span>
@@ -55,15 +58,20 @@
                     <div class="col-md-6">
                         @if (User.IsInRole("dare-control-admin"))
                         {
-                            <a href="@Url.Action("SaveProjectForm", "Project",new{Projectid=@Model.Id})" class="btn btn-sm btn-primary mb-3">Edit</a>
+                            <a href="@Url.Action("SaveProjectForm", "Project", new { Projectid = @Model.Id })"
+                               class="btn btn-sm btn-primary mb-3">Edit</a>
                         }
                         @{
                             var minio = @ViewBag.URLBucket;
                         }
 
                         <p>
-                            <a class="btn btn-sm btn-primary me-2" target="_blank" href="http://@minio/browser/@Model.SubmissionBucket" rel="noopener">Submission Bucket <i class="fa fa-external-link ms-2"></i></a>
-                            <a class="btn btn-sm btn-outline-secondary" target="_blank" href="http://@minio/browser/@Model.OutputBucket" rel="noopener">Output Bucket<i class="fa fa-external-link ms-2"></i></a>
+                            <a class="btn btn-sm btn-primary me-2" target="_blank"
+                               href="http://@minio/browser/@Model.SubmissionBucket" rel="noopener">Submission Bucket <i
+                                    class="fa fa-external-link ms-2"></i></a>
+                            <a class="btn btn-sm btn-outline-secondary" target="_blank"
+                               href="http://@minio/browser/@Model.OutputBucket" rel="noopener">Output Bucket<i
+                                    class="fa fa-external-link ms-2"></i></a>
 
                         </p>
                         @{
@@ -99,7 +107,7 @@
                             }
                         }
                         <p class="text-muted fs-7 mt-4">
-                            Project Start Date: @Model.StartDate.ToString("dd/MM/yyyy") <br />
+                            Project Start Date: @Model.StartDate.ToString("dd/MM/yyyy") <br/>
                             Project End Date: @Model.EndDate.ToString("dd/MM/yyyy")
                         </p>
 
@@ -111,29 +119,43 @@
                 {
                     <div class="d-flex align-items-center mb-3">
                         <div class="dropdown">
-                            <button class="btn btn-primary btn-sm d-flex align-items-center mb-3  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-primary btn-sm d-flex align-items-center mb-3  dropdown-toggle"
+                                    type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
                                 <i class="fa fa-table-columns align-middle me-2"></i>
                                 <span>Create Submission </span>
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                <li><a class="dropdown-item" href="@Url.Action("SubmissionProjectDemo", "Project",  new { id = pId })">Demo TES Wizard</a></li>
-                                <li><a class="dropdown-item" href="@Url.Action("SubmissionProjectSQL", "Project",  new { id = pId })">SQL TES Wizard</a></li>
-                                <li><a class="dropdown-item" href="@Url.Action("SubmissionProjectGraphQL", "Project",  new { id = pId })">GraphQL TES Wizard</a></li>
+                                @if (Configuration.GetValue<bool>("DemoMode"))
+                                {
+                                    <li><a class="dropdown-item"
+                                           href="@Url.Action("SubmissionProjectDemo", "Project", new { id = pId })">Demo
+                                            TES Wizard</a></li>
+                                }
+                                <li><a class="dropdown-item"
+                                       href="@Url.Action("SubmissionProjectSQL", "Project", new { id = pId })">SQL TES
+                                        Wizard</a></li>
+                                <li><a class="dropdown-item"
+                                       href="@Url.Action("SubmissionProjectGraphQL", "Project", new { id = pId })">GraphQL
+                                        TES Wizard</a></li>
                             </ul>
                         </div>
-                        <a asp-controller="Submission" asp-action="Instructions" class="btn btn-link btn-sm d-flex align-items-center mb-3 me-2 text-decoration-none">
+                        <a asp-controller="Submission" asp-action="Instructions"
+                           class="btn btn-link btn-sm d-flex align-items-center mb-3 me-2 text-decoration-none">
                             <i class="fa fa-info-circle align-middle me-2"></i>
                             <span>Submit with API</span>
                         </a>
 
                     </div>
                 }
-                @await Html.PartialAsync("_SubmissionList", new SubmissionList(){SubmissionsGetProjectModel  = Model.Submissions.Where(x => x.HasParent == false).ToList(), UseParent = false}) @*@await Html.PartialAsync("_SubmissionList", new SubmissionList(){Submissions  = Model.Submissions.Where(x => x.Parent == null).ToList(), UseParent = false})*@
+                @await Html.PartialAsync("_SubmissionList", new SubmissionList() { SubmissionsGetProjectModel = Model.Submissions.Where(x => x.HasParent == false).ToList(), UseParent = false }) @*@await Html.PartialAsync("_SubmissionList", new SubmissionList(){Submissions  = Model.Submissions.Where(x => x.Parent == null).ToList(), UseParent = false})*@
             </div>
             <div class="tab-pane fade" id="userMembership" role="tabpanel" aria-labelledby="people">
                 @if (User.IsInRole("dare-control-admin"))
                 {
-                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addUser"><i class="fa fa-plus me-2"></i> Add User</button>
+                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addUser"><i
+                            class="fa fa-plus me-2"></i> Add User
+                    </button>
                 }
 
                 <div class="row">
@@ -151,7 +173,8 @@
                                     @if (User.IsInRole("dare-control-admin"))
                                     {
                                         <a href="@Url.Action("RemoveUserFromProject", "Project", new { ProjectId = Model.Id, UserId = @user.Id })">
-                                            <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove user from project"></span>
+                                            <span class="fa fa-trash" data-bs-toggle="tooltip"
+                                                  data-bs-title="Remove user from project"></span>
                                         </a>
                                     }
                                 </li>
@@ -164,7 +187,9 @@
             <div class="tab-pane fade" id="tre" role="tabpanel" aria-labelledby="contact-tab">
                 @if (User.IsInRole("dare-control-admin"))
                 {
-                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addTre"><i class="fa fa-plus me-2"></i>Add TRE</button>
+                    <button type="button" class="btn btn-sm btn-primary mb-3" id="addTre"><i
+                            class="fa fa-plus me-2"></i>Add TRE
+                    </button>
                 }
                 <div class="row">
                     <div class="col-lg-5 col-md-6">
@@ -172,7 +197,8 @@
                             @foreach (var tre in Model.Tres)
                             {
                                 <li class="list-group-item justify-content-between d-flex">
-                                    <a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })" class="fw-bold">@tre.Name</a>
+                                    <a href="@Url.Action("GetATre", "Tre", new { id = tre.Id })"
+                                       class="fw-bold">@tre.Name</a>
                                     @{
                                         var doesNotHaveDecision = true;
                                     }
@@ -180,7 +206,8 @@
                                         @if (tre.ProjectTreDecision.Decision == BL.Models.Enums.Decision.Approved)
                                         {
                                             doesNotHaveDecision = false;
-                                            <span class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 me-3">
+                                            <span
+                                                class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 me-3">
                                                 <i class="fa-solid fa-check-circle me-1"></i> @tre.ProjectTreDecision.Decision.ToString()
                                             </span>
                                         }
@@ -196,7 +223,8 @@
                                         {
                                             doesNotHaveDecision = false;
 
-                                            <span class="badge  px-2 badge-sm bg-danger text-light rounded-pill m-0 me-3">
+                                            <span
+                                                class="badge  px-2 badge-sm bg-danger text-light rounded-pill m-0 me-3">
                                                 <i class="fa-solid fa-close me-1"></i> @tre.ProjectTreDecision.Decision.ToString()
                                             </span>
                                         }
@@ -206,18 +234,16 @@
                                             <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 me-3">
                                                 <i class="fa-solid fa-circle-notch fa-spin me-1"></i> Undecided
                                             </span>
-
-
                                         }
-                                    @if (User.IsInRole("dare-control-admin"))
-                                    {
-                                        <a href="@Url.Action("RemoveTreFromProject", "Project", new { ProjectId = Model.Id, TreId = tre.Id })">
-                                            <span class="fa fa-trash" data-bs-toggle="tooltip" data-bs-title="Remove TRE from project"></span>
+                                        @if (User.IsInRole("dare-control-admin"))
+                                        {
+                                            <a href="@Url.Action("RemoveTreFromProject", "Project", new { ProjectId = Model.Id, TreId = tre.Id })">
+                                            <span class="fa fa-trash" data-bs-toggle="tooltip"
+                                                  data-bs-title="Remove TRE from project"></span>
                                         </a>
-                                    }
+                                        }
                                     </span>
                                 </li>
-
                             }
                         </ul>
                     </div>
@@ -227,7 +253,8 @@
     </div>
 </div>
 
-<div class="modal fade bd-user-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="userModal">
+<div class="modal fade bd-user-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+     aria-hidden="true" id="userModal">
     <div class="modal-dialog modal-md shadow-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -244,7 +271,8 @@
                                 {
                                     <tr>
                                         <td>
-                                            <input type="checkbox" value="@user.Value" id="@user.Value" name="selectedUser" class="form-check-input me-2" />
+                                            <input type="checkbox" value="@user.Value" id="@user.Value"
+                                                   name="selectedUser" class="form-check-input me-2"/>
                                             @user.Text
                                         </td>
                                     </tr>
@@ -262,7 +290,8 @@
     </div>
 </div>
 
-<div class="modal fade bd-tre-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="treModal">
+<div class="modal fade bd-tre-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+     aria-hidden="true" id="treModal">
     <div class="modal-dialog modal-md shadow-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -279,7 +308,8 @@
                                 {
                                     <tr>
                                         <td>
-                                            <input type="checkbox" value="@tre.Value" id="Tre_@tre.Value" name="selectedTre" class="form-check-input me-2" />
+                                            <input type="checkbox" value="@tre.Value" id="Tre_@tre.Value"
+                                                   name="selectedTre" class="form-check-input me-2"/>
                                             @tre.Text
                                         </td>
                                     </tr>
