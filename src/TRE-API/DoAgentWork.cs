@@ -54,10 +54,10 @@ namespace TRE_API
             IMinioSubHelper minioSubHelper,
             IHasuraAuthenticationService hasuraAuthenticationService,
             IDareClientWithoutTokenHelper dareHelper,
-            AgentSettings AgentSettings,
+            AgentSettings agentSettings,
             MinioSettings minioSettings,
             IKeyCloakService keyCloakService,
-            TreKeyCloakSettings TreKeyCloakSettings,
+            TreKeyCloakSettings treKeyCloakSettings,
             IEncDecHelper encDecHelper,
             IFeatureManager features
         )
@@ -65,24 +65,14 @@ namespace TRE_API
             _serviceProvider = serviceProvider;
             _dbContext = dbContext;
             _subHelper = subHelper;
-
             _minioTreHelper = minioTreHelper;
             _minioSubHelper = minioSubHelper;
-
-            _serviceProvider = serviceProvider;
-            _dbContext = dbContext;
-            _subHelper = subHelper;
-
             _hasuraAuthenticationService = hasuraAuthenticationService;
             _dareHelper = dareHelper;
-            _AgentSettings = AgentSettings;
+            _AgentSettings = agentSettings;
             _minioSettings = minioSettings;
-
-            _minioTreHelper = minioTreHelper;
-            _minioSubHelper = minioSubHelper;
-
             _keyCloakService = keyCloakService;
-            _TreKeyCloakSettings = TreKeyCloakSettings;
+            _TreKeyCloakSettings = treKeyCloakSettings;
             _encDecHelper = encDecHelper;
             _features = features;
         }
