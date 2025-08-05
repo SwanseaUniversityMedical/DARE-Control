@@ -24,7 +24,7 @@ namespace TRE_API
     public interface IDoAgentWork
     {
         Task Execute();
-        Task CheckTESK(string taskID, int subId, string tesId, string outputBucket, string NameTes);
+        Task CheckTES(string taskID, int subId, string tesId, string outputBucket, string NameTes);
         void ClearJob(string jobname);
     }
 
@@ -132,18 +132,21 @@ namespace TRE_API
                 var responseObj = JsonConvert.DeserializeObject<ResponseModel>(responseBody);
                 string id = responseObj.id;
 
-                RecurringJob.AddOrUpdate<IDoAgentWork>(id,
-                    a => a.CheckTESK(id, subId, tesId, outputBucket, Tesname),
-                    Cron.MinuteInterval(1));
+
+                    RecurringJob.AddOrUpdate<IDoAgentWork>(id,
+                        a => a.CheckTES(id, subId, tesId, outputBucket, Tesname),
+                        Cron.Minutely());
+
 
                 _dbContext.Add(new TeskAudit() { message = jsonContent, teskid = tesId, subid = subId.ToString() });
                 _dbContext.SaveChanges();
 
-                return id;
-            }
-            else
-            {
+
+                    return id;
+                }
+
                 Log.Error("{Function} Request failed with status code: {Code}", "CreateTESK", response.StatusCode);
+
 
                 return "";
             }
@@ -154,11 +157,11 @@ namespace TRE_API
             public string id { get; set; }
         }
 
-        public async Task CheckTESK(string taskID, int subId, string tesId, string outputBucket, string NameTes)
+        public async Task CheckTES(string taskID, int subId, string tesId, string outputBucket, string NameTes)
         {
             try
             {
-                Log.Information("{Function} Check TESK : {TaskId},  TES : {TesId}, sub: {SubId}", "CheckTESK", taskID,
+                Log.Information("{Function} Check TES : {TaskId},  TES : {TesId}, sub: {SubId}", "CheckTES", taskID,
                     tesId, subId);
                 string url = _AgentSettings.TESKAPIURL + "/" + taskID + "?view=BASIC";
 
@@ -176,7 +179,7 @@ namespace TRE_API
                 using (HttpClient client = new HttpClient(handler))
                 {
                     HttpResponseMessage response = client.GetAsync(url).Result;
-                    Log.Information("{Function} Response status {State}", "CheckTESK", response.StatusCode);
+                    Log.Information("{Function} Response status {State}", "CheckTES", response.StatusCode);
                     Console.WriteLine(response.StatusCode);
 
                     if (response.IsSuccessStatusCode)
@@ -206,12 +209,12 @@ namespace TRE_API
                         }
 
                         _dbContext.SaveChanges();
-                        Log.Information("{Function} shouldReport {shouldReport} status {status}", "CheckTESK",
+                        Log.Information("{Function} shouldReport {shouldReport} status {status}", "CheckTES",
                             shouldReport, status.state);
-                        if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR" ||
-                                                     status.state == "SYSTEM_ERROR"))
+                        if (shouldReport || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR" ||
+                                             status.state == "SYSTEM_ERROR"))
                         {
-                            Log.Information("{Function} *** status change *** {State}", "CheckTESK", status.state);
+                            Log.Information("{Function} *** status change *** {State}", "CheckTES", status.state);
 
 
                             // send update
@@ -232,7 +235,7 @@ namespace TRE_API
 
                                         Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
                                         Log.Information("{Function} *** COMPLETE remove Token *** {Token} ",
-                                            "CheckTESK", Token);
+                                            "CheckTES", Token);
 
                                         if (Token != null)
                                         {
@@ -246,7 +249,7 @@ namespace TRE_API
                                         statusMessage = StatusType.Cancelled;
                                         Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
                                         Log.Information("{Function} *** EXECUTOR_ERROR remove Token *** {Token} ",
-                                            "CheckTESK", Token);
+                                            "CheckTES", Token);
 
                                         if (Token != null)
                                         {
@@ -261,7 +264,7 @@ namespace TRE_API
                                         statusMessage = StatusType.Cancelled;
                                         Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
                                         Log.Information("{Function} *** SYSTEM_ERROR remove Token *** {Token} ",
-                                            "CheckTESK", Token);
+                                            "CheckTES", Token);
 
                                         if (Token != null)
                                         {
@@ -275,14 +278,7 @@ namespace TRE_API
                                 }
 
                                 APIReturn? result = null;
-                                try
-                                {
-                                    result = _subHelper.UpdateStatusForTre(subId.ToString(), statusMessage, "");
-                                }
-                                catch (Exception ex)
-                                {
-                                    Log.Error(ex.ToString());
-                                }
+ 
 
                                 if (status.state == "COMPLETE")
                                 {
@@ -300,10 +296,10 @@ namespace TRE_API
 
                                     ClearJob(taskID);
                                 }
-                                else if (status.state == "EXECUTER_ERROR" || status.state == "SYSTEM_ERROR")
+                                else if (status.state == "EXECUTOR_ERROR" || status.state == "SYSTEM_ERROR")
                                 {
                                     Log.Information(
-                                        $"  CloseSubmissionForTre with status.state subId {subId.ToString()} == EXECUTER_ERROR or SYSTEM_ERROR ");
+                                        $"  CloseSubmissionForTre with status.state subId {subId.ToString()} == EXECUTOR_ERROR or SYSTEM_ERROR ");
                                     try
                                     {
                                         result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Failed,
@@ -320,11 +316,10 @@ namespace TRE_API
 
                             Log.Information($" Checking status ");
                             // are we done ?
-                            if (status.state == "COMPLETE" || status.state == "EXECUTER_ERROR" ||
-                                status.state == "SYSTEM_ERROR")
+                            if (status.state == "COMPLETE")
                             {
                                 Log.Information(
-                                    $"  status.state == \"COMPLETE\" || status.state == \"EXECUTOR_ERROR\" or SYSTEM_ERROR ");
+                                    "status.state == COMPLETE");
 
                                 ClearJob(taskID);
                                 var outputBucketGood = outputBucket.Replace(_AgentSettings.TESKOutputBucketPrefix, "");
@@ -334,7 +329,7 @@ namespace TRE_API
                                 foreach (var s3Object in data.S3Objects) //TODO is this right?
                                 {
                                     Log.Information("{Function} *** added file from outputBucket *** {file} ",
-                                        "CheckTESK", s3Object.Key);
+                                        "CheckTES", s3Object.Key);
                                     files.Add(s3Object.Key);
                                 }
 
@@ -357,11 +352,11 @@ namespace TRE_API
                             }
                         }
                         else
-                            Log.Information("{Function} No change", "CheckTESK");
+                            Log.Information("{Function} No change", "CheckTES");
                     }
                     else
                     {
-                        Log.Error("{Function} HTTP Request {url} failed with status code {code}", "CheckTESK", url,
+                        Log.Error("{Function} HTTP Request {url} failed with status code {code}", "CheckTES", url,
                             response.StatusCode);
                     }
                 }
@@ -380,10 +375,10 @@ namespace TRE_API
             using (var scope = _serviceProvider.CreateScope())
             {
                 // OPTIONS
-                var useRabbit = _AgentSettings.UseRabbit;               
+                var useRabbit = _AgentSettings.UseRabbit;
                 var useTESK = _AgentSettings.UseTESK;
 
-                Log.Information("{Function} useRabbit {useRabbit}", "Execute", useRabbit);              
+                Log.Information("{Function} useRabbit {useRabbit}", "Execute", useRabbit);
                 Log.Information("{Function} useTESK {useTESK}", "Execute", useTESK);
                 if (await _features.IsEnabledAsync(FeatureFlags.DemoAllInOne))
                 {
@@ -481,6 +476,22 @@ namespace TRE_API
                                 }
                             }
 
+ 
+                            if (await _features.IsEnabledAsync(FeatureFlags.DemoAllInOne))
+                            {
+                                try
+                                {
+                                    _subHelper.SimulateSubmissionProcessing(aSubmission);
+                                }
+                                catch (Exception e)
+                                {
+                                    Log.Error(e, "{Function} Simulation failed for sub {SubId}", "Execute",
+                                        aSubmission.Id);
+                                    processedOK = false;
+                                }
+                            }
+
+ 
                             // **************  SEND TO TESK
                             if (useTESK)
                             {
