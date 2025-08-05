@@ -78,7 +78,15 @@ namespace TRE_API
         }
 
 
-
+        /// <summary>
+        /// Called by Hangfire, each running job has a specific hangfire job that calls this method to check on the running status of that job periodically
+        /// </summary>
+        /// <param name="taskID"></param>
+        /// <param name="subId"></param>
+        /// <param name="tesId"></param>
+        /// <param name="outputBucket"></param>
+        /// <param name="NameTes"></param>
+        /// <returns></returns>
         public async Task CheckTES(string taskID, int subId, string tesId, string outputBucket, string NameTes)
         {
             Log.Information("Checking TESK status {taskID}", taskID);
