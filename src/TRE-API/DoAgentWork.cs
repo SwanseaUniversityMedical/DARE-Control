@@ -104,7 +104,7 @@ namespace TRE_API
             using var httpClient = new HttpClient(handler);
             // Define the URL for the POST request
             string apiUrl = _AgentSettings.TESKAPIURL;
-            
+
             // Create a HttpRequestMessage with the HTTP method set to POST
             var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
 
@@ -133,24 +133,24 @@ namespace TRE_API
                 string id = responseObj.id;
 
 
-                    RecurringJob.AddOrUpdate<IDoAgentWork>(id,
-                        a => a.CheckTES(id, subId, tesId, outputBucket, Tesname),
-                        Cron.Minutely());
+                RecurringJob.AddOrUpdate<IDoAgentWork>(id,
+                    a => a.CheckTES(id, subId, tesId, outputBucket, Tesname),
+                    Cron.Minutely());
 
 
                 _dbContext.Add(new TeskAudit() { message = jsonContent, teskid = tesId, subid = subId.ToString() });
                 _dbContext.SaveChanges();
 
 
-                    return id;
-                }
-
-                Log.Error("{Function} Request failed with status code: {Code}", "CreateTESK", response.StatusCode);
-
-
-                return "";
+                return id;
             }
+
+            Log.Error("{Function} Request failed with status code: {Code}", "CreateTESK", response.StatusCode);
+
+
+            return "";
         }
+
 
         class ResponseModel
         {
