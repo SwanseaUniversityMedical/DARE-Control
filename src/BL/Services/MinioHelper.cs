@@ -1,35 +1,36 @@
 ﻿using Amazon;
-using Amazon.Runtime;
-using Amazon.Runtime.Internal.Util;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using Aws4RequestSigner;
-using BL.Models.Settings;
 using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
-using Minio;
 using Minio.Exceptions;
 using Newtonsoft.Json;
 using Serilog;
-using System;
 using System.Net;
 using System.Text;
+using Minio.DataModel.Args;
 
 namespace BL.Services
 {
     public class MinioHelper : IMinioHelper
     {
         private readonly MinioSettings _minioSettings;
+
         public MinioHelper(MinioSettings minioSettings)
         {
             _minioSettings = minioSettings;
         }
+
         public async Task<bool> CheckBucketExists(string bucketName = "")
         {
             try
             {
-                if (string.IsNullOrEmpty(bucketName)) { bucketName = _minioSettings.BucketName; }
+                if (string.IsNullOrEmpty(bucketName))
+                {
+                    bucketName = _minioSettings.BucketName;
+                }
 
                 var amazonS3Client = GenerateAmazonS3Client();
 
@@ -48,7 +49,6 @@ namespace BL.Services
         {
             try
             {
-
                 ListObjectsV2Request request = new ListObjectsV2Request
                 {
                     BucketName = bucketName,
@@ -62,23 +62,27 @@ namespace BL.Services
             }
             catch (MinioException e)
             {
-                Log.Warning("GetFilesInBucket: {bucketName}, failed due to Minio exception: {message}", bucketName, e.Message);
+                Log.Warning("GetFilesInBucket: {bucketName}, failed due to Minio exception: {message}", bucketName,
+                    e.Message);
             }
             catch (Exception ex)
             {
-                Log.Warning("GetFilesInBucket: {bucketName}, failed due to Exception: {message}", bucketName, ex.Message);
+                Log.Warning("GetFilesInBucket: {bucketName}, failed due to Exception: {message}", bucketName,
+                    ex.Message);
             }
 
             return null;
         }
+
         public async Task<bool> CreateBucket(string bucketName = "")
         {
-            if (string.IsNullOrEmpty(bucketName)) { bucketName = _minioSettings.BucketName; }
+            if (string.IsNullOrEmpty(bucketName))
+            {
+                bucketName = _minioSettings.BucketName;
+            }
 
             if (!string.IsNullOrEmpty(bucketName))
             {
-
-
                 try
                 {
                     // Create bucket if it doesn't exist.
@@ -99,17 +103,20 @@ namespace BL.Services
                 }
                 catch (MinioException e)
                 {
-                    Log.Warning("Create bucket: {bucketName}, failed due to Minio exception: {message}", bucketName, e.Message);
+                    Log.Warning("Create bucket: {bucketName}, failed due to Minio exception: {message}", bucketName,
+                        e.Message);
                 }
                 catch (Exception ex)
                 {
-                    Log.Warning("Create bucket: {bucketName}, failed due to Exception: {message}", bucketName, ex.Message);
+                    Log.Warning("Create bucket: {bucketName}, failed due to Exception: {message}", bucketName,
+                        ex.Message);
                 }
             }
             else
             {
                 Log.Warning("Cannot create bucket as bucket name is null or empty.");
             }
+
             return false;
         }
 
@@ -117,15 +124,11 @@ namespace BL.Services
         {
             try
             {
-
-
                 var amazonS3Client = GenerateAmazonS3Client();
                 if (filePath != null)
                 {
                     using (var stream = new MemoryStream())
                     {
-
-
                         await filePath.CopyToAsync(stream);
 
                         var uploadRequest = new PutObjectRequest
@@ -150,13 +153,31 @@ namespace BL.Services
                         }
                     }
                 }
+
                 return true;
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Log.Warning("UploadFile: {filePath}, failed: {message}", filePath, e.Message);
                 throw;
             }
+        }
+
+
+        public async Task WriteToStore(string bucketName, string filePath, MemoryStream file)
+        {
+            var amazonS3Client = GenerateAmazonS3Client();
+            var objectName = Path.GetFileName(filePath);
+            var putObjectRequest = new PutObjectRequest()
+            {
+                BucketName = bucketName,
+                Key = objectName,
+                InputStream = file,
+                ContentType = "text/plain"
+            };
+            Log.Information("Uploading '{TargetObject} to {Bucket}...", filePath, bucketName);
+            await amazonS3Client.PutObjectAsync(putObjectRequest);
+            Log.Debug("Successfully uploaded {TargetObject} to {Bucket}", filePath, bucketName);
         }
 
         public async Task<bool> DownloadFileAsync(string bucketName = "", string objectName = "")
@@ -200,8 +221,6 @@ namespace BL.Services
             {
                 return false;
             }
-
-
         }
 
         public async Task DeleteObject(string bucketName, string objectKey)
@@ -211,7 +230,6 @@ namespace BL.Services
             try
             {
                 await amazonS3Client.DeleteObjectAsync(bucketName, objectKey);
-
             }
             catch (AmazonS3Exception ex)
             {
@@ -272,41 +290,37 @@ namespace BL.Services
                         Proxy = proxy,
                         UseProxy = true
                     };
-                    Log.Information("{Function} Using proxy {Proxy}", "FetchAndStoreObject", _minioSettings.ProxyAddresURLForExternalFetch);
+                    Log.Information("{Function} Using proxy {Proxy}", "FetchAndStoreObject",
+                        _minioSettings.ProxyAddresURLForExternalFetch);
                 }
                 else
                 {
                     handler = new HttpClientHandler
                     {
-                        
                         UseProxy = false
                     };
                     Log.Information("{Function} Not Using proxy", "FetchAndStoreObject");
                 }
-                
+
 
                 // Configure the HttpClientHandler to use the proxy
-                
+
 
                 // Create the HttpClient with the handler
                 using (var httpClient = new HttpClient(handler))
                 {
-
-                    
                     var response = await httpClient.GetAsync(url);
-                    
-                    
+
+
                     response.EnsureSuccessStatusCode();
-                    
+
                     var contentBytes = await response.Content.ReadAsByteArrayAsync();
 
                     var amazonS3Client = GenerateAmazonS3Client();
-                    
+
                     using (var transferUtility = new TransferUtility(amazonS3Client))
                     {
-                    
                         await transferUtility.UploadAsync(new MemoryStream(contentBytes), bucketName, key);
-                    
                     }
                 }
 
@@ -321,7 +335,6 @@ namespace BL.Services
 
         public async Task<bool> RabbitExternalObject(MQFetchFile msgBytes)
         {
-
             if (msgBytes == null)
             {
                 Log.Information("{Function} Empty message", "RabbitExternalObject");
@@ -352,15 +365,18 @@ namespace BL.Services
 
         public async Task<bool> CreateBucketPolicy(string bucketName)
         {
-
             var signer = new AWS4RequestSigner(_minioSettings.AccessKey, _minioSettings.SecretKey);
 
-            var content = new StringContent("{\r\n    \"Version\": \"2012-10-17\",\r\n    \"Statement\": [\r\n        {\r\n            \"Effect\": \"Allow\",\r\n            \"Action\": [\r\n                \"s3:List*\",\r\n                \"s3:ListBucket\",\r\n                \"s3:PutObject\",\r\n                \"s3:DeleteObject\",\r\n                \"s3:GetBucketLocation\",\r\n                \"s3:GetObject\"\r\n            ],\r\n            \"Resource\": [\r\n                \"arn:aws:s3:::" + bucketName + "\",\r\n                \"arn:aws:s3:::" + bucketName + "/*\"\r\n            ]\r\n        }\r\n    ]\r\n}", null, "application/json");
+            var content = new StringContent(
+                "{\r\n    \"Version\": \"2012-10-17\",\r\n    \"Statement\": [\r\n        {\r\n            \"Effect\": \"Allow\",\r\n            \"Action\": [\r\n                \"s3:List*\",\r\n                \"s3:ListBucket\",\r\n                \"s3:PutObject\",\r\n                \"s3:DeleteObject\",\r\n                \"s3:GetBucketLocation\",\r\n                \"s3:GetObject\"\r\n            ],\r\n            \"Resource\": [\r\n                \"arn:aws:s3:::" +
+                bucketName + "\",\r\n                \"arn:aws:s3:::" + bucketName +
+                "/*\"\r\n            ]\r\n        }\r\n    ]\r\n}", null, "application/json");
 
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Put,
-                RequestUri = new Uri(_minioSettings.Url + "/minio/admin/v3/add-canned-policy?name=" + bucketName + "_policy"),
+                RequestUri = new Uri(_minioSettings.Url + "/minio/admin/v3/add-canned-policy?name=" + bucketName +
+                                     "_policy"),
                 Content = content
             };
 
@@ -379,7 +395,6 @@ namespace BL.Services
 
         public async Task<bool> BucketPolicySetPublic(string bucketName)
         {
-
             var signer = new AWS4RequestSigner(_minioSettings.AccessKey, _minioSettings.SecretKey);
 
             var content = new StringContent(@"{
@@ -403,7 +418,8 @@ namespace BL.Services
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Put,
-                RequestUri = new Uri(_minioSettings.Url + "/minio/admin/v3/add-canned-policy?name=" + bucketName + "_policy"),
+                RequestUri = new Uri(_minioSettings.Url + "/minio/admin/v3/add-canned-policy?name=" + bucketName +
+                                     "_policy"),
                 Content = content
             };
 
@@ -419,10 +435,10 @@ namespace BL.Services
             return true;
         }
 
-        public async Task<bool> CopyObjectToDestination(string destinationBucketName, string destinationObjectKey, GetObjectResponse response)
+        public async Task<bool> CopyObjectToDestination(string destinationBucketName, string destinationObjectKey,
+            GetObjectResponse response)
         {
             var amazonS3Client = GenerateAmazonS3Client();
-
 
 
             long contentLength = response.Headers.ContentLength;
@@ -439,12 +455,9 @@ namespace BL.Services
                         Key = destinationObjectKey,
                         InputStream = memoryStream,
                         ContentType = response.Headers.ContentType
-
-
                     };
 
                     var putObjectResponse = amazonS3Client.PutObjectAsync(putObjectRequest).Result;
-
 
 
                     return putObjectResponse.HttpStatusCode == HttpStatusCode.OK;
@@ -457,7 +470,6 @@ namespace BL.Services
             var amazonS3Client = GenerateAmazonS3Client();
 
 
-
             GetObjectRequest getObjectRequest = new GetObjectRequest
             {
                 BucketName = sourceBucketName,
@@ -467,8 +479,6 @@ namespace BL.Services
             var getObjectResponse = await amazonS3Client.GetObjectAsync(getObjectRequest);
 
             return getObjectResponse;
-
-
         }
 
         public async Task<string> ShareMinioObject(string bucketName, string objectKey)
@@ -487,6 +497,7 @@ namespace BL.Services
 
             return url;
         }
+
         public async Task<bool> FolderExists(string bucketName, string folderName)
         {
             var amazonS3Client = GenerateAmazonS3Client();
@@ -510,11 +521,10 @@ namespace BL.Services
             }
             catch (Exception ex)
             {
-
                 return true;
             }
-
         }
+
         public async Task<bool> CreateFolder(string bucketName, string folderName)
         {
             var amazonS3Client = GenerateAmazonS3Client();
@@ -540,11 +550,8 @@ namespace BL.Services
             }
             catch (Exception ex)
             {
-
                 return false;
             }
-
-
         }
 
         public async Task<bool> SetPublicPolicy(string bucketName)
@@ -602,22 +609,26 @@ namespace BL.Services
 
                 amazonS3Client.PutBucketPolicyAsync(putBucketPolicyRequest).Wait();
 
-                Console.WriteLine("Bucket policy set successfully!");
+                Log.Information("Bucket policy set successfully!");
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error: {e.Message}");
+                Log.Error($"Error: {e.Message}");
             }
+
             return true;
         }
 
 
         #region PrivateHelpers
+
         private AmazonS3Config GenerateAmazonS3Config()
         {
             var config = new AmazonS3Config
             {
-                RegionEndpoint = RegionEndpoint.USEast1, // MUST set this before setting ServiceURL and it should match the `MINIO_REGION` environment variable.
+                RegionEndpoint =
+                    RegionEndpoint
+                        .USEast1, // MUST set this before setting ServiceURL and it should match the `MINIO_REGION` environment variable.
                 ServiceURL = _minioSettings.Url, // replace http://localhost:9000 with URL of your MinIO server
                 ForcePathStyle = true, // MUST be true to work correctly with MinIO server
             };
@@ -655,6 +666,7 @@ namespace BL.Services
                 return partSize;
             }
         }
+
         #endregion
     }
 }
