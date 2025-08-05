@@ -45,6 +45,7 @@ namespace TRE_API
         private readonly IEncDecHelper _encDecHelper;
         private readonly IFeatureManager _features;
 
+        private static readonly HashSet<string> TerminalStates = new() { "COMPLETE", "EXECUTOR_ERROR", "SYSTEM_ERROR", "EXECUTER_ERROR" };
 
         public DoAgentWork(IServiceProvider serviceProvider,
             ApplicationDbContext dbContext,
@@ -86,7 +87,88 @@ namespace TRE_API
             _features = features;
         }
 
- 
+
+
+        public async Task CheckTES(string taskID, int subId, string tesId, string outputBucket, string NameTes)
+        {
+            Log.Information("Checking TESK status {taskID}", taskID);
+            using var httpClient = new HttpClient(CreateHttpHandler());
+            var response = await httpClient.GetAsync($"{_AgentSettings.TESKAPIURL}/{taskID}?view=BASIC");
+            if (!response.IsSuccessStatusCode)
+            {
+                Log.Error("TESK status check failed for {taskID}", taskID);
+                return;
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            var status = JsonConvert.DeserializeObject<TESKstatus>(content);
+            var existing = _dbContext.TESK_Status.FirstOrDefault(x => x.id == status.id);
+
+            bool shouldReport = existing == null || existing.state != status.state;
+            if (shouldReport)
+            {
+                if (existing == null)
+                    _dbContext.Add(status);
+                else { existing.state = status.state; _dbContext.Update(existing); }
+                _dbContext.SaveChanges();
+            }
+
+            if (!shouldReport && !TerminalStates.Contains(status.state)) return;
+
+            await HandleTESKFinalStatus(status.state, subId, taskID);
+
+            if (TerminalStates.Contains(status.state))
+                await FinalizeFilesAndNotify(subId, outputBucket, tesId, NameTes);
+        }
+
+        private async Task HandleTESKFinalStatus(string state, int subId, string taskID)
+        {
+            var token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
+            if (token != null)
+            {
+                _dbContext.TokensToExpire.Remove(token);
+                _hasuraAuthenticationService.ExpirerToken(token.Token);
+                _dbContext.SaveChanges();
+            }
+
+            var statusType = state switch
+            {
+                "QUEUED" => StatusType.TransferredToPod,
+                "RUNNING" => StatusType.PodProcessing,
+                "COMPLETE" => StatusType.PodProcessingComplete,
+                _ => StatusType.Cancelled
+            };
+
+            _subHelper.UpdateStatusForTre(subId.ToString(), statusType, "");
+            if (state == "COMPLETE")
+                _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.DataOutRequested, "", "");
+            else if (state.Contains("ERROR"))
+                _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Failed, "", "");
+
+            ClearJob(taskID);
+        }
+
+        private async Task FinalizeFilesAndNotify(int subId, string outputBucket, string tesId, string nameTes)
+        {
+            var cleaned = outputBucket.Replace(_AgentSettings.TESKOutputBucketPrefix, "");
+            var data = await _minioTreHelper.GetFilesInBucket(cleaned, subId.ToString());
+            var files = data.S3Objects.Select(f => f.Key).ToList();
+
+            if (files.Count == 0)
+            {
+                _subHelper.UpdateStatusForTre(subId.ToString(), StatusType.DataOutApprovalRejected, "No files");
+                return;
+            }
+
+            _subHelper.UpdateStatusForTre(subId.ToString(), StatusType.DataOutRequested, "");
+            _subHelper.FilesReadyForReview(new ReviewFiles { SubId = subId.ToString(), Files = files, tesId = tesId, Name = nameTes }, cleaned);
+        }
+
+        public void ClearJob(string jobname)
+        {
+            try { RecurringJob.RemoveIfExists(jobname); }
+            catch (Exception ex) { Log.Error(ex, "Clear job failed"); }
+        }
 
         private HttpClientHandler CreateHttpHandler()
         {
@@ -94,241 +176,26 @@ namespace TRE_API
             return new HttpClientHandler { Proxy = new WebProxy(_AgentSettings.ProxyAddresURL, true), UseProxy = true };
         }
 
-        class ResponseModel
-        {
-            public string id { get; set; }
-        }
-
-        public async Task CheckTES(string taskID, int subId, string tesId, string outputBucket, string NameTes)
-        {
-            try
-            {
-                Log.Information("{Function} Check TES : {TaskId},  TES : {TesId}, sub: {SubId}", "CheckTES", taskID,
-                    tesId, subId);
-                string url = _AgentSettings.TESKAPIURL + "/" + taskID + "?view=BASIC";
-
-                HttpClientHandler handler = new HttpClientHandler();
-
-                if (_AgentSettings.Proxy)
-                {
-                    handler = new HttpClientHandler
-                    {
-                        Proxy = new WebProxy(_AgentSettings.ProxyAddresURL, true), // Replace with your proxy server URL
-                        UseProxy = _AgentSettings.Proxy,
-                    };
-                }
-
-                using (HttpClient client = new HttpClient(handler))
-                {
-                    HttpResponseMessage response = client.GetAsync(url).Result;
-                    Log.Information("{Function} Response status {State}", "CheckTES", response.StatusCode);
-                    Console.WriteLine(response.StatusCode);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string content = response.Content.ReadAsStringAsync().Result;
+        private class ResponseModel { public string id { get; set; } }
 
 
-                        TESKstatus status = JsonConvert.DeserializeObject<TESKstatus>(content);
-
-                        var shouldReport = false;
-
-                        var fromDatabase = (_dbContext.TESK_Status.Where(x => x.id == status.id)).FirstOrDefault();
-
-                        if (fromDatabase is null)
-                        {
-                            shouldReport = true;
-                            _dbContext.Add(status);
-                        }
-                        else
-                        {
-                            if (fromDatabase.state != status.state)
-                            {
-                                shouldReport = true;
-                                fromDatabase.state = status.state;
-                                _dbContext.Update(fromDatabase);
-                            }
-                        }
-
-                        _dbContext.SaveChanges();
-                        Log.Information("{Function} shouldReport {shouldReport} status {status}", "CheckTES",
-                            shouldReport, status.state);
-                        if (shouldReport || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR" ||
-                                             status.state == "SYSTEM_ERROR"))
-                        {
-                            Log.Information("{Function} *** status change *** {State}", "CheckTES", status.state);
 
 
-                            // send update
-                            using (var scope = _serviceProvider.CreateScope())
-                            {
-                                TokenToExpire Token = null;
-                                var statusMessage = StatusType.TransferredToPod;
-                                switch (status.state)
-                                {
-                                    case "QUEUED":
-                                        statusMessage = StatusType.TransferredToPod;
-                                        break;
-                                    case "RUNNING":
-                                        statusMessage = StatusType.PodProcessing;
-                                        break;
-                                    case "COMPLETE":
-                                        statusMessage = StatusType.PodProcessingComplete;
 
-                                        Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
-                                        Log.Information("{Function} *** COMPLETE remove Token *** {Token} ",
-                                            "CheckTES", Token);
 
-                                        if (Token != null)
-                                        {
-                                            _dbContext.TokensToExpire.Remove(Token);
-                                            _hasuraAuthenticationService.ExpirerToken(Token.Token);
-                                        }
 
-                                        _dbContext.SaveChanges();
-                                        break;
-                                    case "EXECUTOR_ERROR":
-                                        statusMessage = StatusType.Cancelled;
-                                        Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
-                                        Log.Information("{Function} *** EXECUTOR_ERROR remove Token *** {Token} ",
-                                            "CheckTES", Token);
 
-                                        if (Token != null)
-                                        {
-                                            _dbContext.TokensToExpire.Remove(Token);
-                                            _hasuraAuthenticationService.ExpirerToken(Token.Token);
-                                        }
 
-                                        _dbContext.SaveChanges();
 
-                                        break;
-                                    case "SYSTEM_ERROR":
-                                        statusMessage = StatusType.Cancelled;
-                                        Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
-                                        Log.Information("{Function} *** SYSTEM_ERROR remove Token *** {Token} ",
-                                            "CheckTES", Token);
 
-                                        if (Token != null)
-                                        {
-                                            _dbContext.TokensToExpire.Remove(Token);
-                                            _hasuraAuthenticationService.ExpirerToken(Token.Token);
-                                        }
 
-                                        _dbContext.SaveChanges();
-
-                                        break;
-                                }
-
-                                APIReturn? result = null;
- 
-
-                                if (status.state == "COMPLETE")
-                                {
-                                    Log.Information(
-                                        $"  CloseSubmissionForTre with status.state subId {subId.ToString()} == COMPLETE ");
-                                    try
-                                    {
-                                        result = _subHelper.CloseSubmissionForTre(subId.ToString(),
-                                            StatusType.DataOutRequested, "", "");
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        Log.Error(ex.ToString());
-                                    }
-
-                                    ClearJob(taskID);
-                                }
-                                else if (status.state == "EXECUTOR_ERROR" || status.state == "SYSTEM_ERROR")
-                                {
-                                    Log.Information(
-                                        $"  CloseSubmissionForTre with status.state subId {subId.ToString()} == EXECUTOR_ERROR or SYSTEM_ERROR ");
-                                    try
-                                    {
-                                        result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Failed,
-                                            "", "");
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        Log.Error(ex.ToString());
-                                    }
-
-                                    ClearJob(taskID);
-                                }
-                            }
-
-                            Log.Information($" Checking status ");
-                            // are we done ?
-                            if (status.state == "COMPLETE")
-                            {
-                                Log.Information(
-                                    "status.state == COMPLETE");
-
-                                ClearJob(taskID);
-                                var outputBucketGood = outputBucket.Replace(_AgentSettings.TESKOutputBucketPrefix, "");
-                                var data = await _minioTreHelper.GetFilesInBucket(outputBucketGood, $"{subId}");
-                                var files = new List<string>();
-
-                                foreach (var s3Object in data.S3Objects) //TODO is this right?
-                                {
-                                    Log.Information("{Function} *** added file from outputBucket *** {file} ",
-                                        "CheckTES", s3Object.Key);
-                                    files.Add(s3Object.Key);
-                                }
-
-                                _subHelper.UpdateStatusForTre(subId.ToString(), StatusType.DataOutRequested, "");
-                                Log.Information($"  FilesReadyForReview files {files.Count} ");
-                                if (files.Count == 0)
-                                {
-                                    _subHelper.UpdateStatusForTre(subId.ToString(), StatusType.DataOutApprovalRejected,
-                                        " No Files to review ");
-                                    return;
-                                }
-
-                                _subHelper.FilesReadyForReview(new ReviewFiles()
-                                {
-                                    SubId = subId.ToString(),
-                                    Files = files,
-                                    tesId = tesId.ToString(),
-                                    Name = NameTes
-                                }, outputBucketGood);
-                            }
-                        }
-                        else
-                            Log.Information("{Function} No change", "CheckTES");
-                    }
-                    else
-                    {
-                        Log.Error("{Function} HTTP Request {url} failed with status code {code}", "CheckTES", url,
-                            response.StatusCode);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Error(e.ToString());
-            }
-        }
-
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
 
 
         /// <summary>
         /// Method called by timed Hangfire job
         /// Purpose to communicate with the submission layer and get cancelled and new job to run
         /// </summary>
-        
+
         public async Task Execute()
         {
             Log.Information("{Function} DoAgentWork running", nameof(Execute));
@@ -487,18 +354,6 @@ namespace TRE_API
         }
         
 
-        public void ClearJob(string jobname)
-        {
-            Log.Information("{Function} Hangfire clear job: {Jobname}", "ClearJob", jobname);
-
-            try
-            {
-                RecurringJob.RemoveIfExists(jobname);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
-            }
-        }
+      
     }
 }
