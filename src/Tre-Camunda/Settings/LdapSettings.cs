@@ -9,7 +9,7 @@ namespace Tre_Camunda.Services
     public class LdapSettings
     {
         public string Host { get; set; }
-        public string Port { get; set; }
+        public int Port { get; set; }
 
         public string AdminDn { get; set; }
 
@@ -18,6 +18,8 @@ namespace Tre_Camunda.Services
         public string BaseDn { get; set; }
 
         public string UserOu {  get; set; }
+
+        public bool UseSSL { get; set; }
     
     }
 }
