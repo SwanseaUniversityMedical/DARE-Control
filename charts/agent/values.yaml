@@ -1,0 +1,288 @@
+# Default values for agent.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+egress:
+  api:
+    image:
+      repository: harbor.ukserp.ac.uk/dare-trefx/control-egress-api
+      pullPolicy: IfNotPresent
+      # Overrides the image tag whose default is the chart appVersion.
+      tag: ""
+
+    service:
+      type: ClusterIP
+      port: 81
+
+    ingress:
+      enabled: false
+      className: nginx
+      annotations: {}
+      clusterHostNameOverride: ""
+      tls: []
+      host: ""
+      hosts: []
+
+  ui:
+    image:
+      repository: harbor.ukserp.ac.uk/dare-trefx/control-egress-ui
+      pullPolicy: IfNotPresent
+      # Overrides the image tag whose default is the chart appVersion.
+      tag: ""
+
+    service:
+      type: ClusterIP
+      port: 80
+
+    ingress:
+      enabled: false
+      className: nginx
+      annotations: {}
+      clusterHostNameOverride: ""
+      tls: []
+      host: ""
+      hosts: []
+
+  config:
+    useSslCookies: false
+    httpsRedirect: false
+    # dataegressapisettings__address is just the internal service name of the egress api container
+    # treapisettings__address is just the internal service name of the tre api container
+    keycloak:
+      baseUrl: ""
+      realm: ""
+      clientAuthSecret:
+        name: ""
+        idKey: "clientId"
+        secretKey: "clientSecret"
+      validAudiences: "Data-Egress-UI,Data-Egress-API"
+      proxy:
+        enabled: false
+        url: ""
+        bypass: "" # needs to be the tre api and seq
+      # tokenExpiredAddress can be derived from the ingress host with /Account/LoginAfterTokenExpired, otherwise it needs to be set here
+      tokenExpiredAddress: ""
+      redirect:
+        enabled: false
+        url: ""
+    minio:
+      url: ""
+      authSecret:
+        name: ""
+        accessKeyRef: "accessKey"
+        secretKeyRef: "secretKey"
+      bucketName: ""
+      adminConsole: ""
+
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+tre:
+  config:
+    name: "MYTRE"
+    useSslCookies: false
+    httpsRedirect: false
+    externalHangfire: false
+    # dataegressapisettings__address is just the internal service name of the egress api container
+    # treapisettings__address is just the internal service name of the tre api container
+    keycloak:
+      baseUrl: ""
+      realm: ""
+      clientAuthSecret:
+        name: ""
+        idKey: "clientId"
+        secretKey: "clientSecret"
+      validAudiences: ""
+      proxy:
+        enabled: false
+        url: ""
+        bypass: "" # needs to be the tre api and seq
+      # tokenExpiredAddress can be derived from the ingress host with /Account/LoginAfterTokenExpired
+      # AccountManagementURL can be derived from baseurl/realm/account
+      tokenExpiredAddress: ""
+      redirect:
+        enabled: false
+        url: ""
+
+    minio:
+      url: ""
+      authSecret:
+        name: ""
+        accessKeyRef: "accessKey"
+        secretKeyRef: "secretKey"
+      bucketName: ""
+      adminConsole: ""
+
+    agent:
+      image: "harbor.ukserp.ac.uk/dare-trefx/control-tre-hasura"
+      tesk:
+        enabled: true
+        apiUrl: ""
+        # Do not change me unless you know what you're doing!
+        outputBucketPrefix: "http://s3.foo.bar.baz/"
+      hutch:
+        enabled: false
+        ignoreSsl: true
+        minioUrlOverride: ""
+        apiUrl: ""
+        database:
+          host: ""
+          port: ""
+          name: ""
+      rabbit:
+        enabled: false
+      hasura:
+        externalAddress: ""
+        internalAddress: ""
+        adminPassword: ""
+      proxy:
+        enabled: false
+        url: ""
+
+    job:
+      schedule:
+        scan: "1"
+        sync: "10"
+
+  api:
+    image:
+      repository: harbor.ukserp.ac.uk/dare-trefx/control-tre-api
+      pullPolicy: IfNotPresent
+      # Overrides the image tag whose default is the chart appVersion.
+      tag: ""
+
+    service:
+      type: ClusterIP
+      port: 81
+
+    ingress:
+      enabled: false
+      className: nginx
+      annotations: {}
+      clusterHostNameOverride: ""
+      tls: []
+      host: ""
+      hosts: []
+
+  ui:
+    image:
+      repository: harbor.ukserp.ac.uk/dare-trefx/control-tre-ui
+      pullPolicy: IfNotPresent
+      # Overrides the image tag whose default is the chart appVersion.
+      tag: ""
+
+    service:
+      type: ClusterIP
+      port: 80
+
+    ingress:
+      enabled: false
+      className: nginx
+      annotations: {}
+      clusterHostNameOverride: ""
+      tls: []
+      host: ""
+      hosts: []
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+submission:
+  config:
+    apiUrl: ""
+    keycloak:
+      baseUrl: ""
+      realm: ""
+      clientAuthSecret:
+        name: ""
+        idKey: "clientId"
+        secretKey: "clientSecret"
+      validAudiences: ""
+      proxy:
+        enabled: false
+        url: ""
+        bypass: "" # needs to be the tre api and seq
+      # tokenExpiredAddress can be derived from the ingress host with /Account/LoginAfterTokenExpired
+      tokenExpiredAddress: ""
+      redirect:
+        enabled: false
+        url: ""
+
+    minio:
+      url: ""
+      authSecret:
+        name: ""
+        accessKeyRef: "accessKey"
+        secretKeyRef: "secretKey"
+      bucketName: ""
+      adminConsole: ""
+
+
+externalPostgres:
+  enabled: true
+  host: "postgres"
+  port: "5432"
+  username: "pglogin"
+  password: "pgpass"
+
+rabbitmq:
+  host: "rabbitmq"
+  username: "guest"
+  passwordSecret:
+    name: ""
+    key: "password"
+
+seq:
+  enabled: false
+  url: "http://seq:5341"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+podSecurityContext: 
+  fsGroup: 2000
+
+securityContext: 
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

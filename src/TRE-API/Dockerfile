@@ -28,6 +28,7 @@ RUN dotnet publish "TRE-API.csproj" -c Release -o /app/publish /p:UseAppHost=fal
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+ENV COMPlus_EnableDiagnostics=0
 ENTRYPOINT ["dotnet", "TRE-API.dll"]
 
 COPY rootca.pem /usr/local/share/ca-certificates/chi-ansible.crt

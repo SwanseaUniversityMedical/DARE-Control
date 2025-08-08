@@ -22,6 +22,7 @@ RUN dotnet publish "Data-Egress-UI.csproj" -c Release -o /app/publish /p:UseAppH
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+ENV COMPlus_EnableDiagnostics=0
 ENTRYPOINT ["dotnet", "Data-Egress-UI.dll"]
 
 COPY rootca.pem /usr/local/share/ca-certificates/chi-ansible.crt

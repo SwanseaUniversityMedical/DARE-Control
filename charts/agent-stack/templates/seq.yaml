@@ -1,0 +1,29 @@
+{{- if .Values.seq.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: seq
+  namespace: {{ .Release.Namespace }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: {{ .Values.global.argo.project }}
+  destination:
+    namespace: {{ .Release.Namespace }}
+    server: {{ .Values.global.argo.destinationServer }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+  source:
+    repoURL: {{ .Values.seq.repoUrl }}
+    chart: {{ .Values.seq.chart }}
+    targetRevision: {{ .Values.seq.chartVersion }}
+    helm:
+      values: |
+      {{- .Values.seq.helmValues | toYaml | nindent 8 }}
+
+{{- end }}     
