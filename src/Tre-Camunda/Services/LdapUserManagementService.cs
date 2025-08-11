@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using System.Net;
 using System.Linq.Expressions;
 using System.Reflection.Metadata.Ecma335;
+using System.Text;
 
 
 namespace Tre_Camunda.Services
@@ -27,6 +28,7 @@ namespace Tre_Camunda.Services
             var identifier = new LdapDirectoryIdentifier(_config.Host, _config.Port);
 
             var connection = new LdapConnection(identifier);
+            connection.SessionOptions.ProtocolVersion = 3;
 
             if (_config.UseSSL)
             {
@@ -38,36 +40,51 @@ namespace Tre_Camunda.Services
 
             return connection;
         }
-
+        
         public async Task<UserCreationResult> CreateUserAsync(CreateUserRequest request)
         {
             try
             {
                 using var connection = CreateConnection();
                 connection.Bind();
-                
+                _logger.LogInformation("LDAP bind successful.");
+
                 //Null check
                 if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
                     return UserCreationResult.Error("Username and password are required");
 
-                //Check if user already exists
+                //Check if user already exists             
                 if (await UserExistsAsync(request.Username))
                     return UserCreationResult.Error($"User {request.Username} already exists");
-                var userDn = $"cn={request.Username},{_config.UserOu},{_config.BaseDn}";
 
-                var schemaPermissions = request.SchemaPermissions.Select(p => $"{p.SchemaName}:{(int)p.Permissions}").ToArray();
+                var escapedCn = EscapeDnValue(request.Username);
+                var userDn = $"cn={escapedCn},{_config.UserOu},{_config.BaseDn}";
 
-                var addRequest = new AddRequest(userDn, new DirectoryAttribute[]
+                var addAttrs = new List<DirectoryAttribute>
                 {
-                    new("objectClass", "inetOrgPerson"), //Internet Organisational Person
-                    new("cn", request.Username), //Common name
-                    new("sn", request.Username), //Surname
-                    new("userPassword", request.Password),
-                    new("uid", request.Username), //User ID
+           
+                    new DirectoryAttribute("objectClass", new[] { "top", "person", "organizationalPerson", "inetOrgPerson" }),
+                    new DirectoryAttribute("cn", request.Username),
+                    new DirectoryAttribute("sn", request.Username),
+                    new DirectoryAttribute("uid", request.Username),
+                    new DirectoryAttribute("userPassword", request.Password)
+                };
 
-                   new("businessCategory", schemaPermissions)
-                });
+                
+                if (request.SchemaPermissions != null)
+                {
+                    var schemaPermissions = request.SchemaPermissions
+                        .Where(p => !string.IsNullOrWhiteSpace(p.SchemaName))
+                        .Select(p => $"{p.SchemaName}:{(int)p.Permissions}")
+                        .ToArray();
 
+                    if (schemaPermissions.Length > 0)
+                    {
+                        addAttrs.Add(new DirectoryAttribute("businessCategory", schemaPermissions));
+                    }
+                }
+
+                var addRequest = new AddRequest(userDn, addAttrs.ToArray());
                 var response = (AddResponse)connection.SendRequest(addRequest);
 
                 if (response.ResultCode == ResultCode.Success)
@@ -80,7 +97,7 @@ namespace Tre_Camunda.Services
                     _logger.LogError($"Failed to create User {request.Username}:{response.ErrorMessage}");
                     return UserCreationResult.Error(response.ErrorMessage);
                 }
-            }
+            }           
             catch (Exception ex)
             {
 
@@ -125,6 +142,7 @@ namespace Tre_Camunda.Services
         {
             using var connection = CreateConnection();
             connection.Bind();
+            _logger.LogInformation("LDAP bind successful.");
 
             var searchRequest = new SearchRequest(
                 $"{_config.UserOu},{_config.BaseDn}",
@@ -134,6 +152,40 @@ namespace Tre_Camunda.Services
 
             var response = (SearchResponse)connection.SendRequest(searchRequest);
             return response.Entries.Count > 0;
+        }
+
+        private static string EscapeDnValue(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+
+            var sb = new StringBuilder();
+            for (int i = 0; i < value.Length; i++)
+            {
+                char c = value[i];
+                switch (c)
+                {
+                    case ',':
+                    case '+':
+                    case '"':
+                    case '\\':
+                    case '<':
+                    case '>':
+                    case ';':
+                    case '=':
+                        sb.Append('\\').Append(c);
+                        break;
+                    case '#':
+                        if (i == 0) { sb.Append('\\').Append(c); } else { sb.Append(c); }
+                        break;
+                    case ' ':
+                        if (i == 0 || i == value.Length - 1) { sb.Append('\\').Append(' '); } else { sb.Append(' '); }
+                        break;
+                    default:
+                        sb.Append(c);
+                        break;
+                }
+            }
+            return sb.ToString();
         }
     }
 }

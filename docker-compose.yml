@@ -267,8 +267,8 @@ services:
     - openldap_config:/etc/ldap/slapd.d
     - ./ldap-init/init.ldif:/container/service/slapd/assets/init.ldif
     ports:
-     - "389:389"
-     - "636:636"
+     - "1389:389"
+     - "1636:636"
     domainname: "camundaephemeral.local"
     hostname: "ldap.camundaephemeral.local"
     tty: true
