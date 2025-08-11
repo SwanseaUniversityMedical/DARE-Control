@@ -28,11 +28,7 @@ namespace Tre_Camunda.Extensions
         {
             var camundaSettings = new CamundaSettings();
             configuration.Bind(nameof(camundaSettings), camundaSettings);
-            services.AddSingleton(camundaSettings);
-
-            var ldapSettings = new LdapSettings();
-            configuration.Bind(nameof(ldapSettings), ldapSettings);
-            services.AddSingleton(ldapSettings);
+            services.AddSingleton(camundaSettings);           
 
             services.AddHostedService<BpmnProcessDeployService>();
             services.AddScoped<IProcessModelService, ProcessModelService>();
@@ -40,6 +36,9 @@ namespace Tre_Camunda.Extensions
             services.AddScoped<IServicedZeebeClient, ServicedZeebeClient>();
 
             services.AddScoped<IPostgreSQLUserManagementService, PostgreSQLUserManagementService>();
+
+            services.AddScoped<ILdapUserManagementService, LdapUserManagementService>();
+
 
         }
     }
