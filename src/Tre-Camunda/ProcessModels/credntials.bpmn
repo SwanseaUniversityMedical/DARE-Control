@@ -11,10 +11,7 @@
           <zeebe:input source="=InputCollections.user" target="user" />
           <zeebe:input source="=InputCollections.tag" target="tag" />
           <zeebe:input source="=InputCollections" target="InputCollections" />
-          <zeebe:output source="=dmnResult" target="CredentialsDMNResult" />
-          <zeebe:output source="=env" target="env" />
-          <zeebe:output source="=value" target="value" />
-          <zeebe:output source="=path" target="path" />
+         <!-- <zeebe:output source="=dmnResult" target="CredentialsDMNResult" />-->
         </zeebe:ioMapping>
         <zeebe:properties />
       </bpmn:extensionElements>
@@ -42,7 +39,6 @@
           <zeebe:output source="=body.records.project" target="project" />
           <zeebe:output source="=body.records.user" target="user" />
           <zeebe:output source="=body.records.tag" target="tag" />
-          <zeebe:output source="=body" target="InputCollection" />
           <zeebe:output source="=body.records" target="InputCollections" />
         </zeebe:ioMapping>
       </bpmn:extensionElements>
@@ -54,9 +50,9 @@
     <bpmn:callActivity id="Activity_0kqf8jn" name="Credentials dertermine">
       <bpmn:extensionElements>
         <zeebe:calledElement processId="Credentials_determine_sub" propagateAllChildVariables="true" />
-        <zeebe:ioMapping>
+        <!--<zeebe:ioMapping>
           <zeebe:input source="=CredentialsDMNResult" target="partialCredentialResults" inputElement="credential" />
-        </zeebe:ioMapping>
+        </zeebe:ioMapping>-->
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0xzzpo0</bpmn:incoming>
       <bpmn:outgoing>Flow_0agvslm</bpmn:outgoing>
@@ -80,12 +76,12 @@
           <dc:Bounds x="161" y="145" width="79" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0nrlikw_di" bpmnElement="Event_0nrlikw">
+        <dc:Bounds x="722" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0kqf8jn_di" bpmnElement="Activity_0kqf8jn">
         <dc:Bounds x="520" y="80" width="100" height="80" />
         <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0nrlikw_di" bpmnElement="Event_0nrlikw">
-        <dc:Bounds x="722" y="102" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0xzzpo0_di" bpmnElement="Flow_0xzzpo0">
         <di:waypoint x="410" y="120" />
