@@ -8,6 +8,7 @@ using Zeebe.Client;
 
 using System.Reflection;
 using Zeebe.Client.Accelerator.Extensions;
+using Tre_Camunda.Services;
 
 
 var configuration = GetConfiguration();
@@ -48,7 +49,7 @@ await Host.CreateDefaultBuilder(args)
 
         services.AddZeebeBuilders();
         services.BootstrapZeebe(configuration.GetSection("ZeebeConfiguration"), typeof(Program).Assembly);
-
+        services.Configure<LdapSettings>(configuration.GetSection("LdapSettings"));
         services.AddHttpClient();
         services.AddBusinessServices(configuration);
         services.ConfigureCamunda(configuration);        
