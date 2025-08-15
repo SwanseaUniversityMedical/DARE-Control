@@ -17,13 +17,13 @@ namespace Tre_Camunda.ProcessHandlers
     {
         private readonly ILogger<CreatePostgresUserHandler> _logger;
         private readonly ILdapUserManagementService _ldapUserManagementService;
-        private readonly CredentialSettings _config;
+        
 
-        public CreateTrinoUserHandler(ILogger<CreatePostgresUserHandler> logger, ILdapUserManagementService ldapUserManagementService, IOptions<CredentialSettings> config)
+        public CreateTrinoUserHandler(ILogger<CreatePostgresUserHandler> logger, ILdapUserManagementService ldapUserManagementService)
         {
             _logger = logger;
             _ldapUserManagementService = ldapUserManagementService;
-            _config = config.Value;
+           
         }   
 
         public async Task<Dictionary<string, object>> HandleJob(ZeebeJob job, CancellationToken cancellationToken)
@@ -77,8 +77,7 @@ namespace Tre_Camunda.ProcessHandlers
                 var result = await _ldapUserManagementService.CreateUserAsync(createUserRequest);
 
                 if (result.Success)
-                {
-                    var userExpirationPeriod = _config.UserExpirationPeriod;
+                {                    
                     var outputVariables = new Dictionary<string, object>
                     {
                         
@@ -95,8 +94,7 @@ namespace Tre_Camunda.ProcessHandlers
                         },
 
                         ["vaultPath"] = $"trino/{project}/{user}/{username}",
-                        ["trinoUsername"] = username,
-                        ["userExpirationPeriod"] = userExpirationPeriod
+                        ["trinoUsername"] = username                        
                     };
 
                     _logger.LogInformation($"Successfully created Trino user: {username} for project: {project}");

@@ -49,8 +49,7 @@ await Host.CreateDefaultBuilder(args)
 
         services.AddZeebeBuilders();
         services.BootstrapZeebe(configuration.GetSection("ZeebeConfiguration"), typeof(Program).Assembly);
-        services.Configure<LdapSettings>(configuration.GetSection("LdapSettings"));
-        services.Configure<CredentialSettings>(configuration.GetSection("CredentialSettings"));
+        services.Configure<LdapSettings>(configuration.GetSection("LdapSettings"));      
         services.AddHttpClient();
         services.AddBusinessServices(configuration);
         services.ConfigureCamunda(configuration);        
