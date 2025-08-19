@@ -11,13 +11,7 @@ namespace BL.Models.ViewModels
         
         public string GetALlIDs()
         {
-
-            var data = $"Submission ID: {Submission.Id.ToString()}, Sub ID(s) of ";
-            foreach(var Sub in Submission.Children)
-            {
-                data = data + (Sub.Id.ToString() + " ");
-            }
-            return data;
+            return $"Submission ID: {Submission.Id.ToString()}";
         }
 
         public Submission Submission { get; set; }
