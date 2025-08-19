@@ -300,6 +300,41 @@ services:
       - "8080:80"
     depends_on:
       - openldap
+
+  tre-camunda:
+    build:
+      context: .
+      dockerfile: src/Tre-Camunda/Dockerfile
+    container_name: tre-camunda
+    ports:
+      - "8086:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ZeebeBootstrap__Client__GatewayAddress=zeebe:26500
+      - Serilog__SeqServerUrl=http://seq:80
+      # Updated to match your actual MinIO credentials
+      - MinioSettings__Url=http://minio:9000
+      - MinioSettings__AccessKey=minio
+      - MinioSettings__SecretKey=minio123
+      - MinioSettings__Alias=dareminio
+      - MinioSettings__BucketName=default-bucket
+      - MinioSettings__AWSService=s3
+      - MinioSettings__AWSRegion=us-east-1
+    volumes:
+      - /tmp/minio-files:/tmp/minio-files
+    networks:
+      - camunda-platform  
+      - communicating    
+    depends_on:
+      zeebe:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy 
+      minio:
+        condition: service_started  
+      seq:
+        condition: service_started 
+    restart: unless-stopped
   
    # command:
    #   - "run" 
