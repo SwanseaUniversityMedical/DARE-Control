@@ -10,9 +10,11 @@ using System.Reflection;
 using Zeebe.Client.Accelerator.Extensions;
 using Tre_Camunda.Services;
 
-
+var builder = WebApplication.CreateBuilder(args);
 var configuration = GetConfiguration();
 string AppName = typeof(Program).Module.Name.Replace(".dll", "");
+
+ConfigurationManager configurations = builder.Configuration;
 
 Log.Logger = CreateSerilogLogger(configuration);
 Log.Information("Camunda logging Start.");
@@ -38,6 +40,7 @@ Serilog.ILogger CreateSerilogLogger(IConfiguration configuration)
     .CreateLogger();
 
 }
+//AddVaultServices(builder, configurations);
 
 await Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
@@ -50,6 +53,7 @@ await Host.CreateDefaultBuilder(args)
         services.AddZeebeBuilders();
         services.BootstrapZeebe(configuration.GetSection("ZeebeConfiguration"), typeof(Program).Assembly);
         services.Configure<LdapSettings>(configuration.GetSection("LdapSettings"));
+        services.Configure<VaultSettings>(configuration.GetSection("VaultSettings"));
         services.AddHttpClient();
         services.AddBusinessServices(configuration);
         services.ConfigureCamunda(configuration);        
@@ -73,3 +77,22 @@ IConfiguration GetConfiguration()
 
     return builder.Build();
 }
+
+//void AddVaultServices(WebApplicationBuilder builder, ConfigurationManager configuration)
+//{
+//    builder.Services.Configure<VaultSettings>(configuration.GetSection("VaultSettings"));
+
+//    builder.Services.AddHttpClient<IVaultCredentialsService, VaultCredentialsService>((sp, client) =>
+//    {
+//        var settings = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<VaultSettings>>().Value;
+
+//        client.BaseAddress = new Uri("http://localhost:8200/");
+//        client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+//        client.DefaultRequestHeaders.Clear();
+//        client.DefaultRequestHeaders.Add("X-Vault-Token", settings.Token);
+//        client.DefaultRequestHeaders.Accept.Add(
+//            new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+//    });
+
+//    builder.Services.AddScoped<IVaultCredentialsService, VaultCredentialsService>();
+//}
