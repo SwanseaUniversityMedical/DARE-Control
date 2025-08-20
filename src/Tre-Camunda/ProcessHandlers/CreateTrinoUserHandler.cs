@@ -6,6 +6,8 @@ using Zeebe.Client.Accelerator.Attributes;
 using Zeebe.Client.Accelerator.Abstractions;
 using System.Diagnostics;
 using System.Text.Json;
+using Amazon.Runtime.Internal;
+using System.Text;
 
 
 namespace Tre_Camunda.ProcessHandlers
@@ -74,6 +76,8 @@ namespace Tre_Camunda.ProcessHandlers
 
                 if (result.Success)
                 {
+                    var userId = CleanDnValue(user);
+                    var jobId = CleanDnValue(project);
                     var outputVariables = new Dictionary<string, object>
                     {
                         
@@ -83,13 +87,13 @@ namespace Tre_Camunda.ProcessHandlers
                             ["password"] = password,
                             ["credentialType"] = "trino",
                             ["project"] = project,
-                            ["userId"] = user,
+                            ["user_id"] = userId,
+                            ["job_id"] = jobId,
                             ["createdAt"] = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                             ["expiresAt"] = DateTime.UtcNow.AddHours(24).ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                            ["ldapDn"] = $"cn={username},ou=Users,dc=camundaephemeral,dc=local"
+                            ["ldapDn"] = $"cn={username},ou=Users,dc=camundaephemeral,dc=local"                            
                         },
-
-                        ["vaultPath"] = $"trino/{project}/{user}/{username}",
+                        ["vaultPath"] = $"ephemeral/{userId}/{jobId}",
                         ["trinoUsername"] = username 
                     };
 
@@ -125,6 +129,22 @@ namespace Tre_Camunda.ProcessHandlers
             var random = new Random();
             return new string(Enumerable.Repeat(chars, 16)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        private static string CleanDnValue(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+
+            var charsToRemove = new[] { '[', ']', '\\', '"' };
+            var sb = new StringBuilder();
+            foreach (var c in value)
+            {
+                if (!charsToRemove.Contains(c))
+                {
+                    sb.Append(c);
+                }
+            }
+            return sb.ToString();
         }
     }
 }
