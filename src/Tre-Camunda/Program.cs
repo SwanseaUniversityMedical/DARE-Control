@@ -40,7 +40,6 @@ Serilog.ILogger CreateSerilogLogger(IConfiguration configuration)
     .CreateLogger();
 
 }
-//AddVaultServices(builder, configurations);
 
 await Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
@@ -77,22 +76,3 @@ IConfiguration GetConfiguration()
 
     return builder.Build();
 }
-
-//void AddVaultServices(WebApplicationBuilder builder, ConfigurationManager configuration)
-//{
-//    builder.Services.Configure<VaultSettings>(configuration.GetSection("VaultSettings"));
-
-//    builder.Services.AddHttpClient<IVaultCredentialsService, VaultCredentialsService>((sp, client) =>
-//    {
-//        var settings = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<VaultSettings>>().Value;
-
-//        client.BaseAddress = new Uri("http://localhost:8200/");
-//        client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
-//        client.DefaultRequestHeaders.Clear();
-//        client.DefaultRequestHeaders.Add("X-Vault-Token", settings.Token);
-//        client.DefaultRequestHeaders.Accept.Add(
-//            new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-//    });
-
-//    builder.Services.AddScoped<IVaultCredentialsService, VaultCredentialsService>();
-//}
