@@ -51,6 +51,7 @@ await Host.CreateDefaultBuilder(args)
 
         services.AddZeebeBuilders();
         services.BootstrapZeebe(configuration.GetSection("ZeebeConfiguration"), typeof(Program).Assembly);
+
         services.Configure<LdapSettings>(configuration.GetSection("LdapSettings"));
         services.Configure<VaultSettings>(configuration.GetSection("VaultSettings"));
         services.AddHttpClient();

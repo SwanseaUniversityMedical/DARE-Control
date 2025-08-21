@@ -8,6 +8,9 @@ using System.Diagnostics;
 using System.Text.Json;
 using Amazon.Runtime.Internal;
 using System.Text;
+using Tre_Camunda.Settings;
+using Microsoft.Extensions.Options;
+
 
 
 namespace Tre_Camunda.ProcessHandlers
@@ -17,12 +20,14 @@ namespace Tre_Camunda.ProcessHandlers
     {
         private readonly ILogger<CreatePostgresUserHandler> _logger;
         private readonly ILdapUserManagementService _ldapUserManagementService;
+        
 
         public CreateTrinoUserHandler(ILogger<CreatePostgresUserHandler> logger, ILdapUserManagementService ldapUserManagementService)
         {
             _logger = logger;
             _ldapUserManagementService = ldapUserManagementService;
-        }
+           
+        }   
 
         public async Task<Dictionary<string, object>> HandleJob(ZeebeJob job, CancellationToken cancellationToken)
         {
@@ -75,12 +80,13 @@ namespace Tre_Camunda.ProcessHandlers
                 var result = await _ldapUserManagementService.CreateUserAsync(createUserRequest);
 
                 if (result.Success)
+
                 {
                     var userId = CleanDnValue(user);
                     var jobId = CleanDnValue(project);
+                 
                     var outputVariables = new Dictionary<string, object>
-                    {
-                        
+                    {                      
                         ["credentialData"] = new Dictionary<string, object>
                         {
                             ["username"] = username,
