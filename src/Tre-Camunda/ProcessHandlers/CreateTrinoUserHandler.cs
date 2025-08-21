@@ -6,6 +6,8 @@ using Zeebe.Client.Accelerator.Attributes;
 using Zeebe.Client.Accelerator.Abstractions;
 using System.Diagnostics;
 using System.Text.Json;
+using Tre_Camunda.Settings;
+using Microsoft.Extensions.Options;
 
 
 namespace Tre_Camunda.ProcessHandlers
@@ -15,12 +17,14 @@ namespace Tre_Camunda.ProcessHandlers
     {
         private readonly ILogger<CreatePostgresUserHandler> _logger;
         private readonly ILdapUserManagementService _ldapUserManagementService;
+        
 
         public CreateTrinoUserHandler(ILogger<CreatePostgresUserHandler> logger, ILdapUserManagementService ldapUserManagementService)
         {
             _logger = logger;
             _ldapUserManagementService = ldapUserManagementService;
-        }
+           
+        }   
 
         public async Task<Dictionary<string, object>> HandleJob(ZeebeJob job, CancellationToken cancellationToken)
         {
@@ -73,7 +77,7 @@ namespace Tre_Camunda.ProcessHandlers
                 var result = await _ldapUserManagementService.CreateUserAsync(createUserRequest);
 
                 if (result.Success)
-                {
+                {                    
                     var outputVariables = new Dictionary<string, object>
                     {
                         
@@ -90,7 +94,7 @@ namespace Tre_Camunda.ProcessHandlers
                         },
 
                         ["vaultPath"] = $"trino/{project}/{user}/{username}",
-                        ["trinoUsername"] = username 
+                        ["trinoUsername"] = username                        
                     };
 
                     _logger.LogInformation($"Successfully created Trino user: {username} for project: {project}");
