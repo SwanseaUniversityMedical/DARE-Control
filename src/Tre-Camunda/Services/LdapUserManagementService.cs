@@ -59,7 +59,7 @@ namespace Tre_Camunda.Services
 
                 var escapedCn = EscapeDnValue(request.Username);
                 var userDn = $"cn={escapedCn},{_config.UserOu},{_config.BaseDn}";
-
+   
                 var addAttrs = new List<DirectoryAttribute>
                 {
            
@@ -186,6 +186,6 @@ namespace Tre_Camunda.Services
                 }
             }
             return sb.ToString();
-        }
+        }        
     }
 }

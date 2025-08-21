@@ -9,6 +9,8 @@ using Zeebe.Client.Accelerator.Extensions;
 using Zeebe.Client.Accelerator.Abstractions;
 using BL.Services.Contract;
 using BL.Services;
+using Microsoft.Extensions.Options;
+using System.Net.Http.Headers;
 
 
 namespace Tre_Camunda.Extensions
@@ -22,6 +24,19 @@ namespace Tre_Camunda.Extensions
             services.AddHttpClient();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
+            services.Configure<VaultSettings>(configuration.GetSection("VaultSettings"));
+
+            services.AddHttpClient<IVaultCredentialsService, VaultCredentialsService>((sp, client) =>
+            {
+                var settings = sp.GetRequiredService<IOptions<VaultSettings>>().Value;
+
+                client.BaseAddress = new Uri(settings.BaseUrl);
+                client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+                client.DefaultRequestHeaders.Clear();
+                client.DefaultRequestHeaders.Add("X-Vault-Token", settings.Token);
+                client.DefaultRequestHeaders.Accept.Add(
+                    new MediaTypeWithQualityHeaderValue("application/json"));
+            });
         }
 
         public static void ConfigureCamunda(this IServiceCollection services, IConfiguration configuration)
@@ -37,7 +52,7 @@ namespace Tre_Camunda.Extensions
 
             services.AddScoped<IPostgreSQLUserManagementService, PostgreSQLUserManagementService>();
 
-            services.AddScoped<ILdapUserManagementService, LdapUserManagementService>();
+            services.AddScoped<ILdapUserManagementService, LdapUserManagementService>();           
 
 
         }

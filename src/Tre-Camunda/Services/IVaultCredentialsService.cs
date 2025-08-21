@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BL.Services.Contract
+namespace Tre_Camunda.Services
 {
     public interface IVaultCredentialsService
     {
@@ -15,4 +15,7 @@ namespace BL.Services.Contract
         Task<string> GetConnectionStringAsync(string databaseName);
         Task<bool> StoreConnectionStringAsync(string databaseName, string server, string database, string username, string password, int port = 5432);
     }
+
 }
+
+
