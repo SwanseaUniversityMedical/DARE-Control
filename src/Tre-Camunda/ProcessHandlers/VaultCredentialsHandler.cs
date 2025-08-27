@@ -2,17 +2,17 @@
 using System.Text.Json;
 using Zeebe.Client.Accelerator.Attributes;
 using Zeebe.Client.Accelerator.Abstractions;
-using BL.Services;
+using Tre_Camunda.Services;
 
 namespace Tre_Camunda.ProcessHandlers
 {
     [JobType("store-in-vault")]
     public class VaultCredentialsHandler : IAsyncZeebeWorkerWithResult<Dictionary<string, object>>
     {
-        private readonly VaultCredentialsService _vaultCredentialsService;
+        private readonly IVaultCredentialsService _vaultCredentialsService;
         private readonly ILogger<VaultCredentialsHandler> _logger;
 
-        public VaultCredentialsHandler(VaultCredentialsService vaultCredentialsService, ILogger<VaultCredentialsHandler> logger)
+        public VaultCredentialsHandler(IVaultCredentialsService vaultCredentialsService, ILogger<VaultCredentialsHandler> logger)
         {
             _vaultCredentialsService = vaultCredentialsService;
             _logger = logger;
@@ -31,7 +31,7 @@ namespace Tre_Camunda.ProcessHandlers
                 var variables = JsonSerializer.Deserialize<Dictionary<string, object>>(job.Variables);
 
                
-                var vaultPath = variables["vaultPath"]?.ToString(); //Might need to change this based on current logic
+                var vaultPath = variables["vaultPath"]?.ToString(); 
                 var credentialDataJson = variables["credentialData"]?.ToString();
 
                 if (string.IsNullOrEmpty(vaultPath))
@@ -48,11 +48,32 @@ namespace Tre_Camunda.ProcessHandlers
                     throw new Exception(errorMsg);
                 }
 
-               
                 Dictionary<string, object> credentialData;
                 try
                 {
-                    credentialData = JsonSerializer.Deserialize<Dictionary<string, object>>(credentialDataJson);
+                    var rawData = JsonSerializer.Deserialize<Dictionary<string, object>>(credentialDataJson);
+
+                    
+                    credentialData = new Dictionary<string, object>();
+                    foreach (var x in rawData)
+                    {
+                        if (x.Value is JsonElement element)
+                        {
+                            credentialData[x.Key] = element.ValueKind switch
+                            {
+                                JsonValueKind.String => element.GetString(),
+                                JsonValueKind.Number => element.TryGetInt64(out var longVal) ? longVal : element.GetDouble(),
+                                JsonValueKind.True => true,
+                                JsonValueKind.False => false,
+                                JsonValueKind.Null => null,
+                                _ => element.GetRawText() 
+                            };
+                        }
+                        else
+                        {
+                            credentialData[x.Key] = x.Value;
+                        }
+                    }
                 }
                 catch (JsonException ex)
                 {

@@ -10,9 +10,11 @@ using System.Reflection;
 using Zeebe.Client.Accelerator.Extensions;
 using Tre_Camunda.Services;
 
-
+var builder = WebApplication.CreateBuilder(args);
 var configuration = GetConfiguration();
 string AppName = typeof(Program).Module.Name.Replace(".dll", "");
+
+ConfigurationManager configurations = builder.Configuration;
 
 Log.Logger = CreateSerilogLogger(configuration);
 Log.Information("Camunda logging Start.");
@@ -49,7 +51,9 @@ await Host.CreateDefaultBuilder(args)
 
         services.AddZeebeBuilders();
         services.BootstrapZeebe(configuration.GetSection("ZeebeConfiguration"), typeof(Program).Assembly);
-        services.Configure<LdapSettings>(configuration.GetSection("LdapSettings"));      
+
+        services.Configure<LdapSettings>(configuration.GetSection("LdapSettings"));
+        services.Configure<VaultSettings>(configuration.GetSection("VaultSettings"));
         services.AddHttpClient();
         services.AddBusinessServices(configuration);
         services.ConfigureCamunda(configuration);        
