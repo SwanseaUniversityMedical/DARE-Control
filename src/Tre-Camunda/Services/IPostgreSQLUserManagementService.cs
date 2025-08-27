@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BL.Services.Contract
+namespace Tre_Camunda.Services
 {
     public interface IPostgreSQLUserManagementService
     {

@@ -21,6 +21,25 @@ services:
     networks:
       - communicating
 
+  postgres-ephemeralcred:
+    image: postgres
+    mem_limit: 2G
+    mem_reservation: 1G
+    cpus: 0.5
+    #container_name: postgres
+    restart: always
+    ports:
+      - 32570:5432
+    volumes:
+      - postgres-ephemeral-data:/var/lib/postgresql/data
+      - ./init-creds.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_USER=postgres_cred
+      - POSTGRES_PASSWORD=password123
+      - POSTGRES_DB=Ephemeral_Cred
+    networks:
+      - communicating
+
   rabbitmq:
     image: rabbitmq:3-management-alpine
     mem_limit: 512M
@@ -386,6 +405,8 @@ services:
 ######################################################
 volumes:
     postgres:
+      driver: local
+    postgres-ephemeral-data:
       driver: local
     #postgresHasura:
     #  driver: local

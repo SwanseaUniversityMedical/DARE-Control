@@ -1,5 +1,4 @@
 ﻿using BL.Models;
-using BL.Services.Contract;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -9,7 +8,7 @@ using System.Threading.Tasks;
 using Npgsql;
 using Serilog;
 
-namespace BL.Services
+namespace Tre_Camunda.Services
 {
     public class PostgreSQLUserManagementService : IPostgreSQLUserManagementService
     {

@@ -7,7 +7,6 @@ using Tre_Camunda.Services;
 using Tre_Camunda.Settings;
 using Zeebe.Client.Accelerator.Extensions;
 using Zeebe.Client.Accelerator.Abstractions;
-using BL.Services.Contract;
 using BL.Services;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
