@@ -143,6 +143,8 @@ builder.Services.AddScoped<IDoAgentWork, DoAgentWork>();
 builder.Services.AddScoped<IHasuraService, HasuraService>();
 builder.Services.AddScoped<IHasuraAuthenticationService, HasuraAuthenticationService>();
 builder.Services.AddScoped<IKeyCloakService, KeyCloakService>();
+builder.Services.AddScoped<ICredentialProcessingService, CredentialProcessingService>();
+builder.Services.AddScoped<IVaultCredentialsService, VaultCredentialsService>(); //Need to move VaultCredentialsService from Camunda to BL to access here
 
 var TVP = new TokenValidationParameters
 {
@@ -227,6 +229,8 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedProto
 });
+
+ServiceLocator.SetServiceProvider(app.Services);
 // --- Session Token
 
 // Configure the HTTP request pipeline.
