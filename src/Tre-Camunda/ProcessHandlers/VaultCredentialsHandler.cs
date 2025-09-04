@@ -3,6 +3,7 @@ using System.Text.Json;
 using Zeebe.Client.Accelerator.Attributes;
 using Zeebe.Client.Accelerator.Abstractions;
 using Tre_Camunda.Services;
+using Hangfire;
 
 namespace Tre_Camunda.ProcessHandlers
 {
@@ -11,11 +12,13 @@ namespace Tre_Camunda.ProcessHandlers
     {
         private readonly IVaultCredentialsService _vaultCredentialsService;
         private readonly ILogger<VaultCredentialsHandler> _logger;
+        private readonly IBackgroundJobClient _hangfireClient;
 
-        public VaultCredentialsHandler(IVaultCredentialsService vaultCredentialsService, ILogger<VaultCredentialsHandler> logger)
+        public VaultCredentialsHandler(IVaultCredentialsService vaultCredentialsService, ILogger<VaultCredentialsHandler> logger, IBackgroundJobClient hangfireClient)
         {
             _vaultCredentialsService = vaultCredentialsService;
             _logger = logger;
+            _hangfireClient = hangfireClient;
         }
 
         public async Task<Dictionary<string, object>> HandleJob(ZeebeJob job, CancellationToken cancellation)
@@ -99,7 +102,12 @@ namespace Tre_Camunda.ProcessHandlers
                     throw new Exception(errorMsg);
                 }
 
-               
+                var submissionId = variables.GetValueOrDefault("submissionId")?.ToString();
+                _hangfireClient.Enqueue(() => ProcessCredentialsReady(submissionId, vaultPath));
+
+                _logger.LogInformation($"Hangfire job enqueued for credentials {submissionId}");
+
+
                 var outputVariables = new Dictionary<string, object>
                 {
                     ["vaultPath"] = vaultPath,
@@ -130,6 +138,11 @@ namespace Tre_Camunda.ProcessHandlers
                 throw; 
             }
         }
-    
+
+        public static void ProcessCredentialsReady(string submissionId, string vaultPath)
+        {
+            Console.WriteLine($"Credentials ready for submission {submissionId} at vault path {vaultPath}");
+        }
+
     }
 }

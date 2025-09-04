@@ -5,10 +5,14 @@ using Serilog;
 using Tre_Camunda.Extensions;
 using Tre_Camunda.Settings;
 using Zeebe.Client;
-
+using Hangfire;
+using Hangfire.PostgreSql;
+using Hangfire.Dashboard;
+using Hangfire.Dashboard.BasicAuthorization;
 using System.Reflection;
 using Zeebe.Client.Accelerator.Extensions;
 using Tre_Camunda.Services;
+using Google.Protobuf.WellKnownTypes;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = GetConfiguration();
@@ -41,6 +45,14 @@ Serilog.ILogger CreateSerilogLogger(IConfiguration configuration)
 
 }
 
+string hangfireConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddHangfire(config => { config.UsePostgreSqlStorage(hangfireConnectionString); });
+
+builder.Services.AddHangfireServer(options =>
+{
+    options.WorkerCount = 0; //Since no work is being done in this project, only storage
+});
+
 await Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
@@ -56,8 +68,7 @@ await Host.CreateDefaultBuilder(args)
         services.Configure<VaultSettings>(configuration.GetSection("VaultSettings"));
         services.AddHttpClient();
         services.AddBusinessServices(configuration);
-        services.ConfigureCamunda(configuration);        
-
+        services.ConfigureCamunda(configuration);
 
     })
     .Build()
