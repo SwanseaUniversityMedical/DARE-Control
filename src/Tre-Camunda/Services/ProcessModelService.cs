@@ -23,7 +23,7 @@ namespace Tre_Camunda.Services
         public async Task DeployProcessDefinitionAndDecisionModels()
         {
             /* Testing connection */
-            var gatewayAddress = _configuration["ZeebeBootstrap:Client:GatewayAddress"] ?? "localhost:26500";
+            var gatewayAddress = _configuration["ZeebeBootstrap:Client:GatewayAddress"];
 
             var zeebeClient = ZeebeClient.Builder()
                 .UseGatewayAddress(gatewayAddress)
