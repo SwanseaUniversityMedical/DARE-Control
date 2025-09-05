@@ -9,11 +9,13 @@ namespace Tre_Camunda.Services
     public class ProcessModelService : IProcessModelService
     {
         private IServicedZeebeClient _camunda;
+        private readonly IConfiguration _configuration;
 
-        public ProcessModelService(IServicedZeebeClient IServicedZeebeClient)
+        public ProcessModelService(IServicedZeebeClient IServicedZeebeClient, IConfiguration configuration)
         {
 
             _camunda = IServicedZeebeClient;
+            _configuration = configuration;
         }
 
        
@@ -21,8 +23,10 @@ namespace Tre_Camunda.Services
         public async Task DeployProcessDefinitionAndDecisionModels()
         {
             /* Testing connection */
+            var gatewayAddress = _configuration["ZeebeBootstrap:Client:GatewayAddress"] ?? "localhost:26500";
+
             var zeebeClient = ZeebeClient.Builder()
-                .UseGatewayAddress("localhost:26500")
+                .UseGatewayAddress(gatewayAddress)
                 .UsePlainText()
                 .Build();
 
