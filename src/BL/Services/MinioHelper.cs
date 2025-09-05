@@ -3,14 +3,16 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using Aws4RequestSigner;
+using BL.Models;
 using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
+using Minio.DataModel.Args;
 using Minio.Exceptions;
 using Newtonsoft.Json;
 using Serilog;
+using System.Diagnostics;
 using System.Net;
 using System.Text;
-using Minio.DataModel.Args;
 
 namespace BL.Services
 {
@@ -664,6 +666,263 @@ namespace BL.Services
             else
             {
                 return partSize;
+            }
+        }
+
+        #endregion
+
+        #region Secret Management Methods
+
+        private bool _isMinioClientInitialized = false;
+
+        /// <summary>
+        /// Create a MinIO secret (access key/secret key pair)
+        /// </summary>
+        /// <param name="accessKey">The access key name</param>
+        /// <param name="secretKey">The secret key value (optional, will be generated if not provided)</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>MinioCommandResult with the created secret information</returns>
+        public async Task<MinioCommandResult> CreateMinioSecretAsync(string accessKey, string secretKey = "", CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await EnsureMinioClientInitializedAsync(cancellationToken);
+
+                string command;
+                if (string.IsNullOrEmpty(secretKey))
+                {
+                    // Generate secret key automatically
+                    command = $"mc admin user add {_minioSettings.Alias} {accessKey}";
+                }
+                else
+                {
+                    command = $"mc admin user add {_minioSettings.Alias} {accessKey} {secretKey}";
+                }
+
+                var result = await ExecuteMinioCommandAsync(command, cancellationToken);
+
+                if (result.Success)
+                {
+                    Log.Information("MinIO secret created successfully for access key: {AccessKey}", accessKey);
+                }
+                else
+                {
+                    Log.Warning("Failed to create MinIO secret for access key: {AccessKey}. Error: {Error}", accessKey, result.Error);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Exception occurred while creating MinIO secret for access key: {AccessKey}", accessKey);
+                return new MinioCommandResult
+                {
+                    Success = false,
+                    Error = ex.Message
+                };
+            }
+        }
+
+        /// <summary>
+        /// Delete a MinIO secret (access key)
+        /// </summary>
+        /// <param name="accessKey">The access key to delete</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>MinioCommandResult indicating success or failure</returns>
+        public async Task<MinioCommandResult> DeleteMinioSecretAsync(string accessKey, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await EnsureMinioClientInitializedAsync(cancellationToken);
+
+                var command = $"mc admin user remove {_minioSettings.Alias} {accessKey}";
+                var result = await ExecuteMinioCommandAsync(command, cancellationToken);
+
+                if (result.Success)
+                {
+                    Log.Information("MinIO secret deleted successfully for access key: {AccessKey}", accessKey);
+                }
+                else
+                {
+                    Log.Warning("Failed to delete MinIO secret for access key: {AccessKey}. Error: {Error}", accessKey, result.Error);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Exception occurred while deleting MinIO secret for access key: {AccessKey}", accessKey);
+                return new MinioCommandResult
+                {
+                    Success = false,
+                    Error = ex.Message
+                };
+            }
+        }
+
+        /// <summary>
+        /// List all MinIO secrets (access keys)
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns>MinioCommandResult with the list of secrets</returns>
+        public async Task<MinioCommandResult> ListMinioSecretsAsync(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await EnsureMinioClientInitializedAsync(cancellationToken);
+
+                var command = $"mc admin user list {_minioSettings.Alias}";
+                var result = await ExecuteMinioCommandAsync(command, cancellationToken);
+
+                if (result.Success)
+                {
+                    Log.Information("MinIO secrets listed successfully");
+                }
+                else
+                {
+                    Log.Warning("Failed to list MinIO secrets. Error: {Error}", result.Error);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Exception occurred while listing MinIO secrets");
+                return new MinioCommandResult
+                {
+                    Success = false,
+                    Error = ex.Message
+                };
+            }
+        }
+
+        /// <summary>
+        /// Get information about a specific MinIO secret
+        /// </summary>
+        /// <param name="accessKey">The access key to get information about</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>MinioCommandResult with the secret information</returns>
+        public async Task<MinioCommandResult> GetMinioSecretAsync(string accessKey, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await EnsureMinioClientInitializedAsync(cancellationToken);
+
+                var command = $"mc admin user info {_minioSettings.Alias} {accessKey}";
+                var result = await ExecuteMinioCommandAsync(command, cancellationToken);
+
+                if (result.Success)
+                {
+                    Log.Information("MinIO secret information retrieved successfully for access key: {AccessKey}", accessKey);
+                }
+                else
+                {
+                    Log.Warning("Failed to get MinIO secret information for access key: {AccessKey}. Error: {Error}", accessKey, result.Error);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Exception occurred while getting MinIO secret information for access key: {AccessKey}", accessKey);
+                return new MinioCommandResult
+                {
+                    Success = false,
+                    Error = ex.Message
+                };
+            }
+        }
+
+        #endregion
+
+        #region MinIO Client Helper Methods
+
+        private async Task<bool> EnsureMinioClientInitializedAsync(CancellationToken cancellationToken = default)
+        {
+            if (!_isMinioClientInitialized)
+            {
+                var command = $"mc alias set {_minioSettings.Alias ?? "myminio"} {_minioSettings.Url} {_minioSettings.AccessKey} {_minioSettings.SecretKey}";
+                var result = await ExecuteMinioCommandAsync(command, cancellationToken);
+
+                if (result.Success)
+                {
+                    _isMinioClientInitialized = true;
+                    Log.Information("MinIO MC client initialized successfully");
+                    return true;
+                }
+                else
+                {
+                    Log.Error("Failed to initialize MinIO MC client: {Error}", result.Error);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private async Task<MinioCommandResult> ExecuteMinioCommandAsync(string command, CancellationToken cancellationToken = default)
+        {
+            var result = new MinioCommandResult();
+
+            try
+            {
+                Log.Debug("Executing MinIO command: {Command}", command);
+
+                var processStartInfo = new ProcessStartInfo
+                {
+                    FileName = "/bin/sh",
+                    Arguments = $"-c \"{command}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = new Process();
+                process.StartInfo = processStartInfo;
+
+                var outputBuilder = new StringBuilder();
+                var errorBuilder = new StringBuilder();
+
+                process.OutputDataReceived += (sender, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                        outputBuilder.AppendLine(e.Data);
+                };
+
+                process.ErrorDataReceived += (sender, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                        errorBuilder.AppendLine(e.Data);
+                };
+
+                process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
+                await process.WaitForExitAsync(cancellationToken);
+
+                result.ExitCode = process.ExitCode;
+                result.Output = outputBuilder.ToString().Trim();
+                result.Error = errorBuilder.ToString().Trim();
+                result.Success = process.ExitCode == 0;
+
+                if (result.Success)
+                {
+                    Log.Debug("MinIO command executed successfully: {Output}", result.Output);
+                }
+                else
+                {
+                    Log.Warning("MinIO command failed with exit code {ExitCode}: {Error}", result.ExitCode, result.Error);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Exception occurred while executing MinIO command: {Command}", command);
+                result.Success = false;
+                result.Error = ex.Message;
+                return result;
             }
         }
 

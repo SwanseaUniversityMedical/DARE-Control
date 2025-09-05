@@ -1,4 +1,5 @@
 ﻿using Amazon.S3.Model;
+using BL.Models;
 using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
 
@@ -31,5 +32,10 @@ namespace BL.Services
 
         Task DeleteObject(string bucketName, string objectKey);
         Task WriteToStore(string bucketName, string objectKey, MemoryStream file);
+
+        Task<MinioCommandResult> CreateMinioSecretAsync(string accessKey, string secretKey = "", CancellationToken cancellationToken = default);
+        Task<MinioCommandResult> DeleteMinioSecretAsync(string accessKey, CancellationToken cancellationToken = default);
+        Task<MinioCommandResult> ListMinioSecretsAsync(CancellationToken cancellationToken = default);
+        Task<MinioCommandResult> GetMinioSecretAsync(string accessKey, CancellationToken cancellationToken = default);
     }
 }
