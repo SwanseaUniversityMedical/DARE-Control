@@ -11,6 +11,7 @@ namespace BL.Models.ViewModels
         public string AccessKey { get; set; }
         public string SecretKey { get; set; }
         public string BucketName { get; set; }
+        public string Alias { get; set; } = "dareminio";
         public string AWSRegion { get; set; }
         public string HutchURLOverride { get; set; }
         public string AWSService { get; set; }
