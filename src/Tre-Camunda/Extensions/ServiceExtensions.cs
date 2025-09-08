@@ -43,7 +43,7 @@ namespace Tre_Camunda.Extensions
         {
             var camundaSettings = new CamundaSettings();
             configuration.Bind(nameof(camundaSettings), camundaSettings);
-            services.AddSingleton(camundaSettings);           
+            services.AddSingleton(camundaSettings);
 
             services.AddHostedService<BpmnProcessDeployService>();
             services.AddScoped<IProcessModelService, ProcessModelService>();
@@ -52,7 +52,8 @@ namespace Tre_Camunda.Extensions
 
             services.AddScoped<IPostgreSQLUserManagementService, PostgreSQLUserManagementService>();
 
-            services.AddScoped<ILdapUserManagementService, LdapUserManagementService>();           
+            services.AddScoped<ILdapUserManagementService, LdapUserManagementService>();
+            services.AddScoped<IMinioHelper, MinioHelper>();
 
 
         }
