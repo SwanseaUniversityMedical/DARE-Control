@@ -62,7 +62,7 @@ AddServices(builder);
 
 //Add Dependancies
 AddDependencies(builder, configuration);
-AddVaultServices(builder, configuration);
+//AddVaultServices(builder, configuration);
 
 builder.Services.Configure<OPASettings>(configuration.GetSection("OPASettings"));
 builder.Services.AddTransient(opa => opa.GetService<IOptions<OPASettings>>().Value);
@@ -311,26 +311,26 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
     builder.Services.AddMvc().AddControllersAsServices();
 }
 
-void AddVaultServices(WebApplicationBuilder builder, ConfigurationManager configuration)
-{
-    // Configure Vault settings
-    var vaultSettings = new VaultSettings();
-    configuration.Bind("VaultSettings", vaultSettings);
-    builder.Services.AddSingleton(vaultSettings);
+//void AddVaultServices(WebApplicationBuilder builder, ConfigurationManager configuration)
+//{
+//    // Configure Vault settings
+//    var vaultSettings = new VaultSettings();
+//    configuration.Bind("VaultSettings", vaultSettings);
+//    builder.Services.AddSingleton(vaultSettings);
 
-    // Register HttpClient for Vault service
-    builder.Services.AddHttpClient<VaultCredentialsService>(client =>
-    {
-        client.BaseAddress = new Uri(vaultSettings.BaseUrl);
-        client.Timeout = TimeSpan.FromSeconds(vaultSettings.TimeoutSeconds);
-        client.DefaultRequestHeaders.Add("X-Vault-Token", vaultSettings.Token);
-        client.DefaultRequestHeaders.Accept.Add(
-            new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-    });
+//    // Register HttpClient for Vault service
+//    builder.Services.AddHttpClient<VaultCredentialsService>(client =>
+//    {
+//        client.BaseAddress = new Uri(vaultSettings.BaseUrl);
+//        client.Timeout = TimeSpan.FromSeconds(vaultSettings.TimeoutSeconds);
+//        client.DefaultRequestHeaders.Add("X-Vault-Token", vaultSettings.Token);
+//        client.DefaultRequestHeaders.Accept.Add(
+//            new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+//    });
 
-    // Register the Vault service
-    builder.Services.AddScoped<IVaultCredentialsService, VaultCredentialsService>();
-}
+//    // Register the Vault service
+//    builder.Services.AddScoped<IVaultCredentialsService, VaultCredentialsService>();
+//}
 
 void AddServices(WebApplicationBuilder builder)
 {

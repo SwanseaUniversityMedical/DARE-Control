@@ -1,5 +1,4 @@
-﻿using BL.Models.Settings;
-using BL.Services.Contract;
+﻿using Tre_Camunda.Settings;
 using Newtonsoft.Json;
 using Serilog;
 using System;
@@ -8,8 +7,10 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
+using static IdentityModel.ClaimComparer;
 
-namespace BL.Services
+namespace Tre_Camunda.Services
 {
     public class VaultCredentialsService : IVaultCredentialsService, IDisposable
     {
@@ -17,23 +18,12 @@ namespace BL.Services
         private readonly VaultSettings _vaultSettings;
         private bool _disposed = false;
 
-        public VaultCredentialsService(HttpClient httpClient, VaultSettings vaultSettings)
+        public VaultCredentialsService(HttpClient httpClient, IOptions<VaultSettings> options)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            _vaultSettings = vaultSettings ?? throw new ArgumentNullException(nameof(vaultSettings));
+            _vaultSettings = options?.Value ?? throw new ArgumentNullException(nameof(options));
 
-            ConfigureHttpClient();
-        }
-
-        private void ConfigureHttpClient()
-        {
-            _httpClient.BaseAddress = new Uri(_vaultSettings.BaseUrl);
-            _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.DefaultRequestHeaders.Add("X-Vault-Token", _vaultSettings.Token);
-            _httpClient.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json"));
-            _httpClient.Timeout = TimeSpan.FromSeconds(_vaultSettings.TimeoutSeconds);
-        }
+        }      
 
         public async Task<bool> AddCredentialAsync(string path, Dictionary<string, object> credential)
         {

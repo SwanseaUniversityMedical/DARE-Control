@@ -84,7 +84,6 @@ namespace TRE_API.Controllers
         [ValidateModelState]
         [SwaggerOperation("UpdateStatusForTre")]
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
-        // public IActionResult UpdateStatusForTre([FromBody] SubmissionDetails subDetails)
         public IActionResult UpdateStatusForTre(
             [FromQuery] string subId,
             [FromQuery] StatusType statusType,
