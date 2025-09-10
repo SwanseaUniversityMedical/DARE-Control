@@ -28,6 +28,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.FeatureManagement;
 using TRE_API.Constants;
 using BL.Services.Contract;
+using Tre_Credentials.DbContexts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +60,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));
 AddServices(builder);
+
+builder.Services.AddDbContext<CredentialsDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("CredentialsConnection")));
 
 //Add Dependancies
 AddDependencies(builder, configuration);
