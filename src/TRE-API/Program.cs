@@ -446,6 +446,11 @@ if (HasuraSettings.IsEnabled)
 }
 
 
+const string credsJobName = "Process Pending Ephemeral Credentials";
+RecurringJob.AddOrUpdate<IEphemeralCredMonitorService>(credsJobName,
+    service => service.ProcessAllPendingCredentials(),
+    Cron.MinuteInterval(15));
+
 var port = app.Environment.WebRootPath;
 Console.WriteLine("Application is running on port: " + port);
 

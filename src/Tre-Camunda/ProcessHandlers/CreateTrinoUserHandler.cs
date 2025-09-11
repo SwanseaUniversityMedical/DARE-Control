@@ -57,6 +57,11 @@ namespace Tre_Camunda.ProcessHandlers
 
                 var project = variables["project"]?.ToString();
                 var user = variables["user"]?.ToString();
+                var submissionId = variables["submissionId"].ToString();
+
+                var processInstanceKey = job.ProcessInstanceKey;
+
+                _logger.LogInformation($"Creating Trino user for Submission: {submissionId}, Process: {processInstanceKey}");
 
                 if (string.IsNullOrEmpty(username))
                 {
@@ -99,7 +104,9 @@ namespace Tre_Camunda.ProcessHandlers
                             ["expiresAt"] = DateTime.UtcNow.AddHours(24).ToString("yyyy-MM-ddTHH:mm:ssZ"),
                             ["ldapDn"] = $"cn={username},ou=Users,dc=camundaephemeral,dc=local"                            
                         },
-                        ["vaultPath"] = $"ephemeral/{userId}/{jobId}",
+                        ["submissionId"] = submissionId,
+                        ["processInstanceKey"] = processInstanceKey,
+                        ["vaultPath"] = $"ephemeral/{submissionId}/{userId}/{jobId}", //Check if we need to add processInstanceKey to vault path
                         ["trinoUsername"] = username 
                     };
 

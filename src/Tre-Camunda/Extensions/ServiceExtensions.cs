@@ -11,6 +11,8 @@ using BL.Services.Contract;
 using BL.Services;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
+using IVaultCredentialsService = Tre_Camunda.Services.IVaultCredentialsService;
+using VaultCredentialsService = Tre_Camunda.Services.VaultCredentialsService;
 
 
 namespace Tre_Camunda.Extensions
