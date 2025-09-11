@@ -320,6 +320,9 @@ services:
       - LdapSettings__Port=389
       - VaultSettings__BaseUrl=http://vault:8200
       - VaultSettings__TimeoutSeconds=60
+      - MinioSettings__Url=http://minio2:9000
+      - MinioSettings__AccessKey=minio
+      - MinioSettings__SecretKey=minio123
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080;http://+:8081
     networks:
