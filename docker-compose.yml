@@ -304,7 +304,7 @@ services:
       - openldap
 
   tre-camunda:
-    image: harbor.ukserp.ac.uk:443/dare-trefx/control-tre-camunda:2.9.4
+    image: harbor.ukserp.ac.uk:443/dare-trefx/control-tre-camunda:2.9.5
     container_name: tre-camunda
     restart: always
     ports:
@@ -328,8 +328,6 @@ services:
       - minio-network
     depends_on:
       zeebe:
-        condition: service_healthy
-      elasticsearch:
         condition: service_healthy
       seq:
         condition: service_started
