@@ -11,7 +11,10 @@ using Tre_Camunda.ProcessHandlers;
 using Tre_Camunda.Services;
 using Tre_Camunda.Settings;
 using Zeebe.Client.Accelerator.Abstractions;
+using IVaultCredentialsService = Tre_Camunda.Services.IVaultCredentialsService;
+using VaultCredentialsService = Tre_Camunda.Services.VaultCredentialsService;
 using Zeebe.Client.Accelerator.Extensions;
+
 
 
 namespace Tre_Camunda.Extensions

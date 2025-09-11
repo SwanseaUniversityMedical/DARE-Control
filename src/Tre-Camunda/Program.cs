@@ -9,6 +9,8 @@ using Zeebe.Client;
 using System.Reflection;
 using Zeebe.Client.Accelerator.Extensions;
 using Tre_Camunda.Services;
+using Microsoft.EntityFrameworkCore;
+using Tre_Credentials.DbContexts;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = GetConfiguration();
@@ -40,6 +42,9 @@ Serilog.ILogger CreateSerilogLogger(IConfiguration configuration)
     .CreateLogger();
 
 }
+builder.Services.AddDbContext<CredentialsDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("CredentialsConnection")));
 
 await Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
@@ -57,7 +62,6 @@ await Host.CreateDefaultBuilder(args)
         services.AddHttpClient();
         services.AddBusinessServices(configuration);
         services.ConfigureCamunda(configuration);        
-
 
     })
     .Build()
