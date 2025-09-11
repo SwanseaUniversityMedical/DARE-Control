@@ -194,6 +194,8 @@ services:
     ports:
       - 9002:9000
       - 9003:9001
+    networks:   
+      - minio-network
   seq:
     image: datalust/seq:latest
     mem_limit: 2G
@@ -302,7 +304,7 @@ services:
       - openldap
 
   tre-camunda:
-    image: harbor.ukserp.ac.uk:443/dare-trefx/control-tre-camunda:2.9.3
+    image: harbor.ukserp.ac.uk:443/dare-trefx/control-tre-camunda:2.9.4
     container_name: tre-camunda
     restart: always
     ports:
@@ -323,6 +325,7 @@ services:
     networks:
       - camunda-platform
       - communicating
+      - minio-network
     depends_on:
       zeebe:
         condition: service_healthy
@@ -461,4 +464,6 @@ networks:
   communicating:
     driver: bridge
   camunda-platform:
+    driver: bridge
+  minio-network:
     driver: bridge
