@@ -14,13 +14,13 @@ namespace Tre_Credentials.DbContexts
         {
         }
 
-        public DbSet<EphemeralCredsReadyMessage> EphemeralCredsReadyMessages { get; set; }
+        public DbSet<EphemeralCredential> EphemeralCredentials { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<EphemeralCredsReadyMessage>()
+            modelBuilder.Entity<EphemeralCredential>()
                 .HasIndex(m => new { m.SubmissionId, m.ProcessInstanceKey })
                 .IsUnique(false);           
         }

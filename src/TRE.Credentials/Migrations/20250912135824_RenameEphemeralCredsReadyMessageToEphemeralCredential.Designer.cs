@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Tre_Credentials.DbContexts;
@@ -11,9 +12,11 @@ using Tre_Credentials.DbContexts;
 namespace Tre_Credentials.Migrations
 {
     [DbContext(typeof(CredentialsDbContext))]
-    partial class CredentialsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250912135824_RenameEphemeralCredsReadyMessageToEphemeralCredential")]
+    partial class RenameEphemeralCredsReadyMessageToEphemeralCredential
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,9 +38,6 @@ namespace Tre_Credentials.Migrations
 
                     b.Property<string>("ErrorMessage")
                         .HasColumnType("text");
-
-                    b.Property<DateTime?>("ExpiredAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsProcessed")
                         .HasColumnType("boolean");
