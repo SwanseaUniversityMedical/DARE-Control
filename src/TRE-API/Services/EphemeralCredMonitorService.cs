@@ -34,7 +34,7 @@ namespace TRE_API.Services
                 _logger.LogInformation("Starting check for all pending credentials..."); 
                 
                 //This should fetch the latest credentials that are ready from the DB
-                var pendingMessages = await _credentialsDb.EphemeralCredsReadyMessages.Where(m => !m.IsProcessed)
+                var pendingMessages = await _credentialsDb.EphemeralCredentials.Where(m => !m.IsProcessed)
                     .OrderBy(m => m.CreatedAt).ToListAsync();
 
                 if (!pendingMessages.Any())
@@ -67,7 +67,7 @@ namespace TRE_API.Services
             }
         }
 
-        private async Task FetchEphemeralCredential(EphemeralCredsReadyMessage message)
+        private async Task FetchEphemeralCredential(EphemeralCredential message)
         {
             _logger.LogInformation($"Processing credentials for Submission: {message.SubmissionId}, ProcessKey: {message.ProcessInstanceKey}, VaultPath: {message.VaultPath}");   
             var credentials = await _vaultService.GetCredentialAsync(message.VaultPath);
@@ -79,8 +79,7 @@ namespace TRE_API.Services
             }            
 
             // Mark as processed
-            message.IsProcessed = true;
-            message.ErrorMessage = null;            
+            message.IsProcessed = true;                      
 
             _logger.LogInformation($"Successfully processed credentials for submission: {message.SubmissionId} and processInstance: {message.ProcessInstanceKey}");
 

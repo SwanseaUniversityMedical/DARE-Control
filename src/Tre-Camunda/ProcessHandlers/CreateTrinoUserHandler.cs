@@ -57,8 +57,8 @@ namespace Tre_Camunda.ProcessHandlers
 
                 var project = variables["project"]?.ToString();
                 var user = variables["user"]?.ToString();
-                var submissionId = variables["submissionId"].ToString();
-
+                //var submissionId = variables["submissionId"].ToString();
+                var submissionId = "3456"; //will have to use above line once submissionId is received properly, this is jut for testing purpose
                 var processInstanceKey = job.ProcessInstanceKey;
 
                 _logger.LogInformation($"Creating Trino user for Submission: {submissionId}, Process: {processInstanceKey}");
@@ -88,7 +88,7 @@ namespace Tre_Camunda.ProcessHandlers
 
                 {
                     var userId = CleanDnValue(user);
-                    var jobId = CleanDnValue(project);
+                    var jobId = submissionId;
                  
                     var outputVariables = new Dictionary<string, object>
                     {                      
@@ -106,7 +106,7 @@ namespace Tre_Camunda.ProcessHandlers
                         },
                         ["submissionId"] = submissionId,
                         ["processInstanceKey"] = processInstanceKey,
-                        ["vaultPath"] = $"ephemeral/{submissionId}/{userId}/{jobId}", //Check if we need to add processInstanceKey to vault path
+                        ["vaultPath"] = $"ephemeral/{userId}/{jobId}/{project}", 
                         ["trinoUsername"] = username 
                     };
 

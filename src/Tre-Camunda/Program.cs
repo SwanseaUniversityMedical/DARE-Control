@@ -42,9 +42,6 @@ Serilog.ILogger CreateSerilogLogger(IConfiguration configuration)
     .CreateLogger();
 
 }
-builder.Services.AddDbContext<CredentialsDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("CredentialsConnection")));
 
 await Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>

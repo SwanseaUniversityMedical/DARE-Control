@@ -14,15 +14,13 @@ namespace Tre_Camunda.ProcessHandlers
     {
         private readonly IVaultCredentialsService _vaultCredentialsService;
         private readonly ILogger<VaultCredentialsHandler> _logger;
-        private readonly CredentialsDbContext _credentialsDbContext;
-        private readonly IBackgroundJobClient _backgroundJobClient;
+        private readonly CredentialsDbContext _credentialsDbContext;        
 
-        public VaultCredentialsHandler(IVaultCredentialsService vaultCredentialsService, ILogger<VaultCredentialsHandler> logger, CredentialsDbContext credentialsDbContext, IBackgroundJobClient backgroundJobClient)
+        public VaultCredentialsHandler(IVaultCredentialsService vaultCredentialsService, ILogger<VaultCredentialsHandler> logger, CredentialsDbContext credentialsDbContext/*, IBackgroundJobClient backgroundJobClient*/)
         {
             _vaultCredentialsService = vaultCredentialsService;
             _logger = logger;
-            _credentialsDbContext = credentialsDbContext;
-            _backgroundJobClient = backgroundJobClient;
+            _credentialsDbContext = credentialsDbContext;           
         }
 
         public async Task<Dictionary<string, object>> HandleJob(ZeebeJob job, CancellationToken cancellation)
@@ -154,9 +152,8 @@ namespace Tre_Camunda.ProcessHandlers
         {
             try
             {
-                var submissionGuid = Guid.Parse(submissionId);
-
-                var credReadyMessage = new EphemeralCredsReadyMessage
+                var submissionGuid = int.Parse(submissionId);
+                var credReadyMessage = new EphemeralCredential
                 {
                     SubmissionId = submissionGuid,
                     ProcessInstanceKey = processInstanceKey,
@@ -165,12 +162,9 @@ namespace Tre_Camunda.ProcessHandlers
                     VaultPath = vaultPath
                 };
 
-                _credentialsDbContext.EphemeralCredsReadyMessages.Add(credReadyMessage);
+                _credentialsDbContext.EphemeralCredentials.Add(credReadyMessage);
 
-                await _credentialsDbContext.SaveChangesAsync();
-                
-                //This method immediately fires a notification when the creds are ready, may not be needed as recurring job is set in TRE-API
-                BackgroundJob.Enqueue(() => LogCredentialsReady(submissionGuid, processInstanceKey, vaultPath));
+                await _credentialsDbContext.SaveChangesAsync();                                
             }
             catch (Exception ex)
             {
@@ -178,11 +172,6 @@ namespace Tre_Camunda.ProcessHandlers
             }
 
         }
-
-        public Task LogCredentialsReady(Guid submissionId, long processInstanceKey, string vaultPath)
-        {
-            _logger.LogInformation($"Credentials ready for Submission: {submissionId} and ProcessInstance: {processInstanceKey} and VaultPath: {vaultPath}");
-            return Task.CompletedTask;
-        }
+     
     }   
 }
