@@ -7,7 +7,6 @@ using BL.Rabbit;
 using BL.Services;
 using EasyNetQ;
 using Hangfire;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.FeatureManagement;
 using Newtonsoft.Json;
 using Serilog;
@@ -25,7 +24,7 @@ namespace TRE_API
     public interface IDoAgentWork
     {
         Task Execute();
-        Task CheckTES(string taskID, int subId, string tesId, string outputBucket, string NameTes);
+        Task CheckTesStatus(string taskId, int subId, string tesId, string outputBucket, string nameTes);
         void ClearJob(string jobname);
     }
 
@@ -45,7 +44,7 @@ namespace TRE_API
         private readonly IEncDecHelper _encDecHelper;
         private readonly IFeatureManager _features;
 
-        private static readonly HashSet<string> TerminalStates = new() { "COMPLETE", "EXECUTOR_ERROR", "SYSTEM_ERROR", "EXECUTER_ERROR" };
+        private static readonly HashSet<string> TerminalStates = new() { "COMPLETE", "EXECUTOR_ERROR", "SYSTEM_ERROR" };
 
         public DoAgentWork(IServiceProvider serviceProvider,
             ApplicationDbContext dbContext,
@@ -81,25 +80,25 @@ namespace TRE_API
         /// <summary>
         /// Called by Hangfire, each running job has a specific hangfire job that calls this method to check on the running status of that job periodically
         /// </summary>
-        /// <param name="taskID"></param>
+        /// <param name="taskId"></param>
         /// <param name="subId"></param>
         /// <param name="tesId"></param>
         /// <param name="outputBucket"></param>
-        /// <param name="NameTes"></param>
+        /// <param name="nameTes"></param>
         /// <returns></returns>
-        public async Task CheckTES(string taskID, int subId, string tesId, string outputBucket, string NameTes)
+        public async Task CheckTesStatus(string taskId, int subId, string tesId, string outputBucket, string nameTes)
         {
-            Log.Information("Checking TESK status {taskID}", taskID);
+            Log.Information("Checking TES status... {taskID}", taskId);
             using var httpClient = new HttpClient(CreateHttpHandler());
-            var response = await httpClient.GetAsync($"{_AgentSettings.TESKAPIURL}/{taskID}?view=BASIC");
+            var response = await httpClient.GetAsync($"{_AgentSettings.TESKAPIURL}/{taskId}?view=BASIC");
             if (!response.IsSuccessStatusCode)
             {
-                Log.Error("TESK status check failed for {taskID}", taskID);
+                Log.Error("TES status check failed for {taskId}", taskId);
                 return;
             }
 
             var content = await response.Content.ReadAsStringAsync();
-            var status = JsonConvert.DeserializeObject<TESKstatus>(content);
+            var status = JsonConvert.DeserializeObject<TESKstatus>(content) ?? throw new NullReferenceException("");
             var existing = _dbContext.TESK_Status.FirstOrDefault(x => x.id == status.id);
 
             bool shouldReport = existing == null || existing.state != status.state;
@@ -107,26 +106,37 @@ namespace TRE_API
             {
                 if (existing == null)
                     _dbContext.Add(status);
-                else { existing.state = status.state; _dbContext.Update(existing); }
+                else
+                {
+                    existing.state = status.state;
+                    _dbContext.Update(existing);
+                }
+
                 _dbContext.SaveChanges();
             }
 
             if (!shouldReport && !TerminalStates.Contains(status.state)) return;
 
-            await HandleTESKFinalStatus(status.state, subId, taskID);
+            Log.Information("TES task state: {state}", status.state);
 
-            if (TerminalStates.Contains(status.state))
-                await FinalizeFilesAndNotify(subId, outputBucket, tesId, NameTes);
+            if (shouldReport)
+            {
+                await HandleTesFinalStatus(status.state, subId, taskId);
+            }
+
+            if (shouldReport && status.state == "COMPLETE")
+                await FinalizeFilesAndNotify(subId, outputBucket, tesId, nameTes);
+            shouldReport = false;
         }
 
-        private async Task HandleTESKFinalStatus(string state, int subId, string taskID)
+        private async Task HandleTesFinalStatus(string state, int subId, string taskId)
         {
             var token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
             if (token != null)
             {
                 _dbContext.TokensToExpire.Remove(token);
                 _hasuraAuthenticationService.ExpirerToken(token.Token);
-                _dbContext.SaveChanges();
+                await _dbContext.SaveChangesAsync();
             }
 
             var statusType = state switch
@@ -137,13 +147,16 @@ namespace TRE_API
                 _ => StatusType.Cancelled
             };
 
-            _subHelper.UpdateStatusForTre(subId.ToString(), statusType, "");
             if (state == "COMPLETE")
-                _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.DataOutRequested, "", "");
+            {
+                _subHelper.UpdateStatusForTre(subId.ToString(), statusType, "");
+                ClearJob(taskId);
+            }
             else if (state.Contains("ERROR"))
-                _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Failed, "", "");
-
-            ClearJob(taskID);
+            {
+                _subHelper.UpdateStatusForTre(subId.ToString(), StatusType.Failed, "");
+                ClearJob(taskId);
+            }
         }
 
         private async Task FinalizeFilesAndNotify(int subId, string outputBucket, string tesId, string nameTes)
@@ -159,13 +172,21 @@ namespace TRE_API
             }
 
             _subHelper.UpdateStatusForTre(subId.ToString(), StatusType.DataOutRequested, "");
-            _subHelper.FilesReadyForReview(new ReviewFiles { SubId = subId.ToString(), Files = files, tesId = tesId, Name = nameTes }, cleaned);
+            _subHelper.FilesReadyForReview(
+                new ReviewFiles { SubId = subId.ToString(), Files = files, tesId = tesId, Name = nameTes }, cleaned);
         }
 
         public void ClearJob(string jobname)
         {
-            try { RecurringJob.RemoveIfExists(jobname); }
-            catch (Exception ex) { Log.Error(ex, "Clear job failed"); }
+            Log.Information("{Function} Clearing Hangfire job: {Jobname}", "ClearJob", jobname);
+            try
+            {
+                RecurringJob.RemoveIfExists(jobname);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Clear job failed");
+            }
         }
 
         private HttpClientHandler CreateHttpHandler()
@@ -174,26 +195,15 @@ namespace TRE_API
             return new HttpClientHandler { Proxy = new WebProxy(_AgentSettings.ProxyAddresURL, true), UseProxy = true };
         }
 
-        private class ResponseModel { public string id { get; set; } }
-
-
-
-
-
-
-
-
-
-
-
-
-
+        private class ResponseModel
+        {
+            public string id { get; set; }
+        }
 
         /// <summary>
         /// Method called by timed Hangfire job
         /// Purpose to communicate with the submission layer and get cancelled and new job to run
         /// </summary>
-
         public async Task Execute()
         {
             Log.Information("{Function} DoAgentWork running", nameof(Execute));
@@ -201,7 +211,11 @@ namespace TRE_API
 
             await HandleCancelledSubmissions();
 
+            Log.Information("Polling Submission Layer for waiting submissions");
             var submissions = _subHelper.GetWaitingSubmissionForTre() ?? new List<Submission>();
+
+            Log.Information("Found {submissions} submissions",
+                submissions?.Count);
             foreach (var submission in submissions)
                 await ProcessSubmission(submission);
         }
@@ -216,7 +230,6 @@ namespace TRE_API
             {
                 Log.Information("Cancelling submission {SubId}", cancel.Id.ToString());
                 _subHelper.UpdateStatusForTre(cancel.Id.ToString(), StatusType.CancellationRequestSent, "");
-                _subHelper.CloseSubmissionForTre(cancel.Id.ToString(), StatusType.Cancelled, "", "");
             }
         }
 
@@ -225,17 +238,25 @@ namespace TRE_API
             Log.Information("Processing submission {SubId}", sub.Id);
             if (!_subHelper.IsUserApprovedOnProject(sub.Project.Id, sub.SubmittedBy.Id))
             {
+                Log.Information("Invalid user {user} for submission {SubId}", sub.SubmittedBy.Id, sub.Id);
                 _subHelper.UpdateStatusForTre(sub.Id.ToString(), StatusType.InvalidUser, "");
                 _subHelper.CloseSubmissionForTre(sub.Id.ToString(), StatusType.Failed, "", "");
                 return;
             }
 
             bool processedOK = true;
-
+            // Simulate submission if demo mode is on
             if (await _features.IsEnabledAsync(FeatureFlags.DemoAllInOne))
             {
-                try { _subHelper.SimulateSubmissionProcessing(sub); }
-                catch (Exception e) { Log.Error(e, "Sim demo failed"); processedOK = false; }
+                try
+                {
+                    _subHelper.SimulateSubmissionProcessing(sub);
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Sim demo failed");
+                    processedOK = false;
+                }
             }
 
             var tesMessage = JsonConvert.DeserializeObject<TesTask>(sub.TesJson);
@@ -269,7 +290,8 @@ namespace TRE_API
                 string token = await GetTokenForSubmission(sub);
 
                 string outputBucket = _AgentSettings.TESKOutputBucketPrefix +
-                    _dbContext.Projects.First(x => x.SubmissionProjectId == sub.Project.Id).OutputBucketTre;
+                                      _dbContext.Projects.First(x => x.SubmissionProjectId == sub.Project.Id)
+                                          .OutputBucketTre;
 
                 foreach (var o in msg.Outputs ??= new())
                     o.Url = $"{outputBucket}/{sub.Id}";
@@ -298,7 +320,7 @@ namespace TRE_API
                 _dbContext.SaveChanges();
                 
                 var json = JsonConvert.SerializeObject(msg);
-                return await CreateTES(json, sub.Id, sub.TesId, outputBucket, sub.TesName) != "";
+                return await CreateTes(json, sub.Id, sub.TesId, outputBucket, sub.TesName) != "";
             }
             catch (Exception e)
             {
@@ -312,8 +334,10 @@ namespace TRE_API
             if (await _features.IsEnabledAsync(FeatureFlags.GenerateAccounts) &&
                 await _features.IsEnabledAsync(FeatureFlags.SqlAndNotGraphQl))
             {
-                var acc = _dbContext.ProjectAcount.FirstOrDefault(x => x.Name == sub.Project.Name + sub.SubmittedBy.Name);
-                var tk = await _keyCloakService.GenAccessTokenSimple(acc.Name, _encDecHelper.Decrypt(acc.Pass), _TreKeyCloakSettings.TokenRefreshSeconds);
+                var acc = _dbContext.ProjectAcount.FirstOrDefault(
+                    x => x.Name == sub.Project.Name + sub.SubmittedBy.Name);
+                var tk = await _keyCloakService.GenAccessTokenSimple(acc.Name, _encDecHelper.Decrypt(acc.Pass),
+                    _TreKeyCloakSettings.TokenRefreshSeconds);
                 return tk.access_token;
             }
 
@@ -323,7 +347,8 @@ namespace TRE_API
                 return "";
         }
 
-        public async Task<string> CreateTES(string jsonContent, int subId, string tesId, string outputBucket, string Tesname)
+        public async Task<string> CreateTes(string jsonContent, int subId, string tesId, string outputBucket,
+            string tesName)
         {
             Log.Information("Creating TESK for sub {subId}", subId);
 
@@ -334,7 +359,7 @@ namespace TRE_API
             };
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var response = await httpClient.SendAsync(request);
+            var response = httpClient.SendAsync(request).Result;
             if (!response.IsSuccessStatusCode)
             {
                 Log.Error("TESK request failed: {code}", response.StatusCode);
@@ -344,14 +369,12 @@ namespace TRE_API
             var body = await response.Content.ReadAsStringAsync();
             var id = JsonConvert.DeserializeObject<ResponseModel>(body)?.id;
 
-            RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTES(id, subId, tesId, outputBucket, Tesname), Cron.MinuteInterval(1));
+            RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTesStatus(id, subId, tesId, outputBucket, tesName),
+                Cron.Minutely);
 
             _dbContext.Add(new TeskAudit { message = jsonContent, teskid = tesId, subid = subId.ToString() });
             _dbContext.SaveChanges();
             return id;
         }
-        
-
-      
     }
 }
