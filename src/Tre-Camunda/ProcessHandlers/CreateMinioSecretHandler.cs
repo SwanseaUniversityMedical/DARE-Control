@@ -8,13 +8,13 @@ using Zeebe.Client.Accelerator.Attributes;
 
 namespace Tre_Camunda.ProcessHandlers
 {
-    [JobType("create-minio-secrate")]
-    public class CreateMinioSecrateHandler: IAsyncZeebeWorkerWithResult<Dictionary<string, object>>
+    [JobType("create-minio-secret")]
+    public class CreateMinioSecretHandler: IAsyncZeebeWorkerWithResult<Dictionary<string, object>>
     {
         private readonly IMinioHelper _minioHelper;
         private readonly ILogger<CreatePostgresUserHandler> _logger;
 
-        public CreateMinioSecrateHandler(IMinioHelper minioHelper, ILogger<CreatePostgresUserHandler> logger)
+        public CreateMinioSecretHandler(IMinioHelper minioHelper, ILogger<CreatePostgresUserHandler> logger)
         {
             _minioHelper = minioHelper;
             _logger = logger;
