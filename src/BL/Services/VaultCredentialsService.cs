@@ -129,37 +129,7 @@ namespace BL.Services
                 return false;
             });
         }
-
-        public async Task<string> GetConnectionStringAsync(string databaseName)
-        {
-            try
-            {
-                var credentials = await GetCredentialAsync($"database/{databaseName}");
-
-                if (credentials.Count == 0)
-                {
-                    Log.Warning("No database credentials found for: {DatabaseName}", databaseName);
-                    return string.Empty;
-                }
-
-                var server = credentials.GetValueOrDefault("server", "localhost").ToString();
-                var port = credentials.GetValueOrDefault("port", "5432").ToString();
-                var database = credentials.GetValueOrDefault("database", databaseName).ToString();
-                var username = credentials.GetValueOrDefault("username", "").ToString();
-                var password = credentials.GetValueOrDefault("password", "").ToString();
-
-                var connectionString = $"Server={server};Port={port};Database={database};User Id={username};Password={password};Include Error Detail=true;";
-
-                Log.Information("Successfully built connection string for database: {DatabaseName}", databaseName);
-                return connectionString;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Failed to get connection string for database: {DatabaseName}", databaseName);
-                return string.Empty;
-            }
-        }
-
+        
         public async Task<bool> StoreConnectionStringAsync(string databaseName, string server, string database, string username, string password, int port = 5432)
         {
             var credentials = new Dictionary<string, object>

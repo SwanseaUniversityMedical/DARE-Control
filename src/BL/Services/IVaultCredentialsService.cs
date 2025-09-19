@@ -11,8 +11,7 @@ namespace BL.Services
         Task<bool> AddCredentialAsync(string path, Dictionary<string, object> credential);
         Task<bool> RemoveCredentialAsync(string path);
         Task<Dictionary<string, object>> GetCredentialAsync(string path);
-        Task<bool> UpdateCredentialAsync(string path, Dictionary<string, object> credential);
-        Task<string> GetConnectionStringAsync(string databaseName);
+        Task<bool> UpdateCredentialAsync(string path, Dictionary<string, object> credential);      
         Task<bool> StoreConnectionStringAsync(string databaseName, string server, string database, string username, string password, int port = 5432);
     }
 
