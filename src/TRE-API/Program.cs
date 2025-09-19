@@ -28,6 +28,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.FeatureManagement;
 using TRE_API.Constants;
 using BL.Services.Contract;
+using Tre_Credentials.DbContexts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +60,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));
 AddServices(builder);
+
+builder.Services.AddDbContext<CredentialsDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("CredentialsConnection")));
 
 //Add Dependancies
 AddDependencies(builder, configuration);
@@ -311,26 +316,26 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
     builder.Services.AddMvc().AddControllersAsServices();
 }
 
-//void AddVaultServices(WebApplicationBuilder builder, ConfigurationManager configuration)
-//{
-//    // Configure Vault settings
-//    var vaultSettings = new VaultSettings();
-//    configuration.Bind("VaultSettings", vaultSettings);
-//    builder.Services.AddSingleton(vaultSettings);
+void AddVaultServices(WebApplicationBuilder builder, ConfigurationManager configuration)
+{
+    // Configure Vault settings
+    var vaultSettings = new VaultSettings();
+    configuration.Bind("VaultSettings", vaultSettings);
+    builder.Services.AddSingleton(vaultSettings);
 
-//    // Register HttpClient for Vault service
-//    builder.Services.AddHttpClient<VaultCredentialsService>(client =>
-//    {
-//        client.BaseAddress = new Uri(vaultSettings.BaseUrl);
-//        client.Timeout = TimeSpan.FromSeconds(vaultSettings.TimeoutSeconds);
-//        client.DefaultRequestHeaders.Add("X-Vault-Token", vaultSettings.Token);
-//        client.DefaultRequestHeaders.Accept.Add(
-//            new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-//    });
+    // Register HttpClient for Vault service
+    builder.Services.AddHttpClient<VaultCredentialsService>(client =>
+    {
+        client.BaseAddress = new Uri(vaultSettings.BaseUrl);
+        client.Timeout = TimeSpan.FromSeconds(vaultSettings.TimeoutSeconds);
+        client.DefaultRequestHeaders.Add("X-Vault-Token", vaultSettings.Token);
+        client.DefaultRequestHeaders.Accept.Add(
+            new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+    });
 
-//    // Register the Vault service
-//    builder.Services.AddScoped<IVaultCredentialsService, VaultCredentialsService>();
-//}
+    // Register the Vault service
+    builder.Services.AddScoped<IVaultCredentialsService, VaultCredentialsService>();
+}
 
 void AddServices(WebApplicationBuilder builder)
 {
@@ -440,6 +445,11 @@ if (HasuraSettings.IsEnabled)
     RecurringJob.AddOrUpdate<IHasuraService>(a => a.Run(), Cron.HourInterval(4));
 }
 
+
+const string credsJobName = "Process Pending Ephemeral Credentials";
+RecurringJob.AddOrUpdate<IEphemeralCredMonitorService>(credsJobName,
+    service => service.ProcessAllPendingCredentials(),
+    Cron.MinuteInterval(15));
 
 var port = app.Environment.WebRootPath;
 Console.WriteLine("Application is running on port: " + port);

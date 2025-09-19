@@ -11,7 +11,12 @@ using Tre_Camunda.ProcessHandlers;
 using Tre_Camunda.Services;
 using Tre_Camunda.Settings;
 using Zeebe.Client.Accelerator.Abstractions;
+using IVaultCredentialsService = Tre_Camunda.Services.IVaultCredentialsService;
+using VaultCredentialsService = Tre_Camunda.Services.VaultCredentialsService;
+using Tre_Credentials.DbContexts;
+using Microsoft.EntityFrameworkCore;
 using Zeebe.Client.Accelerator.Extensions;
+
 
 
 namespace Tre_Camunda.Extensions
@@ -38,6 +43,10 @@ namespace Tre_Camunda.Extensions
                 client.DefaultRequestHeaders.Accept.Add(
                     new MediaTypeWithQualityHeaderValue("application/json"));
             });
+
+            services.AddDbContext<CredentialsDbContext>(options =>
+                options.UseNpgsql(configuration.GetConnectionString("CredentialsConnection")));
+
         }
 
         public static void ConfigureCamunda(this IServiceCollection services, IConfiguration configuration)
