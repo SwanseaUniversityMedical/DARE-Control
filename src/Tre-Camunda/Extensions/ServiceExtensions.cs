@@ -1,16 +1,22 @@
 ﻿
+using BL.Models.ViewModels;
+using BL.Services;
+using BL.Services.Contract;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using System.Net.Http.Headers;
 using Tre_Camunda.ProcessHandlers;
 using Tre_Camunda.Services;
 using Tre_Camunda.Settings;
-using Zeebe.Client.Accelerator.Extensions;
 using Zeebe.Client.Accelerator.Abstractions;
-using BL.Services.Contract;
-using BL.Services;
-using Microsoft.Extensions.Options;
-using System.Net.Http.Headers;
+using IVaultCredentialsService = Tre_Camunda.Services.IVaultCredentialsService;
+using VaultCredentialsService = Tre_Camunda.Services.VaultCredentialsService;
+using Tre_Credentials.DbContexts;
+using Microsoft.EntityFrameworkCore;
+using Zeebe.Client.Accelerator.Extensions;
+
 
 
 namespace Tre_Camunda.Extensions
@@ -37,13 +43,21 @@ namespace Tre_Camunda.Extensions
                 client.DefaultRequestHeaders.Accept.Add(
                     new MediaTypeWithQualityHeaderValue("application/json"));
             });
+
+            services.AddDbContext<CredentialsDbContext>(options =>
+                options.UseNpgsql(configuration.GetConnectionString("CredentialsConnection")));
+
         }
 
         public static void ConfigureCamunda(this IServiceCollection services, IConfiguration configuration)
         {
             var camundaSettings = new CamundaSettings();
             configuration.Bind(nameof(camundaSettings), camundaSettings);
-            services.AddSingleton(camundaSettings);           
+            services.AddSingleton(camundaSettings);
+
+            var minioSettings = new MinioSettings();
+            configuration.Bind(nameof(minioSettings), minioSettings);
+            services.AddSingleton(minioSettings);
 
             services.AddHostedService<BpmnProcessDeployService>();
             services.AddScoped<IProcessModelService, ProcessModelService>();
@@ -52,7 +66,9 @@ namespace Tre_Camunda.Extensions
 
             services.AddScoped<IPostgreSQLUserManagementService, PostgreSQLUserManagementService>();
 
-            services.AddScoped<ILdapUserManagementService, LdapUserManagementService>();           
+            services.AddScoped<ILdapUserManagementService, LdapUserManagementService>();
+            services.AddScoped<IMinioHelper, MinioHelper>();
+            
 
 
         }
