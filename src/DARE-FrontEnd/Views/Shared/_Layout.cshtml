@@ -1,4 +1,6 @@
 ﻿@using DARE_FrontEnd.Models;
+@using Microsoft.Extensions.Configuration;
+@inject IConfiguration Configuration
 @inject UIName UIName
 <!DOCTYPE html>
 <html lang="en" class="h-100">
@@ -84,7 +86,7 @@
                             </a>
                             <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
                                 <li><a class="dropdown-item" href="http://keycloak-dev:8080/auth/">Account</a></li>
-                                <li><a class="dropdown-item" href="https://ukserp.atlassian.net/servicedesk/customer/portal/3">Helpdesk</a></li>
+                                <li><a class="dropdown-item" href=@Configuration.GetSection("Helpdesk")["URL"]>Helpdesk</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a></li>
                             </ul>
