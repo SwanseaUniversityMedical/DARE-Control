@@ -75,7 +75,7 @@ namespace Tre_Camunda.ProcessHandlers
                     {
                         new SchemaPermission
                         {
-                            SchemaName = "public", 
+                            SchemaName = project, 
                             Permissions = DatabasePermissions.Read | DatabasePermissions.Write | DatabasePermissions.CreateTables | DatabasePermissions.DropTables
                         }
                 
