@@ -148,6 +148,7 @@ builder.Services.AddScoped<IDoAgentWork, DoAgentWork>();
 builder.Services.AddScoped<IHasuraService, HasuraService>();
 builder.Services.AddScoped<IHasuraAuthenticationService, HasuraAuthenticationService>();
 builder.Services.AddScoped<IKeyCloakService, KeyCloakService>();
+builder.Services.AddScoped<IEphemeralCredMonitorService, EphemeralCredMonitorService>();
 
 var TVP = new TokenValidationParameters
 {

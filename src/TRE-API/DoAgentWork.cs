@@ -7,6 +7,7 @@ using EasyNetQ;
 using Newtonsoft.Json;
 using Serilog;
 using Hangfire;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using TRE_API.Repositories.DbContexts;
@@ -18,6 +19,7 @@ using System.Net;
 using BL.Models.Settings;
 using Microsoft.FeatureManagement;
 using TRE_API.Constants;
+
 
 namespace TRE_API
 {
@@ -43,6 +45,8 @@ namespace TRE_API
         private readonly TreKeyCloakSettings _TreKeyCloakSettings;
         private readonly IEncDecHelper _encDecHelper;
         private readonly IFeatureManager _features;
+        private readonly EphemeralCredMonitorService _ephemeralCredMonitorService;
+        private readonly IHttpClientFactory _httpClientFactory;
 
 
         public DoAgentWork(IServiceProvider serviceProvider,
@@ -57,7 +61,9 @@ namespace TRE_API
             IKeyCloakService keyCloakService,
             TreKeyCloakSettings TreKeyCloakSettings,
             IEncDecHelper encDecHelper,
-            IFeatureManager features
+            IFeatureManager features,
+            EphemeralCredMonitorService ephemeralCredMonitorService,
+            IHttpClientFactory httpClientFactory
         )
         {
             _serviceProvider = serviceProvider;
@@ -83,6 +89,8 @@ namespace TRE_API
             _TreKeyCloakSettings = TreKeyCloakSettings;
             _encDecHelper = encDecHelper;
             _features = features;
+            _ephemeralCredMonitorService = ephemeralCredMonitorService;
+            _httpClientFactory = httpClientFactory;
         }
 
         public string CreateTesk(string jsonContent, int subId, string tesId, string outputBucket, string Tesname)
@@ -436,9 +444,47 @@ namespace TRE_API
                         }
                         else
                         {
-                             
+                            Log.Information($"Triggering Camunda workflow for submission {aSubmission.Id}");
+
+                            var payload = new
+                            {
+                                submissionId = aSubmission.Id.ToString(),
+                                userId = aSubmission.SubmittedBy.Id.ToString(),
+                                projectId = aSubmission.Project.Id.ToString(),                                                            
+                            };
+
+                            var jsonPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
+                            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+                            var camundaWebhookUrl = "http://localhost:8085/inbound/StartCredentials";
+
+                            using var httpClient = _httpClientFactory.CreateClient();
+                            httpClient.Timeout = TimeSpan.FromMinutes(2);
+
+                            var response = await httpClient.PostAsync(camundaWebhookUrl, content);
+
+                            if (!response.IsSuccessStatusCode)
+                            {
+                                var errorContent = await response.Content.ReadAsStringAsync();
+                                throw new Exception($"Camunda webhook call failed");
+                            }
+
+                            var responseContent = await response.Content.ReadAsStringAsync();
+                            Log.Information($"Camunda webhook triggered successfully for submission {aSubmission.Id}.");
 
 
+                            Log.Information($"Waiting for ephemeral credentials for submission {aSubmission.Id}");
+                            var credentials = await _ephemeralCredMonitorService.WaitForAndFetchCredentialsAsync(
+                                aSubmission.Id,
+                                TimeSpan.FromMinutes(10) //Maybe change it to bit longer???
+                            );
+
+                            if (credentials == null || credentials.Count == 0)
+                            {
+                                throw new Exception($"Failed to obtain ephemeral credentials for submission {aSubmission.Id}");
+                            }
+
+                            Log.Information($"Successfully obtained {credentials.Count} credentials for submission {aSubmission.Id}");
                             // The TES message
                             var tesMessage = JsonConvert.DeserializeObject<TesTask>(aSubmission.TesJson);
                             var processedOK = true;
@@ -543,7 +589,7 @@ namespace TRE_API
                                     tesMessage.Executors = new List<TesExecutor>();
                                 }
 
-                                Log.Information("looking for _AgentSettings.ImageNameToAddToToken > " +
+                                Log.Information("looking for _AgentSettings.ImageNameToAddToToken > " + 
                                                 _AgentSettings.ImageNameToAddToToken);
                                 foreach (var Executor in tesMessage.Executors)
                                 {
@@ -557,6 +603,16 @@ namespace TRE_API
                                             Executor.Env["USER_NAME"] = aSubmission.SubmittedBy.Name;
                                             Executor.Env["SCHEMA"] = aSubmission.Project.Name;
                                             Executor.Env["CATALOG"] = _AgentSettings.CATALOG;
+
+                                            if (credentials != null && credentials.Count > 0)
+                                            {
+                                                foreach (var cred in credentials){
+                                                    var key = $"EphemeralCred_{cred.Key.ToUpper()}";
+                                                    var value = cred.Value?.ToString() ?? string.Empty;
+                                                    Executor.Env[key] = value;
+                                                }
+                                                Log.Information($"Injected {credentials.Count} credentials into environment variables for {aSubmission.Id}");
+                                            }
                                         }
                                     }
                                     else
@@ -627,6 +683,6 @@ namespace TRE_API
             {
                 Log.Error(ex.ToString());
             }
-        }
+        }      
     }
 }

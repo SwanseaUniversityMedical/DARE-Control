@@ -86,6 +86,58 @@ namespace TRE_API.Services
             //Maybe after this, do whatever needs to be done in DoAgentWork
         }
 
+        public async Task<Dictionary<string, Dictionary<string,object>>> WaitForAndFetchCredentialsAsync(int submissionId,TimeSpan? timeout = null)
+        {
+            var maxWaitTime = timeout ?? TimeSpan.FromMinutes(5);
+            var pollInterval = TimeSpan.FromSeconds(10);            
+            var fetchedCredentials = new Dictionary<string, Dictionary<string, object>>();
+
+            _logger.LogInformation($"Starting to wait for credentials for submission {submissionId}.");
+
+            while (maxWaitTime < timeout) 
+            {
+                try
+                {
+
+                    var credentialRecord = await _credentialsDb.EphemeralCredentials
+                        .Where(c => c.SubmissionId == submissionId && !c.IsProcessed)
+                        .OrderByDescending(c => c.CreatedAt)
+                        .ToListAsync();
+
+                    foreach (var record in credentialRecord)
+                    {
+                        if(!fetchedCredentials.ContainsKey(record.CredentialType) && !string.IsNullOrEmpty(record.VaultPath))
+                        {
+                            _logger.LogInformation($"Found {record.CredentialType} credentials for submission {submissionId} at vault path: {record.VaultPath}");
+
+                            var credentials = await _vaultService.GetCredentialAsync(record.VaultPath);
+                            if (credentials != null && credentials.Count > 0)
+                            {
+                                fetchedCredentials[record.CredentialType] = credentials;                                
+                                record.IsProcessed = true;              
+
+                                _logger.LogInformation($"Successfully fetched {record.CredentialType} credentials for submission {submissionId}");
+                            }
+                        }                       
+
+                    }
+                    if (credentialRecord.Any(r => r.IsProcessed))
+                    {
+                        await _credentialsDb.SaveChangesAsync();
+                    }                                                                        
+                    await Task.Delay(pollInterval);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Error while waiting for credentials for submission {submissionId}: {ex.Message}");
+                    await Task.Delay(pollInterval); 
+                }
+            }           
+            var errorMsg = $"Timeout waiting for credentials for submission {submissionId}";
+            _logger.LogError(errorMsg);
+            throw new TimeoutException(errorMsg);
+        }
+
     }
 }
 

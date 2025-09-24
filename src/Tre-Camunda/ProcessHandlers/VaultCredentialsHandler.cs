@@ -6,6 +6,7 @@ using Tre_Camunda.Services;
 using Tre_Credentials.DbContexts;
 using Hangfire;
 using Tre_Credentials.Models;
+using Serilog;
 
 namespace Tre_Camunda.ProcessHandlers
 {
@@ -153,13 +154,15 @@ namespace Tre_Camunda.ProcessHandlers
             try
             {
                 var submissionGuid = int.Parse(submissionId);
+                var credType = ExtractCredType(vaultPath);
                 var credReadyMessage = new EphemeralCredential
                 {
                     SubmissionId = submissionGuid,
                     ProcessInstanceKey = processInstanceKey,
                     CreatedAt = DateTime.UtcNow,
                     IsProcessed = false,
-                    VaultPath = vaultPath
+                    VaultPath = vaultPath,
+                    CredentialType = credType
                 };
 
                 _credentialsDbContext.EphemeralCredentials.Add(credReadyMessage);
@@ -171,6 +174,28 @@ namespace Tre_Camunda.ProcessHandlers
                 _logger.LogError(ex, $"Error creating credentials ready message for submission: {submissionId}");
             }
 
+        }
+
+        private string ExtractCredType(string vaultPath)
+        {
+            try
+            {
+                var parts = vaultPath.Split('/');
+
+                if (parts.Length > 0 && !string.IsNullOrEmpty(parts[0]))
+                {
+                    return parts[0].ToLower();
+                }
+                else
+                {
+                    Log.Warning("Could not extract cred type");
+                    return "";
+                }
+            }
+            catch (Exception ex) {
+                Log.Error("Error extracting cred type from vault path");
+                return "";
+            }
         }
      
     }   

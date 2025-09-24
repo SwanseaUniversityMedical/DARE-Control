@@ -106,7 +106,7 @@ namespace Tre_Camunda.ProcessHandlers
                         },
                         ["submissionId"] = submissionId,
                         ["processInstanceKey"] = processInstanceKey,
-                        ["vaultPath"] = $"ephemeral/{userId}/{jobId}/{project}", 
+                        ["vaultPath"] = $"trino/{userId}/{jobId}/{project}", 
                         ["trinoUsername"] = username 
                     };
 
