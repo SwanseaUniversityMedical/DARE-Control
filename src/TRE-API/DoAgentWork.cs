@@ -448,20 +448,20 @@ namespace TRE_API
 
                             var payload = new
                             {
-                                submissionId = aSubmission.Id.ToString(),
-                                userId = aSubmission.SubmittedBy.Id.ToString(),
-                                projectId = aSubmission.Project.Id.ToString(),                                                            
-                            };
+                                project = aSubmission.Project.Name,
+                                user = aSubmission.SubmittedBy.Name,
+                                submission = aSubmission.Id.ToString()
+                            }; //Decided to pass projectname and username instead of ids as needed back in handler
 
                             var jsonPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
                             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
-                            var camundaWebhookUrl = "http://localhost:8085/inbound/StartCredentials";
+                            var camundaCredUrl = "http://localhost:8085/inbound/StartCredentials";
 
                             using var httpClient = _httpClientFactory.CreateClient();
                             httpClient.Timeout = TimeSpan.FromMinutes(2);
 
-                            var response = await httpClient.PostAsync(camundaWebhookUrl, content);
+                            var response = await httpClient.PostAsync(camundaCredUrl, content);
 
                             if (!response.IsSuccessStatusCode)
                             {
@@ -474,9 +474,9 @@ namespace TRE_API
 
 
                             Log.Information($"Waiting for ephemeral credentials for submission {aSubmission.Id}");
-                            var credentials = await _ephemeralCredMonitorService.WaitForAndFetchCredentialsAsync(
+                            var credentials = await _ephemeralCredMonitorService.WaitAndFetchCredentialsAsync(
                                 aSubmission.Id,
-                                TimeSpan.FromMinutes(10) //Maybe change it to bit longer???
+                                TimeSpan.FromMinutes(2) //Maybe change it to bit longer???
                             );
 
                             if (credentials == null || credentials.Count == 0)
@@ -606,12 +606,22 @@ namespace TRE_API
 
                                             if (credentials != null && credentials.Count > 0)
                                             {
-                                                foreach (var cred in credentials){
-                                                    var key = $"EphemeralCred_{cred.Key.ToUpper()}";
-                                                    var value = cred.Value?.ToString() ?? string.Empty;
-                                                    Executor.Env[key] = value;
-                                                }
-                                                Log.Information($"Injected {credentials.Count} credentials into environment variables for {aSubmission.Id}");
+                                                //Not sure if this will work, looping through a dictionary of dictionaries to first get credential type and then in next loop get the actual credentials.
+                                                foreach (var credentialType in credentials)
+                                                {
+                                                    var credType = credentialType.Key; 
+                                                    var values = credentialType.Value; 
+
+                                                    foreach (var kvp in values)
+                                                    {                                                        
+                                                        var key = $"EphemeralCred_{credType.ToUpper()}_{kvp.Key.ToUpper()}";
+                                                        var value = kvp.Value?.ToString() ?? string.Empty;
+
+                                                        Executor.Env[key] = value;
+                                                    }
+                                                } //Eg: EphemeralCred_TRINO_USERNAME = Abc; EphemeralCred_TRINO_PASSWORD = pw123
+
+                                                Log.Information($"Injected {credentials.Count} credential sets into environment variables for {aSubmission.Id}");
                                             }
                                         }
                                     }
