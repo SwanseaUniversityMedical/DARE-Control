@@ -52,14 +52,15 @@ namespace Tre_Camunda.ProcessHandlers
                 }
 
                 var username = credentialInfo.ContainsKey("value") ? credentialInfo["value"]?.ToString()
-                    : credentialInfo.ContainsKey("username")
-                    ? credentialInfo["username"]?.ToString() : null;
+                    : credentialInfo.ContainsKey("user")
+                    ? credentialInfo["user"]?.ToString() : null;
 
-                var project = variables["project"]?.ToString();
-                var user = variables["user"]?.ToString();
+                var project = variables["project"]?.ToString();                
+                var tag = variables["tag"]?.ToString();
                 //var submissionId = variables["submissionId"].ToString();
                 var submissionId = "3456"; //will have to use above line once submissionId is received properly, this is jut for testing purpose
                 var processInstanceKey = job.ProcessInstanceKey;
+                
 
                 _logger.LogInformation($"Creating Trino user for Submission: {submissionId}, Process: {processInstanceKey}");
 
@@ -87,7 +88,7 @@ namespace Tre_Camunda.ProcessHandlers
                 if (result.Success)
 
                 {
-                    var userId = CleanDnValue(user);
+                    var userId = CleanDnValue(username);
                     var jobId = submissionId;
                  
                     var outputVariables = new Dictionary<string, object>
@@ -96,7 +97,7 @@ namespace Tre_Camunda.ProcessHandlers
                         {
                             ["username"] = username,
                             ["password"] = password,
-                            ["credentialType"] = "trino",
+                            ["credentialType"] = tag ?? "trino",
                             ["project"] = project,
                             ["user_id"] = userId,
                             ["job_id"] = jobId,
@@ -106,7 +107,7 @@ namespace Tre_Camunda.ProcessHandlers
                         },
                         ["submissionId"] = submissionId,
                         ["processInstanceKey"] = processInstanceKey,
-                        ["vaultPath"] = $"trino/{userId}/{jobId}/{project}", 
+                        ["vaultPath"] = $"{tag}/{userId}/{jobId}/{project}", 
                         ["trinoUsername"] = username 
                     };
 
