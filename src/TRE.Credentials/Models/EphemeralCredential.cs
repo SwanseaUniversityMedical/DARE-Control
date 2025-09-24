@@ -15,6 +15,8 @@ namespace Tre_Credentials.Models
         public long ProcessInstanceKey { get; set; } //Get from camunda flow
 
         public string VaultPath { get; set; } = string.Empty;
+
+        public string CredentialType { get; set; } //Need to set it to identify which type : postgres/trino and minio
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsProcessed { get; set; } = false; //a flag to know if the creds are process in TRE-API or not
         public string? ErrorMessage { get; set; }
