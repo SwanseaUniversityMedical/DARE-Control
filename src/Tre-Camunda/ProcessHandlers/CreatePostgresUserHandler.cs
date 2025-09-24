@@ -8,6 +8,7 @@ using System.Text.Json;
 using BL.Models;
 using Tre_Camunda.Models;
 using Zeebe.Client.Impl.Commands;
+using EasyNetQ.Management.Client.Model;
 
 
 
@@ -56,9 +57,14 @@ namespace Tre_Camunda.ProcessHandlers
                     :credentialInfo.ContainsKey("username")
                     ? credentialInfo["username"]?.ToString(): null;
 
+                     //var submissionId = variables["submissionId"].ToString();
+                    var submissionId = "3456"; //will have to use above line once submissionId is received properly, this is jut for testing purpose
+                    var processInstanceKey = job.ProcessInstanceKey;
+
 
                     var project = variables["project"]?.ToString();
                     var user = variables["user"]?.ToString();
+                    var tag = variables["tag"]?.ToString();
 
                     if (string.IsNullOrEmpty(username))
                     {
@@ -93,25 +99,31 @@ namespace Tre_Camunda.ProcessHandlers
                     var result = await _postgreSQLUserManagementService.CreateUserAsync(createUserRequest);
 
                     if (result.Success)
-                    {                      
+                    {
 
-                        var outputVariables = new Dictionary<string, object>
+                    var userId = user;
+                    var jobId = submissionId;
+
+                    var outputVariables = new Dictionary<string, object>
                         {
                             //Credential data to store in Vault
                             ["credentialData"] = new Dictionary<string, object>
                             {
                                 ["username"] = username,
                                 ["password"] = password,
-                                ["credentialType"] = "postgres",
+                                ["credentialType"] = tag ?? "postgres",
                                 ["project"] = project,
                                 ["userId"] = user,
                                 ["createdAt"] = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                                 ["expiresAt"] = DateTime.UtcNow.AddHours(24).ToString("yyyy-MM-ddTHH:mm:ssZ"), //Not sure, need to confirm
                                 ["schemas"] = schemaPermissions.Select(s => s.SchemaName).ToList()
                             },
-                            
-                            ["vaultPath"] = $"postgres/{project}/{user}/{username}",
-                                                       
+
+                            ["vaultPath"] = $"{tag}/{userId}/{jobId}/{project}",
+                            ["submissionId"] = submissionId,
+                            ["processInstanceKey"] = processInstanceKey,
+                            ["postgresUsername"] = username
+
                         };
 
                         _logger.LogInformation($"Successfully created PostgreSQL user: {username} for project: {project}");

@@ -30,7 +30,7 @@ namespace Tre_Camunda.ProcessHandlers
             try
             {
                 var variables = JsonSerializer.Deserialize<Dictionary<string, object>>(job.Variables);
-                var username = variables != null && variables.TryGetValue("trinoUsername", out var u)  //Change it to use postgres username
+                var username = variables != null && variables.TryGetValue("postgresUsername", out var u)  
                     ? u?.ToString()
                     : null;
 

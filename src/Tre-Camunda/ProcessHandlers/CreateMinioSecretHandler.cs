@@ -1,6 +1,7 @@
 ﻿using BL.Models;
 using BL.Services;
 using BL.Services.Contract;
+using EasyNetQ.Management.Client.Model;
 using System.Diagnostics;
 using System.Text.Json;
 using Zeebe.Client.Accelerator.Abstractions;
@@ -51,6 +52,11 @@ namespace Tre_Camunda.ProcessHandlers
 
                 var project = variables["project"]?.ToString();
                 var user = variables["user"]?.ToString();
+                var tag = variables["tag"]?.ToString();
+
+                //var submissionId = variables["submissionId"].ToString();
+                var submissionId = "3456"; //will have to use above line once submissionId is received properly, this is jut for testing purpose
+                var processInstanceKey = job.ProcessInstanceKey;
 
                 if (string.IsNullOrEmpty(username))
                 {
@@ -86,7 +92,8 @@ namespace Tre_Camunda.ProcessHandlers
 
                 if (result.Success)
                 {
-
+                    var userId = user;
+                    var jobId = submissionId;
                     var outputVariables = new Dictionary<string, object>
                     {
                         //Credential data to store in Vault
@@ -94,7 +101,7 @@ namespace Tre_Camunda.ProcessHandlers
                         {
                             ["username"] = username,
                             ["password"] = password,
-                            ["credentialType"] = "postgres",
+                            ["credentialType"] = tag ?? "minio",
                             ["project"] = project,
                             ["userId"] = user,
                             ["createdAt"] = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
@@ -102,7 +109,7 @@ namespace Tre_Camunda.ProcessHandlers
                             ["schemas"] = schemaPermissions.Select(s => s.SchemaName).ToList()
                         },
 
-                        ["vaultPath"] = $"postgres/{project}/{user}/{username}",
+                        ["vaultPath"] = $"{tag}/{userId}/{jobId}/{project}",
 
                     };
 
