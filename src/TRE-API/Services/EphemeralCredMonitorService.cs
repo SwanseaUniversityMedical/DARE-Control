@@ -11,7 +11,10 @@ namespace TRE_API.Services
 
     public interface IEphemeralCredMonitorService
     {
-        Task ProcessAllPendingCredentials();        
+        Task ProcessAllPendingCredentials();
+
+        Task<Dictionary<string, Dictionary<string, object>>> WaitAndFetchCredentialsAsync(int submissionId, TimeSpan? timeout = null);
+
     }
 
     public class EphemeralCredMonitorService : IEphemeralCredMonitorService
@@ -86,15 +89,15 @@ namespace TRE_API.Services
             //Maybe after this, do whatever needs to be done in DoAgentWork
         }
 
-        public async Task<Dictionary<string, Dictionary<string,object>>> WaitForAndFetchCredentialsAsync(int submissionId,TimeSpan? timeout = null)
+        public async Task<Dictionary<string, Dictionary<string,object>>> WaitAndFetchCredentialsAsync(int submissionId,TimeSpan? timeout = null)
         {
-            var maxWaitTime = timeout ?? TimeSpan.FromMinutes(5);
-            var pollInterval = TimeSpan.FromSeconds(10);            
+            var deadline = DateTime.UtcNow + (timeout ?? TimeSpan.FromMinutes(2));
+            var pollInterval = TimeSpan.FromSeconds(2);            
             var fetchedCredentials = new Dictionary<string, Dictionary<string, object>>();
 
             _logger.LogInformation($"Starting to wait for credentials for submission {submissionId}.");
 
-            while (maxWaitTime < timeout) 
+            while (DateTime.UtcNow < deadline) 
             {
                 try
                 {
