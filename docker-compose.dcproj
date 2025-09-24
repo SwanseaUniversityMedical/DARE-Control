@@ -22,7 +22,7 @@
     <None Include="Camunda-docker\templates\webhook.json.txt" />
     <None Include="connector-secrets.txt" />
     <None Include="docker-compose.override.yml">
-      <DependentUpon>docker-compose.yml</DependentUpon>
+      <DependentUpon>docker-compose.yml</DependentUpodocn>
     </None>
     <None Include="docker-compose.yml" />
     <None Include=".dockerignore" />

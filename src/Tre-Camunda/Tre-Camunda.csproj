@@ -12,13 +12,11 @@
 
   <ItemGroup>
     <None Remove="ProcessModels\credentials.dmn" />
-    <None Remove="ProcessModels\Credentials_Determins_Subrpocess.bpmn" />
     <None Remove="ProcessModels\credntials.bpmn" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="ProcessModels\credentials.dmn" />
-    <EmbeddedResource Include="ProcessModels\Credentials_Determins_Subrpocess.bpmn" />
   </ItemGroup>
 
   <ItemGroup>
