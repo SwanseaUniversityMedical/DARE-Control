@@ -475,22 +475,6 @@ namespace TRE_API
                                     processedOK = false;
                                 }
                             }
-
- 
-                            if (await _features.IsEnabledAsync(FeatureFlags.DemoAllInOne))
-                            {
-                                try
-                                {
-                                    _subHelper.SimulateSubmissionProcessing(aSubmission);
-                                }
-                                catch (Exception e)
-                                {
-                                    Log.Error(e, "{Function} Simulation failed for sub {SubId}", "Execute",
-                                        aSubmission.Id);
-                                    processedOK = false;
-                                }
-                            }
-
  
                             // **************  SEND TO TESK
                             if (useTESK)
