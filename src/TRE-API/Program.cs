@@ -1,34 +1,33 @@
 using BL.Models.Settings;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Serilog;
-using System.Net;
-using Microsoft.AspNetCore.Http.Connections;
-using TRE_API.Services.SignalR;
-using BL.Services;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.HttpOverrides;
-using TRE_API.Repositories.DbContexts;
-using TRE_API.Services;
-using Newtonsoft.Json;
-using Hangfire;
-using Hangfire.PostgreSql;
-using TRE_API;
 using BL.Models.ViewModels;
 using BL.Rabbit;
-using Microsoft.Extensions.Options;
+using BL.Services;
 using EasyNetQ;
+using Hangfire;
 using Hangfire.Dashboard;
 using Hangfire.Dashboard.BasicAuthorization;
-using TRE_API.Models;
-using TREAPI.Services;
+using Hangfire.PostgreSql;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Http.Connections;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.FeatureManagement;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
+using Serilog;
+using System.Net;
+using TRE_API;
 using TRE_API.Constants;
-using BL.Services.Contract;
+using TRE_API.Models;
+using TRE_API.Repositories.DbContexts;
+using TRE_API.Services;
+using TRE_API.Services.SignalR;
 using Tre_Credentials.DbContexts;
+using TREAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,10 +47,10 @@ if (configuration["SuppressAntiforgery"] != null && configuration["SuppressAntif
 
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
-    {
-        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-        options.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
-    }
+{
+    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    options.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
+}
 );
 ;
 builder.Services.AddDbContext<ApplicationDbContext>(options => options
@@ -67,11 +66,12 @@ builder.Services.AddDbContext<CredentialsDbContext>(options =>
 
 //Add Dependancies
 AddDependencies(builder, configuration);
-//AddVaultServices(builder, configuration);
+AddVaultServices(builder, configuration);
 
 builder.Services.Configure<OPASettings>(configuration.GetSection("OPASettings"));
 builder.Services.AddTransient(opa => opa.GetService<IOptions<OPASettings>>().Value);
 builder.Services.AddScoped<OpaService>();
+
 
 builder.Services.Configure<RabbitMQSetting>(configuration.GetSection("RabbitMQ"));
 builder.Services.AddTransient(cfg => cfg.GetService<IOptions<RabbitMQSetting>>().Value);
@@ -170,10 +170,10 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformerBL>();
 
 builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
     .AddJwtBearer(options =>
     {
         Console.WriteLine("TRE Keycloak use proxy = " + treKeyCloakSettings.Proxy.ToString());
@@ -263,6 +263,7 @@ if (!app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var credDb = scope.ServiceProvider.GetRequiredService<CredentialsDbContext>();
     var encDec = scope.ServiceProvider.GetRequiredService<IEncDecHelper>();
     IFeatureManager featureManager = app.Services.GetRequiredService<IFeatureManager>();
     db.Database.Migrate();
@@ -272,6 +273,7 @@ using (var scope = app.Services.CreateScope())
         Log.Information("Demo mode is on, seeding data...");
         initialiser.SeedAllInOneData(configuration["DemoModeDefaultP"]);
     }
+    credDb.Database.Migrate();
 }
 
 
@@ -318,30 +320,29 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
 
 void AddVaultServices(WebApplicationBuilder builder, ConfigurationManager configuration)
 {
-    // Configure Vault settings
-    var vaultSettings = new VaultSettings();
-    configuration.Bind("VaultSettings", vaultSettings);
-    builder.Services.AddSingleton(vaultSettings);
+    //Configure Vault settings
+    builder.Services.Configure<VaultSettings>(
+        configuration.GetSection("VaultSettings"));
 
     // Register HttpClient for Vault service
-    builder.Services.AddHttpClient<VaultCredentialsService>(client =>
+    builder.Services.AddHttpClient<IVaultCredentialsService, VaultCredentialsService>((sp, client) =>
     {
-        client.BaseAddress = new Uri(vaultSettings.BaseUrl);
-        client.Timeout = TimeSpan.FromSeconds(vaultSettings.TimeoutSeconds);
-        client.DefaultRequestHeaders.Add("X-Vault-Token", vaultSettings.Token);
+        var options = sp.GetRequiredService<IOptions<VaultSettings>>().Value;
+
+        client.BaseAddress = new Uri(options.BaseUrl);
+        client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
+        client.DefaultRequestHeaders.Add("X-Vault-Token", options.Token);
         client.DefaultRequestHeaders.Accept.Add(
             new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
     });
-
-    // Register the Vault service
-    builder.Services.AddScoped<IVaultCredentialsService, VaultCredentialsService>();
 }
+
 
 void AddServices(WebApplicationBuilder builder)
 {
     ServicePointManager.ServerCertificateValidationCallback +=
         (sender, cert, chain, sslPolicyErrors) => true;
-    builder.Services.AddHttpClient();   
+    builder.Services.AddHttpClient();
 
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
@@ -349,29 +350,29 @@ void AddServices(WebApplicationBuilder builder)
 
     //TODO
     builder.Services.AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = environment.ApplicationName, Version = "v1" });
+        var securityScheme = new OpenApiSecurityScheme
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = environment.ApplicationName, Version = "v1" });
-            var securityScheme = new OpenApiSecurityScheme
+            Name = "JWT Authentication",
+            Description = "Enter JWT token.",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            Reference = new OpenApiReference
             {
-                Name = "JWT Authentication",
-                Description = "Enter JWT token.",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.Http,
-                Scheme = "bearer",
-                BearerFormat = "JWT",
-                Reference = new OpenApiReference
-                {
-                    Id = JwtBearerDefaults.AuthenticationScheme,
-                    Type = ReferenceType.SecurityScheme
-                }
-            };
+                Id = JwtBearerDefaults.AuthenticationScheme,
+                Type = ReferenceType.SecurityScheme
+            }
+        };
 
-            c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+        c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
                 { securityScheme, new string[] { } }
             });
-        }
+    }
     );
 
     if (!string.IsNullOrEmpty(configuration.GetConnectionString("DefaultConnection")))
@@ -445,11 +446,6 @@ if (HasuraSettings.IsEnabled)
     RecurringJob.AddOrUpdate<IHasuraService>(a => a.Run(), Cron.HourInterval(4));
 }
 
-
-const string credsJobName = "Process Pending Ephemeral Credentials";
-RecurringJob.AddOrUpdate<IEphemeralCredMonitorService>(credsJobName,
-    service => service.ProcessAllPendingCredentials(),
-    Cron.MinuteInterval(15));
 
 var port = app.Environment.WebRootPath;
 Console.WriteLine("Application is running on port: " + port);
