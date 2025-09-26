@@ -35,11 +35,18 @@ namespace Tre_Camunda.ProcessHandlers
 
                 var variables = JsonSerializer.Deserialize<Dictionary<string, object>>(job.Variables);
 
+                var envListJson = variables["envList"]?.ToString();
+                var envList = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(envListJson);
+
+                var usernameInfo = envList?.FirstOrDefault();
+                var submissionInfo = envList?.LastOrDefault();
 
                 var vaultPath = variables["vaultPath"]?.ToString();
                 var credentialDataJson = variables["credentialData"]?.ToString();
 
-                var submissionId = variables["submissionId"]?.ToString();
+                var submissionId = submissionInfo.ContainsKey("value") ? submissionInfo["value"]?.ToString()
+                  : submissionInfo.ContainsKey("submissionId")
+                  ? submissionInfo["submissionId"]?.ToString() : null;
                 var processInstanceKey = job.ProcessInstanceKey;
 
 
