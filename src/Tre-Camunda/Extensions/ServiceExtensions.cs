@@ -13,6 +13,8 @@ using Tre_Camunda.Settings;
 using Zeebe.Client.Accelerator.Abstractions;
 using IVaultCredentialsService = Tre_Camunda.Services.IVaultCredentialsService;
 using VaultCredentialsService = Tre_Camunda.Services.VaultCredentialsService;
+using IPostgreSQLUserManagementService = Tre_Camunda.Services.IPostgreSQLUserManagementService;
+using PostgreSQLUserManagementService = Tre_Camunda.Services.PostgreSQLUserManagementService;
 using Tre_Credentials.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Zeebe.Client.Accelerator.Extensions;

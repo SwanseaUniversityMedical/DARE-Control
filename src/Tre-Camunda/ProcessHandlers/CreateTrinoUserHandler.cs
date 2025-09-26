@@ -43,22 +43,27 @@ namespace Tre_Camunda.ProcessHandlers
                 var envListJson = variables["envList"]?.ToString();
                 var envList = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(envListJson);
 
-                var credentialInfo = envList?.FirstOrDefault();
-                if (credentialInfo == null)
+                var usernameInfo = envList?.FirstOrDefault();
+                var submissionInfo = envList?.LastOrDefault();
+
+                if (usernameInfo == null || submissionInfo == null)
                 {
                     var errorMsg = "No credential information found in envList";
                     _logger.LogError(errorMsg);
                     throw new Exception(errorMsg);
                 }
 
-                var username = credentialInfo.ContainsKey("value") ? credentialInfo["value"]?.ToString()
-                    : credentialInfo.ContainsKey("username")
-                    ? credentialInfo["username"]?.ToString() : null;
+                var username = usernameInfo.ContainsKey("value") ? usernameInfo["value"]?.ToString()
+                    : usernameInfo.ContainsKey("username")
+                    ? usernameInfo["username"]?.ToString() : null;
+
+                var submissionId = submissionInfo.ContainsKey("value") ? submissionInfo["value"]?.ToString()
+                  : submissionInfo.ContainsKey("submissionId")
+                  ? submissionInfo["submissionId"]?.ToString() : null;
 
                 var project = variables["project"]?.ToString();
                 var user = variables["user"]?.ToString();
-                //var submissionId = variables["submissionId"].ToString();
-                var submissionId = "3456"; //will have to use above line once submissionId is received properly, this is jut for testing purpose
+     
                 var processInstanceKey = job.ProcessInstanceKey;
 
                 _logger.LogInformation($"Creating Trino user for Submission: {submissionId}, Process: {processInstanceKey}");

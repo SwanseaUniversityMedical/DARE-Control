@@ -35,8 +35,10 @@ namespace Tre_Camunda.ProcessHandlers
                 var envListJson = variables["envList"]?.ToString();
                 var envList = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(envListJson);
 
-                var credentialInfo = envList?.FirstOrDefault();
-                if (credentialInfo == null)
+                var usernameInfo = envList?.FirstOrDefault();
+                var submissionInfo = envList?.LastOrDefault();
+
+                if (usernameInfo == null)
                 {
                     var errorMsg = "No credential information found in envList";
                     _logger.LogError(errorMsg);
@@ -44,15 +46,20 @@ namespace Tre_Camunda.ProcessHandlers
                 }
 
 
-                var username = credentialInfo.ContainsKey("value") ? credentialInfo["value"]?.ToString()
-                : credentialInfo.ContainsKey("username")
-                ? credentialInfo["username"]?.ToString() : null;
+                var username = usernameInfo.ContainsKey("value") ? usernameInfo["value"]?.ToString()
+                : usernameInfo.ContainsKey("username")
+                ? usernameInfo["username"]?.ToString() : null;
+
+                var submissionId = submissionInfo.ContainsKey("value") ? submissionInfo["value"]?.ToString()
+                : submissionInfo.ContainsKey("submissionId")
+                ? submissionInfo["submissionId"]?.ToString() : null;
 
 
                 var project = variables["project"]?.ToString();
                 var user = variables["user"]?.ToString();
 
-                if (string.IsNullOrEmpty(username))
+
+                if (usernameInfo == null || submissionInfo == null)
                 {
                     var errorMsg = "Username not found in DMN result";
                     _logger.LogError(errorMsg);
@@ -99,7 +106,8 @@ namespace Tre_Camunda.ProcessHandlers
                             ["userId"] = user,
                             ["createdAt"] = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                             ["expiresAt"] = DateTime.UtcNow.AddHours(24).ToString("yyyy-MM-ddTHH:mm:ssZ"), //Not sure, need to confirm
-                            ["schemas"] = schemaPermissions.Select(s => s.SchemaName).ToList()
+                            ["schemas"] = schemaPermissions.Select(s => s.SchemaName).ToList(),
+                            ["submissionId"] = submissionId
                         },
 
                         ["vaultPath"] = $"postgres/{project}/{user}/{username}",

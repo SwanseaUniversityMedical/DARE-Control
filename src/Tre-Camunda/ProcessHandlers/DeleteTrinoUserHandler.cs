@@ -32,9 +32,23 @@ namespace Tre_Camunda.ProcessHandlers
             try
             {
                 var variables = JsonSerializer.Deserialize<Dictionary<string, object>>(job.Variables);
-                var username = variables != null && variables.TryGetValue("trinoUsername", out var u)
-                    ? u?.ToString()
-                    : null;
+
+                var envListJson = variables["envList"]?.ToString();
+                var envList = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(envListJson);
+
+                var credentialInfo = envList?.FirstOrDefault();
+                if (credentialInfo == null)
+                {
+                    var errorMsg = "No credential information found in envList";
+                    _logger.LogError(errorMsg);
+                    throw new Exception(errorMsg);
+                }
+
+
+                var username = credentialInfo.ContainsKey("value") ? credentialInfo["value"]?.ToString()
+                : credentialInfo.ContainsKey("username")
+                ? credentialInfo["username"]?.ToString() : null;
+
 
                 if (string.IsNullOrWhiteSpace(username))
                 {
