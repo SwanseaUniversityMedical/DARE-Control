@@ -450,5 +450,5 @@ if (HasuraSettings.IsEnabled)
 var port = app.Environment.WebRootPath;
 Console.WriteLine("Application is running on port: " + port);
 
-Log.Information($"minioTRESettings  Url> {minioTRESettings.Url}");
+Log.Information($"minioTRESettings Url> {minioTRESettings.Url}");
 app.Run();
