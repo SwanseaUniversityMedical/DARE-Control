@@ -1,4 +1,6 @@
-﻿namespace TRE_API.Models
+﻿using BL.Models.Settings;
+
+namespace TRE_API.Models
 {
     public class AgentSettings
     {
@@ -21,5 +23,7 @@
         public string URLTrinoToAdd { get; set; }
 
         public string CATALOG { get; set; }
+        
+        public TreDbCredentials Credentials { get; set; } = new TreDbCredentials();
     }
 }

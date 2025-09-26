@@ -551,6 +551,13 @@ namespace TRE_API
                                             Executor.Command.Add("--URL_" + _AgentSettings.URLHasuraToAdd);
                                         }
                                     }
+
+                                    if (await _features.IsEnabledAsync(FeatureFlags.UseDbCredentials))
+                                    {
+                                        // for analysis container
+                                        var connectionString = $"Host={_AgentSettings.Credentials.Host};Username={_AgentSettings.Credentials.Username};Password={_AgentSettings.Credentials.Password};Database={_AgentSettings.Credentials.Database}";
+                                        Executor.Command.Add("--Connection=" + connectionString );
+                                    }
                                 }
 
                                 _dbContext.TokensToExpire.Add(new TokenToExpire()
