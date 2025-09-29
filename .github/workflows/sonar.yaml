@@ -9,7 +9,7 @@ on:
   push:
     # Only release off of release and maintenance branches for this asset
     branches:
-      - 'main'
+      - 'release/nottingham'
     # Only consider pushes that change files for this asset, including ci scripts.
     paths:
       - '.github/workflows/sonar.yaml'
