@@ -2,7 +2,7 @@
 using Zeebe.Client.Accelerator.Abstractions;
 using Zeebe.Client.Accelerator.Attributes;
 using static Google.Apis.Requests.BatchRequest;
-using BL.Services.Contract;
+using Tre_Camunda.Services;
 using System.Diagnostics;
 using System.Text.Json;
 using BL.Models;
@@ -75,8 +75,8 @@ namespace Tre_Camunda.ProcessHandlers
                     {
                         new SchemaPermission
                         {
-                            SchemaName = project, 
-                            Permissions = DatabasePermissions.Read | DatabasePermissions.Write | DatabasePermissions.CreateTables | DatabasePermissions.DropTables
+                            SchemaName = "ephemeral", 
+                            Permissions = DatabasePermissions.Read | DatabasePermissions.Write | DatabasePermissions.CreateTables 
                         }
                 
                     };
