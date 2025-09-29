@@ -9,7 +9,7 @@ on:
   push:
     # Only release off of release and maintenance branches for this asset
     branches:
-      - 'main'
+      - 'release/nottingham'
     # Only consider pushes that change files for this asset, including ci scripts
     paths:
       - '.github/workflows/containers.yaml'
@@ -32,7 +32,7 @@ jobs:
     uses: SwanseaUniversityMedical/workflows/.github/workflows/pr-and-release-repo.yaml@v2.0.1-repo
     with:
       job-name: containers
-      release-tag-format: 'v${version}-containers'
+      release-tag-format: 'v${version}-nottingham-containers'
 
   egress-api-container:
     needs: containers
@@ -40,8 +40,8 @@ jobs:
     with:
       job-name: egress-api-container
       registry: ${{ vars.HARBOR_REGISTRY }}
-      registry-user: ${{ vars.HARBOR_USER }}
-      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-egress-api
+      registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
+      registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-egress-api
       release-info: ${{ needs.containers.outputs.release-info }}
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       build-file: src/Data-Egress-API/Dockerfile
@@ -49,7 +49,7 @@ jobs:
     secrets:
       cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
       cosign-password: ${{ secrets.COSIGN_PASSWORD }}
-      registry-token: ${{ secrets.HARBOR_TOKEN }}
+      registry-token: ${{ secrets.HARBOR_NOTTINGHAM_TOKEN }}
 
   egress-ui-container:
     needs: containers
@@ -57,8 +57,8 @@ jobs:
     with:
       job-name: egress-ui-container
       registry: ${{ vars.HARBOR_REGISTRY }}
-      registry-user: ${{ vars.HARBOR_USER }}
-      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-egress-ui
+      registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
+      registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-egress-ui
       release-info: ${{ needs.containers.outputs.release-info }}
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       build-file: src/Data-Egress-UI/Dockerfile
@@ -66,7 +66,7 @@ jobs:
     secrets:
       cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
       cosign-password: ${{ secrets.COSIGN_PASSWORD }}
-      registry-token: ${{ secrets.HARBOR_TOKEN }}
+      registry-token: ${{ secrets.HARBOR_NOTTINGHAM_TOKEN }}
 
   main-api-container:
     needs: containers
@@ -74,8 +74,8 @@ jobs:
     with:
       job-name: main-api-container
       registry: ${{ vars.HARBOR_REGISTRY }}
-      registry-user: ${{ vars.HARBOR_USER }}
-      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-main-api
+      registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
+      registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-main-api
       release-info: ${{ needs.containers.outputs.release-info }}
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       build-file: src/DARE-API/Dockerfile
@@ -83,7 +83,7 @@ jobs:
     secrets:
       cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
       cosign-password: ${{ secrets.COSIGN_PASSWORD }}
-      registry-token: ${{ secrets.HARBOR_TOKEN }}
+      registry-token: ${{ secrets.HARBOR_NOTTINGHAM_TOKEN }}
 
   main-ui-container:
     needs: containers
@@ -91,8 +91,8 @@ jobs:
     with:
       job-name: main-ui-container
       registry: ${{ vars.HARBOR_REGISTRY }}
-      registry-user: ${{ vars.HARBOR_USER }}
-      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-main-ui
+      registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
+      registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-main-ui
       release-info: ${{ needs.containers.outputs.release-info }}
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       build-file: src/DARE-FrontEnd/Dockerfile
@@ -100,7 +100,7 @@ jobs:
     secrets:
       cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
       cosign-password: ${{ secrets.COSIGN_PASSWORD }}
-      registry-token: ${{ secrets.HARBOR_TOKEN }}
+      registry-token: ${{ secrets.HARBOR_NOTTINGHAM_TOKEN }}
 
   tre-api-container:
     needs: containers
@@ -108,8 +108,8 @@ jobs:
     with:
       job-name: tre-api-container
       registry: ${{ vars.HARBOR_REGISTRY }}
-      registry-user: ${{ vars.HARBOR_USER }}
-      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-api
+      registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
+      registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-api
       release-info: ${{ needs.containers.outputs.release-info }}
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       build-file: src/TRE-API/Dockerfile
@@ -117,7 +117,7 @@ jobs:
     secrets:
       cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
       cosign-password: ${{ secrets.COSIGN_PASSWORD }}
-      registry-token: ${{ secrets.HARBOR_TOKEN }}
+      registry-token: ${{ secrets.HARBOR_NOTTINGHAM_TOKEN }}
 
   tre-hasura-container:
     needs: containers
@@ -125,8 +125,8 @@ jobs:
     with:
       job-name: tre-hasura-container
       registry: ${{ vars.HARBOR_REGISTRY }}
-      registry-user: ${{ vars.HARBOR_USER }}
-      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-hasura
+      registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
+      registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-hasura
       release-info: ${{ needs.containers.outputs.release-info }}
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       build-file: src/Tre-Hasura/Dockerfile
@@ -134,7 +134,7 @@ jobs:
     secrets:
       cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
       cosign-password: ${{ secrets.COSIGN_PASSWORD }}
-      registry-token: ${{ secrets.HARBOR_TOKEN }}
+      registry-token: ${{ secrets.HARBOR_NOTTINGHAM_TOKEN }}
 
   tre-sql-pg-container:
     needs: containers
@@ -142,8 +142,8 @@ jobs:
     with:
       job-name: tre-sql-pg-container
       registry: ${{ vars.HARBOR_REGISTRY }}
-      registry-user: ${{ vars.HARBOR_USER }}
-      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-sqlpg
+      registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
+      registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-sqlpg
       release-info: ${{ needs.containers.outputs.release-info }}
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       build-file: src/Tre-SQL-PG/Dockerfile
@@ -151,7 +151,7 @@ jobs:
     secrets:
       cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
       cosign-password: ${{ secrets.COSIGN_PASSWORD }}
-      registry-token: ${{ secrets.HARBOR_TOKEN }}
+      registry-token: ${{ secrets.HARBOR_NOTTINGHAM_TOKEN }}
 
   tre-sql-trino-container:
     needs: containers
@@ -159,8 +159,8 @@ jobs:
     with:
       job-name: tre-sql-trino-container
       registry: ${{ vars.HARBOR_REGISTRY }}
-      registry-user: ${{ vars.HARBOR_USER }}
-      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-sqltrino
+      registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
+      registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-sqltrino
       release-info: ${{ needs.containers.outputs.release-info }}
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       build-file: src/Tre-SQL-Trino/Dockerfile
@@ -168,7 +168,7 @@ jobs:
     secrets:
       cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
       cosign-password: ${{ secrets.COSIGN_PASSWORD }}
-      registry-token: ${{ secrets.HARBOR_TOKEN }}
+      registry-token: ${{ secrets.HARBOR_NOTTINGHAM_TOKEN }}
 
   tre-ui-container:
     needs: containers
@@ -176,8 +176,8 @@ jobs:
     with:
       job-name: tre-ui-container
       registry: ${{ vars.HARBOR_REGISTRY }}
-      registry-user: ${{ vars.HARBOR_USER }}
-      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-ui
+      registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
+      registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-ui
       release-info: ${{ needs.containers.outputs.release-info }}
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       build-file: src/TRE-UI/Dockerfile
@@ -185,7 +185,7 @@ jobs:
     secrets:
       cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
       cosign-password: ${{ secrets.COSIGN_PASSWORD }}
-      registry-token: ${{ secrets.HARBOR_TOKEN }}
+      registry-token: ${{ secrets.HARBOR_NOTTINGHAM_TOKEN }}
 
   tre-camunda-container:
     needs: containers
@@ -193,8 +193,8 @@ jobs:
     with:
       job-name: tre-camunda-container
       registry: ${{ vars.HARBOR_REGISTRY }}
-      registry-user: ${{ vars.HARBOR_USER }}
-      registry-repo: ${{ vars.HARBOR_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-camunda
+      registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
+      registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-camunda
       release-info: ${{ needs.containers.outputs.release-info }}
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       build-file: src/Tre-Camunda/Dockerfile
@@ -202,4 +202,4 @@ jobs:
     secrets:
       cosign-private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
       cosign-password: ${{ secrets.COSIGN_PASSWORD }}
-      registry-token: ${{ secrets.HARBOR_TOKEN }}
+      registry-token: ${{ secrets.HARBOR_NOTTINGHAM_TOKEN }}
