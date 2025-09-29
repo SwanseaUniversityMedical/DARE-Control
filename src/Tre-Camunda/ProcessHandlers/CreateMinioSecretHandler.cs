@@ -101,7 +101,7 @@ namespace Tre_Camunda.ProcessHandlers
                         {
                             ["username"] = username,
                             ["password"] = password,
-                            ["credentialType"] = "postgres",
+                            ["credentialType"] = "minio",
                             ["project"] = project,
                             ["userId"] = user,
                             ["createdAt"] = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
@@ -110,7 +110,7 @@ namespace Tre_Camunda.ProcessHandlers
                             ["submissionId"] = submissionId
                         },
 
-                        ["vaultPath"] = $"postgres/{project}/{user}/{username}",
+                        ["vaultPath"] = $"minio/{project}/{user}/{username}",
 
                     };
 

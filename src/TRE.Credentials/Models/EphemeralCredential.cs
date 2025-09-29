@@ -14,6 +14,8 @@ namespace Tre_Credentials.Models
         public int SubmissionId { get; set; } //Get from submission
         public long ProcessInstanceKey { get; set; } //Get from camunda flow
 
+        public string? CredentialType { get; set; }
+
         public string VaultPath { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsProcessed { get; set; } = false; //a flag to know if the creds are process in TRE-API or not

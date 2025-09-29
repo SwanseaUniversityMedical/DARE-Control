@@ -1,11 +1,12 @@
-﻿using System.Diagnostics;
+﻿using Hangfire;
+using Serilog;
+using System.Diagnostics;
 using System.Text.Json;
-using Zeebe.Client.Accelerator.Attributes;
-using Zeebe.Client.Accelerator.Abstractions;
 using Tre_Camunda.Services;
 using Tre_Credentials.DbContexts;
-using Hangfire;
 using Tre_Credentials.Models;
+using Zeebe.Client.Accelerator.Abstractions;
+using Zeebe.Client.Accelerator.Attributes;
 
 namespace Tre_Camunda.ProcessHandlers
 {
@@ -160,13 +161,15 @@ namespace Tre_Camunda.ProcessHandlers
             try
             {
                 var submissionGuid = int.Parse(submissionId);
+                var credType = ExtractCredType(vaultPath);
                 var credReadyMessage = new EphemeralCredential
                 {
                     SubmissionId = submissionGuid,
                     ProcessInstanceKey = processInstanceKey,
                     CreatedAt = DateTime.UtcNow,
                     IsProcessed = false,
-                    VaultPath = vaultPath
+                    VaultPath = vaultPath,
+                    CredentialType = credType
                 };
 
                 _credentialsDbContext.EphemeralCredentials.Add(credReadyMessage);
@@ -179,6 +182,29 @@ namespace Tre_Camunda.ProcessHandlers
             }
 
         }
-     
+
+        private string ExtractCredType(string vaultPath)
+        {
+            try
+            {
+                var parts = vaultPath.Split('/');
+
+                if (parts.Length > 0 && !string.IsNullOrEmpty(parts[0]))
+                {
+                    return parts[0].ToLower();
+                }
+                else
+                {
+                    Log.Warning("Could not extract cred type");
+                    return "";
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error extracting cred type from vault path");
+                return "";
+            }
+        }
+
     }   
 }
