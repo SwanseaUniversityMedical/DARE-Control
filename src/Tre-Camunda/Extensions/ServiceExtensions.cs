@@ -67,6 +67,7 @@ namespace Tre_Camunda.Extensions
             services.AddScoped<IServicedZeebeClient, ServicedZeebeClient>();
 
             services.AddScoped<IPostgreSQLUserManagementService, PostgreSQLUserManagementService>();
+            services.AddScoped<CreatePostgresUserHandler>();
 
             services.AddScoped<ILdapUserManagementService, LdapUserManagementService>();
             services.AddScoped<IMinioHelper, MinioHelper>();
