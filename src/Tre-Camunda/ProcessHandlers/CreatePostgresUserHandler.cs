@@ -111,6 +111,7 @@ namespace Tre_Camunda.ProcessHandlers
                             },
                             
                             ["vaultPath"] = $"postgres/{project}/{user}/{username}",
+                            ["postgresUsername"] = username
                                                        
                         };
 
