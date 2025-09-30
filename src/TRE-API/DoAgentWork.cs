@@ -552,11 +552,23 @@ namespace TRE_API
                                         }
                                     }
 
-                                    if (await _features.IsEnabledAsync(FeatureFlags.UseDbCredentials))
+                                    if (await _features.IsEnabledAsync(FeatureFlags.InjectDbCredentials))
                                     {
-                                        // for analysis container
-                                        var connectionString = $"Host={_AgentSettings.Credentials.Host};Username={_AgentSettings.Credentials.Username};Password={_AgentSettings.Credentials.Password};Database={_AgentSettings.Credentials.Database}";
-                                        Executor.Command.Add("--Connection=" + connectionString );
+                                        if (Executor.Image.Contains("tre-sqlpg"))
+                                        {
+                                            // inject credentials as a connection string
+                                            var connectionString = $"Host={_AgentSettings.Credentials.Host};Username={_AgentSettings.Credentials.Username};Password={_AgentSettings.Credentials.Password};Database={_AgentSettings.Credentials.Database}";
+                                            Executor.Command.Add("--Connection=" + connectionString );
+                                        }
+                                        else
+                                        {
+                                            // inject credentials as env vars
+                                            Executor.Env["Username"] = _AgentSettings.Credentials.Username;
+                                            Executor.Env["Password"] = _AgentSettings.Credentials.Password;
+                                            Executor.Env["Database"] = _AgentSettings.Credentials.Database;
+                                            Executor.Env["Host"] = _AgentSettings.Credentials.Host;
+                                        }
+                                       
                                     }
                                 }
 
