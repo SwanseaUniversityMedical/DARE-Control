@@ -8,6 +8,6 @@ public static class FeatureFlags
 
     public const string DemoAllInOne = nameof(DemoAllInOne);
     
-    public const string UseDbCredentials = nameof(UseDbCredentials);
+    public const string InjectDbCredentials = nameof(InjectDbCredentials);
 
 }
