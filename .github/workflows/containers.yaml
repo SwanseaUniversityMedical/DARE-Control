@@ -1,4 +1,4 @@
-name: Build containers
+job-name: Build containers
 
 on:
   pull_request:
@@ -38,7 +38,7 @@ jobs:
     needs: containers
     uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.0.2-bulk-containers
     with:
-      name: egress-api-container
+      job-name: egress-api-container
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
       registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-egress-api
@@ -55,7 +55,7 @@ jobs:
     needs: containers
     uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.0.2-bulk-containers
     with:
-      name: egress-ui-container
+      job-name: egress-ui-container
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
       registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-egress-ui
@@ -72,7 +72,7 @@ jobs:
     needs: containers
     uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.0.2-bulk-containers
     with:
-      name: main-api-container
+      job-name: main-api-container
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
       registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-main-api
@@ -89,7 +89,7 @@ jobs:
     needs: containers
     uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.0.2-bulk-containers
     with:
-      name: main-ui-container
+      job-name: main-ui-container
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
       registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-main-ui
@@ -106,7 +106,7 @@ jobs:
     needs: containers
     uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.0.2-bulk-containers
     with:
-      name: tre-api-container
+      job-name: tre-api-container
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
       registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-api
@@ -123,7 +123,7 @@ jobs:
     needs: containers
     uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.0.2-bulk-containers
     with:
-      name: tre-hasura-container
+      job-name: tre-hasura-container
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
       registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-hasura
@@ -140,7 +140,7 @@ jobs:
     needs: containers
     uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.0.2-bulk-containers
     with:
-      name: tre-sql-pg-container
+      job-name: tre-sql-pg-container
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
       registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-sqlpg
@@ -157,7 +157,7 @@ jobs:
     needs: containers
     uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.0.2-bulk-containers
     with:
-      name: tre-sql-trino-container
+      job-name: tre-sql-trino-container
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
       registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-sqltrino
@@ -174,7 +174,7 @@ jobs:
     needs: containers
     uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.0.2-bulk-containers
     with:
-      name: tre-ui-container
+      job-name: tre-ui-container
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
       registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-ui
@@ -191,7 +191,7 @@ jobs:
     needs: containers
     uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.0.2-bulk-containers
     with:
-      name: tre-camunda-container
+      job-name: tre-camunda-container
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_NOTTINGHAM_USER }}
       registry-repo: ${{ vars.HARBOR_NOTTINGHAM_PROJECT }}/${{ vars.HARBOR_REPO }}-tre-camunda
