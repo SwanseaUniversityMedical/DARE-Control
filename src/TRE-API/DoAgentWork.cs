@@ -534,6 +534,11 @@ namespace TRE_API
 
                                 var bucket = _subHelper.GetOutputBucketGutsSub(aSubmission.Id.ToString(), true);
 
+                                if (tesMessage.Inputs == null)
+                                {
+                                    tesMessage.Inputs = new List<TesInput>();
+                                }
+
                                 foreach (var input in tesMessage.Inputs)
                                 {
                                     input.Url = "s3://" + InputBucket;
