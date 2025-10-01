@@ -551,6 +551,28 @@ namespace TRE_API
                                             Executor.Command.Add("--URL_" + _AgentSettings.URLHasuraToAdd);
                                         }
                                     }
+
+                                    if (await _features.IsEnabledAsync(FeatureFlags.InjectDbCredentials))
+                                    {
+                                        if (Executor.Image.Contains("tre-sqlpg") ||
+                                            Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken))
+                                        {
+                                            // inject credentials as a connection string
+                                            var connectionString =
+                                                $"Host={_AgentSettings.Credentials.Host};Username={_AgentSettings.Credentials.Username};Password={_AgentSettings.Credentials.Password};Database={_AgentSettings.Credentials.Database}";
+                                            Executor.Command.Add("--Connection=" + connectionString);
+                                        }
+                                        else
+                                        {
+                                            // inject credentials as env vars
+                                            Executor.Env["Username"] = _AgentSettings.Credentials.Username;
+                                            Executor.Env["Password"] = _AgentSettings.Credentials.Password;
+                                            Executor.Env["Database"] = _AgentSettings.Credentials.Database;
+                                            Executor.Env["Host"] = _AgentSettings.Credentials.Host;
+                                        }
+                                        
+                                       
+                                    }
                                 }
 
                                 _dbContext.TokensToExpire.Add(new TokenToExpire()
