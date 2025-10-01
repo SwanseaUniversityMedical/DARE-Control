@@ -554,11 +554,13 @@ namespace TRE_API
 
                                     if (await _features.IsEnabledAsync(FeatureFlags.InjectDbCredentials))
                                     {
-                                        if (Executor.Image.Contains("tre-sqlpg") || Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken))
+                                        if (Executor.Image.Contains("tre-sqlpg") ||
+                                            Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken))
                                         {
                                             // inject credentials as a connection string
-                                            var connectionString = $"Host={_AgentSettings.Credentials.Host};Username={_AgentSettings.Credentials.Username};Password={_AgentSettings.Credentials.Password};Database={_AgentSettings.Credentials.Database}";
-                                            Executor.Command.Add("--Connection=" + connectionString );
+                                            var connectionString =
+                                                $"Host={_AgentSettings.Credentials.Host};Username={_AgentSettings.Credentials.Username};Password={_AgentSettings.Credentials.Password};Database={_AgentSettings.Credentials.Database}";
+                                            Executor.Command.Add("--Connection=" + connectionString);
                                         }
                                         else
                                         {
@@ -568,6 +570,7 @@ namespace TRE_API
                                             Executor.Env["Database"] = _AgentSettings.Credentials.Database;
                                             Executor.Env["Host"] = _AgentSettings.Credentials.Host;
                                         }
+                                        
                                        
                                     }
                                 }
