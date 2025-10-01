@@ -83,7 +83,11 @@ namespace TRE_API.Services
                     creds.Id = dbcred.Id;
                     
                     add = false;
+                    DbContext.Entry(dbcred).State = EntityState.Detached;
                 }
+
+               
+
                 creds.CredentialType = type;
                 creds.PasswordEnc = encDecHelper.Encrypt(creds.PasswordEnc);
                 if (add)
