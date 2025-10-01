@@ -1,4 +1,6 @@
 ﻿@using TRE_UI.Models;
+@using Microsoft.Extensions.Configuration;
+@inject IConfiguration Configuration
 @inject UIName UIName
 <!DOCTYPE html>
 <html lang="en" class="h-100">
@@ -67,7 +69,7 @@
                         </a>
                         <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="#">Account</a></li>
-                            <li><a class="dropdown-item" href="#">Helpdesk</a></li>
+                            <li><a class="dropdown-item" href=@Configuration.GetSection("Helpdesk")["URL"]>Helpdesk</a></li>
                             <li><hr class="dropdown-divider"></li>
                             @if (@User?.FindFirst("name")?.Value == null)
                             {
