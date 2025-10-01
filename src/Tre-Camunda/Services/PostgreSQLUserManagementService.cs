@@ -39,7 +39,8 @@ namespace Tre_Camunda.Services
 
                 if (await UserExistsInternalAsync(connection, request.Username))
                 {
-                    return UserCreationResult.Error($"User '{request.Username}' already exists");
+                    Log.Information("User {Username} already exists, skipping creation", request.Username);
+                    return UserCreationResult.Ok(); 
                 }
 
                 await CreateUserInternalAsync(connection, request);
@@ -49,6 +50,11 @@ namespace Tre_Camunda.Services
                 {
                     foreach (var schemaPermission in request.SchemaPermissions)
                     {
+                        if(!string.IsNullOrWhiteSpace(schemaPermission.SchemaName))
+                        {
+                            await EnsureSchemaExistsAsync(connection, schemaPermission.SchemaName);
+                        }
+                        
                         if (schemaPermission.Permissions != DatabasePermissions.None)
                         {
                             await GrantSchemaPermissionsInternalAsync(connection, request.Username,
@@ -265,11 +271,7 @@ namespace Tre_Camunda.Services
             {
                 commands.Add($"GRANT CREATE ON SCHEMA \"{schemaName}\" TO \"{username}\"");
             }
-
-            if (permissions.HasFlag(DatabasePermissions.DropTables))
-            {
-                commands.Add($"GRANT DROP ON SCHEMA \"{schemaName}\" TO \"{username}\"");
-            }
+            
 
             foreach (var command in commands)
             {
@@ -296,6 +298,16 @@ namespace Tre_Camunda.Services
 
             // Allow alphanumeric, underscore, and hyphen
             return schemaName.All(c => char.IsLetterOrDigit(c) || c == '_' || c == '-');
+        }
+
+        private async Task EnsureSchemaExistsAsync(NpgsqlConnection connection, string schemaName)
+        {          
+            var commandText = $"CREATE SCHEMA IF NOT EXISTS {schemaName}";
+
+            Log.Information("Executing SQL: {CommandText}", commandText);
+
+            using var cmd = new NpgsqlCommand(commandText, connection);
+            await cmd.ExecuteNonQueryAsync();
         }
     }
 }
