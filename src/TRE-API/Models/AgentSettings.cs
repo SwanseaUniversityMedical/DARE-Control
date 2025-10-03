@@ -1,4 +1,6 @@
-﻿namespace TRE_API.Models
+﻿using BL.Models.Tes;
+
+namespace TRE_API.Models
 {
     public class AgentSettings
     {
@@ -21,5 +23,8 @@
         public string URLTrinoToAdd { get; set; }
 
         public string CATALOG { get; set; }
+
+
+        public string MandatoryInput { get; set; }
     }
 }

@@ -391,6 +391,24 @@ namespace DARE_FrontEnd.Controllers
                     };
                 }
 
+                if (string.IsNullOrEmpty(model.DataInputPath) == false)
+                {
+                    if (test.Inputs == null)
+                    {
+                        test.Inputs = new List<TesInput>();
+                    }
+                    test.Inputs.Add(new TesInput()
+                    {
+                        Path = model.DataInputPath,
+                        Type = Enum.Parse<TesFileType>(model.DataInputType),
+                        Name = "a",
+                        Description = "a",
+                        Url = "a",
+                        Content = "a",
+                        Streamable = false
+                    });
+                }
+
                 var context = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 var Token = await _IKeyCloakService.RefreshUserToken(context);
 

@@ -1,23 +1,25 @@
 ﻿using BL.Models;
 using BL.Models.Enums;
-using BL.Models.ViewModels;
+using BL.Models.Settings;
 using BL.Models.Tes;
+using BL.Models.ViewModels;
 using BL.Rabbit;
+using BL.Services;
 using EasyNetQ;
+using Hangfire;
+using Microsoft.FeatureManagement;
+using Minio.DataModel;
 using Newtonsoft.Json;
 using Serilog;
-using Hangfire;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
+using TRE_API.Constants;
+using TRE_API.Migrations;
+using TRE_API.Models;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
-using BL.Services;
 using TREAgent.Repositories;
-using TRE_API.Models;
-using System.Net;
-using BL.Models.Settings;
-using Microsoft.FeatureManagement;
-using TRE_API.Constants;
 
 namespace TRE_API
 {
@@ -417,6 +419,8 @@ namespace TRE_API
                     listOfSubmissions?.Count);
                 foreach (var aSubmission in listOfSubmissions)
                 {
+                    
+
                     try
                     {
                         Log.Information("{Function}Submission: {submission}", "Execute", aSubmission.Id);
@@ -516,11 +520,61 @@ namespace TRE_API
                                     tesMessage.Outputs = new List<TesOutput> { };
                                 }
 
+                               
+
+
+
                                 //S3://bucket-name/key-name
                                 foreach (var output in tesMessage.Outputs)
                                 {
                                     output.Url = OutputBucket + $"/{aSubmission.Id}";
+
                                 }
+
+
+                                var InputBucket = _dbContext.Projects
+                                  .First(x => x.SubmissionProjectId == projectId)
+                                  .SubmissionBucketTre;
+
+                                var bucket = _subHelper.GetOutputBucketGutsSub(aSubmission.Id.ToString(), true);
+
+                                if (tesMessage.Inputs == null)
+                                {
+                                    tesMessage.Inputs = new List<TesInput>();
+                                }
+                                if (string.IsNullOrEmpty(_AgentSettings.MandatoryInput) == false)
+                                {
+                                    tesMessage.Inputs.Add(JsonConvert.DeserializeObject<TesInput>(_AgentSettings.MandatoryInput));
+                                }
+                                
+
+                                var Files = await _minioTreHelper.GetFilesInBucket(InputBucket);
+
+                                foreach (var input in tesMessage.Inputs)
+                                {
+                                    input.Url = "s3://" + InputBucket;
+
+                                    input.Path = input.Path.Replace("..", "");
+
+                                    var GoodIntput = input.Path;
+
+                                    if (input.Path.StartsWith("/"))
+                                    {
+                                        GoodIntput = GoodIntput.Remove(0, 1);
+                                    }
+
+                                    
+                                    var source = await _minioSubHelper.GetCopyObject(aSubmission.Project.SubmissionBucket, GoodIntput);
+
+                                    if (Files.S3Objects.Any(x => x.ETag == source.ETag))
+                                    {
+                                        continue;
+                                    }
+
+                                    var resultcopy = await _minioTreHelper.CopyObjectToDestination(InputBucket, GoodIntput, source);
+
+                                }
+
 
                                 if (tesMessage.Executors == null)
                                 {
