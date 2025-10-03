@@ -172,29 +172,36 @@ namespace DARE_API.Repositories.DbContexts
 
             if (proj == null)
             {
-                var submission = GenerateRandomName(name.ToLower()) + "submission".Replace("_", "");
-                var output = GenerateRandomName(name.ToLower()) + "output".Replace("_", "");
-                var submissionBucket = _minioHelper.CreateBucket(submission.ToLower()).Result;
-                var submistionBucketPolicy = _minioHelper.CreateBucketPolicy(submission.ToLower()).Result;
-                var outputBucket = _minioHelper.CreateBucket(output.ToLower()).Result;
-                var outputBucketPolicy = _minioHelper.CreateBucketPolicy(output.ToLower()).Result;
-
                 proj = new Project()
                 {
                     Name = name,
                     Display = name,
                     EndDate = DateTime.Now.ToUniversalTime(),
                     StartDate = DateTime.Now.ToUniversalTime(),
-                    SubmissionBucket = submission,
-                    OutputBucket = output,
+                    SubmissionBucket = "AA",
+                    OutputBucket = "AA",
                     Tres = new List<Tre>(),
                     Users = new List<BL.Models.User>(),
                     Submissions = new List<Submission>(),
                     ProjectDescription = ""
                 };
+
                 proj.FormData = JsonConvert.SerializeObject(proj);
                 _dbContext.Projects.Add(proj);
 
+                var submission = GenerateRandomName(proj.Id.ToString()) + "submission".Replace("_", "");
+                var output = GenerateRandomName(proj.Id.ToString()) + "output".Replace("_", "");
+                var submissionBucket = _minioHelper.CreateBucket(submission.ToLower()).Result;
+                var submistionBucketPolicy = _minioHelper.CreateBucketPolicy(submission.ToLower()).Result;
+                var outputBucket = _minioHelper.CreateBucket(output.ToLower()).Result;
+                var outputBucketPolicy = _minioHelper.CreateBucketPolicy(output.ToLower()).Result;
+
+                proj.SubmissionBucket = submission;
+                proj.OutputBucket = output;
+
+                _dbContext.Projects.Update(proj);
+
+                _dbContext.SaveChanges();
             }
             return proj;
 
