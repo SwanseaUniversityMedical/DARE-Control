@@ -520,6 +520,10 @@ namespace TRE_API
                                     tesMessage.Outputs = new List<TesOutput> { };
                                 }
 
+                               
+
+
+
                                 //S3://bucket-name/key-name
                                 foreach (var output in tesMessage.Outputs)
                                 {
@@ -538,6 +542,13 @@ namespace TRE_API
                                 {
                                     tesMessage.Inputs = new List<TesInput>();
                                 }
+                                if (string.IsNullOrEmpty(_AgentSettings.MandatoryInput) == false)
+                                {
+                                    tesMessage.Inputs.Add(JsonConvert.DeserializeObject<TesInput>(_AgentSettings.MandatoryInput));
+                                }
+                                
+
+                                var Files = await _minioTreHelper.GetFilesInBucket(InputBucket);
 
                                 foreach (var input in tesMessage.Inputs)
                                 {
@@ -552,7 +563,14 @@ namespace TRE_API
                                         GoodIntput = GoodIntput.Remove(0, 1);
                                     }
 
+                                    
                                     var source = await _minioSubHelper.GetCopyObject(aSubmission.Project.SubmissionBucket, GoodIntput);
+
+                                    if (Files.S3Objects.Any(x => x.ETag == source.ETag))
+                                    {
+                                        continue;
+                                    }
+
                                     var resultcopy = await _minioTreHelper.CopyObjectToDestination(InputBucket, GoodIntput, source);
 
                                 }
