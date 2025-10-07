@@ -7,7 +7,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5233"
+      "applicationUrl": "http://localhost:5269",
+      "comment": "Use http://localhost:8989 for local Notts development"
     },
     "https": {
       "commandName": "Project",
