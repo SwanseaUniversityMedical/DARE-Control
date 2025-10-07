@@ -74,6 +74,10 @@
                                     class="fa fa-external-link ms-2"></i></a>
 
                         </p>
+                        <p class="text-muted fs-7 mt-4">
+                            Project Start Date: @Model.StartDate.ToString("dd/MM/yyyy") <br />
+                            Project End Date: @Model.EndDate.ToString("dd/MM/yyyy")
+                        </p>
                         @{
                             if (Model.ProjectOwner == null || Model.ProjectOwner == "")
                             {
@@ -106,10 +110,6 @@
                                 </p>
                             }
                         }
-                        <p class="text-muted fs-7 mt-4">
-                            Project Start Date: @Model.StartDate.ToString("dd/MM/yyyy") <br/>
-                            Project End Date: @Model.EndDate.ToString("dd/MM/yyyy")
-                        </p>
 
                     </div>
                 </div>
