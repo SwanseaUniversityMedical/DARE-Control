@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using Tre_Camunda.Models;
 using Zeebe.Client.Impl.Commands;
+using System.Xml.Linq;
 
 
 
@@ -17,15 +18,18 @@ namespace Tre_Camunda.ProcessHandlers
         public class CreatePostgresUserHandler : IAsyncZeebeWorkerWithResult<Dictionary<string, object>>
         {
             private readonly IPostgreSQLUserManagementService _postgreSQLUserManagementService;
+            private readonly IVaultCredentialsService _vaultCredentialsService;
             private readonly ILogger<CreatePostgresUserHandler> _logger;
 
             public CreatePostgresUserHandler(
                 IPostgreSQLUserManagementService postgresSQLUserManagementService,
-                ILogger<CreatePostgresUserHandler> logger)
+                ILogger<CreatePostgresUserHandler> logger,
+                IVaultCredentialsService vaultCredentialsService)
             {
                 _postgreSQLUserManagementService = postgresSQLUserManagementService;
                 _logger = logger;
-            }
+                _vaultCredentialsService = vaultCredentialsService;
+        }
 
             public async Task<Dictionary<string, object>> HandleJob(ZeebeJob job, CancellationToken cancellationToken)
             {
@@ -40,7 +44,8 @@ namespace Tre_Camunda.ProcessHandlers
                     var variables = JsonSerializer.Deserialize<Dictionary<string, object>>(job.Variables);
                     
                     var envListJson = variables["envList"]?.ToString();
-                    var envList = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(envListJson);
+                    var envList = JsonSerializer.Deserialize<List<CredentialsCamundaOutput>>(envListJson);
+
 
                     var credentialInfo = envList?.FirstOrDefault();
                     if (credentialInfo == null)
@@ -51,9 +56,9 @@ namespace Tre_Camunda.ProcessHandlers
                     }
 
 
-                    var username = credentialInfo.ContainsKey("value")?credentialInfo["value"]?.ToString()
-                    :credentialInfo.ContainsKey("username")
-                    ? credentialInfo["username"]?.ToString(): null;
+                    //var username = credentialInfo.ContainsKey("value")?credentialInfo["value"]?.ToString()
+                    //:credentialInfo.ContainsKey("username")
+                    //? credentialInfo["username"]?.ToString(): null;
 
 
                     var project = variables["project"]?.ToString();
@@ -95,29 +100,59 @@ namespace Tre_Camunda.ProcessHandlers
                     var result = await _postgreSQLUserManagementService.CreateUserAsync(createUserRequest);
 
                     if (result.Success)
-                    {                      
+                    {
 
-                        var outputVariables = new Dictionary<string, object>
+                    var outputVariables = new List<CredentialsVault();
+                    var credentialData = new Dictionary<string, object>();
+
+                    foreach (var output in envList)
+                    {
+                        var outputVariable = new CredentialsVault();
+                       
+                        
+                        outputVariable.env = output.env;
+                        if (output.value.Contains(password))  {
+                            output.value = password;
+                        }
+                        else
                         {
-                            //Credential data to store in Vault
-                            ["credentialData"] = new Dictionary<string, object>
-                            {
-                                ["username"] = username,
-                                ["password"] = password,
-                                ["credentialType"] = "postgres",
-                                ["project"] = project,
-                                ["userId"] = user,
-                                ["createdAt"] = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                                ["expiresAt"] = DateTime.UtcNow.AddHours(24).ToString("yyyy-MM-ddTHH:mm:ssZ"), //Not sure, need to confirm
-                                ["schemas"] = schemaPermissions.Select(s => s.SchemaName).ToList()
-                            },
-                            
-                            ["vaultPath"] = $"postgres/{project}/{user}/{username}",
-                            ["postgresUsername"] = username
-                                                       
-                        };
+                            outputVariable.value = output.value;
+                        }
 
-                        _logger.LogInformation($"Successfully created PostgreSQL user: {username} for project: {project}");
+                        credentialData.Add(outputVariable.env, outputVariable.value);
+                        outputVariables.Add(outputVariable);
+                    }
+
+
+
+
+                    var vaultPath = $"postgres/{project}/{user}/{username}",
+                             
+
+                    var success = await _vaultCredentialsService.AddCredentialAsync(vaultPath, credentialData);
+
+                    var outputVariables = new Dictionary<string, object>
+                    {
+                        //Credential data to store in Vault
+
+                        ["credentialData"] = new Dictionary<string, object>
+                        {
+                            ["username"] = username,
+                            //["password"] = password,
+                            ["credentialType"] = "postgres",
+                            ["project"] = project,
+                            ["userId"] = user,
+                            ["createdAt"] = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                            ["expiresAt"] = DateTime.UtcNow.AddHours(24).ToString("yyyy-MM-ddTHH:mm:ssZ"), //Not sure, need to confirm
+                            ["schemas"] = schemaPermissions.Select(s => s.SchemaName).ToList()
+                        },
+
+                        ["vaultPath"] = $"postgres/{project}/{user}/{username}",
+                        ["postgresUsername"] = username
+
+                    };
+
+                    _logger.LogInformation($"Successfully created PostgreSQL user: {username} for project: {project}");
 
                         SW.Stop();
                         _logger.LogInformation($"CreatePostgresUserHandler took {SW.Elapsed.TotalSeconds} seconds");
