@@ -401,10 +401,10 @@ namespace DARE_FrontEnd.Controllers
                     {
                         Path = model.DataInputPath,
                         Type = Enum.Parse<TesFileType>(model.DataInputType),
-                        Name = "a",
-                        Description = "a",
+                        Name = "",
+                        Description = "",
                         Url = "a",
-                        Content = "a",
+                        Content = "",2
                         Streamable = false
                     });
                 }
