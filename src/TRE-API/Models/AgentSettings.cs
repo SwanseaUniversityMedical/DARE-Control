@@ -26,5 +26,7 @@ namespace TRE_API.Models
 
 
         public string MandatoryInput { get; set; }
+
+        public string TESKinputBucketIP { get; set; }
     }
 }
