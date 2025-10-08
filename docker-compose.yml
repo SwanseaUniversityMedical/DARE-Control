@@ -303,50 +303,7 @@ services:
     depends_on:
       - openldap
 
-  tre-camunda:
-    image: harbor.ukserp.ac.uk:443/dare-trefx/control-tre-camunda:2.9.5
-    container_name: tre-camunda
-    restart: always
-    ports:
-      - "8082:8080" 
-      - "8083:8081"  
-    environment:
-      - Serilog__SeqServerUrl=http://seq:80
-      - ZeebeBootstrap__Client__GatewayAddress=zeebe:26500
-      - ZeebeBootstrap__Worker__TimeoutInMilliseconds=10000
-      - ZeebeBootstrap__Worker__RetryTimeoutInMilliseconds=5000
-      - ZeebeBootstrap__Worker__PollIntervalInMilliseconds=1000
-      - LdapSettings__Host=openldap
-      - LdapSettings__Port=389
-      - VaultSettings__BaseUrl=http://vault:8200
-      - VaultSettings__TimeoutSeconds=60
-      - MinioSettings__Url=http://minio2:9000
-      - MinioSettings__AccessKey=minio
-      - MinioSettings__SecretKey=minio123
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080;http://+:8081
-    networks:
-      - camunda-platform
-      - communicating
-      - minio-network
-    depends_on:
-      zeebe:
-        condition: service_healthy
-      seq:
-        condition: service_started
-      openldap:
-        condition: service_started
-      vault:
-        condition: service_healthy
-      postgres:
-        condition: service_started
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 120s
-    entrypoint: ["sh", "-c", "sleep 30 && dotnet Tre-Camunda.dll"]
+  
    # command:
    #   - "run" 
    #   - "stuff/bundle.tar.gz"
