@@ -223,7 +223,7 @@ namespace TRE_API
                         if (shouldReport || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR" ||
                                              status.state == "SYSTEM_ERROR"))
                         {
-                            Log.Information("{Function} *** status change *** {State}", "CheckTES", status.state);
+                            Log.Information("{Function} *** status change *** {State} {name} {description}", "CheckTES", status.state,status.name ,  status.description);
 
 
                             // send update
