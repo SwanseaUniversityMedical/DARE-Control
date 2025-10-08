@@ -277,6 +277,11 @@ namespace DARE_API.Controllers
                     return BadRequest("Project " + project + " doesn't exist.");
                 }
 
+                // Reject if current time is past the project's end date
+                if (DateTime.UtcNow > dbproj.EndDate.ToUniversalTime())
+                {
+                    return BadRequest($"Project '{project}' has ended (end date: {dbproj.EndDate:yyyy-MM-dd}). Cannot create new tasks.");
+                }
 
                 if (!IsUserOnProject(dbproj, usersName))
                 {
@@ -624,5 +629,4 @@ namespace DARE_API.Controllers
         }
     }
 }
-
 
