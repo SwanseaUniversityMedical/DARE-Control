@@ -146,8 +146,15 @@ namespace TRE_API
 
                 return id;
             }
-
-            Log.Error("{Function} Request failed with status code: {Code}", "CreateTESK", response.StatusCode);
+            try
+            {
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                Log.Error("{Function} Request failed with status code: {Code} {responseBody}", "CreateTESK", response.StatusCode, responseBody);
+            }
+            catch (Exception ex) {
+                Log.Error("{Function} Request failed with status code: {Code}", "CreateTESK", response.StatusCode);
+            }
+            
 
 
             return "";
