@@ -312,19 +312,22 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 });
 // --- Session Token
 
+
+// Swagger
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.EnableValidator(null);
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{environment.ApplicationName} v1");
+    c.OAuthClientId(submissionKeyCloakSettings.ClientId);
+    c.OAuthClientSecret(submissionKeyCloakSettings.ClientSecret);
+    c.OAuthAppName(submissionKeyCloakSettings.ClientId);
+});
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-
-    app.UseSwaggerUI(c =>
-    {
-        c.EnableValidator(null);
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{environment.ApplicationName} v1");
-        c.OAuthClientId(submissionKeyCloakSettings.ClientId);
-        c.OAuthClientSecret(submissionKeyCloakSettings.ClientSecret);
-        c.OAuthAppName(submissionKeyCloakSettings.ClientId);
-    });
     //app.UseDeveloperExceptionPage();
 }
 
