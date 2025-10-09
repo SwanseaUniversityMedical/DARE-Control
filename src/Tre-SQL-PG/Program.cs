@@ -10,7 +10,14 @@ Console.WriteLine("TREFX SQL Runner Module : Postgress");
 var Token = "";
 var OutputFilename = "data.csv";
 var Query = "SELECT * FROM \"profileForm\"";
-string connectionString = "Host=localhost:5432;Username=admin;Password=admin;Database=assets3";
+
+var postgresHost = Environment.GetEnvironmentVariable("server") ?? "localhost";
+var postgresPort = Environment.GetEnvironmentVariable("postgresPort") ?? "5432";
+var postgresUsername = Environment.GetEnvironmentVariable("postgresUsername") ?? "admin";
+var postgresPassword = Environment.GetEnvironmentVariable("postgresPassword") ?? "admin";
+var postgresDatabase = Environment.GetEnvironmentVariable("databaseName") ?? "assets3";
+
+string connectionString = $"Host={postgresHost}:{postgresPort};Username={postgresUsername};Password={postgresPassword};Database={postgresDatabase}";
 
 foreach (var arg in args)
 {

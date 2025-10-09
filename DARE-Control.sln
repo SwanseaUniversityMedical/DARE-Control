@@ -34,6 +34,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tre-Camunda", "src\Tre-Camu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tre_Credentials", "src\TRE.Credentials\Tre_Credentials.csproj", "{0E989384-DF4F-4EAF-B4B3-CD66BDB78C33}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tre-SQL-PG", "src\Tre-SQL-PG\Tre-SQL-PG.csproj", "{AC57D0FC-75C0-CF6F-E5F4-9841C0EA97C8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -88,6 +90,10 @@ Global
 		{0E989384-DF4F-4EAF-B4B3-CD66BDB78C33}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E989384-DF4F-4EAF-B4B3-CD66BDB78C33}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E989384-DF4F-4EAF-B4B3-CD66BDB78C33}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC57D0FC-75C0-CF6F-E5F4-9841C0EA97C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC57D0FC-75C0-CF6F-E5F4-9841C0EA97C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC57D0FC-75C0-CF6F-E5F4-9841C0EA97C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC57D0FC-75C0-CF6F-E5F4-9841C0EA97C8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -105,6 +111,7 @@ Global
 		{3BAD3B69-2B08-4E09-BB8A-2611A0990062} = {505AD4FB-0822-4989-9A01-1F56C3820D0D}
 		{5E37FECC-97C3-45F7-840F-E241DA59674D} = {505AD4FB-0822-4989-9A01-1F56C3820D0D}
 		{0E989384-DF4F-4EAF-B4B3-CD66BDB78C33} = {505AD4FB-0822-4989-9A01-1F56C3820D0D}
+		{AC57D0FC-75C0-CF6F-E5F4-9841C0EA97C8} = {505AD4FB-0822-4989-9A01-1F56C3820D0D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {29E246A8-202C-4544-A30D-33E0AB416005}
