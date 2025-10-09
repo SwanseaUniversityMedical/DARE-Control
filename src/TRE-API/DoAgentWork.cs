@@ -8,6 +8,7 @@ using BL.Services;
 using EasyNetQ;
 using Hangfire;
 using Microsoft.FeatureManagement;
+using Microsoft.IdentityModel.Tokens;
 using Minio.DataModel;
 using Newtonsoft.Json;
 using Serilog;
@@ -570,6 +571,14 @@ namespace TRE_API
                                     if (input.Path.StartsWith("/"))
                                     {
                                         GoodIntput = GoodIntput.Remove(0, 1);
+                                    }
+
+                                    if (string.IsNullOrEmpty(input.Name))
+                                    {
+                                        if (input.Path.Contains("/"))
+                                        {
+                                            input.Name = input.Path.Split('/')[^1];
+                                        }
                                     }
 
                                     
