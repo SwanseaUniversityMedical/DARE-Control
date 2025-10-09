@@ -8,11 +8,11 @@ namespace BL.Settings
 {
     public class VaultSettings
     {
-        public string BaseUrl { get; set; } 
-        public string Token { get; set; }
-        public int TimeoutSeconds { get; set; } 
-        public string SecretEngine { get; set; } 
-        public bool EnableRetry { get; set; } 
-        public int MaxRetryAttempts { get; set; } 
+        public string BaseUrl { get; set; } = "http://localhost:8200";
+        public string Token { get; set; } = string.Empty;
+        public int TimeoutSeconds { get; set; } = 30;
+        public string SecretEngine { get; set; } = "secret"; // KV v2 engine name
+        public bool EnableRetry { get; set; } = true;
+        public int MaxRetryAttempts { get; set; } = 3;
     }
 }
