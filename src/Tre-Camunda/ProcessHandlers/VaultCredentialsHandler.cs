@@ -48,6 +48,15 @@ namespace Tre_Camunda.ProcessHandlers
                 var submissionId = submissionInfo.ContainsKey("value") ? submissionInfo["value"]?.ToString()
                   : submissionInfo.ContainsKey("submissionId")
                   ? submissionInfo["submissionId"]?.ToString() : null;
+
+                long? parentProcessKey = null;
+                if (variables.TryGetValue("parentProcessKey", out var parentObj) && parentObj != null)
+                {
+                    if (parentObj is JsonElement el && el.ValueKind == JsonValueKind.Number && el.TryGetInt64(out var parsed))
+                        parentProcessKey = parsed;
+                    else if (long.TryParse(parentObj.ToString(), out var parsed2))
+                        parentProcessKey = parsed2;
+                }
                 var processInstanceKey = job.ProcessInstanceKey;
 
 
@@ -123,7 +132,7 @@ namespace Tre_Camunda.ProcessHandlers
                     throw new Exception(errorMsg);
                 }
 
-                await CreateCredentialsReadyMessage(submissionId, processInstanceKey, vaultPath);
+                await CreateCredentialsReadyMessage(submissionId, parentProcessKey, processInstanceKey, vaultPath);
 
                 var outputVariables = new Dictionary<string, object>
                 {
@@ -156,15 +165,18 @@ namespace Tre_Camunda.ProcessHandlers
             }
         }
 
-        private async Task CreateCredentialsReadyMessage(string submissionId, long processInstanceKey, string vaultPath)
+        private async Task CreateCredentialsReadyMessage(string submissionId, long? parentProcessKey, long processInstanceKey, string vaultPath)
         {
             try
             {
+
+                
                 var submissionGuid = int.Parse(submissionId);
                 var credType = ExtractCredType(vaultPath);
                 var credReadyMessage = new EphemeralCredential
                 {
                     SubmissionId = submissionGuid,
+                    ParentProcessInstanceKey = parentProcessKey,
                     ProcessInstanceKey = processInstanceKey,
                     CreatedAt = DateTime.UtcNow,
                     IsProcessed = false,

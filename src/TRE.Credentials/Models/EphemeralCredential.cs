@@ -12,7 +12,9 @@ namespace Tre_Credentials.Models
     {
         public int Id { get; set; }
         public int SubmissionId { get; set; } //Get from submission
-        public long ProcessInstanceKey { get; set; } //Get from camunda flow
+
+        public long? ParentProcessInstanceKey { get; set; } //To store the parent process instance key for Start Credentials
+        public long ProcessInstanceKey { get; set; } //Child process Instance key for each camunda flow 
 
         public string? CredentialType { get; set; }
 
