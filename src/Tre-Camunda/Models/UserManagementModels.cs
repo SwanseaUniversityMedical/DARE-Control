@@ -4,12 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BL.Models
+namespace Tre_Camunda.Models
 {
     public class CreateUserRequest
     {
         public string Username { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+        public string Server { get; set; } = string.Empty;
+        public string Datasbasename { get; set; } = string.Empty;
+        public string Port { get; set; } = string.Empty;
         public bool CanLogin { get; set; } = true;
         public bool CanCreateDb { get; set; } = false;
         public bool CanCreateRole { get; set; } = false;
