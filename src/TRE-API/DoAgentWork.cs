@@ -447,50 +447,82 @@ namespace TRE_API
                             result = _subHelper.CloseSubmissionForTre(aSubmission.Id.ToString(), StatusType.Failed, "",
                                 "");
                         }
+
+
                         else
                         {
-
                             Log.Information($"Triggering Camunda workflow for submission {aSubmission.Id}");
 
-                            var payload = new
+                            var creds = await _credsDbContext.EphemeralCredentials
+                                .Where(e => e.SubmissionId == aSubmission.Id && e.IsProcessed != true)
+                                .OrderByDescending(e => e.CreatedAt)
+                                .ToListAsync();
+
+                            if (creds.Count == 0)
                             {
-                                submissionId = aSubmission.Id.ToString(),
-                                userId = aSubmission.SubmittedBy.Id.ToString(),
-                                projectId = aSubmission.Project.Id.ToString(),
-                            };
-
-                            var jsonPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
-                            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-
-                            var camundaWebhookUrl = "http://localhost:8085/inbound/StartCredentials";
-
-                            using var httpClient = _httpClientFactory.CreateClient();
-                            httpClient.Timeout = TimeSpan.FromMinutes(2);
-
-                            var response = await httpClient.PostAsync(camundaWebhookUrl, content);
-
-                            if (!response.IsSuccessStatusCode)
-                            {
-                                var errorContent = await response.Content.ReadAsStringAsync();
-                                throw new Exception($"Camunda webhook call failed");
+                                Log.Information("No EphemeralCredentials rows yet for submission {SubId}. Skipping.", aSubmission.Id);
+                                continue;
                             }
 
-                            var responseContent = await response.Content.ReadAsStringAsync();
-                            Log.Information($"Camunda webhook triggered successfully for submission {aSubmission.Id}.");
+
+                            var parentKey = creds.Select(c => c.ParentProcessInstanceKey)
+                                                 .FirstOrDefault(k => k.HasValue && k.Value > 0);
+
+                            if (!parentKey.HasValue)
+                            {
+                                Log.Information("No parent processInstanceKey for submission {SubId}. Skipping this cycle.", aSubmission.Id);
+                                continue;
+                            }
 
 
-                            Log.Information($"Waiting for ephemeral credentials for submission {aSubmission.Id}");
+                            var procStatus = await GetProcessInstanceStatus(parentKey.Value);
+
+                            if (procStatus.Errored)
+                            {
+                                Log.Error("Credential process errored for submission {SubId}.", aSubmission.Id);
+
+                                var latestRow = creds.First();
+                                latestRow.ErrorMessage = "Credential process failed";
+                                await _credsDbContext.SaveChangesAsync();
+
+                                _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.RequestCancellation, "Credential process failed");
+                                continue;
+                            }
+
+                            if (!procStatus.Finished)
+                            {
+                                Log.Information("Credential process still running for submission {SubId}. Will retry next run.", aSubmission.Id);
+                                continue;
+                            }
+
+                            Log.Information("Credential process finished for submission {SubId}. Fetching credentials.", aSubmission.Id);
+
                             var credentials = await WaitForAndFetchCredentialsAsync(
                                 aSubmission.Id,
-                                TimeSpan.FromMinutes(10) //Maybe change it to bit longer???
+                                TimeSpan.FromMinutes(10)
                             );
 
                             if (credentials == null || credentials.Count == 0)
                             {
-                                throw new Exception($"Failed to obtain ephemeral credentials for submission {aSubmission.Id}");
+                                var errorMsg = $"No credentials found in Vault for submission {aSubmission.Id}";
+                                Log.Error(errorMsg);
+
+                                var latestRow = creds.First();
+                                latestRow.ErrorMessage = errorMsg;
+                                latestRow.IsProcessed = true;
+                                await _credsDbContext.SaveChangesAsync();
+
+                                _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.RequestCancellation, errorMsg);
+                                continue;
                             }
 
                             Log.Information($"Successfully obtained {credentials.Count} credentials for submission {aSubmission.Id}");
+
+                            foreach (var row in creds)
+                                row.IsProcessed = true;
+
+                            await _credsDbContext.SaveChangesAsync();
+
 
                             // The TES message
                             var tesMessage = JsonConvert.DeserializeObject<TesTask>(aSubmission.TesJson);
@@ -507,7 +539,7 @@ namespace TRE_API
                                         aSubmission.Id);
                                     processedOK = false;
                                 }
-                            }   
+                            }
 
                             // **************  SEND TO RABBIT
                             if (useRabbit)
@@ -528,7 +560,7 @@ namespace TRE_API
                                     processedOK = false;
                                 }
                             }
- 
+
                             // **************  SEND TO TESK
                             if (useTESK)
                             {
@@ -654,9 +686,10 @@ namespace TRE_API
                             }
                         }
                     }
-                    catch (Exception e)
+
+                    catch (Exception ex)
                     {
-                        Log.Error(e, "{Function } Error occured processing submission {SubId}", "Execute",
+                        Log.Error(ex, "{Function } Error occured processing submission {SubId}", "Execute",
                             aSubmission.Id);
                     }
                 }
@@ -683,14 +716,14 @@ namespace TRE_API
             var maxWaitTime = timeout ?? TimeSpan.FromMinutes(5);
             var pollInterval = TimeSpan.FromSeconds(10);
             var fetchedCredentials = new Dictionary<string, Dictionary<string, object>>();
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
             Log.Information($"Starting to wait for credentials for submission {submissionId}.");
 
-            while (maxWaitTime < timeout)
+            while (stopwatch.Elapsed < maxWaitTime)
             {
                 try
                 {
-
                     var credentialRecord = await _credsDbContext.EphemeralCredentials
                         .Where(c => c.SubmissionId == submissionId && !c.IsProcessed)
                         .OrderByDescending(c => c.CreatedAt)
@@ -711,12 +744,19 @@ namespace TRE_API
                                 Log.Information($"Successfully fetched {record.CredentialType} credentials for submission {submissionId}");
                             }
                         }
-
                     }
+
                     if (credentialRecord.Any(r => r.IsProcessed))
                     {
                         await _credsDbContext.SaveChangesAsync();
                     }
+                    
+                    if (fetchedCredentials.Count > 0)
+                    {
+                        Log.Information($"Successfully fetched all credentials for submission {submissionId}");
+                        return fetchedCredentials;
+                    }
+
                     await Task.Delay(pollInterval);
                 }
                 catch (Exception ex)
@@ -725,9 +765,121 @@ namespace TRE_API
                     await Task.Delay(pollInterval);
                 }
             }
+
             var errorMsg = $"Timeout waiting for credentials for submission {submissionId}";
             Log.Error(errorMsg);
             throw new TimeoutException(errorMsg);
+        }
+
+        private sealed class ProcStatus
+        {
+            public bool Finished { get; set; }
+            public bool Errored { get; set; }
+        }
+
+        //private async Task<ProcStatus> GetProcessInstanceStatus(long parentKey)
+        //{
+        //    try
+        //    {
+        //        using var httpClient = _httpClientFactory.CreateClient();
+
+        //        var username = "demo"; 
+        //        var password = "demo"; 
+        //        var byteArray = System.Text.Encoding.ASCII.GetBytes($"{username}:{password}");
+        //        httpClient.DefaultRequestHeaders.Authorization =
+        //            new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+        //        var statisticsUrl = $"http://localhost:8081/v1/process-instances/{parentKey}/statistics";
+        //        var response = await httpClient.GetAsync(statisticsUrl);
+
+        //        if (!response.IsSuccessStatusCode)
+        //        {
+        //            return new ProcStatus { Finished = false, Errored = true };
+        //        }
+
+        //        var json = await response.Content.ReadAsStringAsync();
+        //        var statistics = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(json);
+
+        //        bool hasActive = false;
+        //        bool hasIncidents = false;
+
+        //        foreach (var stat in statistics)
+        //        {
+        //            if (stat.TryGetValue("active", out var activeObj))
+        //            {
+        //                var activeCount = System.Text.Json.JsonSerializer.Deserialize<int>(activeObj.ToString());
+        //                if (activeCount > 0) hasActive = true;
+        //            }
+
+        //            if (stat.TryGetValue("incidents", out var incidentsObj))
+        //            {
+        //                var incidentCount = System.Text.Json.JsonSerializer.Deserialize<int>(incidentsObj.ToString());
+        //                if (incidentCount > 0) hasIncidents = true;
+        //            }
+        //        }
+
+        //        return new ProcStatus
+        //        {
+        //            Finished = !hasActive && !hasIncidents,
+        //            Errored = hasIncidents
+        //        };
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Log.Error(ex, "Failed to check process status for key {Key}", parentKey);
+        //        return new ProcStatus { Finished = false, Errored = true };
+        //    }
+        //}
+
+
+        private async Task<ProcStatus> GetProcessInstanceStatus(long parentKey)
+        {
+            try
+            {
+                using var httpClient = _httpClientFactory.CreateClient();
+
+               
+                httpClient.DefaultRequestHeaders.Add("Cookie", "OPERATE-SESSION=B3CE4676A7C8D5DD6D4520D6BC52CEED");
+
+                var statisticsUrl = $"http://localhost:8081/v1/process-instances/{parentKey}/statistics";
+                var response = await httpClient.GetAsync(statisticsUrl);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new ProcStatus { Finished = false, Errored = true };
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var statistics = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(json);
+
+                bool hasActive = false;
+                bool hasIncidents = false;
+
+                foreach (var stat in statistics)
+                {
+                    if (stat.TryGetValue("active", out var activeObj))
+                    {
+                        var activeCount = System.Text.Json.JsonSerializer.Deserialize<int>(activeObj.ToString());
+                        if (activeCount > 0) hasActive = true;
+                    }
+
+                    if (stat.TryGetValue("incidents", out var incidentsObj))
+                    {
+                        var incidentCount = System.Text.Json.JsonSerializer.Deserialize<int>(incidentsObj.ToString());
+                        if (incidentCount > 0) hasIncidents = true;
+                    }
+                }
+
+                return new ProcStatus
+                {
+                    Finished = !hasActive && !hasIncidents,
+                    Errored = hasIncidents
+                };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to check process status for key {Key}", parentKey);
+                return new ProcStatus { Finished = false, Errored = true };
+            }
         }
     }
 }
