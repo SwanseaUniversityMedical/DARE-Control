@@ -559,7 +559,9 @@ namespace TRE_API
 
                                 foreach (var input in tesMessage.Inputs)
                                 {
-                                    input.Url = "s3://" + _AgentSettings.TESKinputBucketIP + "/" + InputBucket;
+                                    //+ _AgentSettings.TESKinputBucketIP + "/"
+
+                                    input.Url = "s3://"  + InputBucket;
 
                                     input.Path = input.Path.Replace("..", "");
 
