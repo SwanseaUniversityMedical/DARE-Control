@@ -1,8 +1,4 @@
-﻿
-using BL.Models.ViewModels;
-using BL.Services;
-using BL.Services.Contract;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -57,10 +53,7 @@ namespace Tre_Camunda.Extensions
             configuration.Bind(nameof(camundaSettings), camundaSettings);
             services.AddSingleton(camundaSettings);
 
-            var minioSettings = new MinioSettings();
-            configuration.Bind(nameof(minioSettings), minioSettings);
-            services.AddSingleton(minioSettings);
-
+           
             services.AddHostedService<BpmnProcessDeployService>();
             services.AddScoped<IProcessModelService, ProcessModelService>();
 
@@ -70,7 +63,7 @@ namespace Tre_Camunda.Extensions
             services.AddScoped<CreatePostgresUserHandler>();
 
             services.AddScoped<ILdapUserManagementService, LdapUserManagementService>();
-            services.AddScoped<IMinioHelper, MinioHelper>();
+           
             
 
 
