@@ -59,6 +59,9 @@
 									@*                            <p class="my-4">
                                 @Html.Raw(project.Display?.Replace("\n","<br/>"))
                                 </p>*@
+									<p class="text-muted fs-7 mt-4 mb-0">
+										Start Date: @project.StartDate.ToString("dd/MM/yyyy") <span class="mx-2"></span>End Date: @project.EndDate.ToString("dd/MM/yyyy")
+									</p>
 									@{
 										if (project.ProjectDescription == null || project.ProjectDescription == "")
 										{
@@ -72,10 +75,6 @@
 											</div>
 										}
 									}
-
-									<p class="text-muted fs-7 mt-4 mb-0">
-										Start Date: @project.StartDate.ToString("dd/MM/yyyy") <span class="mx-2"></span>End Date: @project.EndDate.ToString("dd/MM/yyyy")
-									</p>
 								</td>
 							</tr>
 						}

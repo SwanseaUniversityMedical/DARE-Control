@@ -5,7 +5,6 @@ using static Google.Apis.Requests.BatchRequest;
 using Tre_Camunda.Services;
 using System.Diagnostics;
 using System.Text.Json;
-using BL.Models;
 using Tre_Camunda.Models;
 using Zeebe.Client.Impl.Commands;
 
@@ -86,6 +85,9 @@ namespace Tre_Camunda.ProcessHandlers
                     {
                         Username = username,
                         Password = password,
+                        Server = "",
+                        Datasbasename = "",
+                        Port = "",
                         SchemaPermissions = schemaPermissions
                     };
 

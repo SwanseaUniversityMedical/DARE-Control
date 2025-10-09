@@ -1,4 +1,6 @@
 ﻿@using TRE_UI.Models;
+@using Microsoft.Extensions.Configuration;
+@inject IConfiguration Configuration
 @inject UIName UIName
 <!DOCTYPE html>
 <html lang="en" class="h-100">
@@ -67,7 +69,7 @@
                         </a>
                         <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="#">Account</a></li>
-                            <li><a class="dropdown-item" href="#">Helpdesk</a></li>
+                            <li><a class="dropdown-item" href=@Configuration.GetSection("Helpdesk")["URL"]>Helpdesk</a></li>
                             <li><hr class="dropdown-divider"></li>
                             @if (@User?.FindFirst("name")?.Value == null)
                             {
@@ -124,7 +126,7 @@
                         <a class="nav-link text-light" href="https://dareuk.org.uk/contact/" target="_blank" rel="noopener">Contact Us</a>
                     </li>
                 </ul>
-                <p class="text-light mt-md-0 mt-5 mb-0">&copy;DARE UK - @UIName.Name 2023. All rights reserved.</p>
+                <p class="text-light mt-md-0 mt-5 mb-0">&copy;DARE UK - @UIName.Name @DateTime.Now.Year. All rights reserved.</p>
             </div>
         </div>
     </footer>

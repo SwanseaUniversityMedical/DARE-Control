@@ -55,7 +55,7 @@
         <div class="tab-content py-5" id="myTabContent">
             <div class="tab-pane fade show active" id="project" role="tabpanel" aria-labelledby="home-tab">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         @if (User.IsInRole("dare-control-admin"))
                         {
                             <a href="@Url.Action("SaveProjectForm", "Project", new { Projectid = @Model.Id })"
@@ -73,6 +73,10 @@
                                href="http://@minio/browser/@Model.OutputBucket" rel="noopener">Output Bucket<i
                                     class="fa fa-external-link ms-2"></i></a>
 
+                        </p>
+                        <p class="text-muted fs-7 mt-4">
+                            Project Start Date: @Model.StartDate.ToString("dd/MM/yyyy") <br />
+                            Project End Date: @Model.EndDate.ToString("dd/MM/yyyy")
                         </p>
                         @{
                             if (Model.ProjectOwner == null || Model.ProjectOwner == "")
@@ -106,10 +110,6 @@
                                 </p>
                             }
                         }
-                        <p class="text-muted fs-7 mt-4">
-                            Project Start Date: @Model.StartDate.ToString("dd/MM/yyyy") <br/>
-                            Project End Date: @Model.EndDate.ToString("dd/MM/yyyy")
-                        </p>
 
                     </div>
                 </div>
