@@ -10,7 +10,23 @@ Console.WriteLine("TREFX SQL Runner Module : Postgress");
 var Token = "";
 var OutputFilename = "data.csv";
 var Query = "SELECT * FROM \"profileForm\"";
-string connectionString = "Host=localhost:5432;Username=admin;Password=admin;Database=assets3";
+
+var postgresHost = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost";
+var postgresPort = Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "32769";
+var postgresUsername = Environment.GetEnvironmentVariable("POSTGRES_USERNAME") ?? "postgres";
+var postgresPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "password123";
+var postgresDatabase = Environment.GetEnvironmentVariable("POSTGRES_DATABASE") ?? "postgres";
+
+string connectionString = $"Host={postgresHost}:{postgresPort};Username={postgresUsername};Password={postgresPassword};Database={postgresDatabase}";
+
+Console.WriteLine("=== Environment Variables ===");
+Console.WriteLine($"POSTGRES_HOST: {postgresHost}");
+Console.WriteLine($"POSTGRES_PORT: {postgresPort}");
+Console.WriteLine($"POSTGRES_USERNAME: {postgresUsername}");
+Console.WriteLine($"POSTGRES_PASSWORD: {(string.IsNullOrEmpty(postgresPassword) ? "NOT SET" : "***SET***")}");
+Console.WriteLine($"POSTGRES_DATABASE: {postgresDatabase}");
+Console.WriteLine($"Connection String: Host={postgresHost}:{postgresPort};Database={postgresDatabase}");
+Console.WriteLine("============================\n");
 
 foreach (var arg in args)
 {
