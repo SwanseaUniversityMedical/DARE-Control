@@ -449,17 +449,17 @@ namespace BL.Services
                 using (MemoryStream memoryStream = new MemoryStream())
                 {
                     await responseStream.CopyToAsync(memoryStream);
-                    string path = Path.Combine(@"c:\testing", destinationObjectKey);
 
                     PutObjectRequest putObjectRequest = new PutObjectRequest
                     {
                         BucketName = destinationBucketName,
                         Key = destinationObjectKey,
                         InputStream = memoryStream,
-                        ContentType = response.Headers.ContentType
+                        ContentType = response.Headers.ContentType,
+                        
                     };
 
-                    var putObjectResponse = amazonS3Client.PutObjectAsync(putObjectRequest).Result;
+                    var putObjectResponse = await amazonS3Client.PutObjectAsync(putObjectRequest);
 
 
                     return putObjectResponse.HttpStatusCode == HttpStatusCode.OK;
