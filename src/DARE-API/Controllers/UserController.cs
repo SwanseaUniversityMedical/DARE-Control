@@ -14,14 +14,9 @@ using System.Linq;
 
 namespace DARE_API.Controllers
 {
-
-    
-    
-    
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        
         private readonly ApplicationDbContext _DbContext;
         private readonly IKeycloakMinioUserService _keycloakMinioUserService;
         protected readonly IHttpContextAccessor _httpContextAccessor;
@@ -72,6 +67,11 @@ namespace DARE_API.Controllers
                 else
                     _DbContext.Users.Add(userData);
 
+                if (!ModelState.IsValid) // SonarQube security
+                {
+                    return userData;
+                }
+
 
                 await _DbContext.SaveChangesAsync();
 
@@ -99,6 +99,10 @@ namespace DARE_API.Controllers
             {
                 var returned = _DbContext.Users.Find(userId);
                 if (returned == null)
+                {
+                    return null;
+                }
+                if (!ModelState.IsValid) // SonarQube security
                 {
                     return null;
                 }
@@ -171,6 +175,11 @@ namespace DARE_API.Controllers
                     return null;
                 }
 
+                if (!ModelState.IsValid) // SonarQube security
+                {
+                    return null;
+                }
+
                 var project = _DbContext.Projects.FirstOrDefault(x => x.Id == model.ProjectId);
                 if (project == null)
                 {
@@ -221,7 +230,12 @@ namespace DARE_API.Controllers
                     Log.Error("{Function} Invalid project id {UserId}", "RemoveProjectMembership", model.ProjectId);
                     return null;
                 }
-              
+
+                if (!ModelState.IsValid) // SonarQube security
+                {
+                    return null;
+                }
+
                 if (!user.Projects.Any(x => x == project))
                 {
                     Log.Error("{Function} User {UserName} is not in the {ProjectName}", "RemoveProjectMembership", user.Name, project.Name);
