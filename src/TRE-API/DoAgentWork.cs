@@ -562,10 +562,8 @@ namespace TRE_API
                                 {
                                     //+ _AgentSettings.TESKinputBucketIP + "/"
 
-                                    input.Url = "s3://"  + InputBucket;
-
                                     input.Path = input.Path.Replace("..", "");
-
+                                    input.Url = "s3://" + InputBucket + "/" + input.Path;
                                     var GoodIntput = input.Path;
 
                                     if (input.Path.StartsWith("/"))
