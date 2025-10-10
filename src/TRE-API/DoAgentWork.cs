@@ -8,15 +8,12 @@ using BL.Services;
 using EasyNetQ;
 using Hangfire;
 using Microsoft.FeatureManagement;
-using Microsoft.IdentityModel.Tokens;
-using Minio.DataModel;
 using Newtonsoft.Json;
 using Serilog;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using TRE_API.Constants;
-using TRE_API.Migrations;
 using TRE_API.Models;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
@@ -564,11 +561,11 @@ namespace TRE_API
 
                                     input.Path = input.Path.Replace("..", "");
                                     input.Url = "s3://" + InputBucket + input.Path;
-                                    var GoodIntput = input.Path;
+                                    var CleanedIntput = input.Path;
 
                                     if (input.Path.StartsWith("/"))
                                     {
-                                        GoodIntput = GoodIntput.Remove(0, 1);
+                                        CleanedIntput = CleanedIntput.Remove(0, 1);
                                     }
 
                                     if (string.IsNullOrEmpty(input.Name))
@@ -580,14 +577,14 @@ namespace TRE_API
                                     }
 
                                     
-                                    var source = await _minioSubHelper.GetCopyObject(aSubmission.Project.SubmissionBucket, GoodIntput);
+                                    var source = await _minioSubHelper.GetCopyObject(aSubmission.Project.SubmissionBucket, CleanedIntput);
 
                                     if (Files.S3Objects.Any(x => x.ETag == source.ETag))
                                     {
                                         continue;
                                     }
 
-                                    var resultcopy = await _minioTreHelper.CopyObjectToDestination(InputBucket, GoodIntput, source);
+                                    var resultcopy = await _minioTreHelper.CopyObjectToDestination(InputBucket, CleanedIntput, source);
 
                                 }
 
