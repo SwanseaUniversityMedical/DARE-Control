@@ -291,7 +291,6 @@ namespace DARE_FrontEnd.Controllers
                         model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
                 }
 
-
                 test = new TesTask();
 
                 if (string.IsNullOrEmpty(model.RawInput) == false)
@@ -403,7 +402,7 @@ namespace DARE_FrontEnd.Controllers
             catch (Exception e)
             {
                 Log.Error(e, "{Function} Boom crash", "AddiSubmissionWizard");
-                throw;
+                return BadRequest(e.Message);
             }
         }
     }
