@@ -30,6 +30,11 @@ namespace TRE_UI.Controllers
             };
             var projects = _treclientHelper.CallAPIWithoutModel<List<TreProject>>("/api/Approval/GetAllTreProjects/", paramlist).Result;
 
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View(projects);
+            }
+
             return View(projects);
         }
 
@@ -45,6 +50,11 @@ namespace TRE_UI.Controllers
             var members = _treclientHelper.CallAPIWithoutModel<List<TreMembershipDecision>>(
                 "/api/Approval/GetMemberships/", paramlist).Result;
 
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View(members);
+            }
+
             return View(members);
         }
 
@@ -54,7 +64,12 @@ namespace TRE_UI.Controllers
         {
             var result =
                 await _treclientHelper.CallAPI<List<TreMembershipDecision>, List<TreMembershipDecision>>("/api/Approval/UpdateMembershipDecisions", model);
-            
+
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View(model);
+            }
+
             return View(result);
         }
 
@@ -63,6 +78,11 @@ namespace TRE_UI.Controllers
         {
             var result =
                 await _treclientHelper.CallAPI<List<TreProject>, List<TreProject>>("/api/Approval/UpdateProjects", new List<TreProject>(){ model});
+
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View(result.First());
+            }
 
             return View(result.First());
         }
@@ -74,7 +94,12 @@ namespace TRE_UI.Controllers
             paramlist.Add("projectId", projectId.ToString());
             var project = _treclientHelper.CallAPIWithoutModel<TreProject>(
                 "/api/Approval/GetTreProject/", paramlist).Result;
-                           
+
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View(project);
+            }
+
             return View(project);
         }
 
