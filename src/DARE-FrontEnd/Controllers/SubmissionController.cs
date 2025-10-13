@@ -419,7 +419,7 @@ namespace DARE_FrontEnd.Controllers
             }
             catch (Exception e)
             {
-                Log.Error(e, "{Function} Boom crash", "AddiSubmissionWizard");
+                Log.Error(e, "Exception in {Function}");
                 return BadRequest(e.Message);
             }
         }
