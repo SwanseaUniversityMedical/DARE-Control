@@ -42,7 +42,6 @@ namespace Tre_Camunda.ProcessHandlers
             {
 
                 var variables = JsonSerializer.Deserialize<Dictionary<string, object>>(job.Variables);
-
                 var envListJson = variables["envList"]?.ToString();
                 var envList = JsonSerializer.Deserialize<List<CredentialsCamundaOutput>>(envListJson);
 
@@ -53,14 +52,15 @@ namespace Tre_Camunda.ProcessHandlers
                     _logger.LogError(errorMsg);
                     throw new Exception(errorMsg);
                 }
-                else {
+                else
+                {
 
-                    var username = envList.Where(x => x.env.ToLower().Contains("username")).FirstOrDefault();
-                    var database = envList.Where(x => x.env.ToLower().Contains("database")).FirstOrDefault();
-                    var server = envList.Where(x => x.env.ToLower().Contains("userver")).FirstOrDefault();
-                    var port = envList.Where(x => x.env.ToLower().Contains("port")).FirstOrDefault();
-                    var project = variables["project"]?.ToString();
-                    var user = variables["user"]?.ToString();
+                    string? username = envList.Where(x => x.env.ToLower().Contains("username")).FirstOrDefault().ToString();
+                    string? database = envList.Where(x => x.env.ToLower().Contains("database")).FirstOrDefault().ToString();
+                    string? server = envList.Where(x => x.env.ToLower().Contains("userver")).FirstOrDefault().ToString();
+                    string? port = envList.Where(x => x.env.ToLower().Contains("port")).FirstOrDefault().ToString();
+                    string? project = variables["project"]?.ToString();
+                    string? user = variables["user"]?.ToString();
 
                     if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(database) || string.IsNullOrEmpty(server) || string.IsNullOrEmpty(port) || string.IsNullOrEmpty(user) || string.IsNullOrEmpty(project))
                     {
@@ -69,21 +69,21 @@ namespace Tre_Camunda.ProcessHandlers
                         throw new Exception(errorMsg);
 
                     }
-                    else {
-
+                    else
+                    {
 
                         var password = GenerateSecurePassword();
 
 
                         var schemaPermissions = new List<SchemaPermission>
-                    {
-                        new SchemaPermission
                         {
-                            SchemaName = "ephemeral",
-                            Permissions = DatabasePermissions.Read | DatabasePermissions.Write | DatabasePermissions.CreateTables
-                        }
+                            new SchemaPermission
+                            {
+                                SchemaName = "ephemeral",
+                                Permissions = DatabasePermissions.Read | DatabasePermissions.Write | DatabasePermissions.CreateTables
+                            }
 
-                    };
+                        };
 
 
                         var createUserRequest = new CreateUserRequest
@@ -100,7 +100,7 @@ namespace Tre_Camunda.ProcessHandlers
                         var result = await _postgreSQLUserManagementService.CreateUserAsync(createUserRequest);
 
                         if (result.Success)
-                        {                           
+                        {
                             var credentialData = new Dictionary<string, object>();
 
                             foreach (var credential in envList)
@@ -109,7 +109,8 @@ namespace Tre_Camunda.ProcessHandlers
 
 
                                 CredentialEnv.env = credential.env;
-                                if (credential.value.Contains(password)) {
+                                if (credential.value.Contains(password))
+                                {
                                     credential.value = password;
                                 }
                                 else
@@ -118,9 +119,8 @@ namespace Tre_Camunda.ProcessHandlers
                                 }
 
                                 credentialData.Add(CredentialEnv.env, CredentialEnv.value);
-                              
-                            }
 
+                            }
 
 
 
@@ -133,35 +133,13 @@ namespace Tre_Camunda.ProcessHandlers
                                 var errorMsg = $"Failed to store credential in Vault at path: {vaultPath}";
                                 _logger.LogError(errorMsg);
                                 throw new Exception(errorMsg);
-                            }
-
-                            //var outputVariables = new Dictionary<string, object>
-                            //{
-                            //    //Credential data to store in Vault
-
-                            //    ["credentialData"] = new Dictionary<string, object>
-                            //    {
-                            //        ["username"] = username,
-                            //        //["password"] = password,
-                            //        ["credentialType"] = "postgres",
-                            //        ["project"] = project,
-                            //        ["userId"] = user,
-                            //        ["createdAt"] = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                            //        ["expiresAt"] = DateTime.UtcNow.AddHours(24).ToString("yyyy-MM-ddTHH:mm:ssZ"), //Not sure, need to confirm
-                            //        ["schemas"] = schemaPermissions.Select(s => s.SchemaName).ToList()
-                            //    },
-
-                            //    ["vaultPath"] = $"postgres/{project}/{user}/{username}",
-                            //    ["postgresUsername"] = username
-
-                            //};
+                            }                           
 
                             _logger.LogInformation($"Successfully created PostgreSQL user: {username} for project: {project}");
 
                             SW.Stop();
                             _logger.LogInformation($"CreatePostgresUserHandler took {SW.Elapsed.TotalSeconds} seconds");
-
-                            return outputVariables;
+                                                        
 
                         }
                         else
@@ -171,20 +149,19 @@ namespace Tre_Camunda.ProcessHandlers
                             _logger.LogError(errorMsg);
                             throw new Exception(errorMsg);
                         }
-                    }                
-                catch (Exception ex)
-            {
-                var errorMsg = $"Unexpected error in CreatePostgresUserHandler: {ex.Message}";
-                _logger.LogError(ex, errorMsg);
+                    }
+                }
+                    }
+                    catch (Exception ex)
+                    {
+                    var errorMsg = $"Unexpected error in CreatePostgresUserHandler: {ex.Message}";
+                    _logger.LogError(ex, errorMsg);
 
-                SW.Stop();
-                _logger.LogInformation($"CreatePostgresUserHandler took {SW.Elapsed.TotalSeconds} seconds");
+                    SW.Stop();
+                    _logger.LogInformation($"CreatePostgresUserHandler took {SW.Elapsed.TotalSeconds} seconds");
 
-                throw;
-            }
-        }
-        
-    }
+                    throw;
+                     }  
 
   }
 
