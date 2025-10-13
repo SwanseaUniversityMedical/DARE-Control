@@ -551,6 +551,10 @@
                         console.log(result);
                     },
                     error: function (error) {
+                        var ElementError = document.getElementById("error");
+                        ElementError.textContent = error.responseText;
+                        ElementError.style.color = "red";
+
                         console.log(error);
                     }
                 });
