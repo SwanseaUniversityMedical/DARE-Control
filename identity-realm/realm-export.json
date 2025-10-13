@@ -1,0 +1,30 @@
+{
+"realm": "camunda-platform",
+"enabled": true,
+"loginWithEmailAllowed": true,
+"registrationAllowed": false,
+"accessTokenLifespan": 300,
+"clients": [
+{
+"clientId": "camunda-identity",
+"protocol": "openid-connect",
+"enabled": true,
+"publicClient": false,
+"standardFlowEnabled": true,
+"directAccessGrantsEnabled": false,
+"serviceAccountsEnabled": false,
+"secret": "qINcvHZitC5rp8vK2MK3dE9liwSnxNce",
+"attributes": {
+"pkce.code.challenge.method": "S256"
+},
+"redirectUris": [
+"http://localhost:8084/login/oauth2/code/keycloak",
+"http://identity:8084/login/oauth2/code/keycloak"
+],
+"webOrigins": [
+"http://localhost:8084",
+"http://identity:8084"
+]
+}
+]
+}

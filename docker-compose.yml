@@ -17,7 +17,6 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password123
       - POSTGRES_DB=DARE-Control
-      - POSTGRES_DB=myCoolDataDB
     networks:
       - communicating
 
@@ -86,6 +85,10 @@ services:
       - CAMUNDA_OPERATE_ZEEBEELASTICSEARCH_URL=http://elasticsearch:9200
       - management.endpoints.web.exposure.include=health
       - management.endpoint.health.probes.enabled=true
+      - SPRING_PROFILES_ACTIVE=identity-auth      
+      - CAMUNDA_OPERATE_IDENTITY_BASE_URL=http://identity:8084
+      - CAMUNDA_OPERATE_IDENTITY_ISSUER_URL=http://identity:8084     
+      - CAMUNDA_OPERATE_IDENTITY_CLIENT_ID=operate-ui
     healthcheck:
       test: [ "CMD-SHELL", "wget -O - -q 'http://localhost:8080/actuator/health/readiness'" ]
       interval: 30s
@@ -123,6 +126,163 @@ services:
     depends_on:
       - zeebe
       - operate
+
+  # identity:
+  #   image: camunda/identity:${CAMUNDA_PLATFORM_VERSION}
+  #   container_name: identity
+  #   restart: always
+  #   ports:
+  #     - "8084:8084"
+  #   environment:    
+  #    - SERVER_PORT=8084  
+  #    - SPRING_PROFILES_ACTIVE=oidc
+  #    - IDENTITY_AUTHENTICATION_PROVIDER=GENERIC_OIDC
+  #    - IDENTITY_OIDC_ISSUER=https://auth2.ukserp.ac.uk/realms/Tre-Camunda
+  #    - IDENTITY_OIDC_CLIENT_ID=camunda-identity
+  #    - IDENTITY_OIDC_CLIENT_SECRET=x86tC3UxQXptN3K1Bces6bua7uiXDrxz
+  #    - IDENTITY_IDP_ISSUER=https://auth2.ukserp.ac.uk/realms/Tre-Camunda     
+  #    - IDENTITY_IDP_ISSUER_URL=https://auth2.ukserp.ac.uk/realms/Tre-Camunda
+  #    - IDENTITY_IDP_CLIENT_ID=camunda-identity
+  #    - IDENTITY_IDP_CLIENT_SECRET=x86tC3UxQXptN3K1Bces6bua7uiXDrxz
+  #    - IDENTITY_URL=http://localhost:8084
+  #    - IDENTITY_BASE_URL=http://localhost:8084
+  #    - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/DARE-Control
+  #    - SPRING_DATASOURCE_USERNAME=postgres
+  #    - SPRING_DATASOURCE_PASSWORD=password123
+  #    - LOGGING_LEVEL_IO_CAMUNDA_IDENTITY=DEBUG
+  #   depends_on:
+  #     - postgres 
+  #   networks:
+  #     - camunda-platform
+  #     - communicating
+ 
+
+  #For internal keyclaok and diff camunda version
+  # identity:
+  #   image: camunda/identity:8.4.3
+  #   container_name: identity
+  #   restart: always
+  #   ports:
+  #     - "8084:8084"
+  #   environment:    
+  #    - SERVER_PORT=8084  
+  #    - SPRING_PROFILES_ACTIVE=oidc
+  #    - IDENTITY_OIDC_ISSUER=http://keycloak:8080/realms/camunda-platform
+  #    - IDENTITY_OIDC_CLIENT_ID=identity
+  #    - IDENTITY_OIDC_CLIENT_SECRET=EUrq5rHlWqJ8fqA7xeHkGwWu0AM8KulJ              
+  #    - IDENTITY_URL=http://localhost:8084
+  #    - IDENTITY_BASE_URL=http://localhost:8084
+  #    - IDENTITY_CORS_ALLOWED_ORIGINS=http://localhost:8084
+  #    - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/DARE-Control
+  #    - SPRING_DATASOURCE_USERNAME=postgres
+  #    - SPRING_DATASOURCE_PASSWORD=password123
+  #    - LOGGING_LEVEL_IO_CAMUNDA_IDENTITY=DEBUG
+  #    - LOGGING_LEVEL_io.camunda.identity.sdk=DEBUG
+  #    - LOGGING_LEVEL_org.springframework.boot.context.properties=DEBUG   
+  #   depends_on:
+  #     - postgres 
+  #   networks:
+  #     - camunda-platform
+  #     - communicating
+
+
+  # identity:
+  #   image: camunda/identity:${CAMUNDA_PLATFORM_VERSION}
+  #   container_name: identity
+  #   restart: always
+  #   ports:
+  #     - "8084:8084"
+  #   environment:     
+  #   - SERVER_PORT=8084
+  #   - IDENTITY_AUTHENTICATION_PROVIDER=KEYCLOAK
+  #   - IDENTITY_KEYCLOAK_URL=https://auth2.ukserp.ac.uk
+  #   - IDENTITY_KEYCLOAK_REALM=Tre-Camunda
+  #   - IDENTITY_KEYCLOAK_CLIENT_ID=camunda-identity
+  #   - IDENTITY_KEYCLOAK_CLIENT_SECRET=x86tC3UxQXptN3K1Bces6bua7uiXDrxz
+  #   - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/DARE-Control
+  #   - SPRING_DATASOURCE_USERNAME=postgres
+  #   - SPRING_DATASOURCE_PASSWORD=password123   
+  #   - LOGGING_LEVEL_IO_CAMUNDA_IDENTITY=DEBUG
+  #   - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB=INFO
+  #   - LOGGING_LEVEL_ORG_KEYCLOAK=DEBUG 
+  #   depends_on:
+  #   - postgres 
+  #   networks:
+  #     - camunda-platform
+  #     - communicating
+
+
+  # identity:
+  #     image: camunda/identity:${CAMUNDA_PLATFORM_VERSION}
+  #     container_name: identity
+  #     restart: always
+  #     ports:
+  #       - "8084:8084"
+  #     environment:
+  #       - SERVER_PORT=8084
+  #       - SPRING_PROFILES_ACTIVE=keycloak
+  #       - IDENTITY_KEYCLOAK_INIT_ENABLED=false
+  #       - KEYCLOAK_SETUP_ENABLED=false
+  #       - IDENTITY_KEYCLOAK_ENV_INITIALIZER_ENABLED=false
+  #       - KEYCLOAK_URL=http://keycloak:8080
+  #       - KEYCLOAK_REALM=camunda-platform
+  #       - KEYCLOAK_RESOURCE=camunda-identity    
+  #       - KEYCLOAK_CREDENTIALS_SECRET=qINcvHZitC5rp8vK2MK3dE9liwSnxNce
+  #       - IDENTITY_BASE_URL=http://localhost:8084
+  #       - IDENTITY_URL=http://localhost:8084
+  #       - IDENTITY_ISSUER_URL=http://localhost:18080/realms/camunda-platform
+  #       - IDENTITY_LOGIN_REDIRECT_PATH=/login/oauth2/code/keycloak
+  #       - IDENTITY_CORS_ALLOWED_ORIGINS=http://localhost:8084
+  #       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/DARE-Control
+  #       - SPRING_DATASOURCE_USERNAME=postgres
+  #       - SPRING_DATASOURCE_PASSWORD=password123
+  #       - LOGGING_LEVEL_IO_CAMUNDA_IDENTITY=DEBUG
+  #       - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB=INFO
+  #       - LOGGING_LEVEL_ORG_KEYCLOAK=DEBUG      
+  #     depends_on:
+  #       - postgres
+  #       - keycloak
+  #     volumes:
+  #       - ./wait-for-keycloak.sh:/app/wait-for-keycloak.sh:ro
+  #     entrypoint: ["/bin/sh", "/app/wait-for-keycloak.sh", "http://keycloak:18080", "java", "-jar", "/app/identity.jar"]
+  #     networks:
+  #       - camunda-platform
+  #       - communicating
+
+  identity:
+      image: camunda/identity:8.4.3
+      container_name: identity
+      restart: always
+      ports:
+        - "8084:8084"
+      environment:
+        - SERVER_PORT=8084
+        - SPRING_PROFILES_ACTIVE=keycloak
+        - IDENTITY_KEYCLOAK_INIT_ENABLED=false
+        - KEYCLOAK_SETUP_ENABLED=false
+        - IDENTITY_KEYCLOAK_ENV_INITIALIZER_ENABLED=false
+        - KEYCLOAK_URL=http://keycloak:8080
+        - KEYCLOAK_REALM=camunda-platform
+        - KEYCLOAK_RESOURCE=camunda-identity    
+        - KEYCLOAK_CREDENTIALS_SECRET=qINcvHZitC5rp8vK2MK3dE9liwSnxNce
+        - IDENTITY_BASE_URL=http://localhost:8084
+        - IDENTITY_URL=http://localhost:8084
+        - IDENTITY_ISSUER_URL=http://localhost:18080/realms/camunda-platform
+        - IDENTITY_LOGIN_REDIRECT_PATH=/login/oauth2/code/keycloak
+        - IDENTITY_CORS_ALLOWED_ORIGINS=http://localhost:8084
+        - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/DARE-Control
+        - SPRING_DATASOURCE_USERNAME=postgres
+        - SPRING_DATASOURCE_PASSWORD=password123
+        - LOGGING_LEVEL_IO_CAMUNDA_IDENTITY=DEBUG
+        - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB=INFO
+        - LOGGING_LEVEL_ORG_KEYCLOAK=DEBUG      
+      depends_on:
+        - postgres
+        - keycloak             
+      entrypoint: ["/bin/sh", "/app/wait-for-keycloak.sh", "http://keycloak:18080", "java", "-jar", "/app/identity.jar"]
+      networks:
+        - camunda-platform
+        - communicating
 
   elasticsearch: # https://hub.docker.com/_/elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}
@@ -253,6 +413,44 @@ services:
       start_period: 10s
     command: ["vault", "server", "-dev", "-dev-root-token-id=dev-only-token"]
 
+  keycloak:
+      image: quay.io/keycloak/keycloak:22.0
+      container_name: keycloak
+      command: start-dev --import-realm
+      environment:
+        - KEYCLOAK_ADMIN=admin
+        - KEYCLOAK_ADMIN_PASSWORD=admin
+        - KC_HOSTNAME=localhost
+        - KC_HOSTNAME_PORT=18080
+        - KC_HOSTNAME_STRICT=false
+        - KC_HOSTNAME_STRICT_HTTPS=false
+      ports:
+        - "18080:8080"
+      volumes:     
+      - ./identity-realm/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+      networks:
+        - camunda-platform
+      healthcheck:
+          test: ["CMD", "curl", "-f", "http://localhost:18080/realms/camunda-platform"]
+          interval: 5s
+          retries: 12
+          start_period: 10s
+
+  # keycloak:
+  #     image: quay.io/keycloak/keycloak:22.0
+  #     container_name: keycloak
+  #     command: start-dev
+  #     environment:
+  #       - KEYCLOAK_ADMIN=admin
+  #       - KEYCLOAK_ADMIN_PASSWORD=admin        
+  #     ports:
+  #       - "18080:8080"     
+  #     networks:
+  #       - camunda-platform    
+
+
+
+
   openldap:
     image: osixia/openldap:1.5.0
     container_name: openldap
@@ -291,6 +489,7 @@ services:
       "
     volumes:
       - ./ldap-init/init.ldif:/container/service/slapd/assets/init.ldif
+ 
  
   phpldapadmin:
     image: osixia/phpldapadmin:latest
@@ -414,6 +613,8 @@ volumes:
      driver: local
     openldap_config:
      driver: local
+    camunda-platform:
+     driver: bridge
 
 ######################################################
 # networks
