@@ -543,13 +543,16 @@ namespace TRE_API
 
                                 var bucket = _subHelper.GetOutputBucketGutsSub(aSubmission.Id.ToString(), true);
 
+                                TesInput MandatoryInput = null;
+
                                 if (tesMessage.Inputs == null)
                                 {
                                     tesMessage.Inputs = new List<TesInput>();
                                 }
                                 if (string.IsNullOrEmpty(_AgentSettings.MandatoryInput) == false)
                                 {
-                                    tesMessage.Inputs.Add(JsonConvert.DeserializeObject<TesInput>(_AgentSettings.MandatoryInput));
+                                    MandatoryInput = JsonConvert.DeserializeObject<TesInput>(_AgentSettings.MandatoryInput);
+                                    tesMessage.Inputs.Add(MandatoryInput);
                                 }
                                 
 
@@ -557,6 +560,7 @@ namespace TRE_API
 
                                 foreach (var input in tesMessage.Inputs)
                                 {
+                                    
                                     input.Path = input.Path.Replace("..", "");
                                     input.Path = "/data" + input.Path;
                                     input.Url = "s3://" + InputBucket + input.Path;
@@ -575,7 +579,15 @@ namespace TRE_API
                                         }
                                     }
 
-                                    
+
+                                    if (MandatoryInput != null)
+                                    {
+                                        if (input == MandatoryInput)
+                                        {
+                                            continue;
+                                        }
+                                    }
+
                                     var source = await _minioSubHelper.GetCopyObject(aSubmission.Project.SubmissionBucket, CleanedIntput);
 
                                     if (Files.S3Objects.Any(x => x.ETag == source.ETag))
