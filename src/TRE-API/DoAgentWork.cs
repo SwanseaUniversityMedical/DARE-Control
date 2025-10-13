@@ -1,26 +1,27 @@
 ﻿using BL.Models;
 using BL.Models.Enums;
-using BL.Models.ViewModels;
+using BL.Models.Settings;
 using BL.Models.Tes;
+using BL.Models.ViewModels;
 using BL.Rabbit;
+using BL.Services;
 using EasyNetQ;
+using Hangfire;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.FeatureManagement;
 using Newtonsoft.Json;
 using Serilog;
-using Hangfire;
+using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json;
+using TRE_API.Constants;
+using TRE_API.Models;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
-using BL.Services;
-using TREAgent.Repositories;
-using TRE_API.Models;
-using System.Net;
-using BL.Models.Settings;
-using Microsoft.FeatureManagement;
-using TRE_API.Constants;
-using System.Net.Http;
 using Tre_Credentials.DbContexts;
-using Microsoft.EntityFrameworkCore;
+using TREAgent.Repositories;
 
 
 namespace TRE_API
@@ -50,6 +51,7 @@ namespace TRE_API
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly CredentialsDbContext _credsDbContext;
         private readonly IVaultCredentialsService _vaultService;
+     
 
 
         public DoAgentWork(IServiceProvider serviceProvider,
@@ -68,6 +70,7 @@ namespace TRE_API
             IHttpClientFactory httpClientFactory,
             CredentialsDbContext credsDbContext,
             IVaultCredentialsService vaultService
+           
         )
         {
             _serviceProvider = serviceProvider;
@@ -475,7 +478,7 @@ namespace TRE_API
                             }
 
 
-                            var procStatus = await GetProcessInstanceStatus(parentKey.Value);
+                            var procStatus = await GetProcessInstanceStatus1(parentKey.Value);
 
                             if (procStatus.Errored)
                             {
@@ -522,6 +525,17 @@ namespace TRE_API
                                 row.IsProcessed = true;
 
                             await _credsDbContext.SaveChangesAsync();
+
+                            try
+                            {
+                                await TriggerRevokeCredentialsAsync(aSubmission.Id, aSubmission.Project.Id, aSubmission.SubmittedBy.Id);
+                               
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Error(ex, "Failed to trigger revoke for submission {SubId}", aSubmission.Id);
+                               
+                            }
 
 
                             // The TES message
@@ -628,16 +642,16 @@ namespace TRE_API
                                             Executor.Env["CATALOG"] = _AgentSettings.CATALOG;
                                         }
 
-                                        if (credentials != null && credentials.Count > 0)
-                                        {
-                                            foreach (var cred in credentials)
-                                            {
-                                                var key = $"EphemeralCred_{cred.Key.ToUpper()}";
-                                                var value = cred.Value?.ToString() ?? string.Empty;
-                                                Executor.Env[key] = value;
-                                            }
-                                            Log.Information($"Injected {credentials.Count} credentials into environment variables for {aSubmission.Id}");
-                                        }
+                                        //if (credentials != null && credentials.Count > 0)
+                                        //{
+                                        //    foreach (var cred in credentials)
+                                        //    {
+                                        //        var key = $"{cred.Key.ToUpper()}";
+                                        //        var value = cred.Value?.ToString() ?? string.Empty;
+                                        //        Executor.Env[key] = value;
+                                        //    }
+                                        //    Log.Information($"Injected {credentials.Count} credentials into environment variables for {aSubmission.Id}");
+                                        //}
                                     }
                                     else
                                     {
@@ -777,58 +791,14 @@ namespace TRE_API
             public bool Errored { get; set; }
         }
 
-        //private async Task<ProcStatus> GetProcessInstanceStatus(long parentKey)
-        //{
-        //    try
-        //    {
-        //        using var httpClient = _httpClientFactory.CreateClient();
-
-        //        var username = "demo"; 
-        //        var password = "demo"; 
-        //        var byteArray = System.Text.Encoding.ASCII.GetBytes($"{username}:{password}");
-        //        httpClient.DefaultRequestHeaders.Authorization =
-        //            new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
-        //        var statisticsUrl = $"http://localhost:8081/v1/process-instances/{parentKey}/statistics";
-        //        var response = await httpClient.GetAsync(statisticsUrl);
-
-        //        if (!response.IsSuccessStatusCode)
-        //        {
-        //            return new ProcStatus { Finished = false, Errored = true };
-        //        }
-
-        //        var json = await response.Content.ReadAsStringAsync();
-        //        var statistics = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(json);
-
-        //        bool hasActive = false;
-        //        bool hasIncidents = false;
-
-        //        foreach (var stat in statistics)
-        //        {
-        //            if (stat.TryGetValue("active", out var activeObj))
-        //            {
-        //                var activeCount = System.Text.Json.JsonSerializer.Deserialize<int>(activeObj.ToString());
-        //                if (activeCount > 0) hasActive = true;
-        //            }
-
-        //            if (stat.TryGetValue("incidents", out var incidentsObj))
-        //            {
-        //                var incidentCount = System.Text.Json.JsonSerializer.Deserialize<int>(incidentsObj.ToString());
-        //                if (incidentCount > 0) hasIncidents = true;
-        //            }
-        //        }
-
-        //        return new ProcStatus
-        //        {
-        //            Finished = !hasActive && !hasIncidents,
-        //            Errored = hasIncidents
-        //        };
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Log.Error(ex, "Failed to check process status for key {Key}", parentKey);
-        //        return new ProcStatus { Finished = false, Errored = true };
-        //    }
-        //}
+        private sealed class ProcessStat
+        {
+            public string ActivityId { get; set; } = "";
+            public int Active { get; set; }
+            public int Canceled { get; set; }
+            public int Incidents { get; set; }
+            public int Completed { get; set; }
+        }
 
 
         private async Task<ProcStatus> GetProcessInstanceStatus(long parentKey)
@@ -837,8 +807,8 @@ namespace TRE_API
             {
                 using var httpClient = _httpClientFactory.CreateClient();
 
-               
-                httpClient.DefaultRequestHeaders.Add("Cookie", "OPERATE-SESSION=B3CE4676A7C8D5DD6D4520D6BC52CEED");
+
+                httpClient.DefaultRequestHeaders.Add("Cookie", "OPERATE-SESSION=59FBA6B0D98F20F9B93538DA022A890C");
 
                 var statisticsUrl = $"http://localhost:8081/v1/process-instances/{parentKey}/statistics";
                 var response = await httpClient.GetAsync(statisticsUrl);
@@ -880,6 +850,116 @@ namespace TRE_API
                 Log.Error(ex, "Failed to check process status for key {Key}", parentKey);
                 return new ProcStatus { Finished = false, Errored = true };
             }
+        }
+
+
+        //private async Task<ProcStatus> GetProcessInstanceStatus1(long parentKey)
+        //{
+        //    try
+        //    {
+        //        using var httpClient = _httpClientFactory.CreateClient();
+
+                
+        //        var tokenRequest = new HttpRequestMessage(HttpMethod.Post,
+        //            "https://auth2.ukserp.ac.uk/realms/Tre-Camunda/protocol/openid-connect/token");
+
+        //        var body = new Dictionary<string, string>
+        //        {
+        //            { "grant_type", "client_credentials" },
+        //            { "client_id", "operate-api-client" },      
+        //            { "client_secret", "2NKZuVn9RJzTQ01HxDOoIvbe6esvLYN5" }
+        //        };
+
+        //        tokenRequest.Content = new FormUrlEncodedContent(body);
+
+        //        var tokenResponse = await httpClient.SendAsync(tokenRequest);
+        //        tokenResponse.EnsureSuccessStatusCode();
+
+        //        var tokenJson = await tokenResponse.Content.ReadAsStringAsync();
+        //        using var doc = JsonDocument.Parse(tokenJson);
+        //        var accessToken = doc.RootElement.GetProperty("access_token").GetString();
+
+                
+        //        httpClient.DefaultRequestHeaders.Authorization =
+        //            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+        //        var statisticsUrl = $"http://localhost:8081/v1/process-instances/{parentKey}/statistics";
+        //        var response = await httpClient.GetAsync(statisticsUrl);
+
+        //        if (!response.IsSuccessStatusCode)
+        //        {
+        //            Log.Warning("Operate API returned {StatusCode} when fetching statistics for {ParentKey}",
+        //                response.StatusCode, parentKey);
+
+        //            return new ProcStatus { Finished = false, Errored = true };
+        //        }
+
+        //        var json = await response.Content.ReadAsStringAsync();
+        //        var statistics = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(json);
+
+        //        bool hasActive = false;
+        //        bool hasIncidents = false;
+
+        //        foreach (var stat in statistics)
+        //        {
+        //            if (stat.TryGetValue("active", out var activeObj) && int.TryParse(activeObj.ToString(), out var activeCount))
+        //                hasActive |= activeCount > 0;
+
+        //            if (stat.TryGetValue("incidents", out var incidentObj) && int.TryParse(incidentObj.ToString(), out var incidentCount))
+        //                hasIncidents |= incidentCount > 0;
+        //        }
+
+        //        return new ProcStatus
+        //        {
+        //            Finished = !hasActive && !hasIncidents,
+        //            Errored = hasIncidents
+        //        };
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Log.Error(ex, "Failed to check process status for key {Key}", parentKey);
+        //        return new ProcStatus { Finished = false, Errored = true };
+        //    }
+        //}
+
+
+
+
+
+
+        private async Task TriggerRevokeCredentialsAsync(int submissionId, int project, int user)
+        {
+            var payload = new
+            {
+                records = new[]
+                {
+                    new
+                    {
+                     submissionId = submissionId.ToString(),
+                     project = project.ToString(),
+                     user = user.ToString()
+                    }
+                }
+            };
+
+            var jsonPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
+            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+           
+            var camundaWebhookUrl = "http://localhost:8085/inbound/RevokeCredentials";
+
+            using var httpClient = _httpClientFactory.CreateClient();
+            httpClient.Timeout = TimeSpan.FromMinutes(2);
+
+            var response = await httpClient.PostAsync(camundaWebhookUrl, content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Log.Error("Camunda revoke webhook failed for submission {SubmissionId}. Error: {Error}", submissionId, error);
+                throw new Exception($"Camunda revoke webhook call failed: {response.StatusCode}");
+            }
+
+            Log.Information("Camunda RevokeCredentials triggered successfully for submission {SubmissionId}", submissionId);
         }
     }
 }
