@@ -403,8 +403,7 @@ namespace DARE_FrontEnd.Controllers
                         Name = "",
                         Description = "",
                         Url = "a",
-                        Content = "",
-                        Streamable = false
+                        Content = ""
                     });
                 }
 
