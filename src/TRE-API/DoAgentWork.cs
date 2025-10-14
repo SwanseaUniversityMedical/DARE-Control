@@ -5,6 +5,7 @@ using BL.Models.Tes;
 using BL.Models.ViewModels;
 using BL.Rabbit;
 using BL.Services;
+using Build.Security.AspNetCore.Middleware.Dto;
 using EasyNetQ;
 using Hangfire;
 using Microsoft.FeatureManagement;
@@ -562,15 +563,9 @@ namespace TRE_API
                                 {
                                     
                                     input.Path = input.Path.Replace("..", "");
-                                    input.Path = "/data" + input.Path;
+                               
                                     input.Url = "s3://" + InputBucket + input.Path;
-                                    var CleanedIntput = input.Path;
-
-                                    if (input.Path.StartsWith("/"))
-                                    {
-                                        CleanedIntput = CleanedIntput.Remove(0, 1);
-                                    }
-
+                                  
                                     if (string.IsNullOrEmpty(input.Name))
                                     {
                                         if (input.Path.Contains("/"))
@@ -588,7 +583,23 @@ namespace TRE_API
                                         }
                                     }
 
-                                    Log.Information($"getting copy for {CleanedIntput} for SubmissionBucket {aSubmission.Project.SubmissionBucket}");
+                                   
+                                    var CleanedIntput = input.Path;
+                                    input.Path = "/data" + input.Path;
+                                    if (CleanedIntput.StartsWith("/"))
+                                    {
+                                        CleanedIntput = CleanedIntput.Remove(0, 1);
+                                    }
+
+
+                                    var NewCleanedInput = input.Path;
+                                    if (NewCleanedInput.StartsWith("/"))
+                                    {
+                                        NewCleanedInput = NewCleanedInput.Remove(0, 1);
+                                    }
+
+
+                                    Log.Information($"getting copy for {CleanedIntput} for SubmissionBucket {aSubmission.Project.SubmissionBucket} to {NewCleanedInput}");
 
                                     var source = await _minioSubHelper.GetCopyObject(aSubmission.Project.SubmissionBucket, CleanedIntput);
 
@@ -597,7 +608,7 @@ namespace TRE_API
                                         continue;
                                     }
 
-                                    var resultcopy = await _minioTreHelper.CopyObjectToDestination(InputBucket, CleanedIntput, source);
+                                    var resultcopy = await _minioTreHelper.CopyObjectToDestination(InputBucket, NewCleanedInput, source);
 
                                 }
 
