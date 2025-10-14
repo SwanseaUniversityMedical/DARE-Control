@@ -121,10 +121,10 @@ namespace DARE_FrontEnd.Controllers
                 return RedirectToAction("GetASubmission", new { id = result.Id });
                 //return Ok();
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Log.Error("SubmissionWizard > " + ex.ToString());
-                return BadRequest();
+                Log.Error(e, "Exception in {Function}");
+                return BadRequest(e.Message);
             }
         }
 
@@ -228,8 +228,8 @@ namespace DARE_FrontEnd.Controllers
             }
             catch (Exception e)
             {
-                Log.Error(e, "{Function}  crash", "SubmitDemoTes");
-                throw new Exception("SubmissionWizard > " + e.ToString());
+                Log.Error(e, "Exception in {Function}");
+                return BadRequest(e.Message);
             }
         }
 
