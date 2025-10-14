@@ -78,8 +78,11 @@ namespace DARE_API.Controllers
 
                 if (project.Id == 0)
                 {
-                    project.SubmissionBucket = GenerateRandomName(project.Name.ToLower()) + "submission".Replace("_", "");
-                    project.OutputBucket = GenerateRandomName(project.Name.ToLower()) + "output".Replace("_", ""); ;
+                    _DbContext.Projects.Add(project);
+                    await _DbContext.SaveChangesAsync();
+
+                    project.SubmissionBucket = GenerateRandomName(project.Id.ToString()) + "submission".Replace("_", "");
+                    project.OutputBucket = GenerateRandomName(project.Id.ToString()) + "output".Replace("_", ""); ;
                     var submissionBucket = await _minioHelper.CreateBucket(project.SubmissionBucket);
                     if (!submissionBucket)
                     {

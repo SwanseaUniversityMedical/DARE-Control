@@ -17,7 +17,7 @@ namespace Tre_Camunda.Services
 
         public PostgreSQLUserManagementService(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("ContainerConnection");
+            _connectionString = configuration.GetConnectionString("TREPostgresConnection");
         }
 
         public async Task<UserCreationResult> CreateUserAsync(CreateUserRequest request)

@@ -3,6 +3,7 @@ using Zeebe.Client.Accelerator.Abstractions;
 using Zeebe.Client.Accelerator.Attributes;
 using System.Diagnostics;
 using System.Text.Json;
+using Tre_Camunda.Models;
 
 namespace Tre_Camunda.ProcessHandlers
 {
@@ -28,29 +29,44 @@ namespace Tre_Camunda.ProcessHandlers
             try
             {
                 var variables = JsonSerializer.Deserialize<Dictionary<string, object>>(job.Variables);
-                var username = variables != null && variables.TryGetValue("postgresUsername", out var u)  
-                    ? u?.ToString()
-                    : null;
+                var envListJson = variables["envList"]?.ToString();
+                var envList = JsonSerializer.Deserialize<List<CredentialsCamundaOutput>>(envListJson);
 
-                if (string.IsNullOrWhiteSpace(username))
+
+                if (envList?.FirstOrDefault() == null)
                 {
-                    var errorMsg = "postgresUsername not found in process variables";
+                    var errorMsg = "No credential information found in envList";
                     _logger.LogError(errorMsg);
                     throw new Exception(errorMsg);
                 }
-
-                _logger.LogInformation($"Attempting to delete postgres user: {username}");
-
-                var result = await _postgresUserManagementService.DropUserAsync(username);
-
-                if (!result)
+                else
                 {
-                    var errorMsg = $"Failed to delete postgres user {username}";
-                    _logger.LogError(errorMsg);
-                    throw new Exception(errorMsg);
-                }
 
-                _logger.LogInformation($"Successfully deleted postgres user: {username}");
+                    string? username = envList.Where(x => x.env.ToLower().Contains("username")).FirstOrDefault().value.ToString();
+                    string? database = envList.Where(x => x.env.ToLower().Contains("database")).FirstOrDefault().value.ToString();
+                    string? server = envList.Where(x => x.env.ToLower().Contains("server")).FirstOrDefault().value.ToString();
+                    string? port = envList.Where(x => x.env.ToLower().Contains("port")).FirstOrDefault().value.ToString();
+                    string? project = variables["project"]?.ToString();
+                    string? user = variables["user"]?.ToString();
+
+                    if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(database) || string.IsNullOrEmpty(server) || string.IsNullOrEmpty(port) || string.IsNullOrEmpty(user) || string.IsNullOrEmpty(project))
+                    {
+                        _logger.LogInformation($"Attempting to delete postgres user: {username}");
+
+
+
+                        var result = await _postgresUserManagementService.DropUserAsync(username);
+
+                        if (!result)
+                        {
+                            var errorMsg = $"Failed to delete postgres user {username}";
+                            _logger.LogError(errorMsg);
+                            throw new Exception(errorMsg);
+                        }
+
+                        _logger.LogInformation($"Successfully deleted postgres user: {username}");
+                    }
+                }
             }
             catch (Exception ex)
             {
