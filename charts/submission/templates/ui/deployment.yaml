@@ -1,0 +1,162 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "submission.fullname" . }}-ui
+  labels:
+    {{- include "submission.labels" . | nindent 4 }}
+    component: "ui"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "submission.selectorLabels" . | nindent 6 }}
+      component: "ui"
+  template:
+    metadata:
+      {{- with .Values.ui.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "submission.labels" . | nindent 8 }}
+        component: "ui"
+        {{- with .Values.ui.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "submission.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: submissionui
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.ui.image.repository }}:{{ .Values.ui.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.ui.image.pullPolicy }}
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.postgres.secretName }}
+                  key: {{ .Values.config.postgres.passwordSecretKey }}
+            - name: POSTGRES_USERNAME
+              valueFrom:
+                secretKeyRef: 
+                  name: {{ .Values.config.postgres.secretName }}
+                  key: {{ .Values.config.postgres.usernameSecretKey }}
+            - name: CONNECTIONSTRINGS__DEFAULTCONNECTION
+              value: "Server={{ .Values.config.postgres.host }};port={{ .Values.config.postgres.port }};Database={{ .Values.config.postgres.database }};Username=$(POSTGRES_USERNAME);Password=$(POSTGRES_PASSWORD);"
+            - name: Serilog__SeqServerUrl
+              value: "{{ .Values.config.seqUrl }}"
+            - name: DareAPISettings__Address
+              value: 'http://{{ include "submission.fullname" . }}-api:{{ .Values.api.service.port }}'
+            - name: DareAPISettings__HelpAddress
+              value: 'http://{{ include "submission.fullname" . }}-api:{{ .Values.api.service.port }}'
+            - name: FormIOSettings__UseInternal
+              value: "true"
+            - name: SubmissionKeyCloakSettings__Authority
+              value: "{{ .Values.config.keycloak.ui.protocol }}://{{ .Values.config.keycloak.ui.host }}/realms/{{ .Values.config.keycloak.ui.realm }}"
+            - name: SubmissionKeyCloakSettings__BaseUrl
+              value: "{{ .Values.config.keycloak.ui.protocol }}://{{ .Values.config.keycloak.ui.host }}/realms/{{ .Values.config.keycloak.ui.realm }}"
+            - name: SubmissionKeyCloakSettings__MetadataAddress
+              value: "{{ .Values.config.keycloak.ui.protocol }}://{{ .Values.config.keycloak.ui.host }}/realms/{{ .Values.config.keycloak.ui.realm }}/.well-known/openid-configuration"
+            - name: SubmissionKeyCloakSettings__ClientId
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.keycloak.ui.secretName }}
+                  key: {{ .Values.config.keycloak.ui.clientIdKey }}
+            - name: SubmissionKeyCloakSettings__ClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.keycloak.ui.secretName }}
+                  key: {{ .Values.config.keycloak.ui.clientSecretKey }}
+            - name: SubmissionKeyCloakSettings__ValidAudience
+              value: "{{ .Values.config.keycloak.ui.validAudience }}"
+            - name: SubmissionKeyCloakSettings__ValidIssuer
+              value: "{{ .Values.config.keycloak.ui.validIssuer }}"
+            - name: SubmissionKeyCloakSettings__Proxy
+              value: "{{ .Values.config.keycloak.proxy.enabled }}"
+            - name: KeyCloakSettings__Proxy
+              value: "{{ .Values.config.keycloak.proxy.enabled }}"
+            - name: SubmissionKeyCloakSettings__ProxyAddresURL
+              value: "{{ .Values.config.keycloak.proxy.url }}"
+            - name: SubmissionKeyCloakSettings__BypassProxy
+              value: "{{ .Values.config.keycloak.proxy.bypassList }}"
+            - name: SubmissionKeyCloakSettings__UseRedirectURL
+              value: "{{ .Values.config.keycloak.ui.useRedirect }}"
+            - name: SubmissionKeyCloakSettings__RedirectURL
+              value: "{{ .Values.config.keycloak.ui.redirectUrl }}" 
+            - name: SubmissionKeyCloakSettings__TokenRefreshSeconds
+              value: "{{ .Values.config.keycloak.ui.tokenRefreshSettings }}" 
+            - name: SubmissionKeyCloakSettings__AutoTrustKeycloakCert
+              value: "{{ .Values.config.keycloak.ui.trustKeycloakCert }}" 
+            - name: SubmissionKeyCloakSettings__AccountManagementURL
+              value: "{{ .Values.config.keycloak.ui.protocol }}://{{ .Values.config.keycloak.ui.host }}/realms/{{ .Values.config.keycloak.ui.realm }}/account"
+            - name: SubmissionKeyCloakSettings__TokenExpiredAddress
+              value: "{{ .Values.config.keycloak.ui.tokenExpiredAddress }}"
+            - name: DemoMode
+              value: "{{ .Values.config.demoMode }}"
+            - name: KeyCloakDemoMode
+              value: "{{ .Values.config.keycloakDemoMode }}"
+            - name: Testdata
+              value: "{{ .Values.config.testData }}"
+            - name: sslcookies
+              value: "{{ .Values.config.sslCookies }}"
+            - name: httpsRedirect
+              value: "{{ .Values.config.httpsRedirect }}"
+            - name: URLSettingsFrontEnd__QueryImageSQL
+              value: "{{ .Values.config.queryImage.sql }}"
+            - name: URLSettingsFrontEnd__MinioUrl
+              value: '{{ .Values.config.minio.url | replace "https://" "" | replace "http://" "" | trimSuffix "/" }}'
+            {{- with .Values.ui.env }}
+            {{- . | toYaml | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.ui.service.port }}
+              protocol: TCP
+          {{- with .Values.ui.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.ui.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.ui.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: pvc
+              mountPath: /root/.aspnet/DataProtection-Keys
+          {{- with .Values.ui.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: pvc
+          persistentVolumeClaim:
+            claimName: {{ include "submission.fullname" . }}
+      {{- with .Values.ui.volumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
