@@ -588,6 +588,8 @@ namespace TRE_API
                                         }
                                     }
 
+                                    Log.Information($"getting copy for {CleanedIntput} for SubmissionBucket {aSubmission.Project.SubmissionBucket}");
+
                                     var source = await _minioSubHelper.GetCopyObject(aSubmission.Project.SubmissionBucket, CleanedIntput);
 
                                     if (Files.S3Objects.Any(x => x.ETag == source.ETag))
