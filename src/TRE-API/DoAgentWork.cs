@@ -478,7 +478,7 @@ namespace TRE_API
                             }
 
 
-                            var procStatus = await GetProcessInstanceStatus1(parentKey.Value);
+                            var procStatus = await GetProcessInstanceStatus(parentKey.Value);
 
                             if (procStatus.Errored)
                             {

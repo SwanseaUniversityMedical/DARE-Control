@@ -19,10 +19,18 @@ namespace Tre_Credentials.Models
         public string? CredentialType { get; set; }
 
         public string VaultPath { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? CreatedAt { get; set; }
         public bool IsProcessed { get; set; } = false; //a flag to know if the creds are process in TRE-API or not
         public string? ErrorMessage { get; set; }
 
         public DateTime? ExpiredAt { get; set; }
+
+        public SuccessStatus? SuccessStatus { get; set; } = Models.SuccessStatus.Error;
+    }
+
+    public enum SuccessStatus
+    {
+        Error = 0,
+        Success = 1,
     }
 }
