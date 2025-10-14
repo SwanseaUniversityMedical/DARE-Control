@@ -602,13 +602,20 @@ namespace TRE_API
                                     Log.Information($"getting copy for {CleanedIntput} for SubmissionBucket {aSubmission.Project.SubmissionBucket} to {NewCleanedInput}");
 
                                     var source = await _minioSubHelper.GetCopyObject(aSubmission.Project.SubmissionBucket, CleanedIntput);
+                                    try {
+                                        if (Files?.S3Objects != null && Files.S3Objects.Any(x => x.ETag == source.ETag))
+                                        {
+                                            continue;
+                                        }
 
-                                    if (Files.S3Objects.Any(x => x.ETag == source.ETag))
+                                        var resultcopy = await _minioTreHelper.CopyObjectToDestination(InputBucket, NewCleanedInput, source);
+                                    } 
+                                    catch (Exception ex)
                                     {
-                                        continue;
+                                        Log.Error(ex.ToString());
+                                        throw ex;
                                     }
-
-                                    var resultcopy = await _minioTreHelper.CopyObjectToDestination(InputBucket, NewCleanedInput, source);
+                                    
 
                                 }
 
