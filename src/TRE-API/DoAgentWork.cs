@@ -150,10 +150,11 @@ namespace TRE_API
                 string responseBody = response.Content.ReadAsStringAsync().Result;
                 Log.Error("{Function} Request failed with status code: {Code} {responseBody}", "CreateTESK", response.StatusCode, responseBody);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Log.Error("{Function} Request failed with status code: {Code}", "CreateTESK", response.StatusCode);
             }
-            
+
 
 
             return "";
@@ -222,7 +223,7 @@ namespace TRE_API
                         if (shouldReport || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR" ||
                                              status.state == "SYSTEM_ERROR"))
                         {
-                            Log.Information("{Function} *** status change *** {State} {name} {description}", "CheckTES", status.state,status.name ,  status.description);
+                            Log.Information("{Function} *** status change *** {State} {name} {description}", "CheckTES", status.state, status.name, status.description);
 
 
                             // send update
@@ -286,7 +287,7 @@ namespace TRE_API
                                 }
 
                                 APIReturn? result = null;
- 
+
 
                                 if (status.state == "COMPLETE")
                                 {
@@ -391,7 +392,7 @@ namespace TRE_API
                 if (await _features.IsEnabledAsync(FeatureFlags.DemoAllInOne))
                 {
                     Log.Information("{Function} Demo Mode is on, simulating execution..", "Execute");
-                    
+
                 }
 
                 var cancelsubprojs = _subHelper.GetRequestCancelSubsForTre();
@@ -425,7 +426,7 @@ namespace TRE_API
                     listOfSubmissions?.Count);
                 foreach (var aSubmission in listOfSubmissions)
                 {
-                    
+
 
                     try
                     {
@@ -446,7 +447,7 @@ namespace TRE_API
                         }
                         else
                         {
-                             
+
 
 
                             // The TES message
@@ -464,7 +465,7 @@ namespace TRE_API
                                         aSubmission.Id);
                                     processedOK = false;
                                 }
-                            }   
+                            }
 
                             // **************  SEND TO RABBIT
                             if (useRabbit)
@@ -485,7 +486,7 @@ namespace TRE_API
                                     processedOK = false;
                                 }
                             }
- 
+
                             // **************  SEND TO TESK
                             if (useTESK)
                             {
@@ -526,7 +527,7 @@ namespace TRE_API
                                     tesMessage.Outputs = new List<TesOutput> { };
                                 }
 
-                               
+
 
 
 
@@ -555,17 +556,17 @@ namespace TRE_API
                                     MandatoryInput = JsonConvert.DeserializeObject<TesInput>(_AgentSettings.MandatoryInput);
                                     tesMessage.Inputs.Add(MandatoryInput);
                                 }
-                                
+
 
                                 var Files = await _minioTreHelper.GetFilesInBucket(InputBucket);
 
                                 foreach (var input in tesMessage.Inputs)
                                 {
-                                    
+
                                     input.Path = input.Path.Replace("..", "");
-                               
+
                                     input.Url = "s3://" + InputBucket + input.Path;
-                                  
+
                                     if (string.IsNullOrEmpty(input.Name))
                                     {
                                         if (input.Path.Contains("/"))
@@ -583,7 +584,7 @@ namespace TRE_API
                                         }
                                     }
 
-                                   
+
                                     var CleanedIntput = input.Path;
                                     input.Path = "/data" + input.Path;
                                     if (CleanedIntput.StartsWith("/"))
@@ -602,20 +603,21 @@ namespace TRE_API
                                     Log.Information($"getting copy for {CleanedIntput} for SubmissionBucket {aSubmission.Project.SubmissionBucket} to {NewCleanedInput}");
 
                                     var source = await _minioSubHelper.GetCopyObject(aSubmission.Project.SubmissionBucket, CleanedIntput);
-                                    try {
+                                    try
+                                    {
                                         if (Files?.S3Objects != null && Files.S3Objects.Any(x => x.ETag == source.ETag))
                                         {
                                             continue;
                                         }
 
                                         var resultcopy = await _minioTreHelper.CopyObjectToDestination(InputBucket, NewCleanedInput, source);
-                                    } 
+                                    }
                                     catch (Exception ex)
                                     {
                                         Log.Error(ex.ToString());
                                         throw ex;
                                     }
-                                    
+
 
                                 }
 
@@ -634,7 +636,7 @@ namespace TRE_API
                                     {
                                         if (Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken))
                                         {
-
+                                            Log.Information("Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken)  ");
 
                                             Executor.Env["TRINO_SERVER_URL"] = _AgentSettings.URLTrinoToAdd;
                                             Executor.Env["ACCESS_TOKEN"] = Token;
@@ -652,6 +654,7 @@ namespace TRE_API
                                     {
                                         if (Executor.Image.Contains(_AgentSettings.ImageNameToAddToTokenGraphQL))
                                         {
+                                            Log.Information("Executor.Image.Contains(_AgentSettings.ImageNameToAddToTokenGraphQL)  ");
                                             Executor.Command.Add("--Token_" + Token);
                                             Executor.Command.Add("--URL_" + _AgentSettings.URLHasuraToAdd);
                                         }
