@@ -1,23 +1,23 @@
 ﻿using BL.Models;
 using BL.Models.Enums;
-using BL.Models.ViewModels;
+using BL.Models.Settings;
 using BL.Models.Tes;
+using BL.Models.ViewModels;
 using BL.Rabbit;
+using BL.Services;
 using EasyNetQ;
+using Hangfire;
+using Microsoft.FeatureManagement;
 using Newtonsoft.Json;
 using Serilog;
-using Hangfire;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
+using TRE_API.Constants;
+using TRE_API.Models;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
-using BL.Services;
 using TREAgent.Repositories;
-using TRE_API.Models;
-using System.Net;
-using BL.Models.Settings;
-using Microsoft.FeatureManagement;
-using TRE_API.Constants;
 
 namespace TRE_API
 {
@@ -144,8 +144,15 @@ namespace TRE_API
 
                 return id;
             }
-
-            Log.Error("{Function} Request failed with status code: {Code}", "CreateTESK", response.StatusCode);
+            try
+            {
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                Log.Error("{Function} Request failed with status code: {Code} {responseBody}", "CreateTESK", response.StatusCode, responseBody);
+            }
+            catch (Exception ex) {
+                Log.Error("{Function} Request failed with status code: {Code}", "CreateTESK", response.StatusCode);
+            }
+            
 
 
             return "";
@@ -214,7 +221,7 @@ namespace TRE_API
                         if (shouldReport || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR" ||
                                              status.state == "SYSTEM_ERROR"))
                         {
-                            Log.Information("{Function} *** status change *** {State}", "CheckTES", status.state);
+                            Log.Information("{Function} *** status change *** {State} {name} {description}", "CheckTES", status.state,status.name ,  status.description);
 
 
                             // send update
@@ -417,6 +424,8 @@ namespace TRE_API
                     listOfSubmissions?.Count);
                 foreach (var aSubmission in listOfSubmissions)
                 {
+                    
+
                     try
                     {
                         Log.Information("{Function}Submission: {submission}", "Execute", aSubmission.Id);
@@ -516,11 +525,80 @@ namespace TRE_API
                                     tesMessage.Outputs = new List<TesOutput> { };
                                 }
 
+                               
+
+
+
                                 //S3://bucket-name/key-name
                                 foreach (var output in tesMessage.Outputs)
                                 {
                                     output.Url = OutputBucket + $"/{aSubmission.Id}";
+
                                 }
+
+
+                                var InputBucket = _dbContext.Projects
+                                  .First(x => x.SubmissionProjectId == projectId)
+                                  .SubmissionBucketTre;
+
+                                var bucket = _subHelper.GetOutputBucketGutsSub(aSubmission.Id.ToString(), true);
+
+                                TesInput MandatoryInput = null;
+
+                                if (tesMessage.Inputs == null)
+                                {
+                                    tesMessage.Inputs = new List<TesInput>();
+                                }
+                                if (string.IsNullOrEmpty(_AgentSettings.MandatoryInput) == false)
+                                {
+                                    MandatoryInput = JsonConvert.DeserializeObject<TesInput>(_AgentSettings.MandatoryInput);
+                                    tesMessage.Inputs.Add(MandatoryInput);
+                                }
+                                
+
+                                var Files = await _minioTreHelper.GetFilesInBucket(InputBucket);
+
+                                foreach (var input in tesMessage.Inputs)
+                                {
+                                    
+                                    input.Path = input.Path.Replace("..", "");
+                                    input.Path = "/data" + input.Path;
+                                    input.Url = "s3://" + InputBucket + input.Path;
+                                    var CleanedIntput = input.Path;
+
+                                    if (input.Path.StartsWith("/"))
+                                    {
+                                        CleanedIntput = CleanedIntput.Remove(0, 1);
+                                    }
+
+                                    if (string.IsNullOrEmpty(input.Name))
+                                    {
+                                        if (input.Path.Contains("/"))
+                                        {
+                                            input.Name = input.Path.Split('/')[^1];
+                                        }
+                                    }
+
+
+                                    if (MandatoryInput != null)
+                                    {
+                                        if (input == MandatoryInput)
+                                        {
+                                            continue;
+                                        }
+                                    }
+
+                                    var source = await _minioSubHelper.GetCopyObject(aSubmission.Project.SubmissionBucket, CleanedIntput);
+
+                                    if (Files.S3Objects.Any(x => x.ETag == source.ETag))
+                                    {
+                                        continue;
+                                    }
+
+                                    var resultcopy = await _minioTreHelper.CopyObjectToDestination(InputBucket, CleanedIntput, source);
+
+                                }
+
 
                                 if (tesMessage.Executors == null)
                                 {
@@ -536,11 +614,18 @@ namespace TRE_API
                                     {
                                         if (Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken))
                                         {
+
+
                                             Executor.Env["TRINO_SERVER_URL"] = _AgentSettings.URLTrinoToAdd;
                                             Executor.Env["ACCESS_TOKEN"] = Token;
                                             Executor.Env["USER_NAME"] = aSubmission.SubmittedBy.Name;
                                             Executor.Env["SCHEMA"] = aSubmission.Project.Name;
                                             Executor.Env["CATALOG"] = _AgentSettings.CATALOG;
+
+                                            if (string.IsNullOrEmpty(Executor.Env["TRINO_SERVER_URL"]))
+                                            {
+                                                Executor.Env["TRINO_SERVER_URL"] = "";
+                                            }
                                         }
                                     }
                                     else

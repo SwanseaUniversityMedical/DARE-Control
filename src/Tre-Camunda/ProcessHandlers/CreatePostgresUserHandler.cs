@@ -103,9 +103,16 @@ namespace Tre_Camunda.ProcessHandlers
                         {
                             var credentialData = new Dictionary<string, object>();
 
-                            foreach (var credential in envList)
-                            {
-                                var CredentialEnv = new CredentialsVault();
+                    
+                    var createUserRequest = new CreateUserRequest
+                    {
+                        Username = username,
+                        Password = password,
+                        Server = "",
+                        Datasbasename = "",
+                        Port = "",
+                        SchemaPermissions = schemaPermissions
+                    };
 
 
                                 CredentialEnv.env = credential.env;
