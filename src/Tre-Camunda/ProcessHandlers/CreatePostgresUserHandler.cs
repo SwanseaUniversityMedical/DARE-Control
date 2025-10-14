@@ -60,7 +60,7 @@ namespace Tre_Camunda.ProcessHandlers
                     string? server = envList.Where(x => x.env.ToLower().Contains("server")).FirstOrDefault().value.ToString();
                     string? port = envList.Where(x => x.env.ToLower().Contains("port")).FirstOrDefault().value.ToString();
                     string? project = variables["project"]?.ToString().Replace("[", "").Replace("]", "").Replace("\"", "");
-;                   string? user = variables["user"]?.ToString().Replace("[", "").Replace("]", "");
+                    ; string? user = variables["user"]?.ToString().Replace("[", "").Replace("]", "");
 
                     if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(database) || string.IsNullOrEmpty(server) || string.IsNullOrEmpty(port) || string.IsNullOrEmpty(user) || string.IsNullOrEmpty(project))
                     {
@@ -103,16 +103,9 @@ namespace Tre_Camunda.ProcessHandlers
                         {
                             var credentialData = new Dictionary<string, object>();
 
-                    
-                    var createUserRequest = new CreateUserRequest
-                    {
-                        Username = username,
-                        Password = password,
-                        Server = "",
-                        Datasbasename = "",
-                        Port = "",
-                        SchemaPermissions = schemaPermissions
-                    };
+                            foreach (var credential in envList)
+                            {
+                                var CredentialEnv = new CredentialsVault();
 
 
                                 CredentialEnv.env = credential.env;
@@ -140,7 +133,7 @@ namespace Tre_Camunda.ProcessHandlers
                                 var errorMsg = $"Failed to store credential in Vault at path: {vaultPath}";
                                 _logger.LogError(errorMsg);
                                 throw new Exception(errorMsg);
-                            }                           
+                            }
 
                             _logger.LogInformation($"Successfully created PostgreSQL user: {username} for project: {project}");
 
@@ -153,8 +146,8 @@ namespace Tre_Camunda.ProcessHandlers
                                 {
                                     ["username"] = username,
                                     ["credentialType"] = "postgres",
-                                    ["project"] = project                                   
-                                }                           
+                                    ["project"] = project
+                                }
                             };
 
 
@@ -169,27 +162,27 @@ namespace Tre_Camunda.ProcessHandlers
                         }
                     }
                 }
-                    }
-                    catch (Exception ex)
-                    {
-                    var errorMsg = $"Unexpected error in CreatePostgresUserHandler: {ex.Message}";
-                    _logger.LogError(ex, errorMsg);
-
-                    SW.Stop();
-                    _logger.LogInformation($"CreatePostgresUserHandler took {SW.Elapsed.TotalSeconds} seconds");
-
-                    throw;
-                     }  
-
-  }
-
-            private string GenerateSecurePassword()
-            {
-                const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-                var random = new Random();
-                return new string(Enumerable.Repeat(chars, 16)
-                    .Select(s => s[random.Next(s.Length)]).ToArray());
             }
+            catch (Exception ex)
+            {
+                var errorMsg = $"Unexpected error in CreatePostgresUserHandler: {ex.Message}";
+                _logger.LogError(ex, errorMsg);
+
+                SW.Stop();
+                _logger.LogInformation($"CreatePostgresUserHandler took {SW.Elapsed.TotalSeconds} seconds");
+
+                throw;
+            }
+
         }
- }
+
+        private string GenerateSecurePassword()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, 16)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+    }
+}
 
