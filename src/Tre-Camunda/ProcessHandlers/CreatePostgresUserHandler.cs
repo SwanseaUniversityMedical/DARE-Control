@@ -60,7 +60,7 @@ namespace Tre_Camunda.ProcessHandlers
                     string? server = envList.Where(x => x.env.ToLower().Contains("server")).FirstOrDefault().value.ToString();
                     string? port = envList.Where(x => x.env.ToLower().Contains("port")).FirstOrDefault().value.ToString();
                     string? project = variables["project"]?.ToString().Replace("[", "").Replace("]", "").Replace("\"", "");
-                    ; string? user = variables["user"]?.ToString().Replace("[", "").Replace("]", "");
+                    string? user = variables["user"]?.ToString().Replace("[", "").Replace("]", "");
 
                     if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(database) || string.IsNullOrEmpty(server) || string.IsNullOrEmpty(port) || string.IsNullOrEmpty(user) || string.IsNullOrEmpty(project))
                     {
