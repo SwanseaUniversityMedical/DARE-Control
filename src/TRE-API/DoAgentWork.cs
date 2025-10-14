@@ -631,12 +631,19 @@ namespace TRE_API
                                                 _AgentSettings.ImageNameToAddToToken);
                                 foreach (var Executor in tesMessage.Executors)
                                 {
+                                    if (Executor.Env == null)
+                                    {
+                                        Executor.Env = new Dictionary<string, string>();
+                                    }
+
                                     Log.Information("Executor.Image > " + Executor.Image);
                                     if (await _features.IsEnabledAsync(FeatureFlags.SqlAndNotGraphQl))
                                     {
                                         if (Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken))
                                         {
                                             Log.Information("Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken)  ");
+
+
 
                                             Executor.Env["TRINO_SERVER_URL"] = _AgentSettings.URLTrinoToAdd;
                                             Executor.Env["ACCESS_TOKEN"] = Token;
