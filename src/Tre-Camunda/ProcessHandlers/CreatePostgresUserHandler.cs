@@ -55,12 +55,12 @@ namespace Tre_Camunda.ProcessHandlers
                 else
                 {
 
-                    string? username = envList.Where(x => x.env.ToLower().Contains("username")).FirstOrDefault().ToString();
-                    string? database = envList.Where(x => x.env.ToLower().Contains("database")).FirstOrDefault().ToString();
-                    string? server = envList.Where(x => x.env.ToLower().Contains("userver")).FirstOrDefault().ToString();
-                    string? port = envList.Where(x => x.env.ToLower().Contains("port")).FirstOrDefault().ToString();
-                    string? project = variables["project"]?.ToString();
-                    string? user = variables["user"]?.ToString();
+                    string? username = envList.Where(x => x.env.ToLower().Contains("username")).FirstOrDefault().value.ToString();
+                    string? database = envList.Where(x => x.env.ToLower().Contains("database")).FirstOrDefault().value.ToString();
+                    string? server = envList.Where(x => x.env.ToLower().Contains("server")).FirstOrDefault().value.ToString();
+                    string? port = envList.Where(x => x.env.ToLower().Contains("port")).FirstOrDefault().value.ToString();
+                    string? project = variables["project"]?.ToString().Replace("[", "").Replace("]", "").Replace("\"", "");
+;                   string? user = variables["user"]?.ToString().Replace("[", "").Replace("]", "");
 
                     if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(database) || string.IsNullOrEmpty(server) || string.IsNullOrEmpty(port) || string.IsNullOrEmpty(user) || string.IsNullOrEmpty(project))
                     {
@@ -79,7 +79,7 @@ namespace Tre_Camunda.ProcessHandlers
                         {
                             new SchemaPermission
                             {
-                                SchemaName = "ephemeral",
+                                SchemaName = project,
                                 Permissions = DatabasePermissions.Read | DatabasePermissions.Write | DatabasePermissions.CreateTables
                             }
 
@@ -139,8 +139,19 @@ namespace Tre_Camunda.ProcessHandlers
 
                             SW.Stop();
                             _logger.LogInformation($"CreatePostgresUserHandler took {SW.Elapsed.TotalSeconds} seconds");
-                                                        
 
+                            var outputVariables = new Dictionary<string, object>
+                            {
+                                ["credentialData"] = new Dictionary<string, object>
+                                {
+                                    ["username"] = username,
+                                    ["credentialType"] = "postgres",
+                                    ["project"] = project                                   
+                                }                           
+                            };
+
+
+                            return outputVariables;
                         }
                         else
                         {
