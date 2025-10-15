@@ -641,10 +641,6 @@ namespace TRE_API
                                     {
                                         if (Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken))
                                         {
-                                            Log.Information("Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken)  ");
-
-
-
                                             Executor.Env["TRINO_SERVER_URL"] = _AgentSettings.URLTrinoToAdd;
                                             Executor.Env["ACCESS_TOKEN"] = Token;
                                             Executor.Env["USER_NAME"] = aSubmission.SubmittedBy.Name;
@@ -661,7 +657,6 @@ namespace TRE_API
                                     {
                                         if (Executor.Image.Contains(_AgentSettings.ImageNameToAddToTokenGraphQL))
                                         {
-                                            Log.Information("Executor.Image.Contains(_AgentSettings.ImageNameToAddToTokenGraphQL)  ");
                                             Executor.Command.Add("--Token_" + Token);
                                             Executor.Command.Add("--URL_" + _AgentSettings.URLHasuraToAdd);
                                         }
