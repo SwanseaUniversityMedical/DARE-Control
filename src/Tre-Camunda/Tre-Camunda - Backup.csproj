@@ -23,7 +23,7 @@
     <EmbeddedResource Include="ProcessModels\credentials.dmn" />
     <EmbeddedResource Include="ProcessModels\Credentials_Expire_Subprocess.bpmn" />
     <EmbeddedResource Include="ProcessModels\Credentials_Revoke.bpmn" />
-    <EmbeddedResource Include="ProcessModels\Credentials_Determins_Subprocess.bpmn" />
+    <EmbeddedResource Include="ProcessModels\Credentials_CreateVariables_Subprocess.bpmn" />
   </ItemGroup>
 
   <ItemGroup>
