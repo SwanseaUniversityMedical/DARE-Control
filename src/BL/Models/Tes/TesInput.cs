@@ -67,13 +67,6 @@ namespace BL.Models.Tes
         public string Content { get; set; }
 
         /// <summary>
-        /// Indicates that the file should not be downloaded
-        /// https://github.com/ga4gh/task-execution-schemas/blob/1df37d34242f74d3f03475c6b9de3324b8094054/openapi/task_execution_service.openapi.yaml#L481
-        /// </summary>
-        [DataMember(Name = "streamable")]
-        public bool Streamable { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -86,7 +79,6 @@ namespace BL.Models.Tes
             .Append("  Path: ").Append(Path).Append('\n')
             .Append("  Type: ").Append(Type).Append('\n')
             .Append("  Content: ").Append(Content).Append('\n')
-            .Append("  Streamable: ").Append(Streamable).Append('\n')
             .Append("}\n")
             .ToString();
 
@@ -149,10 +141,7 @@ namespace BL.Models.Tes
                     Content == other.Content ||
                     Content is not null &&
                     Content.Equals(other.Content)
-                ) &&
-                (
-                    Streamable.Equals(other.Streamable)
-                ),
+                )
             };
 
         /// <summary>
@@ -191,8 +180,6 @@ namespace BL.Models.Tes
                 {
                     hashCode = hashCode * 59 + Content.GetHashCode();
                 }
-
-                hashCode = hashCode * 59 + Streamable.GetHashCode();
 
                 return hashCode;
             }

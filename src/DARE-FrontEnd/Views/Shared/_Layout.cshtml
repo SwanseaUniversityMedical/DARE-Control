@@ -377,6 +377,9 @@
                     window.location.href = "/Project/GetProject/" + ProjectId;
                 },
                 error: function (error) {
+                    var ElementError = document.getElementById("error");
+                    ElementError.textContent = error.responseText;
+                    ElementError.style.color = "red";
                     console.log(error);
                 }
             });
@@ -551,6 +554,10 @@
                         console.log(result);
                     },
                     error: function (error) {
+                        var ElementError = document.getElementById("error");
+                        ElementError.textContent = error.responseText;
+                        ElementError.style.color = "red";
+
                         console.log(error);
                     }
                 });
@@ -631,6 +638,10 @@
                         console.log(result);
                     },
                     error: function (error) {
+                        var ElementError = document.getElementById("error");
+                        ElementError.textContent = error.responseText;
+                        ElementError.style.color = "red";
+
                         console.log(error);
                     }
                 });

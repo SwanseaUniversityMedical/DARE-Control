@@ -121,10 +121,10 @@ namespace DARE_FrontEnd.Controllers
                 return RedirectToAction("GetASubmission", new { id = result.Id });
                 //return Ok();
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Log.Error("SubmissionWizard > " + ex.ToString());
-                return BadRequest();
+                Log.Error(e, "Exception in {Function}");
+                return BadRequest(e.Message);
             }
         }
 
@@ -228,8 +228,8 @@ namespace DARE_FrontEnd.Controllers
             }
             catch (Exception e)
             {
-                Log.Error(e, "{Function}  crash", "SubmitDemoTes");
-                throw new Exception("SubmissionWizard > " + e.ToString());
+                Log.Error(e, "Exception in {Function}");
+                return BadRequest(e.Message);
             }
         }
 
@@ -290,7 +290,6 @@ namespace DARE_FrontEnd.Controllers
                     listOfTre = string.Join("|",
                         model.TreRadios.Where(info => info.IsSelected).Select(info => info.Name));
                 }
-
 
                 test = new TesTask();
 
@@ -404,8 +403,7 @@ namespace DARE_FrontEnd.Controllers
                         Name = "",
                         Description = "",
                         Url = "a",
-                        Content = "",
-                        Streamable = false
+                        Content = ""
                     });
                 }
 
@@ -420,8 +418,8 @@ namespace DARE_FrontEnd.Controllers
             }
             catch (Exception e)
             {
-                Log.Error(e, "{Function} Boom crash", "AddiSubmissionWizard");
-                throw;
+                Log.Error(e, "Exception in {Function}");
+                return BadRequest(e.Message);
             }
         }
     }
