@@ -109,9 +109,9 @@ namespace Tre_Camunda.ProcessHandlers
 
 
                                 CredentialEnv.env = credential.env;
-                                if (credential.value.Contains(password))
+                                if (credential.env.ToLower().Contains("password"))
                                 {
-                                    credential.value = password;
+                                    CredentialEnv.value = password;
                                 }
                                 else
                                 {
