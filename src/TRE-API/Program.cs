@@ -2,6 +2,7 @@ using BL.Models.Settings;
 using BL.Models.ViewModels;
 using BL.Rabbit;
 using BL.Services;
+using TRE_API.Services;
 using EasyNetQ;
 using Hangfire;
 using Hangfire.Dashboard;
