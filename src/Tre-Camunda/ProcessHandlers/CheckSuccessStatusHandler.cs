@@ -1,12 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Tre_Credentials.DbContexts;
 using Tre_Credentials.Models;
 using Zeebe.Client.Accelerator.Abstractions;
 using Zeebe.Client.Accelerator.Attributes;
-
-
-
 
 namespace Tre_Camunda.ProcessHandlers
 {
@@ -22,34 +20,53 @@ namespace Tre_Camunda.ProcessHandlers
             _logger = logger;
         }
 
-        public async Task HandleJob(ZeebeJob job, CancellationToken ct)
+        public async Task HandleJob(ZeebeJob job, CancellationToken token)
         {
             var vars = JsonSerializer.Deserialize<Dictionary<string, object>>(job.Variables) ?? new();
 
             if (!vars.TryGetValue("parentProcessKey", out var parentObj) || parentObj is null)
             {
-                _logger.LogWarning("parentProcessKey missing.");
-                return; 
+                _logger.LogWarning("parentProcessKey missing, cannot check for success status.");
+                return;
             }
 
             long parentProcessKey = parentObj is JsonElement el && el.ValueKind == JsonValueKind.Number && el.TryGetInt64(out var parsed)
                 ? parsed
                 : long.Parse(parentObj.ToString());
 
-            var rows = await _credDb.EphemeralCredentials.Where(e => e.ParentProcessInstanceKey == parentProcessKey).ToListAsync(ct);
+            var rows = await _credDb.EphemeralCredentials.Where(e => e.ParentProcessInstanceKey == parentProcessKey).ToListAsync();
 
             if (rows.Count == 0)
             {
-                _logger.LogInformation("No rows found for ParentProcessInstanceKey={Parent}", parentProcessKey);
+                
+                _logger.LogWarning("No rows found for ParentProcessInstanceKey={Parent}. Hence error.", parentProcessKey);
+                _credDb.EphemeralCredentials.Add(new EphemeralCredential
+                {
+                    ParentProcessInstanceKey = parentProcessKey,
+                    ProcessInstanceKey = job.ProcessInstanceKey,
+                    CreatedAt = DateTime.UtcNow,
+                    IsProcessed = false,
+                    SuccessStatus = SuccessStatus.Error,
+                    ErrorMessage = "No credential records found."
+                });
+                await _credDb.SaveChangesAsync();
                 return;
             }
 
+            bool anyError = rows.Any(r => r.SuccessStatus == SuccessStatus.Error);
+
+            if (anyError)
+            {
+                _logger.LogInformation("Status ERROR for ParentProcessInstanceKey={Parent}", parentProcessKey);               
+                return;
+            }
+
+            
             foreach (var r in rows)
                 r.SuccessStatus = SuccessStatus.Success;
 
-            await _credDb.SaveChangesAsync(ct);
-
-            _logger.LogInformation("Marked {Count} row(s) Success for ParentProcessInstanceKey={Parent}", rows.Count, parentProcessKey);
+            await _credDb.SaveChangesAsync();
+            _logger.LogInformation("Status SUCCESS  for ParentProcessInstanceKey={Parent}", parentProcessKey);
         }
     }
 }
