@@ -85,7 +85,7 @@ services:
       - CAMUNDA_OPERATE_ELASTICSEARCH_URL=http://elasticsearch:9200
       - CAMUNDA_OPERATE_ZEEBEELASTICSEARCH_URL=http://elasticsearch:9200
       - management.endpoints.web.exposure.include=health
-      - management.endpoint.health.probes.enabled=true
+      - management.endpoint.health.probes.enabled=true     
     healthcheck:
       test: [ "CMD-SHELL", "wget -O - -q 'http://localhost:8080/actuator/health/readiness'" ]
       interval: 30s
@@ -122,8 +122,8 @@ services:
       - camunda-platform
     depends_on:
       - zeebe
-      - operate
-
+      - operate 
+  
   elasticsearch: # https://hub.docker.com/_/elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}
     container_name: elasticsearch
@@ -252,6 +252,7 @@ services:
       retries: 5
       start_period: 10s
     command: ["vault", "server", "-dev", "-dev-root-token-id=dev-only-token"]
+  
 
   openldap:
     image: osixia/openldap:1.5.0
@@ -291,6 +292,7 @@ services:
       "
     volumes:
       - ./ldap-init/init.ldif:/container/service/slapd/assets/init.ldif
+ 
  
   phpldapadmin:
     image: osixia/phpldapadmin:latest
