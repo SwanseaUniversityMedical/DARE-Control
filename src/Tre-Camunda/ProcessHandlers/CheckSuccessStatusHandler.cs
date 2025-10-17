@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using Tre_Camunda.Models;
 using Tre_Credentials.DbContexts;
 using Tre_Credentials.Models;
 using Zeebe.Client.Accelerator.Abstractions;
@@ -30,6 +31,11 @@ namespace Tre_Camunda.ProcessHandlers
                 return;
             }
 
+            var variables = JsonSerializer.Deserialize<Dictionary<string, object>>(job.Variables);
+            var envListJson = variables["envList"]?.ToString();
+            var envList = JsonSerializer.Deserialize<List<CredentialsCamundaOutput>>(envListJson);
+            var subItem = envList.FirstOrDefault(x => string.Equals(x.env, "submissionId", StringComparison.OrdinalIgnoreCase));
+            var submissionId = subItem?.value;
             long parentProcessKey = parentObj is JsonElement el && el.ValueKind == JsonValueKind.Number && el.TryGetInt64(out var parsed)
                 ? parsed
                 : long.Parse(parentObj.ToString());
@@ -44,6 +50,7 @@ namespace Tre_Camunda.ProcessHandlers
                 {
                     ParentProcessInstanceKey = parentProcessKey,
                     ProcessInstanceKey = job.ProcessInstanceKey,
+                    SubmissionId = int.Parse(submissionId),
                     CreatedAt = DateTime.UtcNow,
                     IsProcessed = false,
                     SuccessStatus = SuccessStatus.Error,
