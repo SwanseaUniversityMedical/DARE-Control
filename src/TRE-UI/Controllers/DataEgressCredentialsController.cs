@@ -33,6 +33,11 @@ namespace TRE_UI.Controllers
 
         public async Task<IActionResult> UpdateCredentials(KeycloakCredentials credentials)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View(credentials);
+            }
+
             if (await ControllerHelpers.UpdateCredentials("DataEgressCredentials", _clientHelper, ModelState,
                     credentials))
             {
@@ -43,19 +48,7 @@ namespace TRE_UI.Controllers
                 return View(credentials);
             }
 
-            
-            
-
         }
-
-
-
-
-
-
-
-
-
 
     }
 }

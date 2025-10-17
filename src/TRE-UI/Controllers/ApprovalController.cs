@@ -22,8 +22,12 @@ namespace TRE_UI.Controllers
      
         [HttpGet]
         public IActionResult GetAllProjects(bool showOnlyUnprocessed)
-
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var paramlist = new Dictionary<string, string>
             {
                { "showOnlyUnprocessed", showOnlyUnprocessed.ToString() }
@@ -35,8 +39,12 @@ namespace TRE_UI.Controllers
 
         [HttpGet]
         public IActionResult EditMemberships(int projectId, bool showOnlyUnprocessed)
-
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var paramlist = new Dictionary<string, string>
             {
                 { "projectId", projectId.ToString() },
@@ -52,15 +60,25 @@ namespace TRE_UI.Controllers
         [HttpPost]
         public async Task<IActionResult> EditMemberships(List<TreMembershipDecision> model)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var result =
                 await _treclientHelper.CallAPI<List<TreMembershipDecision>, List<TreMembershipDecision>>("/api/Approval/UpdateMembershipDecisions", model);
-            
+
             return View(result);
         }
 
         [HttpPost]
         public async Task<IActionResult> EditProject(TreProject model)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var result =
                 await _treclientHelper.CallAPI<List<TreProject>, List<TreProject>>("/api/Approval/UpdateProjects", new List<TreProject>(){ model});
 
@@ -70,11 +88,16 @@ namespace TRE_UI.Controllers
         [HttpGet]
         public IActionResult EditProject(int? projectId)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", projectId.ToString());
             var project = _treclientHelper.CallAPIWithoutModel<TreProject>(
                 "/api/Approval/GetTreProject/", paramlist).Result;
-                           
+
             return View(project);
         }
 
