@@ -197,7 +197,7 @@ services:
     networks:   
       - minio-network
   seq:
-    image: datalust/seq:latest
+    image: datalust/seq:2025.1.14095
     mem_limit: 2G
     mem_reservation: 1G
     cpus: 0.5
