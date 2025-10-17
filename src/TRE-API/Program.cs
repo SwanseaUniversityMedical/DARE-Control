@@ -25,7 +25,6 @@ using TRE_API;
 using TRE_API.Constants;
 using TRE_API.Models;
 using TRE_API.Repositories.DbContexts;
-using TRE_API.Services;
 using TRE_API.Services.SignalR;
 using Tre_Credentials.DbContexts;
 using TREAPI.Services;

@@ -4,18 +4,9 @@ using BL.Models.Enums;
 using BL.Models.ViewModels;
 using BL.Services;
 using Tre_Credentials.DbContexts;
-using EasyNetQ.Management.Client.Model;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using Sentry;
 using Serilog;
-using System.Runtime.Intrinsics.X86;
 using System.Text;
 using TRE_API.Repositories.DbContexts;
-using static Npgsql.PostgresTypes.PostgresCompositeType;
 
 
 namespace TRE_API.Services
@@ -30,8 +21,10 @@ namespace TRE_API.Services
         private readonly IMinioTreHelper _minioTreHelper;
 
         private readonly IHttpClientFactory _httpClientFactory;
+
+        private readonly IConfiguration _config;
         
-        public DareSyncHelper(ApplicationDbContext dbContext, IDareClientWithoutTokenHelper dareClient,  IMinioTreHelper minioTreHelper, CredentialsDbContext credentialsDbContext, IHttpClientFactory httpClientFactory)
+        public DareSyncHelper(ApplicationDbContext dbContext, IDareClientWithoutTokenHelper dareClient,  IMinioTreHelper minioTreHelper, CredentialsDbContext credentialsDbContext, IHttpClientFactory httpClientFactory, IConfiguration config)
         {
             _DbContext = dbContext;
             _dareclientHelper = dareClient;
@@ -41,6 +34,8 @@ namespace TRE_API.Services
             _CredentialsDbContext = credentialsDbContext;
 
             _httpClientFactory = httpClientFactory;
+
+            _config = config;
         }
 
         public async Task<BoolReturn> SyncSubmissionWithTre()
@@ -248,7 +243,7 @@ namespace TRE_API.Services
             var jsonPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
-            var camundaWebhookUrl = "http://localhost:8085/inbound/StartCredentials";
+            var camundaWebhookUrl = _config["CredentialAPISettings:StartWebhookUrl"];
 
             using var httpClient = _httpClientFactory.CreateClient();
             httpClient.Timeout = TimeSpan.FromMinutes(2);

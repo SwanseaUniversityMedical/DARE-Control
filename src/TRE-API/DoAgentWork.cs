@@ -5,7 +5,6 @@ using BL.Models.Tes;
 using BL.Models.ViewModels;
 using BL.Rabbit;
 using BL.Services;
-using Build.Security.AspNetCore.Middleware.Dto;
 using EasyNetQ;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
@@ -51,6 +50,7 @@ namespace TRE_API
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly CredentialsDbContext _credsDbContext;
         private readonly IVaultCredentialsService _vaultService;
+        private readonly IConfiguration _config;
      
 
 
@@ -69,7 +69,8 @@ namespace TRE_API
             IFeatureManager features,
             IHttpClientFactory httpClientFactory,
             CredentialsDbContext credsDbContext,
-            IVaultCredentialsService vaultService
+            IVaultCredentialsService vaultService,
+            IConfiguration config
            
         )
         {
@@ -99,6 +100,8 @@ namespace TRE_API
             _httpClientFactory = httpClientFactory;
             _credsDbContext = credsDbContext;
             _vaultService = vaultService;
+
+            _config = config;
         }
 
         public string CreateTesk(string jsonContent, int subId, int projectId, int userId, string tesId, string outputBucket, string Tesname)
@@ -762,12 +765,12 @@ namespace TRE_API
                                         //if (credentials != null && credentials.Count > 0)
                                         //{
                                         //    foreach (var outerKey in credentials)
-                                        //    {                                              
+                                        //    {
                                         //        if (outerKey.Value is IDictionary<string, object> innerDict) //Cuz the format is dictionary within a dictionary
                                         //        {
                                         //            foreach (var inner in innerDict)
                                         //            {
-                                        //                var key = inner.Key; 
+                                        //                var key = inner.Key;
                                         //                var value = inner.Value?.ToString() ?? string.Empty;
                                         //                Executor.Env[key] = value;
                                         //            }
@@ -909,82 +912,7 @@ namespace TRE_API
             Log.Error(errorMsg);
             throw new TimeoutException(errorMsg);
         }
-
-        private sealed class ProcStatus
-        {
-            public bool Finished { get; set; }
-            public bool Errored { get; set; }
-        }
-
-        private sealed class ProcessStat
-        {
-            public string ActivityId { get; set; } = "";
-            public int Active { get; set; }
-            public int Canceled { get; set; }
-            public int Incidents { get; set; }
-            public int Completed { get; set; }
-        }
-
-
-        private async Task<ProcStatus> GetProcessInstanceStatus(long parentKey)
-        {
-            try
-            {
-                using var httpClient = _httpClientFactory.CreateClient();
-
-
-                httpClient.DefaultRequestHeaders.Add("Cookie", "OPERATE-SESSION=59FBA6B0D98F20F9B93538DA022A890C");
-
-                var statisticsUrl = $"http://localhost:8081/v1/process-instances/{parentKey}/statistics";
-                var response = await httpClient.GetAsync(statisticsUrl);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return new ProcStatus { Finished = false, Errored = true };
-                }
-
-                var json = await response.Content.ReadAsStringAsync();
-                var statistics = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(json);
-
-                bool hasActive = false;
-                bool hasIncidents = false;
-
-                foreach (var stat in statistics)
-                {
-                    if (stat.TryGetValue("active", out var activeObj))
-                    {
-                        var activeCount = System.Text.Json.JsonSerializer.Deserialize<int>(activeObj.ToString());
-                        if (activeCount > 0) hasActive = true;
-                    }
-
-                    if (stat.TryGetValue("incidents", out var incidentsObj))
-                    {
-                        var incidentCount = System.Text.Json.JsonSerializer.Deserialize<int>(incidentsObj.ToString());
-                        if (incidentCount > 0) hasIncidents = true;
-                    }
-                }
-
-                return new ProcStatus
-                {
-                    Finished = !hasActive && !hasIncidents,
-                    Errored = hasIncidents
-                };
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Failed to check process status for key {Key}", parentKey);
-                return new ProcStatus { Finished = false, Errored = true };
-            }
-        }
-
-
-        
-
-
-
-
-
-
+                             
         private async Task TriggerRevokeCredentialsAsync(int submissionId, int project, int user, int timer)
         {
             var payload = new
@@ -1004,7 +932,7 @@ namespace TRE_API
             var jsonPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
            
-            var camundaWebhookUrl = "http://localhost:8085/inbound/RevokeCredentials";
+            var camundaWebhookUrl = _config["CredentialAPISettings:RevokeCredentials"];
 
             using var httpClient = _httpClientFactory.CreateClient();
             httpClient.Timeout = TimeSpan.FromMinutes(2);
