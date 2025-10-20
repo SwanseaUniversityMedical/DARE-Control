@@ -113,14 +113,19 @@ namespace Tre_Camunda.ProcessHandlers
                     var credentialData = new Dictionary<string, object>();
                     foreach (var credential in envList)
                     {
-                        var key = credential.env;
-                        var value = credential.value ?? string.Empty;
-                        if (!string.IsNullOrEmpty(value) && value.Contains(password))
+                        var CredentialEnv = new CredentialsVault();
+                        CredentialEnv.env = credential.env;
+                        if (credential.env.ToLower().Contains("password"))
                         {
-                            value = password;
+                            CredentialEnv.value = password;
+                        }
+                        else
+                        {
+                            CredentialEnv.value = credential.value;
                         }
 
-                        credentialData[key] = value;
+                        credentialData.Add(CredentialEnv.env, CredentialEnv.value);
+
                     }
 
                     var jobId = submissionId;
