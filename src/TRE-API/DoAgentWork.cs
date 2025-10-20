@@ -762,23 +762,23 @@ namespace TRE_API
                                             }
                                         }
 
-                                        //if (credentials != null && credentials.Count > 0)
-                                        //{
-                                        //    foreach (var outerKey in credentials)
-                                        //    {
-                                        //        if (outerKey.Value is IDictionary<string, object> innerDict) //Cuz the format is dictionary within a dictionary
-                                        //        {
-                                        //            foreach (var inner in innerDict)
-                                        //            {
-                                        //                var key = inner.Key;
-                                        //                var value = inner.Value?.ToString() ?? string.Empty;
-                                        //                Executor.Env[key] = value;
-                                        //            }
-                                        //        }
-                                        //    }
+                                        if (credentials != null && credentials.Count > 0)
+                                        {
+                                            foreach (var outerKey in credentials)
+                                            {
+                                                if (outerKey.Value is IDictionary<string, object> innerDict) //The format is dictionary within a dictionary
+                                                {
+                                                    foreach (var inner in innerDict)
+                                                    {
+                                                        var key = inner.Key;
+                                                        var value = inner.Value?.ToString() ?? string.Empty;
+                                                        Executor.Env[key] = value;
+                                                    }
+                                                }
+                                            }
 
-                                        //    Log.Information($"Injected credentials into environment variables for {aSubmission.Id}");
-                                        //}
+                                            Log.Information($"Injected credentials into environment variables for {aSubmission.Id}");
+                                        }
 
                                     }
                                     else
