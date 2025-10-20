@@ -1,4 +1,4 @@
-﻿using TRE_API.Settings;
+﻿using BL.Models.Settings;
 using Newtonsoft.Json;
 using Serilog;
 using System;
@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using static IdentityModel.ClaimComparer;
 
-namespace TRE_API.Services
+namespace BL.Services
 {
     public class VaultCredentialsService : IVaultCredentialsService, IDisposable
     {

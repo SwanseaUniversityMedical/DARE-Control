@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TRE_API.Services
+namespace BL.Services
 {
     public interface IVaultCredentialsService
     {
