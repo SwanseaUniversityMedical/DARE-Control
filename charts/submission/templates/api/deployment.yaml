@@ -53,7 +53,7 @@ spec:
                   name: {{ .Values.config.postgres.secretName }}
                   key: {{ .Values.config.postgres.usernameSecretKey }}
             - name: ConnectionStrings__DefaultConnection
-              value: "Server={{ .Values.config.postgres.host }};port={{ .Values.config.postgres.port }};Database={{ .Values.config.postgres.database }};Username=$(POSTGRES_USERNAME);Password=$(POSTGRES_PASSWORD);"
+              value: "Server={{ .Values.config.postgres.host }};port={{ .Values.config.postgres.port }};Database={{ .Values.config.postgres.database }};Include Error Detail=true;User Id=$(POSTGRES_USERNAME);Password=$(POSTGRES_PASSWORD);"
             - name: RabbitMQ__HostAddress
               value: "{{ .Values.config.rabbitmq.host }}"
             - name: RabbitMQ__PortNumber
