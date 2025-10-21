@@ -1,81 +1,79 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using Tre_Camunda.Models;
 using Tre_Camunda.Services;
-using Tre_Camunda.Settings;
 using Tre_Credentials.DbContexts;
-using Tre_Credentials.Migrations;
 using Tre_Credentials.Models;
 using Zeebe.Client.Accelerator.Abstractions;
 using Zeebe.Client.Accelerator.Attributes;
 
-
-
 namespace Tre_Camunda.ProcessHandlers
 {
     [JobType("create-trino-user")]
-    public class CreateTrinoUserHandler: IAsyncZeebeWorkerWithResult<Dictionary<string, object>>
+    public class CreateTrinoUserHandler : IAsyncZeebeWorkerWithResult<Dictionary<string, object>>
     {
-        private readonly ILogger<CreatePostgresUserHandler> _logger;
+        private readonly ILogger<CreateTrinoUserHandler> _logger;
         private readonly ILdapUserManagementService _ldapUserManagementService;
+        private readonly IVaultCredentialsService _vaultCredentialsService;
+        private readonly CredentialsDbContext _credentialsDbContext;
 
-
-        public CreateTrinoUserHandler(ILogger<CreatePostgresUserHandler> logger, ILdapUserManagementService ldapUserManagementService)
+        public CreateTrinoUserHandler(
+            ILogger<CreateTrinoUserHandler> logger,
+            ILdapUserManagementService ldapUserManagementService,
+            IVaultCredentialsService vaultCredentialsService,
+            CredentialsDbContext credentialsDbContext)
         {
             _logger = logger;
             _ldapUserManagementService = ldapUserManagementService;
-
+            _vaultCredentialsService = vaultCredentialsService;
+            _credentialsDbContext = credentialsDbContext;
         }
 
         public async Task<Dictionary<string, object>> HandleJob(ZeebeJob job, CancellationToken cancellationToken)
         {
-            var SW = new Stopwatch();
-            SW.Start();
+            var sw = Stopwatch.StartNew();
+            _logger.LogDebug("CreateTrinoUserHandler started. processInstance={ProcessInstanceKey}", job.ProcessInstanceKey);
 
-            _logger.LogDebug($"CreateTrinoUserHandler started for process instance {job.ProcessInstanceKey}");
+            string? submissionId = null;
+            long? parentProcessKey = null;
+            long processInstanceKey = job.ProcessInstanceKey;
 
             try
             {
                 var variables = JsonSerializer.Deserialize<Dictionary<string, object>>(job.Variables);
-
                 var envListJson = variables["envList"]?.ToString();
-                var envList = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(envListJson);
+                var envList = JsonSerializer.Deserialize<List<CredentialsCamundaOutput>>(envListJson);
 
-                var usernameInfo = envList?.FirstOrDefault();
-                var submissionInfo = envList?.LastOrDefault();
-
-                if (usernameInfo == null || submissionInfo == null)
+                if (envList?.FirstOrDefault() == null)
                 {
-                    var errorMsg = "No credential information found in envList";
-                    _logger.LogError(errorMsg);
-                    throw new Exception(errorMsg);
+                    await RecordErrorAsync(submissionId, parentProcessKey, processInstanceKey, "trino",
+                        "No credential information found in envList");
+                    return CreateStatusResponse("ERROR: Missing credentials, cannot proceed.");
                 }
 
-                var username = usernameInfo.ContainsKey("value") ? usernameInfo["value"]?.ToString()
-                    : usernameInfo.ContainsKey("username")
-                    ? usernameInfo["username"]?.ToString() : null;
+                string? username = envList.Where(x => x.env.ToLower().Contains("username")).FirstOrDefault()?.value?.ToString();
+                string? project = variables["project"]?.ToString().Replace("[", "").Replace("]", "").Replace("\"", "");
+                string? user = variables["user"]?.ToString().Replace("[", "").Replace("]", "");
 
-                var submissionId = submissionInfo.ContainsKey("value") ? submissionInfo["value"]?.ToString()
-                  : submissionInfo.ContainsKey("submissionId")
-                  ? submissionInfo["submissionId"]?.ToString() : null;
+                var subItem = envList.FirstOrDefault(x => string.Equals(x.env, "submissionId", StringComparison.OrdinalIgnoreCase));
+                submissionId = subItem?.value;
 
-                var project = variables["project"]?.ToString();
-                var user = variables["user"]?.ToString();
-
-                var processInstanceKey = job.ProcessInstanceKey;
-
-                _logger.LogInformation($"Creating Trino user for Submission: {submissionId}, Process: {processInstanceKey}");
-
-                if (string.IsNullOrEmpty(username))
+                if (variables.TryGetValue("parentProcessKey", out var parentObj))
                 {
-                    var errorMsg = "Username not found in DMN result";
-                    _logger.LogError(errorMsg);
-                    throw new Exception(errorMsg);
+                    if (parentObj is JsonElement el && el.ValueKind == JsonValueKind.Number && el.TryGetInt64(out var parsed))
+                        parentProcessKey = parsed;
+                    else if (long.TryParse(parentObj?.ToString(), out var parsed2))
+                        parentProcessKey = parsed2;
+                }
+
+                if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(project) || string.IsNullOrEmpty(user))
+                {
+                    await RecordErrorAsync(submissionId, parentProcessKey, processInstanceKey, "trino",
+                        "Missing credentials; cannot proceed with Trino user creation.");
+                    return CreateStatusResponse("ERROR: Missing credentials, cannot proceed.");
                 }
 
                 var password = GenerateSecurePassword();
@@ -86,62 +84,152 @@ namespace Tre_Camunda.ProcessHandlers
                     Password = password,
                     CanLogin = true,
                     CanCreateDb = false,
-                    CanCreateRole = false,
-                    //ExpiryDate = DateTime.UtcNow.AddHours(24) 
+                    CanCreateRole = false
                 };
 
                 var result = await _ldapUserManagementService.CreateUserAsync(createUserRequest);
 
-                if (result.Success)
-
+                if (!result.Success)
                 {
-                    var userId = CleanDnValue(user);
-                    var jobId = submissionId;
+                    await RecordErrorAsync(submissionId, parentProcessKey, processInstanceKey, "trino",
+                        $"Failed to create Trino user: {result.ErrorMessage}");
+                    return CreateStatusResponse("ERROR: Failed credential creation");
+                }
 
-                    var outputVariables = new Dictionary<string, object>
+                var credentialData = new Dictionary<string, object>();
+                foreach (var credential in envList)
+                {
+                    var credentialEnv = new CredentialsVault();
+                    credentialEnv.env = credential.env;
+
+                    if (credential.env.ToLower().Contains("password"))
                     {
-                        ["credentialData"] = new Dictionary<string, object>
-                        {
-                            ["username"] = username,
-                            ["password"] = password,
-                            ["credentialType"] = "trino",
-                            ["project"] = project,
-                            ["user_id"] = userId,
-                            ["job_id"] = jobId,
-                            ["createdAt"] = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                            ["expiresAt"] = DateTime.UtcNow.AddHours(24).ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                            ["ldapDn"] = $"cn={username},ou=Users,dc=camundaephemeral,dc=local"
-                        },
-                        ["submissionId"] = submissionId,
-                        ["processInstanceKey"] = processInstanceKey,
-                        ["vaultPath"] = $"trino/{userId}/{jobId}/{project}",
-                        ["trinoUsername"] = username
-                    };
+                        credentialEnv.value = password;
+                    }
+                    else
+                    {
+                        credentialEnv.value = credential.value;
+                    }
 
-                    _logger.LogInformation($"Successfully created Trino user: {username} for project: {project}");
-
-                    SW.Stop();
-                    _logger.LogInformation($"CreateTrinoUserHandler took {SW.Elapsed.TotalSeconds} seconds");
-
-                    return outputVariables;
+                    credentialData.Add(credentialEnv.env, credentialEnv.value);
                 }
-                else
+
+                var jobId = submissionId;
+                var userId = CleanDnValue(user);
+                string vaultPath = $"trino/{userId}/{jobId}/{project}";
+
+                var vaultResult = await _vaultCredentialsService.AddCredentialAsync(vaultPath, credentialData);
+                if (!vaultResult)
                 {
-                    var errorMsg = $"Failed to create Trino user: {result.ErrorMessage}";
-                    _logger.LogError(errorMsg);
-                    throw new Exception(errorMsg);
+                    await RecordErrorAsync(submissionId, parentProcessKey, processInstanceKey, "trino",
+                        $"Failed to store credential in Vault at path: {vaultPath}");
+                    return CreateStatusResponse("ERROR: Credential store in vault failed");
                 }
+
+                await CreateCredentialsReadyMessageAsync(submissionId, parentProcessKey, processInstanceKey, vaultPath);
+
+                _logger.LogInformation("Successfully created Trino user: {Username} for project: {Project}", username, project);
+                return CreateStatusResponse($"OK: Trino user '{username}' created for project '{project}'.");
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
-                var errorMsg = $"Unexpected error in CreateTrinoUserHandler: {ex.Message}";
-                _logger.LogError(ex, errorMsg);
+                _logger.LogError(ex, "Unexpected error in CreateTrinoUserHandler. processInstance={ProcessInstanceKey}", processInstanceKey);
 
-                SW.Stop();
-                _logger.LogInformation($"CreateTrinoUserHandler took {SW.Elapsed.TotalSeconds} seconds");
+                await RecordErrorAsync(submissionId, parentProcessKey, processInstanceKey, "trino",
+                    $"Unexpected error: {ex.Message}");
 
-                throw;
+                return CreateStatusResponse("Unexpected Error in Trino handler");
             }
+            finally
+            {
+                if (sw.IsRunning) sw.Stop();
+                _logger.LogInformation("CreateTrinoUserHandler took {Seconds} seconds", sw.Elapsed.TotalSeconds);
+            }
+        }
+
+        private async Task RecordErrorAsync(string submissionId, long? parentProcessKey, long processInstanceKey, string credentialType, string errorMessage)
+        {
+            try
+            {
+                var submission = int.Parse(submissionId);
+                var existing = await _credentialsDbContext.EphemeralCredentials.FirstOrDefaultAsync(x => x.SubmissionId == submission && x.ProcessInstanceKey == processInstanceKey);
+
+                if (existing != null)
+                {
+                    _logger.LogWarning("EphemeralCredential already exists for SubmissionId={SubmissionId} and ProcessKey={ProcessInstanceKey}", submissionId, processInstanceKey);
+                    return;
+                }
+
+                var row = new EphemeralCredential
+                {
+                    SubmissionId = submission,
+                    ParentProcessInstanceKey = parentProcessKey,
+                    ProcessInstanceKey = processInstanceKey,
+                    CreatedAt = DateTime.UtcNow,
+                    IsProcessed = false,
+                    CredentialType = credentialType,
+                    VaultPath = null,
+                    SuccessStatus = SuccessStatus.Error,
+                    ErrorMessage = errorMessage
+                };
+
+                _credentialsDbContext.EphemeralCredentials.Add(row);
+                await _credentialsDbContext.SaveChangesAsync();
+
+                _logger.LogInformation("Recorded error for processInstance={ProcessInstanceKey}: {Message}", processInstanceKey, errorMessage);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to record error. processInstance={ProcessInstanceKey}", processInstanceKey);
+            }
+        }
+
+        private async Task CreateCredentialsReadyMessageAsync(string submissionId, long? parentProcessKey, long processInstanceKey, string vaultPath)
+        {
+            try
+            {
+                var submissionGuid = int.Parse(submissionId);
+                var existing = await _credentialsDbContext.EphemeralCredentials
+                    .FirstOrDefaultAsync(x => x.SubmissionId == submissionGuid && x.ProcessInstanceKey == processInstanceKey);
+
+                if (existing != null)
+                {
+                    _logger.LogWarning("EphemeralCredential already exists for SubmissionId={SubmissionId}, ProcessInstanceKey={ProcessInstanceKey}",
+                        submissionId, processInstanceKey);
+                    return;
+                }
+
+                var credReadyMessage = new EphemeralCredential
+                {
+                    SubmissionId = submissionGuid,
+                    ParentProcessInstanceKey = parentProcessKey,
+                    ProcessInstanceKey = processInstanceKey,
+                    CreatedAt = DateTime.UtcNow,
+                    IsProcessed = false,
+                    VaultPath = vaultPath,
+                    CredentialType = "trino",
+                    SuccessStatus = SuccessStatus.Success
+                };
+
+                _credentialsDbContext.EphemeralCredentials.Add(credReadyMessage);
+                await _credentialsDbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating credentials ready message for submission: {SubmissionId}", submissionId);
+            }
+        }
+
+        private Dictionary<string, object> CreateStatusResponse(string text)
+        {
+            return new Dictionary<string, object>
+            {
+                ["statusText"] = text
+            };
         }
 
         private string GenerateSecurePassword()
@@ -169,197 +257,3 @@ namespace Tre_Camunda.ProcessHandlers
         }
     }
 }
-
-
-
-
-//namespace Tre_Camunda.ProcessHandlers
-//{
-//    [JobType("create-trino-user")]
-//    public class CreateTrinoUserHandler: IAsyncZeebeWorkerWithResult<Dictionary<string, object>>
-//    {
-//        private readonly ILogger<CreatePostgresUserHandler> _logger;
-//        private readonly ILdapUserManagementService _ldapUserManagementService;
-//        private readonly CredentialsDbContext _credsDbContext;
-
-
-//        public CreateTrinoUserHandler(ILogger<CreatePostgresUserHandler> logger, ILdapUserManagementService ldapUserManagementService, CredentialsDbContext credsDbContext)
-//        {
-//            _logger = logger;
-//            _ldapUserManagementService = ldapUserManagementService;
-//            _credsDbContext = credsDbContext;
-
-//        }   
-
-//        public async Task<Dictionary<string, object>> HandleJob(ZeebeJob job, CancellationToken cancellationToken)
-//        {
-//            var SW = new Stopwatch();
-//            SW.Start();
-
-//            _logger.LogDebug($"CreateTrinoUserHandler started for process instance {job.ProcessInstanceKey}");
-
-//            try
-//            {
-//                var variables = JsonSerializer.Deserialize<Dictionary<string, object>>(job.Variables);
-
-//                var envListJson = variables["envList"]?.ToString();
-//                var envList = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(envListJson);
-
-//                var usernameInfo = envList?.FirstOrDefault();
-//                var submissionInfo = envList?.LastOrDefault();
-
-//                if (usernameInfo == null || submissionInfo == null)
-//                {
-//                    var errorMsg = "No credential information found in envList";
-//                    _logger.LogError(errorMsg);
-//                    throw new Exception(errorMsg);
-//                }
-
-//                var username = usernameInfo.ContainsKey("value") ? usernameInfo["value"]?.ToString()
-//                    : usernameInfo.ContainsKey("username")
-//                    ? usernameInfo["username"]?.ToString() : null;
-
-//                var submissionId = submissionInfo.ContainsKey("value") ? submissionInfo["value"]?.ToString()
-//                  : submissionInfo.ContainsKey("submissionId")
-//                  ? submissionInfo["submissionId"]?.ToString() : null;
-
-//                var submissionGuid = int.Parse(submissionId);
-
-//                string credentialType = "trino";
-
-//                var project = variables["project"]?.ToString();
-//                var user = variables["user"]?.ToString();
-
-//                var processInstanceKey = job.ProcessInstanceKey;
-
-//                _logger.LogInformation($"Creating Trino user for Submission: {submissionId}, Process: {processInstanceKey}");
-
-//                if (string.IsNullOrEmpty(username))
-//                {
-//                    var errorMsg = "Username not found in DMN result";
-//                    _logger.LogError(errorMsg);
-//                    throw new Exception(errorMsg);
-//                }
-
-//                var credRow = await _credsDbContext.EphemeralCredentials.FirstOrDefaultAsync(e => e.SubmissionId == submissionGuid && e.ProcessInstanceKey == processInstanceKey && e.CredentialType == credentialType); 
-//                if(credRow == null)
-//                {
-//                    credRow = new EphemeralCredential
-//                    {
-//                        SubmissionId = submissionGuid,
-//                        ParentProcessInstanceKey = null,
-//                        ProcessInstanceKey = processInstanceKey,
-//                        CredentialType = credentialType,
-//                        CreatedAt = null,
-//                        IsProcessed = false,
-//                        SuccessStatus = null
-//                    };
-//                    _credsDbContext.EphemeralCredentials.Add(credRow);
-//                    await _credsDbContext.SaveChangesAsync(cancellationToken);
-//                }
-
-//                var password = GenerateSecurePassword();
-
-//                var createUserRequest = new CreateUserRequest
-//                {
-//                    Username = username,
-//                    Password = password,
-//                    CanLogin = true,
-//                    CanCreateDb = false,
-//                    CanCreateRole = false                    
-//                };
-
-//                var result = await _ldapUserManagementService.CreateUserAsync(createUserRequest);
-
-//                if (result.Success)
-
-//                {
-//                    credRow.SuccessStatus = SuccessStatus.Success;
-//                    credRow.CreatedAt = DateTime.UtcNow;
-//                    credRow.ErrorMessage = null;
-//                    await _credsDbContext.SaveChangesAsync(cancellationToken);
-
-
-//                    var userId = CleanDnValue(user);
-//                    var jobId = submissionId;
-
-//                    var outputVariables = new Dictionary<string, object>
-//                    {                      
-//                        ["credentialData"] = new Dictionary<string, object>
-//                        {
-//                            ["username"] = username,
-//                            ["password"] = password,
-//                            ["credentialType"] = credentialType,
-//                            ["project"] = project,
-//                            ["user_id"] = userId,
-//                            ["job_id"] = jobId,
-//                            ["createdAt"] = credRow.CreatedAt,
-//                            ["expiresAt"] = DateTime.UtcNow.AddHours(24).ToString("yyyy-MM-ddTHH:mm:ssZ"),
-//                            ["ldapDn"] = $"cn={username},ou=Users,dc=camundaephemeral,dc=local"                            
-//                        },
-//                        ["submissionId"] = submissionId,
-//                        ["processInstanceKey"] = processInstanceKey,
-//                        ["vaultPath"] = $"trino/{userId}/{jobId}/{project}", 
-//                        ["trinoUsername"] = username 
-//                    };
-
-//                    _logger.LogInformation($"Successfully created Trino user: {username} for project: {project}");
-
-//                    SW.Stop();
-//                    _logger.LogInformation($"CreateTrinoUserHandler took {SW.Elapsed.TotalSeconds} seconds");
-
-//                    return outputVariables;
-//                }
-//                else
-//                {
-//                    var errorMsg = $"Failed to create Trino user: {result.ErrorMessage}";
-//                    credRow.SuccessStatus = SuccessStatus.Error;
-//                    credRow.ErrorMessage = errorMsg;
-//                    await _credsDbContext.SaveChangesAsync(cancellationToken);                  
-//                    throw new Exception(errorMsg);
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                var errorMsg = $"Unexpected error in CreateTrinoUserHandler: {ex.Message}";
-//                _logger.LogError(ex, errorMsg);
-
-//                    var processInstanceKey = job.ProcessInstanceKey;                   
-//                    var credRow = await _credsDbContext.EphemeralCredentials.FirstOrDefaultAsync(e => e.ProcessInstanceKey == processInstanceKey && e.CredentialType == "trino", cancellationToken);
-//                    credRow.SuccessStatus = SuccessStatus.Error;
-//                    credRow.ErrorMessage = ex.Message;
-//                    await _credsDbContext.SaveChangesAsync(cancellationToken);
-//                SW.Stop();
-//                _logger.LogInformation($"CreateTrinoUserHandler took {SW.Elapsed.TotalSeconds} seconds");
-
-//                throw;
-
-//            }
-
-//        }
-
-//        private string GenerateSecurePassword()
-//        {
-//            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-//            var random = new Random();
-//            return new string(Enumerable.Repeat(chars, 16)
-//                .Select(s => s[random.Next(s.Length)]).ToArray());
-//        }
-
-//        private static string CleanDnValue(string value)
-//        {
-//            if (string.IsNullOrEmpty(value)) return value;
-
-//            var charsToRemove = new[] { '[', ']', '\\', '"' };
-//            var sb = new StringBuilder();
-//            foreach (var c in value)
-//            {
-//                if (!charsToRemove.Contains(c))
-//                {
-//                    sb.Append(c);
-//                }
-//            }
-//            return sb.ToString();
-//        }
-//    }
-//}
