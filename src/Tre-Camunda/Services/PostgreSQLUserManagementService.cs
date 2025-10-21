@@ -17,7 +17,7 @@ namespace Tre_Camunda.Services
 
         public PostgreSQLUserManagementService(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("ContainerConnection");
+            _connectionString = configuration.GetConnectionString("TREPostgresConnection");
         }
 
         public async Task<UserCreationResult> CreateUserAsync(CreateUserRequest request)
@@ -112,11 +112,26 @@ namespace Tre_Camunda.Services
                 using var connection = new NpgsqlConnection(_connectionString);
                 await connection.OpenAsync();
 
-                var dropUserCommand = $"DROP USER IF EXISTS \"{username}\"";
-                using var cmd = new NpgsqlCommand(dropUserCommand, connection);
-                await cmd.ExecuteNonQueryAsync();
+                var reassignCommand = $"REASSIGN OWNED BY \"{username}\" TO postgres";
+                using (var cmd = new NpgsqlCommand(reassignCommand, connection))
+                {
+                    await cmd.ExecuteNonQueryAsync();
+                    Log.Information("Reassigned owned objects for user: {Username}", username);
+                }
 
-                Log.Information("Successfully dropped user: {Username}", username);
+                var dropOwnedCommand = $"DROP OWNED BY \"{username}\"";
+                using (var cmd = new NpgsqlCommand(dropOwnedCommand, connection))
+                {
+                    await cmd.ExecuteNonQueryAsync();
+                    Log.Information("Dropped owned objects for user: {Username}", username);
+                }
+
+                var dropUserCommand = $"DROP USER IF EXISTS \"{username}\"";
+                using (var cmd = new NpgsqlCommand(dropUserCommand, connection))
+                {
+                    await cmd.ExecuteNonQueryAsync();
+                    Log.Information("Successfully dropped user: {Username}", username);
+                }
                 return true;
             }
             catch (Exception ex)
