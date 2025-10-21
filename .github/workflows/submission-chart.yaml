@@ -39,7 +39,7 @@ jobs:
       registry: ${{ vars.HARBOR_REGISTRY }}
       registry-user: ${{ vars.HARBOR_USER }}
       registry-project: ${{ vars.HARBOR_PROJECT }}
-      registry-repo: dare-trefx
+      registry-repo: submission
       release-tag-format: 'Helm-Chart-${version}'
       cosign-public-key: ${{ vars.COSIGN_PUBLIC_KEY }}
       chart: charts/submission
