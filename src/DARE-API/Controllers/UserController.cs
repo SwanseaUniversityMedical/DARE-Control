@@ -36,7 +36,7 @@ namespace DARE_API.Controllers
         {
             if (!ModelState.IsValid) // SonarQube security
             {
-                return userData;
+                return null;
             }
 
             try
