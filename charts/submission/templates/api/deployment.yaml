@@ -60,12 +60,12 @@ spec:
               value: "{{ .Values.config.rabbitmq.port }}"
             - name: RabbitMQ__VirtualHost
               value: "{{ .Values.config.rabbitmq.vhost }}"
-            - name: RabbitMQ__Username
+            - name: RabbitMQ__Password
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.config.rabbitmq.secretName }}
                   key: {{ .Values.config.rabbitmq.passwordSecretKey }}
-            - name: RabbitMQ__Password
+            - name: RabbitMQ__Username
               valueFrom:
                 secretKeyRef: 
                   name: {{ .Values.config.rabbitmq.secretName }}
