@@ -14,14 +14,9 @@ using System.Linq;
 
 namespace DARE_API.Controllers
 {
-
-    
-    
-    
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        
         private readonly ApplicationDbContext _DbContext;
         private readonly IKeycloakMinioUserService _keycloakMinioUserService;
         protected readonly IHttpContextAccessor _httpContextAccessor;
@@ -39,6 +34,11 @@ namespace DARE_API.Controllers
         [HttpPost("SaveUser")]
         public async Task<User> SaveUser([FromBody] FormData data) 
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return null;
+            }
+
             try
             {
 
@@ -72,7 +72,6 @@ namespace DARE_API.Controllers
                 else
                     _DbContext.Users.Add(userData);
 
-
                 await _DbContext.SaveChangesAsync();
 
                 
@@ -95,6 +94,11 @@ namespace DARE_API.Controllers
         [HttpGet("GetUser")]
         public User? GetUser(int userId)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return null;
+            }
+
             try
             {
                 var returned = _DbContext.Users.Find(userId);
@@ -102,6 +106,7 @@ namespace DARE_API.Controllers
                 {
                     return null;
                 }
+                
                 Log.Information("{Function} User retrieved successfully", "GetUser");
                 return returned;
             }
@@ -162,6 +167,11 @@ namespace DARE_API.Controllers
         [HttpPost("AddProjectMembership")]
         public async Task<ProjectUser?> AddProjectMembership([FromBody]ProjectUser model)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return null;
+            }
+
             try
             {
                 var user = _DbContext.Users.FirstOrDefault(x => x.Id == model.UserId);
@@ -206,6 +216,11 @@ namespace DARE_API.Controllers
         [HttpPost("RemoveProjectMembership")]
         public async Task<ProjectUser?> RemoveProjectMembership([FromBody] ProjectUser model)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return null;
+            }
+
             try
             {
                 var user = _DbContext.Users.FirstOrDefault(x => x.Id == model.UserId);
@@ -221,7 +236,7 @@ namespace DARE_API.Controllers
                     Log.Error("{Function} Invalid project id {UserId}", "RemoveProjectMembership", model.ProjectId);
                     return null;
                 }
-              
+
                 if (!user.Projects.Any(x => x == project))
                 {
                     Log.Error("{Function} User {UserName} is not in the {ProjectName}", "RemoveProjectMembership", user.Name, project.Name);
