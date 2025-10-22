@@ -1,4 +1,4 @@
-﻿using BL.Settings;
+﻿using BL.Models.Settings;
 using Newtonsoft.Json;
 using Serilog;
 using System;

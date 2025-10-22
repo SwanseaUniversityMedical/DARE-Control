@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Tre_Credentials.DbContexts;
@@ -11,9 +12,11 @@ using Tre_Credentials.DbContexts;
 namespace Tre_Credentials.Migrations
 {
     [DbContext(typeof(CredentialsDbContext))]
-    partial class CredentialsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250929120600_AddnewColumntoCredDB")]
+    partial class AddnewColumntoCredDB
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,7 +33,7 @@ namespace Tre_Credentials.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CredentialType")
@@ -45,19 +48,14 @@ namespace Tre_Credentials.Migrations
                     b.Property<bool>("IsProcessed")
                         .HasColumnType("boolean");
 
-                    b.Property<long?>("ParentProcessInstanceKey")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("ProcessInstanceKey")
+                    b.Property<long>("ProcessInstanceKey")
                         .HasColumnType("bigint");
 
                     b.Property<int>("SubmissionId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("SuccessStatus")
-                        .HasColumnType("integer");
-
                     b.Property<string>("VaultPath")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");

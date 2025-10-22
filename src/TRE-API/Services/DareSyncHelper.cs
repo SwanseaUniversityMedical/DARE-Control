@@ -1,34 +1,41 @@
-﻿using BL.Models.APISimpleTypeReturns;
-using BL.Models;
+﻿using BL.Models;
+using BL.Models.APISimpleTypeReturns;
 using BL.Models.Enums;
-using Microsoft.EntityFrameworkCore;
-using Serilog;
-using TRE_API.Repositories.DbContexts;
 using BL.Models.ViewModels;
 using BL.Services;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using EasyNetQ.Management.Client.Model;
-using static Npgsql.PostgresTypes.PostgresCompositeType;
-using System.Runtime.Intrinsics.X86;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using Sentry;
+using Tre_Credentials.DbContexts;
+using Serilog;
+using System.Text;
+using TRE_API.Repositories.DbContexts;
+
 
 namespace TRE_API.Services
 {
     public class DareSyncHelper : IDareSyncHelper
     {
         public ApplicationDbContext _DbContext { get; set; }
+
+        public CredentialsDbContext _CredentialsDbContext { get; set; }
         public IDareClientWithoutTokenHelper _dareclientHelper { get; set; }
         
         private readonly IMinioTreHelper _minioTreHelper;
-        public DareSyncHelper(ApplicationDbContext dbContext, IDareClientWithoutTokenHelper dareClient,  IMinioTreHelper minioTreHelper)
+
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        private readonly IConfiguration _config;
+        
+        public DareSyncHelper(ApplicationDbContext dbContext, IDareClientWithoutTokenHelper dareClient,  IMinioTreHelper minioTreHelper, CredentialsDbContext credentialsDbContext, IHttpClientFactory httpClientFactory, IConfiguration config)
         {
             _DbContext = dbContext;
             _dareclientHelper = dareClient;
             
             _minioTreHelper = minioTreHelper;
+
+            _CredentialsDbContext = credentialsDbContext;
+
+            _httpClientFactory = httpClientFactory;
+
+            _config = config;
         }
 
         public async Task<BoolReturn> SyncSubmissionWithTre()
@@ -42,8 +49,28 @@ namespace TRE_API.Services
                 };
             }
 
-           
-            var subprojs = await _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForTre");
+            var waitingSubs = await _dareclientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre");
+
+            foreach (var sub in waitingSubs)
+            {
+                //This piece of code allows to skip if the creds are already present in the creds DB
+                var alreadyTriggered = _CredentialsDbContext.EphemeralCredentials.Any(c => c.SubmissionId == sub.Id);
+                if (alreadyTriggered) continue;
+
+                var projectId = sub.Project.Id;
+                var userId = sub.SubmittedBy.Id;
+                var submissionId = sub.Id;
+
+                try
+                {
+                    await TriggerStartCredentialsAsync(submissionId, projectId, userId);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Failed to trigger Camunda for Sub {Sub}", submissionId);
+                }
+            }
+                var subprojs = await _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForTre");
             var dbprojs = _DbContext.Projects.ToList();
             var projectAdds = subprojs.Where(x => !_DbContext.Projects.Any(y => y.SubmissionProjectId == x.Id));
             var projectArchives =
@@ -156,7 +183,7 @@ namespace TRE_API.Services
             {
                 treMembershipDecision.Archived = false;
             }
-
+          
             await _DbContext.SaveChangesAsync();
             await SyncProjectDecisions();
             await SyncMembershipDecisions();
@@ -196,5 +223,41 @@ namespace TRE_API.Services
             return result.Result;
 
         }
+
+        private async Task TriggerStartCredentialsAsync(int submissionId, int projectId, int userId)
+        {
+            var payload = new
+            {
+                records = new[]
+                {
+                    new
+                    {
+                        project = projectId.ToString(),
+                        user = userId.ToString(),
+                        submissionId = submissionId.ToString()
+
+                    }
+                }
+            };
+
+            var jsonPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
+            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+            var camundaWebhookUrl = _config["CredentialAPISettings:StartWebhookUrl"];
+
+            using var httpClient = _httpClientFactory.CreateClient();
+            httpClient.Timeout = TimeSpan.FromMinutes(2);
+
+            var response = await httpClient.PostAsync(camundaWebhookUrl, content);                      
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Log.Error("Camunda webhook call failed for submission {SubmissionId}. Error: {Error}", submissionId, error);
+                throw new Exception($"Camunda webhook call failed: {response.StatusCode}");
+            }
+
+            Log.Information("Camunda StartCredentials triggered successfully for submission {SubmissionId}", submissionId);
+        }      
     }
 }
