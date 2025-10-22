@@ -1,2 +1,4 @@
 CREATE DATABASE hangfire;
 CREATE DATABASE listmonk;
+CREATE DATABASE tredata;
+

@@ -73,16 +73,20 @@ namespace DARE_FrontEnd.Controllers
                 var tokenJson = JObject.Parse(tokenResponseContent);
                 var newAccessToken = tokenJson["access_token"].ToString();
                 result = newAccessToken;
-                Log.Information("{Function} New Access Token with longer expiry: {newAccessToken}", "NewToken", newAccessToken);
             }
             else
             {
                 Log.Error("{Function} Error refreshing token: {tokenResponseContent}", "NewToken", tokenResponseContent);
             }
-
-            var expirationDate = DateTime.Now.AddSeconds(int.Parse(_keycloakSettings.TokenRefreshSeconds));
             ViewBag.AccessToken = result;
+
+            // Decode the JWT to extract the expiration time
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var jwtToken = tokenHandler.ReadJwtToken(result);
+            var expUnix = long.Parse(jwtToken.Claims.First(c => c.Type == "exp").Value);
+            var expirationDate = DateTimeOffset.FromUnixTimeSeconds(expUnix).UtcDateTime;
             ViewBag.TokenExpiryDate = expirationDate;
+            
             return View();
         }
 

@@ -25,6 +25,10 @@ namespace BL.Models.ViewModels
 
         public List<Executors>? Executors { get; set; }
 
+        public string? DataInputType { get; set; } = "";
+
+        public string? DataInputPath { get; set; } = "";
+
         public string? RawInput { get; set; }
 
         public string? Query { get; set; }

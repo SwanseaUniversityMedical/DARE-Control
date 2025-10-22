@@ -30,8 +30,11 @@ namespace Tre_Credentials.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CredentialType")
+                        .HasColumnType("text");
 
                     b.Property<string>("ErrorMessage")
                         .HasColumnType("text");
@@ -42,14 +45,19 @@ namespace Tre_Credentials.Migrations
                     b.Property<bool>("IsProcessed")
                         .HasColumnType("boolean");
 
-                    b.Property<long>("ProcessInstanceKey")
+                    b.Property<long?>("ParentProcessInstanceKey")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("ProcessInstanceKey")
                         .HasColumnType("bigint");
 
                     b.Property<int>("SubmissionId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("SuccessStatus")
+                        .HasColumnType("integer");
+
                     b.Property<string>("VaultPath")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
