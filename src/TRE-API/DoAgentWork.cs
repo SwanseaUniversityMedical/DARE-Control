@@ -565,7 +565,7 @@ namespace TRE_API
 
                                     input.Path = input.Path.Replace("..", "");
 
-                                    input.Url = "s3://" + InputBucket + input.Path;
+                                    input.Url = "s3://" + InputBucket +  "/data" + input.Path;
 
                                     if (string.IsNullOrEmpty(input.Name))
                                     {
