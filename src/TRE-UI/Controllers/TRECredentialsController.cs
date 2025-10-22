@@ -26,7 +26,7 @@ namespace TRE_UI.Controllers
         {
             if (!ModelState.IsValid) // SonarQube security
             {
-                return View(credentials);
+                return View(new KeycloakCredentials());
             }
 
             if (await ControllerHelpers.UpdateCredentials("TRECredentials", _clientHelper, ModelState,
