@@ -63,8 +63,8 @@ namespace Tre_Camunda.Extensions
             services.AddScoped<CreatePostgresUserHandler>();
 
             services.AddScoped<ILdapUserManagementService, LdapUserManagementService>();
-           
-            
+
+            services.AddScoped<IEphemeralCredentialsService, EphemeralCredentialsService>();
 
 
         }

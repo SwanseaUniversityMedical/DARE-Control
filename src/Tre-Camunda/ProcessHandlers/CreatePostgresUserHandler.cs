@@ -1,46 +1,47 @@
 ﻿
-using Zeebe.Client.Accelerator.Abstractions;
-using Zeebe.Client.Accelerator.Attributes;
-using static Google.Apis.Requests.BatchRequest;
-using Tre_Camunda.Services;
+using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System.Diagnostics;
 using System.Text.Json;
 using Tre_Camunda.Models;
-using Zeebe.Client.Impl.Commands;
-using System.Xml.Linq;
-
-
+using Tre_Camunda.Services;
+using Tre_Credentials.DbContexts;
+using Tre_Credentials.Models;
+using Zeebe.Client.Accelerator.Abstractions;
+using Zeebe.Client.Accelerator.Attributes;
 
 namespace Tre_Camunda.ProcessHandlers
 {
-
     [JobType("create-postgres-user")]
     public class CreatePostgresUserHandler : IAsyncZeebeWorkerWithResult<Dictionary<string, object>>
     {
         private readonly IPostgreSQLUserManagementService _postgreSQLUserManagementService;
         private readonly IVaultCredentialsService _vaultCredentialsService;
         private readonly ILogger<CreatePostgresUserHandler> _logger;
+        private readonly CredentialsDbContext _credentialsDbContext;
 
-        public CreatePostgresUserHandler(
-            IPostgreSQLUserManagementService postgresSQLUserManagementService,
-            ILogger<CreatePostgresUserHandler> logger,
-            IVaultCredentialsService vaultCredentialsService)
+        public CreatePostgresUserHandler(IPostgreSQLUserManagementService postgresSQLUserManagementService, ILogger<CreatePostgresUserHandler> logger, IVaultCredentialsService vaultCredentialsService, CredentialsDbContext credentialsDbContext)
         {
             _postgreSQLUserManagementService = postgresSQLUserManagementService;
             _logger = logger;
             _vaultCredentialsService = vaultCredentialsService;
+            _credentialsDbContext = credentialsDbContext;
         }
 
         public async Task<Dictionary<string, object>> HandleJob(ZeebeJob job, CancellationToken cancellationToken)
         {
-            var SW = new Stopwatch();
-            SW.Start();
+            var sw = Stopwatch.StartNew();
+            _logger.LogDebug("CreatePostgresUserHandler started. processInstance={ProcessInstanceKey}", job.ProcessInstanceKey);
 
-            _logger.LogDebug($"CreatePostgresUserHandler started for process instance {job.ProcessInstanceKey}");
+            string? submissionId = null;
+            long? parentProcessKey = null;
+            long processInstanceKey = job.ProcessInstanceKey;
 
             try
             {
-
+               
                 var variables = JsonSerializer.Deserialize<Dictionary<string, object>>(job.Variables);
                 var envListJson = variables["envList"]?.ToString();
                 var envList = JsonSerializer.Deserialize<List<CredentialsCamundaOutput>>(envListJson);
@@ -48,9 +49,8 @@ namespace Tre_Camunda.ProcessHandlers
 
                 if (envList?.FirstOrDefault() == null)
                 {
-                    var errorMsg = "No credential information found in envList";
-                    _logger.LogError(errorMsg);
-                    throw new Exception(errorMsg);
+                    await RecordErrorAsync(submissionId, parentProcessKey, processInstanceKey, "postgres", "No credential information found in envList");
+                    return CreateStatusResponse("ERROR: Missing credentials, cannot proceed.");
                 }
                 else
                 {
@@ -62,118 +62,189 @@ namespace Tre_Camunda.ProcessHandlers
                     string? project = variables["project"]?.ToString().Replace("[", "").Replace("]", "").Replace("\"", "");
                     string? user = variables["user"]?.ToString().Replace("[", "").Replace("]", "");
 
-                    if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(database) || string.IsNullOrEmpty(server) || string.IsNullOrEmpty(port) || string.IsNullOrEmpty(user) || string.IsNullOrEmpty(project))
-                    {
-                        var errorMsg = "Missing Credentials cannot proceed";
-                        _logger.LogError(errorMsg);
-                        throw new Exception(errorMsg);
+                    var subItem = envList.FirstOrDefault(x => string.Equals(x.env, "submissionId", StringComparison.OrdinalIgnoreCase));
+                    submissionId = subItem?.value;
 
+                    if (variables.TryGetValue("parentProcessKey", out var parentObj))
+                    {
+                        if (parentObj is JsonElement el && el.ValueKind == JsonValueKind.Number && el.TryGetInt64(out var parsed))
+                            parentProcessKey = parsed;
+                        else if (long.TryParse(parentObj?.ToString(), out var parsed2))
+                            parentProcessKey = parsed2;
                     }
-                    else
+
+                    if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(database) || string.IsNullOrEmpty(server) || string.IsNullOrEmpty(port) || string.IsNullOrEmpty(user) || string.IsNullOrEmpty(project)) 
                     {
+                        await RecordErrorAsync(submissionId, parentProcessKey, processInstanceKey, "postgres",
+                            "Missing credentials; cannot proceed with Postgres user creation.");
+                        return CreateStatusResponse("ERROR: Missing credentials, cannot proceed.");
+                    }
 
-                        var password = GenerateSecurePassword();
+                    var password = GenerateSecurePassword();
 
+                    var schemaPermissions = new List<SchemaPermission>
+                {
+                    new SchemaPermission
+                    {
+                        SchemaName = project,
+                        Permissions = DatabasePermissions.Read | DatabasePermissions.Write | DatabasePermissions.CreateTables
+                    }
+                };
 
-                        var schemaPermissions = new List<SchemaPermission>
+                    var createUserRequest = new CreateUserRequest
+                    {
+                        Username = username,
+                        Password = password,
+                        Server = server,
+                        Datasbasename = database,
+                        Port = port,
+                        SchemaPermissions = schemaPermissions
+                    };
+
+                    var result = await _postgreSQLUserManagementService.CreateUserAsync(createUserRequest);
+                    if (!result.Success)
+                    {
+                        await RecordErrorAsync(submissionId, parentProcessKey, processInstanceKey, "postgres",
+                            $"Failed to create PostgreSQL user: {result.ErrorMessage}");
+
+                        return CreateStatusResponse("ERROR: Failed credential creation");
+                    }
+
+                    var credentialData = new Dictionary<string, object>();
+                    foreach (var credential in envList)
+                    {
+                        var CredentialEnv = new CredentialsVault();
+                        CredentialEnv.env = credential.env;
+                        if (credential.env.ToLower().Contains("password"))
                         {
-                            new SchemaPermission
-                            {
-                                SchemaName = project,
-                                Permissions = DatabasePermissions.Read | DatabasePermissions.Write | DatabasePermissions.CreateTables
-                            }
-
-                        };
-
-
-                        var createUserRequest = new CreateUserRequest
-                        {
-                            Username = username,
-                            Password = password,
-                            Server = server,
-                            Datasbasename = database,
-                            Port = port,
-                            SchemaPermissions = schemaPermissions
-                        };
-
-
-                        var result = await _postgreSQLUserManagementService.CreateUserAsync(createUserRequest);
-
-                        if (result.Success)
-                        {
-                            var credentialData = new Dictionary<string, object>();
-
-                            foreach (var credential in envList)
-                            {
-                                var CredentialEnv = new CredentialsVault();
-
-
-                                CredentialEnv.env = credential.env;
-                                if (credential.env.ToLower().Contains("password"))
-                                {
-                                    CredentialEnv.value = password;
-                                }
-                                else
-                                {
-                                    CredentialEnv.value = credential.value;
-                                }
-
-                                credentialData.Add(CredentialEnv.env, CredentialEnv.value);
-
-                            }
-
-
-
-                            var vaultPath = $"postgres/{project}/{user}/{username}";
-
-
-                            var success = await _vaultCredentialsService.AddCredentialAsync(vaultPath, credentialData);
-                            if (!success)
-                            {
-                                var errorMsg = $"Failed to store credential in Vault at path: {vaultPath}";
-                                _logger.LogError(errorMsg);
-                                throw new Exception(errorMsg);
-                            }
-
-                            _logger.LogInformation($"Successfully created PostgreSQL user: {username} for project: {project}");
-
-                            SW.Stop();
-                            _logger.LogInformation($"CreatePostgresUserHandler took {SW.Elapsed.TotalSeconds} seconds");
-
-                            var outputVariables = new Dictionary<string, object>
-                            {
-                                ["credentialData"] = new Dictionary<string, object>
-                                {
-                                    ["username"] = username,
-                                    ["credentialType"] = "postgres",
-                                    ["project"] = project
-                                }
-                            };
-
-
-                            return outputVariables;
+                            CredentialEnv.value = password;
                         }
                         else
                         {
-
-                            var errorMsg = $"Failed to create PostgreSQL user: {result.ErrorMessage}";
-                            _logger.LogError(errorMsg);
-                            throw new Exception(errorMsg);
+                            CredentialEnv.value = credential.value;
                         }
+
+                        credentialData.Add(CredentialEnv.env, CredentialEnv.value);
+
                     }
+
+                    var jobId = submissionId;
+                    string vaultPath = $"postgres/{user}/{jobId}/{project}";
+                    var vaultResult = await _vaultCredentialsService.AddCredentialAsync(vaultPath, credentialData);
+                    if (!vaultResult)
+                    {
+                        await RecordErrorAsync(submissionId, parentProcessKey, processInstanceKey, "postgres",
+                            $"Failed to store credential in Vault at path: {vaultPath}");
+                        return CreateStatusResponse("ERROR: Credential store in vault failed");
+                    }
+
+
+                    await CreateCredentialsReadyMessageAsync(submissionId, parentProcessKey, processInstanceKey, vaultPath);
+
+                    _logger.LogInformation("Successfully created PostgreSQL user: {Username} for project: {Project}", username, project);
+                    return CreateStatusResponse($"OK: PostgreSQL user '{username}' created for project '{project}'.");
                 }
             }
-            catch (Exception ex)
+            catch (OperationCanceledException)
             {
-                var errorMsg = $"Unexpected error in CreatePostgresUserHandler: {ex.Message}";
-                _logger.LogError(ex, errorMsg);
-
-                SW.Stop();
-                _logger.LogInformation($"CreatePostgresUserHandler took {SW.Elapsed.TotalSeconds} seconds");
 
                 throw;
             }
+            catch (Exception ex)
+            {
 
+                _logger.LogError(ex, "Unexpected error in CreatePostgresUserHandler. processInstance={ProcessInstanceKey}", processInstanceKey);
+
+                await RecordErrorAsync(submissionId, parentProcessKey, processInstanceKey, "postgres",
+                    $"Unexpected error: {ex.Message}");
+
+                return CreateStatusResponse("Unexpected Error in Postgres handler");
+            }
+            finally
+            {
+                if (sw.IsRunning) sw.Stop();
+                _logger.LogInformation("CreatePostgresUserHandler took {Seconds} seconds", sw.Elapsed.TotalSeconds);
+            }
+        }
+
+        private async Task RecordErrorAsync(string submissionId, long? parentProcessKey, long processInstanceKey, string credentialType, string errorMessage)
+        {
+            try
+            {
+               var submission = int.Parse(submissionId);
+               var existing = await _credentialsDbContext.EphemeralCredentials.FirstOrDefaultAsync(x => x.SubmissionId == submission && x.ProcessInstanceKey == processInstanceKey);
+
+                if (existing != null)
+                {
+                    _logger.LogWarning("EphemeralCredential already exists for SubmissionId={SubmissionId} and ProcessKey={ProcessInstanceKey}", submissionId, processInstanceKey);
+                    return;
+                }
+                var row = new EphemeralCredential
+                {
+                    SubmissionId = submission,
+                    ParentProcessInstanceKey = parentProcessKey,
+                    ProcessInstanceKey = processInstanceKey,
+                    CreatedAt = DateTime.UtcNow,
+                    IsProcessed = false,
+                    CredentialType = credentialType,
+                    VaultPath = null,
+                    SuccessStatus = SuccessStatus.Error,
+                    ErrorMessage = errorMessage
+                };
+
+                _credentialsDbContext.EphemeralCredentials.Add(row);
+                await _credentialsDbContext.SaveChangesAsync();
+
+                _logger.LogInformation("Recorded error for processInstance={ProcessInstanceKey}: {Message}", processInstanceKey, errorMessage);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to record error. processInstance={ProcessInstanceKey}", processInstanceKey);
+            }
+        }
+
+        private async Task CreateCredentialsReadyMessageAsync(string submissionId, long? parentProcessKey, long processInstanceKey, string vaultPath)
+        {
+            try
+            {
+                var submissionGuid = int.Parse(submissionId);
+                var existing = await _credentialsDbContext.EphemeralCredentials
+                    .FirstOrDefaultAsync(x => x.SubmissionId == submissionGuid && x.ProcessInstanceKey == processInstanceKey);
+
+                if (existing != null)
+                {
+                    _logger.LogWarning("EphemeralCredential already exists for SubmissionId={SubmissionId}, ProcessInstanceKey={ProcessInstanceKey}",
+                        submissionId, processInstanceKey);
+                    return;
+                }
+
+                var credReadyMessage = new EphemeralCredential
+                {
+                    SubmissionId = submissionGuid,
+                    ParentProcessInstanceKey = parentProcessKey,
+                    ProcessInstanceKey = processInstanceKey,
+                    CreatedAt = DateTime.UtcNow,
+                    IsProcessed = false,
+                    VaultPath = vaultPath,
+                    CredentialType = "postgres",
+                    SuccessStatus = SuccessStatus.Success
+                };
+
+                _credentialsDbContext.EphemeralCredentials.Add(credReadyMessage);
+                await _credentialsDbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating credentials ready message for submission: {SubmissionId}", submissionId);
+            }
+        }
+
+        private Dictionary<string, object> CreateStatusResponse(string text)
+        {
+            return new Dictionary<string, object>
+            {
+                ["statusText"] = text
+            };
         }
 
         private string GenerateSecurePassword()
@@ -185,4 +256,3 @@ namespace Tre_Camunda.ProcessHandlers
         }
     }
 }
-
