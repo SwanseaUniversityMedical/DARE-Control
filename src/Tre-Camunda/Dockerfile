@@ -31,5 +31,6 @@ RUN dotnet publish "Tre-Camunda.csproj" -c $BUILD_CONFIGURATION -o /app/publish 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+#Camunda Models
 COPY ProcessModels ./ProcessModels
 ENTRYPOINT ["dotnet", "Tre-Camunda.dll"]
