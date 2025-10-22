@@ -3,10 +3,12 @@ using BL.Models.APISimpleTypeReturns;
 using BL.Models.Enums;
 using BL.Models.ViewModels;
 using BL.Services;
-using Tre_Credentials.DbContexts;
+using Microsoft.FeatureManagement;
 using Serilog;
 using System.Text;
+using TRE_API.Constants;
 using TRE_API.Repositories.DbContexts;
+using Tre_Credentials.DbContexts;
 
 
 namespace TRE_API.Services
@@ -23,8 +25,10 @@ namespace TRE_API.Services
         private readonly IHttpClientFactory _httpClientFactory;
 
         private readonly IConfiguration _config;
-        
-        public DareSyncHelper(ApplicationDbContext dbContext, IDareClientWithoutTokenHelper dareClient,  IMinioTreHelper minioTreHelper, CredentialsDbContext credentialsDbContext, IHttpClientFactory httpClientFactory, IConfiguration config)
+
+        private readonly IFeatureManager _features;
+
+        public DareSyncHelper(ApplicationDbContext dbContext, IDareClientWithoutTokenHelper dareClient,  IMinioTreHelper minioTreHelper, CredentialsDbContext credentialsDbContext, IHttpClientFactory httpClientFactory, IConfiguration config, IFeatureManager features)
         {
             _DbContext = dbContext;
             _dareclientHelper = dareClient;
@@ -34,6 +38,8 @@ namespace TRE_API.Services
             _CredentialsDbContext = credentialsDbContext;
 
             _httpClientFactory = httpClientFactory;
+
+            _features = features;
 
             _config = config;
         }
@@ -49,28 +55,37 @@ namespace TRE_API.Services
                 };
             }
 
-            var waitingSubs = await _dareclientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre");
-
-            foreach (var sub in waitingSubs)
+            if(await _features.IsEnabledAsync(FeatureFlags.EphemeralCredentials))
             {
-                //This piece of code allows to skip if the creds are already present in the creds DB
-                var alreadyTriggered = _CredentialsDbContext.EphemeralCredentials.Any(c => c.SubmissionId == sub.Id);
-                if (alreadyTriggered) continue;
+                var waitingSubs = await _dareclientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre");
 
-                var projectId = sub.Project.Id;
-                var userId = sub.SubmittedBy.Id;
-                var submissionId = sub.Id;
+                foreach (var sub in waitingSubs)
+                {
+                    //This piece of code allows to skip if the creds are already present in the creds DB
+                    var alreadyTriggered = _CredentialsDbContext.EphemeralCredentials.Any(c => c.SubmissionId == sub.Id);
+                    if (alreadyTriggered) continue;
 
-                try
-                {
-                    await TriggerStartCredentialsAsync(submissionId, projectId, userId);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Failed to trigger Camunda for Sub {Sub}", submissionId);
+                    var projectId = sub.Project.Id;
+                    var userId = sub.SubmittedBy.Id;
+                    var submissionId = sub.Id;
+
+                    try
+                    {
+                        await TriggerStartCredentialsAsync(submissionId, projectId, userId);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Failed to trigger Camunda for Sub {Sub}", submissionId);
+                    }
                 }
             }
-                var subprojs = await _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForTre");
+            else
+            {
+                Log.Information("Ephemeral Credentials feature flag is disabled; skipping credential triggering.");
+            }
+
+
+            var subprojs = await _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForTre");
             var dbprojs = _DbContext.Projects.ToList();
             var projectAdds = subprojs.Where(x => !_DbContext.Projects.Any(y => y.SubmissionProjectId == x.Id));
             var projectArchives =
