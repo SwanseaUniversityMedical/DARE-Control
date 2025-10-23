@@ -249,7 +249,7 @@ namespace TRE_API.Services
                     {
                         project = projectName,
                         user = userId.ToString(),
-                        submissionId = submissionId.ToString()
+                        submissionId = submissionId
 
                     }
                 }

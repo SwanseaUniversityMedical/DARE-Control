@@ -317,12 +317,17 @@ namespace Tre_Camunda.Services
 
         private async Task EnsureSchemaExistsAsync(NpgsqlConnection connection, string schemaName)
         {          
-            var commandText = $"CREATE SCHEMA IF NOT EXISTS {schemaName}";
+            var commandText = $"CREATE SCHEMA IF NOT EXISTS \"{schemaName}\"";
 
             Log.Information("Executing SQL: {CommandText}", commandText);
 
             using var cmd = new NpgsqlCommand(commandText, connection);
             await cmd.ExecuteNonQueryAsync();
+
+
+            //Check to see the created schema
+            using var visibilityCmd = new NpgsqlCommand("COMMIT; BEGIN;", connection);
+            await visibilityCmd.ExecuteNonQueryAsync();
         }
     }
 }
