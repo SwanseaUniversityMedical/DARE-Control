@@ -1,0 +1,126 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ include "submission-stack.fullname" . }}
+  namespace: {{ .Values.global.namespace }}
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  project: {{ .Values.global.argoProject }}
+  destination:
+    namespace: {{ .Values.global.namespace }}
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      selfHeal: true
+    syncOptions:  
+    - CreateNamespace=true 
+    retry:
+      limit: 5
+      backoff: 
+        duration: "30s"
+        factor: 2
+        maxDuration: "10m0s"
+  source:
+    repoURL: "harbor.ukserp.ac.uk/dare-trefx/chart"
+    chart: submission
+    # renovate: datasource=helm-oci depName=serpforms/chart/submission registryUrl=https://harbor.ukserp.ac.uk
+    targetRevision: "{{ .Values.submission.chartVersion }}"
+    helm:
+      valuesObject: 
+        config:
+          # TODO: what do these demo mode settings do/mean?
+          demoMode: false
+          keycloakDemoMode: true
+          testData: true
+
+          seqUrl: 'http://{{ include "submission-stack.fullname" . }}-seq:5341'
+
+          postgres:
+            secretName: {{ include "submission-stack.fullname" . }}-postgres-secret
+            passwordSecretKey: password
+            usernameSecretKey: username
+            # host: {{ .Values.submission.postgres.host }}-pg-pooler
+            host: {{ .Values.submission.postgres.host }}-rw
+            port: 5432
+            database: {{ .Values.submission.postgres.database }}
+
+          rabbitmq:
+            host: "rabbitmq"
+            port: "5672"
+            secretName: "rabbitmq-secret"
+            usernameSecretKey: "username"
+            passwordSecretKey: "password"
+            vhost: "SubLayer"
+
+          {{- if not .Values.global.dev }}
+          minio:
+            url: "http://minio:9000"
+            consoleUrl: "http://minio:9001"
+            secretName: "minio-env-config"
+            accessSecretKey: "accessKey"
+            secretSecretKey: "secretKey"
+            bucketName: "{{ .Values.submission.minioBucketName }}"
+          {{- else }}
+          minio:
+            url: "http://localhost:9000"
+            consoleUrl: "http://localhost:9001"
+            secretName: "minio-env-config"
+            accessSecretKey: "accessKey"
+            secretSecretKey: "secretKey"
+            bucketName: "{{ .Values.submission.minioBucketName }}"
+          {{- end }}
+
+          {{- if or (not .Values.global.dev) (not .Values.keycloak.enabled) }}
+          {{- with .Values.submission.keycloakConfig }}
+          keycloak:
+            {{ . | toYaml | nindent 12 }}
+          {{- end }}
+          {{- else }}
+          keycloak:
+            api:
+              host: "localhost:8085"
+
+            ui:
+              host: "localhost:8085"
+
+          {{- end }}
+
+          {{- with .Values.submission.queryImage }}
+          queryImage:
+            {{ . | toYaml | nindent 12 }}
+          {{- end }}
+
+        api:
+          {{- with .Values.submission.api.image }}
+          {{ . | toYaml | nindent 10 }}
+          {{- end }}
+
+          service:
+            type: {{ .Values.submission.api.serviceType }}
+
+        ui:
+          {{- with .Values.submission.ui.image }}
+          {{ . | toYaml | nindent 10 }}
+          {{- end }}
+
+          service:
+            type: {{ .Values.submission.ui.serviceType }}
+
+          # TODO: SET THE INGRESS SPEC
+          {{- if .Values.global.ingress.enabled }}
+          ingress:
+            enabled: false
+            className: nginx
+            annotations: {}
+            tls: []
+            host: ""
+            hosts: []
+          {{- end }}
+            
+
+        storage:
+          storageClassName: "{{ .Values.global.storage.rwxClass }}"
+          size: "{{ .Values.submission.storageSize }}"
