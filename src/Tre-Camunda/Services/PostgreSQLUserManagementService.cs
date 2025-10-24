@@ -314,10 +314,23 @@ namespace Tre_Camunda.Services
             // Allow alphanumeric, underscore, and hyphen
             return schemaName.All(c => char.IsLetterOrDigit(c) || c == '_' || c == '-');
         }
-
+        
         private async Task EnsureSchemaExistsAsync(NpgsqlConnection connection, string schemaName)
-        {          
-            var commandText = $"CREATE SCHEMA IF NOT EXISTS {schemaName}";
+        {
+            if (string.IsNullOrWhiteSpace(schemaName))
+            {
+                Log.Warning("Schema name is empty, skipping EnsureSchemaExistsAsync");
+                return;
+            }
+
+            if (!IsValidSchemaName(schemaName))
+            {
+                Log.Warning("Invalid schema name: {SchemaName}, skipping creation", schemaName);
+                return;
+            }
+
+            // Use double quotes to preserve case-sensitivity and allow names starting with digits
+            var commandText = $"CREATE SCHEMA IF NOT EXISTS \"{schemaName}\"";
 
             Log.Information("Executing SQL: {CommandText}", commandText);
 
