@@ -26,8 +26,8 @@ namespace Tre_Camunda.Services
             var gatewayAddress = _configuration["ZeebeBootstrap:Client:GatewayAddress"];
             var modelDirectory = _configuration["ProcessModelSettings:ModelDirectory"];
 
-            var projectRoot = Directory.GetParent(AppContext.BaseDirectory)!.Parent!.Parent!.Parent!.FullName;
-            var fullModelPath = Path.Combine(projectRoot, modelDirectory);
+            //var projectRoot = Directory.GetParent(AppContext.BaseDirectory)!.Parent!.Parent!.Parent!.FullName;
+            var fullModelPath = modelDirectory;
 
             Console.WriteLine($"Resolved Model Path: {fullModelPath}");
             
