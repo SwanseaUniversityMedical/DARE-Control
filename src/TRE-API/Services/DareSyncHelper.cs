@@ -65,13 +65,13 @@ namespace TRE_API.Services
                     var alreadyTriggered = _CredentialsDbContext.EphemeralCredentials.Any(c => c.SubmissionId == sub.Id);
                     if (alreadyTriggered) continue;
 
-                    var projectId = sub.Project.Id;
+                    var projectName = sub.Project.Name;
                     var userId = sub.SubmittedBy.Id;
                     var submissionId = sub.Id;
 
                     try
                     {
-                        await TriggerStartCredentialsAsync(submissionId, projectId, userId);
+                        await TriggerStartCredentialsAsync(submissionId, projectName, userId);
                     }
                     catch (Exception ex)
                     {
@@ -239,7 +239,7 @@ namespace TRE_API.Services
 
         }
 
-        private async Task TriggerStartCredentialsAsync(int submissionId, int projectId, int userId)
+        private async Task TriggerStartCredentialsAsync(int submissionId, string projectName, int userId)
         {
             var payload = new
             {
@@ -247,7 +247,7 @@ namespace TRE_API.Services
                 {
                     new
                     {
-                        project = projectId.ToString(),
+                        project = projectName,
                         user = userId.ToString(),
                         submissionId = submissionId.ToString()
 
