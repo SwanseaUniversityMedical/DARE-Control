@@ -1,16 +1,10 @@
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Serilog;
 using Tre_Camunda.Extensions;
 using Tre_Camunda.Settings;
 using Zeebe.Client;
-
 using System.Reflection;
 using Zeebe.Client.Accelerator.Extensions;
 using Tre_Camunda.Services;
-using Microsoft.EntityFrameworkCore;
-using Tre_Credentials.DbContexts;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = GetConfiguration();
