@@ -329,11 +329,8 @@ namespace Tre_Camunda.Services
                 return;
             }
 
-            // Escape double quotes inside identifier by doubling them
-            var escapedIdentifier = schemaName.Replace("\"", "\"\"");
-
             // Use double quotes to preserve case-sensitivity and allow names starting with digits
-            var commandText = $"CREATE SCHEMA IF NOT EXISTS \"{escapedIdentifier}\"";
+            var commandText = $"CREATE SCHEMA IF NOT EXISTS \"{schemaName}\"";
 
             Log.Information("Executing SQL: {CommandText}", commandText);
 
