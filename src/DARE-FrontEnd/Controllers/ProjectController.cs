@@ -1,19 +1,20 @@
-﻿using BL.Models;
-using BL.Models.ViewModels;
-using Microsoft.AspNetCore.Mvc;
-using BL.Services;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Authorization;
-using BL.Models.Settings;
-using Microsoft.AspNetCore.Http;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using System.Diagnostics;
+using System.Net;
+using BL.Models;
 using BL.Models.APISimpleTypeReturns;
+using BL.Models.Settings;
 using BL.Models.Tes;
+using BL.Models.ViewModels;
+using BL.Services;
+using DARE_FrontEnd.Models;
+using EasyNetQ.Management.Client.Model;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
 using Serilog;
-using EasyNetQ.Management.Client.Model;
-using DARE_FrontEnd.Models;
-using System.Diagnostics;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -74,6 +75,10 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public async Task<IActionResult> GetProject(int id)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
 
             var minioEndpoint = _clientHelper.CallAPIWithoutModel<MinioEndpoint>("/api/Project/GetMinioEndPoint");
             var paramlist = new Dictionary<string, string>();
@@ -134,7 +139,11 @@ namespace DARE_FrontEnd.Controllers
 
         public IActionResult SubmissionProjectSQL(int id)
         {
-           
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());
             var project = _clientHelper.CallAPIWithoutModel<SubmissionGetProjectModel>(
@@ -156,6 +165,10 @@ namespace DARE_FrontEnd.Controllers
 
         public IActionResult SubmissionProjectGraphQL(int id)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
 
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());
@@ -176,6 +189,10 @@ namespace DARE_FrontEnd.Controllers
         
         public IActionResult SubmissionProjectDemo(int id)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
 
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());
@@ -196,6 +213,10 @@ namespace DARE_FrontEnd.Controllers
 
         public IActionResult SubmissionProjectCrate(int id)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
 
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("projectId", id.ToString());
@@ -232,6 +253,10 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public IActionResult AddUserMembership()
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
 
             var projmem = GetProjectUserModel();
             return View(projmem);
@@ -262,6 +287,10 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public IActionResult AddTreMembership()
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
 
             var projmem = GetProjectTreModel();
             return View(projmem);
@@ -315,6 +344,11 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public IActionResult SaveProjectForm(int projectId)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var formData = new FormData()
             {
                 FormIoUrl = _formIOSettings.ProjectForm,
@@ -339,6 +373,11 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<IActionResult> ProjectFormSubmission([FromBody] object arg, int id)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var str = arg?.ToString();
 
             if (!string.IsNullOrEmpty(str))
@@ -363,6 +402,11 @@ namespace DARE_FrontEnd.Controllers
 
         public async Task<IActionResult> RemoveUserFromProject(int projectId, int userId)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var model = new ProjectUser()
             {
                 ProjectId = projectId,
@@ -377,6 +421,11 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public async Task<IActionResult> RemoveTreFromProject(int projectId, int treId)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var model = new ProjectTre()
             {
                 ProjectId = projectId,
@@ -453,6 +502,11 @@ namespace DARE_FrontEnd.Controllers
         [Authorize(Roles = "dare-control-admin")]
         public void IsUserOnProject(int projectId, int userId)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                
+            }
+
             var model = new ProjectUser()
             {
                 ProjectId = projectId,
@@ -463,6 +517,11 @@ namespace DARE_FrontEnd.Controllers
 
         public string ConvertIFormFileToJson(IFormFile formFile)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return null;
+            }
+
             if (formFile == null)
                 return null;
 
