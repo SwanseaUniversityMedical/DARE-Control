@@ -111,7 +111,8 @@ namespace DARE_FrontEnd.Controllers
                     Tags = new Dictionary<string, string>()
                     {
                         { "project", project.Name },
-                        { "tres", listOfTre }
+                        { "tres", listOfTre },
+                        { "author", HttpContext.User.FindFirst("name").Value }
                     }
                 };
 
@@ -214,7 +215,8 @@ namespace DARE_FrontEnd.Controllers
                         tesTask.Tags = new Dictionary<string, string>()
                         {
                             { "project", project.Name },
-                            { "tres", tres }
+                            { "tres", tres },
+                            { "author", HttpContext.User.FindFirst("name").Value }
                         };
                     }
                 }
@@ -386,7 +388,8 @@ namespace DARE_FrontEnd.Controllers
                     test.Tags = new Dictionary<string, string>()
                     {
                         { "project", project.Name },
-                        { "tres", listOfTre }
+                        { "tres", listOfTre },
+                        { "author", HttpContext.User.FindFirst("name").Value }
                     };
                 }
 
@@ -409,7 +412,7 @@ namespace DARE_FrontEnd.Controllers
 
                 var context = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 var Token = await _IKeyCloakService.RefreshUserToken(context);
-
+                var data = JsonConvert.SerializeObject(test);
 
                 var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test);
 
