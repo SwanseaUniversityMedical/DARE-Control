@@ -1,80 +1,46 @@
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Serilog;
 using Tre_Camunda.Extensions;
 using Tre_Camunda.Settings;
 using Zeebe.Client;
-
 using System.Reflection;
 using Zeebe.Client.Accelerator.Extensions;
 using Tre_Camunda.Services;
-using Microsoft.EntityFrameworkCore;
-using Tre_Credentials.DbContexts;
 
 var builder = WebApplication.CreateBuilder(args);
-var configuration = GetConfiguration();
-string AppName = typeof(Program).Module.Name.Replace(".dll", "");
 
-ConfigurationManager configurations = builder.Configuration;
+string appName = typeof(Program).Module.Name.Replace(".dll", "");
+var configurations = builder.Configuration;
 
-Log.Logger = CreateSerilogLogger(configuration);
+Log.Logger = CreateSerilogLogger(configurations);
 Log.Information("Camunda logging Start.");
 
-Serilog.ILogger CreateSerilogLogger(IConfiguration configuration)
+Serilog.ILogger CreateSerilogLogger(IConfiguration cfg)
 {
-    var seqServerUrl = configuration["Serilog:SeqServerUrl"];
-    var seqApiKey = configuration["Serilog:SeqApiKey"];
-
-    if (seqServerUrl == null)
-    {
-        Log.Error("seqServerUrl is null");
-        seqServerUrl = "seqServerUrl == null";
-    }
+    var seqServerUrl = cfg["Serilog:SeqServerUrl"];
+    var seqApiKey = cfg["Serilog:SeqApiKey"];
 
     return new LoggerConfiguration()
-    .MinimumLevel.Verbose()
-    .Enrich.WithProperty("ApplicationContext", AppName)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.Seq(seqServerUrl, apiKey: seqApiKey)
-    .ReadFrom.Configuration(configuration)
-    .CreateLogger();
-
+        .MinimumLevel.Verbose()
+        .Enrich.WithProperty("ApplicationContext", appName)
+        .Enrich.FromLogContext()
+        .WriteTo.Console()
+        .WriteTo.Seq(seqServerUrl ?? "seqServerUrl == null", apiKey: seqApiKey)
+        .ReadFrom.Configuration(cfg)
+        .CreateLogger();
 }
 
-await Host.CreateDefaultBuilder(args)
-    .ConfigureServices(services =>
-    {
-        services.BootstrapZeebe(
-          configuration.GetSection("ZeebeBootstrap"),
-          Assembly.GetExecutingAssembly()
-      );
+// register services on the same builder
+builder.Services.BootstrapZeebe(
+    configurations.GetSection("ZeebeBootstrap"),
+    Assembly.GetExecutingAssembly()
+);
+builder.Services.AddZeebeBuilders();
+builder.Services.BootstrapZeebe(configurations.GetSection("ZeebeConfiguration"), typeof(Program).Assembly);
+builder.Services.Configure<LdapSettings>(configurations.GetSection("LdapSettings"));
+builder.Services.Configure<VaultSettings>(configurations.GetSection("VaultSettings"));
+builder.Services.AddHttpClient();
+builder.Services.AddBusinessServices(configurations);
+builder.Services.ConfigureCamunda(configurations);
 
-        services.AddZeebeBuilders();
-        services.BootstrapZeebe(configuration.GetSection("ZeebeConfiguration"), typeof(Program).Assembly);
-
-        services.Configure<LdapSettings>(configuration.GetSection("LdapSettings"));
-        services.Configure<VaultSettings>(configuration.GetSection("VaultSettings"));
-        services.AddHttpClient();
-        services.AddBusinessServices(configuration);
-        services.ConfigureCamunda(configuration);        
-
-    })
-    .Build()
-    .RunAsync();
-
-/// <summary>
-/// GetConfiguration
-/// </summary>
-IConfiguration GetConfiguration()
-{
-    var a = Directory.GetCurrentDirectory();
-    var builder = new ConfigurationBuilder()
-        .SetBasePath(Directory.GetCurrentDirectory())
-        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-        .AddJsonFile($"appsettings.development.json", optional: true, reloadOnChange: true)
-        .AddEnvironmentVariables();
-
-    return builder.Build();
-}
+var app = builder.Build();
+await app.RunAsync();
