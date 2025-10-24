@@ -14,6 +14,7 @@ namespace Tre_Camunda.ProcessHandlers
         private readonly IPostgreSQLUserManagementService _postgresUserManagementService;
         private readonly IVaultCredentialsService _vaultCredentialsService;
         private readonly IEphemeralCredentialsService _ephemeralCredentialsService;
+        private const string CredentialType = "postgres";
 
         public DeletePostgresUserHandler(ILogger<DeletePostgresUserHandler> logger,
             IPostgreSQLUserManagementService postgresUserManagementService,
@@ -80,7 +81,7 @@ namespace Tre_Camunda.ProcessHandlers
 
                         if (!string.IsNullOrEmpty(submissionId) && int.TryParse(submissionId, out int submissionIdInt))
                         {
-                            var vaultPath = await _ephemeralCredentialsService.GetVaultPathBySubmissionIdAsync(submissionIdInt, cancellationToken);
+                            var vaultPath = await _ephemeralCredentialsService.GetVaultPathBySubmissionIdAsync(submissionIdInt, CredentialType, cancellationToken);
 
                             if (!string.IsNullOrEmpty(vaultPath))
                             {

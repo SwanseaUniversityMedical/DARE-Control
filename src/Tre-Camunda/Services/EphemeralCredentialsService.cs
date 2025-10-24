@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tre_Credentials.DbContexts;
+using Tre_Credentials.Models;
 
 namespace Tre_Camunda.Services
 {
@@ -45,12 +46,15 @@ namespace Tre_Camunda.Services
             }
         }
 
-        public async Task<string?> GetVaultPathBySubmissionIdAsync(int submissionId, CancellationToken cancellationToken = default)
+        public async Task<string?> GetVaultPathBySubmissionIdAsync(int submissionId, string credentialType, CancellationToken cancellationToken = default)
         {
             try
             {
                 var credential = await _credentialsDbContext.EphemeralCredentials
-                    .Where(c => c.SubmissionId == submissionId && !c.ExpiredAt.HasValue)
+                    .Where(c => c.SubmissionId == submissionId
+                        && c.CredentialType == credentialType
+                        && !c.ExpiredAt.HasValue
+                        && c.SuccessStatus == SuccessStatus.Success)
                     .OrderByDescending(c => c.CreatedAt)
                     .FirstOrDefaultAsync(cancellationToken);
 
@@ -58,7 +62,7 @@ namespace Tre_Camunda.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error retrieving vaultPath for submissionId: {submissionId}");
+                _logger.LogError(ex, "Error retrieving vaultPath for submissionId: {SubmissionId}, credentialType: {CredentialType}", submissionId, credentialType);
                 return null;
             }
         }
