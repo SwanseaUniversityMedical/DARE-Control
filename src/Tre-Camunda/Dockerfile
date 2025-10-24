@@ -32,5 +32,5 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 #Camunda Models
-COPY ./ProcessModels
+COPY ProcessModels/ ./ProcessModels/
 ENTRYPOINT ["dotnet", "Tre-Camunda.dll"]
