@@ -976,6 +976,5 @@ namespace TRE_API
 
             Log.Information("Camunda RevokeCredentials triggered successfully for submission {SubmissionId}", submissionId);
         }
-
     }
 }
