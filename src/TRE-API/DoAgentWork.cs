@@ -929,7 +929,7 @@ namespace TRE_API
             Log.Error(errorMsg);
             throw new TimeoutException(errorMsg);
         }
-                             
+        
         private async Task TriggerRevokeCredentialsAsync(int submissionId, int project, int user, int timer)
         {
             var payload = new
@@ -938,23 +938,34 @@ namespace TRE_API
                 {
                     new
                     {
-                     submissionId = submissionId.ToString(),
-                     project = project.ToString(),
-                     user = user.ToString(),
-                     timer = timer
+                        submissionId = submissionId.ToString(),
+                        project = project.ToString(),
+                        user = user.ToString(),
+                        timer = timer
                     }
                 }
             };
 
             var jsonPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-           
-            var camundaWebhookUrl = _config["CredentialAPISettings:RevokeCredentials"];
+
+            // use the correct config key (matches appsettings: RevokeWebhookUrl)
+            var camundaWebhookUrl = _config["CredentialAPISettings:RevokeWebhookUrl"];
+
+            if (string.IsNullOrWhiteSpace(camundaWebhookUrl))
+            {
+                throw new InvalidOperationException("Configuration 'CredentialAPISettings:RevokeWebhookUrl' is missing or empty.");
+            }
+
+            if (!Uri.TryCreate(camundaWebhookUrl, UriKind.Absolute, out var webhookUri))
+            {
+                throw new InvalidOperationException($"Invalid webhook URL in configuration: {camundaWebhookUrl}");
+            }
 
             using var httpClient = _httpClientFactory.CreateClient();
             httpClient.Timeout = TimeSpan.FromMinutes(2);
 
-            var response = await httpClient.PostAsync(camundaWebhookUrl, content);
+            var response = await httpClient.PostAsync(webhookUri, content);
 
             if (!response.IsSuccessStatusCode)
             {
