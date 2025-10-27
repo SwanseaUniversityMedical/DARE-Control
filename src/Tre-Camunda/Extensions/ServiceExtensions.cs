@@ -65,6 +65,9 @@ namespace Tre_Camunda.Extensions
             services.AddScoped<CreateTrinoUserHandler>();
 
             services.AddScoped<IEphemeralCredentialsService, EphemeralCredentialsService>();
+
+            services.AddScoped<CreateTreCredentialsHandler>();
+            services.AddScoped<DeleteTreCredentialsHandler>();
         }
     }
 }
