@@ -16,26 +16,12 @@ namespace Tre_Camunda.Services
 
             _camunda = IServicedZeebeClient;
             _configuration = configuration;           
-        }
+        }       
 
-
-        
         public async Task DeployProcessDefinitionAndDecisionModels()
         {
             /* Testing connection */
             var gatewayAddress = _configuration["ZeebeBootstrap:Client:GatewayAddress"];
-            var modelDirectory = _configuration["ProcessModelSettings:ModelDirectory"];
-
-            var projectRoot = Directory.GetParent(AppContext.BaseDirectory)!.Parent!.Parent!.Parent!.FullName;
-            var fullModelPath = Path.Combine(projectRoot, modelDirectory);
-
-            Console.WriteLine($"Resolved Model Path: {fullModelPath}");
-            
-            if (string.IsNullOrWhiteSpace(fullModelPath))
-            {
-                Log.Warning("Model directory not configured in appsettings.json");
-                return;
-            }            
 
             var zeebeClient = ZeebeClient.Builder()
                 .UseGatewayAddress(gatewayAddress)
@@ -46,33 +32,42 @@ namespace Tre_Camunda.Services
             Console.WriteLine($"Connected to cluster with version");
 
 
-            var modelFiles = Directory.GetFiles(fullModelPath, "*.*", SearchOption.AllDirectories)
-            .Where(f => f.EndsWith(".bpmn", StringComparison.OrdinalIgnoreCase) ||
-                     f.EndsWith(".dmn", StringComparison.OrdinalIgnoreCase))
+            var modelResources = Assembly.GetExecutingAssembly().GetManifestResourceNames()
+            .Where(x => x.ToLower().Contains(".processmodels.") &&
+            (x.EndsWith(".bpmn", StringComparison.OrdinalIgnoreCase) ||
+            x.EndsWith(".dmn", StringComparison.OrdinalIgnoreCase)))
             .ToList();
 
-
-            if (!modelFiles.Any())
+            if (!modelResources.Any())
             {
                 Log.Warning("No BPMN or DMN models found to deploy.");
                 return;
             }
 
-            foreach (var model in modelFiles)
+            foreach (var model in modelResources)
             {
-                var fileName = Path.GetFileName(model);
-                Log.Information($"Deploying process definition: {fileName}");
+                var fileExtension = Path.GetExtension(model);
+                var name = Path.GetFileNameWithoutExtension(model.Split('.').Last());
+                var deploymentFileName = $"{name}{fileExtension}";
+                Log.Information($"Deploying process definition with name: {deploymentFileName}");
+
+                using var resourceStream = GetType().Assembly.GetManifestResourceStream(model);
+
+                if (resourceStream == null)
+                {
+                    Log.Warning("Could not find resource stream for: " + model);
+                    continue;
+                }
 
                 try
                 {
-                    using var stream = File.OpenRead(model);
-                    await _camunda.DeployModel(stream, fileName);
-                    Log.Information($"Successfully deployed: {fileName}");
+                    await _camunda.DeployModel(resourceStream, deploymentFileName);
+                    Log.Information($"Successfully deployed: {deploymentFileName}");
                 }
-                catch (Exception ex)
+                catch (Exception e)
                 {
-                    Log.Error($"Failed to deploy {fileName}: {ex.Message}");
-                    throw;
+                    Log.Error($"Failed to deploy process definition with name: {deploymentFileName}, error: {e}");
+                    throw new ApplicationException("Failed to deploy process definition", e);
                 }
             }
         }

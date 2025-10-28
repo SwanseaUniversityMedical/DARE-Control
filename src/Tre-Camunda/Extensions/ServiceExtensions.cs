@@ -53,7 +53,6 @@ namespace Tre_Camunda.Extensions
             configuration.Bind(nameof(camundaSettings), camundaSettings);
             services.AddSingleton(camundaSettings);
 
-           
             services.AddHostedService<BpmnProcessDeployService>();
             services.AddScoped<IProcessModelService, ProcessModelService>();
 
@@ -63,10 +62,9 @@ namespace Tre_Camunda.Extensions
             services.AddScoped<CreatePostgresUserHandler>();
 
             services.AddScoped<ILdapUserManagementService, LdapUserManagementService>();
+            services.AddScoped<CreateTrinoUserHandler>();
 
             services.AddScoped<IEphemeralCredentialsService, EphemeralCredentialsService>();
-
-
         }
     }
 }
