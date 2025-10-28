@@ -155,14 +155,6 @@ spec:
             - name: http
               containerPort: {{ .Values.api.service.port }}
               protocol: TCP
-          {{- with .Values.api.livenessProbe }}
-          livenessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.api.readinessProbe }}
-          readinessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
           {{- with .Values.api.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
