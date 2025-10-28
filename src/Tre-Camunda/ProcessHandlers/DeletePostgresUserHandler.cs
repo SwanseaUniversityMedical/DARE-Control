@@ -64,10 +64,17 @@ namespace Tre_Camunda.ProcessHandlers
 
                     if (!string.IsNullOrEmpty(username) || !string.IsNullOrEmpty(database) || !string.IsNullOrEmpty(server) || !string.IsNullOrEmpty(port) || !string.IsNullOrEmpty(user) || !string.IsNullOrEmpty(project))
                     {
+                        // Check if user exists before attempting deletion
+                        var userExists = await _postgresUserManagementService.UserExistsAsync(username);
+                        if (!userExists)
+                        {
+                            _logger.LogInformation("Postgres user {Username} does not exist, skipping deletion", username);
+                            SW.Stop();
+                            return;
+                        }
+                        
                         _logger.LogInformation($"Attempting to delete postgres user: {username}");
-
-
-
+                        
                         var deleteUserResult = await _postgresUserManagementService.DropUserAsync(username);
 
                         if (!deleteUserResult)

@@ -61,6 +61,15 @@ namespace Tre_Camunda.ProcessHandlers
                     throw new Exception(errorMsg);
                 }
 
+                // Check if user exists before attempting deletion
+                var userExists = await _ldapUserManagementService.UserExistsAsync(username);
+                if (!userExists)
+                {
+                    _logger.LogInformation("LDAP user {Username} does not exist, skipping deletion", username);
+                    sw.Stop();
+                    return;
+                }
+                
                 _logger.LogInformation("Attempting to delete LDAP user: {Username}", username);
 
                 var result = await _ldapUserManagementService.DeleteUserAsync(username);
