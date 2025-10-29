@@ -6,13 +6,9 @@ global:
   argoProject: dare-control-submission
   namespace: dare-control-submission
   oidc:
-    authority: "https://keycloak.test/realms/Dare-Control"
+    authority: "http://keycloak.localtest.me/realms/Dare-Control"
   ingress:
-    enabled: true
-    host: "test"
-    className: "nginx"
-    adminClassName: "nginx"
-    certClusterIssuer: "ca-issuer"
+    enabled: false
   storage:
     defaultClass: "standard"
     rwxClass: "standard"
@@ -40,7 +36,7 @@ submission:
     image:
       repository: harbor.ukserp.ac.uk/dare-trefx/control-main-api
       pullPolicy: IfNotPresent
-      tag: "2.11.2"
+      tag: "pr-1017"
 
     serviceType: ClusterIP
 
@@ -48,46 +44,13 @@ submission:
     image:
       repository: harbor.ukserp.ac.uk/dare-trefx/control-main-ui
       pullPolicy: IfNotPresent
-      tag: "2.11.2"
+      tag: "pr-1017"
 
     serviceType: ClusterIP
 
 
 
   minioBucketName: "testbucket"
-  keycloakConfig:
-    proxy:
-      enabled: false
-
-    api:
-      protocol: "https"
-      host: "keycloak.test"
-      realm: "Dare-Control"
-      secretName: "api-keycloak-secret"
-      clientSecretKey: "secret"
-      clientIdKey: "id" 
-      redirectUrl: ""
-      useRedirect: false
-      tokenRefreshSeconds: "3600"
-      trustKeycloakCert: false
-      validAudiences: "Dare-Control-UI,Dare-Control-API,Dare-Control-Minio"
-      validIssuer: ""
-      validAudience: ""
-
-    ui:
-      protocol: "https"
-      host: "keycloak.test"
-      realm: "Dare-Control"
-      secretName: "ui-keycloak-secret"
-      clientSecretKey: "secret"
-      clientIdKey: "id" 
-      tokenExpiredAddress: "http://localhost:5001/Account/LoginAfterTokenExpired"
-      redirectUrl: ""
-      useRedirect: false
-      tokenRefreshSeconds: "3600"
-      trustKeycloakCert: false
-      validIssuer: ""
-      validAudience: ""
 
   queryImage:
     sql: "ukserp/runsql:1.0.0"
@@ -156,12 +119,6 @@ rabbitmq-cluster-operator:
     watchAllNamespaces: true
     image:
       repository: bitnamilegacy/rmq-messaging-topology-operator
-
-
-
-
-
-
 
   rabbitmqImage:
     repository: bitnamilegacy/rabbitmq

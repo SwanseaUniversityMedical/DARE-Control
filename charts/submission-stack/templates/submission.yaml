@@ -55,18 +55,20 @@ spec:
             passwordSecretKey: "password"
             vhost: "SubLayer"
 
-          {{- if not .Values.global.dev }}
+          {{- if and .Values.global.dev (not .Values.global.ingress.enabled) }}
           minio:
-            url: "http://minio:9000"
-            consoleUrl: "http://minio:9001"
+            url: "http://minio-api.localtest.me"
+            consoleUrl: "http://minio.localtest.me"
             secretName: "minio-env-config"
             accessSecretKey: "accessKey"
             secretSecretKey: "secretKey"
             bucketName: "{{ .Values.submission.minioBucketName }}"
-          {{- else }}
+          {{- end }}
+
+          {{- if .Values.global.ingress.enabled }}
           minio:
-            url: "http://localhost:9000"
-            consoleUrl: "http://localhost:9001"
+            url: "https://minio.{{ .Values.global.ingress.host }}"
+            consoleUrl: "https://minio-api.{{ .Values.global.ingress.host }}"
             secretName: "minio-env-config"
             accessSecretKey: "accessKey"
             secretSecretKey: "secretKey"
@@ -79,13 +81,25 @@ spec:
             {{ . | toYaml | nindent 12 }}
           {{- end }}
           {{- else }}
+          {{- if and .Values.global.dev (not .Values.global.ingress.enabled) }}
           keycloak:
             api:
-              host: "localhost:8085"
+              protocol: "http"
+              host: "keycloak.localtest.me"
 
             ui:
-              host: "localhost:8085"
+              protocol: "http"
+              host: "keycloak.localtest.me"
+          {{- else }}
+          keycloak:
+            api:
+              protocol: "https"
+              host: "keycloak.{{ .Values.global.ingress.host }}"
 
+            ui:
+              protocol: "https"
+              host: "keycloak.{{ .Values.global.ingress.host }}"
+          {{- end }}
           {{- end }}
 
           {{- with .Values.submission.queryImage }}
@@ -94,17 +108,19 @@ spec:
           {{- end }}
 
         api:
-          {{- with .Values.submission.api.image }}
-          {{ . | toYaml | nindent 10 }}
-          {{- end }}
+          image:
+            {{- with .Values.submission.api.image }}
+            {{ . | toYaml | nindent 12 }}
+            {{- end }}
 
           service:
             type: {{ .Values.submission.api.serviceType }}
 
         ui:
-          {{- with .Values.submission.ui.image }}
-          {{ . | toYaml | nindent 10 }}
-          {{- end }}
+          image:
+            {{- with .Values.submission.ui.image }}
+            {{ . | toYaml | nindent 12 }}
+            {{- end }}
 
           service:
             type: {{ .Values.submission.ui.serviceType }}

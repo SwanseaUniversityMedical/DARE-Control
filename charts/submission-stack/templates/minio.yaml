@@ -107,20 +107,13 @@ spec:
             - name: PROMETHEUS_NAME
               value: "prometheus-operator-kube-p-prometheus"
             {{- end }}
-            {{- if .Values.keycloak.enabled }}
+            {{- if and .Values.global.dev (not .Values.global.ingress.enabled) }}
             - name: MINIO_IDENTITY_OPENID_CONFIG_URL_PRIMARY_IAM
-              value: "http://localhost:8085/realms/{{ .Values.submission.keycloakConfig.ui.realm }}/.well-known/openid-configuration"
-            - name: MINIO_IDENTITY_OPENID_DISPLAY_NAME_PRIMARY_IAM
-              value: "Keycloak"
-            - name: MINIO_IDENTITY_OPENID_SCOPES_PRIMARY_IAM
-              value: "openid,email"
-            - name: MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC_PRIMARY_IAM
-              value: "on"
-            - name: MINIO_IDENTITY_OPENID_VENDOR
-              value: "keycloak"
+              value: "http://keycloak.localtest.me/.well-known/openid-configuration"
             {{- else }}
             - name: MINIO_IDENTITY_OPENID_CONFIG_URL_PRIMARY_IAM
               value: "{{ .Values.global.oidc.authority }}/.well-known/openid-configuration"
+            {{- end }}
             - name: MINIO_IDENTITY_OPENID_DISPLAY_NAME_PRIMARY_IAM
               value: "Keycloak"
             - name: MINIO_IDENTITY_OPENID_SCOPES_PRIMARY_IAM
@@ -129,7 +122,6 @@ spec:
               value: "on"
             - name: MINIO_IDENTITY_OPENID_VENDOR
               value: "keycloak"
-            {{- end }}
             - name: GC
               value: "10"
             - name: MINIO_STORAGE_CLASS_STANDARD
@@ -140,12 +132,61 @@ spec:
             {{ toYaml . | nindent 12 }}
             {{- end }}
 
+
           certificate:
+            {{- if and .Values.global.dev (not .Values.global.ingress.enabled) }}
+            requestAutoCert: false
+            {{- else }}
             requestAutoCert: true
+            externalCertSecret:
+              - name: minio-ingress-tls
+                type: kubernetes.io/tls
+            {{- end }}
+          
 
           prometheusOperator: false
 
           
+        {{- if and .Values.global.dev (not .Values.global.ingress.enabled) }}
+        ingress:
+          api:
+            enabled: true
+            ingressClassName: "nginx"
+            annotations: 
+              nginx.ingress.kubernetes.io/proxy-body-size: "0"
+              nginx.ingress.kubernetes.io/secure-backends: "true"
+              nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+              nginx.ingress.kubernetes.io/client-header-buffer-size: 100k
+              nginx.ingress.kubernetes.io/http2-max-header-size: 96k
+              nginx.ingress.kubernetes.io/large-client-header-buffers: 4 100k
+              nginx.ingress.kubernetes.io/proxy-buffer-size: 256k
+              nginx.ingress.kubernetes.io/proxy-buffering: 'on'
+              nginx.ingress.kubernetes.io/proxy-buffers-number: '4'
+              nginx.ingress.kubernetes.io/proxy-max-temp-file-size: 1024m
+            host: minio-api.localtest.me
+            path: /
+            pathType: Prefix
+
+          console:
+            enabled: true
+            ingressClassName: "nginx"
+            annotations: 
+              nginx.ingress.kubernetes.io/proxy-body-size: "0"
+              nginx.ingress.kubernetes.io/secure-backends: "true"
+              nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+              nginx.ingress.kubernetes.io/client-header-buffer-size: 100k
+              nginx.ingress.kubernetes.io/http2-max-header-size: 96k
+              nginx.ingress.kubernetes.io/large-client-header-buffers: 4 100k
+              nginx.ingress.kubernetes.io/proxy-buffer-size: 256k
+              nginx.ingress.kubernetes.io/proxy-buffering: 'on'
+              nginx.ingress.kubernetes.io/proxy-buffers-number: '4'
+              nginx.ingress.kubernetes.io/proxy-max-temp-file-size: 1024m
+            host: minio.localtest.me
+            path: /
+            pathType: Prefix
+
+        {{- end }}
+
         {{- if .Values.global.ingress.enabled }}
         ingress:
           api:

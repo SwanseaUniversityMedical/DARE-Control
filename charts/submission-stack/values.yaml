@@ -139,10 +139,28 @@ minio:
 
 operators:
   minio:
-    enabled: true
+    enabled: false
 
   postgres:
-    enabled: true
+    enabled: false
 
   rabbitmq:
+    enabled: false
+
+rabbitmq-cluster-operator:
+  clusterOperator:
+    watchAllNamespaces: true
+    image:
+      repository: bitnamilegacy/rabbitmq-cluster-operator
+
+  msgTopologyOperator:
     enabled: true
+    watchAllNamespaces: true
+    image:
+      repository: bitnamilegacy/rmq-messaging-topology-operator
+
+  rabbitmqImage:
+    repository: bitnamilegacy/rabbitmq
+
+  credentialUpdaterImage:
+    repository: bitnamilegacy/rmq-default-credential-updater

@@ -4,7 +4,7 @@ metadata:
   name: rabbitmq
   namespace: {{ .Values.global.namespace }}
   annotations:
-    # "helm.sh/hook": "post-install"
+    "helm.sh/hook": "post-install"
 spec:
   persistence:
     storageClassName: {{ .Values.global.storage.defaultClass }}
@@ -22,7 +22,7 @@ metadata:
   name: vhost-sublayer
   namespace: {{ .Values.global.namespace }}
   annotations:
-    # "helm.sh/hook": "post-install"
+    "helm.sh/hook": "post-install"
 spec:
   name: "SubLayer"
   rabbitmqClusterReference:
