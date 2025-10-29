@@ -43,7 +43,7 @@ submission:
     image:
       repository: harbor.ukserp.ac.uk/dare-trefx/control-main-api
       pullPolicy: IfNotPresent
-      tag: ""
+      tag: "2.12.0"
 
     serviceType: ClusterIP
 
@@ -51,7 +51,7 @@ submission:
     image:
       repository: harbor.ukserp.ac.uk/dare-trefx/control-main-ui
       pullPolicy: IfNotPresent
-      tag: ""
+      tag: "2.12.0"
 
     serviceType: ClusterIP
 
@@ -96,7 +96,7 @@ submission:
 
   queryImage:
     sql: "ukserp/runsql:1.0.0"
-    graphql: "harbor.ukserp.ac.uk/dare-trefx/control-tre-hasura:1.33.1"
+    graphql: "harbor.ukserp.ac.uk/dare-trefx/control-tre-hasura:2.12.0"
 
 
 keycloak:
