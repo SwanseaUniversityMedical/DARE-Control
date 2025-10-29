@@ -100,13 +100,13 @@ minio:
 
 operators:
   minio:
-    enabled: true
+    enabled: false
 
   postgres:
-    enabled: true
+    enabled: false
 
   rabbitmq:
-    enabled: true
+    enabled: false
 
 rabbitmq-cluster-operator:
   clusterOperator:

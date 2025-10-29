@@ -1,5 +1,5 @@
 {{- if .Values.ui.ingress.enabled -}}
-{{- $fullName := include "serp-forms.fullname" . -}}
+{{- $fullName := include "submission.fullname" . -}}
 {{- $svcPort := .Values.ui.service.port -}}
 {{- if and .Values.ui.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.ui.ingress.annotations "kubernetes.io/ingress.class") }}
@@ -17,7 +17,7 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-ui
   labels:
-    {{- include "serp-forms.labels" . | nindent 4 }}
+    {{- include "submission.labels" . | nindent 4 }}
     component: "ui"
   {{- with .Values.ui.ingress.annotations }}
   annotations:

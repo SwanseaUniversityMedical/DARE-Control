@@ -125,6 +125,13 @@ spec:
           service:
             type: {{ .Values.submission.ui.serviceType }}
 
+          {{- if and .Values.global.dev (not .Values.global.ingress.enabled) }}
+          ingress:
+            enabled: true
+            className: nginx
+            host: "submission.localtest.me"
+          {{- end }}
+
           # TODO: SET THE INGRESS SPEC
           {{- if .Values.global.ingress.enabled }}
           ingress:

@@ -22,9 +22,6 @@ spec:
     pvcTemplate:
       accessModes:
         - ReadWriteOnce
-      resources:
-        requests:
-          storage: {{ .Values.keycloak.postgres.size }}
       storageClassName: {{ .Values.global.storage.defaultClass }}
 
   monitoring:
@@ -63,9 +60,6 @@ spec:
     pvcTemplate:
       accessModes:
         - ReadWriteOnce
-      resources:
-        requests:
-          storage: "{{ .Values.global.storage.dbSize }}"
       storageClassName: {{ .Values.global.storage.defaultClass }}
 
   monitoring:
