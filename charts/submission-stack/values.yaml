@@ -21,6 +21,9 @@ global:
     prometheusEndpoint: "http://prometheus-operator-kube-p-prometheus.hiru-mgmt-monitoring.svc:9090"
     prometheusNamespace: "hiru-mgmt-monitoring"
 
+vault:
+  role: hiru
+  secretPath: kvv2/data/prod/hiru/darecontrol/submission
 
 seq:
   storageSize: "1Gi"

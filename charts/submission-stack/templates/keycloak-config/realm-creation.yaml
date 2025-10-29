@@ -1,4 +1,4 @@
-{{- if .Values.keycloak.enabled }}
+{{- if and .Values.keycloak.enabled .Values.global.dev }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

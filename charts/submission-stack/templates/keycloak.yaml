@@ -45,7 +45,7 @@ spec:
           - name: KEYCLOAK_EXTRA_ARGS
             value: "--import-realm"
 
-
+        {{- if .Values.global.dev }}
         extraVolumes: 
           - name: realm-import
             configMap:
@@ -54,6 +54,7 @@ spec:
         extraVolumeMounts: 
           - name: realm-import
             mountPath: /opt/bitnami/keycloak/data/import
+        {{- end }}
 
         keycloakConfigCli:
           image:
