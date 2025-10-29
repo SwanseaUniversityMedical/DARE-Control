@@ -478,87 +478,97 @@ namespace TRE_API
 
                         else
                         {
-                            Log.Information($"Fetching ephemeral credential data from Camunda");
+                            Dictionary<string, Dictionary<string, object>> credentials = new Dictionary<string, Dictionary<string, object>>();
 
-                            var creds = await _credsDbContext.EphemeralCredentials
+                            if (await _features.IsEnabledAsync(FeatureFlags.EphemeralCredentials))
+                            {
+                                
+                                Log.Information($"Fetching ephemeral credential data from Camunda");
+
+                                var creds = await _credsDbContext.EphemeralCredentials
                                 .Where(e => e.SubmissionId == aSubmission.Id && e.IsProcessed != true)
                                 .OrderByDescending(e => e.CreatedAt)
                                 .ToListAsync();
 
-                            if (creds.Count == 0)
-                            {
-                                Log.Information("No EphemeralCredentials rows yet for submission {SubId}. Skipping.", aSubmission.Id);
-                                continue;
-                            }
+                                if (creds.Count == 0)
+                                {
+                                    Log.Information("No EphemeralCredentials rows yet for submission {SubId}. Skipping.", aSubmission.Id);
+                                    continue;
+                                }
 
 
-                            var parentKey = creds.Select(c => c.ParentProcessInstanceKey).FirstOrDefault(k => k.HasValue && k.Value > 0);
+                                var parentKey = creds.Select(c => c.ParentProcessInstanceKey).FirstOrDefault(k => k.HasValue && k.Value > 0);
 
-                            if (!parentKey.HasValue)
-                            {
-                                Log.Information("No parent processInstanceKey for submission {SubId}. Skipping this cycle.", aSubmission.Id);
-                                continue;
-                            }
+                                if (!parentKey.HasValue)
+                                {
+                                    Log.Information("No parent processInstanceKey for submission {SubId}. Skipping this cycle.", aSubmission.Id);
+                                    continue;
+                                }
 
-                            var credsRowforParentKey = await _credsDbContext.EphemeralCredentials.Where(e => e.SubmissionId == aSubmission.Id && e.ParentProcessInstanceKey == parentKey && e.IsProcessed != true).OrderByDescending(e => e.CreatedAt).ToListAsync();
+                                var credsRowforParentKey = await _credsDbContext.EphemeralCredentials.Where(e => e.SubmissionId == aSubmission.Id && e.ParentProcessInstanceKey == parentKey && e.IsProcessed != true).OrderByDescending(e => e.CreatedAt).ToListAsync();
 
-                            bool anyErrored = credsRowforParentKey.Any(c => c.SuccessStatus == SuccessStatus.Error);
-                            bool allSucceeded = credsRowforParentKey.All(c => c.SuccessStatus == SuccessStatus.Success);
+                                bool anyErrored = credsRowforParentKey.Any(c => c.SuccessStatus == SuccessStatus.Error);
+                                bool allSucceeded = credsRowforParentKey.All(c => c.SuccessStatus == SuccessStatus.Success);
 
-                            if (anyErrored)
-                            {
-                                Log.Error("Credential process errored for submission {SubId}.", aSubmission.Id);
+                                if (anyErrored)
+                                {
+                                    Log.Error("Credential process errored for submission {SubId}.", aSubmission.Id);
 
-                                var latestRow = creds.First();
-                                latestRow.ErrorMessage = "Credential process failed";
+                                    var latestRow = creds.First();
+                                    latestRow.ErrorMessage = "Credential process failed";
+                                    await _credsDbContext.SaveChangesAsync();
+
+                                    _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.RequestCancellation, "Credential process failed");
+                                    continue;
+                                }
+
+                                if (!allSucceeded)
+                                {
+                                    Log.Information("Credential process still running for submission , Will retry next run.");
+                                    continue;
+                                }
+
+                                Log.Information("All credential handlers succeeded for submission {SubId}. Fetching credentials.", aSubmission.Id);
+                                credentials = await WaitForAndFetchCredentialsAsync(aSubmission.Id, TimeSpan.FromMinutes(10));
+
+                                if (credentials == null || credentials.Count == 0)
+                                {
+                                    var errorMsg = $"No credentials found in Vault for submission {aSubmission.Id}";
+                                    Log.Error(errorMsg);
+
+                                    var latestRow = creds.First();
+                                    latestRow.ErrorMessage = errorMsg;
+                                    latestRow.IsProcessed = true;
+                                    await _credsDbContext.SaveChangesAsync();
+
+                                    _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.RequestCancellation, errorMsg);
+                                    continue;
+                                }
+
+                                Log.Information($"Successfully obtained {credentials.Count} credentials for submission {aSubmission.Id}");
+
+                                foreach (var row in creds)
+                                    row.IsProcessed = true;
+
                                 await _credsDbContext.SaveChangesAsync();
 
-                                _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.RequestCancellation, "Credential process failed");
-                                continue;
+                                try
+                                {
+                                    await TriggerRevokeCredentialsAsync(aSubmission.Id, aSubmission.Project.Id, aSubmission.SubmittedBy.Id, 1);
+
+                                }
+                                catch (Exception ex)
+                                {
+                                    Log.Error(ex, "Failed to trigger revoke credentials for submission {SubId}", aSubmission.Id);
+
+                                }
+
                             }
 
-                            if (!allSucceeded)
+                            else
                             {
-                                Log.Information("Credential process still running for submission , Will retry next run.");
-                                continue;
+                                Log.Information("EphemeralCredentials feature is disabled.");
                             }
-
-                            Log.Information("All credential handlers succeeded for submission {SubId}. Fetching credentials.", aSubmission.Id);
-                            var credentials = await WaitForAndFetchCredentialsAsync(aSubmission.Id, TimeSpan.FromMinutes(10));
-
-                            if (credentials == null || credentials.Count == 0)
-                            {
-                                var errorMsg = $"No credentials found in Vault for submission {aSubmission.Id}";
-                                Log.Error(errorMsg);
-
-                                var latestRow = creds.First();
-                                latestRow.ErrorMessage = errorMsg;
-                                latestRow.IsProcessed = true;
-                                await _credsDbContext.SaveChangesAsync();
-
-                                _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.RequestCancellation, errorMsg);
-                                continue;
-                            }
-
-                            Log.Information($"Successfully obtained {credentials.Count} credentials for submission {aSubmission.Id}");
-
-                            foreach (var row in creds)
-                                row.IsProcessed = true;
-
-                            await _credsDbContext.SaveChangesAsync();
-
-                            try
-                            {
-                                await TriggerRevokeCredentialsAsync(aSubmission.Id, aSubmission.Project.Id, aSubmission.SubmittedBy.Id, 1);
-                               
-                            }
-                            catch (Exception ex)
-                            {
-                                Log.Error(ex, "Failed to trigger revoke for submission {SubId}", aSubmission.Id);
-                               
-                            }
-
-
                             // The TES message
                             var tesMessage = JsonConvert.DeserializeObject<TesTask>(aSubmission.TesJson);
                             var processedOK = true;
@@ -762,24 +772,31 @@ namespace TRE_API
                                             }
                                         }
 
-                                        if (credentials != null && credentials.Count > 0)
+                                        if(await _features.IsEnabledAsync(FeatureFlags.EphemeralCredentials))
                                         {
-                                            foreach (var outerKey in credentials)
+                                            if (credentials != null && credentials.Count > 0)
                                             {
-                                                if (outerKey.Value is IDictionary<string, object> innerDict) //The format is dictionary within a dictionary
+                                                foreach (var outerKey in credentials)
                                                 {
-                                                    foreach (var inner in innerDict)
+                                                    if (outerKey.Value is IDictionary<string, object> innerDict) //The format is dictionary within a dictionary
                                                     {
-                                                        var key = inner.Key;
-                                                        var value = inner.Value?.ToString() ?? string.Empty;
-                                                        Executor.Env[key] = value;
+                                                        foreach (var inner in innerDict)
+                                                        {
+                                                            var key = inner.Key;
+                                                            var value = inner.Value?.ToString() ?? string.Empty;
+                                                            Executor.Env[key] = value;
+                                                        }
                                                     }
                                                 }
-                                            }
 
-                                            Log.Information($"Injected credentials into environment variables for {aSubmission.Id}");
+                                                Log.Information($"Injected credentials into environment variables for {aSubmission.Id}");
+                                            }
                                         }
 
+                                        else
+                                        {
+                                            Log.Information("Ephemeral Credentials not enabled for the submission");
+                                        }
                                     }
                                     else
                                     {
@@ -912,7 +929,7 @@ namespace TRE_API
             Log.Error(errorMsg);
             throw new TimeoutException(errorMsg);
         }
-                             
+        
         private async Task TriggerRevokeCredentialsAsync(int submissionId, int project, int user, int timer)
         {
             var payload = new
@@ -921,23 +938,34 @@ namespace TRE_API
                 {
                     new
                     {
-                     submissionId = submissionId.ToString(),
-                     project = project.ToString(),
-                     user = user.ToString(),
-                     timer = timer
+                        submissionId = submissionId.ToString(),
+                        project = project.ToString(),
+                        user = user.ToString(),
+                        timer = timer
                     }
                 }
             };
 
             var jsonPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-           
-            var camundaWebhookUrl = _config["CredentialAPISettings:RevokeCredentials"];
+
+            // use the correct config key (matches appsettings: RevokeWebhookUrl)
+            var camundaWebhookUrl = _config["CredentialAPISettings:RevokeWebhookUrl"];
+
+            if (string.IsNullOrWhiteSpace(camundaWebhookUrl))
+            {
+                throw new InvalidOperationException("Configuration 'CredentialAPISettings:RevokeWebhookUrl' is missing or empty.");
+            }
+
+            if (!Uri.TryCreate(camundaWebhookUrl, UriKind.Absolute, out var webhookUri))
+            {
+                throw new InvalidOperationException($"Invalid webhook URL in configuration: {camundaWebhookUrl}");
+            }
 
             using var httpClient = _httpClientFactory.CreateClient();
             httpClient.Timeout = TimeSpan.FromMinutes(2);
 
-            var response = await httpClient.PostAsync(camundaWebhookUrl, content);
+            var response = await httpClient.PostAsync(webhookUri, content);
 
             if (!response.IsSuccessStatusCode)
             {

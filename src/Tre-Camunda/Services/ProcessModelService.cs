@@ -10,15 +10,13 @@ namespace Tre_Camunda.Services
     {
         private IServicedZeebeClient _camunda;
         private readonly IConfiguration _configuration;
-
+     
         public ProcessModelService(IServicedZeebeClient IServicedZeebeClient, IConfiguration configuration)
         {
 
             _camunda = IServicedZeebeClient;
-            _configuration = configuration;
-        }
-
-       
+            _configuration = configuration;           
+        }       
 
         public async Task DeployProcessDefinitionAndDecisionModels()
         {
