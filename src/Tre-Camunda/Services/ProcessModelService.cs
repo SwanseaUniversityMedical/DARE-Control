@@ -19,18 +19,7 @@ namespace Tre_Camunda.Services
         }       
 
         public async Task DeployProcessDefinitionAndDecisionModels()
-        {
-            /* Testing connection */
-            var gatewayAddress = _configuration["ZeebeBootstrap:Client:GatewayAddress"];
-
-            var zeebeClient = ZeebeClient.Builder()
-                .UseGatewayAddress(gatewayAddress)
-                .UsePlainText()
-                .Build();
-
-            var topology = await zeebeClient.TopologyRequest().Send();
-            Console.WriteLine($"Connected to cluster with version");
-
+        {                     
 
             var modelResources = Assembly.GetExecutingAssembly().GetManifestResourceNames()
             .Where(x => x.ToLower().Contains(".processmodels.") &&
