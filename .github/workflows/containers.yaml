@@ -36,7 +36,7 @@ jobs:
 
   egress-api-container:
     needs: containers
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@feat/multiarch-builds-buildx
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.1.0-bulk-containers
     with:
       job-name: egress-api-container
       registry: ${{ vars.HARBOR_REGISTRY }}
@@ -54,7 +54,7 @@ jobs:
 
   egress-ui-container:
     needs: containers
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@feat/multiarch-builds-buildx
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.1.0-bulk-containers
     with:
       job-name: egress-ui-container
       registry: ${{ vars.HARBOR_REGISTRY }}
@@ -72,7 +72,7 @@ jobs:
 
   main-api-container:
     needs: containers
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@feat/multiarch-builds-buildx
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.1.0-bulk-containers
     with:
       job-name: main-api-container
       registry: ${{ vars.HARBOR_REGISTRY }}
@@ -90,7 +90,7 @@ jobs:
 
   main-ui-container:
     needs: containers
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@feat/multiarch-builds-buildx
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.1.0-bulk-containers
     with:
       job-name: main-ui-container
       registry: ${{ vars.HARBOR_REGISTRY }}
@@ -108,7 +108,7 @@ jobs:
 
   tre-api-container:
     needs: containers
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@feat/multiarch-builds-buildx
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.1.0-bulk-containers
     with:
       job-name: tre-api-container
       registry: ${{ vars.HARBOR_REGISTRY }}
@@ -126,7 +126,7 @@ jobs:
 
   tre-hasura-container:
     needs: containers
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@feat/multiarch-builds-buildx
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.1.0-bulk-containers
     with:
       job-name: tre-hasura-container
       registry: ${{ vars.HARBOR_REGISTRY }}
@@ -144,7 +144,7 @@ jobs:
 
   tre-sql-pg-container:
     needs: containers
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@feat/multiarch-builds-buildx
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.1.0-bulk-containers
     with:
       job-name: tre-sql-pg-container
       registry: ${{ vars.HARBOR_REGISTRY }}
@@ -162,7 +162,7 @@ jobs:
 
   tre-sql-trino-container:
     needs: containers
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@feat/multiarch-builds-buildx
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.1.0-bulk-containers
     with:
       job-name: tre-sql-trino-container
       registry: ${{ vars.HARBOR_REGISTRY }}
@@ -180,7 +180,7 @@ jobs:
 
   tre-listfiles:
     needs: containers
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@feat/multiarch-builds-buildx
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.1.0-bulk-containers
     with:
       job-name: tre-listfiles-container
       registry: ${{ vars.HARBOR_REGISTRY }}
@@ -198,7 +198,7 @@ jobs:
 
   tre-ui-container:
     needs: containers
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@feat/multiarch-builds-buildx
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.1.0-bulk-containers
     with:
       job-name: tre-ui-container
       registry: ${{ vars.HARBOR_REGISTRY }}
@@ -216,7 +216,7 @@ jobs:
 
   tre-camunda-container:
     needs: containers
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@feat/multiarch-builds-buildx
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/bulk-pr-and-release-container.yaml@v2.1.0-bulk-containers
     with:
       job-name: tre-camunda-container
       registry: ${{ vars.HARBOR_REGISTRY }}
