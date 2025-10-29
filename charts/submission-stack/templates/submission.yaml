@@ -135,12 +135,15 @@ spec:
           # TODO: SET THE INGRESS SPEC
           {{- if .Values.global.ingress.enabled }}
           ingress:
-            enabled: false
-            className: nginx
-            annotations: {}
-            tls: []
-            host: ""
-            hosts: []
+            enabled: true
+            className: {{ .Values.global.ingress.className }}
+            annotations: 
+              cert-manager.io/cluster-issuer: {{ .Values.global.ingress.certClusterIssuer }}
+            tls: 
+              - hosts:
+                - submission.{{ .Values.global.ingress.host }}
+                secretName: submission-ingress-tls
+            host: submission.{{ .Values.global.ingress.host }}
           {{- end }}
             
 

@@ -109,7 +109,7 @@ spec:
             {{- end }}
             {{- if and .Values.global.dev (not .Values.global.ingress.enabled) }}
             - name: MINIO_IDENTITY_OPENID_CONFIG_URL_PRIMARY_IAM
-              value: "http://keycloak.localtest.me/.well-known/openid-configuration"
+              value: "http://keycloak.localtest.me/realms/Dare-Control/.well-known/openid-configuration"
             {{- else }}
             - name: MINIO_IDENTITY_OPENID_CONFIG_URL_PRIMARY_IAM
               value: "{{ .Values.global.oidc.authority }}/.well-known/openid-configuration"
@@ -154,7 +154,6 @@ spec:
             ingressClassName: "nginx"
             annotations: 
               nginx.ingress.kubernetes.io/proxy-body-size: "0"
-              nginx.ingress.kubernetes.io/secure-backends: "true"
               nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
               nginx.ingress.kubernetes.io/client-header-buffer-size: 100k
               nginx.ingress.kubernetes.io/http2-max-header-size: 96k
@@ -172,7 +171,6 @@ spec:
             ingressClassName: "nginx"
             annotations: 
               nginx.ingress.kubernetes.io/proxy-body-size: "0"
-              nginx.ingress.kubernetes.io/secure-backends: "true"
               nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
               nginx.ingress.kubernetes.io/client-header-buffer-size: 100k
               nginx.ingress.kubernetes.io/http2-max-header-size: 96k
