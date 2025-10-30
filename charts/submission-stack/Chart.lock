@@ -1,0 +1,12 @@
+dependencies:
+- name: operator
+  repository: https://operator.min.io/
+  version: 7.1.1
+- name: cloudnative-pg
+  repository: https://cloudnative-pg.github.io/charts
+  version: 0.26.0
+- name: rabbitmq-cluster-operator
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 4.4.34
+digest: sha256:d83a4f200bf4c27035df4c33614c3f3902f7641c889af263f2638100f2613275
+generated: "2025-10-21T11:15:18.703758+01:00"
