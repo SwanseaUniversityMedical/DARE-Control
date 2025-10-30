@@ -105,7 +105,7 @@ namespace Tre_Camunda.ProcessHandlers
         protected abstract Task<bool> DeleteUserAsync(string? username, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Abstract method to be implemented by derived classes for specific user deletion logic
+        /// Abstract method to be implemented by derived classes for specific user existence check logic
         /// </summary>
         protected abstract Task<bool> UserExistAsync(string username);        
         
@@ -144,7 +144,7 @@ namespace Tre_Camunda.ProcessHandlers
                 if (!userExists)
                 {
                     sw.Stop();
-                    return CreateStatusResponse($"INFO: User {username} does not exist, skipping deletion");
+                    return CreateStatusResponse($"INFO: User {username} does not exist in {CredentialType} DB, skipping deletion");
                 }
                 
                 _logger.LogInformation("Attempting to delete {CredentialType} credentials" +
