@@ -35,9 +35,6 @@ namespace Tre_Camunda.ProcessHandlers
         }
         protected override async Task<bool> UserExistAsync(string username)
         {
-            if (string.IsNullOrEmpty(username))
-                return false;
-
             var result = await _ldapUserManagementService.UserExistsAsync(username);
             return result;
         }
