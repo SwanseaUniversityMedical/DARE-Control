@@ -277,7 +277,6 @@ namespace DARE_FrontEnd.Controllers
         {
             var projs = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;
             var users = _clientHelper.CallAPIWithoutModel<List<BL.Models.User>>("/api/User/GetAllUsers/").Result;
-            Log.Information("Users Count: " + users.Count.ToString());
 
             var projectItems = projs
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
