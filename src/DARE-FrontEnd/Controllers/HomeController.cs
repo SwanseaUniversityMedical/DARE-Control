@@ -119,7 +119,7 @@ namespace DARE_FrontEnd.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-           
+            // This var is always in lower case/case-insensitive because we are getting it from KeyCloak 
             var preferedUsername = (from x in User.Claims where x.Type == "preferred_username" select x.Value).First();
             
             var getAllProj = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects").Result;
@@ -141,7 +141,9 @@ namespace DARE_FrontEnd.Controllers
             {
                 foreach (var user in proj.Users)
                 {
-                    if (user.Name == preferedUsername)
+                    // Making sure that the username getting from the DB is lowered/case-insensitive as well as username from KeyCloak
+                    var loweredUserName = user.Name.ToLower();
+                    if (loweredUserName == preferedUsername)
                     {
                         userOnProjListProj.Add(proj);
 
