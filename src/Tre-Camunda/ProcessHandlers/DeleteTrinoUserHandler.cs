@@ -33,5 +33,13 @@ namespace Tre_Camunda.ProcessHandlers
             var result = await _ldapUserManagementService.DeleteUserAsync(username);
             return result.Success;
         }
+        protected override async Task<bool> UserExistAsync(string username)
+        {
+            if (string.IsNullOrEmpty(username))
+                return false;
+
+            var result = await _ldapUserManagementService.UserExistsAsync(username);
+            return result;
+        }
     }
 }

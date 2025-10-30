@@ -38,5 +38,11 @@ namespace Tre_Camunda.ProcessHandlers
             _logger.LogInformation("Blank credentials - no external user to delete, proceeding with vault cleanup");
             return true;
         }
+        
+        protected override async Task<bool> UserExistAsync(string username)
+        {
+            // Assume this always returns True until understanding about DeleteTreCredentials is gained 
+           return true;
+        }
     }
 }

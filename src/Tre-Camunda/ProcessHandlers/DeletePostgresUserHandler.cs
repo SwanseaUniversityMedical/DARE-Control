@@ -33,5 +33,12 @@ namespace Tre_Camunda.ProcessHandlers
             var result = await _postgresUserManagementService.DropUserAsync(username);
             return result;
         }
+        
+        protected override async Task<bool> UserExistAsync(string username)
+        {
+           
+            var result = await _postgresUserManagementService.UserExistsAsync(username);
+            return result;
+        }
     }
 }
