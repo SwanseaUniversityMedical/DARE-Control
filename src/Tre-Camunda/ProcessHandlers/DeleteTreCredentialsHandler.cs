@@ -35,7 +35,7 @@ namespace Tre_Camunda.ProcessHandlers
             return true;
         }
         
-        protected override async Task<bool> UserExistAsync(string username)
+        protected override async Task<bool> CheckUserExistAsync(string username)
         {
             // Assume this always returns True until understanding about DeleteTreCredentials is gained 
            return true;

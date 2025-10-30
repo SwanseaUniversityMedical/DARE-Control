@@ -31,7 +31,7 @@ namespace Tre_Camunda.ProcessHandlers
             return result;
         }
         
-        protected override async Task<bool> UserExistAsync(string username)
+        protected override async Task<bool> CheckUserExistAsync(string username)
         {
             var result = await _postgresUserManagementService.UserExistsAsync(username);
             return result;

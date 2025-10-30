@@ -107,7 +107,7 @@ namespace Tre_Camunda.ProcessHandlers
         /// <summary>
         /// Abstract method to be implemented by derived classes for specific user existence check logic
         /// </summary>
-        protected abstract Task<bool> UserExistAsync(string username);        
+        protected abstract Task<bool> CheckUserExistAsync(string username);        
         
         
         /// <summary>
@@ -140,7 +140,7 @@ namespace Tre_Camunda.ProcessHandlers
                         "This may be normal for custom/blank credential types.", CredentialType);
                 }
                 // Check if user exists before attempting deletion
-                var userExists = await UserExistAsync(username);
+                var userExists = await CheckUserExistAsync(username);
                 if (!userExists)
                 {
                     sw.Stop();
