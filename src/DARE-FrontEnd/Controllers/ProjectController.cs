@@ -54,23 +54,6 @@ namespace DARE_FrontEnd.Controllers
             return false;
         }
 
-        private bool IsUserOnProject(Project proj)
-        {
-            if (User.IsInRole("dare-control-admin"))
-            {
-                return true;
-            }
-
-            var usersName = "";
-            usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).FirstOrDefault();
-            if (!string.IsNullOrWhiteSpace(usersName) &&
-                (from x in proj.Users where x.Name.ToLower().Trim() == usersName.ToLower().Trim() select x).Any())
-            {
-                return true;
-            }
-            return false;
-        }
-
         [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetProject(int id)
@@ -136,7 +119,10 @@ namespace DARE_FrontEnd.Controllers
             //Log.Error("View(projectView) took ElapsedMilliseconds" + stopwatch.ElapsedMilliseconds);
             return View(projectView);
         }
-
+        
+        // Only users on the project or admins can see the TES Wizard, thanks to the function IsUserOnProject in this file
+        // AllowAnonymous here is to bypass the error from KeyCloak
+        [AllowAnonymous]
         public IActionResult SubmissionProjectSQL(int id)
         {
             if (!ModelState.IsValid) // SonarQube security
@@ -163,6 +149,10 @@ namespace DARE_FrontEnd.Controllers
         }
 
 
+        
+        // Only users on the project or admins can see the TES Wizard, thanks to the function IsUserOnProject in this file
+        // AllowAnonymous here is to bypass the error from KeyCloak
+        [AllowAnonymous]
         public IActionResult SubmissionProjectGraphQL(int id)
         {
             if (!ModelState.IsValid) // SonarQube security
