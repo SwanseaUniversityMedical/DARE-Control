@@ -1,6 +1,3 @@
-﻿using Microsoft.Extensions.Logging;
-using System.Diagnostics;
-using Tre_Camunda.Models;
 using Tre_Camunda.Services;
 using Zeebe.Client.Accelerator.Attributes;
 
@@ -31,6 +28,12 @@ namespace Tre_Camunda.ProcessHandlers
                 return false;
 
             var result = await _postgresUserManagementService.DropUserAsync(username);
+            return result;
+        }
+        
+        protected override async Task<bool> CheckUserExistAsync(string username)
+        {
+            var result = await _postgresUserManagementService.UserExistsAsync(username);
             return result;
         }
     }

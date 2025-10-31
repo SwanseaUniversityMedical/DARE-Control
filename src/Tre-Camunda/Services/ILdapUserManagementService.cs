@@ -6,6 +6,8 @@ namespace Tre_Camunda.Services
     {
         Task<UserCreationResult> CreateUserAsync(CreateUserRequest request);
 
-        Task<UserCreationResult> DeleteUserAsync(string username);        
+        Task<UserCreationResult> DeleteUserAsync(string username);  
+        
+        Task<bool> UserExistsAsync(string username);
     }
 }
