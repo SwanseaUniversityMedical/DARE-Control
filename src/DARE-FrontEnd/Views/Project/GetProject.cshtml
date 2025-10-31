@@ -264,21 +264,30 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col-12">
-                        <div class="table-responsive">
-                            <table class="table" id="UserList">
-                                <caption>List of users on project</caption>
-                                @foreach (var user in Model.UserItemList)
-                                {
-                                    <tr>
-                                        <td>
-                                            <input type="checkbox" value="@user.Value" id="@user.Value"
-                                                   name="selectedUser" class="form-check-input me-2"/>
-                                            @user.Text
-                                        </td>
-                                    </tr>
-                                }
-                            </table>
-                        </div>
+                        @if (Model.UserItemList == null || !Model.UserItemList.Any())
+                        {
+                            <div class="alert alert-info">
+                                <i class="fa fa-info-circle me-2"></i>
+                                No users available to add. All users may already be members of this project.
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table" id="UserList">
+                                    @foreach (var user in Model.UserItemList)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" value="@user.Value" id="@user.Value"
+                                                       name="selectedUser" class="form-check-input me-20"/>
+                                                @user.Text
+                                            </td>
+                                        </tr>
+                                    }
+                                </table>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>

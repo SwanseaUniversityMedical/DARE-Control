@@ -399,8 +399,10 @@ namespace DARE_API.Controllers
 
         private bool IsUserOnProject(Project project, string username)
         {
-            try { 
-            return project.Users.Any(x => x.Name == username.ToLower());
+            try 
+            { 
+                // To match the username's case-insensitive in KeyCloak and DB
+                return project.Users.Any(x => x.Name.ToLower() == username.ToLower());
             }
             catch (Exception ex)
             {
