@@ -49,14 +49,22 @@ namespace TRE_API.Controllers
                             (!showOnlyUnprocessed || x.Decision == Decision.Undecided))
                         .ToList();
                     
-                    // this logic here is to prevent the duplication of users in the memberships page
+                    // this logic here is to prevent the duplication of users in the memberships page (if any decisions for a user are non-Undecided, pick the most recent non-Undecided; otherwise pick the most recent Undecided)
                     // there can be many TreMembershipDecision for one user, but if the user can get one Approval decision, the submission from that user can go through
                     // as the logic in the function `IsUserApprovedOnProject` in TRE_API.Services.SubmissionHelper.cs 
                     var dedupedUsers = users
                         .GroupBy(x => x.User?.Username ?? $"<id:{x.User?.Id}>")
-                        .Select(g => g.OrderByDescending(m => m.LastDecisionDate).First())
+                        .Select(g =>
+                        {
+                            var mostRecentNonUndecided = g
+                                .Where(m => m.Decision != Decision.Undecided)
+                                .OrderByDescending(m => m.LastDecisionDate)
+                                .FirstOrDefault();
+
+                            return mostRecentNonUndecided ?? g.OrderByDescending(m => m.LastDecisionDate).First();
+                        })
                         .ToList();
-                
+                    
                     return dedupedUsers;
                 }
                 catch (Exception ex)
