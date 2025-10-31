@@ -112,7 +112,16 @@ namespace Tre_Camunda.Services
                 using var connection = new NpgsqlConnection(_connectionString);
                 await connection.OpenAsync();
 
-                var reassignCommand = $"REASSIGN OWNED BY \"{username}\" TO postgres";
+                // Determine admin user from connection string
+                var builder = new NpgsqlConnectionStringBuilder(connection.ConnectionString);
+                var adminUser = builder.Username;
+                // Fallback to 'postgres' if admin user is not valid
+                if (string.IsNullOrWhiteSpace(adminUser) || !IsValidUsername(adminUser))
+                {
+                    adminUser = "postgres";
+                }
+
+                var reassignCommand = $"REASSIGN OWNED BY \"{username}\" TO \"{adminUser}\"";
                 using (var cmd = new NpgsqlCommand(reassignCommand, connection))
                 {
                     await cmd.ExecuteNonQueryAsync();
