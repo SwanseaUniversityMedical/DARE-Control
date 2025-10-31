@@ -42,6 +42,19 @@
                     <div class="col-md-6">
                         <p class="mb-0">
                             @Model.About
+                            Last heartbeat Received: @Model.LastHeartBeatReceived
+                            @if (Model.IsOnline())
+                            {
+                                <span class="badge  px-2 badge-sm bg-success text-light rounded-pill m-0 ms-3">
+                                    <i class="fa-solid fa-check-circle me-1"></i> Online
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge  px-2 badge-sm bg-grey text-dark rounded-pill m-0 ms-3">
+                                    <i class="fa-solid fa-ban me-1"></i> Offline
+                                </span>
+                            }
                         </p>
                     </div>
                 </div>
