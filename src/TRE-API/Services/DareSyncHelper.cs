@@ -117,7 +117,8 @@ namespace TRE_API.Services
                     Description = project.ProjectDescription,
                     SubmissionBucketTre = submission,
                     OutputBucketTre = output,
-                    OutputBucketSub = project.OutputBucket.ToLower()
+                    OutputBucketSub = project.OutputBucket.ToLower(),
+                    ProjectExpiryDate = project.EndDate,
                 });
 
             }
@@ -185,7 +186,8 @@ namespace TRE_API.Services
                 _DbContext.MembershipDecisions.Add(new TreMembershipDecision()
                 {
                     User = user,
-                    Project = project
+                    Project = project,
+                    ProjectExpiryDate = project.ProjectExpiryDate
                 });
             }
 
