@@ -5,6 +5,7 @@ using BL.Models.APISimpleTypeReturns;
 using BL.Models.Enums;
 using Serilog;
 using BL.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.FeatureManagement;
 using TRE_API.Constants;
 using TRE_API.Repositories.DbContexts;
@@ -39,17 +40,31 @@ namespace TRE_API.Controllers
         [HttpGet("GetMemberships")]
         public List<TreMembershipDecision> GetMemberships(int projectId, bool showOnlyUnprocessed)
         {
-            try
-            {
-                return _DbContext.MembershipDecisions.Where(x =>
-                    (projectId <= 0 || x.Project.Id == projectId) &&
-                    (!showOnlyUnprocessed || x.Decision == Decision.Undecided)).ToList();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crash", "GetMemberships");
-                throw;
-            }
+                try
+                {
+                    var users = _DbContext.MembershipDecisions
+                        .Include(x => x.User)
+                        .Where(x =>
+                            (projectId <= 0 || x.Project.Id == projectId) &&
+                            (!showOnlyUnprocessed || x.Decision == Decision.Undecided))
+                        .ToList();
+                    
+                    // this logic here is to prevent the duplication of users in the memberships page
+                    // there can be many TreMembershipDecision for one user, but if the user can get one Approval decision, the submission from that user can go through
+                    // as the logic in the function `IsUserApprovedOnProject` in TRE_API.Services.SubmissionHelper.cs 
+                    var dedupedUsers = users
+                        .GroupBy(x => x.User?.Username ?? $"<id:{x.User?.Id}>")
+                        .Select(g => g.OrderByDescending(m => m.LastDecisionDate).First())
+                        .ToList();
+                
+                    return dedupedUsers;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "{Function} Crash", "GetMemberships");
+                    throw;
+                }
+                
         }
 
 
