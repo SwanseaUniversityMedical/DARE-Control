@@ -78,14 +78,24 @@ namespace DARE_FrontEnd.Controllers
             stopwatch.Stop();
             var project = projectawait.Result;
             var users = _clientHelper.CallAPIWithoutModel<List<BL.Models.User>>("/api/User/GetAllUsers/").Result;
-            var tres = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Tre/GetAllTres/").Result;
-
+            
+            // List of users not already on the project
             var userItems2 = users.Where(p => !project.Users.Select(x => x.Id).Contains(p.Id)).ToList();
-            var treItems2 = tres.Where(p => !project.Tres.Select(x => x.Id).Contains(p.Id)).ToList();
-
+            // Process user names for display
             var userItems = userItems2
-                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.FullName != "" ? p.FullName : p.Name })
+                .Select(p => new SelectListItem
+                {
+                    Value = p.Id.ToString(),
+                    Text = !string.IsNullOrWhiteSpace(p.FullName)
+                        ? p.FullName
+                        : (!string.IsNullOrWhiteSpace(p.Name) ? p.Name : $"[id:{p.Id}]")
+                })
                 .ToList();
+
+            var tres = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Tre/GetAllTres/").Result;
+            // List of TREs not already on the project
+            var treItems2 = tres.Where(p => !project.Tres.Select(x => x.Id).Contains(p.Id)).ToList();
+            // Process TRE names for display
             var treItems = treItems2
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
