@@ -1,6 +1,3 @@
-﻿using Microsoft.Extensions.Logging;
-using System.Diagnostics;
-using Tre_Camunda.Models;
 using Tre_Camunda.Services;
 using Zeebe.Client.Accelerator.Attributes;
 
@@ -32,6 +29,11 @@ namespace Tre_Camunda.ProcessHandlers
 
             var result = await _ldapUserManagementService.DeleteUserAsync(username);
             return result.Success;
+        }
+        protected override async Task<bool> CheckUserExistAsync(string username)
+        {
+            var result = await _ldapUserManagementService.UserExistsAsync(username);
+            return result;
         }
     }
 }

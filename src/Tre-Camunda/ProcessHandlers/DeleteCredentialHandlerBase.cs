@@ -105,6 +105,12 @@ namespace Tre_Camunda.ProcessHandlers
         protected abstract Task<bool> DeleteUserAsync(string? username, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Abstract method to be implemented by derived classes for specific user existence check logic
+        /// </summary>
+        protected abstract Task<bool> CheckUserExistAsync(string username);        
+        
+        
+        /// <summary>
         /// Main handler method called by Zeebe - implements common deletion workflow
         /// Returns Dictionary<string, object> for consistency with Create handlers
         /// </summary>
@@ -133,7 +139,14 @@ namespace Tre_Camunda.ProcessHandlers
                     _logger.LogWarning("No username found in envList for {CredentialType}. " +
                         "This may be normal for custom/blank credential types.", CredentialType);
                 }
-
+                // Check if user exists before attempting deletion
+                var userExists = await CheckUserExistAsync(username);
+                if (!userExists)
+                {
+                    sw.Stop();
+                    return CreateStatusResponse($"INFO: User {username} does not exist in {CredentialType} DB, skipping deletion");
+                }
+                
                 _logger.LogInformation("Attempting to delete {CredentialType} credentials" +
                     (string.IsNullOrEmpty(username) ? " (no external user)" : " for user: {Username}"),
                     CredentialType, username);
