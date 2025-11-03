@@ -78,24 +78,31 @@
                             <button class="btn btn-sm btn-primary" type="submit" id="button-addon2">Go</button>
                         </div>
                     </form>
-                    @if (User.IsInRole("dare-control-admin"))
+                    @if (User?.Identity?.IsAuthenticated == true)
                     {
-                        <div class="nav-item dropdown">
-                            <a class="nav-link text-dark dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                @User?.FindFirst("name")?.Value
-                            </a>
-                            <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="http://keycloak-dev:8080/auth/">Account</a></li>
-                                <li><a class="dropdown-item" href=@Configuration.GetSection("Helpdesk")["URL"]>Helpdesk</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a></li>
-                            </ul>
-                        </div>
+                    <div class="nav-item dropdown">
+                        <a class="nav-link text-dark dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            @User?.FindFirst("name")?.Value
+                        </a>
+                        <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
+                            <li>
+                                <a class="dropdown-item" href="@Configuration.GetSection("SubmissionKeyCloakSettings")["AccountManagementURL"]">Account</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="@Configuration.GetSection("Helpdesk")["URL"]">Helpdesk</a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                            </li>
+                        </ul>
+                    </div>
                     }
                     else
                     {
-                        <a asp-area="" asp-controller="Account" asp-action="Login" class="btn btn-outline-primary">Sign In</a>
+                    <a asp-area="" asp-controller="Account" asp-action="Login" class="btn btn-outline-primary">Sign In</a>
                     }
+
                 </div>
 
             </div>

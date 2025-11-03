@@ -67,6 +67,7 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult GetATre(int id)
         {
             if (!ModelState.IsValid) // SonarQube security
@@ -76,10 +77,10 @@ namespace DARE_FrontEnd.Controllers
 
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("treId", id.ToString());
-            var test = _clientHelper.CallAPIWithoutModel<Tre?>(
+            var Tre = _clientHelper.CallAPIWithoutModel<Tre?>(
                 "/api/Tre/GetATre/", paramlist).Result;
 
-            return View(test);
+            return View(Tre);
         }
 
      
