@@ -25,7 +25,14 @@ namespace BL.Models
         public string? tesId { get; set; }
 
         public string? Name { get; set; } 
-
+        
+        public string GetMinioBucketUrl(string minioBaseUrl = "http://localhost:9003")
+        {
+            return string.IsNullOrEmpty(OutputBucket) 
+                ? "#" 
+                : $"{minioBaseUrl}/browser/{OutputBucket}";
+        }
+        
         public string EgressStatusDisplay
         {
             get
