@@ -1,24 +1,9 @@
-﻿using Data_Egress_UI.Models;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using BL.Services;
 using BL.Models;
-using EasyNetQ.Management.Client.Model;
-using System.Collections.Generic;
-using BL.Models.APISimpleTypeReturns;
-using Microsoft.EntityFrameworkCore;
-using Serilog;
-using Amazon.S3.Model;
-using BL.Models.ViewModels;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Xml.Linq;
-using System.Text.RegularExpressions;
-using BL.Models.Enums;
 using Microsoft.AspNetCore.StaticFiles;
-using Amazon.Runtime.Internal.Transform;
+
 
 namespace Data_Egress_UI.Controllers
 {
@@ -27,11 +12,13 @@ namespace Data_Egress_UI.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IDataEgressClientHelper _dataClientHelper;
+        private readonly IConfiguration _configuration;
 
-        public DataController(ILogger<HomeController> logger, IDataEgressClientHelper datahelper)
+        public DataController(ILogger<HomeController> logger, IDataEgressClientHelper datahelper, IConfiguration configuration)
         {
             _logger = logger;
             _dataClientHelper = datahelper;
+            _configuration = configuration;
         }
    
         [HttpGet]
@@ -53,7 +40,10 @@ namespace Data_Egress_UI.Controllers
             paramlist.Add("id", id.ToString());
 
             var files = _dataClientHelper.CallAPIWithoutModel<EgressSubmission>("/api/DataEgress/GetEgress/", paramlist).Result;
-
+            // Get Minio URL from configuration
+            var minioUrl = _configuration["MinioSettings:Url"] ?? "http://localhost:9003";
+            ViewBag.MinioUrl = minioUrl;
+            
             return View(files);
         }
 
