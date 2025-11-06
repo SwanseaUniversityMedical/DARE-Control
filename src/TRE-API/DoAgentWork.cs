@@ -689,7 +689,16 @@ namespace TRE_API
 
                                     input.Path = input.Path.Replace("..", "");
 
-                                    input.Url = "s3://" + InputBucket + input.Path;
+
+                                    if (input != MandatoryInput)
+                                    {
+                                        input.Url = "s3://" + InputBucket + "/data" + input.Path;
+                                    }
+                                    else
+                                    {
+                                        input.Url = "s3://" + InputBucket + input.Path;
+                                    }
+
 
                                     if (string.IsNullOrEmpty(input.Name))
                                     {
@@ -700,12 +709,9 @@ namespace TRE_API
                                     }
 
 
-                                    if (MandatoryInput != null)
+                                    if (input == MandatoryInput)
                                     {
-                                        if (input == MandatoryInput)
-                                        {
-                                            continue;
-                                        }
+                                        continue;
                                     }
 
 
