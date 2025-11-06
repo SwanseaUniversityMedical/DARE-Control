@@ -1,4 +1,4 @@
-﻿using BL.Models;
+using BL.Models;
 using BL.Models.Enums;
 using BL.Models.Settings;
 using BL.Models.Tes;
@@ -193,7 +193,12 @@ namespace TRE_API
                 string url = _AgentSettings.TESKAPIURL + "/" + taskID + "?view=BASIC";
 
                 HttpClientHandler handler = new HttpClientHandler();
-
+                // Getting project name
+                var projectName = _dbContext.Projects.FirstOrDefault(p => p.SubmissionProjectId == projectId)?.SubmissionProjectName ?? "UnknownProject";
+                if (projectName == "UnknownProject")
+                {
+                    Log.Error("{Function} Could not find project name for projectId {ProjectId}", "CheckTES", projectId);
+                }
                 if (_AgentSettings.Proxy)
                 {
                     handler = new HttpClientHandler
@@ -267,7 +272,7 @@ namespace TRE_API
                                         
                                         try
                                         {
-                                            await TriggerRevokeCredentialsAsync(subId, projectId, userId, 0);
+                                            await TriggerRevokeCredentialsAsync(subId, projectName, userId, 0);
 
                                         }
                                         catch (Exception ex)
@@ -554,7 +559,7 @@ namespace TRE_API
 
                                 try
                                 {
-                                    await TriggerRevokeCredentialsAsync(aSubmission.Id, aSubmission.Project.Id, aSubmission.SubmittedBy.Id, 1);
+                                    await TriggerRevokeCredentialsAsync(aSubmission.Id, aSubmission.Project.Name, aSubmission.SubmittedBy.Id, 1);
 
                                 }
                                 catch (Exception ex)
@@ -684,7 +689,16 @@ namespace TRE_API
 
                                     input.Path = input.Path.Replace("..", "");
 
-                                    input.Url = "s3://" + InputBucket + input.Path;
+
+                                    if (input != MandatoryInput)
+                                    {
+                                        input.Url = "s3://" + InputBucket + "/data" + input.Path;
+                                    }
+                                    else
+                                    {
+                                        input.Url = "s3://" + InputBucket + input.Path;
+                                    }
+
 
                                     if (string.IsNullOrEmpty(input.Name))
                                     {
@@ -695,12 +709,9 @@ namespace TRE_API
                                     }
 
 
-                                    if (MandatoryInput != null)
+                                    if (input == MandatoryInput)
                                     {
-                                        if (input == MandatoryInput)
-                                        {
-                                            continue;
-                                        }
+                                        continue;
                                     }
 
 
@@ -930,7 +941,7 @@ namespace TRE_API
             throw new TimeoutException(errorMsg);
         }
         
-        private async Task TriggerRevokeCredentialsAsync(int submissionId, int project, int user, int timer)
+        private async Task TriggerRevokeCredentialsAsync(int submissionId, string projectName, int user, int timer)
         {
             var payload = new
             {
@@ -939,7 +950,7 @@ namespace TRE_API
                     new
                     {
                         submissionId = submissionId.ToString(),
-                        project = project.ToString(),
+                        project = projectName,
                         user = user.ToString(),
                         timer = timer
                     }

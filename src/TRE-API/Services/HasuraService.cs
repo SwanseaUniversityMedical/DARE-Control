@@ -36,32 +36,38 @@ namespace TREAPI.Services
 
         public async Task Run()
         {
-         
-            string dbName = _hasuraSettings.DbName;
-
-            await SetUpDb(dbName, _hasuraSettings.EnvironmentVariableForDB);
-            var Schemas = await this.Schemas(dbName);
-
-            if (Schemas.Any())
+            try
             {
+                string dbName = _hasuraSettings.DbName;
 
-                foreach (var schema in Schemas)
+                await SetUpDb(dbName, _hasuraSettings.EnvironmentVariableForDB);
+                var Schemas = await this.Schemas(dbName);
+
+                if (Schemas.Any())
                 {
 
-                    var data = await TablesInSchemas(dbName, schema[0]);
-                    var tables = data.Where(x => x[0] != "table_name");
-                    foreach (var table in tables)
+                    foreach (var schema in Schemas)
                     {
-                        var successful = await TrackData(dbName, schema[0], table[0]);
-                        if (successful)
+
+                        var data = await TablesInSchemas(dbName, schema[0]);
+                        var tables = data.Where(x => x[0] != "table_name");
+                        foreach (var table in tables)
                         {
-                            await SetPermission(dbName, schema[0], table[0]);
+                            var successful = await TrackData(dbName, schema[0], table[0]);
+                            if (successful)
+                            {
+                                await SetPermission(dbName, schema[0], table[0]);
+                            }
                         }
                     }
                 }
-            }
 
-            return;
+                return;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
         }
 
         public class ReturnData

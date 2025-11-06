@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using Tre_Credentials.Models.Zeebe;
@@ -37,6 +37,12 @@ namespace Tre_Camunda.ProcessHandlers
             // We just return true to continue with vault cleanup
             _logger.LogInformation("Blank credentials - no external user to delete, proceeding with vault cleanup");
             return true;
+        }
+        
+        protected override async Task<bool> CheckUserExistAsync(string username)
+        {
+            // Assume this always returns True until understanding about DeleteTreCredentials is gained 
+           return true;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using Tre_Credentials.Models.Zeebe;
 using Tre_Camunda.Services;
@@ -31,6 +31,12 @@ namespace Tre_Camunda.ProcessHandlers
                 return false;
 
             var result = await _postgresUserManagementService.DropUserAsync(username);
+            return result;
+        }
+        
+        protected override async Task<bool> CheckUserExistAsync(string username)
+        {
+            var result = await _postgresUserManagementService.UserExistsAsync(username);
             return result;
         }
     }

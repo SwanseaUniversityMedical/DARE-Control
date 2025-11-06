@@ -34,6 +34,11 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public IActionResult SaveUserForm(int userId)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var formData = new FormData()
             {
                 FormIoUrl = _formIOSettings.UserForm,
@@ -67,6 +72,11 @@ namespace DARE_FrontEnd.Controllers
         [AllowAnonymous]
         public IActionResult GetUser(int id)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var projects = _clientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjects/").Result;            
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("userId", id.ToString());
@@ -88,6 +98,11 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<IActionResult> UserEditFormSubmission([FromBody] object arg, int id)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var str = arg?.ToString();
 
             if (!string.IsNullOrEmpty(str))
@@ -119,19 +134,27 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<IActionResult> AddProjectMembership(ProjectUser model)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var result =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/User/AddProjectMembership", model);
             result = GetProjectUserModel();
 
 
             return View(result);
-
-
         }
 
         [HttpGet]
         public async Task<IActionResult> RemoveProjectFromUser(int userId, int projectId)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var model = new ProjectUser()
             {
                 UserId = userId,

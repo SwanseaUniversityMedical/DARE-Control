@@ -138,72 +138,110 @@ namespace TRE_API.Services
             }
 
             await _DbContext.SaveChangesAsync();
-            var users = subprojs.SelectMany(x => x.Users).Distinct();
-            var dbusers = _DbContext.Users.ToList();
-            var userAdds = users.Where(x => !_DbContext.Users.Any(y => y.SubmissionUserId == x.Id));
-            var userArchives = dbusers.Where(x => !users.Any(y => y.Id == x.SubmissionUserId));
-            var userUnarchives = dbusers.Where(x => x.Archived && users.Any(y => y.Id == x.SubmissionUserId));
-            foreach (var user in userAdds)
+            try
             {
-                _DbContext.Users.Add(new TreUser()
+                var users = subprojs.SelectMany(x => x.Users).Distinct();
+                var dbusers = _DbContext.Users.ToList();
+                var userAdds = users.Where(x => !_DbContext.Users.Any(y => y.SubmissionUserId == x.Id));
+                var userArchives = dbusers.Where(x => !users.Any(y => y.Id == x.SubmissionUserId));
+                var userUnarchives = dbusers.Where(x => x.Archived && users.Any(y => y.Id == x.SubmissionUserId));
+                foreach (var user in userAdds)
                 {
-                    SubmissionUserId = user.Id,
-                    Username = user.Name,
-                    Email = user.Email,
-                });
+                    _DbContext.Users.Add(new TreUser()
+                    {
+                        SubmissionUserId = user.Id,
+                        Username = user.Name,
+                        Email = user.Email,
+                    });
+                }
+
+                foreach (var userArchive in userArchives)
+                {
+                    userArchive.Archived = true;
+                }
+
+                foreach (var userUnarchive in userUnarchives)
+                {
+                    userUnarchive.Archived = false;
+                }
+
+                await _DbContext.SaveChangesAsync();
+
+            }
+            catch (Exception ex)
+            {
+
+                Log.Error(ex.ToString());
             }
 
-            foreach (var userArchive in userArchives)
+            try
             {
-                userArchive.Archived = true;
-            }
-
-            foreach (var userUnarchive in userUnarchives)
-            {
-                userUnarchive.Archived = false;
-            }
-            await _DbContext.SaveChangesAsync();
-            var projectUserPairs = subprojs
+                var projectUserPairs = subprojs
                 .SelectMany(project => project.Users, (project, user) => new
                 {
                     ProjectId = project.Id,
                     UserId = user.Id
                 }).ToList();
-            var dbmembers = _DbContext.MembershipDecisions.ToList();
-            var memberAdds = projectUserPairs.Where(x => !_DbContext.MembershipDecisions.Any(y =>
-                y.Project.SubmissionProjectId == x.ProjectId && y.User.SubmissionUserId == x.UserId));
-            var memberArchives = dbmembers.Where(x =>
-                !projectUserPairs.Any(y =>
-                    y.ProjectId == x.Project.SubmissionProjectId && y.UserId == x.User.SubmissionUserId));
-            var memberUnarchives = dbmembers.Where(x =>
-                x.Archived && projectUserPairs.Any(y =>
-                    y.ProjectId == x.Project.SubmissionProjectId && y.UserId == x.User.SubmissionUserId));
+                var dbmembers = _DbContext.MembershipDecisions.ToList();
+                var memberAdds = projectUserPairs.Where(x => !_DbContext.MembershipDecisions.Any(y =>
+                    y.Project.SubmissionProjectId == x.ProjectId && y.User.SubmissionUserId == x.UserId));
+                var memberArchives = dbmembers.Where(x =>
+                    !projectUserPairs.Any(y =>
+                        y.ProjectId == x.Project.SubmissionProjectId && y.UserId == x.User.SubmissionUserId));
+                var memberUnarchives = dbmembers.Where(x =>
+                    x.Archived && projectUserPairs.Any(y =>
+                        y.ProjectId == x.Project.SubmissionProjectId && y.UserId == x.User.SubmissionUserId));
 
-            foreach (var memberAdd in memberAdds)
-            {
-                var project = _DbContext.Projects.First(x => x.SubmissionProjectId == memberAdd.ProjectId);
-                var user = _DbContext.Users.First(x => x.SubmissionUserId == memberAdd.UserId);
-                _DbContext.MembershipDecisions.Add(new TreMembershipDecision()
+                foreach (var memberAdd in memberAdds)
                 {
-                    User = user,
-                    Project = project,
-                    ProjectExpiryDate = project.ProjectExpiryDate
-                });
+                    var project = _DbContext.Projects.First(x => x.SubmissionProjectId == memberAdd.ProjectId);
+                    var user = _DbContext.Users.First(x => x.SubmissionUserId == memberAdd.UserId);
+                    _DbContext.MembershipDecisions.Add(new TreMembershipDecision()
+                    {
+                        User = user,
+                        Project = project,
+                        ProjectExpiryDate = project.ProjectExpiryDate
+                    });
+                }
+
+                foreach (var treMembershipDecision in memberArchives)
+                {
+                    treMembershipDecision.Archived = true;
+                }
+
+                foreach (var treMembershipDecision in memberUnarchives)
+                {
+                    treMembershipDecision.Archived = false;
+                }
+
+                await _DbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+
+                Log.Error(ex.ToString());
             }
 
-            foreach (var treMembershipDecision in memberArchives)
+            try
             {
-                treMembershipDecision.Archived = true;
+                await SyncProjectDecisions();
+            }
+            catch (Exception ex)
+            {
+
+                Log.Error(ex.ToString());
             }
 
-            foreach (var treMembershipDecision in memberUnarchives)
+
+            try
             {
-                treMembershipDecision.Archived = false;
+                await SyncMembershipDecisions();
             }
-          
-            await _DbContext.SaveChangesAsync();
-            await SyncProjectDecisions();
-            await SyncMembershipDecisions();
+            catch (Exception ex) {
+
+                Log.Error(ex.ToString());
+            }
+       
 
             return new BoolReturn()
             {
