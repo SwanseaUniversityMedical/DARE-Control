@@ -50,6 +50,11 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<IActionResult> SubmissionWizard(SubmissionWizard model)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             try
             {
                 var listOfTre = "";
@@ -164,6 +169,11 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public IActionResult GetASubmission(int id)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var res = _clientHelper.CallAPIWithoutModel<Submission>($"/api/Submission/GetASubmission/{id}").Result;
 
 
@@ -182,6 +192,11 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<ActionResult> SubmitDemoTes(AddiSubmissionWizard model, string Executors, string SQL)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             try
             {
                 var tres = "";
@@ -239,6 +254,11 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<ActionResult> AddiSubmissionWizard(AddiSubmissionWizard model, string Executors, string SQL)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             try
             {
                 var listOfTre = "";

@@ -15,6 +15,11 @@
             <h1 class="fs-3 mb-0">@Model.Name</h1>
             <p class="font-monospace text-muted small mb-0">#@Model.Id</p>
         </div>
+        @if (User.IsInRole("dare-control-admin"))
+        {
+            <a href="@Url.Action("SaveProjectForm", "Project", new { Projectid = @Model.Id })"
+			   class="btn btn-sm btn-outline-primary mb-3"><span class="small">Edit</span></a>
+        }
     </div>
     <div class="mt-4">
         <ul class="nav nav-underline border-bottom" id="myTab" role="tablist">
@@ -56,11 +61,6 @@
             <div class="tab-pane fade show active" id="project" role="tabpanel" aria-labelledby="home-tab">
                 <div class="row">
                     <div class="col-md-12">
-                        @if (User.IsInRole("dare-control-admin"))
-                        {
-                            <a href="@Url.Action("SaveProjectForm", "Project", new { Projectid = @Model.Id })"
-                               class="btn btn-sm btn-primary mb-3">Edit</a>
-                        }
                         @{
                             var minio = @ViewBag.URLBucket;
                         }
@@ -264,21 +264,30 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col-12">
-                        <div class="table-responsive">
-                            <table class="table" id="UserList">
-                                <caption>List of users on project</caption>
-                                @foreach (var user in Model.UserItemList)
-                                {
-                                    <tr>
-                                        <td>
-                                            <input type="checkbox" value="@user.Value" id="@user.Value"
-                                                   name="selectedUser" class="form-check-input me-2"/>
-                                            @user.Text
-                                        </td>
-                                    </tr>
-                                }
-                            </table>
-                        </div>
+                        @if (Model.UserItemList == null || !Model.UserItemList.Any())
+                        {
+                            <div class="alert alert-info">
+                                <i class="fa fa-info-circle me-2"></i>
+                                No users available to add. All users may already be members of this project.
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table" id="UserList">
+                                    @foreach (var user in Model.UserItemList)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" value="@user.Value" id="@user.Value"
+                                                       name="selectedUser" class="form-check-input me-20"/>
+                                                @user.Text
+                                            </td>
+                                        </tr>
+                                    }
+                                </table>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>

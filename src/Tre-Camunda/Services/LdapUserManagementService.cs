@@ -54,7 +54,10 @@ namespace Tre_Camunda.Services
 
                 //Check if user already exists             
                 if (await UserExistsAsync(request.Username))
-                    return UserCreationResult.Error($"User {request.Username} already exists");
+                {
+                    _logger.LogInformation("User {Username} already exists, skipping creation", request.Username);
+                    return UserCreationResult.Ok(); 
+                }
 
                 var escapedCn = EscapeDnValue(request.Username);
                 var userDn = $"cn={escapedCn},{_config.UserOu},{_config.BaseDn}";
@@ -137,7 +140,7 @@ namespace Tre_Camunda.Services
             }
         }
 
-        private async Task<bool> UserExistsAsync(string username)
+        public async Task<bool> UserExistsAsync(string username)
         {
             using var connection = CreateConnection();
             connection.Bind();

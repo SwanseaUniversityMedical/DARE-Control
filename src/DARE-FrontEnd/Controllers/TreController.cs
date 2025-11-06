@@ -29,6 +29,11 @@ namespace DARE_FrontEnd.Controllers
         
         public IActionResult SaveATre(int treId)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var formData = new FormData()
             {
                 
@@ -62,20 +67,31 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult GetATre(int id)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("treId", id.ToString());
-            var test = _clientHelper.CallAPIWithoutModel<Tre?>(
+            var Tre = _clientHelper.CallAPIWithoutModel<Tre?>(
                 "/api/Tre/GetATre/", paramlist).Result;
 
-            return View(test);
+            return View(Tre);
         }
 
      
         [HttpPost]
         public async Task<IActionResult> TreFormSubmission([FromBody] object arg, int id)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var str = arg?.ToString();
 
             if (!string.IsNullOrEmpty(str))
