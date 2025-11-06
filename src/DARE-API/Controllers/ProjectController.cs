@@ -449,11 +449,15 @@ namespace DARE_API.Controllers
         {
             try
             {
+                Log.Information("SyncTreProjectDecisions called with  " + decisions.Count);
+
                 var result = new BoolReturn();
                 var tre = ControllerHelpers.GetUserTre(User, _DbContext);
 
                 foreach (var item in decisions)
                 {
+                    Log.Information("SyncTreProjectDecisions item > ProjectId  " + item.ProjectId  + " Decision  > " + item.Decision);
+
                     var dbproj = _DbContext.Projects.FirstOrDefault(x => x.Id == item.ProjectId);
                     if (dbproj == null)
                     {
@@ -463,6 +467,8 @@ namespace DARE_API.Controllers
                     var tredecision = _DbContext.ProjectTreDecisions.FirstOrDefault(x => x.SubmissionProj == dbproj && x.Tre == tre);
                     if (tredecision == null)
                     {
+                        Log.Information("SyncTreProjectDecisions add new  tredecision " + decisions.Count);
+
                         tredecision = new ProjectTreDecision()
                         {
                             SubmissionProj = dbproj,
