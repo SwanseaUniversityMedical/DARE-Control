@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Diagnostics;
-using Tre_Camunda.Models;
+using Tre_Credentials.Models.Zeebe;
 using Tre_Camunda.Services;
 using Tre_Credentials.DbContexts;
 using Zeebe.Client.Accelerator.Abstractions;

@@ -11,19 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="ProcessModels\Credentials.bpmn" />
-    <None Remove="ProcessModels\credentials.dmn" />
-    <None Remove="ProcessModels\Credentials_Expire_Subprocess.bpmn" />
-    <None Remove="ProcessModels\Credentials_Revoke.bpmn" />
-    <None Remove="ProcessModels\credntials.bpmn" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="ProcessModels\Credentials.bpmn" />
-    <EmbeddedResource Include="ProcessModels\credentials.dmn" />
-    <EmbeddedResource Include="ProcessModels\Credentials_Expire_Subprocess.bpmn" />
-    <EmbeddedResource Include="ProcessModels\Credentials_Revoke.bpmn" />
-    <EmbeddedResource Include="ProcessModels\Credentials_Determins_Subprocess.bpmn" />
+    <Compile Remove="ProcessModels\**" />
+    <Content Remove="ProcessModels\**" />
+    <EmbeddedResource Remove="ProcessModels\**" />
+    <None Remove="ProcessModels\**" />
   </ItemGroup>
 
   <ItemGroup>
