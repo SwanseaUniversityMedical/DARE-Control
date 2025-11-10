@@ -185,7 +185,8 @@ namespace DARE_API.Repositories.DbContexts
                     Submissions = new List<Submission>(),
                     ProjectDescription = ""
                 };
-
+                
+                proj.FormData = JsonConvert.SerializeObject(proj);
                 // Add and save to get a permanent Id from the database
                 _dbContext.Projects.Add(proj);
                 _dbContext.SaveChanges();
