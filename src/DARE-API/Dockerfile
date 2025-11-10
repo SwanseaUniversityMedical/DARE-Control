@@ -27,6 +27,7 @@ RUN dotnet publish "DARE-API.csproj" -c Release -o /app/publish /p:UseAppHost=fa
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "DARE-API.dll"]
 
 COPY rootca.pem /usr/local/share/ca-certificates/chi-ansible.crt
 
