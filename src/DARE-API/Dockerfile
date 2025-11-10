@@ -1,8 +1,9 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging. 
-
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 
 ENV ASPNETCORE_ENVIRONMENT=Development
+
+# Install curl for health checks
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 EXPOSE 80
@@ -26,7 +27,6 @@ RUN dotnet publish "DARE-API.csproj" -c Release -o /app/publish /p:UseAppHost=fa
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "DARE-API.dll"]
 
 COPY rootca.pem /usr/local/share/ca-certificates/chi-ansible.crt
 
