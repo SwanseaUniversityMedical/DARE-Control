@@ -1,9 +1,9 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using TRE_UI.Services;
 using BL.Services;
@@ -18,11 +18,16 @@ namespace TRE_UI.Controllers
     {
         private readonly ITREClientHelper _clientHelper;
         private readonly ILogger<DmnController> _logger;
+        private readonly IConfiguration _configuration;
 
-        public DmnController(ITREClientHelper clientHelper, ILogger<DmnController> logger)
+        public DmnController(
+            ITREClientHelper clientHelper,
+            ILogger<DmnController> logger,
+            IConfiguration configuration)
         {
             _clientHelper = clientHelper;
             _logger = logger;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -30,10 +35,26 @@ namespace TRE_UI.Controllers
         /// </summary>
         /// <returns>View with DMN editor</returns>
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             try
             {
+                var accessToken = await GetAccessTokenAsync();
+
+                if (string.IsNullOrEmpty(accessToken))
+                {
+                    _logger.LogWarning("Access token not found for user: {User}", User?.Identity?.Name);
+                }
+                else
+                {
+                    _logger.LogInformation("Access token retrieved for user: {User}", User?.Identity?.Name);
+                }
+
+                ViewBag.AccessToken = accessToken;
+                ViewBag.ApiBaseUrl = _configuration["TreAPISettings:Address"];
+
+                _logger.LogInformation("DMN management page loaded for user: {User}", User?.Identity?.Name);
+
                 return View();
             }
             catch (Exception ex)
@@ -44,9 +65,41 @@ namespace TRE_UI.Controllers
         }
 
         /// <summary>
-        /// Test DMN evaluation page
+        /// Retrieves the Keycloak access token from the current user's authentication ticket
         /// </summary>
-        /// <returns>View for testing DMN rules</returns>
+        /// <returns>Access token string, or empty string if not found</returns>
+        private async Task<string> GetAccessTokenAsync()
+        {
+            try
+            {
+                var result = await HttpContext.AuthenticateAsync();
+
+                if (result?.Principal == null)
+                {
+                    _logger.LogWarning("No authentication principal found");
+                    return string.Empty;
+                }
+
+                if (result.Properties?.GetTokenValue("access_token") is string token && !string.IsNullOrEmpty(token))
+                {
+                    _logger.LogDebug("Access token retrieved from authentication result");
+                    return token;
+                }
+
+                _logger.LogWarning("Access token not found in authentication result");
+                return string.Empty;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving access token");
+                return string.Empty;
+            }
+        }
+
+
+        /// <summary>
+        /// Test DMN evaluation page (currently commented out)
+        /// </summary>
         //[HttpGet]
         //public IActionResult Test()
         //{

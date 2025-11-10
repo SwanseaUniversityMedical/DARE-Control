@@ -3,7 +3,35 @@
 @{
     ViewData["Title"] = "DMN Rule Manager";
     var apiBaseUrl = Configuration.GetSection("TreAPISettings")["Address"];
+    var accessToken = (string)ViewBag.AccessToken ?? "";
 }
+
+<input type="hidden" id="authToken" name="authToken" value="@accessToken" />
+<meta name="auth-token" content="@accessToken" />
+<meta name="api-base-url" content="@apiBaseUrl" />
+
+<script>
+    const TRE_API_BASE_URL = '@apiBaseUrl';
+
+    // Store token in sessionStorage for JavaScript access
+    @if (!string.IsNullOrEmpty(accessToken))
+    {
+            <text>
+            if (sessionStorage) {
+                sessionStorage.setItem('authToken', '@Html.Raw(accessToken)');
+                console.log('[OK] Keycloak access token stored in sessionStorage');
+            }
+            </text>
+    }
+    else
+    {
+            <text>
+            console.warn('[WARNING] No Keycloak access token found. DMN API calls may fail with 401 Unauthorized.');
+            console.log('Token from hidden input:', document.getElementById('authToken').value);
+            </text>
+    }
+</script>
+
 
 <div class="container-lg p-4">
     @* <div class="d-flex align-items-center justify-content-between mb-4">

@@ -1,12 +1,65 @@
-// DMN Rule Manager JavaScript
+// DMN Rule Manager JavaScript - Fixed for Keycloak Authentication
 let dmnTable = null;
 let dataTable = null;
 
 // API Base URL - will be set from the page or use default
 const API_BASE_URL = (typeof TRE_API_BASE_URL !== 'undefined' ? TRE_API_BASE_URL : '') + '/api/Dmn';
 
+function getAuthToken() {
+    let token = sessionStorage.getItem('authToken');
+    if (token) {
+        console.log('[OK] Token found in sessionStorage');
+        return token;
+    }
+
+    token = localStorage.getItem('authToken');
+    if (token) {
+        console.log('[OK] Token found in localStorage');
+        return token;
+    }
+
+    const metaToken = document.querySelector('meta[name="auth-token"]');
+    if (metaToken) {
+        token = metaToken.getAttribute('content');
+        if (token) {
+            console.log('[OK] Token found in meta tag');
+            return token;
+        }
+    }
+
+    const inputToken = document.querySelector('input[name="authToken"]');
+    if (inputToken) {
+        token = inputToken.value;
+        if (token) {
+            console.log('[OK] Token found in hidden input');
+            return token;
+        }
+    }
+
+    console.warn('[ERROR] No authentication token found. API calls will fail with 401 Unauthorized.');
+    return null;
+}
+
+/**
+ * Setup jQuery AJAX to include authorization header with all requests
+ */
+$.ajaxSetup({
+    beforeSend: function (xhr) {
+        const token = getAuthToken();
+        if (token) {
+            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            console.log('[OK] Authorization header set on request');
+        } else {
+            console.warn('[WARNING] Authorization header NOT set - token is missing');
+        }
+    }
+});
+
 // Initialize on page load
 $(document).ready(function () {
+    console.log('DMN Manager initialized');
+    console.log('API Base URL:', API_BASE_URL);
+
     loadDmnTable();
 
     // Event Listeners
@@ -28,17 +81,36 @@ function loadDmnTable() {
     $.ajax({
         url: API_BASE_URL + '/table',
         method: 'GET',
+        xhrFields: {
+            withCredentials: true
+        },
         success: function (data) {
             dmnTable = data;
             displayDmnInfo(data);
             buildTableHeaders(data);
             displayRules(data);
             showLoading(false);
+            console.log('[OK] DMN table loaded successfully');
         },
         error: function (xhr, status, error) {
             showLoading(false);
-            showAlert('Error loading DMN table: ' + (xhr.responseJSON?.message || error), 'danger');
-            console.error('Error loading DMN:', xhr);
+            console.error('[ERROR] Error loading DMN table:', {
+                status: xhr.status,
+                statusText: xhr.statusText,
+                responseText: xhr.responseText,
+                error: error
+            });
+
+            let errorMessage = 'Error loading DMN table';
+            if (xhr.status === 401) {
+                errorMessage += ': Unauthorized - Your session may have expired. Please refresh the page.';
+            } else if (xhr.status === 403) {
+                errorMessage += ': Forbidden - You do not have permission to access this resource. Check your Keycloak role assignments.';
+            } else {
+                errorMessage += ': ' + (xhr.responseJSON?.message || xhr.statusText || error);
+            }
+
+            showAlert(errorMessage, 'danger');
         }
     });
 }
@@ -327,11 +399,14 @@ function saveRule() {
         method: method,
         contentType: 'application/json',
         data: JSON.stringify(requestData),
+        xhrFields: {
+            withCredentials: true
+        },
         success: function (response) {
             $('#ruleModal').modal('hide');
             showAlert(response.message, response.success ? 'success' : 'danger');
             // Reload the table after a brief delay to ensure modal is fully hidden
-            setTimeout(function() {
+            setTimeout(function () {
                 loadDmnTable();
             }, 300);
         },
@@ -359,11 +434,14 @@ function deleteRule() {
     $.ajax({
         url: API_BASE_URL + '/rules/' + encodeURIComponent(ruleId),
         method: 'DELETE',
+        xhrFields: {
+            withCredentials: true
+        },
         success: function (response) {
             $('#deleteModal').modal('hide');
             showAlert(response.message, response.success ? 'success' : 'danger');
             // Reload the table after a brief delay to ensure modal is fully hidden
-            setTimeout(function() {
+            setTimeout(function () {
                 loadDmnTable();
             }, 300);
         },
@@ -382,6 +460,9 @@ function validateDmn() {
     $.ajax({
         url: API_BASE_URL + '/validate',
         method: 'GET',
+        xhrFields: {
+            withCredentials: true
+        },
         success: function (response) {
             showAlert(response.message, response.success ? 'success' : 'warning');
         },
@@ -403,6 +484,9 @@ function deployDmn() {
     $.ajax({
         url: API_BASE_URL + '/deploy',
         method: 'POST',
+        xhrFields: {
+            withCredentials: true
+        },
         success: function (response) {
             showAlert(response.message, response.success ? 'success' : 'danger');
         },
