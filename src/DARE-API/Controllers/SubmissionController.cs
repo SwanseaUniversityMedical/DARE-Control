@@ -48,6 +48,31 @@ namespace DARE_API.Controllers
         }
 
 
+        [AllowAnonymous]
+        [HttpGet("health")]
+        public IActionResult Health()
+        {
+            try
+            {
+                // quick heath check to see if database is reachable
+                if (!_DbContext.Database.CanConnect())
+                {
+                    Log.Warning("{Function} Database can't connect", "Health");
+                    return StatusCode(503, new { status = "Unhealthy", reason = "Database unreachable" });
+                }
+        
+                Log.Information("{Function} Healthy", "Health");
+                return Ok(new { status = "Healthy" });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Function} Crashed", "Health");
+                return StatusCode(503, new { status = "Unhealthy", error = ex.Message });
+            }
+        }
+        
+        
+        
         [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
         [HttpGet]
         [Route("GetWaitingSubmissionsForTre")]
