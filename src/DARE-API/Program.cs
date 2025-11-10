@@ -28,6 +28,8 @@ using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddHealthChecks();
+
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
@@ -304,7 +306,7 @@ builder.Services.AddAuthorization(options =>
 var app = builder.Build();
 
 var serviceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
-
+app.MapHealthChecks("/health");
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
