@@ -197,7 +197,7 @@ namespace DARE_API.Repositories.DbContexts
                     var submission = GenerateRandomName(proj.Id.ToString()) + "submission".Replace("_", "");
                     var output = GenerateRandomName(proj.Id.ToString()) + "output".Replace("_", "");
 
-                    // create buckets/policies (synchronous .Result kept to match existing pattern)
+                    // not sure if needed but keep them for now
                     var submissionBucket = _minioHelper.CreateBucket(submission.ToLower()).Result;
                     var submistionBucketPolicy = _minioHelper.CreateBucketPolicy(submission.ToLower()).Result;
                     var outputBucket = _minioHelper.CreateBucket(output.ToLower()).Result;
@@ -205,9 +205,6 @@ namespace DARE_API.Repositories.DbContexts
 
                     proj.SubmissionBucket = submission;
                     proj.OutputBucket = output;
-
-                    // serialise FormData after Id and buckets are set
-                    proj.FormData = JsonConvert.SerializeObject(proj);
 
                     // tracked entity updated, persist changes
                     _dbContext.SaveChanges();
