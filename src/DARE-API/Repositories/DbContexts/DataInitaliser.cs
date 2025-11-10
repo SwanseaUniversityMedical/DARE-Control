@@ -165,7 +165,7 @@ namespace DARE_API.Repositories.DbContexts
 
 
         }
-
+            
         private Project CreateProject(string name)
         {
             var proj = _dbContext.Projects.FirstOrDefault(x => x.Name.ToLower() == name.ToLower());
@@ -186,26 +186,42 @@ namespace DARE_API.Repositories.DbContexts
                     ProjectDescription = ""
                 };
 
-                proj.FormData = JsonConvert.SerializeObject(proj);
+                // Add and save to get a permanent Id from the database
                 _dbContext.Projects.Add(proj);
-
-                var submission = GenerateRandomName(proj.Id.ToString()) + "submission".Replace("_", "");
-                var output = GenerateRandomName(proj.Id.ToString()) + "output".Replace("_", "");
-                var submissionBucket = _minioHelper.CreateBucket(submission.ToLower()).Result;
-                var submistionBucketPolicy = _minioHelper.CreateBucketPolicy(submission.ToLower()).Result;
-                var outputBucket = _minioHelper.CreateBucket(output.ToLower()).Result;
-                var outputBucketPolicy = _minioHelper.CreateBucketPolicy(output.ToLower()).Result;
-
-                proj.SubmissionBucket = submission;
-                proj.OutputBucket = output;
-
-                _dbContext.Projects.Update(proj);
-
                 _dbContext.SaveChanges();
+
+                try
+                {
+                    // Now proj.Id has a permanent value; generate stable bucket names
+                    var submission = GenerateRandomName(proj.Id.ToString()) + "submission".Replace("_", "");
+                    var output = GenerateRandomName(proj.Id.ToString()) + "output".Replace("_", "");
+
+                    // create buckets/policies (synchronous .Result kept to match existing pattern)
+                    var submissionBucket = _minioHelper.CreateBucket(submission.ToLower()).Result;
+                    var submistionBucketPolicy = _minioHelper.CreateBucketPolicy(submission.ToLower()).Result;
+                    var outputBucket = _minioHelper.CreateBucket(output.ToLower()).Result;
+                    var outputBucketPolicy = _minioHelper.CreateBucketPolicy(output.ToLower()).Result;
+
+                    proj.SubmissionBucket = submission;
+                    proj.OutputBucket = output;
+
+                    // serialise FormData after Id and buckets are set
+                    proj.FormData = JsonConvert.SerializeObject(proj);
+
+                    // tracked entity updated, persist changes
+                    _dbContext.SaveChanges();
+
+                    Log.Information("Created project {Project} with submission bucket {Submission} and output bucket {Output}", proj.Name, proj.SubmissionBucket, proj.OutputBucket);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error creating Minio buckets for project {Project}", proj.Name);
+                    throw;
+                }
             }
             return proj;
-
         }
+
 
         private User CreateUser(string name, string email)
         {
