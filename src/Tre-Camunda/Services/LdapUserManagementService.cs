@@ -61,6 +61,14 @@ namespace Tre_Camunda.Services
             try
             {
                 using var connection = CreateConnection();
+                try
+                {
+
+                }catch (System.DirectoryServices.Protocols.LdapException ex)
+                {
+                    Log.Error(ex.ServerErrorMessage);
+                    throw ex;
+                }
                 connection.Bind();
                 _logger.LogInformation("LDAP bind successful.");
 
