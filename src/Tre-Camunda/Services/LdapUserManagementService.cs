@@ -7,6 +7,7 @@ using System.Net;
 using System.Linq.Expressions;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
+using Serilog;
 
 
 namespace Tre_Camunda.Services
@@ -24,17 +25,32 @@ namespace Tre_Camunda.Services
 
         private LdapConnection CreateConnection()
         {
-            var identifier = new LdapDirectoryIdentifier(_config.Host, _config.Port);
+            LdapDirectoryIdentifier identifier = null;
+            if (_config.Port == -1)
+            {
+                Log.Information("_config.Host > " + _config.Host + " _config.connectionless >  " + _config.connectionless);
+                identifier = new LdapDirectoryIdentifier(_config.Host, fullyQualifiedDnsHostName : true, _config.connectionless);
+            }
+            else
+            {
+                Log.Information("_config.Host > " + _config.Host + " _config.Port >  " + _config.Port);
+                identifier = new LdapDirectoryIdentifier(_config.Host, _config.Port);
+            }
+
+            
+            
 
             var connection = new LdapConnection(identifier);
             connection.SessionOptions.ProtocolVersion = 3;
-
+            Log.Information("_config.UseSSL > " + _config.UseSSL);
             if (_config.UseSSL)
             {
                 connection.SessionOptions.SecureSocketLayer = true;
             }
 
             connection.AuthType = AuthType.Basic;
+            Log.Information("admin DN > " + _config.AdminDn);
+
             connection.Credential = new NetworkCredential(_config.AdminDn, _config.AdminPassword);
 
             return connection;
@@ -61,7 +77,9 @@ namespace Tre_Camunda.Services
 
                 var escapedCn = EscapeDnValue(request.Username);
                 var userDn = $"cn={escapedCn},{_config.UserOu},{_config.BaseDn}";
-   
+
+                Log.Information("userDn >" + userDn);
+
                 var addAttrs = new List<DirectoryAttribute>
                 {
            

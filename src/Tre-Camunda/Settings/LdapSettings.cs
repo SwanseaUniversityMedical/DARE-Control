@@ -20,6 +20,9 @@ namespace Tre_Camunda.Services
         public string UserOu {  get; set; }
 
         public bool UseSSL { get; set; }
-    
+
+        public bool connectionless { get; set; }
+
+
     }
 }
