@@ -7,12 +7,12 @@ namespace BL.Models.ViewModels
     {
         public int ProjectId { get; set; }
 
-        [Display(Name = "TES Name")] public string TESName { get; set; }
+        [Display(Name = "TES Name")] public string? TESName { get; set; }
 
-        [Display(Name = "TES Description")] public string TESDescription { get; set; }
+        [Display(Name = "TES Description")] public string? TESDescription { get; set; }
 
         [Display(Name = "Submitting to Project: ")]
-        public string ProjectName { get; set; }
+        public string? ProjectName { get; set; }
 
         [Display(Name = "Select TREs")] public List<string>? Tres { get; set; }
 
@@ -21,7 +21,7 @@ namespace BL.Models.ViewModels
         public List<string>? SelectTresOptions { get; set; }
 
         [Display(Name = "Select TREs or leave blank for all")]
-        public string SelectedTres { get; set; }
+        public string? SelectedTres { get; set; }
 
         public List<Executors>? Executors { get; set; }
 
@@ -33,13 +33,13 @@ namespace BL.Models.ViewModels
 
         public string? Query { get; set; }
 
-        public virtual List<Submission> Submissions { get; set; }
+        public virtual List<Submission>? Submissions { get; set; }
 
         public IEnumerable<SelectListItem>? TreItemList { get; set; }
 
         public IEnumerable<SelectListItem>? UserItemList { get; set; }
 
-        public string JsonData { get; set; } = string.Empty;
+        public string? JsonData { get; set; } = string.Empty;
     }
 
     public class Executors
