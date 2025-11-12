@@ -1,14 +1,18 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [":enableRenovate"],
+  "extends": [
+    ":enableRenovate"
+  ],
   "branchPrefix": "upgrade/",
-  "ignorePaths": ["charts/**"],
+  "ignorePaths": [
+    "charts/**"
+  ],
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": [
-        "^\\.github/workflows/.*\\.yaml$",
-        "^\\.github/actions/.*\\.yaml$"
+      "managerFilePatterns": [
+        "/^\\.github/workflows/.*\\.yaml$/",
+        "/^\\.github/actions/.*\\.yaml$/"
       ],
       "matchStrings": [
         "uses:\\s*SwanseaUniversityMedical/workflows/\\.github/actions/(?<depName>[^@]+)@(?<currentValue>\\S+)"
@@ -20,7 +24,9 @@
   ],
   "packageRules": [
     {
-      "matchDepTypes": [ "action" ],
+      "matchDepTypes": [
+        "action"
+      ],
       "pinDigests": true
     },
     {
@@ -29,7 +35,9 @@
       ],
       "enabled": true,
       "pinDigests": false,
-      "schedule": [ "* * * * *" ],
+      "schedule": [
+        "* * * * *"
+      ],
       "dependencyDashboardApproval": false,
       "cacheHardTtlMinutes": 0,
       "httpCacheTtlDays": 0
