@@ -798,6 +798,8 @@ namespace TRE_API
                                                             Log.Information($"Injecteing key {inner.Key}");
                                                             var key = inner.Key;
                                                             var value = inner.Value?.ToString() ?? string.Empty;
+                                                            Log.Information("Injected credentials with Key " + key);
+
                                                             Executor.Env[key] = value;
                                                         }
                                                     }
