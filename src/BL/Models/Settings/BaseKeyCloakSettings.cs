@@ -22,7 +22,7 @@ namespace BL.Models.Settings
         public string ProxyAddresURL { get; set; }
         public string TokenRefreshSeconds { get; set; }
 
-
+        public bool KeycloakDemoMode { get; set; }
         public string RedirectURL { get; set; }
 
         public bool UseRedirectURL { get; set; }
@@ -30,6 +30,7 @@ namespace BL.Models.Settings
         public string MetadataAddress { get; set; }
         public string? ValidAudiences { get; set; }
         public string Server { get; set; }
+        public string Protocol { get; set; }
         public string Realm { get; set; }
         public bool AutoTrustKeycloakCert { get; set; }
         public string ValidIssuer { get; set; }

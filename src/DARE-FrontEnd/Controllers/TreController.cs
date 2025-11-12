@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using BL.Models.Settings;
 using Microsoft.CodeAnalysis;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 
 namespace DARE_FrontEnd.Controllers
 {
@@ -28,6 +29,11 @@ namespace DARE_FrontEnd.Controllers
         
         public IActionResult SaveATre(int treId)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var formData = new FormData()
             {
                 
@@ -61,20 +67,31 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult GetATre(int id)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var paramlist = new Dictionary<string, string>();
             paramlist.Add("treId", id.ToString());
-            var test = _clientHelper.CallAPIWithoutModel<Tre?>(
+            var Tre = _clientHelper.CallAPIWithoutModel<Tre?>(
                 "/api/Tre/GetATre/", paramlist).Result;
 
-            return View(test);
+            return View(Tre);
         }
 
-
+     
         [HttpPost]
         public async Task<IActionResult> TreFormSubmission([FromBody] object arg, int id)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var str = arg?.ToString();
 
             if (!string.IsNullOrEmpty(str))
@@ -82,16 +99,26 @@ namespace DARE_FrontEnd.Controllers
                 var data = System.Text.Json.JsonSerializer.Deserialize<FormData>(str);
                 data.FormIoString = str;
 
-                var result = await _clientHelper.CallAPI<FormData, Tre?>("/api/Tre/SaveTre", data);
-                         
-                if (result.Error)
-                    return BadRequest();
+                
+                var json = System.Text.Json.JsonSerializer.Serialize(data);
+                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+               
+                var response = await _clientHelper.CallAPI("/api/Tre/SaveTre", content);
 
-                TempData["success"] = "Tre Save Successfully";
-                return Ok(result);
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadAsStringAsync();
+                    var tre = JsonConvert.DeserializeObject<Tre>(result);
+                    TempData["success"] = "Tre saved Successfully";
+                    return Ok(tre);
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    return BadRequest(errorMessage);
+                }
             }
-            return BadRequest();
+            return BadRequest("Invalid data");
         }
-
     }
 }

@@ -4,61 +4,76 @@ using BL.Models;
 using BL.Models.APISimpleTypeReturns;
 using BL.Models.Enums;
 using Serilog;
-using Microsoft.Extensions.Options;
 using BL.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.FeatureManagement;
+using TRE_API.Constants;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using BL.Models.Tes;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Threading;
-using TRE_API.Models;
 
 namespace TRE_API.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
-
     public class ApprovalController : Controller
     {
-
         private readonly ApplicationDbContext _DbContext;
         protected readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IKeyCloakService _IKeyCloakService;
-        private readonly Features _Features;
         private readonly IEncDecHelper _encDecHelper;
-
         public IDareSyncHelper _dareSyncHelper { get; set; }
+        private readonly IFeatureManager _features;
 
         public ApprovalController(IDareSyncHelper dareSyncHelper, ApplicationDbContext applicationDbContext,
-            IHttpContextAccessor httpContextAccessor, IKeyCloakService IKeyCloakService, Features Features, IEncDecHelper encDecHelper)
+            IHttpContextAccessor httpContextAccessor, IKeyCloakService IKeyCloakService,
+            IEncDecHelper encDecHelper, IFeatureManager features)
         {
             _dareSyncHelper = dareSyncHelper;
             _DbContext = applicationDbContext;
             _httpContextAccessor = httpContextAccessor;
             _IKeyCloakService = IKeyCloakService;
-            _Features = Features;
             _encDecHelper = encDecHelper;
+            _features = features;
         }
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpGet("GetMemberships")]
         public List<TreMembershipDecision> GetMemberships(int projectId, bool showOnlyUnprocessed)
         {
-            try
-            {
-                return _DbContext.MembershipDecisions.Where(x =>
-                    (projectId <= 0 || x.Project.Id == projectId) &&
-                    (!showOnlyUnprocessed || x.Decision == Decision.Undecided)).ToList();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crash", "GetMemberships");
-                throw;
-            }
-        }
+                try
+                {
+                    var users = _DbContext.MembershipDecisions
+                        .Include(x => x.User)
+                        .Where(x =>
+                            (projectId <= 0 || x.Project.Id == projectId) &&
+                            (!showOnlyUnprocessed || x.Decision == Decision.Undecided))
+                        .ToList();
+                    
+                    // this logic here is to prevent the duplication of users in the memberships page (if any decisions for a user are Decided (approve/reject), pick the most recent one; otherwise pick the most recent Undecided)
+                    // Explanation: there can be many TreMembershipDecision for one user, but if the user can get one Approval decision, the submission from that user can go through
+                    // as the logic in the function `IsUserApprovedOnProject` in TRE_API.Services.SubmissionHelper.cs 
+                    var dedupedUsers = users
+                        .GroupBy(x => x.User?.Username ?? $"<id:{x.User?.Id}>")
+                        .Select(g =>
+                        {
+                            var mostRecentNonUndecided = g
+                                .Where(m => m.Decision != Decision.Undecided)
+                                .OrderByDescending(m => m.LastDecisionDate)
+                                .FirstOrDefault();
 
+                            return mostRecentNonUndecided ?? g.OrderByDescending(m => m.LastDecisionDate).First();
+                        })
+                        .ToList();
+                    
+                    return dedupedUsers;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "{Function} Crash", "GetMemberships");
+                    throw;
+                }
+                
+        }
 
 
         [Authorize(Roles = "dare-tre-admin")]
@@ -205,13 +220,11 @@ namespace TRE_API.Controllers
 
                     if (treProject.Password != null)
                     {
-
-                        dbproj.Password = treProject.Password;
+                        dbproj.Password = _encDecHelper.Encrypt(treProject.Password);
                     }
 
                     if (treProject.UserName != null)
                     {
-
                         dbproj.UserName = treProject.UserName;
                     }
 
@@ -229,7 +242,7 @@ namespace TRE_API.Controllers
                     await _DbContext.SaveChangesAsync();
                     await ControllerHelpers.AddTreAuditLog(dbproj, null, treProject.Decision == Decision.Approved,
                         _DbContext, _httpContextAccessor, User);
-                    if (_Features.GenerateAcounts)
+                    if (await _features.IsEnabledAsync(FeatureFlags.GenerateAccounts))
                     {
                         var acc = _DbContext.ProjectAcount.FirstOrDefault(x => x.Name == dbproj.SubmissionProjectName);
 
@@ -241,7 +254,6 @@ namespace TRE_API.Controllers
                         {
                             await _IKeyCloakService.DeleteUser(dbproj.SubmissionProjectName);
                         }
-
                     }
 
                     Log.Information("{Function}:", "AuditLogs", "Treproject Decision:" + treProject.Decision.ToString(),
@@ -278,8 +290,7 @@ namespace TRE_API.Controllers
                     var dbMembership = _DbContext.MembershipDecisions.First(x => x.Id == membershipDecision.Id);
                     if (membershipDecision.Decision != dbMembership.Decision)
                     {
-
-                        if (_Features.GenerateAcounts)
+                        if (await _features.IsEnabledAsync(FeatureFlags.GenerateAccounts))
                         {
                             var name = dbMembership.Project.SubmissionProjectName + dbMembership.User.Username;
 
@@ -293,7 +304,6 @@ namespace TRE_API.Controllers
                             {
                                 await _IKeyCloakService.DeleteUser(acc.Name);
                             }
-
                         }
 
                         dbMembership.Decision = membershipDecision.Decision;
@@ -302,12 +312,11 @@ namespace TRE_API.Controllers
                     }
 
                     returnResult.Add(dbMembership);
-                    
-                    await _DbContext.SaveChangesAsync();
-                    await ControllerHelpers.AddTreAuditLog(null, dbMembership, dbMembership.Decision == Decision.Approved,
-                        _DbContext, _httpContextAccessor, User);
-                    
 
+                    await _DbContext.SaveChangesAsync();
+                    await ControllerHelpers.AddTreAuditLog(null, dbMembership,
+                        dbMembership.Decision == Decision.Approved,
+                        _DbContext, _httpContextAccessor, User);
                 }
 
                 await _DbContext.SaveChangesAsync();
@@ -318,7 +327,6 @@ namespace TRE_API.Controllers
                 Log.Error(ex, "{Function} Crash", "UpdateMembershipDecisions");
                 throw;
             }
-
         }
 
         [Authorize(Roles = "dare-tre-admin")]
@@ -328,7 +336,6 @@ namespace TRE_API.Controllers
             try
             {
                 return await _dareSyncHelper.SyncSubmissionWithTre();
-
             }
             catch (Exception ex)
             {
@@ -336,6 +343,5 @@ namespace TRE_API.Controllers
                 throw;
             }
         }
-
     }
 }

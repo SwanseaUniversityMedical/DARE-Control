@@ -33,9 +33,25 @@ function renderForm(layOutURLOrString, formData, submitFuction, ReadOnly = false
         });
     }
 
+    function showError(message) {
+        var errorDiv = document.getElementById('errorMsg');
+        if (errorDiv) {
+            errorDiv.innerHTML = message;
+            errorDiv.style.display = 'block';
+        }
+    }
+ 
+    function hideError() {
+        var errorDiv = document.getElementById('errorMsg');
+        if (errorDiv) {
+            errorDiv.style.display = 'none';
+        }
+    }
+
     function AddListenerTo() {
         externalSubmit.addEventListener("click", function SubmitExternal() {
             externalSubmit.removeEventListener("click", SubmitExternal);
+            hideError(); 
             var Response = submitForm();
             if (Response == "BAD") {
                 AddListenerTo();
@@ -51,25 +67,39 @@ function renderForm(layOutURLOrString, formData, submitFuction, ReadOnly = false
     function submitForm() {
         if (formReference.checkValidity(null, true, null, false)) {
             Data = renderForm.draftSubmissionData;
-            Formio.fetch(submitFuction,
-                {
-                    body: JSON.stringify(Data),
-                    headers: { 'content-type': 'application/json' },
-                    method: 'POST',
-                    mode: 'cors'
-                }).then(function (response) {
-                    if (response.ok) {
-                        console.log("Ok");
-                        setTimeout(function () { window.location.href = redirectOverrideUrl; }, 1); //LocalRedirect don't work so we Have to use this to get it working also brakes stuff when it's not delayed by at least a tiny amount
-                        return "GOOD"
-                    }
-                    else {
-                        console.log("Bad " + response.message);
-                        return "BAD"
-                    }
-                });
+            Formio.fetch(submitFuction,{
+                body: JSON.stringify(Data),
+                headers: { 'content-type': 'application/json' },
+                method: 'POST',
+                mode: 'cors'
+            }).then(function (response) {
+                if (response.ok) {
+                    hideError();
+                    setTimeout(function () { window.location.href = redirectOverrideUrl; }, 1);
+                    return "GOOD";
+                } else {
+                    response.text().then(function (errorText) {
+                        let message = errorText;
+                        try {
+                            
+                            const obj = JSON.parse(errorText);
+                            if (obj && obj.message) {
+                                message = obj.message;
+                            }
+                        } catch (e) {
+                           
+                        }
+                        showError("An error occurred while saving");
+                    });
+                    return "BAD";
+                }
+            }).catch(function (error) {
+                showError("Network error occurred. Please try again.");
+                return "BAD";
+            });
         } else {
-            return "BAD"
+            showError("Please fill in all required fields correctly.");
+            return "BAD";
         }
     }
 };

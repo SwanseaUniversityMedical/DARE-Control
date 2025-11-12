@@ -1,5 +1,5 @@
 # DARE-Control
 
-to connect them together
+To connect them together
 u = sailegressapi
 pass = password123

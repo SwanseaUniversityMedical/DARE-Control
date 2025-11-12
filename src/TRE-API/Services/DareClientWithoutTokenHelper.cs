@@ -1,6 +1,7 @@
 ﻿using BL.Models;
 using BL.Models.Settings;
 using BL.Services;
+using Serilog;
 using TRE_API.Repositories.DbContexts;
 
 namespace TRE_API.Services
@@ -15,7 +16,7 @@ namespace TRE_API.Services
             config["DareAPISettings:Address"], false)
         {
             CredDb = db;
-            _keycloakTokenHelper = new KeycloakTokenHelper(settings.BaseUrl, settings.ClientId, settings.ClientSecret, settings.Proxy, settings.ProxyAddresURL);
+            _keycloakTokenHelper = new KeycloakTokenHelper(settings.BaseUrl, settings.ClientId, settings.ClientSecret, settings.Proxy, settings.ProxyAddresURL, settings.KeycloakDemoMode);
 
             var creds = db.KeycloakCredentials.FirstOrDefault(x => x.CredentialType == CredentialType.Submission);
             if (creds != null)
@@ -24,6 +25,7 @@ namespace TRE_API.Services
                 _password = encDec.Decrypt(creds.PasswordEnc);
                 _requiredRole = "dare-tre-admin";
             }
+            //Log.Information("{Function} Creds are there? {Creds} with username {Username}, Password {Password} and role {Role}", "DareClientWithoutTokenHelper", _username, _password, _requiredRole);
         }
 
         public bool CheckCredsAreAvailable()

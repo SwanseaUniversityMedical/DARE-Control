@@ -19,14 +19,23 @@ using DARE_Egress.Services;
 using NETCore.MailKit.Extensions;
 using NETCore.MailKit.Infrastructure.Internal;
 using BL.Models;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
+
 Log.Logger = CreateSerilogLogger(configuration, environment);
 Log.Information("Data_Egress API logging LastStatusUpdate.");
-
+if (configuration["SuppressAntiforgery"] != null && configuration["SuppressAntiforgery"].ToLower() == "true")
+{
+    Log.Warning("{Function} Disabling Anti Forgery token. Only do if testing", "Main");
+    builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo("/root/.aspnet/DataProtection-Keys"))
+        .DisableAutomaticKeyGeneration();
+}
 // Add services to the container.
 
 // Add services to the container.
@@ -50,7 +59,16 @@ AddDependencies(builder, configuration);
 
 var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
 configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
+var keycloakDemomode = configuration["KeycloakDemoMode"].ToLower() == "true";
+var demomode = configuration["DemoMode"].ToLower() == "true";
+dataEgressKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
 builder.Services.AddSingleton(dataEgressKeyCloakSettings);
+
+
+var treKeyCloakSettings = new TreKeyCloakSettings();
+configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
+treKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
+builder.Services.AddSingleton(treKeyCloakSettings);
 
 var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
@@ -60,9 +78,7 @@ var emailSettings = new EmailSettings();
 configuration.Bind(nameof(emailSettings), emailSettings);
 builder.Services.AddSingleton(emailSettings);
 
-var treKeyCloakSettings = new TreKeyCloakSettings();
-configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
-builder.Services.AddSingleton(treKeyCloakSettings);
+
 builder.Services.AddScoped<ITreClientWithoutTokenHelper, TreClientWithoutTokenHelper>();
 builder.Services.AddScoped<IMinioHelper, MinioHelper>();
 
@@ -176,7 +192,11 @@ using (var scope = app.Services.CreateScope())
     var encDec = scope.ServiceProvider.GetRequiredService<IEncDecHelper>();
     db.Database.Migrate();
     var initialiser = new DataInitaliser(db, encDec);
-    initialiser.SeedData();
+    if (demomode)
+    {
+        initialiser.SeedAllInOneData(configuration["DemoModeDefaultP"]);
+    }
+    //initialiser.SeedData();
 }
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions

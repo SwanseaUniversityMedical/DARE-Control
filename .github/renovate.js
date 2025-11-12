@@ -5,7 +5,7 @@ module.exports = {
   //dryRun: "full",
 
   // Inherit default config options
-  extends: ["config:base"],
+  //extends: ["config:base"], // <- causes weird monorepo groups
   configMigration: true,
 
   // Force use of Conventional Commit messages to avoid Renovate not detecting them
@@ -25,9 +25,9 @@ module.exports = {
   // requests for dependencies unless they override the schedule.
   updateNotScheduled: false,
   timezone: "Europe/London",
+  //after 10pm and before 5am every weekday
   schedule: [
-    "after 10pm",
-    "before 5am"
+    "* 22-23,0-4 * * 1-5"
   ],
 
   // This setting helps handle breaking changes to Renovate bot when its version changes.
@@ -45,4 +45,31 @@ module.exports = {
   repositories: [
     "SwanseaUniversityMedical/DARE-Control",
   ],
+
+  branchPrefix: "upgrade/",
+
+  ignorePaths: ["charts/**"],
+  
+  packageRules: [
+    {
+      groupName: "all non-major dependencies",
+      groupSlug: "all-minor-patch",
+      matchPackageNames: ["*"],
+      matchUpdateTypes: ["minor", "patch"]
+    },
+    {
+      matchPackageNames: ["SwanseaUniversityMedical/workflows"],
+      schedule: ["at any time"],
+    },
+    {
+      groupName: "workflows non-major dependencies",
+      groupSlug: "workflows-minor-patch",
+      matchPackageNames: ["SwanseaUniversityMedical/workflows"],
+      matchUpdateTypes: ["minor", "patch"]
+    },
+    {
+      matchUpdateTypes: ["major"],
+      dependencyDashboardApproval: true
+    }
+  ]
 };

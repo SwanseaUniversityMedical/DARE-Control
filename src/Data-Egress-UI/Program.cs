@@ -14,15 +14,26 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using BL.Models;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
+
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
 Log.Logger = CreateSerilogLogger(configuration, environment);
+//builder.Host.UseSerilog();
 Log.Information("Data-Egress-UI logging LastStatusUpdate.");
 try
 {
+    if (configuration["SuppressAntiforgery"] != null && configuration["SuppressAntiforgery"].ToLower() == "true")
+    {
+        Log.Warning("{Function} Disabling Anti Forgery token. Only do if testing", "Main");
+        builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
+        builder.Services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo("/root/.aspnet/DataProtection-Keys"))
+            .DisableAutomaticKeyGeneration();
+    }
     IdentityModelEventSource.ShowPII = true;
 
     builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
@@ -35,6 +46,9 @@ try
 // -- authentication here
     var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
     configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
+    var keycloakDemomode = configuration["KeycloakDemoMode"].ToLower() == "true";
+    var demomode = configuration["DemoMode"].ToLower() == "true";
+    dataEgressKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
     builder.Services.AddSingleton(dataEgressKeyCloakSettings);
     
 

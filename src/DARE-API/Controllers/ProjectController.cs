@@ -78,8 +78,11 @@ namespace DARE_API.Controllers
 
                 if (project.Id == 0)
                 {
-                    project.SubmissionBucket = GenerateRandomName(project.Name.ToLower()) + "submission".Replace("_", "");
-                    project.OutputBucket = GenerateRandomName(project.Name.ToLower()) + "output".Replace("_", ""); ;
+                    _DbContext.Projects.Add(project);
+                    await _DbContext.SaveChangesAsync();
+
+                    project.SubmissionBucket = GenerateRandomName(project.Id.ToString()) + "submission".Replace("_", "");
+                    project.OutputBucket = GenerateRandomName(project.Id.ToString()) + "output".Replace("_", ""); ;
                     var submissionBucket = await _minioHelper.CreateBucket(project.SubmissionBucket);
                     if (!submissionBucket)
                     {
@@ -236,12 +239,11 @@ namespace DARE_API.Controllers
                     return null;
                 }
 
-
+                project.Users.Remove(user);
                 await _DbContext.SaveChangesAsync();
                 await ControllerHelpers.RemoveUserFromMinioBucket(user, project, _httpContextAccessor, _minioSettings.AttributeName, _keycloakMinioUserService, User, _DbContext);
 
                 await ControllerHelpers.AddAuditLog(LogType.RemoveUserFromProject, user, project, null, null, null, _httpContextAccessor, User, _DbContext);
-
                 
                 Log.Information("{Function} Added User {UserName} to {ProjectName}", "RemoveUserMembership", user.Name, project.Name);
                 return model;
@@ -449,11 +451,15 @@ namespace DARE_API.Controllers
         {
             try
             {
+                Log.Information("SyncTreProjectDecisions called with  " + decisions.Count);
+
                 var result = new BoolReturn();
                 var tre = ControllerHelpers.GetUserTre(User, _DbContext);
 
                 foreach (var item in decisions)
                 {
+                    Log.Information("SyncTreProjectDecisions item > ProjectId  " + item.ProjectId  + " Decision  > " + item.Decision);
+
                     var dbproj = _DbContext.Projects.FirstOrDefault(x => x.Id == item.ProjectId);
                     if (dbproj == null)
                     {
@@ -463,6 +469,8 @@ namespace DARE_API.Controllers
                     var tredecision = _DbContext.ProjectTreDecisions.FirstOrDefault(x => x.SubmissionProj == dbproj && x.Tre == tre);
                     if (tredecision == null)
                     {
+                        Log.Information("SyncTreProjectDecisions add new  tredecision " + decisions.Count);
+
                         tredecision = new ProjectTreDecision()
                         {
                             SubmissionProj = dbproj,

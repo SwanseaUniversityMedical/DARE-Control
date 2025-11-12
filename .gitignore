@@ -3,8 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+.DS_Store
+**/.DS_Store
 # User-specific files
-appsettings.Development.json
 *.rsuser
 *.suo
 *.user
@@ -376,3 +377,7 @@ serp-forms-api/appsettings.Development.json
 serp-forms-api/appsettings.Development.json
 
 .idea
+
+.DS_Store
+
+**/.DS_Store

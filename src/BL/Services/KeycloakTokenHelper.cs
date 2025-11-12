@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Serilog;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using System.Runtime;
 
 namespace BL.Services
 {
@@ -15,15 +16,17 @@ namespace BL.Services
         public string _clientId { get; set; }
         public string _clientSecret { get; set; }
         public bool _useProxy { get; set; }
+        public bool _keycloakDemoMode { get; set; }
         public string _proxyUrl { get; set; }
 
-        public KeycloakTokenHelper(string keycloakBaseUrl, string clientId, string clientSecret, bool useProxy, string proxyurl)
+        public KeycloakTokenHelper(string keycloakBaseUrl, string clientId, string clientSecret, bool useProxy, string proxyurl, bool keycloakDemoMode)
         {
             _keycloakBaseUrl = keycloakBaseUrl;
             _clientId = clientId;
             _clientSecret = clientSecret;
             _useProxy = useProxy;
             _proxyUrl = proxyurl;
+            _keycloakDemoMode = keycloakDemoMode;
         }
 
         public async Task<string> GetTokenForUser(string username, string password, string requiredRole)
@@ -42,12 +45,12 @@ namespace BL.Services
             {
                 // Create an HttpClientHandler with proxy settings
                 handler.Proxy = new WebProxy(_proxyUrl); // Replace with your proxy server URL
-                
-            }
-           
 
+            }
+
+            Log.Information("{Function} 2  user {KeycloakDemoMode}", "GetTokenForUser", _keycloakDemoMode);
             // Create an HttpClient with the handler
-            return await KeycloakCommon.GetTokenForUserGuts(username, password, requiredRole, handler, keycloakBaseUrl, clientId, clientSecret);
+            return await KeycloakCommon.GetTokenForUserGuts(username, password, requiredRole, handler, keycloakBaseUrl, clientId, clientSecret, _keycloakDemoMode);
 
         }
     }

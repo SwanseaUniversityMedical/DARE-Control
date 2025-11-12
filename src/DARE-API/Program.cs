@@ -24,8 +24,11 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using NETCore.MailKit.Extensions;
 using NETCore.MailKit.Infrastructure.Internal;
 using BL.Models;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddHealthChecks();
 
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
@@ -45,7 +48,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options
     .UseNpgsql(
     builder.Configuration.GetConnectionString("DefaultConnection")
 ));
-
+if (configuration["SuppressAntiforgery"] != null && configuration["SuppressAntiforgery"].ToLower() == "true")
+{
+    Log.Warning("{Function} Disabling Anti Forgery token. Only do if testing", "Main");
+    builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo("/root/.aspnet/DataProtection-Keys"))
+        .DisableAutomaticKeyGeneration();
+}
 //Add Services
 AddServices(builder);
 
@@ -70,6 +80,9 @@ await SetUpRabbitMQ.DoItSubmissionAsync(configuration["RabbitMQ:HostAddress"], c
 
 var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
+var keycloakDemomode = configuration["KeycloakDemoMode"].ToLower() == "true";
+var demomode = configuration["DemoMode"].ToLower() == "true";
+submissionKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
 builder.Services.AddSingleton(submissionKeyCloakSettings);
 
 builder.Services.Configure<KestrelServerOptions>(options =>
@@ -80,6 +93,7 @@ builder.Services.Configure<KestrelServerOptions>(options =>
 var minioSettings = new MinioSettings();
 configuration.Bind(nameof(MinioSettings), minioSettings);
 builder.Services.AddSingleton(minioSettings);
+
 
 var emailSettings = new EmailSettings();
 configuration.Bind(nameof(emailSettings), emailSettings);
@@ -292,7 +306,7 @@ builder.Services.AddAuthorization(options =>
 var app = builder.Build();
 
 var serviceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
-
+app.MapHealthChecks("/health");
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
@@ -300,19 +314,22 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 });
 // --- Session Token
 
+
+// Swagger
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.EnableValidator(null);
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{environment.ApplicationName} v1");
+    c.OAuthClientId(submissionKeyCloakSettings.ClientId);
+    c.OAuthClientSecret(submissionKeyCloakSettings.ClientSecret);
+    c.OAuthAppName(submissionKeyCloakSettings.ClientId);
+});
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-
-    app.UseSwaggerUI(c =>
-    {
-        c.EnableValidator(null);
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{environment.ApplicationName} v1");
-        c.OAuthClientId(submissionKeyCloakSettings.ClientId);
-        c.OAuthClientSecret(submissionKeyCloakSettings.ClientSecret);
-        c.OAuthAppName(submissionKeyCloakSettings.ClientId);
-    });
     //app.UseDeveloperExceptionPage();
 }
 
@@ -337,8 +354,10 @@ using (var scope = app.Services.CreateScope())
 
     db.Database.Migrate();
     var initialiser = new DataInitaliser(miniosettings, miniohelper, db, keytoken, userService);
-
-    if (configuration.GetValue<bool>("Testdata"))
+    if (demomode)
+    {
+        initialiser.SeedAllInOneData();
+    }else if (configuration.GetValue<bool>("Testdata"))
         initialiser.SeedData();
 }
 

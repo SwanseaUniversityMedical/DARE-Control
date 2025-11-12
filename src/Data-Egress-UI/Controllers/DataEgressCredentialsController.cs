@@ -14,23 +14,16 @@ namespace Data_Egress_UI.Controllers
         {
             _clientHelper = client;
         }
-
-
         [HttpGet]
         public async Task<IActionResult> UpdateCredentialsAsync()
         {
             var valid = await _clientHelper.CallAPIWithoutModel<BoolReturn>("/api/TreCredentials/EgressCheckCredentialsAreValid");
-
-
             return View(new KeycloakCredentials()
-            { Valid = valid.Result });
+                { Valid = valid.Result });
         }
-
         [HttpPost]
-
         public async Task<IActionResult> UpdateCredentials(KeycloakCredentials credentials)
         {
-
             if (ModelState.IsValid)
             {
                 var result =
@@ -49,8 +42,6 @@ namespace Data_Egress_UI.Controllers
             {
                 return View(credentials);
             }
-
         }
-
     }
 }

@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Tre_Camunda</RootNamespace>
+	<UserSecretsId>f70c7047-bdd3-43f7-8794-b6462228e2ed</UserSecretsId>
+	<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	<NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="ProcessModels\Credentials.bpmn" />
+    <None Remove="ProcessModels\credentials.dmn" />
+    <None Remove="ProcessModels\Credentials_Expire_Subprocess.bpmn" />
+    <None Remove="ProcessModels\Credentials_Revoke.bpmn" />
+    <None Remove="ProcessModels\credntials.bpmn" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="ProcessModels\Credentials.bpmn" />
+    <EmbeddedResource Include="ProcessModels\credentials.dmn" />
+    <EmbeddedResource Include="ProcessModels\Credentials_Expire_Subprocess.bpmn" />
+    <EmbeddedResource Include="ProcessModels\Credentials_Revoke.bpmn" />
+    <EmbeddedResource Include="ProcessModels\Credentials_Determins_Subprocess.bpmn" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hangfire" Version="1.8.21" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.13" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.13">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="System.DirectoryServices" Version="9.0.8" />
+    <PackageReference Include="System.DirectoryServices.Protocols" Version="9.0.8" />
+    <PackageReference Include="zb-client" Version="2.9.0" />
+    <PackageReference Include="zb-client-accelerator" Version="2.1.13" />
+  </ItemGroup>	
+
+	<ItemGroup>
+	  <ProjectReference Include="..\TRE.Credentials\Tre_Credentials.csproj" />
+	</ItemGroup>	
+
+	<ItemGroup>
+	  <Folder Include="Controllers\" />	 
+	</ItemGroup>
+</Project>

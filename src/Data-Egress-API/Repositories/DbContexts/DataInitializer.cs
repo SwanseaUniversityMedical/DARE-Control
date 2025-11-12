@@ -22,7 +22,52 @@ namespace Data_Egress_API.Repositories.DbContexts
 
         }
 
-        
+
+        public void SeedAllInOneData(string password)
+        {
+            
+            try
+            {
+                if (!_dbContext.KeycloakCredentials.Any(x => x.CredentialType == CredentialType.Tre))
+                {
+
+
+                    _dbContext.KeycloakCredentials.Add(new KeycloakCredentials()
+                    {
+                        UserName = "accessfromegresstotre",
+                        CredentialType = CredentialType.Tre,
+                        PasswordEnc = _encDecHelper.Encrypt(password)
+                    });
+                    _dbContext.SaveChanges();
+                }
+
+                if (!_dbContext.KeycloakCredentials.Any(x => x.CredentialType == CredentialType.Egress))
+                {
+
+
+                    _dbContext.KeycloakCredentials.Add(new KeycloakCredentials()
+                    {
+                        UserName = "globaladminuser",
+                        CredentialType = CredentialType.Egress,
+                        PasswordEnc = _encDecHelper.Encrypt(password)
+                    });
+                    _dbContext.SaveChanges();
+                }
+
+
+
+
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "{Function} Error seeding data", "SeedAllInOneData");
+                throw;
+            }
+
+
+
+
+        }
 
         public void SeedData()
         {

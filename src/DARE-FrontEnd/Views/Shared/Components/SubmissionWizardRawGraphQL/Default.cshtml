@@ -109,6 +109,34 @@
             </table>
         </div>
 
+
+        <label class="form-label fw-bold">Data Input</label>
+        <div class="col-md-12 mb-4">
+                <thead>
+                    <tr>
+                        <th class="col-md-4">Path</th>
+                        <th class="col-md-4">Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="vertical-align: top;">
+                        <td class="col-md-4 border-0">
+                            <div class="d-flex align-items-start justify-content-between">
+                            <input type="text" id="DataInputPath" name="DataInputPath" class="form-control" />
+                            </div>
+                        </td>
+                        <td class="col-md-4 border-0">
+                            <div class="d-flex align-items-start justify-content-between">
+                            <select name="DataInputType" id="DataInputType">
+                                <option value="FILEEnum">FILE</option>
+                                <option value="DIRECTORYEnum">DIRECTORY</option>
+                                </select>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+        </div>
+
         <label class="form-label fw-bold">Raw Json Input </label>
         <div id="RawInput" class="form-group">
             @Html.TextAreaFor(m => m.RawInput, new {@class="form-control"})
@@ -117,6 +145,11 @@
         <div class="d-flex align-items-center mt-5">
             <button type="submit" class="btn btn-sm btn-primary">Submit</button>
             <a href="/Project/GetProject/@Model.ProjectId#submissions" class="btn btn-sm btn-link">Cancel</a>
+        </div>
+
+
+        <div class="d-flex align-items-center mt-5">
+            <div id="error"></div>
         </div>
     }
 }

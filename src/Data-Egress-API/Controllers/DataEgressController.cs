@@ -40,13 +40,14 @@ namespace Data_Egress_API.Controllers
 
 
         public DataEgressController(ApplicationDbContext repository, ITreClientWithoutTokenHelper treClientHelper,
-            IMinioHelper minioHelper, IDareEmailService iDareEmailService, EmailSettings emailSettings)
+            IMinioHelper minioHelper, IDareEmailService iDareEmailService, EmailSettings emailSettings, IKeyCloakService keyCloakService)
         {
             _DbContext = repository;
             _minioHelper = minioHelper;
             _treClientHelper = treClientHelper;
             _IDareEmailService = iDareEmailService;
             _EmailSettings = emailSettings;
+            _IKeyCloakService = keyCloakService;
         }
 
         [Authorize(Roles = "data-egress-admin,dare-tre-admin")]
@@ -70,6 +71,7 @@ namespace Data_Egress_API.Controllers
                     await _DbContext.SaveChangesAsync();
                     try
                     {
+
                         var Emails = await _IKeyCloakService.GetEmailsOfAccountWithRole("data-egress-admin");
 
                         if (string.IsNullOrEmpty(_EmailSettings.EmailOverride) == false)
@@ -86,7 +88,7 @@ namespace Data_Egress_API.Controllers
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(ex.ToString());
+                        Log.Error(ex,"{Function} Sending email error", "AddNewDataEgress");
                     }                  
                     
                     return new BoolReturn() { Result = true };

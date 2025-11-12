@@ -1,11 +1,11 @@
-﻿namespace TRE_API.Models
+﻿using BL.Models.Tes;
+
+namespace TRE_API.Models
 {
     public class AgentSettings
     {
-        public bool UseRabbit { get; set; }
-        public bool UseHutch { get; set; }
+        public bool UseRabbit { get; set; }      
         public bool UseTESK { get; set; }
-
         public string TESKOutputBucketPrefix { get; set; }
 
         public string ImageNameToAddToToken { get; set; }
@@ -23,5 +23,8 @@
         public string URLTrinoToAdd { get; set; }
 
         public string CATALOG { get; set; }
+
+
+        public string MandatoryInput { get; set; }
     }
 }

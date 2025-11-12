@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using BL.Models.APISimpleTypeReturns;
 using TRE_UI.Services;
-
 namespace TRE_UI.Controllers
 {
     [Authorize(Roles = "dare-tre-admin")]
@@ -15,20 +14,20 @@ namespace TRE_UI.Controllers
         {
             _clientHelper = client;
         }
-
-
-
         [HttpGet]
-
         public async Task<IActionResult> UpdateCredentialsAsync()
         {
             return View(await ControllerHelpers.CheckCredentialsAreValid("TRECredentials", _clientHelper));
-            
-        }
 
+        }
         [HttpPost]
-        
-        public async Task<IActionResult> UpdateCredentials(KeycloakCredentials credentials) {
+
+        public async Task<IActionResult> UpdateCredentials(KeycloakCredentials credentials)
+        {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View(new KeycloakCredentials());
+            }
 
             if (await ControllerHelpers.UpdateCredentials("TRECredentials", _clientHelper, ModelState,
                     credentials))
@@ -39,14 +38,8 @@ namespace TRE_UI.Controllers
             {
                 return View(credentials);
             }
-            
 
         }
 
-       
-       
-
-    
-     
     }
 }

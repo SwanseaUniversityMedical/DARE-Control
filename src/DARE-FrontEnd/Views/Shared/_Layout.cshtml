@@ -1,4 +1,6 @@
 ﻿@using DARE_FrontEnd.Models;
+@using Microsoft.Extensions.Configuration;
+@inject IConfiguration Configuration
 @inject UIName UIName
 <!DOCTYPE html>
 <html lang="en" class="h-100">
@@ -76,24 +78,31 @@
                             <button class="btn btn-sm btn-primary" type="submit" id="button-addon2">Go</button>
                         </div>
                     </form>
-                    @if (User.IsInRole("dare-control-admin"))
+                    @if (User?.Identity?.IsAuthenticated == true)
                     {
-                        <div class="nav-item dropdown">
-                            <a class="nav-link text-dark dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                @User?.FindFirst("name")?.Value
-                            </a>
-                            <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="http://keycloak-dev:8080/auth/">Account</a></li>
-                                <li><a class="dropdown-item" href="https://jira.hiru.swan.ac.uk/servicedesk/customer/portal/6">Helpdesk</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a></li>
-                            </ul>
-                        </div>
+                    <div class="nav-item dropdown">
+                        <a class="nav-link text-dark dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            @User?.FindFirst("name")?.Value
+                        </a>
+                        <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
+                            <li>
+                                <a class="dropdown-item" href="@Configuration.GetSection("SubmissionKeyCloakSettings")["AccountManagementURL"]">Account</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="@Configuration.GetSection("Helpdesk")["URL"]">Helpdesk</a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                            </li>
+                        </ul>
+                    </div>
                     }
                     else
                     {
-                        <a asp-area="" asp-controller="Account" asp-action="Login" class="btn btn-outline-primary">Sign In</a>
+                    <a asp-area="" asp-controller="Account" asp-action="Login" class="btn btn-outline-primary">Sign In</a>
                     }
+
                 </div>
 
             </div>
@@ -141,7 +150,7 @@
                         <a class="nav-link text-light" href="https://dareuk.org.uk/contact/" target="_blank" rel="noopener">Contact Us</a>
                     </li>
                 </ul>
-                <p class="text-light mt-md-0 mt-5 mb-0">&copy; DARE UK - @UIName.Name 2023. All rights reserved.</p>
+                <p class="text-light mt-md-0 mt-5 mb-0">&copy; DARE UK - @UIName.Name @DateTime.Now.Year. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -375,6 +384,9 @@
                     window.location.href = "/Project/GetProject/" + ProjectId;
                 },
                 error: function (error) {
+                    var ElementError = document.getElementById("error");
+                    ElementError.textContent = error.responseText;
+                    ElementError.style.color = "red";
                     console.log(error);
                 }
             });
@@ -549,6 +561,10 @@
                         console.log(result);
                     },
                     error: function (error) {
+                        var ElementError = document.getElementById("error");
+                        ElementError.textContent = error.responseText;
+                        ElementError.style.color = "red";
+
                         console.log(error);
                     }
                 });
@@ -620,6 +636,54 @@
 
                 $.ajax({
                     url: '@Url.Action("AddiSubmissionWizard", "Submission")',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (result) {
+                        window.location.href = "/Project/GetProject/" + this.data.get("ProjectId");
+                        console.log(result);
+                    },
+                    error: function (error) {
+                        var ElementError = document.getElementById("error");
+                        ElementError.textContent = error.responseText;
+                        ElementError.style.color = "red";
+
+                        console.log(error);
+                    }
+                });
+            });
+        });
+        
+        // Post method Demo Mode
+        $(document).ready(function () {
+            $('#frmMainDemo').submit(function (e) {
+                e.preventDefault();
+                debugger;
+
+                var executorData = [];
+                var treData = [];
+                var anyCheckboxSelected = false;
+
+                $('.col-md-6.mb-4 .form-check-input').each(function () {
+                    var name = $(this).siblings('input[type="hidden"]').val();
+                    var isSelected = $(this).prop('checked');
+
+                    if (isSelected) {
+                        anyCheckboxSelected = true;
+                    }
+
+                    treData.push({ Name: name, IsSelected: isSelected });
+                });
+
+                var formData = new FormData($(this)[0]);
+                
+
+                formData.append('SQL', "false");
+
+
+                $.ajax({
+                    url: '@Url.Action("SubmitDemoTes", "Submission")',
                     type: 'POST',
                     data: formData,
                     contentType: false,

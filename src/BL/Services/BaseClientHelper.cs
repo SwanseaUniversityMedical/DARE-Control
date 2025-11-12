@@ -112,6 +112,7 @@ namespace BL.Services
         {
             try
             {
+                //Log.Information("{Function} Calling {Address}", "ClientHelperRequestAsync", endPoint);
                 var usetoken = true;
                 if (string.IsNullOrEmpty(endPoint)) return new HttpResponseMessage { StatusCode = System.Net.HttpStatusCode.BadRequest };
                 
@@ -153,6 +154,7 @@ namespace BL.Services
                         // Output the string contentsn
                         
                     }
+
                      Log.Information("{Function} Api returned an error for {endPoint} Response {Res} Error content {Content}", "ClientHelperRequestAsync",endPoint ,  res, content);
                     throw new Exception("API Call Failure: " + res.StatusCode + ": " + res.ReasonPhrase + " " + content);
                 }
@@ -160,7 +162,7 @@ namespace BL.Services
                 return res;
             }
             catch (Exception ex) {
-                Log.Error(ex, "{Function} Crash", "ClientHelperRequestAsync");
+                Log.Error(ex, "{Function} Crash with Endpoint {Enpoint}", "ClientHelperRequestAsync", endPoint);
                 throw;
             }
         }
@@ -203,10 +205,12 @@ namespace BL.Services
             var accessToken = "";
             if (_keycloakTokenHelper != null)
             {
+                //Log.Information("{Function} First step. Creds are there? {Creds} with username {Username}, Password {Password} and role {Role}", "DareClienCreateClientWithKeycloaktWithoutTokenHelper", _username, _password, _requiredRole);
                 accessToken = await _keycloakTokenHelper.GetTokenForUser(_username, _password, _requiredRole);
             }
             else
             {
+                //Log.Information("{Function} Should not be here. Creds are there? {Creds} with username {Username}, Password {Password} and role {Role}", "DareClienCreateClientWithKeycloaktWithoutTokenHelper", _username, _password, _requiredRole);
                 if (_httpContextAccessor.HttpContext == null)
                 {
                     accessToken = "";
@@ -216,7 +220,7 @@ namespace BL.Services
                     accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
                 }
             }
-
+            //Log.Information("{Function} NExt step. Creds are there? {Creds} with username {Username}, Password {Password} and role {Role} now has token  {Bearer}", "DareClienCreateClientWithKeycloaktWithoutTokenHelper", _username, _password, _requiredRole, accessToken);
             if (IgnoreSSL)
             {
                 Log.Information("{Function} Using No SSL client for {Address}", "CreateClientWithKeycloak", _address);

@@ -1,18 +1,16 @@
 ﻿using Amazon;
-using Amazon.Runtime;
-using Amazon.Runtime.Internal.Util;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using Aws4RequestSigner;
-using BL.Models.Settings;
+using BL.Models;
 using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
-using Minio;
+using Minio.DataModel.Args;
 using Minio.Exceptions;
 using Newtonsoft.Json;
 using Serilog;
-using System;
+using System.Diagnostics;
 using System.Net;
 using System.Text;
 
@@ -21,15 +19,20 @@ namespace BL.Services
     public class MinioHelper : IMinioHelper
     {
         private readonly MinioSettings _minioSettings;
+
         public MinioHelper(MinioSettings minioSettings)
         {
             _minioSettings = minioSettings;
         }
+
         public async Task<bool> CheckBucketExists(string bucketName = "")
         {
             try
             {
-                if (string.IsNullOrEmpty(bucketName)) { bucketName = _minioSettings.BucketName; }
+                if (string.IsNullOrEmpty(bucketName))
+                {
+                    bucketName = _minioSettings.BucketName;
+                }
 
                 var amazonS3Client = GenerateAmazonS3Client();
 
@@ -48,7 +51,6 @@ namespace BL.Services
         {
             try
             {
-
                 ListObjectsV2Request request = new ListObjectsV2Request
                 {
                     BucketName = bucketName,
@@ -62,23 +64,27 @@ namespace BL.Services
             }
             catch (MinioException e)
             {
-                Log.Warning("GetFilesInBucket: {bucketName}, failed due to Minio exception: {message}", bucketName, e.Message);
+                Log.Warning("GetFilesInBucket: {bucketName}, failed due to Minio exception: {message}", bucketName,
+                    e.Message);
             }
             catch (Exception ex)
             {
-                Log.Warning("GetFilesInBucket: {bucketName}, failed due to Exception: {message}", bucketName, ex.Message);
+                Log.Warning("GetFilesInBucket: {bucketName}, failed due to Exception: {message}", bucketName,
+                    ex.Message);
             }
 
             return null;
         }
+
         public async Task<bool> CreateBucket(string bucketName = "")
         {
-            if (string.IsNullOrEmpty(bucketName)) { bucketName = _minioSettings.BucketName; }
+            if (string.IsNullOrEmpty(bucketName))
+            {
+                bucketName = _minioSettings.BucketName;
+            }
 
             if (!string.IsNullOrEmpty(bucketName))
             {
-
-
                 try
                 {
                     // Create bucket if it doesn't exist.
@@ -99,17 +105,20 @@ namespace BL.Services
                 }
                 catch (MinioException e)
                 {
-                    Log.Warning("Create bucket: {bucketName}, failed due to Minio exception: {message}", bucketName, e.Message);
+                    Log.Warning("Create bucket: {bucketName}, failed due to Minio exception: {message}", bucketName,
+                        e.Message);
                 }
                 catch (Exception ex)
                 {
-                    Log.Warning("Create bucket: {bucketName}, failed due to Exception: {message}", bucketName, ex.Message);
+                    Log.Warning("Create bucket: {bucketName}, failed due to Exception: {message}", bucketName,
+                        ex.Message);
                 }
             }
             else
             {
                 Log.Warning("Cannot create bucket as bucket name is null or empty.");
             }
+
             return false;
         }
 
@@ -117,15 +126,11 @@ namespace BL.Services
         {
             try
             {
-
-
                 var amazonS3Client = GenerateAmazonS3Client();
                 if (filePath != null)
                 {
                     using (var stream = new MemoryStream())
                     {
-
-
                         await filePath.CopyToAsync(stream);
 
                         var uploadRequest = new PutObjectRequest
@@ -150,13 +155,31 @@ namespace BL.Services
                         }
                     }
                 }
+
                 return true;
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Log.Warning("UploadFile: {filePath}, failed: {message}", filePath, e.Message);
                 throw;
             }
+        }
+
+
+        public async Task WriteToStore(string bucketName, string filePath, MemoryStream file)
+        {
+            var amazonS3Client = GenerateAmazonS3Client();
+            var objectName = Path.GetFileName(filePath);
+            var putObjectRequest = new PutObjectRequest()
+            {
+                BucketName = bucketName,
+                Key = objectName,
+                InputStream = file,
+                ContentType = "text/plain"
+            };
+            Log.Information("Uploading '{TargetObject} to {Bucket}...", filePath, bucketName);
+            await amazonS3Client.PutObjectAsync(putObjectRequest);
+            Log.Debug("Successfully uploaded {TargetObject} to {Bucket}", filePath, bucketName);
         }
 
         public async Task<bool> DownloadFileAsync(string bucketName = "", string objectName = "")
@@ -200,8 +223,6 @@ namespace BL.Services
             {
                 return false;
             }
-
-
         }
 
         public async Task DeleteObject(string bucketName, string objectKey)
@@ -211,7 +232,6 @@ namespace BL.Services
             try
             {
                 await amazonS3Client.DeleteObjectAsync(bucketName, objectKey);
-
             }
             catch (AmazonS3Exception ex)
             {
@@ -272,41 +292,37 @@ namespace BL.Services
                         Proxy = proxy,
                         UseProxy = true
                     };
-                    Log.Information("{Function} Using proxy {Proxy}", "FetchAndStoreObject", _minioSettings.ProxyAddresURLForExternalFetch);
+                    Log.Information("{Function} Using proxy {Proxy}", "FetchAndStoreObject",
+                        _minioSettings.ProxyAddresURLForExternalFetch);
                 }
                 else
                 {
                     handler = new HttpClientHandler
                     {
-                        
                         UseProxy = false
                     };
                     Log.Information("{Function} Not Using proxy", "FetchAndStoreObject");
                 }
-                
+
 
                 // Configure the HttpClientHandler to use the proxy
-                
+
 
                 // Create the HttpClient with the handler
                 using (var httpClient = new HttpClient(handler))
                 {
-
-                    
                     var response = await httpClient.GetAsync(url);
-                    
-                    
+
+
                     response.EnsureSuccessStatusCode();
-                    
+
                     var contentBytes = await response.Content.ReadAsByteArrayAsync();
 
                     var amazonS3Client = GenerateAmazonS3Client();
-                    
+
                     using (var transferUtility = new TransferUtility(amazonS3Client))
                     {
-                    
                         await transferUtility.UploadAsync(new MemoryStream(contentBytes), bucketName, key);
-                    
                     }
                 }
 
@@ -321,7 +337,6 @@ namespace BL.Services
 
         public async Task<bool> RabbitExternalObject(MQFetchFile msgBytes)
         {
-
             if (msgBytes == null)
             {
                 Log.Information("{Function} Empty message", "RabbitExternalObject");
@@ -352,15 +367,18 @@ namespace BL.Services
 
         public async Task<bool> CreateBucketPolicy(string bucketName)
         {
-
             var signer = new AWS4RequestSigner(_minioSettings.AccessKey, _minioSettings.SecretKey);
 
-            var content = new StringContent("{\r\n    \"Version\": \"2012-10-17\",\r\n    \"Statement\": [\r\n        {\r\n            \"Effect\": \"Allow\",\r\n            \"Action\": [\r\n                \"s3:List*\",\r\n                \"s3:ListBucket\",\r\n                \"s3:PutObject\",\r\n                \"s3:DeleteObject\",\r\n                \"s3:GetBucketLocation\",\r\n                \"s3:GetObject\"\r\n            ],\r\n            \"Resource\": [\r\n                \"arn:aws:s3:::" + bucketName + "\",\r\n                \"arn:aws:s3:::" + bucketName + "/*\"\r\n            ]\r\n        }\r\n    ]\r\n}", null, "application/json");
+            var content = new StringContent(
+                "{\r\n    \"Version\": \"2012-10-17\",\r\n    \"Statement\": [\r\n        {\r\n            \"Effect\": \"Allow\",\r\n            \"Action\": [\r\n                \"s3:List*\",\r\n                \"s3:ListBucket\",\r\n                \"s3:PutObject\",\r\n                \"s3:DeleteObject\",\r\n                \"s3:GetBucketLocation\",\r\n                \"s3:GetObject\"\r\n            ],\r\n            \"Resource\": [\r\n                \"arn:aws:s3:::" +
+                bucketName + "\",\r\n                \"arn:aws:s3:::" + bucketName +
+                "/*\"\r\n            ]\r\n        }\r\n    ]\r\n}", null, "application/json");
 
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Put,
-                RequestUri = new Uri(_minioSettings.Url + "/minio/admin/v3/add-canned-policy?name=" + bucketName + "_policy"),
+                RequestUri = new Uri(_minioSettings.Url + "/minio/admin/v3/add-canned-policy?name=" + bucketName +
+                                     "_policy"),
                 Content = content
             };
 
@@ -379,7 +397,6 @@ namespace BL.Services
 
         public async Task<bool> BucketPolicySetPublic(string bucketName)
         {
-
             var signer = new AWS4RequestSigner(_minioSettings.AccessKey, _minioSettings.SecretKey);
 
             var content = new StringContent(@"{
@@ -403,7 +420,8 @@ namespace BL.Services
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Put,
-                RequestUri = new Uri(_minioSettings.Url + "/minio/admin/v3/add-canned-policy?name=" + bucketName + "_policy"),
+                RequestUri = new Uri(_minioSettings.Url + "/minio/admin/v3/add-canned-policy?name=" + bucketName +
+                                     "_policy"),
                 Content = content
             };
 
@@ -419,10 +437,10 @@ namespace BL.Services
             return true;
         }
 
-        public async Task<bool> CopyObjectToDestination(string destinationBucketName, string destinationObjectKey, GetObjectResponse response)
+        public async Task<bool> CopyObjectToDestination(string destinationBucketName, string destinationObjectKey,
+            GetObjectResponse response)
         {
             var amazonS3Client = GenerateAmazonS3Client();
-
 
 
             long contentLength = response.Headers.ContentLength;
@@ -431,20 +449,17 @@ namespace BL.Services
                 using (MemoryStream memoryStream = new MemoryStream())
                 {
                     await responseStream.CopyToAsync(memoryStream);
-                    string path = Path.Combine(@"c:\testing", destinationObjectKey);
 
                     PutObjectRequest putObjectRequest = new PutObjectRequest
                     {
                         BucketName = destinationBucketName,
                         Key = destinationObjectKey,
                         InputStream = memoryStream,
-                        ContentType = response.Headers.ContentType
-
-
+                        ContentType = response.Headers.ContentType,
+                        
                     };
 
-                    var putObjectResponse = amazonS3Client.PutObjectAsync(putObjectRequest).Result;
-
+                    var putObjectResponse = await amazonS3Client.PutObjectAsync(putObjectRequest);
 
 
                     return putObjectResponse.HttpStatusCode == HttpStatusCode.OK;
@@ -457,7 +472,6 @@ namespace BL.Services
             var amazonS3Client = GenerateAmazonS3Client();
 
 
-
             GetObjectRequest getObjectRequest = new GetObjectRequest
             {
                 BucketName = sourceBucketName,
@@ -467,8 +481,6 @@ namespace BL.Services
             var getObjectResponse = await amazonS3Client.GetObjectAsync(getObjectRequest);
 
             return getObjectResponse;
-
-
         }
 
         public async Task<string> ShareMinioObject(string bucketName, string objectKey)
@@ -487,6 +499,7 @@ namespace BL.Services
 
             return url;
         }
+
         public async Task<bool> FolderExists(string bucketName, string folderName)
         {
             var amazonS3Client = GenerateAmazonS3Client();
@@ -510,11 +523,10 @@ namespace BL.Services
             }
             catch (Exception ex)
             {
-
                 return true;
             }
-
         }
+
         public async Task<bool> CreateFolder(string bucketName, string folderName)
         {
             var amazonS3Client = GenerateAmazonS3Client();
@@ -540,11 +552,8 @@ namespace BL.Services
             }
             catch (Exception ex)
             {
-
                 return false;
             }
-
-
         }
 
         public async Task<bool> SetPublicPolicy(string bucketName)
@@ -602,22 +611,26 @@ namespace BL.Services
 
                 amazonS3Client.PutBucketPolicyAsync(putBucketPolicyRequest).Wait();
 
-                Console.WriteLine("Bucket policy set successfully!");
+                Log.Information("Bucket policy set successfully!");
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error: {e.Message}");
+                Log.Error($"Error: {e.Message}");
             }
+
             return true;
         }
 
 
         #region PrivateHelpers
+
         private AmazonS3Config GenerateAmazonS3Config()
         {
             var config = new AmazonS3Config
             {
-                RegionEndpoint = RegionEndpoint.USEast1, // MUST set this before setting ServiceURL and it should match the `MINIO_REGION` environment variable.
+                RegionEndpoint =
+                    RegionEndpoint
+                        .USEast1, // MUST set this before setting ServiceURL and it should match the `MINIO_REGION` environment variable.
                 ServiceURL = _minioSettings.Url, // replace http://localhost:9000 with URL of your MinIO server
                 ForcePathStyle = true, // MUST be true to work correctly with MinIO server
             };
@@ -655,6 +668,264 @@ namespace BL.Services
                 return partSize;
             }
         }
+
+        #endregion
+
+        #region Secret Management Methods
+
+        private bool _isMinioClientInitialized = false;
+
+        /// <summary>
+        /// Create a MinIO secret (access key/secret key pair)
+        /// </summary>
+        /// <param name="accessKey">The access key name</param>
+        /// <param name="secretKey">The secret key value (optional, will be generated if not provided)</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>MinioCommandResult with the created secret information</returns>
+        public async Task<MinioCommandResult> CreateMinioSecretAsync(string accessKey, string secretKey = "", CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await EnsureMinioClientInitializedAsync(cancellationToken);
+
+                string command;
+                if (string.IsNullOrEmpty(secretKey))
+                {
+                    // Generate secret key automatically
+                    command = $"mc admin user add {_minioSettings.Alias} {accessKey}";
+                }
+                else
+                {
+                    command = $"mc admin user add {_minioSettings.Alias} {accessKey} {secretKey}";
+                }
+
+                var result = await ExecuteMinioCommandAsync(command, cancellationToken);
+
+                if (result.Success)
+                {
+                    Log.Information("MinIO secret created successfully for access key: {AccessKey}", accessKey);
+                }
+                else
+                {
+                    Log.Warning("Failed to create MinIO secret for access key: {AccessKey}. Error: {Error}", accessKey, result.Error);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Exception occurred while creating MinIO secret for access key: {AccessKey}", accessKey);
+                return new MinioCommandResult
+                {
+                    Success = false,
+                    Error = ex.Message
+                };
+            }
+        }
+
+        /// <summary>
+        /// Delete a MinIO secret (access key)
+        /// </summary>
+        /// <param name="accessKey">The access key to delete</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>MinioCommandResult indicating success or failure</returns>
+        public async Task<MinioCommandResult> DeleteMinioSecretAsync(string accessKey, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await EnsureMinioClientInitializedAsync(cancellationToken);
+
+                var command = $"mc admin user remove {_minioSettings.Alias} {accessKey}";
+                var result = await ExecuteMinioCommandAsync(command, cancellationToken);
+
+                if (result.Success)
+                {
+                    Log.Information("MinIO secret deleted successfully for access key: {AccessKey}", accessKey);
+                }
+                else
+                {
+                    Log.Warning("Failed to delete MinIO secret for access key: {AccessKey}. Error: {Error}", accessKey, result.Error);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Exception occurred while deleting MinIO secret for access key: {AccessKey}", accessKey);
+                return new MinioCommandResult
+                {
+                    Success = false,
+                    Error = ex.Message
+                };
+            }
+        }
+
+        /// <summary>
+        /// List all MinIO secrets (access keys)
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns>MinioCommandResult with the list of secrets</returns>
+        public async Task<MinioCommandResult> ListMinioSecretsAsync(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await EnsureMinioClientInitializedAsync(cancellationToken);
+
+                var command = $"mc admin user list {_minioSettings.Alias}";
+                var result = await ExecuteMinioCommandAsync(command, cancellationToken);
+
+                if (result.Success)
+                {
+                    Log.Information("MinIO secrets listed successfully");
+                }
+                else
+                {
+                    Log.Warning("Failed to list MinIO secrets. Error: {Error}", result.Error);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Exception occurred while listing MinIO secrets");
+                return new MinioCommandResult
+                {
+                    Success = false,
+                    Error = ex.Message
+                };
+            }
+        }
+
+        /// <summary>
+        /// Get information about a specific MinIO secret
+        /// </summary>
+        /// <param name="accessKey">The access key to get information about</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>MinioCommandResult with the secret information</returns>
+        public async Task<MinioCommandResult> GetMinioSecretAsync(string accessKey, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await EnsureMinioClientInitializedAsync(cancellationToken);
+
+                var command = $"mc admin user info {_minioSettings.Alias} {accessKey}";
+                var result = await ExecuteMinioCommandAsync(command, cancellationToken);
+
+                if (result.Success)
+                {
+                    Log.Information("MinIO secret information retrieved successfully for access key: {AccessKey}", accessKey);
+                }
+                else
+                {
+                    Log.Warning("Failed to get MinIO secret information for access key: {AccessKey}. Error: {Error}", accessKey, result.Error);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Exception occurred while getting MinIO secret information for access key: {AccessKey}", accessKey);
+                return new MinioCommandResult
+                {
+                    Success = false,
+                    Error = ex.Message
+                };
+            }
+        }
+
+        #endregion
+
+        #region MinIO Client Helper Methods
+
+        private async Task<bool> EnsureMinioClientInitializedAsync(CancellationToken cancellationToken = default)
+        {
+            if (!_isMinioClientInitialized)
+            {
+                var command = $"mc alias set {_minioSettings.Alias ?? "myminio"} {_minioSettings.Url} {_minioSettings.AccessKey} {_minioSettings.SecretKey}";
+                var result = await ExecuteMinioCommandAsync(command, cancellationToken);
+
+                if (result.Success)
+                {
+                    _isMinioClientInitialized = true;
+                    Log.Information("MinIO MC client initialized successfully");
+                    return true;
+                }
+                else
+                {
+                    Log.Error("Failed to initialize MinIO MC client: {Error}", result.Error);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private async Task<MinioCommandResult> ExecuteMinioCommandAsync(string command, CancellationToken cancellationToken = default)
+        {
+            var result = new MinioCommandResult();
+
+            try
+            {
+                Log.Debug("Executing MinIO command: {Command}", command);
+
+                var processStartInfo = new ProcessStartInfo
+                {
+                    FileName = "/bin/sh",
+                    Arguments = $"-c \"{command}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = new Process();
+                process.StartInfo = processStartInfo;
+
+                var outputBuilder = new StringBuilder();
+                var errorBuilder = new StringBuilder();
+
+                process.OutputDataReceived += (sender, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                        outputBuilder.AppendLine(e.Data);
+                };
+
+                process.ErrorDataReceived += (sender, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                        errorBuilder.AppendLine(e.Data);
+                };
+
+                process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
+                await process.WaitForExitAsync(cancellationToken);
+
+                result.ExitCode = process.ExitCode;
+                result.Output = outputBuilder.ToString().Trim();
+                result.Error = errorBuilder.ToString().Trim();
+                result.Success = process.ExitCode == 0;
+
+                if (result.Success)
+                {
+                    Log.Debug("MinIO command executed successfully: {Output}", result.Output);
+                }
+                else
+                {
+                    Log.Warning("MinIO command failed with exit code {ExitCode}: {Error}", result.ExitCode, result.Error);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Exception occurred while executing MinIO command: {Command}", command);
+                result.Success = false;
+                result.Error = ex.Message;
+                return result;
+            }
+        }
+
         #endregion
     }
 }

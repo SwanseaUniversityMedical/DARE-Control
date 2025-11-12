@@ -11,6 +11,7 @@ using BL.Services;
 using EasyNetQ.Management.Client.Model;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Xml.Linq;
 
 namespace DARE_API.Repositories.DbContexts
 {
@@ -30,6 +31,44 @@ namespace DARE_API.Repositories.DbContexts
             _userService = userService;
 
         }
+
+        public void SeedAllInOneData()
+        {
+
+            //var token = _keyclockTokenAPIHelper.GetTokenForUser("minioadmin", "password123", "").Result;
+            try
+            {
+                var trename = "DEMO";
+                var tre = _dbContext.Tres.FirstOrDefault(x => x.Name.ToLower() == "D".ToLower());
+                if (tre == null)
+                {
+                    var demo = CreateTre(trename, "accessfromtretosubmission");
+                    var globaladmin = CreateUser("globaladminuser", "globaladminuser@example.com");
+                    var testing = CreateProject("Testing");
+                    AddMissingTre(testing, demo);
+                    AddMissingUser(testing, globaladmin);
+                    _dbContext.SaveChanges();
+                }
+                
+               
+
+
+              
+               
+               
+               
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "{Function} Error seeding data", "SeedAllInOneData");
+                throw;
+            }
+
+
+
+
+        }
+
         public void SeedData()
         {
             return;
@@ -126,40 +165,61 @@ namespace DARE_API.Repositories.DbContexts
 
 
         }
-
+            
         private Project CreateProject(string name)
         {
             var proj = _dbContext.Projects.FirstOrDefault(x => x.Name.ToLower() == name.ToLower());
 
             if (proj == null)
             {
-                var submission = GenerateRandomName(name.ToLower()) + "submission".Replace("_", "");
-                var output = GenerateRandomName(name.ToLower()) + "output".Replace("_", "");
-                var submissionBucket = _minioHelper.CreateBucket(submission.ToLower()).Result;
-                var submistionBucketPolicy = _minioHelper.CreateBucketPolicy(submission.ToLower()).Result;
-                var outputBucket = _minioHelper.CreateBucket(output.ToLower()).Result;
-                var outputBucketPolicy = _minioHelper.CreateBucketPolicy(output.ToLower()).Result;
-
                 proj = new Project()
                 {
                     Name = name,
                     Display = name,
                     EndDate = DateTime.Now.ToUniversalTime(),
                     StartDate = DateTime.Now.ToUniversalTime(),
-                    SubmissionBucket = submission,
-                    OutputBucket = output,
+                    SubmissionBucket = "",
+                    OutputBucket = "",
                     Tres = new List<Tre>(),
                     Users = new List<BL.Models.User>(),
                     Submissions = new List<Submission>(),
                     ProjectDescription = ""
                 };
+                
                 proj.FormData = JsonConvert.SerializeObject(proj);
+                // Add and save to get a permanent Id from the database
                 _dbContext.Projects.Add(proj);
+                _dbContext.SaveChanges();
 
+                try
+                {
+                    // Now proj.Id has a permanent value; generate stable bucket names
+                    var submission = GenerateRandomName(proj.Id.ToString()) + "submission".Replace("_", "");
+                    var output = GenerateRandomName(proj.Id.ToString()) + "output".Replace("_", "");
+
+                    // not sure if needed but keep them for now
+                    var submissionBucket = _minioHelper.CreateBucket(submission.ToLower()).Result;
+                    var submistionBucketPolicy = _minioHelper.CreateBucketPolicy(submission.ToLower()).Result;
+                    var outputBucket = _minioHelper.CreateBucket(output.ToLower()).Result;
+                    var outputBucketPolicy = _minioHelper.CreateBucketPolicy(output.ToLower()).Result;
+
+                    proj.SubmissionBucket = submission;
+                    proj.OutputBucket = output;
+
+                    // tracked entity updated, persist changes
+                    _dbContext.SaveChanges();
+
+                    Log.Information("Created project {Project} with submission bucket {Submission} and output bucket {Output}", proj.Name, proj.SubmissionBucket, proj.OutputBucket);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error creating Minio buckets for project {Project}", proj.Name);
+                    throw;
+                }
             }
             return proj;
-
         }
+
 
         private User CreateUser(string name, string email)
         {

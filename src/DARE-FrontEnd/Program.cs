@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Authentication;
 using Newtonsoft.Json;
 using DARE_FrontEnd.Models;
 using DARE_FrontEnd.Services;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 IdentityModelEventSource.ShowPII = true;
@@ -28,8 +29,10 @@ IWebHostEnvironment environment = builder.Environment;
 Log.Logger = CreateSerilogLogger(configuration, environment);
 try
 {
-// Add services to the container.
-builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
+
+    //builder.Host.UseSerilog();
+    // Add services to the container.
+    builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
 {
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
     options.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
@@ -44,7 +47,10 @@ Log.Information("Dare-FrontEnd logging LastStatusUpdate.");
 // -- authentication here
 var submissionKeyCloakSettings = new SubmissionKeyCloakSettings();
 configuration.Bind(nameof(submissionKeyCloakSettings), submissionKeyCloakSettings);
-builder.Services.AddSingleton(submissionKeyCloakSettings);
+var keycloakDemomode = configuration["KeycloakDemoMode"].ToLower() == "true";
+var demomode = configuration["DemoMode"].ToLower() == "true";
+    submissionKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
+    builder.Services.AddSingleton(submissionKeyCloakSettings);
 
 var formIOSettings = new FormIOSettings();
 configuration.Bind(nameof(formIOSettings), formIOSettings);
@@ -61,10 +67,17 @@ builder.Services.AddSingleton(UIName);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
+if (configuration["SuppressAntiforgery"] != null && configuration["SuppressAntiforgery"].ToLower() == "true")
+{
+    Log.Warning("{Function} Disabling Anti Forgery token. Only do if testing", "Main");
+    builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo("/root/.aspnet/DataProtection-Keys"))
+        .DisableAutomaticKeyGeneration();
+    }
 
-
-//add services here
-builder.Services.AddScoped<CustomCookieEvent>();
+    //add services here
+    builder.Services.AddScoped<CustomCookieEvent>();
 
 builder.Services.AddScoped<IDareClientHelper, DareClientHelper>();
 
@@ -249,35 +262,35 @@ builder.Services.AddAuthentication(options =>
                     },
                     OnRedirectToIdentityProvider = async context =>
                     {
-                        //Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}",
-                        //    context.HttpContext.Connection.RemoteIpAddress);
-                        //Log.Information("HttpContext.Connection.RemotePort : {RemotePort}",
-                        //    context.HttpContext.Connection.RemotePort);
-                        //Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
-                        //Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
+                        Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}",
+                            context.HttpContext.Connection.RemoteIpAddress);
+                        Log.Information("HttpContext.Connection.RemotePort : {RemotePort}",
+                            context.HttpContext.Connection.RemotePort);
+                        Log.Information("HttpContext.Request.Scheme : {Scheme}", context.HttpContext.Request.Scheme);
+                        Log.Information("HttpContext.Request.Host : {Host}", context.HttpContext.Request.Host);
 
-                        //foreach (var header in context.HttpContext.Request.Headers)
-                        //{
-                        //    Log.Information("Request Header {key} - {value}", header.Key, header.Value);
-                        //}
+                        foreach (var header in context.HttpContext.Request.Headers)
+                        {
+                            Log.Information("Request Header {key} - {value}", header.Key, header.Value);
+                        }
 
-                        //foreach (var header in context.HttpContext.Response.Headers)
-                        //{
-                        //    Log.Information("Response Header {key} - {value}", header.Key, header.Value);
-                        //}
+                        foreach (var header in context.HttpContext.Response.Headers)
+                        {
+                            Log.Information("Response Header {key} - {value}", header.Key, header.Value);
+                        }
 
-                        //if (submissionKeyCloakSettings.UseRedirectURL)
-                        //{
-                        //    context.ProtocolMessage.RedirectUri = submissionKeyCloakSettings.RedirectURL;
-                        //}
+                        if (submissionKeyCloakSettings.UseRedirectURL)
+                        {
+                            context.ProtocolMessage.RedirectUri = submissionKeyCloakSettings.RedirectURL;
+                        }
 
-                        //Log.Information("Redirect Uri {Redirect}", context.ProtocolMessage.RedirectUri);
+                        Log.Information("Redirect Uri {Redirect}", context.ProtocolMessage.RedirectUri);
 
                         await Task.FromResult(0);
                     }
                 };
                 //options.MetadataAddress = submissionKeyCloakSettings.MetadataAddress;
-
+                Log.Information("{Function} Keycloak Settings Auth {Auth}, Client {Client}, Secret {Secret}, Meta {Meta}", "Main", submissionKeyCloakSettings.Authority, submissionKeyCloakSettings.ClientId, submissionKeyCloakSettings.ClientSecret, submissionKeyCloakSettings.MetadataAddress);
                 options.RequireHttpsMetadata = false;
                 options.SaveTokens = true;
                 options.Scope.Add("openid");

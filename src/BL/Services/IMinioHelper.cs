@@ -1,4 +1,5 @@
 ﻿using Amazon.S3.Model;
+using BL.Models;
 using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
 
@@ -14,7 +15,10 @@ namespace BL.Services
         Task<bool> FetchAndStoreObject(string url, string bucketName, string key);
         Task<bool> RabbitExternalObject(MQFetchFile msgBytes);
         Task<bool> CreateBucketPolicy(string bucketName);
-        Task<bool> CopyObjectToDestination(string destinationBucketName, string destinationObjectKey, GetObjectResponse response);
+
+        Task<bool> CopyObjectToDestination(string destinationBucketName, string destinationObjectKey,
+            GetObjectResponse response);
+
         Task<GetObjectResponse> GetCopyObject(string sourceBucketName, string sourceObjectKey);
         Task<string> ShareMinioObject(string bucketName, string objectKey);
         Task<bool> FolderExists(string bucketName, string folderName);
@@ -22,11 +26,16 @@ namespace BL.Services
 
         Task<ListObjectsV2Response> GetFilesInBucket(string bucketName, string prefix = "");
 
-
         Task<bool> SetPublicPolicy(string bucketName);
 
         Task<bool> BucketPolicySetPublic(string bucketName);
 
         Task DeleteObject(string bucketName, string objectKey);
+        Task WriteToStore(string bucketName, string objectKey, MemoryStream file);
+
+        Task<MinioCommandResult> CreateMinioSecretAsync(string accessKey, string secretKey = "", CancellationToken cancellationToken = default);
+        Task<MinioCommandResult> DeleteMinioSecretAsync(string accessKey, CancellationToken cancellationToken = default);
+        Task<MinioCommandResult> ListMinioSecretsAsync(CancellationToken cancellationToken = default);
+        Task<MinioCommandResult> GetMinioSecretAsync(string accessKey, CancellationToken cancellationToken = default);
     }
 }

@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
@@ -23,6 +24,14 @@ Log.Logger = CreateSerilogLogger(configuration, environment);
 Log.Information("TRE-UI logging LastStatusUpdate.");
 try
 {
+    if (configuration["SuppressAntiforgery"] != null && configuration["SuppressAntiforgery"].ToLower() == "true")
+    {
+        Log.Warning("{Function} Disabling Anti Forgery token. Only do if testing", "Main");
+        builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
+        builder.Services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo("/root/.aspnet/DataProtection-Keys"))
+            .DisableAutomaticKeyGeneration();
+    }
     //builder.Host.UseSerilog();
     IdentityModelEventSource.ShowPII = true;
 
@@ -39,8 +48,11 @@ try
 // -- authentication here
     var treKeyCloakSettings = new TreKeyCloakSettings();
     configuration.Bind(nameof(treKeyCloakSettings), treKeyCloakSettings);
+    var keycloakDemomode = configuration["KeycloakDemoMode"].ToLower() == "true";
+    var demomode = configuration["DemoMode"].ToLower() == "true";
+    treKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
     builder.Services.AddSingleton(treKeyCloakSettings);
-
+    Log.Information("{Function} Step 1 Authority {Authority}","Main",  treKeyCloakSettings.Authority);
     var UIName = new TRE_UI.Models.UIName();
     configuration.Bind(nameof(UIName), UIName);
     builder.Services.AddSingleton(UIName);
@@ -148,8 +160,8 @@ try
 
                 options.BackchannelHttpHandler = httpClientHandler;
             }
-
-
+            Log.Information("{Function} Step 2 Authority {Authority}", treKeyCloakSettings.Authority);
+           
             // URL of the Keycloak server
             options.Authority = treKeyCloakSettings.Authority;
             //// Client configured in the Keycloak
@@ -195,6 +207,7 @@ try
                     context.HandleResponse();
                     return context.Response.CompleteAsync();
                 },
+
                 OnRemoteFailure = context =>
                 {
                     Log.Error("OnRemoteFailure: {ex}", context.Failure);
@@ -240,6 +253,7 @@ try
                 },
                 OnRedirectToIdentityProvider = async context =>
                 {
+
                     //Log.Information("HttpContext.Connection.RemoteIpAddress : {RemoteIpAddress}",
                     //    context.HttpContext.Connection.RemoteIpAddress);
                     //Log.Information("HttpContext.Connection.RemotePort : {RemotePort}",
@@ -296,7 +310,10 @@ try
             }
         });
 
-
+    Log.Information(
+        "{Function} Authority {Authority}, MetaAddress {MetaAddress}, Audience {Audience}, ValidAudiences {ValidAudiences}",
+        "Program", treKeyCloakSettings.Authority, treKeyCloakSettings.MetadataAddress, treKeyCloakSettings.ClientId,
+        treKeyCloakSettings.ValidAudiences);
     var app = builder.Build();
     app.UseCors();
     app.UseForwardedHeaders();

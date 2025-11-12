@@ -46,8 +46,8 @@ namespace DARE_API.Controllers
 
 
         }
-
-
+        
+        
         [Authorize(Roles = "dare-control-admin,dare-tre-admin")]
         [HttpGet]
         [Route("GetWaitingSubmissionsForTre")]
@@ -271,8 +271,7 @@ namespace DARE_API.Controllers
                 StatusType.InvalidUser,
                 StatusType.TRENotAuthorisedForProject,
                 StatusType.AgentTransferringToPod,
-                StatusType.TransferToPodFailed,
-                StatusType.SendingSubmissionToHutch,
+                StatusType.TransferToPodFailed,               
                 StatusType.TreCrateValidated,
                 StatusType.TreCrateValidationFailed,
                 StatusType.TreCrateValidated,
@@ -321,8 +320,7 @@ namespace DARE_API.Controllers
             {
                 StatusType.DataOutApprovalBegun,
                 StatusType.DataOutApprovalRejected,
-                StatusType.DataOutApproved,
-                StatusType.RequestingHutchDoesFinalPackaging
+                StatusType.DataOutApproved               
             };
             Dictionary<int, List<StatusType>> stage4Dict = new Dictionary<int, List<StatusType>>();
             stage4Dict.Add(4, stage4List.statusTypeList);
@@ -405,31 +403,7 @@ namespace DARE_API.Controllers
 
             // If the content type cannot be determined, provide a default value
             return "application/octet-stream"; // This is a common default for unknown file types
-        }
-        
-        [HttpGet("DownloadFile")]
-        public async Task<IActionResult> DownloadFileAsync(int submissionId)
-        {
-            try
-            {
-                Log.Debug($"DownloadFileAsync submissionId > {submissionId}");
-                var submission = _DbContext.Submissions.First(x => x.Id == submissionId);
-
-
-                Log.Debug($"DownloadFileAsync submission.Project.OutputBucket > {submission.Project.OutputBucket} submission.FinalOutputFile > {submission.FinalOutputFile} "  );
-                var response = await _minioHelper.GetCopyObject(submission.Project.OutputBucket, submission.FinalOutputFile);
-
-            
-                var responseStream = response.ResponseStream;
-                return File(responseStream, GetContentType(submission.FinalOutputFile), submission.FinalOutputFile);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Function} Crashed", "DownloadFiles");
-                throw;
-            }
-
-        }
+        }              
        
 
         [Authorize(Roles = "dare-control-admin")]

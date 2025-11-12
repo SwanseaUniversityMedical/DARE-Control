@@ -1,43 +1,36 @@
-﻿using Microsoft.Extensions.Configuration;
 using BL.Models;
-using BL.Models.APISimpleTypeReturns;
 using BL.Models.Enums;
-using BL.Models.ViewModels;
+using BL.Models.Settings;
 using BL.Models.Tes;
+using BL.Models.ViewModels;
 using BL.Rabbit;
-using Microsoft.Extensions.DependencyInjection;
+using BL.Services;
 using EasyNetQ;
+using Hangfire;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.FeatureManagement;
 using Newtonsoft.Json;
 using Serilog;
-
-using Microsoft.Extensions.Hosting;
-using Hangfire;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
+using TRE_API.Constants;
+using TRE_API.Models;
 using TRE_API.Repositories.DbContexts;
 using TRE_API.Services;
-using BL.Services;
+using Tre_Credentials.DbContexts;
+using Tre_Credentials.Models;
 using TREAgent.Repositories;
-using System.Net.Http.Json;
-using TRE_API.Models;
-using Castle.Components.DictionaryAdapter.Xml;
-using System;
-using System.Net;
-using Microsoft.EntityFrameworkCore;
-using BL.Models.Settings;
+
 
 namespace TRE_API
 {
     public interface IDoAgentWork
     {
         Task Execute();
-        Task CheckTESK(string taskID, int subId, string tesId, string outputBucket, string NameTes);
+        Task CheckTES(string taskID, int subId, int projectId, int userId, string tesId, string outputBucket, string NameTes);
         void ClearJob(string jobname);
-        Task testing(string toRun, string Role);
     }
-
-    // TESK : http://172.16.34.31:8080/    https://tesk.ukserp.ac.uk/ga4gh/tes/v1/tasks
-
 
     public class DoAgentWork : IDoAgentWork
     {
@@ -53,12 +46,17 @@ namespace TRE_API
         private readonly IKeyCloakService _keyCloakService;
         private readonly TreKeyCloakSettings _TreKeyCloakSettings;
         private readonly IEncDecHelper _encDecHelper;
-        private readonly Features _Features;
-        
+        private readonly IFeatureManager _features;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly CredentialsDbContext _credsDbContext;
+        private readonly IVaultCredentialsService _vaultService;
+        private readonly IConfiguration _config;
+     
+
 
         public DoAgentWork(IServiceProvider serviceProvider,
             ApplicationDbContext dbContext,
-            ISubmissionHelper subHelper, 
+            ISubmissionHelper subHelper,
             IMinioTreHelper minioTreHelper,
             IMinioSubHelper minioSubHelper,
             IHasuraAuthenticationService hasuraAuthenticationService,
@@ -68,8 +66,13 @@ namespace TRE_API
             IKeyCloakService keyCloakService,
             TreKeyCloakSettings TreKeyCloakSettings,
             IEncDecHelper encDecHelper,
-            Features Features
-            )
+            IFeatureManager features,
+            IHttpClientFactory httpClientFactory,
+            CredentialsDbContext credsDbContext,
+            IVaultCredentialsService vaultService,
+            IConfiguration config
+           
+        )
         {
             _serviceProvider = serviceProvider;
             _dbContext = dbContext;
@@ -93,91 +96,17 @@ namespace TRE_API
             _keyCloakService = keyCloakService;
             _TreKeyCloakSettings = TreKeyCloakSettings;
             _encDecHelper = encDecHelper;
-            _Features = Features;
+            _features = features;
+            _httpClientFactory = httpClientFactory;
+            _credsDbContext = credsDbContext;
+            _vaultService = vaultService;
+
+            _config = config;
         }
 
-
-        public async Task testing(string toRun, string Role)
+        public string CreateTesk(string jsonContent, int subId, int projectId, int userId, string tesId, string outputBucket, string Tesname)
         {
-
-
-            //TesId
-
-            Console.WriteLine("Testing");
-            Log.Information("{Function}  SEND TO TESK ", "Execute");
-            var arr = new HttpClient();
-
-
-
-            var role = Role; 
-
-            var Token = _hasuraAuthenticationService.GetNewToken(role);
-
-
-
-            var projectId = 1;
-
-
-
-            var OutputBucket = _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects.First(x => x.Id == projectId).OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
-            var tesMessage = JsonConvert.DeserializeObject<TesTask>(toRun);                                                                                                                 //it need the file name?? (key-name)
-
-            if (tesMessage.Outputs == null)
-            {
-                tesMessage.Outputs = new List<TesOutput> { };
-            }
-
-            //S3://bucket-name/key-name
-            foreach (var output in tesMessage.Outputs)
-            {
-                output.Url = OutputBucket;
-            }
-
-            if (tesMessage.Executors == null)
-            {
-                tesMessage.Executors = new List<TesExecutor>();
-            }
-
-            foreach (var Executor in tesMessage.Executors)
-            {
-                if (Executor.Image == "CustomerImages") //TODO
-                {
-                    for (int i = 0; i < Executor.Command.Count; i++)
-                    {
-                        Executor.Command[i] += "--" + Token;
-                    }
-                }
-
-                //if (Executor.Env == null)
-                //{
-                //    Executor.Env = new Dictionary<string, string>();
-                //}
-                //Executor.Env["HASURAAuthenticationToken"] = Token;
-            }
-
-            _dbContext.TokensToExpire.Add(new TokenToExpire()
-            {
-                SubId = 99,
-                Token = Token
-            });
-            _dbContext.SaveChanges();
-
-
-
-            if (tesMessage is not null)
-            {
-                var stringdata = JsonConvert.SerializeObject(tesMessage);
-                Log.Information("{Function} tesMessage is not null runhing CreateTESK {tesMessage}", "Execute", stringdata);
-                CreateTESK(stringdata, 99, "123COOOLLL", OutputBucket, "cool DEBUG NAME");
-            }
-
- 
-        }
-
-        public string CreateTESK(string jsonContent, int subId, string tesId, string outputBucket, string Tesname)
-        {
-
-            Log.Information("{Function} {jsonContent} runhing CreateTESK ", "CreateTESK", jsonContent);
+            Log.Information("{Function} {jsonContent} running CreateTESK ", "CreateTesk", jsonContent);
 
             HttpClientHandler handler = new HttpClientHandler();
 
@@ -191,70 +120,85 @@ namespace TRE_API
             }
 
 
-            using (var httpClient = new HttpClient(handler))
+            using var httpClient = new HttpClient(handler);
+            // Define the URL for the POST request
+            string apiUrl = _AgentSettings.TESKAPIURL;
+
+            // Create a HttpRequestMessage with the HTTP method set to POST
+            var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
+
+            // Set the headers
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Headers.TryAddWithoutValidation("Content-Type", "application/json");
+
+            // Attach the JSON string to the request's content
+            request.Content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+
+            // Send the POST request
+            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+
+            // Check the response status
+            if (response.IsSuccessStatusCode)
             {
-                // Define the URL for the POST request
-                string apiUrl = _AgentSettings.TESKAPIURL;
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                Log.Information("{Function} Request successful. Response: {Response}", "CreateTesk", responseBody);
+                Console.WriteLine("Request successful. Response:");
+                Console.WriteLine(responseBody);
+                Log.Information("Request successful. Response: {response}", responseBody);
 
 
-                // Create a HttpRequestMessage with the HTTP method set to POST
-                var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
-
-                // Set the headers
-                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                request.Headers.TryAddWithoutValidation("Content-Type", "application/json");
-
-                // Attach the JSON string to the request's content
-                request.Content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                var responseObj = JsonConvert.DeserializeObject<ResponseModel>(responseBody);
+                string id = responseObj.id;
 
 
-                // Send the POST request
-                HttpResponseMessage response = httpClient.SendAsync(request).Result;
-
-                // Check the response status
-                if (response.IsSuccessStatusCode)
-                {
-                    string responseBody = response.Content.ReadAsStringAsync().Result;
-                    Log.Information("{Function} Request successful. Response: {Response}", "CreateTESK", responseBody);
-                    Console.WriteLine("Request successful. Response:");
-                    Console.WriteLine(responseBody);
-                    Log.Information("Request successful. Response: {response}", responseBody);
+                RecurringJob.AddOrUpdate<IDoAgentWork>(id,
+                    a => a.CheckTES(id, subId, projectId, userId, tesId, outputBucket, Tesname),
+                    Cron.Minutely());
 
 
-                    var responseObj = JsonConvert.DeserializeObject<ResponseModel>(responseBody);
-                    string id = responseObj.id;
+                _dbContext.Add(new TeskAudit() { message = jsonContent, teskid = tesId, subid = subId.ToString() });
+                _dbContext.SaveChanges();
 
-                    RecurringJob.AddOrUpdate<IDoAgentWork>(id, a => a.CheckTESK(id, subId, tesId, outputBucket, Tesname),
-                        Cron.MinuteInterval(1));
 
-                    _dbContext.Add(new TeskAudit() { message = jsonContent, teskid = tesId, subid = subId.ToString() });
-                    _dbContext.SaveChanges();
-
-                    return id;
-                }
-                else
-                {
-                    Log.Error("{Function} Request failed with status code: {Code}", "CreateTESK", response.StatusCode);
-                    
-                    return "";
-                }
+                return id;
             }
+            try
+            {
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                Log.Error("{Function} Request failed with status code: {Code} {responseBody}", "CreateTESK", response.StatusCode, responseBody);
+            }
+            catch (Exception ex)
+            {
+                Log.Error("{Function} Request failed with status code: {Code}", "CreateTESK", response.StatusCode);
+            }
+
+
+
+            return "";
         }
+
 
         class ResponseModel
         {
             public string id { get; set; }
         }
 
-        public async Task CheckTESK(string taskID, int subId, string tesId, string outputBucket, string NameTes)
+        public async Task CheckTES(string taskID, int subId, int projectId, int userId, string tesId, string outputBucket, string NameTes)
         {
             try
             {
-                Log.Information("{Function} Check TESK : {TaskId},  TES : {TesId}, sub: {SubId}", "CheckTESK", taskID, tesId, subId);
-                string url = _AgentSettings.TESKAPIURL + "/" + taskID + "?view=basic";
-                             
-                HttpClientHandler handler = new HttpClientHandler();
+                Log.Information("{Function} Check TES : {TaskId},  TES : {TesId}, sub: {SubId}", "CheckTES", taskID,
+                    tesId, subId);
+                string url = _AgentSettings.TESKAPIURL + "/" + taskID + "?view=BASIC";
 
+                HttpClientHandler handler = new HttpClientHandler();
+                // Getting project name
+                var projectName = _dbContext.Projects.FirstOrDefault(p => p.SubmissionProjectId == projectId)?.SubmissionProjectName ?? "UnknownProject";
+                if (projectName == "UnknownProject")
+                {
+                    Log.Error("{Function} Could not find project name for projectId {ProjectId}", "CheckTES", projectId);
+                }
                 if (_AgentSettings.Proxy)
                 {
                     handler = new HttpClientHandler
@@ -267,7 +211,7 @@ namespace TRE_API
                 using (HttpClient client = new HttpClient(handler))
                 {
                     HttpResponseMessage response = client.GetAsync(url).Result;
-                    Log.Information("{Function} Response status {State}", "CheckTESK", response.StatusCode);
+                    Log.Information("{Function} Response status {State}", "CheckTES", response.StatusCode);
                     Console.WriteLine(response.StatusCode);
 
                     if (response.IsSuccessStatusCode)
@@ -293,15 +237,16 @@ namespace TRE_API
                                 shouldReport = true;
                                 fromDatabase.state = status.state;
                                 _dbContext.Update(fromDatabase);
-
                             }
                         }
 
                         _dbContext.SaveChanges();
-                        Log.Information("{Function} shouldReport {shouldReport} status {status}", "CheckTESK", shouldReport, status.state);
-                        if (shouldReport == true || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR" || status.state == "SYSTEM_ERROR"))
+                        Log.Information("{Function} shouldReport {shouldReport} status {status}", "CheckTES",
+                            shouldReport, status.state);
+                        if (shouldReport || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR" ||
+                                             status.state == "SYSTEM_ERROR"))
                         {
-                            Log.Information("{Function} *** status change *** {State}", "CheckTESK", status.state);
+                            Log.Information("{Function} *** status change *** {State} {name} {description}", "CheckTES", status.state, status.name, status.description);
 
 
                             // send update
@@ -321,20 +266,33 @@ namespace TRE_API
                                         statusMessage = StatusType.PodProcessingComplete;
 
                                         Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
-                                        Log.Information("{Function} *** COMPLETE remove Token *** {Token} ", "CheckTESK", Token);
+                                        Log.Information("{Function} *** COMPLETE remove Token *** {Token} ",
+                                            "CheckTES", Token);
 
+                                        
+                                        try
+                                        {
+                                            await TriggerRevokeCredentialsAsync(subId, projectName, userId, 0);
+
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Log.Error(ex, "Failed to trigger revoke for submission {SubId}", subId);
+
+                                        }
                                         if (Token != null)
                                         {
                                             _dbContext.TokensToExpire.Remove(Token);
                                             _hasuraAuthenticationService.ExpirerToken(Token.Token);
                                         }
-
+                                        
                                         _dbContext.SaveChanges();
                                         break;
                                     case "EXECUTOR_ERROR":
                                         statusMessage = StatusType.Cancelled;
                                         Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
-                                        Log.Information("{Function} *** EXECUTOR_ERROR remove Token *** {Token} ", "CheckTESK", Token);
+                                        Log.Information("{Function} *** EXECUTOR_ERROR remove Token *** {Token} ",
+                                            "CheckTES", Token);
 
                                         if (Token != null)
                                         {
@@ -348,7 +306,8 @@ namespace TRE_API
                                     case "SYSTEM_ERROR":
                                         statusMessage = StatusType.Cancelled;
                                         Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
-                                        Log.Information("{Function} *** SYSTEM_ERROR remove Token *** {Token} ", "CheckTESK", Token);
+                                        Log.Information("{Function} *** SYSTEM_ERROR remove Token *** {Token} ",
+                                            "CheckTES", Token);
 
                                         if (Token != null)
                                         {
@@ -362,47 +321,48 @@ namespace TRE_API
                                 }
 
                                 APIReturn? result = null;
-                                try
-                                {
-                                    result = _subHelper.UpdateStatusForTre(subId.ToString(), statusMessage, "");
-                                }
-                                catch (Exception ex)
-                                {
-                                    Log.Error(ex.ToString());
-                                }
+
 
                                 if (status.state == "COMPLETE")
                                 {
-                                    Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == COMPLETE ");
+                                    Log.Information(
+                                        $"  CloseSubmissionForTre with status.state subId {subId.ToString()} == COMPLETE ");
                                     try
                                     {
-                                        result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.DataOutRequested, "", "");
+                                        result = _subHelper.CloseSubmissionForTre(subId.ToString(),
+                                            StatusType.DataOutRequested, "", "");
                                     }
                                     catch (Exception ex)
                                     {
                                         Log.Error(ex.ToString());
                                     }
+
                                     ClearJob(taskID);
                                 }
-                                else if (status.state == "EXECUTER_ERROR" || status.state == "SYSTEM_ERROR")
+                                else if (status.state == "EXECUTOR_ERROR" || status.state == "SYSTEM_ERROR")
                                 {
-                                    Log.Information($"  CloseSubmissionForTre with status.state subId {subId.ToString()} == EXECUTER_ERROR or SYSTEM_ERROR ");
+                                    Log.Information(
+                                        $"  CloseSubmissionForTre with status.state subId {subId.ToString()} == EXECUTOR_ERROR or SYSTEM_ERROR ");
                                     try
                                     {
-                                        result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Failed, "", "");
+                                        result = _subHelper.CloseSubmissionForTre(subId.ToString(), StatusType.Failed,
+                                            "", "");
                                     }
                                     catch (Exception ex)
                                     {
                                         Log.Error(ex.ToString());
                                     }
+
                                     ClearJob(taskID);
                                 }
                             }
+
                             Log.Information($" Checking status ");
                             // are we done ?
-                            if (status.state == "COMPLETE" || status.state == "EXECUTER_ERROR" || status.state == "SYSTEM_ERROR")
+                            if (status.state == "COMPLETE")
                             {
-                                Log.Information($"  status.state == \"COMPLETE\" || status.state == \"EXECUTOR_ERROR\" or SYSTEM_ERROR ");
+                                Log.Information(
+                                    "status.state == COMPLETE");
 
                                 ClearJob(taskID);
                                 var outputBucketGood = outputBucket.Replace(_AgentSettings.TESKOutputBucketPrefix, "");
@@ -411,14 +371,17 @@ namespace TRE_API
 
                                 foreach (var s3Object in data.S3Objects) //TODO is this right?
                                 {
-                                    Log.Information("{Function} *** added file from outputBucket *** {file} ", "CheckTESK", s3Object.Key);
+                                    Log.Information("{Function} *** added file from outputBucket *** {file} ",
+                                        "CheckTES", s3Object.Key);
                                     files.Add(s3Object.Key);
                                 }
+
                                 _subHelper.UpdateStatusForTre(subId.ToString(), StatusType.DataOutRequested, "");
                                 Log.Information($"  FilesReadyForReview files {files.Count} ");
-                                if (files.Count == 0) 
+                                if (files.Count == 0)
                                 {
-                                    _subHelper.UpdateStatusForTre(subId.ToString(), StatusType.DataOutApprovalRejected, " No Files to review ");
+                                    _subHelper.UpdateStatusForTre(subId.ToString(), StatusType.DataOutApprovalRejected,
+                                        " No Files to review ");
                                     return;
                                 }
 
@@ -429,19 +392,15 @@ namespace TRE_API
                                     tesId = tesId.ToString(),
                                     Name = NameTes
                                 }, outputBucketGood);
-
                             }
                         }
                         else
-                            Log.Information("{Function} No change", "CheckTESK");
-
-
-
+                            Log.Information("{Function} No change", "CheckTES");
                     }
                     else
                     {
-                        Log.Error("{Function} HTTP Request {url} failed with status code {code}", "CheckTESK", url, response.StatusCode);
-
+                        Log.Error("{Function} HTTP Request {url} failed with status code {code}", "CheckTES", url,
+                            response.StatusCode);
                     }
                 }
             }
@@ -449,30 +408,26 @@ namespace TRE_API
             {
                 Log.Error(e.ToString());
             }
-
-        }
-
-        //TODO Implement proper check
-        private bool ValidateCreate(Submission sub)
-        {
-            return true;
         }
 
         // Method executed upon hangfire job
         public async Task Execute()
         {
-            Log.Information("{Function} DoAgentWork ruinng", "Execute");
+            Log.Information("{Function} DoAgentWork running", "Execute");
             // control use of dependency injection
             using (var scope = _serviceProvider.CreateScope())
             {
                 // OPTIONS
                 var useRabbit = _AgentSettings.UseRabbit;
-                var useHutch = _AgentSettings.UseHutch;
                 var useTESK = _AgentSettings.UseTESK;
 
                 Log.Information("{Function} useRabbit {useRabbit}", "Execute", useRabbit);
-                Log.Information("{Function} useHutch {useHutch}", "Execute", useHutch);
                 Log.Information("{Function} useTESK {useTESK}", "Execute", useTESK);
+                if (await _features.IsEnabledAsync(FeatureFlags.DemoAllInOne))
+                {
+                    Log.Information("{Function} Demo Mode is on, simulating execution..", "Execute");
+
+                }
 
                 var cancelsubprojs = _subHelper.GetRequestCancelSubsForTre();
                 if (cancelsubprojs != null)
@@ -484,35 +439,39 @@ namespace TRE_API
                         //TODO Do we need to call Hutch or other stuff to cancel and do other cancel stuff
                         _subHelper.CloseSubmissionForTre(cancelsubproj.Id.ToString(), StatusType.Cancelled, "", "");
                     }
-
                 }
 
                 // Get list of submissions
                 List<Submission> listOfSubmissions;
-                
+
                 try
                 {
                     listOfSubmissions = _subHelper.GetWaitingSubmissionForTre();
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e,"{Function} Error getting submissions", "Execute");
-                    
+                    Log.Error(e, "{Function} Error getting submissions", "Execute");
+
                     throw;
                 }
 
 
-                Log.Information("{Function} listOfSubmissions {listOfSubmissions}", "Execute", listOfSubmissions?.Count);
+                Log.Information("{Function} listOfSubmissions {listOfSubmissions}", "Execute",
+                    listOfSubmissions?.Count);
                 foreach (var aSubmission in listOfSubmissions)
                 {
+
+
                     try
                     {
                         Log.Information("{Function}Submission: {submission}", "Execute", aSubmission.Id);
 
-                        // Check user is allowed ont he project
+                        // Check user is allowed on the project
                         if (!_subHelper.IsUserApprovedOnProject(aSubmission.Project.Id, aSubmission.SubmittedBy.Id))
                         {
-                            Log.Error("{Function }User {UserID}/project {ProjectId} is not value for this submission {submission}","Execute",
+                            Log.Error(
+                                "{Function }User {UserID}/project {ProjectId} is not value for this submission {submission}",
+                                "Execute",
                                 aSubmission.SubmittedBy.Id, aSubmission.Project.Id, aSubmission);
                             // record error with submission layer
                             var result =
@@ -520,52 +479,117 @@ namespace TRE_API
                             result = _subHelper.CloseSubmissionForTre(aSubmission.Id.ToString(), StatusType.Failed, "",
                                 "");
                         }
+
+
                         else
                         {
-                            try
+                            Dictionary<string, Dictionary<string, object>> credentials = new Dictionary<string, Dictionary<string, object>>();
+
+                            if (await _features.IsEnabledAsync(FeatureFlags.EphemeralCredentials))
                             {
-                                if (useTESK == false)
+                                
+                                Log.Information($"Fetching ephemeral credential data from Camunda");
+
+                                var creds = await _credsDbContext.EphemeralCredentials
+                                .Where(e => e.SubmissionId == aSubmission.Id && e.IsProcessed != true)
+                                .OrderByDescending(e => e.CreatedAt)
+                                .ToListAsync();
+
+                                if (creds.Count == 0)
                                 {
-                                    Uri uri = new Uri(aSubmission.DockerInputLocation);
-                                    string fileName = Path.GetFileName(uri.LocalPath);
-                                    var sourceBucket = aSubmission.Project.SubmissionBucket;
-                                    var subProj = _dbContext.Projects
-                                        .FirstOrDefault(x => x.SubmissionProjectId == aSubmission.Project.Id);
-
-                                    var destinationBucket = subProj.SubmissionBucketTre;
-                                    Log.Information("{Function} Copying {File} from {From} to {To}", "Execute", fileName, sourceBucket, destinationBucket);
-                                    var source = _minioSubHelper.GetCopyObject(sourceBucket, fileName);
-                                    var resultcopy = _minioTreHelper
-                                        .CopyObjectToDestination(destinationBucket, fileName, source.Result).Result;
-
+                                    Log.Information("No EphemeralCredentials rows yet for submission {SubId}. Skipping.", aSubmission.Id);
+                                    continue;
                                 }
 
-                                _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(),
-                                    StatusType.TreWaitingForCrateFormatCheck, "");
-                                if (ValidateCreate(aSubmission))
+
+                                var parentKey = creds.Select(c => c.ParentProcessInstanceKey).FirstOrDefault(k => k.HasValue && k.Value > 0);
+
+                                if (!parentKey.HasValue)
                                 {
-                                    _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.TreCrateValidated,
-                                        "");
+                                    Log.Information("No parent processInstanceKey for submission {SubId}. Skipping this cycle.", aSubmission.Id);
+                                    continue;
                                 }
-                                else
+
+                                var credsRowforParentKey = await _credsDbContext.EphemeralCredentials.Where(e => e.SubmissionId == aSubmission.Id && e.ParentProcessInstanceKey == parentKey && e.IsProcessed != true).OrderByDescending(e => e.CreatedAt).ToListAsync();
+
+                                bool anyErrored = credsRowforParentKey.Any(c => c.SuccessStatus == SuccessStatus.Error);
+                                bool allSucceeded = credsRowforParentKey.All(c => c.SuccessStatus == SuccessStatus.Success);
+
+                                if (anyErrored)
                                 {
-                                    _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(),
-                                        StatusType.SubmissionCrateValidationFailed, "");
-                                    _subHelper.CloseSubmissionForTre(aSubmission.Id.ToString(), StatusType.Failed, "", "");
+                                    Log.Error("Credential process errored for submission {SubId}.", aSubmission.Id);
+
+                                    var latestRow = creds.First();
+                                    latestRow.ErrorMessage = "Credential process failed";
+                                    await _credsDbContext.SaveChangesAsync();
+
+                                    _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.RequestCancellation, "Credential process failed");
+                                    continue;
+                                }
+
+                                if (!allSucceeded)
+                                {
+                                    Log.Information("Credential process still running for submission , Will retry next run.");
+                                    continue;
+                                }
+
+                                Log.Information("All credential handlers succeeded for submission {SubId}. Fetching credentials.", aSubmission.Id);
+                                credentials = await WaitForAndFetchCredentialsAsync(aSubmission.Id, TimeSpan.FromMinutes(10));
+
+                                if (credentials == null || credentials.Count == 0)
+                                {
+                                    var errorMsg = $"No credentials found in Vault for submission {aSubmission.Id}";
+                                    Log.Error(errorMsg);
+
+                                    var latestRow = creds.First();
+                                    latestRow.ErrorMessage = errorMsg;
+                                    latestRow.IsProcessed = true;
+                                    await _credsDbContext.SaveChangesAsync();
+
+                                    _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.RequestCancellation, errorMsg);
+                                    continue;
+                                }
+
+                                Log.Information($"Successfully obtained {credentials.Count} credentials for submission {aSubmission.Id}");
+
+                                foreach (var row in creds)
+                                    row.IsProcessed = true;
+
+                                await _credsDbContext.SaveChangesAsync();
+
+                                try
+                                {
+                                    await TriggerRevokeCredentialsAsync(aSubmission.Id, aSubmission.Project.Name, aSubmission.SubmittedBy.Id, 1);
+
+                                }
+                                catch (Exception ex)
+                                {
+                                    Log.Error(ex, "Failed to trigger revoke credentials for submission {SubId}", aSubmission.Id);
+
                                 }
 
                             }
-                            catch (Exception ex)
+
+                            else
                             {
-                                Log.Error(ex.ToString());
-                                throw;
+                                Log.Information("EphemeralCredentials feature is disabled.");
                             }
-
-
-
                             // The TES message
                             var tesMessage = JsonConvert.DeserializeObject<TesTask>(aSubmission.TesJson);
                             var processedOK = true;
+                            if (await _features.IsEnabledAsync(FeatureFlags.DemoAllInOne))
+                            {
+                                try
+                                {
+                                    _subHelper.SimulateSubmissionProcessing(aSubmission);
+                                }
+                                catch (Exception e)
+                                {
+                                    Log.Error(e, "{Function} Simulation failed for sub {SubId}", "Execute",
+                                        aSubmission.Id);
+                                    processedOK = false;
+                                }
+                            }
 
                             // **************  SEND TO RABBIT
                             if (useRabbit)
@@ -576,28 +600,13 @@ namespace TRE_API
                                     IBus rabbit = scope.ServiceProvider.GetRequiredService<IBus>();
                                     EasyNetQ.Topology.Exchange exchangeObject =
                                         rabbit.Advanced.ExchangeDeclare(ExchangeConstants.Submission, "topic");
-                                    rabbit.Advanced.Publish(exchangeObject, RoutingConstants.ProcessSub, false, new Message<TesTask>(tesMessage));
+                                    rabbit.Advanced.Publish(exchangeObject, RoutingConstants.ProcessSub, false,
+                                        new Message<TesTask>(tesMessage));
                                 }
                                 catch (Exception e)
                                 {
-                                    Log.Error(e, "{Function} Send rabbit failed for sub {SubId}", "Execute", aSubmission.Id);
-                                    processedOK = false;
-                                }
-                            }
-
-                            // **************  SEND TO HUTCH
-                            if (useHutch)
-                            {
-                                // TODO for rest API
-                                try
-                                {
-
-                                    _subHelper.SendSumissionToHUTCH(aSubmission);
-
-                                }
-                                catch (Exception e)
-                                {
-                                    Log.Error(e, "{Function} Send HUTCH failed for sub {SubId}", "Execute", aSubmission.Id);
+                                    Log.Error(e, "{Function} Send rabbit failed for sub {SubId}", "Execute",
+                                        aSubmission.Id);
                                     processedOK = false;
                                 }
                             }
@@ -605,55 +614,160 @@ namespace TRE_API
                             // **************  SEND TO TESK
                             if (useTESK)
                             {
-
                                 Log.Information("{Function}  SEND TO TESK ", "Execute");
                                 var arr = new HttpClient();
                                 var Token = "";
 
                                 var role = aSubmission.Project.Name; //TODO Check
 
-                                if (_Features.GenerateAcounts && _Features.SQLAndNotGraphQL)
+                                if (await _features.IsEnabledAsync(FeatureFlags.GenerateAccounts) &&
+                                    await _features.IsEnabledAsync(FeatureFlags.SqlAndNotGraphQl))
                                 {
-                                    var Acount = _dbContext.ProjectAcount.FirstOrDefault(x => x.Name == aSubmission.Project.Name + aSubmission.SubmittedBy.Name);
+                                    var Acount = _dbContext.ProjectAcount.FirstOrDefault(x =>
+                                        x.Name == aSubmission.Project.Name + aSubmission.SubmittedBy.Name);
 
-                                    var TokenIN = await _keyCloakService.GenAccessTokenSimple(Acount.Name, _encDecHelper.Decrypt(Acount.Pass), _TreKeyCloakSettings.TokenRefreshSeconds);
+                                    var TokenIN = await _keyCloakService.GenAccessTokenSimple(Acount.Name,
+                                        _encDecHelper.Decrypt(Acount.Pass), _TreKeyCloakSettings.TokenRefreshSeconds);
 
                                     Token = TokenIN.access_token;
                                 }
 
-                                if (_Features.SQLAndNotGraphQL == false)
+                                if (!await _features.IsEnabledAsync(FeatureFlags.SqlAndNotGraphQl))
                                 {
                                     Token = _hasuraAuthenticationService.GetNewToken(role);
                                 }
 
                                 var projectId = aSubmission.Project.Id;
 
-                                var OutputBucket = _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects.First(x => x.SubmissionProjectId == projectId).OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
-
+                                var OutputBucket = _AgentSettings.TESKOutputBucketPrefix + _dbContext.Projects
+                                    .First(x => x.SubmissionProjectId == projectId)
+                                    .OutputBucketTre; //TODO Check, Projects not getting The synchronised Properly 
 
 
                                 //it need the file name?? (key-name)
 
                                 if (tesMessage.Outputs == null)
                                 {
-                                    tesMessage.Outputs = new List<TesOutput> {};
+                                    tesMessage.Outputs = new List<TesOutput> { };
                                 }
+
+
+
+
 
                                 //S3://bucket-name/key-name
                                 foreach (var output in tesMessage.Outputs)
                                 {
                                     output.Url = OutputBucket + $"/{aSubmission.Id}";
+
                                 }
+
+
+                                var InputBucket = _dbContext.Projects
+                                  .First(x => x.SubmissionProjectId == projectId)
+                                  .SubmissionBucketTre;
+
+                                var bucket = _subHelper.GetOutputBucketGutsSub(aSubmission.Id.ToString(), true);
+
+                                TesInput MandatoryInput = null;
+
+                                if (tesMessage.Inputs == null)
+                                {
+                                    tesMessage.Inputs = new List<TesInput>();
+                                }
+                                if (string.IsNullOrEmpty(_AgentSettings.MandatoryInput) == false)
+                                {
+                                    MandatoryInput = JsonConvert.DeserializeObject<TesInput>(_AgentSettings.MandatoryInput);
+                                    tesMessage.Inputs.Add(MandatoryInput);
+                                }
+
+
+                                var Files = await _minioTreHelper.GetFilesInBucket(InputBucket);
+
+                                foreach (var input in tesMessage.Inputs)
+                                {
+
+                                    input.Path = input.Path.Replace("..", "");
+
+
+                                    if (input != MandatoryInput)
+                                    {
+                                        input.Url = "s3://" + InputBucket + "/data" + input.Path;
+                                    }
+                                    else
+                                    {
+                                        input.Url = "s3://" + InputBucket + input.Path;
+                                    }
+
+
+                                    if (string.IsNullOrEmpty(input.Name))
+                                    {
+                                        if (input.Path.Contains("/"))
+                                        {
+                                            input.Name = input.Path.Split('/')[^1];
+                                        }
+                                    }
+
+
+                                    if (input == MandatoryInput)
+                                    {
+                                        continue;
+                                    }
+
+
+                                    var CleanedIntput = input.Path;
+                                    input.Path = "/data" + input.Path;
+                                    if (CleanedIntput.StartsWith("/"))
+                                    {
+                                        CleanedIntput = CleanedIntput.Remove(0, 1);
+                                    }
+
+
+                                    var NewCleanedInput = input.Path;
+                                    if (NewCleanedInput.StartsWith("/"))
+                                    {
+                                        NewCleanedInput = NewCleanedInput.Remove(0, 1);
+                                    }
+
+
+                                    Log.Information($"getting copy for {CleanedIntput} for SubmissionBucket {aSubmission.Project.SubmissionBucket} to {NewCleanedInput}");
+
+                                    var source = await _minioSubHelper.GetCopyObject(aSubmission.Project.SubmissionBucket, CleanedIntput);
+                                    try
+                                    {
+                                        if (Files?.S3Objects != null && Files.S3Objects.Any(x => x.ETag == source.ETag))
+                                        {
+                                            continue;
+                                        }
+
+                                        var resultcopy = await _minioTreHelper.CopyObjectToDestination(InputBucket, NewCleanedInput, source);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log.Error(ex.ToString());
+                                        throw ex;
+                                    }
+
+
+                                }
+
 
                                 if (tesMessage.Executors == null)
                                 {
                                     tesMessage.Executors = new List<TesExecutor>();
                                 }
-                                Log.Information("looking for _AgentSettings.ImageNameToAddToToken > " + _AgentSettings.ImageNameToAddToToken);
+
+                                Log.Information("looking for _AgentSettings.ImageNameToAddToToken > " +
+                                                _AgentSettings.ImageNameToAddToToken);
                                 foreach (var Executor in tesMessage.Executors)
                                 {
+                                    if (Executor.Env == null)
+                                    {
+                                        Executor.Env = new Dictionary<string, string>();
+                                    }
+
                                     Log.Information("Executor.Image > " + Executor.Image);
-                                    if (_Features.SQLAndNotGraphQL)
+                                    if (await _features.IsEnabledAsync(FeatureFlags.SqlAndNotGraphQl))
                                     {
                                         if (Executor.Image.Contains(_AgentSettings.ImageNameToAddToToken))
                                         {
@@ -662,6 +776,37 @@ namespace TRE_API
                                             Executor.Env["USER_NAME"] = aSubmission.SubmittedBy.Name;
                                             Executor.Env["SCHEMA"] = aSubmission.Project.Name;
                                             Executor.Env["CATALOG"] = _AgentSettings.CATALOG;
+
+                                            if (string.IsNullOrEmpty(Executor.Env["TRINO_SERVER_URL"]))
+                                            {
+                                                Executor.Env["TRINO_SERVER_URL"] = "";
+                                            }
+                                        }
+
+                                        if(await _features.IsEnabledAsync(FeatureFlags.EphemeralCredentials))
+                                        {
+                                            if (credentials != null && credentials.Count > 0)
+                                            {
+                                                foreach (var outerKey in credentials)
+                                                {
+                                                    if (outerKey.Value is IDictionary<string, object> innerDict) //The format is dictionary within a dictionary
+                                                    {
+                                                        foreach (var inner in innerDict)
+                                                        {
+                                                            var key = inner.Key;
+                                                            var value = inner.Value?.ToString() ?? string.Empty;
+                                                            Executor.Env[key] = value;
+                                                        }
+                                                    }
+                                                }
+
+                                                Log.Information($"Injected credentials into environment variables for {aSubmission.Id}");
+                                            }
+                                        }
+
+                                        else
+                                        {
+                                            Log.Information("Ephemeral Credentials not enabled for the submission");
                                         }
                                     }
                                     else
@@ -671,7 +816,6 @@ namespace TRE_API
                                             Executor.Command.Add("--Token_" + Token);
                                             Executor.Command.Add("--URL_" + _AgentSettings.URLHasuraToAdd);
                                         }
-                                        
                                     }
                                 }
 
@@ -683,15 +827,15 @@ namespace TRE_API
                                 _dbContext.SaveChanges();
 
 
-
                                 if (tesMessage is not null)
                                 {
                                     var stringdata = JsonConvert.SerializeObject(tesMessage);
-                                    Log.Information("{Function} tesMessage is not null runhing CreateTESK {tesMessage}", "Execute", stringdata);
-                                    
-                                    CreateTESK(stringdata, aSubmission.Id, aSubmission.TesId, OutputBucket, aSubmission.TesName);
-                                }
+                                    Log.Information("{Function} tesMessage is not null runhing CreateTESK {tesMessage}",
+                                        "Execute", stringdata);
 
+                                    CreateTesk(stringdata, aSubmission.Id,aSubmission.Project.Id, aSubmission.SubmittedBy.Id, aSubmission.TesId, OutputBucket,
+                                        aSubmission.TesName);
+                                }
                             }
 
                             // **************  TELL SUBMISSION LAYER WE DONE
@@ -704,20 +848,22 @@ namespace TRE_API
                                 }
                                 catch (Exception e)
                                 {
-                                    Log.Error(e,"{Function} Error sending record outcome to submission layer for sub {SubId}", "Execute", aSubmission.Id);
+                                    Log.Error(e,
+                                        "{Function} Error sending record outcome to submission layer for sub {SubId}",
+                                        "Execute", aSubmission.Id);
                                     processedOK = false;
                                 }
                             }
                         }
                     }
-                    catch (Exception e)
+
+                    catch (Exception ex)
                     {
-                        Log.Error(e, "{Function } Error occured processing submission {SubId}", "Execute", aSubmission.Id);
-                        
+                        Log.Error(ex, "{Function } Error occured processing submission {SubId}", "Execute",
+                            aSubmission.Id);
                     }
                 }
             }
-
         }
 
         public void ClearJob(string jobname)
@@ -732,9 +878,114 @@ namespace TRE_API
             {
                 Log.Error(ex.ToString());
             }
+        }
 
-           
+
+        private async Task<Dictionary<string, Dictionary<string, object>>> WaitForAndFetchCredentialsAsync(int submissionId, TimeSpan? timeout = null)
+        {
+            var maxWaitTime = timeout ?? TimeSpan.FromMinutes(5);
+            var pollInterval = TimeSpan.FromSeconds(10);
+            var fetchedCredentials = new Dictionary<string, Dictionary<string, object>>();
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+            Log.Information($"Starting to wait for credentials for submission {submissionId}.");
+
+            while (stopwatch.Elapsed < maxWaitTime)
+            {
+                try
+                {
+                    var credentialRecord = await _credsDbContext.EphemeralCredentials
+                        .Where(c => c.SubmissionId == submissionId && !c.IsProcessed)
+                        .OrderByDescending(c => c.CreatedAt)
+                        .ToListAsync();
+
+                    foreach (var record in credentialRecord)
+                    {
+                        if (!fetchedCredentials.ContainsKey(record.CredentialType) && !string.IsNullOrEmpty(record.VaultPath))
+                        {
+                            Log.Information($"Found {record.CredentialType} credentials for submission {submissionId} at vault path: {record.VaultPath}");
+
+                            var credentials = await _vaultService.GetCredentialAsync(record.VaultPath);
+                            if (credentials != null && credentials.Count > 0)
+                            {
+                                fetchedCredentials[record.CredentialType] = credentials;
+                                record.IsProcessed = true;
+
+                                Log.Information($"Successfully fetched {record.CredentialType} credentials for submission {submissionId}");
+                            }
+                        }
+                    }
+
+                    if (credentialRecord.Any(r => r.IsProcessed))
+                    {
+                        await _credsDbContext.SaveChangesAsync();
+                    }
+                    
+                    if (fetchedCredentials.Count > 0)
+                    {
+                        Log.Information($"Successfully fetched all credentials for submission {submissionId}");
+                        return fetchedCredentials;
+                    }
+
+                    await Task.Delay(pollInterval);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, $"Error while waiting for credentials for submission {submissionId}: {ex.Message}");
+                    await Task.Delay(pollInterval);
+                }
+            }
+
+            var errorMsg = $"Timeout waiting for credentials for submission {submissionId}";
+            Log.Error(errorMsg);
+            throw new TimeoutException(errorMsg);
+        }
+        
+        private async Task TriggerRevokeCredentialsAsync(int submissionId, string projectName, int user, int timer)
+        {
+            var payload = new
+            {
+                records = new[]
+                {
+                    new
+                    {
+                        submissionId = submissionId.ToString(),
+                        project = projectName,
+                        user = user.ToString(),
+                        timer = timer
+                    }
+                }
+            };
+
+            var jsonPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
+            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+            // use the correct config key (matches appsettings: RevokeWebhookUrl)
+            var camundaWebhookUrl = _config["CredentialAPISettings:RevokeWebhookUrl"];
+
+            if (string.IsNullOrWhiteSpace(camundaWebhookUrl))
+            {
+                throw new InvalidOperationException("Configuration 'CredentialAPISettings:RevokeWebhookUrl' is missing or empty.");
+            }
+
+            if (!Uri.TryCreate(camundaWebhookUrl, UriKind.Absolute, out var webhookUri))
+            {
+                throw new InvalidOperationException($"Invalid webhook URL in configuration: {camundaWebhookUrl}");
+            }
+
+            using var httpClient = _httpClientFactory.CreateClient();
+            httpClient.Timeout = TimeSpan.FromMinutes(2);
+
+            var response = await httpClient.PostAsync(webhookUri, content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Log.Error("Camunda revoke webhook failed for submission {SubmissionId}. Error: {Error}", submissionId, error);
+                throw new Exception($"Camunda revoke webhook call failed: {response.StatusCode}");
+            }
+
+            Log.Information("Camunda RevokeCredentials triggered successfully for submission {SubmissionId}", submissionId);
         }
     }
-
 }
