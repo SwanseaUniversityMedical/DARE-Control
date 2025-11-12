@@ -37,10 +37,18 @@ namespace Tre_Camunda.Services
                 identifier = new LdapDirectoryIdentifier(_config.Host, _config.Port);
             }
 
-            
-            
+            LdapConnection connection = null;
 
-            var connection = new LdapConnection(identifier);
+            if (_config.Port == -1)
+            {
+                connection = new LdapConnection(identifier);
+            }
+            else
+            {
+                connection = new LdapConnection(_config.Host);
+            }
+
+    
             connection.SessionOptions.ProtocolVersion = 3;
             Log.Information("_config.UseSSL > " + _config.UseSSL);
             if (_config.UseSSL)
