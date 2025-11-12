@@ -1,47 +1,10 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [":enableRenovate"],
-  "branchPrefix": "upgrade/",
-  "ignorePaths": ["charts/**"],
-  "customManagers": [
-    {
-      "customType": "regex",
-      "fileMatch": [
-        "^\\.github/workflows/.*\\.yaml$",
-        "^\\.github/actions/.*\\.yaml$"
-      ],
-      "matchStrings": [
-        "uses:\\s*SwanseaUniversityMedical/workflows/\\.github/actions/(?<depName>[^@]+)@(?<currentValue>\\S+)"
-      ],
-      "packageNameTemplate": "SwanseaUniversityMedical/workflows",
-      "datasourceTemplate": "github-tags",
-      "versioningTemplate": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<compatibility>.+)$"
-    }
+  "extends": [
+    ":enableRenovate"
   ],
-  "packageRules": [
-    {
-      "matchDepTypes": [ "action" ],
-      "pinDigests": true
-    },
-    {
-      "matchPackageNames": [
-        "SwanseaUniversityMedical/workflows"
-      ],
-      "enabled": true,
-      "pinDigests": false,
-      "schedule": [ "* * * * *" ],
-      "dependencyDashboardApproval": false,
-      "cacheHardTtlMinutes": 0,
-      "httpCacheTtlDays": 0
-    },
-    {
-      "matchPackageNames": [
-        "SwanseaUniversityMedical/workflows"
-      ],
-      "matchManagers": [
-        "github-actions"
-      ],
-      "enabled": false
-    }
+  "branchPrefix": "upgrade/",
+  "ignorePaths": [
+    "charts/**"
   ]
 }
