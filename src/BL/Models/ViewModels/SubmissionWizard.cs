@@ -20,13 +20,13 @@ namespace BL.Models.ViewModels
 
     public class SubmissionWizard
     {
-        public int ProjectId { get; set; }
+        public int? ProjectId { get; set; }
 
         [Display(Name = "TES Name")]
-        public string TESName { get; set; }
+        public string? TESName { get; set; }
 
         [Display(Name = "Submitting to Project: ")]
-        public string ProjectName { get; set; }
+        public string? ProjectName { get; set; }
 
         [Display(Name = "Select TREs")]
         public List<string>? Tres { get; set; }
@@ -35,10 +35,10 @@ namespace BL.Models.ViewModels
 
         public List<string>? SelectTresOptions { get; set; }
         [Display(Name = "Select TREs or leave blank for all")]
-        public string SelectedTres { get; set; }
+        public string? SelectedTres { get; set; }
 
         [Display(Name = "Upload script file via external URL or upload to project bucket")]
-        public CrateOrigin OriginOption { get; set; }
+        public CrateOrigin? OriginOption { get; set; }
 
         [Display(Name = "External URL")]
         public string? ExternalURL { get; set; }
@@ -49,7 +49,7 @@ namespace BL.Models.ViewModels
         [Display(Name = "Tes to run")]
         public string? TesRun { get; set; }
 
-        public virtual List<Submission> Submissions { get; set; }
+        public virtual List<Submission>? Submissions { get; set; }
 
         public IEnumerable<SelectListItem>? TreItemList { get; set; }
 
