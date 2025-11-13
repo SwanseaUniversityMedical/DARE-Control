@@ -77,11 +77,10 @@ namespace DARE_FrontEnd.Controllers
             //Log.Error("minioEndpoint took ElapsedMilliseconds" + stopwatch.ElapsedMilliseconds);
             stopwatch.Stop();
             var project = projectawait.Result;
-            var users = _clientHelper.CallAPIWithoutModel<List<BL.Models.User>>("/api/User/GetAllUsers/").Result;
-            
-            // List of users not already on the project
-            var userItems2 = users.Where(p => !project.Users.Select(x => x.Id).Contains(p.Id)).ToList();
-            // Process user names for display
+    
+            var userItems2 = project.UsersNotInProject;
+            var treItems2 = project.TresNotInProject;
+
             var userItems = userItems2
                 .Select(p => new SelectListItem
                 {
@@ -93,8 +92,7 @@ namespace DARE_FrontEnd.Controllers
                 .ToList();
 
             var tres = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Tre/GetAllTres/").Result;
-            // List of TREs not already on the project
-            var treItems2 = tres.Where(p => !project.Tres.Select(x => x.Id).Contains(p.Id)).ToList();
+
             // Process TRE names for display
             var treItems = treItems2
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })

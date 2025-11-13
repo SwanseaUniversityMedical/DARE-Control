@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   main-ui-sonar:
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet-7.yaml@v2.2.0-sonar-dotnet-7
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet-7.yaml@v2.3.2-sonar-dotnet-7
     with:
       project-name: "dare-control-ui"
       project-file: "DARE-FrontEnd.csproj"
@@ -33,7 +33,7 @@ jobs:
       sonar-token: ${{ secrets.SONAR_TOKEN }}
 
   main-api-sonar:
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet-7.yaml@v2.2.0-sonar-dotnet-7
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet-7.yaml@v2.3.2-sonar-dotnet-7
     with:
       project-name: "dare-control-api"
       project-file: "DARE-API.csproj"
@@ -43,7 +43,7 @@ jobs:
       sonar-token: ${{ secrets.SONAR_TOKEN }}
 
   tre-ui-sonar:
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet-7.yaml@v2.2.0-sonar-dotnet-7
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet-7.yaml@v2.3.2-sonar-dotnet-7
     with:
       project-name: "dare-control-tre-ui"
       project-file: "TRE-UI.csproj"
@@ -53,7 +53,7 @@ jobs:
       sonar-token: ${{ secrets.SONAR_TOKEN }}
 
   tre-api-sonar:
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet-7.yaml@v2.2.0-sonar-dotnet-7
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet-7.yaml@v2.3.2-sonar-dotnet-7
     with:
       project-name: "dare-control-tre-api"
       project-file: "TRE-API.csproj"
@@ -63,7 +63,7 @@ jobs:
       sonar-token: ${{ secrets.SONAR_TOKEN }}
 
   tre-hasura-sonar:
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet-7.yaml@v2.2.0-sonar-dotnet-7
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet-7.yaml@v2.3.2-sonar-dotnet-7
     with:
       project-name: "dare-control-tre-hasura"
       project-file: "Tre-Hasura.csproj"
@@ -73,7 +73,7 @@ jobs:
       sonar-token: ${{ secrets.SONAR_TOKEN }}
 
   tre-sql-pg-sonar:
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet-7.yaml@v2.2.0-sonar-dotnet-7
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet-7.yaml@v2.3.2-sonar-dotnet-7
     with:
       project-name: "dare-control-tre-sql-pg"
       project-file: "Tre-SQL-PG.csproj"
@@ -83,7 +83,7 @@ jobs:
       sonar-token: ${{ secrets.SONAR_TOKEN }}
 
   tre-sql-trino-sonar:
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet-7.yaml@v2.2.0-sonar-dotnet-7
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet-7.yaml@v2.3.2-sonar-dotnet-7
     with:
       project-name: "dare-control-tre-sql-trino"
       project-file: "Tre-SQL-Trino.csproj"
@@ -93,7 +93,7 @@ jobs:
       sonar-token: ${{ secrets.SONAR_TOKEN }}
 
   bl-sonar:
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet-7.yaml@v2.2.0-sonar-dotnet-7
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet-7.yaml@v2.3.2-sonar-dotnet-7
     with:
       project-name: "dare-control-bl"
       project-file: "BL.csproj"
