@@ -28,6 +28,8 @@ using TRE_API.Repositories.DbContexts;
 using TRE_API.Services.SignalR;
 using Tre_Credentials.DbContexts;
 using TREAPI.Services;
+using Zeebe.Client.Accelerator.Extensions;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +60,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options
     .UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));
+
+// Bootstrap Zeebe client if configuration exists (optional for DMN deployment)
+if (configuration.GetSection("ZeebeBootstrap").Exists())
+{
+    builder.Services.BootstrapZeebe(
+        configuration.GetSection("ZeebeBootstrap"),
+        Assembly.GetExecutingAssembly()
+    );
+}
+
 AddServices(builder);
 
 builder.Services.AddDbContext<CredentialsDbContext>(options =>
@@ -220,7 +232,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins(configuration["TreAPISettings:Address"])
+            policy.WithOrigins(
+                    configuration["TreAPISettings:Address"],
+                    configuration["TreUISettings:Address"] ?? "https://localhost:7187"
+                )
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials();
@@ -285,6 +300,7 @@ app.UseRouting();
 //    Secure = CookieSecurePolicy.Always
 //});
 
+app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllerRoute(
@@ -347,6 +363,12 @@ void AddServices(WebApplicationBuilder builder)
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSignalR();
+
+    // DMN Service for managing DMN files
+    builder.Services.AddScoped<IDmnService, DmnService>();
+
+    // Zeebe Client for DMN deployment and evaluation
+    builder.Services.AddScoped<Tre_Credentials.Services.IServicedZeebeClient, Tre_Credentials.Services.ServicedZeebeClient>();
 
     //TODO
     builder.Services.AddSwaggerGen(c =>

@@ -1,10 +1,9 @@
-﻿namespace Tre_Camunda.Models
+namespace Tre_Credentials.Models.Zeebe
 {
     public class CredentialsCamundaOutput
     {
         public string env { get; set; }
         public string value { get; set; }
         public string tag { get; set; }
-
     }
 }

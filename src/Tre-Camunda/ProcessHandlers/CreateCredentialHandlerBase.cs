@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Json;
+using Tre_Credentials.Models.Zeebe;
 using Tre_Camunda.Models;
 using Tre_Camunda.Services;
 using Tre_Credentials.DbContexts;

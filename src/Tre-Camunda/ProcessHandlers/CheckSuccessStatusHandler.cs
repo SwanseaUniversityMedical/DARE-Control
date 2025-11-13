@@ -1,7 +1,7 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using Tre_Camunda.Models;
+using Tre_Credentials.Models.Zeebe;
 using Tre_Credentials.DbContexts;
 using Tre_Credentials.Models;
 using Zeebe.Client.Accelerator.Abstractions;
