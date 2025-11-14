@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Zeebe.Client;
 using Tre_Camunda;
+using Tre_Credentials.Services;
 
 namespace Tre_Camunda.Services
 {
@@ -32,7 +33,9 @@ namespace Tre_Camunda.Services
             Console.WriteLine($"Connected to cluster with version");
 
 
-            var modelResources = Assembly.GetExecutingAssembly().GetManifestResourceNames()
+            // Load ProcessModels from TRE.Credentials assembly where they are now embedded
+            var credentialsAssembly = typeof(Tre_Credentials.Services.IServicedZeebeClient).Assembly;
+            var modelResources = credentialsAssembly.GetManifestResourceNames()
             .Where(x => x.ToLower().Contains(".processmodels.") &&
             (x.EndsWith(".bpmn", StringComparison.OrdinalIgnoreCase) ||
             x.EndsWith(".dmn", StringComparison.OrdinalIgnoreCase)))
@@ -40,7 +43,7 @@ namespace Tre_Camunda.Services
 
             if (!modelResources.Any())
             {
-                Log.Warning("No BPMN or DMN models found to deploy.");
+                Log.Warning("No BPMN or DMN models found to deploy in TRE.Credentials assembly.");
                 return;
             }
 
@@ -51,7 +54,7 @@ namespace Tre_Camunda.Services
                 var deploymentFileName = $"{name}{fileExtension}";
                 Log.Information($"Deploying process definition with name: {deploymentFileName}");
 
-                using var resourceStream = GetType().Assembly.GetManifestResourceStream(model);
+                using var resourceStream = credentialsAssembly.GetManifestResourceStream(model);
 
                 if (resourceStream == null)
                 {
