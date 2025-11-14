@@ -542,19 +542,14 @@ namespace TRE_API
                                     Log.Error(errorMsg);
 
                                     var latestRow = creds.First();
-                                    latestRow.ErrorMessage = errorMsg;
-                                    latestRow.IsProcessed = true;
+                                    latestRow.ErrorMessage = errorMsg;                                   
                                     await _credsDbContext.SaveChangesAsync();
 
                                     _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.RequestCancellation, errorMsg);
                                     continue;
                                 }
 
-                                Log.Information($"Successfully obtained {credentials.Count} credentials for submission {aSubmission.Id}");
-
-                                foreach (var row in creds)
-                                    row.IsProcessed = true;
-
+                                Log.Information($"Successfully obtained {credentials.Count} credentials for submission {aSubmission.Id}");                               
                                 await _credsDbContext.SaveChangesAsync();
 
                                 try
