@@ -180,14 +180,20 @@ namespace Tre_Camunda.Services
             connection.Bind();
             _logger.LogInformation("LDAP bind successful.");
 
-            var searchRequest = new SearchRequest(
-                $"{_config.UserOu},{_config.BaseDn}",
-                $"(cn={username})",
-                SearchScope.OneLevel,
-                "cn");
+            try
+            {
+                var searchRequest = new SearchRequest(
+              $"{_config.UserOu},{_config.BaseDn}",
+              $"(cn={username})",
+              SearchScope.OneLevel,
+              "cn");
 
-            var response = (SearchResponse)connection.SendRequest(searchRequest);
-            return response.Entries.Count > 0;
+                var response = (SearchResponse)connection.SendRequest(searchRequest);
+                return response.Entries.Count > 0;
+            }
+            catch (System.DirectoryServices.Protocols.DirectoryOperationException ex) {
+                return false;
+            }
         }
 
         private static string EscapeDnValue(string value)
