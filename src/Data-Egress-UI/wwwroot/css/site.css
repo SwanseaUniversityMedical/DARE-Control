@@ -575,3 +575,7 @@ table tr {
         height: 150px;
     }
 }
+
+caption {
+    display: none;
+}

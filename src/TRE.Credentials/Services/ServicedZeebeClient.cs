@@ -1,8 +1,12 @@
-﻿using System.Text.Json;
-using Tre_Camunda.Models;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Tre_Credentials.Models.Zeebe;
 using Zeebe.Client;
 
-namespace Tre_Camunda.Services
+namespace Tre_Credentials.Services
 {
     public class ServicedZeebeClient : IServicedZeebeClient
     {
@@ -22,14 +26,12 @@ namespace Tre_Camunda.Services
                     .Send();
 
             Console.WriteLine($"Deployed model");
-
         }
 
 
         /* DMN model Evaluation */
         public async Task<DmnResponse> EvaluateDecisionModelAsync(DmnRequest input)
         {
-
             var json = JsonSerializer.Serialize(input.Variables);
 
             var result = await _IZeebeClient.NewEvaluateDecisionCommand()
@@ -60,8 +62,6 @@ namespace Tre_Camunda.Services
                 DecisionId = input.DecisionId,
                 Result = outputDict
             };
-
-
         }
 
 
@@ -85,7 +85,5 @@ namespace Tre_Camunda.Services
             var topology = await _IZeebeClient.TopologyRequest().Send();
             Console.WriteLine(topology);
         }
-
-
     }
 }

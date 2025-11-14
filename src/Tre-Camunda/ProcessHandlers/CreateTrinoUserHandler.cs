@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using Tre_Credentials.Models.Zeebe;
 using Tre_Camunda.Models;
 using Tre_Camunda.Services;
 using Tre_Credentials.DbContexts;

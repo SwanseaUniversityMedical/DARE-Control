@@ -357,7 +357,9 @@ namespace DARE_API.Controllers
                 }
 
                 Log.Information("{Function} Project retrieved successfully", "GetProject");
-                return new SubmissionGetProjectModel(returned);
+                var Users = _DbContext.Users.ToList();
+                _DbContext.Tres.ToList();
+                return new SubmissionGetProjectModel(returned, _DbContext.Users, _DbContext.Tres);
             }
             catch (Exception ex)
             {

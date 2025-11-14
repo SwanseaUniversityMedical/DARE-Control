@@ -1,9 +1,10 @@
-﻿using Tre_Camunda.Models;
+using System.IO;
+using System.Threading.Tasks;
+using Tre_Credentials.Models.Zeebe;
 using Zeebe.Client;
 
-namespace Tre_Camunda.Services
+namespace Tre_Credentials.Services
 {
-
     public interface IServicedZeebeClient
     {
         Task DeployModel(Stream resourceStream, string resourceName);
@@ -14,5 +15,4 @@ namespace Tre_Camunda.Services
 
         Task PrintTopologyAsync();
     }
-  
 }
