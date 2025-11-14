@@ -51,6 +51,11 @@ namespace Tre_Camunda.ProcessHandlers
                 string? username = extraction.EnvList
                     .Where(x => x.env.ToLower().Contains("username"))
                     .FirstOrDefault()?.value?.ToString();
+                string? schemaName = extraction.EnvList
+                    .FirstOrDefault(x =>
+                    x.env.Equals("postgresSchema", StringComparison.OrdinalIgnoreCase))
+                    ?.value?.ToString();
+
                 string? database = extraction.EnvList
                     .Where(x => x.env.ToLower().Contains("database"))
                     .FirstOrDefault()?.value?.ToString();
@@ -62,7 +67,7 @@ namespace Tre_Camunda.ProcessHandlers
                     .FirstOrDefault()?.value?.ToString();
 
                 // Validate all required fields
-                if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(database) ||
+                if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(schemaName) || string.IsNullOrEmpty(database) ||
                     string.IsNullOrEmpty(server) || string.IsNullOrEmpty(port) ||
                     string.IsNullOrEmpty(extraction.User) || string.IsNullOrEmpty(extraction.Project))
                 {
@@ -79,7 +84,7 @@ namespace Tre_Camunda.ProcessHandlers
                 {
                     new SchemaPermission
                     {
-                        SchemaName = extraction.Project,
+                        SchemaName = schemaName,
                         Permissions = DatabasePermissions.Read | DatabasePermissions.Write | DatabasePermissions.CreateTables
                     }
                 };
