@@ -17,6 +17,11 @@
     <EmbeddedResource Include="bundle.tar.gz">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="ProcessModels\Credentials.bpmn" />
+    <EmbeddedResource Include="ProcessModels\credentials.dmn" />
+    <EmbeddedResource Include="ProcessModels\Credentials_Determins_Subprocess.bpmn" />
+    <EmbeddedResource Include="ProcessModels\Credentials_Expire_Subprocess.bpmn" />
+    <EmbeddedResource Include="ProcessModels\Credentials_Revoke.bpmn" />
   </ItemGroup>
 
   <ItemGroup>

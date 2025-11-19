@@ -94,7 +94,7 @@ function loadDmnTable() {
         },
         error: function (xhr, status, error) {
             showLoading(false);
-            console.error('[ERROR] Error loading DMN table:', {
+            console.error('[ERROR] Error loading DMN tableeeee:', {
                 status: xhr.status,
                 statusText: xhr.statusText,
                 responseText: xhr.responseText,
