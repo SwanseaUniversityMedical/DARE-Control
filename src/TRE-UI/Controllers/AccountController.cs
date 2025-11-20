@@ -52,13 +52,9 @@ namespace TRE_UI.Controllers
                 RedirectUri = Url.Action("Login", "Account")
             });
         }
-        public async Task<IActionResult> AccessDenied(string ReturnUrl)
+        public IActionResult AccessDenied()
         {
-            var accessToken = await HttpContext.GetTokenAsync("access_token");
             return View();
         }
-
-
-
     }
 }
