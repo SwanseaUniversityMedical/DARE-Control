@@ -130,7 +130,7 @@ namespace TRE_API.Controllers
                 await _dmnService.ValidateDmnAsync(_dmnFilePath);
 
                 // Deploy to Zeebe
-                await DeployDmnToZeebe();
+                await _dmnService.DeployDmnToZeebeAsync(_dmnFilePath);
 
                 return Ok(new DmnOperationResult
                 {
@@ -174,7 +174,7 @@ namespace TRE_API.Controllers
                 await _dmnService.ValidateDmnAsync(_dmnFilePath);
 
                 // Deploy to Zeebe
-                await DeployDmnToZeebe();
+                await _dmnService.DeployDmnToZeebeAsync(_dmnFilePath);
 
                 return Ok(new DmnOperationResult
                 {
@@ -319,11 +319,11 @@ namespace TRE_API.Controllers
         {
             try
             {
-                await DeployDmnToZeebe();
+                await _dmnService.DeployDmnToZeebeAsync(_dmnFilePath);
                 return Ok(new DmnOperationResult
                 {
                     Success = true,
-                    Message = "DMN deployed to Zeebe successfully"
+                    Message = "DMN deployed successfully"
                 });
             }
             catch (Exception ex)
@@ -334,26 +334,6 @@ namespace TRE_API.Controllers
                     Success = false,
                     Message = ex.Message
                 });
-            }
-        }
-
-        /// <summary>
-        /// Helper method to deploy DMN to Zeebe
-        /// </summary>
-        private async Task DeployDmnToZeebe()
-        {
-            try
-            {
-                using (var stream = new FileStream(_dmnFilePath, FileMode.Open, FileAccess.Read))
-                {
-                    await _zeebeClient.DeployModel(stream, "credentials.dmn");
-                }
-                _logger.LogInformation("DMN deployed to Zeebe successfully");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to deploy DMN to Zeebe");
-                throw new InvalidOperationException("Failed to deploy DMN to Zeebe: " + ex.Message, ex);
             }
         }
     }

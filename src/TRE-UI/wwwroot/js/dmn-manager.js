@@ -222,13 +222,14 @@ function displayRules(table) {
 
     $('#rulesTable').show();
 
-    // Bind action buttons
-    $('.edit-rule').on('click', function () {
+    // Bind action buttons using event delegation (required for DataTables)
+    // Use the table as the parent since DataTable recreates the button elements
+    $('#rulesTable').off('click', '.edit-rule').on('click', '.edit-rule', function () {
         const ruleId = $(this).data('rule-id');
         showEditRuleModal(ruleId);
     });
 
-    $('.delete-rule').on('click', function () {
+    $('#rulesTable').off('click', '.delete-rule').on('click', '.delete-rule', function () {
         const ruleId = $(this).data('rule-id');
         showDeleteModal(ruleId);
     });
@@ -256,20 +257,28 @@ function showAddRuleModal() {
 
         // Hide submissionId input and store default value
         if (label.toLowerCase() === 'submissionid') {
-            inputContainer.append(`
-                <input type="hidden" class="input-value" data-index="${index}" value="-">
-            `);
+            const hiddenInput = $('<input>')
+                .attr('type', 'hidden')
+                .addClass('input-value')
+                .attr('data-index', index)
+                .val('-');
+            inputContainer.append(hiddenInput);
             return;
         }
 
-        inputContainer.append(`
-            <div class="mb-2">
-                <label class="form-label">${label}</label>
-                <input type="text" class="form-control input-value" data-index="${index}"
-                       placeholder="Enter value (use '-' for any, leave empty for none)">
-                <small class="form-text text-muted">Tip: Use '-' to match any value, leave empty for no value</small>
-            </div>
-        `);
+        const inputDiv = $('<div>').addClass('mb-2');
+        const labelElem = $('<label>').addClass('form-label').text(label);
+        const inputElem = $('<input>')
+            .attr('type', 'text')
+            .addClass('form-control input-value')
+            .attr('data-index', index)
+            .attr('placeholder', "Enter value (use '-' for any, leave empty for none)");
+        const helpText = $('<small>')
+            .addClass('form-text text-muted')
+            .text("Tip: Use '-' to match any value, leave empty for no value");
+
+        inputDiv.append(labelElem, inputElem, helpText);
+        inputContainer.append(inputDiv);
     });
 
     // Build output fields
@@ -277,14 +286,20 @@ function showAddRuleModal() {
     outputContainer.empty();
     dmnTable.outputs.forEach((output, index) => {
         const label = output.label || output.name || `Output ${index + 1}`;
-        outputContainer.append(`
-            <div class="mb-2">
-                <label class="form-label">${label}</label>
-                <input type="text" class="form-control output-value" data-index="${index}"
-                       placeholder='Enter value (e.g., "stringValue" or expression)'>
-                <small class="form-text text-muted">Tip: Use quotes for string literals, expressions for calculations</small>
-            </div>
-        `);
+
+        const outputDiv = $('<div>').addClass('mb-2');
+        const labelElem = $('<label>').addClass('form-label').text(label);
+        const inputElem = $('<input>')
+            .attr('type', 'text')
+            .addClass('form-control output-value')
+            .attr('data-index', index)
+            .attr('placeholder', 'Enter value (e.g., "stringValue" or expression)');
+        const helpText = $('<small>')
+            .addClass('form-text text-muted')
+            .text('Tip: Use quotes for string literals, expressions for calculations');
+
+        outputDiv.append(labelElem, inputElem, helpText);
+        outputContainer.append(outputDiv);
     });
 
     $('#ruleModal').modal('show');
@@ -308,42 +323,77 @@ function showEditRuleModal(ruleId) {
     // Build input fields with existing values (hide submissionId)
     const inputContainer = $('#inputFieldsContainer');
     inputContainer.empty();
+    const inputValues = []; // Store values to set after modal is shown
     dmnTable.inputs.forEach((input, index) => {
         const label = input.label || input.expression || `Input ${index + 1}`;
         const value = rule.inputEntries[index]?.text || '';
 
         // Hide submissionId input but keep its value
         if (label.toLowerCase() === 'submissionid') {
-            inputContainer.append(`
-                <input type="hidden" class="input-value" data-index="${index}" value="${value}">
-            `);
+            const hiddenInput = $('<input>')
+                .attr('type', 'hidden')
+                .addClass('input-value')
+                .attr('data-index', index)
+                .val(value);
+            inputContainer.append(hiddenInput);
             return;
         }
 
-        inputContainer.append(`
-            <div class="mb-2">
-                <label class="form-label">${label}</label>
-                <input type="text" class="form-control input-value" data-index="${index}"
-                       value="${value}" placeholder="Enter value (use '-' for any, leave empty for none)">
-                <small class="form-text text-muted">Tip: Use '-' to match any value, leave empty for no value</small>
-            </div>
-        `);
+        const inputDiv = $('<div>').addClass('mb-2');
+        const labelElem = $('<label>').addClass('form-label').text(label);
+        const inputElem = $('<input>')
+            .attr('type', 'text')
+            .addClass('form-control input-value')
+            .attr('data-index', index)
+            .attr('placeholder', "Enter value (use '-' for any, leave empty for none)");
+        const helpText = $('<small>')
+            .addClass('form-text text-muted')
+            .text("Tip: Use '-' to match any value, leave empty for no value");
+
+        inputDiv.append(labelElem, inputElem, helpText);
+        inputContainer.append(inputDiv);
+
+        // Store the element and value to set after modal is shown
+        inputValues.push({ element: inputElem, value: value });
     });
 
     // Build output fields with existing values
     const outputContainer = $('#outputFieldsContainer');
     outputContainer.empty();
+    const outputValues = []; // Store values to set after modal is shown
     dmnTable.outputs.forEach((output, index) => {
         const label = output.label || output.name || `Output ${index + 1}`;
         const value = rule.outputEntries[index]?.text || '';
-        outputContainer.append(`
-            <div class="mb-2">
-                <label class="form-label">${label}</label>
-                <input type="text" class="form-control output-value" data-index="${index}"
-                       value="${value}" placeholder='Enter value (e.g., "stringValue" or expression)'>
-                <small class="form-text text-muted">Tip: Use quotes for string literals, expressions for calculations</small>
-            </div>
-        `);
+
+        const outputDiv = $('<div>').addClass('mb-2');
+        const labelElem = $('<label>').addClass('form-label').text(label);
+        const inputElem = $('<input>')
+            .attr('type', 'text')
+            .addClass('form-control output-value')
+            .attr('data-index', index)
+            .attr('placeholder', 'Enter value (e.g., "stringValue" or expression)');
+        const helpText = $('<small>')
+            .addClass('form-text text-muted')
+            .text('Tip: Use quotes for string literals, expressions for calculations');
+
+        outputDiv.append(labelElem, inputElem, helpText);
+        outputContainer.append(outputDiv);
+
+        // Store the element and value to set after modal is shown
+        outputValues.push({ element: inputElem, value: value });
+    });
+
+    // Show the modal first, then set values after it's fully displayed
+    $('#ruleModal').off('shown.bs.modal').one('shown.bs.modal', function () {
+        // Set input values
+        inputValues.forEach((item) => {
+            item.element.val(item.value);
+        });
+
+        // Set output values
+        outputValues.forEach((item) => {
+            item.element.val(item.value);
+        });
     });
 
     $('#ruleModal').modal('show');
@@ -477,7 +527,7 @@ function validateDmn() {
  * Deploy DMN to Zeebe
  */
 function deployDmn() {
-    if (!confirm('Are you sure you want to deploy the DMN to Zeebe?')) {
+    if (!confirm('Are you sure you want to deploy the DMN?')) {
         return;
     }
 
