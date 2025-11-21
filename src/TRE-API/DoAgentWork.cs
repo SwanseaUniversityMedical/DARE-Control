@@ -780,6 +780,8 @@ namespace TRE_API
 
                                         if(await _features.IsEnabledAsync(FeatureFlags.EphemeralCredentials))
                                         {
+                                            Log.Information($"Injecteing credentials into environment variables for {aSubmission.Id} nub > {credentials.Count}");
+
                                             if (credentials != null && credentials.Count > 0)
                                             {
                                                 foreach (var outerKey in credentials)
@@ -788,8 +790,11 @@ namespace TRE_API
                                                     {
                                                         foreach (var inner in innerDict)
                                                         {
+                                                            Log.Information($"Injecteing key {inner.Key}");
                                                             var key = inner.Key;
                                                             var value = inner.Value?.ToString() ?? string.Empty;
+                                                            Log.Information("Injected credentials with Key " + key);
+
                                                             Executor.Env[key] = value;
                                                         }
                                                     }
