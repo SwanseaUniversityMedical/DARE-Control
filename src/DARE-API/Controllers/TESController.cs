@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using DARE_API.Attributes;
-using Microsoft.AspNetCore.WebUtilities;
 using Swashbuckle.AspNetCore.Annotations;
 using BL.Models;
 using DARE_API.Repositories.DbContexts;
@@ -14,26 +13,14 @@ using BL.Rabbit;
 using EasyNetQ;
 using BL.Models.Enums;
 using DARE_API.Services;
-using Microsoft.AspNetCore.Authorization;
-using System.Threading;
-using BL.Services;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json.Linq;
-using System.Net.Http.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
 using DARE_API.Services.Contract;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DARE_API.Controllers
 {
     [Route("api/[controller]")]
     
     [ApiController]
-    /// <summary>
-    /// API endpoints for <see cref="TesTask"/>s.
-    /// </summary>
     public class TaskServiceApiController : ControllerBase
     {
 
@@ -52,7 +39,7 @@ namespace DARE_API.Controllers
             { TesView.FULL, new JsonSerializerSettings { ContractResolver = FullTesTaskContractResolver.Instance } }
         };
 
-        private readonly IKeyclockTokenAPIHelper _IKeyclockTokenAPIHelper;
+        private readonly IKeycloakTokenApiHelper _iKeycloakTokenApiHelper;
 
         /// <summary>
         /// Contruct a <see cref="TaskServiceApiController"/>
@@ -60,13 +47,13 @@ namespace DARE_API.Controllers
         /// <param name="repository">The main <see cref="ApplicationDbContext"/> database repository</param>
         /// <param name="rabbit">The main <see cref="IBus"/> easynet q sender</param>
         public TaskServiceApiController(ApplicationDbContext repository, IBus rabbit, IHttpContextAccessor httpContextAccessor, 
-            IKeyclockTokenAPIHelper IKeyclockTokenAPIHelper, IKeyCloakService IKeyCloakService)
+            IKeycloakTokenApiHelper iKeycloakTokenApiHelper, IKeyCloakService iKeyCloakService)
         {
             _DbContext = repository;
             _rabbit = rabbit;
             _httpContextAccessor = httpContextAccessor;
-            _IKeyclockTokenAPIHelper = IKeyclockTokenAPIHelper;
-            _IKeyCloakService = IKeyCloakService;
+            _iKeycloakTokenApiHelper = iKeycloakTokenApiHelper;
+            _IKeyCloakService = iKeyCloakService;
         }
         
         /// <summary>

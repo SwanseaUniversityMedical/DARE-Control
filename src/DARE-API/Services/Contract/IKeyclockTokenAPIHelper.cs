@@ -1,11 +1,7 @@
-﻿using Microsoft.AspNetCore.Authentication;
-
-namespace DARE_API.Services.Contract
+﻿namespace DARE_API.Services.Contract
 {
-    public interface IKeyclockTokenAPIHelper
+    public interface IKeycloakTokenApiHelper
     {
         Task<string> GetTokenForUser(string username, string password, string requiredRole);
-
-
     }
 }
