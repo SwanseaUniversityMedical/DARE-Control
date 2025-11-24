@@ -76,7 +76,6 @@ $(document).ready(function () {
  */
 function loadDmnTable() {
     showLoading(true);
-    hideAlert();
 
     $.ajax({
         url: API_BASE_URL + '/table',
@@ -158,8 +157,17 @@ function buildTableHeaders(table) {
  * Display rules in the DataTable (excluding submissionId column)
  */
 function displayRules(table) {
+    console.log('[INFO] displayRules called with', table.rules.length, 'rules');
+
+    if (dataTable) {
+        console.log('[INFO] Destroying existing DataTable');
+        dataTable.destroy();
+        dataTable = null;
+    }
+
     const tbody = $('#rulesTable tbody');
     tbody.empty();
+    console.log('[INFO] Cleared table body, adding', table.rules.length, 'rows');
 
     table.rules.forEach((rule, index) => {
         const row = $('<tr>');
@@ -206,11 +214,9 @@ function displayRules(table) {
         tbody.append(row);
     });
 
-    // Initialize or reload DataTable
-    if (dataTable) {
-        dataTable.destroy();
-    }
+    console.log('[INFO] Added', table.rules.length, 'rows to table body');
 
+    console.log('[INFO] Initializing DataTable...');
     dataTable = $('#rulesTable').DataTable({
         pageLength: 25,
         order: [[0, 'asc']],
@@ -220,10 +226,9 @@ function displayRules(table) {
         }
     });
 
+    console.log('[INFO] DataTable initialized with', dataTable.rows().count(), 'rows');
     $('#rulesTable').show();
 
-    // Bind action buttons using event delegation (required for DataTables)
-    // Use the table as the parent since DataTable recreates the button elements
     $('#rulesTable').off('click', '.edit-rule').on('click', '.edit-rule', function () {
         const ruleId = $(this).data('rule-id');
         showEditRuleModal(ruleId);
@@ -453,12 +458,16 @@ function saveRule() {
             withCredentials: true
         },
         success: function (response) {
+            console.log('[OK] Save rule response:', response);
             $('#ruleModal').modal('hide');
             showAlert(response.message, response.success ? 'success' : 'danger');
-            // Reload the table after a brief delay to ensure modal is fully hidden
-            setTimeout(function () {
-                loadDmnTable();
-            }, 300);
+
+            if (response.success) {
+                setTimeout(function () {
+                    console.log('[INFO] Reloading table after save...');
+                    loadDmnTable();
+                }, 300);
+            }
         },
         error: function (xhr, status, error) {
             showAlert('Error saving rule: ' + (xhr.responseJSON?.message || error), 'danger');
@@ -488,17 +497,21 @@ function deleteRule() {
             withCredentials: true
         },
         success: function (response) {
+            console.log('[OK] Delete rule response:', response);
             $('#deleteModal').modal('hide');
             showAlert(response.message, response.success ? 'success' : 'danger');
-            // Reload the table after a brief delay to ensure modal is fully hidden
-            setTimeout(function () {
-                loadDmnTable();
-            }, 300);
+
+            if (response.success) {
+                setTimeout(function () {
+                    console.log('[INFO] Reloading table after delete...');
+                    loadDmnTable();
+                }, 300);
+            }
         },
         error: function (xhr, status, error) {
+            console.error('[ERROR] Delete rule failed:', xhr);
             $('#deleteModal').modal('hide');
             showAlert('Error deleting rule: ' + (xhr.responseJSON?.message || error), 'danger');
-            console.error('Error deleting rule:', xhr);
         }
     });
 }
