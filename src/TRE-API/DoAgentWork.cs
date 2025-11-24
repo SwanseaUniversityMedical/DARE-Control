@@ -7,6 +7,7 @@ using BL.Rabbit;
 using BL.Services;
 using EasyNetQ;
 using Hangfire;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.FeatureManagement;
 using Newtonsoft.Json;
@@ -487,7 +488,25 @@ namespace TRE_API
 
                             if (await _features.IsEnabledAsync(FeatureFlags.EphemeralCredentials))
                             {
-                                
+                                var credsForSubmission = await _credsDbContext.EphemeralCredentials.Where(c => c.SubmissionId == aSubmission.Id).ToListAsync();
+
+                                bool alreadyTriggered = credsForSubmission.Any();                               
+
+                                if(!alreadyTriggered)
+                                {
+                                    try
+                                    {
+                                        var project = aSubmission.Project.Name;
+                                        await TriggerStartCredentialsAsync(aSubmission.Id, project, aSubmission.SubmittedBy.Id);
+                                        Log.Information("Triggered credentials for submission {SubId}", aSubmission.Id);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log.Error(ex, "Failed to trigger credentials for Sub {Sub}", aSubmission.Id);
+                                        continue;
+                                    }
+                                }
+                                                                                                
                                 Log.Information($"Fetching ephemeral credential data from Camunda");
 
                                 var creds = await _credsDbContext.EphemeralCredentials
@@ -875,11 +894,47 @@ namespace TRE_API
             }
         }
 
+        private async Task TriggerStartCredentialsAsync(int submissionId, string projectName, int userId)
+        {
+            var payload = new
+            {
+                records = new[]
+                {
+                    new
+                    {
+                        project = projectName,
+                        user = userId.ToString(),
+                        submissionId = submissionId.ToString()
+
+                    }
+                }
+            };
+
+            var jsonPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
+            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+            var camundaWebhookUrl = _config["CredentialAPISettings:StartWebhookUrl"];
+
+            using var httpClient = _httpClientFactory.CreateClient();
+            httpClient.Timeout = TimeSpan.FromMinutes(2);
+
+            var response = await httpClient.PostAsync(camundaWebhookUrl, content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Log.Error("Camunda webhook call failed for submission {SubmissionId}. Error: {Error}", submissionId, error);
+                throw new Exception($"Camunda webhook call failed: {response.StatusCode}");
+            }
+
+            Log.Information("Camunda StartCredentials triggered successfully for submission {SubmissionId}", submissionId);
+        }
+
 
         private async Task<Dictionary<string, Dictionary<string, object>>> WaitForAndFetchCredentialsAsync(int submissionId, TimeSpan? timeout = null)
         {
             var maxWaitTime = timeout ?? TimeSpan.FromMinutes(5);
-            var pollInterval = TimeSpan.FromSeconds(10);
+            var pollInterval = TimeSpan.FromSeconds(5); //Reduced polling interval for faster fetch
             var fetchedCredentials = new Dictionary<string, Dictionary<string, object>>();
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
