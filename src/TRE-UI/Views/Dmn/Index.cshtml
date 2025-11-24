@@ -2,7 +2,7 @@
 @inject IConfiguration Configuration
 @{
     ViewData["Title"] = "DMN Rule Manager";
-    var apiBaseUrl = Configuration.GetSection("TreAPISettings")["Address"];
+    var apiBaseUrl = Configuration.GetSection("TreAPISettings")["PublicApiBaseUrl"];
     var accessToken = (string)ViewBag.AccessToken ?? "";
 }
 
