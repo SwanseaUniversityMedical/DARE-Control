@@ -56,7 +56,7 @@
 							@User?.FindFirst("name")?.Value
 						</a>
 						<ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
-							<li><a class="dropdown-item" href="#">Account</a></li>
+							<li><a class="dropdown-item" href="@Configuration.GetSection("DataEgressKeyCloakSettings")["AccountManagementURL"]">Account</a></li>
 							<li><a class="dropdown-item" href="@Configuration.GetSection("Helpdesk")["URL"]">Helpdesk</a></li>
 							<li><hr class="dropdown-divider"></li>
 							@if (@User?.FindFirst("name")?.Value == null)
