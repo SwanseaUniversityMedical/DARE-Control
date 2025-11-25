@@ -8,6 +8,7 @@ using System.Xml;
 using System.Xml.Linq;
 using BL.Models;
 using Microsoft.Extensions.Logging;
+using Tre_Credentials.Services;
 
 namespace TRE_API.Services
 {
@@ -19,16 +20,19 @@ namespace TRE_API.Services
         Task<bool> UpdateRuleAsync(string filePath, UpdateDmnRuleRequest request);
         Task<bool> DeleteRuleAsync(string filePath, string ruleId);
         Task<bool> ValidateDmnAsync(string filePath);
+        Task DeployDmnToZeebeAsync(string filePath);
     }
 
     public class DmnService : IDmnService
     {
         private readonly ILogger<DmnService> _logger;
+        private readonly IServicedZeebeClient _zeebeClient;
         private const string DmnNamespace = "https://www.omg.org/spec/DMN/20191111/MODEL/";
 
-        public DmnService(ILogger<DmnService> logger)
+        public DmnService(ILogger<DmnService> logger, IServicedZeebeClient zeebeClient)
         {
             _logger = logger;
+            _zeebeClient = zeebeClient;
         }
 
         /// <summary>
@@ -417,6 +421,33 @@ namespace TRE_API.Services
             {
                 _logger.LogError(ex, $"DMN validation failed for {filePath}");
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Deploys the DMN file to Zeebe
+        /// </summary>
+        public async Task DeployDmnToZeebeAsync(string filePath)
+        {
+            try
+            {
+                if (!File.Exists(filePath))
+                {
+                    throw new FileNotFoundException($"DMN file not found: {filePath}");
+                }
+
+                using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                {
+                    var fileName = Path.GetFileName(filePath);
+                    await _zeebeClient.DeployModel(stream, fileName);
+                }
+
+                _logger.LogInformation($"DMN deployed to Zeebe successfully: {filePath}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to deploy DMN to Zeebe: {filePath}");
+                throw new InvalidOperationException("Failed to deploy DMN to Zeebe: " + ex.Message, ex);
             }
         }
 
