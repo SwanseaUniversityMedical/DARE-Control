@@ -55,34 +55,6 @@ namespace TRE_API.Services
                 };
             }
 
-            if(await _features.IsEnabledAsync(FeatureFlags.EphemeralCredentials))
-            {
-                var waitingSubs = await _dareclientHelper.CallAPIWithoutModel<List<Submission>>("/api/Submission/GetWaitingSubmissionsForTre");
-
-                foreach (var sub in waitingSubs)
-                {
-                    //This piece of code allows to skip if the creds are already present in the creds DB
-                    var alreadyTriggered = _CredentialsDbContext.EphemeralCredentials.Any(c => c.SubmissionId == sub.Id);
-                    if (alreadyTriggered) continue;
-
-                    var projectName = sub.Project.Name;
-                    var userId = sub.SubmittedBy.Id;
-                    var submissionId = sub.Id;
-
-                    try
-                    {
-                        await TriggerStartCredentialsAsync(submissionId, projectName, userId);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex, "Failed to trigger Camunda for Sub {Sub}", submissionId);
-                    }
-                }
-            }
-            else
-            {
-                Log.Information("Ephemeral Credentials feature flag is disabled; skipping credential triggering.");
-            }
 
 
             var subprojs = await _dareclientHelper.CallAPIWithoutModel<List<Project>>("/api/Project/GetAllProjectsForTre");
