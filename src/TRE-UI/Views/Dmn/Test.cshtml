@@ -2,7 +2,7 @@
 @inject IConfiguration Configuration
 @{
     ViewData["Title"] = "Test DMN Evaluation";
-    var apiBaseUrl = Configuration.GetSection("TreAPISettings")["Address"];
+    var apiBaseUrl = Configuration.GetSection("TreAPISettings")["PublicApiBaseUrl"];
 }
 
 <div class="container-lg p-4">

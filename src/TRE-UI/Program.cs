@@ -98,7 +98,7 @@ try
         options.AddPolicy(name: MyAllowSpecificOrigins,
             policy =>
             {
-                policy.WithOrigins(configuration["TreAPISettings:Address"])
+                policy.WithOrigins(configuration["TreAPISettings:InternalApiBaseUrl"])
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials();
