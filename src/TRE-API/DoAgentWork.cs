@@ -761,6 +761,9 @@ namespace TRE_API
                                         Executor.Env = new Dictionary<string, string>();
                                     }
 
+                                    Executor.Env["SCHEMA"] = aSubmission.Project.Name;
+                                    Executor.Env["CATALOG"] = _AgentSettings.CATALOG;
+
                                     Log.Information("Executor.Image > " + Executor.Image);
                                     if (await _features.IsEnabledAsync(FeatureFlags.SqlAndNotGraphQl))
                                     {
@@ -769,8 +772,7 @@ namespace TRE_API
                                             Executor.Env["TRINO_SERVER_URL"] = _AgentSettings.URLTrinoToAdd;
                                             Executor.Env["ACCESS_TOKEN"] = Token;
                                             Executor.Env["USER_NAME"] = aSubmission.SubmittedBy.Name;
-                                            Executor.Env["SCHEMA"] = aSubmission.Project.Name;
-                                            Executor.Env["CATALOG"] = _AgentSettings.CATALOG;
+                                 
 
                                             if (string.IsNullOrEmpty(Executor.Env["TRINO_SERVER_URL"]))
                                             {
