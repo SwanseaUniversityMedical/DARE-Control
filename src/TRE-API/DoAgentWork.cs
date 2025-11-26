@@ -7,7 +7,6 @@ using BL.Rabbit;
 using BL.Services;
 using EasyNetQ;
 using Hangfire;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.FeatureManagement;
 using Newtonsoft.Json;
@@ -1067,7 +1066,7 @@ namespace TRE_API
         }
 
 
-        //Seperated DB check to a private method for easier testing
+        //Seperated DB check to a private method
         private Task<List<EphemeralCredential>> GetLatestCreds(int submissionId)
         {
             return _credsDbContext.EphemeralCredentials
