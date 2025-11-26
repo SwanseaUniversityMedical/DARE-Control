@@ -1,24 +1,16 @@
 ﻿using BL.Models.Settings;
-using DARE_API.Services.Contract;
-using IdentityModel.Client;
-using Newtonsoft.Json;
 using Serilog;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using BL.Models.ViewModels;
 using BL.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Newtonsoft.Json.Linq;
-using Microsoft.AspNetCore.Authentication;
+using DARE_API.Services.Contract;
 
 namespace DARE_API.Services
 {
-    public class KeyclockTokenAPIHelper : IKeyclockTokenAPIHelper
+    public class KeycloakTokenApiHelper : IKeycloakTokenApiHelper
     {
         public SubmissionKeyCloakSettings _settings { get; set; }
 
 
-        public KeyclockTokenAPIHelper(SubmissionKeyCloakSettings settings)
+        public KeycloakTokenApiHelper(SubmissionKeyCloakSettings settings)
         {
             _settings = settings;
         }
