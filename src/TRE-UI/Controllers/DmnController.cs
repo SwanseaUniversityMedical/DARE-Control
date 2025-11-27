@@ -51,7 +51,7 @@ namespace TRE_UI.Controllers
                 }
 
                 ViewBag.AccessToken = accessToken;
-                ViewBag.ApiBaseUrl = _configuration["TreAPISettings:Address"];
+                ViewBag.ApiBaseUrl = _configuration["TreAPISettings:PublicApiBaseUrl"];
 
                 _logger.LogInformation("DMN management page loaded for user: {User}", User?.Identity?.Name);
 

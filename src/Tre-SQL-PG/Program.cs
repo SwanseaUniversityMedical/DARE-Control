@@ -16,8 +16,9 @@ var postgresPort = Environment.GetEnvironmentVariable("postgresPort") ?? "32769"
 var postgresUsername = Environment.GetEnvironmentVariable("postgresUsername") ?? "postgres";
 var postgresPassword = Environment.GetEnvironmentVariable("postgresPassword") ?? "password123";
 var postgresDatabase = Environment.GetEnvironmentVariable("postgresDatabase") ?? "postgres";
+var postgresSchema = Environment.GetEnvironmentVariable("postgresSchema") ?? "public";
 
-string connectionString = $"Host={postgresHost}:{postgresPort};Username={postgresUsername};Password={postgresPassword};Database={postgresDatabase}";
+string connectionString = $"Host={postgresHost}:{postgresPort};Username={postgresUsername};Password={postgresPassword};Database={postgresDatabase};SearchPath={postgresSchema}";
 
 Console.WriteLine("=== Environment Variables ===");
 Console.WriteLine($"postgresServer: {postgresHost}");
@@ -25,7 +26,8 @@ Console.WriteLine($"postgresPort: {postgresPort}");
 Console.WriteLine($"postgresUsername: {postgresUsername}");
 Console.WriteLine($"postgresPassword: {(string.IsNullOrEmpty(postgresPassword) ? "NOT SET" : "***SET***")}");
 Console.WriteLine($"postgresDatabase: {postgresDatabase}");
-Console.WriteLine($"Connection String: Host={postgresHost}:{postgresPort};Database={postgresDatabase}");
+Console.WriteLine($"postgresSchema: {postgresSchema}");
+Console.WriteLine($"Connection String: Host={postgresHost}:{postgresPort};Database={postgresDatabase};Schema={postgresSchema}");
 Console.WriteLine("============================\n");
 
 foreach (var arg in args)
