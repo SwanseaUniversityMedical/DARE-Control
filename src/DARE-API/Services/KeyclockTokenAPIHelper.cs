@@ -31,7 +31,7 @@ namespace DARE_API.Services
             
             
             Log.Information("{Function}} 1 using proxyhandler _settings.Authority > {Authority}, KeycloakDemoMode {KeyCloakDemoMode}", "GetTokenForUser", _settings.Authority, _settings.KeycloakDemoMode);
-            return await KeycloakCommon.GetTokenForUserGuts(username, password, requiredRole, proxyhandler, keycloakBaseUrl, clientId, clientSecret, _settings.KeycloakDemoMode);
+            return (await KeycloakCommon.GetTokenForUserGuts(username, password, requiredRole, proxyhandler, keycloakBaseUrl, clientId, clientSecret, _settings.KeycloakDemoMode)).Item1;
         }
 
     }
