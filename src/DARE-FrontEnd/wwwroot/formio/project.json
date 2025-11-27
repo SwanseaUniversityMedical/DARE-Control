@@ -229,17 +229,6 @@
       "key": "ProjectDescription",
       "type": "textarea",
       "input": true
-    },
-    {
-      "label": "Display on UI",
-      "applyMaskOn": "change",
-      "autoExpand": true,
-      "tableView": true,
-      "calculateValue": "value = \"Project lead : \" + data.projectOwner + \"<br>\" + data.projectDescription",
-      "key": "Display",
-      "type": "textarea",
-      "rows": 1,
-      "input": true
     }
   ],
   "settings": {},
