@@ -28,9 +28,9 @@ namespace TRE_UI.Controllers
             {
                 return View(new KeycloakCredentials());
             }
-
-            if (await ControllerHelpers.UpdateCredentials("TRECredentials", _clientHelper, ModelState,
-                    credentials))
+            credentials = await ControllerHelpers.UpdateCredentials("TRECredentials", _clientHelper, ModelState,
+                    credentials);
+            if (credentials.Valid)
             {
                 return RedirectToAction("Index", "Home");
             }

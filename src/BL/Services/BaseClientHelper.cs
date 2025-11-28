@@ -44,7 +44,7 @@ namespace BL.Services
 
         public async Task<string> GetTokenForUser(string username, string password, string requiredRole)
         {
-            return await _keycloakTokenHelper.GetTokenForUser(username, password, requiredRole);
+            return (await _keycloakTokenHelper.GetTokenForUser(username, password, requiredRole)).Item1;
         }
 
 
@@ -206,7 +206,7 @@ namespace BL.Services
             if (_keycloakTokenHelper != null)
             {
                 //Log.Information("{Function} First step. Creds are there? {Creds} with username {Username}, Password {Password} and role {Role}", "DareClienCreateClientWithKeycloaktWithoutTokenHelper", _username, _password, _requiredRole);
-                accessToken = await _keycloakTokenHelper.GetTokenForUser(_username, _password, _requiredRole);
+                accessToken = (await _keycloakTokenHelper.GetTokenForUser(_username, _password, _requiredRole)).Item1;
             }
             else
             {

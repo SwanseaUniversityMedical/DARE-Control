@@ -37,9 +37,9 @@ namespace TRE_UI.Controllers
             {
                 return View(credentials);
             }
-
-            if (await ControllerHelpers.UpdateCredentials("DataEgressCredentials", _clientHelper, ModelState,
-                    credentials))
+            credentials = await ControllerHelpers.UpdateCredentials("DataEgressCredentials", _clientHelper, ModelState,
+                    credentials);
+            if (credentials.Valid)
             {
                 return RedirectToAction("Index", "Home");
             }

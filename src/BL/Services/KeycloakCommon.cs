@@ -12,7 +12,7 @@ namespace BL.Services
 {
     public class KeycloakCommon
     {
-        public static async Task<string> GetTokenForUserGuts(string username, string password, string requiredRole, HttpClientHandler proxyHandler,
+        public static async Task<(string, string)> GetTokenForUserGuts(string username, string password, string requiredRole, HttpClientHandler proxyHandler,
             string keycloakBaseUrl, string clientId, string clientSecret, bool keycloakDemoMode)
         {
 
@@ -33,7 +33,7 @@ namespace BL.Services
             if (disco.IsError)
             {
                 Log.Error("{Function} {Error}", "GetTokenForUserGuts", disco.Error);
-                return "";
+                return ("", disco.Error);
             }
 
             var tokenResponse = await client.RequestPasswordTokenAsync(new PasswordTokenRequest
@@ -49,7 +49,7 @@ namespace BL.Services
             if (tokenResponse.IsError)
             {
                 Log.Error("{Function} {Error} for user {Username}", "GetTokenForUserGuts", tokenResponse.Error, username);
-                return "";
+                return ("", tokenResponse.ErrorDescription);
             }
 
 
@@ -69,9 +69,10 @@ namespace BL.Services
 
                 if (!roles.roles.Any(gc => gc.Equals(requiredRole)))
                 {
+                    var error = $"does not have correct role {requiredRole}";
                     Log.Information("{Function} User {Username} does not have correct role {AdminRole}",
                         "GetTokenForUserGuts", username, requiredRole);
-                    return "";
+                    return ("", error);
                 }
 
 
@@ -83,8 +84,7 @@ namespace BL.Services
                 Log.Information("{Function} Token found for User {Username}, no role required",
                     "GetTokenForUserGuts", requiredRole, username);
             }
-
-            return tokenResponse.AccessToken;
+            return (tokenResponse.AccessToken, "");
         }
     }
 }
