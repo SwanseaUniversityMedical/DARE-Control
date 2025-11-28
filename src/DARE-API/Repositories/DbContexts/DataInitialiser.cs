@@ -6,6 +6,7 @@ using Serilog;
 using User = BL.Models.User;
 using DARE_API.Services.Contract;
 using BL.Models.ViewModels;
+using BL.Services;
 
 namespace DARE_API.Repositories.DbContexts
 {
@@ -15,14 +16,17 @@ namespace DARE_API.Repositories.DbContexts
         private readonly ApplicationDbContext _dbContext;
         private readonly IKeycloakTokenApiHelper _keycloackTokenApiHelper;
         private readonly IKeycloakMinioUserService _userService;
+        private readonly IMinioHelper _minioHelper;
 
         public DataInitialiser(MinioSettings minioSettings, ApplicationDbContext dbContext,
-            IKeycloakTokenApiHelper keycloackTokenApiHelper, IKeycloakMinioUserService userService)
+            IKeycloakTokenApiHelper keycloackTokenApiHelper, IKeycloakMinioUserService userService,
+            IMinioHelper minioHelper)
         {
             _minioSettings = minioSettings;
             _dbContext = dbContext;
             _keycloackTokenApiHelper = keycloackTokenApiHelper;
             _userService = userService;
+            _minioHelper = minioHelper;
         }
 
         public void SeedAllInOneData()
@@ -81,6 +85,12 @@ namespace DARE_API.Repositories.DbContexts
 
                     proj.SubmissionBucket = submission;
                     proj.OutputBucket = output;
+                    // Create submission bucket
+                    var submissionBucket = _minioHelper.CreateBucket(submission.ToLower()).Result;
+                    var submissionBucketPolicy = _minioHelper.CreateBucketPolicy(submission.ToLower()).Result;
+                    // Create output bucket
+                    var outputBucket = _minioHelper.CreateBucket(output.ToLower()).Result;
+                    var outputBucketPolicy = _minioHelper.CreateBucketPolicy(output.ToLower()).Result;
 
                     // tracked entity updated, persist changes
                     _dbContext.SaveChanges();
