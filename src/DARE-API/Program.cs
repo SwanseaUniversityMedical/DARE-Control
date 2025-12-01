@@ -353,7 +353,7 @@ using (var scope = app.Services.CreateScope())
     var userService = scope.ServiceProvider.GetRequiredService<IKeycloakMinioUserService>();
 
     db.Database.Migrate();
-    var initialiser = new DataInitialiser(miniosettings, db, keytoken, userService);
+    var initialiser = new DataInitialiser(miniosettings, db, keytoken, userService, miniohelper);
     if (demomode)
     {
         initialiser.SeedAllInOneData();
