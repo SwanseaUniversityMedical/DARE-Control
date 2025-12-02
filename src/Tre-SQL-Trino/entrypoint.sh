@@ -10,7 +10,7 @@ fi
 export TRINO_PASSWORD="$trinoPassword"
 
 # Execute Trino CLI command to run SQL statement and output CSV
-trino --server="$trinoURL" --execute="$SQL_STATEMENT" --password="true" --user="$trinoUsername" --schema="$SCHEMA" --catalog="$CATALOG" --insecure --output-format CSV > ~/result.csv 2>&1
+trino --server="$trinoURL" --execute="$SQL_STATEMENT" --password="true" --user="$trinoUsername" --schema="$SCHEMA" --catalog="$CATALOG" --insecure --output-format CSV > /workspace/data/result.csv
 
 ls -la ~/
 
