@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SQL_STATEMENT="$1"
+
 # Check if required environment variables are provided
 if [[ -z "$trinoURL" || -z "$SQL_STATEMENT" || -z "$trinoPassword" || -z "$trinoUsername" || -z "$SCHEMA" || -z "$CATALOG"   ]]; then
     echo "Please provide trinoURL, trinoPassword, SCHEMA, CATALOG, SQL_STATEMENT and trinoUsername environment variables ."
