@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using Data_Egress_API.Repositories.DbContexts;
+using Newtonsoft.Json;
 
 
 namespace Data_Egress_API.Controllers
@@ -24,9 +25,15 @@ namespace Data_Egress_API.Controllers
         public KeycloakTokenHelper _keycloakTokenHelper { get; set; }
         public KeycloakTokenHelper _egressKeycloakTokenHelper { get; set; }
 
+        private DataEgressKeyCloakSettings egressKeyCloakSettings;
+
+        private TreKeyCloakSettings keycloakSettings;
+
 
         public TreCredentialsController(ApplicationDbContext applicationDbContext, IEncDecHelper encDec, TreKeyCloakSettings keycloakSettings, DataEgressKeyCloakSettings egressKeyCloakSettings)
         {
+            this.egressKeyCloakSettings = egressKeyCloakSettings;
+            this.keycloakSettings = keycloakSettings;
             _encDecHelper = encDec;
             _DbContext = applicationDbContext;
             _keycloakTokenHelper = new KeycloakTokenHelper(keycloakSettings.BaseUrl, keycloakSettings.ClientId,
@@ -93,6 +100,8 @@ namespace Data_Egress_API.Controllers
         {
             try
             {
+                Log.Information($"  data egress > {JsonConvert.SerializeObject(egressKeyCloakSettings)}");
+
                 creds.Valid = true;
                 var token = await _egressKeycloakTokenHelper.GetTokenForUser(creds.UserName,
                     creds.PasswordEnc, "data-egress-admin");
@@ -141,7 +150,7 @@ namespace Data_Egress_API.Controllers
         {
             try
             {
-               
+                Log.Information($"  data TRE > {JsonConvert.SerializeObject(keycloakSettings)}");
                 creds.Valid = true;
                 var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
                     creds.PasswordEnc, "data-egress-admin");
