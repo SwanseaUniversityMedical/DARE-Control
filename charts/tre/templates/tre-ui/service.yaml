@@ -1,0 +1,17 @@
+uiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tre.fullname" . }}-ui
+  labels:
+    {{- include "tre.labels" . | nindent 4 }}
+    component: "ui"
+spec:
+  type: {{ .Values.tre.ui.service.type }}
+  ports:
+    - port: {{ .Values.tre.ui.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "tre.selectorLabels" . | nindent 4 }}
+    component: "ui"

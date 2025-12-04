@@ -1,0 +1,323 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tre.fullname" . }}-api
+  labels:
+    {{- include "tre.labels" . | nindent 4 }}
+    component: "api"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "tre.selectorLabels" . | nindent 6 }}
+      component: "api"
+  template:
+    metadata:
+      {{- with .Values.tre.api.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "tre.labels" . | nindent 8 }}
+        component: "api"
+        {{- with .Values.tre.api.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "tre.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: treapi
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.tre.api.image.repository }}:{{ .Values.tre.api.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.tre.api.image.pullPolicy }}
+          env:
+            - name: Serilog__SeqServerUrl
+              value: "{{ .Values.config.seqUrl }}"
+            - name: KeycloakDemoMode
+              value: "{{ .Values.config.keycloakDemoMode }}"
+            - name: DemoModeDefaultP
+              valueFrom:
+                secretKeyRef: 
+                  name: {{ .Values.config.demoMode.secretName }}
+                  key: {{ .Values.config.demoMode.passwordSecretKey }}
+            - name: TreName
+              value: "{{ .Values.config.treName }}"
+            - name: EnableExternalHangfire
+              value: "{{ .Values.config.externalHangfire.enabled }}"
+            - name: JobSettings__syncSchedule
+              value: "{{ .Values.config.jobSettings.syncSchedule }}"
+            - name: JobSettings__scanSchedule
+              value: "{{ .Values.config.jobSettings.scanSchedule }}"
+            - name: AuthenticationSettings__TokenExpireDays
+              value: "{{ .Values.config.authSettings.tokenExpireDays }}"
+            - name: RabbitMQ__HostAddress
+              value: "{{ .Values.config.rabbitmq.host }}"
+            - name: RabbitMQ__PortNumber
+              value: "{{ .Values.config.rabbitmq.port }}"
+            - name: RabbitMQ__Password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.rabbitmq.secretName }}
+                  key: {{ .Values.config.rabbitmq.passwordSecretKey }}
+            - name: RabbitMQ__Username
+              valueFrom:
+                secretKeyRef: 
+                  name: {{ .Values.config.rabbitmq.secretName }}
+                  key: {{ .Values.config.rabbitmq.usernameSecretKey }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.postgres.secretName }}
+                  key: {{ .Values.config.postgres.passwordSecretKey }}
+            - name: POSTGRES_USERNAME
+              valueFrom:
+                secretKeyRef: 
+                  name: {{ .Values.config.postgres.secretName }}
+                  key: {{ .Values.config.postgres.usernameSecretKey }}
+            - name: ConnectionStrings__DefaultConnection
+              value: "Server={{ .Values.config.postgres.host }};port={{ .Values.config.postgres.port }};Database={{ .Values.config.postgres.treDatabase }};Include Error Detail=true;User Id=$(POSTGRES_USERNAME);Password=$(POSTGRES_PASSWORD);"
+            - name: ConnectionStrings__CredentialsConnection
+              value: "Server={{ .Values.config.postgres.host }};port={{ .Values.config.postgres.port }};Database={{ .Values.config.postgres.treCredsDatabase }};Include Error Detail=true;User Id=$(POSTGRES_USERNAME);Password=$(POSTGRES_PASSWORD);"
+            - name: EncryptionSettings__Key
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.encryption.secretName }}
+                  key: {{ .Values.config.encryption.encryptionKeySecretKey }}
+            - name: EncryptionSettings__Base
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.encryption.secretName }}
+                  key: {{ .Values.config.encryption.encryptionBaseSecretKey }}
+            - name: DareAPISettings__Address
+              value: "{{ .Values.config.submission.apiAddress }}"
+            - name: DataEgressAPISettings__Address
+              value: 'http://{{ include "tre.fullname" . }}-data-egress-api'
+            - name: TreAPISettings__Address
+              value: 'http://{{ include "tre.fullname" . }}-api'
+            - name: Features__GenerateAccounts
+              value: "{{ .Values.config.features.generateAccounts }}"
+            - name: Features__SqlAndNotGraphQl
+              value: "{{ .Values.config.features.sqlNotGraphQl }}"
+            - name: Features__DemoAllInOne
+              value: "{{ .Values.config.features.demoAllInOne }}"
+            - name: Features__EphemeralCredentials
+              value: "{{ .Values.config.features.ephemeralCreds }}"
+            - name: TreKeyCloakSettings__Authority
+              value: "{{ default .Values.config.keycloak.tre.authority .Values.config.keycloak.global.authority }}"
+            - name: TreKeyCloakSettings__MetadataAddress
+              value: "{{ default .Values.config.keycloak.tre.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.tre.api.host .Values.config.keycloak.global.host }}/realms/{{ .Values.config.keycloak.tre.api.realm }}/.well-known/openid-configuration"
+            - name: TreKeyCloakSettings__BaseUrl
+              value: "{{ default .Values.config.keycloak.tre.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.tre.api.host .Values.config.keycloak.global.host }}/realms/{{ .Values.config.keycloak.tre.api.realm }}"
+            - name: TreKeyCloakSettings__Realm
+              value: "{{ .Values.config.keycloak.tre.api.realm }}"
+            - name: TreKeyCloakSettings__ClientId
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.keycloak.tre.api.secretName }}
+                  key: {{ .Values.config.keycloak.tre.api.clientIdKey }}
+            - name: TreKeyCloakSettings__ClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.keycloak.tre.api.secretName }}
+                  key: {{ .Values.config.keycloak.tre.api.clientSecretKey }}
+            - name: TreKeyCloakSettings__ValidAudiences
+              value: "{{ .Values.config.keycloak.tre.api.validAudiences }}"
+            - name: TreKeyCloakSettings__Proxy
+              value: "{{ .Values.config.keycloak.proxy.enabled }}"
+            - name: TreKeyCloakSettings__ProxyAddresURL
+              value: "{{ .Values.config.keycloak.proxy.url }}"
+            - name: TreKeyCloakSettings__BypassProxy
+              value: "{{ .Values.config.keycloak.proxy.bypassList }}"
+            - name: TreKeyCloakSettings__UseRedirectURL
+              value: "{{ .Values.config.keycloak.tre.api.useRedirect }}"
+            - name: TreKeyCloakSettings__RedirectURL
+              value: "{{ .Values.config.keycloak.tre.api.redirectUrl }}" 
+            - name: DataEgressKeyCloakSettings__Authority
+              value: "{{ default .Values.config.keycloak.tre.api.authority .Values.config.keycloak.global.authority }}"
+            - name: DataEgressKeyCloakSettings__MetadataAddress
+              value: "{{ default .Values.config.keycloak.tre.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.tre.api.host .Values.config.keycloak.global.host }}/realms/{{ .Values.config.keycloak.tre.api.realm }}/.well-known/openid-configuration"
+            - name: DataEgressKeyCloakSettings__BaseUrl
+              value: "{{ default .Values.config.keycloak.tre.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.tre.api.host .Values.config.keycloak.global.host }}/realms/{{ .Values.config.keycloak.tre.api.realm }}"
+            - name: DataEgressKeyCloakSettings__ClientId
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.keycloak.tre.api.secretName }}
+                  key: {{ .Values.config.keycloak.tre.api.clientIdKey }}
+            - name: DataEgressKeyCloakSettings__ClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.keycloak.tre.api.secretName }}
+                  key: {{ .Values.config.keycloak.tre.api.clientSecretKey }}
+            - name: DataEgressKeyCloakSettings__ValidAudiences
+              value: "{{ .Values.config.keycloak.tre.api.validAudiences }}"
+            - name: DataEgressKeyCloakSettings__Proxy
+              value: "{{ .Values.config.keycloak.proxy.enabled }}"
+            - name: DataEgressKeyCloakSettings__ProxyAddresURL
+              value: "{{ .Values.config.keycloak.proxy.url }}"
+            - name: DataEgressKeyCloakSettings__BypassProxy
+              value: "{{ .Values.config.keycloak.proxy.bypassList }}"
+
+            - name: SubmissionKeyCloakSettings__Authority
+              value: "{{ .Values.config.keycloak.submission.authority }}"
+            - name: SubmissionKeyCloakSettings__MetadataAddress
+              value: "{{ .Values.config.keycloak.submission.protocol }}://{{ .Values.config.keycloak.submission.host }}/realms/{{ .Values.config.keycloak.submission.realm }}/.well-known/openid-configuration"
+            - name: SubmissionKeyCloakSettings__BaseUrl
+              value: "{{ .Values.config.keycloak.submission.protocol }}://{{ .Values.config.keycloak.submission.host }}/realms/{{ .Values.config.keycloak.submission.realm }}"
+            - name: SubmissionKeyCloakSettings__ClientId
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.keycloak.submission.secretName }}
+                  key: {{ .Values.config.keycloak.submission.clientIdKey }}
+            - name: SubmissionKeyCloakSettings__ClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.keycloak.submission.secretName }}
+                  key: {{ .Values.config.keycloak.submission.clientSecretKey }}
+            - name: SubmissionKeyCloakSettings__ValidAudiences
+              value: "{{ .Values.config.keycloak.submission.validAudiences }}"
+            - name: SubmissionKeyCloakSettings__Proxy
+              value: "{{ .Values.config.keycloak.proxy.enabled }}"
+            - name: SubmissionKeyCloakSettings__ProxyAddresURL
+              value: "{{ .Values.config.keycloak.proxy.url }}"
+            - name: SubmissionKeyCloakSettings__BypassProxy
+              value: "{{ .Values.config.keycloak.proxy.bypassList }}"
+            - name: MinioSubSettings__Url
+              value: "{{ .Values.config.minio.submission.url }}"
+            - name: MinioSubSettings__AdminConsole
+              value: "{{ .Values.config.minio.submission.consoleUrl }}"
+            - name: MinioSubSettings__BucketName
+              value: "{{ .Values.config.minio.submission.bucketName }}"
+            - name: MinioSubSettings__AccessKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.minio.submission.secretName }}
+                  key: {{ .Values.config.minio.submission.accessSecretKey }}
+            - name: MinioSubSettings__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.minio.submission.secretName }}
+                  key: {{ .Values.config.minio.submission.secretSecretKey }}
+            - name: MinioSubSettings__AWSRegion
+              value: "us-east-1"
+            - name: MinioTRESettings__Url
+              value: "{{ .Values.config.minio.tre.url }}"
+            - name: MinioTRESettings__AdminConsole
+              value: "{{ .Values.config.minio.tre.consoleUrl }}"
+            - name: MinioTRESettings__AccessKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.minio.tre.secretName }}
+                  key: {{ .Values.config.minio.tre.accessSecretKey }}
+            - name: MinioTRESettings__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.minio.tre.secretName }}
+                  key: {{ .Values.config.minio.tre.secretSecretKey }}
+            - name: MinioTRESettings__HutchURLOverride
+              value: "{{ .Values.config.minio.tre.hutchUrlOverride }}"
+            - name: MinioTRESettings__AWSRegion
+              value: "us-east-1"
+            - name: CredentialAPISettings__StartWebhookUrl
+              value: "{{ .Values.config.camundaUrl }}/inbound/StartCredentials"
+            - name: CredentialAPISettings__RevokeWebhookUrl
+              value: "{{ .Values.config.camundaUrl }}/inbound/RevokeCredentials"
+            - name: HasuraSettings__IsEnabled
+              value: "{{ .Values.config.hasura.enabled }}"
+            - name: HasuraSettings__HasuraURL
+              value: "{{ .Values.config.hasura.url }}"
+            - name: HasuraSettings__HasuraAdminSecret
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.hasura.adminSecretName }}
+                  value: {{ .Values.config.hasura.adminSecretKey }}
+            - name: HasuraSettings__EnvironmentVariableForDB
+              value: "{{ .Values.config.hasura.dbEnvVar }}"
+            - name: HasuraSettings__DbName
+              value: "{{ .Values.config.hasura.dbName }}"
+            - name: OPASettings__OPAUrl
+              value: "{{ .Values.config.opa.endpoint }}"
+            - name: OPASettings__ExpiryDelayMinutes
+              value: "{{ .Values.config.opa.expiryDelayMins }}"
+            - name: OPASettings__UseRealExpiry
+              value: "{{ .Values.config.opa.useRealExpiry }}"
+            - name: OPASettings__OPAPolicyUploadURL
+              value: "{{ .Values.config.opa.policyUploadEndpoint }}"
+            - name: VaultSettings__BaseUrl
+              value: "{{ .Values.config.vault.url }}"
+            - name: VaultSettings__Token 
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.vault.tokenSecretName }}
+                  key: {{ .Values.config.vault.tokenSecretValue }}
+            - name: VaultSettings__SecretEngine
+              value: "{{ .Values.config.vault.secretEngine }}"
+            - name: VaultSettings__EnableRetry
+              value: "{{ .Values.config.vault.retry }}"
+            - name: VaultSettings__MaxRetryAttempts
+              value: "{{ .Values.config.vault.retryAttempts }}"
+            - name: AgentSettings__UseRabbit
+              value: "{{ .Values.config.agent.rabbit.enabled }}"
+            - name: AgentSettings__UseTESK
+              value: "{{ .Values.config.agent.tesk.enabled }}"
+            - name: AgentSettings__TESKOutputBucketPrefix
+              value: "{{ .Values.config.agent.tesk.outputBucketPrefix }}"
+            - name: AgentSettings__Proxy
+              value: "{{ .Values.config.agent.proxy.enabled }}"
+            - name: AgentSettings__ProxyAddresURL
+              value: "{{ .Values.config.agent.proxy.url }}"
+            - name: AgentSettings__BypassProxy
+              value: "{{ .Values.config.agent.proxy.bypassList }}"
+            - name: AgentSettings__ImageNameToAddToToken
+              value: "{{ .Values.config.agent.tokenImageName }}"
+            - name: AgentSettings__ImageNameToAddToTokenGraphQL
+              value: "{{ .Values.config.agent.tokenGQLImageName }}"
+            - name: AgentSettings__TESKAPIURL
+              value: "{{ .Values.config.agent.tesk.url }}"
+            - name: AgentSettings__URLHasuraToAdd
+              value: "{{ .Values.config.agent.hasuraUrl }}"
+            - name: AgentSettings__CATALOG
+              value: "{{ .Values.config.agent.catalog }}"
+            - name: AgentSettings__MandatoryInput
+              value: "{{ .Values.config.agent.mandatoryInput }}"
+            {{- with .Values.tre.api.env }}
+            {{- . | toYaml | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.tre.api.service.port }}
+              protocol: TCP
+          {{- with .Values.tre.api.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tre.api.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.tre.api.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
