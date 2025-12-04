@@ -838,7 +838,6 @@ namespace TRE_API
                                                     {
                                                         foreach (var inner in innerDict)
                                                         {
-                                                            Log.Information($"Injecteing key {inner.Key}");
                                                             var key = inner.Key;
                                                             var value = inner.Value?.ToString() ?? string.Empty;
                                                             Log.Information("Injected credentials with Key " + key);

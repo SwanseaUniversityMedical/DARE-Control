@@ -100,8 +100,6 @@ namespace Data_Egress_API.Controllers
         {
             try
             {
-                Log.Information($"  data egress > {JsonConvert.SerializeObject(egressKeyCloakSettings)}");
-
                 creds.Valid = true;
                 var token = await _egressKeycloakTokenHelper.GetTokenForUser(creds.UserName,
                     creds.PasswordEnc, "data-egress-admin");
@@ -150,7 +148,6 @@ namespace Data_Egress_API.Controllers
         {
             try
             {
-                Log.Information($"  data TRE > {JsonConvert.SerializeObject(keycloakSettings)}");
                 creds.Valid = true;
                 var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
                     creds.PasswordEnc, "data-egress-admin");

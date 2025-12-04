@@ -136,7 +136,6 @@ namespace DARE_API.Services
                     tres = trestr.Split('|').Select(x => x.ToLower()).ToList();
                 }
 
-                Log.Information("TRE set > " + string.Join(',', tres));
 
                 var dbtres = new List<BL.Models.Tre>();
 
