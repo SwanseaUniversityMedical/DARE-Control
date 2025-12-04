@@ -126,6 +126,45 @@ namespace Tre_Camunda.Services
                 if (response.ResultCode == ResultCode.Success)
                 {
                     _logger.LogInformation($"user {request.Username} created successfully");
+                    
+                    // ─────────────────────────────
+                    // ALEX CODE: add user to group
+                    // ─────────────────────────────
+                    var groupCn = $"{_config.GroupCn},{_config.BaseDn}";
+
+                    Log.Information("groupCn >" + groupCn);
+        
+                    // TODO: add support for ldap servers that use 'memberUid' instead of 'member' attribute
+                    // Will require querying the ldap server to see what it uses
+                    var mod = new DirectoryAttributeModification
+                    {
+                        Name = "member",
+                        Operation = DirectoryAttributeOperation.Add
+                    };
+
+                    mod.Add(userDn);
+
+                    var modifyRequest = new ModifyRequest(groupCn, mod);
+        
+                    try
+                    {
+                        var modifyResponse = (ModifyResponse)connection.SendRequest(modifyRequest);
+        
+                        if (modifyResponse.ResultCode == ResultCode.Success)
+                        {
+                            _logger.LogInformation($"User {request.Username} added to group {groupCn} successfully");
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"User {request.Username} created but failed to add to group {groupCn}: {modifyResponse.ErrorMessage}");
+                        }
+                    }
+                    catch (DirectoryOperationException ex)
+                    {
+                        _logger.LogWarning($"User {request.Username} created but exception when adding to group {groupCn}: {ex.Message}");
+                    }
+                    // ─────────────────────────────
+                    
                     return UserCreationResult.Ok();
                 }
                 else
