@@ -807,6 +807,9 @@ namespace TRE_API
                                         Executor.Env = new Dictionary<string, string>();
                                     }
 
+                                    Executor.Env["SCHEMA"] = aSubmission.Project.Name;
+                                    Executor.Env["CATALOG"] = _AgentSettings.CATALOG;
+
                                     Log.Information("Executor.Image > " + Executor.Image);
                                     if (await _features.IsEnabledAsync(FeatureFlags.SqlAndNotGraphQl))
                                     {
@@ -815,8 +818,7 @@ namespace TRE_API
                                             Executor.Env["TRINO_SERVER_URL"] = _AgentSettings.URLTrinoToAdd;
                                             Executor.Env["ACCESS_TOKEN"] = Token;
                                             Executor.Env["USER_NAME"] = aSubmission.SubmittedBy.Name;
-                                            Executor.Env["SCHEMA"] = aSubmission.Project.Name;
-                                            Executor.Env["CATALOG"] = _AgentSettings.CATALOG;
+                                 
 
                                             if (string.IsNullOrEmpty(Executor.Env["TRINO_SERVER_URL"]))
                                             {
@@ -826,6 +828,8 @@ namespace TRE_API
 
                                         if(await _features.IsEnabledAsync(FeatureFlags.EphemeralCredentials))
                                         {
+                                            Log.Information($"Injecteing credentials into environment variables for {aSubmission.Id} nub > {credentials.Count}");
+
                                             if (credentials != null && credentials.Count > 0)
                                             {
                                                 foreach (var outerKey in credentials)
@@ -836,6 +840,8 @@ namespace TRE_API
                                                         {
                                                             var key = inner.Key;
                                                             var value = inner.Value?.ToString() ?? string.Empty;
+                                                            Log.Information("Injected credentials with Key " + key);
+
                                                             Executor.Env[key] = value;
                                                         }
                                                     }

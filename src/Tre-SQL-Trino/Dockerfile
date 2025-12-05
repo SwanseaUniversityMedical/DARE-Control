@@ -31,7 +31,5 @@ COPY entrypoint.sh /home/trino/entrypoint.sh
 # Make entrypoint script executable
 RUN chmod +x /home/trino/entrypoint.sh
 
-USER trino:trino
-
 # Set entrypoint
 ENTRYPOINT ["/home/trino/entrypoint.sh"]
