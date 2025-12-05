@@ -164,9 +164,9 @@ namespace DARE_API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(APIReturn), description: "")]
         public IActionResult CloseSubmissionForTre(string subId, StatusType statusType, string? finalFile, string? description)
         {
-            if (!UpdateSubmissionStatus.SubCompleteTypes.Contains(statusType) && statusType != StatusType.Failure && statusType != StatusType.DataOutRequested)
+            if (!UpdateSubmissionStatus.SubCompleteTypes.Contains(statusType) && statusType != StatusType.Failure)
             {
-                throw new Exception($"Invalid completion type {statusType}");
+                throw new Exception($"Invalid completion type ${statusType}");
             }
 
             if (statusType == StatusType.Failure)
