@@ -166,7 +166,7 @@ namespace DARE_API.Controllers
         {
             if (!UpdateSubmissionStatus.SubCompleteTypes.Contains(statusType) && statusType != StatusType.Failure)
             {
-                throw new Exception("Invalid completion type");
+                throw new Exception($"Invalid completion type ${statusType}");
             }
 
             if (statusType == StatusType.Failure)

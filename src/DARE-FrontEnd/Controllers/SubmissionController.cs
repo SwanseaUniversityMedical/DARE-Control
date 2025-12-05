@@ -363,11 +363,11 @@ namespace DARE_FrontEnd.Controllers
                         QueryExecutor.Command = new List<string>()
                         {
                             "/bin/bash",
-                            "/workspace/entrypoint.sh"
+                            "/workspace/entrypoint.sh",
+                            $"--Query={model.Query}"
                         };
                         QueryExecutor.Env = new Dictionary<string, string>()
                         {
-                            ["SQL_STATEMENT"] = model.Query,
                             ["LOCATION"] = "/workspace/data/results.csv",
                         };
                     }
