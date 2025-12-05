@@ -29,7 +29,7 @@ namespace BL.Services
             _keycloakDemoMode = keycloakDemoMode;
         }
 
-        public async Task<(string, string)> GetTokenForUser(string username, string password, string requiredRole)
+        public async Task<(string token, string Errorstring)> GetTokenForUser(string username, string password, string requiredRole)
         {
             string keycloakBaseUrl = _keycloakBaseUrl;
             string clientId = _clientId;

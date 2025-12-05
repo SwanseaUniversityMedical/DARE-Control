@@ -49,7 +49,7 @@ namespace TRE_API.Services
                     }
                     var token = await keycloakTokenHelper.GetTokenForUser(creds.UserName,
                         encDecHelper.Decrypt(creds.PasswordEnc), "dare-tre-admin");
-                    result.Result = !string.IsNullOrWhiteSpace(token.Item1);
+                    result.Result = !string.IsNullOrWhiteSpace(token.token);
                 }
 
                 return result;
@@ -69,10 +69,10 @@ namespace TRE_API.Services
                 creds.Valid = true;
                 var token = await keycloakTokenHelper.GetTokenForUser(creds.UserName,
                     creds.PasswordEnc, requiredrole);
-                if (string.IsNullOrWhiteSpace(token.Item1))
+                if (string.IsNullOrWhiteSpace(token.token))
                 {
                     Log.Information($"UpdateCredentials creds.Valid = false  for {creds.UserName}");
-                    creds.ErrorMessage = token.Item2;
+                    creds.ErrorMessage = token.Errorstring;
                     creds.Valid = false;
                     return creds;
                 }

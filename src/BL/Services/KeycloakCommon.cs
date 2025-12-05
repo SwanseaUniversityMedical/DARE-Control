@@ -12,7 +12,7 @@ namespace BL.Services
 {
     public class KeycloakCommon
     {
-        public static async Task<(string, string)> GetTokenForUserGuts(string username, string password, string requiredRole, HttpClientHandler proxyHandler,
+        public static async Task<(string token, string Errorstring)> GetTokenForUserGuts(string username, string password, string requiredRole, HttpClientHandler proxyHandler,
             string keycloakBaseUrl, string clientId, string clientSecret, bool keycloakDemoMode)
         {
 

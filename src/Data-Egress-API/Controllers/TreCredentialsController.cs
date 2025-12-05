@@ -57,7 +57,7 @@ namespace Data_Egress_API.Controllers
                 {
                     var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
                         _encDecHelper.Decrypt(creds.PasswordEnc), "data-egress-admin");
-                    result.Result = !string.IsNullOrWhiteSpace(token.Item1);
+                    result.Result = !string.IsNullOrWhiteSpace(token.token);
 
                 }
 
@@ -81,7 +81,7 @@ namespace Data_Egress_API.Controllers
             {
                 var token = await _egressKeycloakTokenHelper.GetTokenForUser(creds.UserName,
                     _encDecHelper.Decrypt(creds.PasswordEnc), "data-egress-admin");
-                result.Result = !string.IsNullOrWhiteSpace(token.Item1);
+                result.Result = !string.IsNullOrWhiteSpace(token.token);
 
             }
 
@@ -103,9 +103,9 @@ namespace Data_Egress_API.Controllers
                 creds.Valid = true;
                 var token = await _egressKeycloakTokenHelper.GetTokenForUser(creds.UserName,
                     creds.PasswordEnc, "data-egress-admin");
-                if (string.IsNullOrWhiteSpace(token.Item1))
+                if (string.IsNullOrWhiteSpace(token.token))
                 {
-                    creds.ErrorMessage = token.Item2;
+                    creds.ErrorMessage = token.Errorstring;
                     creds.Valid = false;
                     return creds;
                 }
@@ -151,9 +151,9 @@ namespace Data_Egress_API.Controllers
                 creds.Valid = true;
                 var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
                     creds.PasswordEnc, "data-egress-admin");
-                if (string.IsNullOrWhiteSpace(token.Item1))
+                if (string.IsNullOrWhiteSpace(token.token))
                 {
-                    creds.ErrorMessage= token.Item2;
+                    creds.ErrorMessage= token.Errorstring;
                     creds.Valid = false;
                     return creds;
                 }
