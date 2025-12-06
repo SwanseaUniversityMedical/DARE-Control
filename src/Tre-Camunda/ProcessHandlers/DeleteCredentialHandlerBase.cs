@@ -129,7 +129,6 @@ namespace Tre_Camunda.ProcessHandlers
                     return CreateStatusResponse("ERROR: No credential information found in envList");
                 }
 
-                // Extract username - common across all handlers
                 string? username = extraction.EnvList
                         .Where(x => x.env.ToLower().Contains("username"))
                         .FirstOrDefault()?.value?.ToString();
@@ -139,7 +138,7 @@ namespace Tre_Camunda.ProcessHandlers
                     _logger.LogWarning("No username found in envList for {CredentialType}. " +
                         "This may be normal for custom/blank credential types.", CredentialType);
                 }
-                // Check if user exists before attempting deletion
+
                 var userExists = await CheckUserExistAsync(username);
                 if (!userExists)
                 {
@@ -151,7 +150,6 @@ namespace Tre_Camunda.ProcessHandlers
                     (string.IsNullOrEmpty(username) ? " (no external user)" : " for user: {Username}"),
                     CredentialType, username);
 
-                // Call derived class to perform specific deletion
                 var deleteResult = await DeleteUserAsync(username, cancellationToken);
 
                 if (!deleteResult)
@@ -166,7 +164,6 @@ namespace Tre_Camunda.ProcessHandlers
                     (string.IsNullOrEmpty(username) ? "" : " for user: {Username}"),
                     CredentialType, username);
 
-                // Handle vault cleanup
                 await HandleVaultOperationsAsync(extraction.SubmissionId, cancellationToken);
 
                 sw.Stop();
