@@ -1,3 +1,4 @@
+# TODO: figure out why the TreAPISettings__PublicApiBaseUrl setting exists and what its assumed it'll be set to...
 uiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -46,16 +47,20 @@ spec:
               value: "{{ .Values.config.seqUrl }}"
             - name: DemoMode
               value: "{{ .Values.config.demoMode.enabled }}"
-            - name: KeyCloakDemoMode
+            - name: KeycloakDemoMode
               value: "{{ .Values.config.keycloakDemoMode }}"
             - name: sslcookies
               value: "{{ .Values.config.sslCookies }}"
             - name: httpsRedirect
               value: "{{ .Values.config.httpsRedirect }}"
-            - name: TreAPISettings__Address
+            - name: TreAPISettings__InternalApiBaseUrl
+              value: 'http://{{ include "tre.fullname" . }}-api'
+              # TODO: what and why does this exist?
+              # setting to the internal api svc name for now as orchestration will be hard...
+            - name: TreAPISettings__PublicApiBaseUrl
               value: 'http://{{ include "tre.fullname" . }}-api'
             - name: TreKeyCloakSettings__Authority
-              value: "{{ default .Values.config.keycloak.tre.authority .Values.config.keycloak.global.authority }}"
+              value: "{{ default .Values.config.keycloak.tre.api.authority .Values.config.keycloak.global.authority }}"
             - name: TreKeyCloakSettings__MetadataAddress
               value: "{{ default .Values.config.keycloak.tre.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.tre.api.host .Values.config.keycloak.global.host }}/realms/{{ .Values.config.keycloak.tre.api.realm }}/.well-known/openid-configuration"
             - name: TreKeyCloakSettings__BaseUrl

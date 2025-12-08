@@ -1,4 +1,5 @@
-uiVersion: apps/v1
+# This is done except some of the extra keycloak cert bits
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "tre.fullname" . }}-data-egress-ui
@@ -46,10 +47,10 @@ spec:
               value: "{{ .Values.config.seqUrl }}"
             - name: DemoMode
               value: "{{ .Values.config.demoMode.enabled }}"
-            - name: KeyCloakDemoMode
+            - name: KeycloakDemoMode
               value: "{{ .Values.config.keycloakDemoMode }}"
             - name: DataEgressAPISettings__Address
-              value: 'http://{{ include "tre.fullname" . }}-data-egress-api'
+              value: 'http://{{ include "tre.fullname" . }}-data-egress-api:{{ .Values.dataEgress.api.service.port }}'
             - name: DataEgressKeyCloakSettings__Authority
               value: "{{ default .Values.config.keycloak.dataEgress.api.authority .Values.config.keycloak.global.authority }}"
             - name: DataEgressKeyCloakSettings__MetadataAddress
@@ -86,6 +87,8 @@ spec:
               value: "{{ default .Values.config.keycloak.dataEgress.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.dataEgress.api.host .Values.config.keycloak.global.host }}/realms/{{ .Values.config.keycloak.dataEgress.api.realm }}/account"
             - name: Helpdesk__URL
               value: "{{ .Values.config.helpdeskUrl }}"
+            - name: MinioSettings__Url
+              value: "{{ .Values.config.minio.tre.url }}"
             {{- with .Values.dataEgress.ui.env }}
             {{- . | toYaml | nindent 12 }}
             {{- end }}

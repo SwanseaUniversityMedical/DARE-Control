@@ -1,3 +1,4 @@
+# This is also done
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -65,6 +66,8 @@ spec:
               value: "{{ .Values.config.rabbitmq.host }}"
             - name: RabbitMQ__PortNumber
               value: "{{ .Values.config.rabbitmq.port }}"
+            - name: RabbitMQ__VirtualHost
+              value: "{{ .Values.config.rabbitmq.vhost }}"
             - name: RabbitMQ__Password
               valueFrom:
                 secretKeyRef:
@@ -102,9 +105,9 @@ spec:
             - name: DareAPISettings__Address
               value: "{{ .Values.config.submission.apiAddress }}"
             - name: DataEgressAPISettings__Address
-              value: 'http://{{ include "tre.fullname" . }}-data-egress-api'
+              value: 'http://{{ include "tre.fullname" . }}-data-egress-api:{{ .Values.dataEgress.api.service.port }}'
             - name: TreAPISettings__Address
-              value: 'http://{{ include "tre.fullname" . }}-api'
+              value: 'http://{{ include "tre.fullname" . }}-api:{{ .Values.tre.api.service.port }}'
             - name: Features__GenerateAccounts
               value: "{{ .Values.config.features.generateAccounts }}"
             - name: Features__SqlAndNotGraphQl
@@ -114,7 +117,7 @@ spec:
             - name: Features__EphemeralCredentials
               value: "{{ .Values.config.features.ephemeralCreds }}"
             - name: TreKeyCloakSettings__Authority
-              value: "{{ default .Values.config.keycloak.tre.authority .Values.config.keycloak.global.authority }}"
+              value: "{{ default .Values.config.keycloak.tre.api.authority .Values.config.keycloak.global.authority }}"
             - name: TreKeyCloakSettings__MetadataAddress
               value: "{{ default .Values.config.keycloak.tre.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.tre.api.host .Values.config.keycloak.global.host }}/realms/{{ .Values.config.keycloak.tre.api.realm }}/.well-known/openid-configuration"
             - name: TreKeyCloakSettings__BaseUrl
@@ -139,10 +142,6 @@ spec:
               value: "{{ .Values.config.keycloak.proxy.url }}"
             - name: TreKeyCloakSettings__BypassProxy
               value: "{{ .Values.config.keycloak.proxy.bypassList }}"
-            - name: TreKeyCloakSettings__UseRedirectURL
-              value: "{{ .Values.config.keycloak.tre.api.useRedirect }}"
-            - name: TreKeyCloakSettings__RedirectURL
-              value: "{{ .Values.config.keycloak.tre.api.redirectUrl }}" 
             - name: DataEgressKeyCloakSettings__Authority
               value: "{{ default .Values.config.keycloak.tre.api.authority .Values.config.keycloak.global.authority }}"
             - name: DataEgressKeyCloakSettings__MetadataAddress
@@ -210,6 +209,10 @@ spec:
                   key: {{ .Values.config.minio.submission.secretSecretKey }}
             - name: MinioSubSettings__AWSRegion
               value: "us-east-1"
+            - name: MinioSubSettings__AWSService
+              value: "{{ .Values.config.minio.submission.awsService }}"
+            - name: MinioSubSettings__AttributeName
+              value: "{{ .Values.config.minio.submission.attributeName }}"
             - name: MinioTRESettings__Url
               value: "{{ .Values.config.minio.tre.url }}"
             - name: MinioTRESettings__AdminConsole
@@ -224,10 +227,14 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.config.minio.tre.secretName }}
                   key: {{ .Values.config.minio.tre.secretSecretKey }}
-            - name: MinioTRESettings__HutchURLOverride
-              value: "{{ .Values.config.minio.tre.hutchUrlOverride }}"
             - name: MinioTRESettings__AWSRegion
               value: "us-east-1"
+            - name: MinioTRESettings__BucketName
+              value: "{{ .Values.config.minio.tre.bucketName }}"
+            - name: MinioTRESettings__AWSService
+              value: "{{ .Values.config.minio.tre.awsService }}"
+            - name: MinioTRESettings__AttributeName
+              value: "{{ .Values.config.minio.tre.attributeName }}"
             - name: CredentialAPISettings__StartWebhookUrl
               value: "{{ .Values.config.camundaUrl }}/inbound/StartCredentials"
             - name: CredentialAPISettings__RevokeWebhookUrl
@@ -255,11 +262,11 @@ spec:
               value: "{{ .Values.config.opa.policyUploadEndpoint }}"
             - name: VaultSettings__BaseUrl
               value: "{{ .Values.config.vault.url }}"
-            - name: VaultSettings__Token 
+            - name: VaultSettings__Token
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.config.vault.tokenSecretName }}
-                  key: {{ .Values.config.vault.tokenSecretValue }}
+                  key: {{ .Values.config.vault.tokenSecretKey }}
             - name: VaultSettings__SecretEngine
               value: "{{ .Values.config.vault.secretEngine }}"
             - name: VaultSettings__EnableRetry
@@ -290,6 +297,26 @@ spec:
               value: "{{ .Values.config.agent.catalog }}"
             - name: AgentSettings__MandatoryInput
               value: "{{ .Values.config.agent.mandatoryInput }}"
+            - name: DmnFilePath
+              value: "{{ .Values.config.dmnFilePath }}"
+            - name: TreUISettings__Address
+              {{- if .Values.tre.ui.ingress.enabled }}
+              value: "https://{{ .Values.tre.ui.ingress.host }}"
+              {{- else }}
+              value: 'http://{{ include "tre.fullname" . }}-ui:{{ .Values.tre.ui.service.port }}'
+              {{- end }}
+            - name: ZeebeBootstrap__Client__GatewayAddress
+              value: "{{ .Values.config.zeebe.clientGatewayAddress }}"
+            - name: ZeebeBootstrap__Worker__MaxJobsActive
+              value: "{{ .Values.config.zeebe.worker.maxJobsActive }}"
+            - name: ZeebeBootstrap__Worker__PollIntervalInMilliseconds
+              value: "{{ .Values.config.zeebe.worker.pollIntervalMS }}"
+            - name: ZeebeBootstrap__Worker__PollingTimeoutInMilliseconds
+              value: "{{ .Values.config.zeebe.worker.pollTimeoutMS }}"
+            - name: ZeebeBootstrap__Worker__RetryTimeoutInMilliseconds
+              value: "{{ .Values.config.zeebe.worker.retryTimeoutMS }}"
+            - name: ZeebeBootstrap__Worker__TimeoutInMilliseconds
+              value: "{{ .Values.config.zeebe.worker.timeoutMS }}"
             {{- with .Values.tre.api.env }}
             {{- . | toYaml | nindent 12 }}
             {{- end }}

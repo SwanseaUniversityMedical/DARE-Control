@@ -29,12 +29,14 @@ config:
     secretName: ""
     passwordSecretKey: "password"
     usernameSecretKey: "username"
-    dataEgressDatabase: ""
-    treDatabase: ""
+    dataEgressDatabase: "DATA-Egress"
+    treDatabase: "DARE-Tre"
+    treCredsDatabase: "TRE_Credentials"
 
   rabbitmq:
     host: ""
-    port: ""
+    port: 5672
+    vhost: "SubLayer"
     secretName: ""
     passwordSecretKey: "password"
     usernameSecretKey: "username"
@@ -44,6 +46,7 @@ config:
   uiName: ""
   treName: ""
   camundaUrl: ""
+  dmnFilePath: "../TRE.Credentials/ProcessModels"
 
 
   demoMode:
@@ -58,12 +61,26 @@ config:
   minio:
     tre:
       url: ""
+      awsService: "s3"
+      attributeName: "policy"
       bucketName: ""
+      consoleName: ""
+      consoleUrl: ""
+      secretName: ""
+      accessSecretKey: "accessKey"
+      secretSecretKey: "secretKey"
+
+    submission:
+      url: ""
+      awsService: "s3"
+      attributeName: "policy"
+      bucketName: ""
+      consoleUrl: ""
       consoleName: ""
       secretName: ""
       accessSecretKey: "accessKey"
       secretSecretKey: "secretKey"
-      hutchUrlOverride: ""
+
 
 
   keycloak:
@@ -82,25 +99,26 @@ config:
         authority: ""
         protocol: ""
         host: ""
-        realm: ""
+        realm: "Dare-TRE"
         secretName: ""
         clientIdKey: "clientId"
         clientSecretKey: "clientSecret"
         useRedirect: false
         redirectUrl: ""
+        validAudiences: "Dare-TRE-API,Dare-TRE-UI"
 
     dataEgress:
       api:
         authority: ""
         protocol: ""
         host: ""
-        realm: ""
+        realm: "Data-Egress"
         secretName: ""
         clientIdKey: "clientId"
         clientSecretKey: "clientSecret"
         useRedirect: false
         redirectUrl: ""
-        validAudiences: ""
+        validAudiences: "Data-Egress-API"
 
       ui:
         redirectUrl: ""
@@ -138,8 +156,8 @@ config:
     enabled: false
 
   jobSettings:
-    syncSchedule: ""
-    scanSchedule: ""
+    syncSchedule: 10
+    scanSchedule: 1
 
 
   authSettings:
@@ -149,10 +167,10 @@ config:
     apiAddress: ""
 
   features:
-    generateAccounts: ""
-    sqlNotGraphQl: ""
-    demoAllInOne: ""
-    ephemeralCreds: ""
+    generateAccounts: "false"
+    sqlNotGraphQl: "true"
+    demoAllInOne: "false"
+    ephemeralCreds: "false"
 
   hasura:
     enabled: false
@@ -193,6 +211,15 @@ config:
     hasuraUrl: ""
     catalog: ""
     mandatoryInput: ""
+
+  zeebe:
+    clientGatewayAddress: ""
+    worker:
+      maxJobsActive: "5"
+      pollIntervalMS: "500"
+      pollTimeoutMS: "50"
+      retryTimeoutMS: "1000"
+      timeoutMS: "1000"
 
 
 

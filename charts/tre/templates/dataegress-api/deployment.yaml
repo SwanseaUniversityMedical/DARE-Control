@@ -1,3 +1,5 @@
+# This is done except some of the keycloak extra setting stuff
+# TODO: make sure the TRE minio config is the right stuff to use here
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -58,14 +60,18 @@ spec:
               value: "{{ .Values.config.seqUrl }}"
             - name: DemoMode
               value: "{{ .Values.config.demoMode.enabled }}"
-            - name: KeyCloakDemoMode
+            - name: KeycloakDemoMode
               value: "{{ .Values.config.keycloakDemoMode }}"
             - name: MinioSettings__Url
               value: "{{ .Values.config.minio.tre.url }}"
             - name: MinioSettings__BucketName
               value: "{{ .Values.config.minio.tre.bucketName }}"
-            - name: MinioSettings__AdminConsole
-              value: "{{ .Values.config.minio.tre.consoleUrl }}"
+            - name: MinioSettings__AWSRegion
+              value: "us-east-1"
+            - name: MinioSettings__AWSService
+              value: "{{ .Values.config.minio.tre.awsService }}"
+            - name: MinioSettings__AttributeName
+              value: "{{ .Values.config.minio.tre.attributeName }}"
             - name: MinioSettings__AccessKey
               valueFrom:
                 secretKeyRef:
@@ -77,17 +83,19 @@ spec:
                   name: {{ .Values.config.minio.tre.secretName }}
                   key: {{ .Values.config.minio.tre.secretSecretKey }}
             - name: DataEgressAPISettings__Address
-              value: 'http://{{ include "tre.fullname" . }}-data-egress-api'
+              value: 'http://{{ include "tre.fullname" . }}-data-egress-api:{{ .Values.dataEgress.api.service.port }}'
             - name: TreAPISettings__Address
-              value: 'http://{{ include "tre.fullname" . }}-api'
+              value: 'http://{{ include "tre.fullname" . }}-api:{{ .Values.tre.api.service.port }}'
             - name: TreKeyCloakSettings__Authority
-              value: "{{ default .Values.config.keycloak.tre.authority .Values.config.keycloak.global.authority }}"
+              value: "{{ default .Values.config.keycloak.tre.api.authority .Values.config.keycloak.global.authority }}"
             - name: TreKeyCloakSettings__MetadataAddress
               value: "{{ default .Values.config.keycloak.tre.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.tre.api.host .Values.config.keycloak.global.host }}/realms/{{ .Values.config.keycloak.tre.api.realm }}/.well-known/openid-configuration"
             - name: TreKeyCloakSettings__BaseUrl
               value: "{{ default .Values.config.keycloak.tre.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.tre.api.host .Values.config.keycloak.global.host }}/realms/{{ .Values.config.keycloak.tre.api.realm }}"
             - name: TreKeyCloakSettings__RootUrl
               value: "{{ default .Values.config.keycloak.tre.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.tre.api.host .Values.config.keycloak.global.host }}"
+            - name: TreKeyCloakSettings__Realm
+              value: "{{ .Values.config.keycloak.tre.api.realm }}"
             - name: TreKeyCloakSettings__ClientId
               valueFrom:
                 secretKeyRef:
@@ -118,6 +126,8 @@ spec:
               value: "{{ default .Values.config.keycloak.dataEgress.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.dataEgress.api.host .Values.config.keycloak.global.host }}/realms/{{ .Values.config.keycloak.dataEgress.api.realm }}"
             - name: DataEgressKeyCloakSettings__RootUrl
               value: "{{ default .Values.config.keycloak.dataEgress.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.dataEgress.api.host .Values.config.keycloak.global.host }}"
+            - name: DataEgressKeyCloakSettings__Realm
+              value: "{{ .Values.config.keycloak.dataEgress.api.realm }}"
             - name: DataEgressKeyCloakSettings__ClientId
               valueFrom:
                 secretKeyRef:
