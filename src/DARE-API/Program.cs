@@ -28,6 +28,8 @@ using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddHealthChecks();
+
 ConfigurationManager configuration = builder.Configuration;
 IWebHostEnvironment environment = builder.Environment;
 
@@ -304,7 +306,7 @@ builder.Services.AddAuthorization(options =>
 var app = builder.Build();
 
 var serviceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
-
+app.MapHealthChecks("/health");
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
@@ -345,18 +347,17 @@ if (!app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    var keytoken = scope.ServiceProvider.GetRequiredService<IKeyclockTokenAPIHelper>();
+    var keytoken = scope.ServiceProvider.GetRequiredService<IKeycloakTokenApiHelper>();
     var miniosettings = scope.ServiceProvider.GetRequiredService<MinioSettings>();
     var miniohelper = scope.ServiceProvider.GetRequiredService<IMinioHelper>();
     var userService = scope.ServiceProvider.GetRequiredService<IKeycloakMinioUserService>();
 
     db.Database.Migrate();
-    var initialiser = new DataInitaliser(miniosettings, miniohelper, db, keytoken, userService);
+    var initialiser = new DataInitialiser(miniosettings, db, keytoken, userService, miniohelper);
     if (demomode)
     {
         initialiser.SeedAllInOneData();
-    }else if (configuration.GetValue<bool>("Testdata"))
-        initialiser.SeedData();
+    }
 }
 
 
@@ -402,7 +403,7 @@ void AddDependencies(WebApplicationBuilder builder, ConfigurationManager configu
     
     builder.Services.AddScoped<IMinioHelper, MinioHelper>();
     builder.Services.AddScoped<IKeycloakMinioUserService, KeycloakMinioUserService>();
-    builder.Services.AddScoped<IKeyclockTokenAPIHelper, KeyclockTokenAPIHelper>();
+    builder.Services.AddScoped<IKeycloakTokenApiHelper, KeycloakTokenApiHelper>();
     builder.Services.AddScoped<IKeyCloakService, KeyCloakService>();
     builder.Services.AddScoped<IDareEmailService, DareEmailService>();
     

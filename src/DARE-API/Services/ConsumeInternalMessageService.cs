@@ -137,7 +137,6 @@ namespace DARE_API.Services
                 }
 
 
-
                 var dbtres = new List<BL.Models.Tre>();
 
                 if (tres.Count == 0)

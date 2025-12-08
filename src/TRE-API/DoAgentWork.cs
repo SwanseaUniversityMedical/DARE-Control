@@ -1,4 +1,4 @@
-﻿using BL.Models;
+using BL.Models;
 using BL.Models.Enums;
 using BL.Models.Settings;
 using BL.Models.Tes;
@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.FeatureManagement;
 using Newtonsoft.Json;
 using Serilog;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
@@ -193,7 +194,12 @@ namespace TRE_API
                 string url = _AgentSettings.TESKAPIURL + "/" + taskID + "?view=BASIC";
 
                 HttpClientHandler handler = new HttpClientHandler();
-
+                // Getting project name
+                var projectName = _dbContext.Projects.FirstOrDefault(p => p.SubmissionProjectId == projectId)?.SubmissionProjectName ?? "UnknownProject";
+                if (projectName == "UnknownProject")
+                {
+                    Log.Error("{Function} Could not find project name for projectId {ProjectId}", "CheckTES", projectId);
+                }
                 if (_AgentSettings.Proxy)
                 {
                     handler = new HttpClientHandler
@@ -267,7 +273,7 @@ namespace TRE_API
                                         
                                         try
                                         {
-                                            await TriggerRevokeCredentialsAsync(subId, projectId, userId, 0);
+                                            await TriggerRevokeCredentialsAsync(subId, projectName, userId, 0);
 
                                         }
                                         catch (Exception ex)
@@ -482,85 +488,125 @@ namespace TRE_API
 
                             if (await _features.IsEnabledAsync(FeatureFlags.EphemeralCredentials))
                             {
-                                
-                                Log.Information($"Fetching ephemeral credential data from Camunda");
+                                var credsForSubmission = await _credsDbContext.EphemeralCredentials.Where(c => c.SubmissionId == aSubmission.Id).ToListAsync();
 
-                                var creds = await _credsDbContext.EphemeralCredentials
-                                .Where(e => e.SubmissionId == aSubmission.Id && e.IsProcessed != true)
-                                .OrderByDescending(e => e.CreatedAt)
-                                .ToListAsync();
+                                //This is the check to see if the start credentials were triggered for this submission
+                                bool alreadyTriggered = credsForSubmission.Any();
 
-                                if (creds.Count == 0)
+                                // This is the check to see if the credentials were already fetched and processed for this submission
+                                bool alreadyProcessed = credsForSubmission.Any(c => c.IsProcessed == true); 
+
+                                if (!alreadyTriggered)
                                 {
-                                    Log.Information("No EphemeralCredentials rows yet for submission {SubId}. Skipping.", aSubmission.Id);
-                                    continue;
+                                    try
+                                    {
+                                        var project = aSubmission.Project.Name;
+                                        await TriggerStartCredentialsAsync(aSubmission.Id, project, aSubmission.SubmittedBy.Id);
+                                        Log.Information("Triggered credentials for submission {SubId}", aSubmission.Id);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log.Error(ex, "Failed to trigger credentials for Sub {Sub}", aSubmission.Id);
+                                        continue;
+                                    }
                                 }
 
-
-                                var parentKey = creds.Select(c => c.ParentProcessInstanceKey).FirstOrDefault(k => k.HasValue && k.Value > 0);
-
-                                if (!parentKey.HasValue)
+                                if(!alreadyProcessed)
                                 {
-                                    Log.Information("No parent processInstanceKey for submission {SubId}. Skipping this cycle.", aSubmission.Id);
-                                    continue;
-                                }
+                                    Log.Information($"Fetching ephemeral credential data from Camunda");                                  
 
-                                var credsRowforParentKey = await _credsDbContext.EphemeralCredentials.Where(e => e.SubmissionId == aSubmission.Id && e.ParentProcessInstanceKey == parentKey && e.IsProcessed != true).OrderByDescending(e => e.CreatedAt).ToListAsync();
+                                    var creds = await GetLatestCreds(aSubmission.Id);
 
-                                bool anyErrored = credsRowforParentKey.Any(c => c.SuccessStatus == SuccessStatus.Error);
-                                bool allSucceeded = credsRowforParentKey.All(c => c.SuccessStatus == SuccessStatus.Success);
+                                    if (creds.Count == 0)
+                                    {
+                                       
+                                        Log.Information("No credentials yet for submission {SubId}. Will retry inside same run.", aSubmission.Id);
 
-                                if (anyErrored)
-                                {
-                                    Log.Error("Credential process errored for submission {SubId}.", aSubmission.Id);
+                                        var retryStopwatch = Stopwatch.StartNew();
+                                        while (retryStopwatch.Elapsed < TimeSpan.FromSeconds(60))
+                                        {
+                                            await Task.Delay(2000);
+                                            creds = await GetLatestCreds(aSubmission.Id);
 
-                                    var latestRow = creds.First();
-                                    latestRow.ErrorMessage = "Credential process failed";
+                                            if (creds.Count > 0)
+                                                break;
+                                        }
+
+                                        if (creds.Count == 0)
+                                        {
+                                            Log.Information("Still no credentials after retry window. Skipping until next Hangfire cycle.");
+                                            continue;
+                                        }
+
+                                    }
+
+                                    //This check is to avoid duplicate runs for the same submission ID
+                                    var parentKey = creds.Select(c => c.ParentProcessInstanceKey).FirstOrDefault(k => k.HasValue && k.Value > 0);
+
+                                    if (!parentKey.HasValue)
+                                    {
+                                        Log.Information("No parent processInstanceKey for submission {SubId}. Skipping this cycle.", aSubmission.Id);
+                                        continue;
+                                    }
+
+                                    var credsRowforParentKey = await _credsDbContext.EphemeralCredentials.Where(e => e.SubmissionId == aSubmission.Id && e.ParentProcessInstanceKey == parentKey && e.IsProcessed != true).OrderByDescending(e => e.CreatedAt).ToListAsync();
+
+                                    bool anyErrored = credsRowforParentKey.Any(c => c.SuccessStatus == SuccessStatus.Error);
+                                    bool allSucceeded = credsRowforParentKey.All(c => c.SuccessStatus == SuccessStatus.Success);
+
+                                    if (anyErrored)
+                                    {
+                                        Log.Error("Credential process errored for submission {SubId}.", aSubmission.Id);
+
+                                        var latestRow = creds.First();
+                                        latestRow.ErrorMessage = "Credential process failed";
+                                        await _credsDbContext.SaveChangesAsync();
+
+                                        _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.RequestCancellation, "Credential process failed");
+                                        continue;
+                                    }
+
+                                    if (!allSucceeded)
+                                    {
+                                        Log.Information("Credential process still running for submission , Will retry next run.");
+                                        continue;
+                                    }
+
+                                    Log.Information("All credential handlers succeeded for submission {SubId}. Fetching credentials.", aSubmission.Id);
+                                    credentials = await WaitForAndFetchCredentialsAsync(aSubmission.Id, TimeSpan.FromMinutes(10));
+
+                                    if (credentials == null || credentials.Count == 0)
+                                    {
+                                        var errorMsg = $"No credentials found in Vault for submission {aSubmission.Id}";
+                                        Log.Error(errorMsg);
+
+                                        var latestRow = creds.First();
+                                        latestRow.ErrorMessage = errorMsg;
+                                        await _credsDbContext.SaveChangesAsync();
+
+                                        _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.RequestCancellation, errorMsg);
+                                        continue;
+                                    }
+
+                                    Log.Information($"Successfully obtained {credentials.Count} credentials for submission {aSubmission.Id}");
                                     await _credsDbContext.SaveChangesAsync();
 
-                                    _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.RequestCancellation, "Credential process failed");
+                                    try
+                                    {
+                                        await TriggerRevokeCredentialsAsync(aSubmission.Id, aSubmission.Project.Name, aSubmission.SubmittedBy.Id, 1);
+
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log.Error(ex, "Failed to trigger revoke credentials for submission {SubId}", aSubmission.Id);
+
+                                    }
+                    
+                                }
+                                else
+                                {
+                                    Log.Information("Submission {SubId} already fully processed. Skipping.", aSubmission.Id);
                                     continue;
-                                }
-
-                                if (!allSucceeded)
-                                {
-                                    Log.Information("Credential process still running for submission , Will retry next run.");
-                                    continue;
-                                }
-
-                                Log.Information("All credential handlers succeeded for submission {SubId}. Fetching credentials.", aSubmission.Id);
-                                credentials = await WaitForAndFetchCredentialsAsync(aSubmission.Id, TimeSpan.FromMinutes(10));
-
-                                if (credentials == null || credentials.Count == 0)
-                                {
-                                    var errorMsg = $"No credentials found in Vault for submission {aSubmission.Id}";
-                                    Log.Error(errorMsg);
-
-                                    var latestRow = creds.First();
-                                    latestRow.ErrorMessage = errorMsg;
-                                    latestRow.IsProcessed = true;
-                                    await _credsDbContext.SaveChangesAsync();
-
-                                    _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.RequestCancellation, errorMsg);
-                                    continue;
-                                }
-
-                                Log.Information($"Successfully obtained {credentials.Count} credentials for submission {aSubmission.Id}");
-
-                                foreach (var row in creds)
-                                    row.IsProcessed = true;
-
-                                await _credsDbContext.SaveChangesAsync();
-
-                                try
-                                {
-                                    await TriggerRevokeCredentialsAsync(aSubmission.Id, aSubmission.Project.Id, aSubmission.SubmittedBy.Id, 1);
-
-                                }
-                                catch (Exception ex)
-                                {
-                                    Log.Error(ex, "Failed to trigger revoke credentials for submission {SubId}", aSubmission.Id);
-
                                 }
 
                             }
@@ -684,7 +730,16 @@ namespace TRE_API
 
                                     input.Path = input.Path.Replace("..", "");
 
-                                    input.Url = "s3://" + InputBucket + input.Path;
+
+                                    if (input != MandatoryInput)
+                                    {
+                                        input.Url = "s3://" + InputBucket + "/data" + input.Path;
+                                    }
+                                    else
+                                    {
+                                        input.Url = "s3://" + InputBucket + input.Path;
+                                    }
+
 
                                     if (string.IsNullOrEmpty(input.Name))
                                     {
@@ -695,12 +750,9 @@ namespace TRE_API
                                     }
 
 
-                                    if (MandatoryInput != null)
+                                    if (input == MandatoryInput)
                                     {
-                                        if (input == MandatoryInput)
-                                        {
-                                            continue;
-                                        }
+                                        continue;
                                     }
 
 
@@ -755,6 +807,9 @@ namespace TRE_API
                                         Executor.Env = new Dictionary<string, string>();
                                     }
 
+                                    Executor.Env["SCHEMA"] = aSubmission.Project.Name;
+                                    Executor.Env["CATALOG"] = _AgentSettings.CATALOG;
+
                                     Log.Information("Executor.Image > " + Executor.Image);
                                     if (await _features.IsEnabledAsync(FeatureFlags.SqlAndNotGraphQl))
                                     {
@@ -763,8 +818,7 @@ namespace TRE_API
                                             Executor.Env["TRINO_SERVER_URL"] = _AgentSettings.URLTrinoToAdd;
                                             Executor.Env["ACCESS_TOKEN"] = Token;
                                             Executor.Env["USER_NAME"] = aSubmission.SubmittedBy.Name;
-                                            Executor.Env["SCHEMA"] = aSubmission.Project.Name;
-                                            Executor.Env["CATALOG"] = _AgentSettings.CATALOG;
+                                 
 
                                             if (string.IsNullOrEmpty(Executor.Env["TRINO_SERVER_URL"]))
                                             {
@@ -774,6 +828,8 @@ namespace TRE_API
 
                                         if(await _features.IsEnabledAsync(FeatureFlags.EphemeralCredentials))
                                         {
+                                            Log.Information($"Injecteing credentials into environment variables for {aSubmission.Id} nub > {credentials.Count}");
+
                                             if (credentials != null && credentials.Count > 0)
                                             {
                                                 foreach (var outerKey in credentials)
@@ -784,6 +840,8 @@ namespace TRE_API
                                                         {
                                                             var key = inner.Key;
                                                             var value = inner.Value?.ToString() ?? string.Empty;
+                                                            Log.Information("Injected credentials with Key " + key);
+
                                                             Executor.Env[key] = value;
                                                         }
                                                     }
@@ -869,11 +927,47 @@ namespace TRE_API
             }
         }
 
+        private async Task TriggerStartCredentialsAsync(int submissionId, string projectName, int userId)
+        {
+            var payload = new
+            {
+                records = new[]
+                {
+                    new
+                    {
+                        project = projectName,
+                        user = userId.ToString(),
+                        submissionId = submissionId.ToString()
+
+                    }
+                }
+            };
+
+            var jsonPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
+            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+            var camundaWebhookUrl = _config["CredentialAPISettings:StartWebhookUrl"];
+
+            using var httpClient = _httpClientFactory.CreateClient();
+            httpClient.Timeout = TimeSpan.FromMinutes(2);
+
+            var response = await httpClient.PostAsync(camundaWebhookUrl, content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Log.Error("Camunda webhook call failed for submission {SubmissionId}. Error: {Error}", submissionId, error);
+                throw new Exception($"Camunda webhook call failed: {response.StatusCode}");
+            }
+
+            Log.Information("Camunda StartCredentials triggered successfully for submission {SubmissionId}", submissionId);
+        }
+
 
         private async Task<Dictionary<string, Dictionary<string, object>>> WaitForAndFetchCredentialsAsync(int submissionId, TimeSpan? timeout = null)
         {
             var maxWaitTime = timeout ?? TimeSpan.FromMinutes(5);
-            var pollInterval = TimeSpan.FromSeconds(10);
+            var pollInterval = TimeSpan.FromSeconds(5); //Reduced polling interval for faster fetch
             var fetchedCredentials = new Dictionary<string, Dictionary<string, object>>();
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
@@ -930,7 +1024,7 @@ namespace TRE_API
             throw new TimeoutException(errorMsg);
         }
         
-        private async Task TriggerRevokeCredentialsAsync(int submissionId, int project, int user, int timer)
+        private async Task TriggerRevokeCredentialsAsync(int submissionId, string projectName, int user, int timer)
         {
             var payload = new
             {
@@ -939,7 +1033,7 @@ namespace TRE_API
                     new
                     {
                         submissionId = submissionId.ToString(),
-                        project = project.ToString(),
+                        project = projectName,
                         user = user.ToString(),
                         timer = timer
                     }
@@ -976,5 +1070,16 @@ namespace TRE_API
 
             Log.Information("Camunda RevokeCredentials triggered successfully for submission {SubmissionId}", submissionId);
         }
+
+
+        //Seperated DB check to a private method
+        private Task<List<EphemeralCredential>> GetLatestCreds(int submissionId)
+        {
+            return _credsDbContext.EphemeralCredentials
+                .Where(e => e.SubmissionId == submissionId && e.IsProcessed != true)
+                .OrderByDescending(e => e.CreatedAt)
+                .ToListAsync();
+        }
+
     }
 }

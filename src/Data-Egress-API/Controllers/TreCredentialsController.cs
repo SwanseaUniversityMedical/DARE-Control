@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using Data_Egress_API.Repositories.DbContexts;
+using Newtonsoft.Json;
 
 
 namespace Data_Egress_API.Controllers
@@ -24,9 +25,15 @@ namespace Data_Egress_API.Controllers
         public KeycloakTokenHelper _keycloakTokenHelper { get; set; }
         public KeycloakTokenHelper _egressKeycloakTokenHelper { get; set; }
 
+        private DataEgressKeyCloakSettings egressKeyCloakSettings;
+
+        private TreKeyCloakSettings keycloakSettings;
+
 
         public TreCredentialsController(ApplicationDbContext applicationDbContext, IEncDecHelper encDec, TreKeyCloakSettings keycloakSettings, DataEgressKeyCloakSettings egressKeyCloakSettings)
         {
+            this.egressKeyCloakSettings = egressKeyCloakSettings;
+            this.keycloakSettings = keycloakSettings;
             _encDecHelper = encDec;
             _DbContext = applicationDbContext;
             _keycloakTokenHelper = new KeycloakTokenHelper(keycloakSettings.BaseUrl, keycloakSettings.ClientId,
@@ -50,7 +57,7 @@ namespace Data_Egress_API.Controllers
                 {
                     var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
                         _encDecHelper.Decrypt(creds.PasswordEnc), "data-egress-admin");
-                    result.Result = !string.IsNullOrWhiteSpace(token);
+                    result.Result = !string.IsNullOrWhiteSpace(token.token);
 
                 }
 
@@ -74,7 +81,7 @@ namespace Data_Egress_API.Controllers
             {
                 var token = await _egressKeycloakTokenHelper.GetTokenForUser(creds.UserName,
                     _encDecHelper.Decrypt(creds.PasswordEnc), "data-egress-admin");
-                result.Result = !string.IsNullOrWhiteSpace(token);
+                result.Result = !string.IsNullOrWhiteSpace(token.token);
 
             }
 
@@ -96,8 +103,9 @@ namespace Data_Egress_API.Controllers
                 creds.Valid = true;
                 var token = await _egressKeycloakTokenHelper.GetTokenForUser(creds.UserName,
                     creds.PasswordEnc, "data-egress-admin");
-                if (string.IsNullOrWhiteSpace(token))
+                if (string.IsNullOrWhiteSpace(token.token))
                 {
+                    creds.ErrorMessage = token.Errorstring;
                     creds.Valid = false;
                     return creds;
                 }
@@ -143,8 +151,9 @@ namespace Data_Egress_API.Controllers
                 creds.Valid = true;
                 var token = await _keycloakTokenHelper.GetTokenForUser(creds.UserName,
                     creds.PasswordEnc, "data-egress-admin");
-                if (string.IsNullOrWhiteSpace(token))
+                if (string.IsNullOrWhiteSpace(token.token))
                 {
+                    creds.ErrorMessage= token.Errorstring;
                     creds.Valid = false;
                     return creds;
                 }

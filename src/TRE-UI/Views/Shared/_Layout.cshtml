@@ -50,6 +50,9 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="TRECredentials" asp-action="UpdateCredentials">Update TRE Credentials</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Dmn" asp-action="Index">DMN Rules</a>
+                        </li>
                         <li class="mobile-account-nav">
                             <hr class="mobile-account-nav dropdown-divider" />
                         </li>
@@ -68,7 +71,7 @@
                             @User?.FindFirst("name")?.Value
                         </a>
                         <ul class="dropdown-menu dropdown-right" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="#">Account</a></li>
+                            <li><a class="dropdown-item" href="@Configuration.GetSection("TreKeyCloakSettings")["AccountManagementURL"]">Account</a></li>
                             <li><a class="dropdown-item" href=@Configuration.GetSection("Helpdesk")["URL"]>Helpdesk</a></li>
                             <li><hr class="dropdown-divider"></li>
                             @if (@User?.FindFirst("name")?.Value == null)

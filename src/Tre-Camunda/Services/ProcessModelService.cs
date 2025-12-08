@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Zeebe.Client;
-using Tre_Camunda;
+using Tre_Credentials.Services;
 
 namespace Tre_Camunda.Services
 {
@@ -11,10 +11,9 @@ namespace Tre_Camunda.Services
         private IServicedZeebeClient _camunda;
         private readonly IConfiguration _configuration;
      
-        public ProcessModelService(IServicedZeebeClient IServicedZeebeClient, IConfiguration configuration)
+        public ProcessModelService(IServicedZeebeClient servicedZeebeClient, IConfiguration configuration)
         {
-
-            _camunda = IServicedZeebeClient;
+            _camunda = servicedZeebeClient;
             _configuration = configuration;           
         }       
 
@@ -28,47 +27,100 @@ namespace Tre_Camunda.Services
                 .UsePlainText()
                 .Build();
 
-            var topology = await zeebeClient.TopologyRequest().Send();
-            Console.WriteLine($"Connected to cluster with version");
+            await zeebeClient.TopologyRequest().Send();
+            Log.Information($"Connected to Zeebe cluster");
 
+            // Load ProcessModels from file system
+            var deployedCount = await DeployFromFileSystem();
 
-            var modelResources = Assembly.GetExecutingAssembly().GetManifestResourceNames()
-            .Where(x => x.ToLower().Contains(".processmodels.") &&
-            (x.EndsWith(".bpmn", StringComparison.OrdinalIgnoreCase) ||
-            x.EndsWith(".dmn", StringComparison.OrdinalIgnoreCase)))
-            .ToList();
-
-            if (!modelResources.Any())
+            if (deployedCount == 0)
             {
-                Log.Warning("No BPMN or DMN models found to deploy.");
-                return;
+                Log.Warning("No BPMN or DMN models found to deploy from file system.");
+            }
+            else
+            {
+                Log.Information($"Successfully deployed {deployedCount} process models total.");
+            }
+        }
+
+        private async Task<int> DeployFromFileSystem()
+        {
+            var deployedCount = 0;
+            
+            // Try to find ProcessModels directory in the application directory
+            var appDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var processModelsPath = Path.Combine(appDirectory!, "ProcessModels");
+
+            if (!Directory.Exists(processModelsPath))
+            {
+                Log.Information($"ProcessModels directory not found at: {processModelsPath}");
+                return deployedCount;
             }
 
-            foreach (var model in modelResources)
+            var modelFiles = Directory.GetFiles(processModelsPath, "*.*", SearchOption.AllDirectories)
+                .Where(f => f.EndsWith(".bpmn", StringComparison.OrdinalIgnoreCase) || 
+                           f.EndsWith(".dmn", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (modelFiles.Any())
             {
-                var fileExtension = Path.GetExtension(model);
-                var name = Path.GetFileNameWithoutExtension(model.Split('.').Last());
-                var deploymentFileName = $"{name}{fileExtension}";
-                Log.Information($"Deploying process definition with name: {deploymentFileName}");
-
-                using var resourceStream = GetType().Assembly.GetManifestResourceStream(model);
-
-                if (resourceStream == null)
+                Log.Information($"Found {modelFiles.Count} process model files in file system to deploy.");
+                
+                foreach (var filePath in modelFiles)
                 {
-                    Log.Warning("Could not find resource stream for: " + model);
-                    continue;
+                    var deploymentFileName = Path.GetFileName(filePath);
+                    
+                    try
+                    {
+                        using var fileStream = File.OpenRead(filePath);
+                        if (await DeployModelStream(fileStream, deploymentFileName))
+                        {
+                            deployedCount++;
+                        }
+                    }
+                    catch (IOException ex)
+                    {
+                        Log.Error($"Could not read file {filePath}: {ex.Message}");
+                    }
+                }
+            }
+            else
+            {
+                Log.Information($"No process model files found in: {processModelsPath}");
+            }
+
+            return deployedCount;
+        }
+
+        private async Task<bool> DeployModelStream(Stream stream, string deploymentFileName)
+        {
+            Log.Information($"Deploying process definition with name: {deploymentFileName}");
+
+            try
+            {
+                // If this is a DMN file, deploy
+                if (deploymentFileName.EndsWith(".dmn", StringComparison.OrdinalIgnoreCase))
+                {
+                    using var reader = new StreamReader(stream);
+                    var content = await reader.ReadToEndAsync();
+                    var bytes = System.Text.Encoding.UTF8.GetBytes(content);
+                    using var memoryStream = new MemoryStream(bytes);
+                    await _camunda.DeployModel(memoryStream, deploymentFileName);
+                }
+                else
+                {
+                    // Reset stream position if possible
+                    if (stream.CanSeek) stream.Position = 0;
+                    await _camunda.DeployModel(stream, deploymentFileName);
                 }
 
-                try
-                {
-                    await _camunda.DeployModel(resourceStream, deploymentFileName);
-                    Log.Information($"Successfully deployed: {deploymentFileName}");
-                }
-                catch (Exception e)
-                {
-                    Log.Error($"Failed to deploy process definition with name: {deploymentFileName}, error: {e}");
-                    throw new ApplicationException("Failed to deploy process definition", e);
-                }
+                Log.Information($"Successfully deployed: {deploymentFileName}");
+                return true;
+            }
+            catch (Exception e)
+            {
+                Log.Error($"Failed to deploy process definition with name: {deploymentFileName}, error: {e}");
+                throw new ApplicationException("Failed to deploy process definition", e);
             }
         }
     }

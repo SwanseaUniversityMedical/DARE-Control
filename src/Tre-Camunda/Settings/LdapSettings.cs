@@ -18,8 +18,12 @@ namespace Tre_Camunda.Services
         public string BaseDn { get; set; }
 
         public string UserOu {  get; set; }
+        public string GroupCn {  get; set; }
 
         public bool UseSSL { get; set; }
-    
+
+        public bool connectionless { get; set; }
+
+
     }
 }

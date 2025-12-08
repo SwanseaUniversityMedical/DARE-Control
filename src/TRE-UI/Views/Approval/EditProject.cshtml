@@ -45,6 +45,10 @@
             <h2 class="fs-5">About</h2>
             @Model.Description
 
+
+            <h2 class="fs-5">Minio</h2>
+            TRE minio submission bucket <b>@Model.SubmissionBucketTre </b>
+
             
         </div>
         <div class="row">
@@ -61,10 +65,9 @@
 
                                  
                     <div id ="date" class="form-group">
-                        @Html.TextBoxFor(x => x.ProjectExpiryDate, new { @class = "form-control", @Value=Model.ProjectExpiryDate.ToString("yyyy-MM-dd"), type = "date"});
-                        <script>
-                            document.getElementById("ProjectExpiryDate").valueAsDate = new Date("@Model.ProjectExpiryDate.ToString("yyyy-MM-dd")");
-                        </script>
+                        @Html.HiddenFor(x => x.ProjectExpiryDate)
+                        <input class="form-control" type="date" value="@Model.ProjectExpiryDate.ToString("yyyy-MM-dd")" disabled="disabled" />
+
 
                     </div>
                     <h2 class="fs-5 mt-5">Decision</h2>
@@ -87,20 +90,7 @@
                             </div>
                             
                         }
-                    </div>
-                    <div class="db-cred">
-                        <h2 class="fs-5 mt-5">Database Credentials</h2>
-                        <p>Please enter the credentials for the database you will allow queries for this project to run against.</p>
-                        
-                        <div class="form-group">
-                            @Html.LabelFor(x => x.UserName, new { @class = "form-label"})
-                            @Html.TextBoxFor(x => x.UserName, new { @class = "form-control", autofocus = "false"})
-                        </div>
-                        <div class="form-group">
-                            @Html.LabelFor(x => x.Password, new { @class = "form-label"})
-                            @Html.PasswordFor(x => x.Password, new { @class = "form-control"})
-                        </div>
-                    </div>
+                    </div>                   
                     <div class="form-group mb-5">
                         @Html.ValidationSummary(false, "", new { @class = "text-danger" })
                     </div>

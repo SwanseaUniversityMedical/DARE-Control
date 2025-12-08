@@ -26,10 +26,10 @@ namespace Data_Egress_UI.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result =
+                credentials =
                     await _clientHelper.CallAPI<KeycloakCredentials, KeycloakCredentials>(
                         "/api/TreCredentials/EgressUpdateCredentials", credentials);
-                if (result.Valid)
+                if (credentials.Valid)
                 {
                     return RedirectToAction("Index", "Home");
                 }

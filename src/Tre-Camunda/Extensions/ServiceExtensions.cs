@@ -12,6 +12,7 @@ using VaultCredentialsService = Tre_Camunda.Services.VaultCredentialsService;
 using IPostgreSQLUserManagementService = Tre_Camunda.Services.IPostgreSQLUserManagementService;
 using PostgreSQLUserManagementService = Tre_Camunda.Services.PostgreSQLUserManagementService;
 using Tre_Credentials.DbContexts;
+using Tre_Credentials.Services;
 using Microsoft.EntityFrameworkCore;
 using Zeebe.Client.Accelerator.Extensions;
 
@@ -56,7 +57,7 @@ namespace Tre_Camunda.Extensions
             services.AddHostedService<BpmnProcessDeployService>();
             services.AddScoped<IProcessModelService, ProcessModelService>();
 
-            services.AddScoped<IServicedZeebeClient, ServicedZeebeClient>();
+            services.AddScoped<Tre_Credentials.Services.IServicedZeebeClient, Tre_Credentials.Services.ServicedZeebeClient>();
 
             services.AddScoped<IPostgreSQLUserManagementService, PostgreSQLUserManagementService>();
             services.AddScoped<CreatePostgresUserHandler>();
@@ -65,6 +66,9 @@ namespace Tre_Camunda.Extensions
             services.AddScoped<CreateTrinoUserHandler>();
 
             services.AddScoped<IEphemeralCredentialsService, EphemeralCredentialsService>();
+
+            services.AddScoped<CreateTreCredentialsHandler>();
+            services.AddScoped<DeleteTreCredentialsHandler>();
         }
     }
 }

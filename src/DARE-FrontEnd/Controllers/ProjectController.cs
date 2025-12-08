@@ -54,23 +54,6 @@ namespace DARE_FrontEnd.Controllers
             return false;
         }
 
-        private bool IsUserOnProject(Project proj)
-        {
-            if (User.IsInRole("dare-control-admin"))
-            {
-                return true;
-            }
-
-            var usersName = "";
-            usersName = (from x in User.Claims where x.Type == "preferred_username" select x.Value).FirstOrDefault();
-            if (!string.IsNullOrWhiteSpace(usersName) &&
-                (from x in proj.Users where x.Name.ToLower().Trim() == usersName.ToLower().Trim() select x).Any())
-            {
-                return true;
-            }
-            return false;
-        }
-
         [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetProject(int id)
@@ -94,15 +77,23 @@ namespace DARE_FrontEnd.Controllers
             //Log.Error("minioEndpoint took ElapsedMilliseconds" + stopwatch.ElapsedMilliseconds);
             stopwatch.Stop();
             var project = projectawait.Result;
-            var users = _clientHelper.CallAPIWithoutModel<List<BL.Models.User>>("/api/User/GetAllUsers/").Result;
-            var tres = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Tre/GetAllTres/").Result;
-
-            var userItems2 = users.Where(p => !project.Users.Select(x => x.Id).Contains(p.Id)).ToList();
-            var treItems2 = tres.Where(p => !project.Tres.Select(x => x.Id).Contains(p.Id)).ToList();
+    
+            var userItems2 = project.UsersNotInProject;
+            var treItems2 = project.TresNotInProject;
 
             var userItems = userItems2
-                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.FullName != "" ? p.FullName : p.Name })
+                .Select(p => new SelectListItem
+                {
+                    Value = p.Id.ToString(),
+                    Text = !string.IsNullOrWhiteSpace(p.FullName)
+                        ? p.FullName
+                        : (!string.IsNullOrWhiteSpace(p.Name) ? p.Name : $"[id:{p.Id}]")
+                })
                 .ToList();
+
+            var tres = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Tre/GetAllTres/").Result;
+
+            // Process TRE names for display
             var treItems = treItems2
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToList();
@@ -136,7 +127,10 @@ namespace DARE_FrontEnd.Controllers
             //Log.Error("View(projectView) took ElapsedMilliseconds" + stopwatch.ElapsedMilliseconds);
             return View(projectView);
         }
-
+        
+        // Only users on the project or admins can see the TES Wizard, thanks to the function IsUserOnProject in this file
+        // AllowAnonymous here is to bypass the error from KeyCloak
+        [AllowAnonymous]
         public IActionResult SubmissionProjectSQL(int id)
         {
             if (!ModelState.IsValid) // SonarQube security
@@ -163,6 +157,10 @@ namespace DARE_FrontEnd.Controllers
         }
 
 
+        
+        // Only users on the project or admins can see the TES Wizard, thanks to the function IsUserOnProject in this file
+        // AllowAnonymous here is to bypass the error from KeyCloak
+        [AllowAnonymous]
         public IActionResult SubmissionProjectGraphQL(int id)
         {
             if (!ModelState.IsValid) // SonarQube security
@@ -321,6 +319,11 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<IActionResult> AddUserMembership(ProjectUser model)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var result =
                 await _clientHelper.CallAPI<ProjectUser, ProjectUser?>("/api/Project/AddUserMembership", model);
             result = GetProjectUserModel();
@@ -331,6 +334,11 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<IActionResult> AddTreMembership(ProjectTre model)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var result =
                 await _clientHelper.CallAPI<ProjectTre, ProjectTre?>("/api/Project/AddTreMembership",
                     model);

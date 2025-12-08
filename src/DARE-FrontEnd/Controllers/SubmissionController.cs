@@ -50,6 +50,11 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<IActionResult> SubmissionWizard(SubmissionWizard model)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             try
             {
                 var listOfTre = "";
@@ -111,7 +116,8 @@ namespace DARE_FrontEnd.Controllers
                     Tags = new Dictionary<string, string>()
                     {
                         { "project", project.Name },
-                        { "tres", listOfTre }
+                        { "tres", listOfTre },
+                        { "author", HttpContext.User.FindFirst("name").Value }
                     }
                 };
 
@@ -163,6 +169,11 @@ namespace DARE_FrontEnd.Controllers
         [HttpGet]
         public IActionResult GetASubmission(int id)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             var res = _clientHelper.CallAPIWithoutModel<Submission>($"/api/Submission/GetASubmission/{id}").Result;
 
 
@@ -181,6 +192,11 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<ActionResult> SubmitDemoTes(AddiSubmissionWizard model, string Executors, string SQL)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             try
             {
                 var tres = "";
@@ -214,7 +230,8 @@ namespace DARE_FrontEnd.Controllers
                         tesTask.Tags = new Dictionary<string, string>()
                         {
                             { "project", project.Name },
-                            { "tres", tres }
+                            { "tres", tres },
+                            { "author", HttpContext.User.FindFirst("name").Value }
                         };
                     }
                 }
@@ -237,6 +254,11 @@ namespace DARE_FrontEnd.Controllers
         [HttpPost]
         public async Task<ActionResult> AddiSubmissionWizard(AddiSubmissionWizard model, string Executors, string SQL)
         {
+            if (!ModelState.IsValid) // SonarQube security
+            {
+                return View("/");
+            }
+
             try
             {
                 var listOfTre = "";
@@ -386,7 +408,8 @@ namespace DARE_FrontEnd.Controllers
                     test.Tags = new Dictionary<string, string>()
                     {
                         { "project", project.Name },
-                        { "tres", listOfTre }
+                        { "tres", listOfTre },
+                        { "author", HttpContext.User.FindFirst("name").Value }
                     };
                 }
 
@@ -409,7 +432,6 @@ namespace DARE_FrontEnd.Controllers
 
                 var context = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 var Token = await _IKeyCloakService.RefreshUserToken(context);
-
 
                 var result = await _clientHelper.CallAPI<TesTask, TesTask?>("/v1/tasks", test);
 
