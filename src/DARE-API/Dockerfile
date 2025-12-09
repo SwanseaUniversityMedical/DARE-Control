@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 
 ENV ASPNETCORE_ENVIRONMENT=Development
 
@@ -9,7 +9,7 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0.416 AS build
 WORKDIR /src
 COPY ["DARE-API/DARE-API.csproj", "DARE-API/"]
 COPY ["BL/BL.csproj", "BL/"]
