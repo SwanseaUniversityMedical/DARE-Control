@@ -287,6 +287,11 @@ namespace BL.Services
             return await CallAPIWithReturnType<TOutput>(endPoint, null, paramList);
         }
 
+        public async Task<TOutput?> CallAPIDelete<TOutput>(string endPoint, Dictionary<string, string>? paramList = null) where TOutput : class?, new()
+        {
+            return await CallAPIWithReturnType<TOutput>(endPoint, null, paramList, false, null, null, HttpMethod.Delete);
+        }
+
         public async Task<HttpResponseMessage> UploadFileAsync(IFormFile file, HttpClient apiClient, string fileParameterName, string endPoint)
         {
             using (var formData = new MultipartFormDataContent())

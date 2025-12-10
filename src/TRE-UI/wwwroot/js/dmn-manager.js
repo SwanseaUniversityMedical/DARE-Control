@@ -1,64 +1,10 @@
-// DMN Rule Manager JavaScript - Fixed for Keycloak Authentication
+// DMN Rule Manager JavaScript - Refactored to use TRE-UI Controller
 let dmnTable = null;
 let dataTable = null;
-
-// API Base URL - will be set from the page or use default
-const API_BASE_URL = (typeof TRE_API_BASE_URL !== 'undefined' ? TRE_API_BASE_URL : '') + '/api/Dmn';
-
-function getAuthToken() {
-    let token = sessionStorage.getItem('authToken');
-    if (token) {
-        console.log('[OK] Token found in sessionStorage');
-        return token;
-    }
-
-    token = localStorage.getItem('authToken');
-    if (token) {
-        console.log('[OK] Token found in localStorage');
-        return token;
-    }
-
-    const metaToken = document.querySelector('meta[name="auth-token"]');
-    if (metaToken) {
-        token = metaToken.getAttribute('content');
-        if (token) {
-            console.log('[OK] Token found in meta tag');
-            return token;
-        }
-    }
-
-    const inputToken = document.querySelector('input[name="authToken"]');
-    if (inputToken) {
-        token = inputToken.value;
-        if (token) {
-            console.log('[OK] Token found in hidden input');
-            return token;
-        }
-    }
-
-    console.warn('[ERROR] No authentication token found. API calls will fail with 401 Unauthorized.');
-    return null;
-}
-
-/**
- * Setup jQuery AJAX to include authorization header with all requests
- */
-$.ajaxSetup({
-    beforeSend: function (xhr) {
-        const token = getAuthToken();
-        if (token) {
-            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-            console.log('[OK] Authorization header set on request');
-        } else {
-            console.warn('[WARNING] Authorization header NOT set - token is missing');
-        }
-    }
-});
 
 // Initialize on page load
 $(document).ready(function () {
     console.log('DMN Manager initialized');
-    console.log('API Base URL:', API_BASE_URL);
 
     loadDmnTable();
 
@@ -72,17 +18,14 @@ $(document).ready(function () {
 });
 
 /**
- * Load the complete DMN table from API
+ * Load the complete DMN table from TRE-UI Controller
  */
 function loadDmnTable() {
     showLoading(true);
 
     $.ajax({
-        url: API_BASE_URL + '/table',
+        url: '/Dmn/GetTable',
         method: 'GET',
-        xhrFields: {
-            withCredentials: true
-        },
         success: function (data) {
             dmnTable = data;
             displayDmnInfo(data);
@@ -104,7 +47,7 @@ function loadDmnTable() {
             if (xhr.status === 401) {
                 errorMessage += ': Unauthorized - Your session may have expired. Please refresh the page.';
             } else if (xhr.status === 403) {
-                errorMessage += ': Forbidden - You do not have permission to access this resource. Check your Keycloak role assignments.';
+                errorMessage += ': Forbidden - You do not have permission to access this resource.';
             } else {
                 errorMessage += ': ' + (xhr.responseJSON?.message || xhr.statusText || error);
             }
@@ -446,7 +389,7 @@ function saveRule() {
         outputValues: outputValues
     };
 
-    const url = isEdit ? API_BASE_URL + '/rules' : API_BASE_URL + '/rules';
+    const url = isEdit ? '/Dmn/UpdateRule' : '/Dmn/AddRule';
     const method = isEdit ? 'PUT' : 'POST';
 
     $.ajax({
@@ -454,9 +397,6 @@ function saveRule() {
         method: method,
         contentType: 'application/json',
         data: JSON.stringify(requestData),
-        xhrFields: {
-            withCredentials: true
-        },
         success: function (response) {
             console.log('[OK] Save rule response:', response);
             $('#ruleModal').modal('hide');
@@ -491,11 +431,8 @@ function deleteRule() {
     const ruleId = $('#deleteRuleId').val();
 
     $.ajax({
-        url: API_BASE_URL + '/rules/' + encodeURIComponent(ruleId),
+        url: '/Dmn/DeleteRule/' + encodeURIComponent(ruleId),
         method: 'DELETE',
-        xhrFields: {
-            withCredentials: true
-        },
         success: function (response) {
             console.log('[OK] Delete rule response:', response);
             $('#deleteModal').modal('hide');
@@ -521,11 +458,8 @@ function deleteRule() {
  */
 function validateDmn() {
     $.ajax({
-        url: API_BASE_URL + '/validate',
+        url: '/Dmn/ValidateDmn',
         method: 'GET',
-        xhrFields: {
-            withCredentials: true
-        },
         success: function (response) {
             showAlert(response.message, response.success ? 'success' : 'warning');
         },
@@ -545,11 +479,8 @@ function deployDmn() {
     }
 
     $.ajax({
-        url: API_BASE_URL + '/deploy',
+        url: '/Dmn/DeployDmn',
         method: 'POST',
-        xhrFields: {
-            withCredentials: true
-        },
         success: function (response) {
             showAlert(response.message, response.success ? 'success' : 'danger');
         },

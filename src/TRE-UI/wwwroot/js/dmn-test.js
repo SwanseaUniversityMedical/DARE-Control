@@ -1,5 +1,4 @@
-// DMN Test JavaScript
-const API_BASE_URL = (typeof TRE_API_BASE_URL !== 'undefined' ? TRE_API_BASE_URL : '') + '/api/Dmn';
+// DMN Test JavaScript - Refactored to use TRE-UI Controller
 
 // Initialize on page load
 $(document).ready(function () {
@@ -42,7 +41,7 @@ function evaluateDmn() {
     };
 
     $.ajax({
-        url: API_BASE_URL + '/test',
+        url: '/Dmn/TestDmn',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ inputVariables: inputVariables }),
