@@ -29,7 +29,10 @@ namespace TRE_API
     public interface IDoAgentWork
     {
         Task Execute();
-        Task CheckTES(string taskID, int subId, int projectId, int userId, string tesId, string outputBucket, string NameTes);
+
+        Task CheckTES(string taskID, int subId, int projectId, int userId, string tesId, string outputBucket,
+            string NameTes);
+
         void ClearJob(string jobname);
     }
 
@@ -52,7 +55,6 @@ namespace TRE_API
         private readonly CredentialsDbContext _credsDbContext;
         private readonly IVaultCredentialsService _vaultService;
         private readonly IConfiguration _config;
-     
 
 
         public DoAgentWork(IServiceProvider serviceProvider,
@@ -72,7 +74,6 @@ namespace TRE_API
             CredentialsDbContext credsDbContext,
             IVaultCredentialsService vaultService,
             IConfiguration config
-           
         )
         {
             _serviceProvider = serviceProvider;
@@ -105,7 +106,8 @@ namespace TRE_API
             _config = config;
         }
 
-        public string CreateTesk(string jsonContent, int subId, int projectId, int userId, string tesId, string outputBucket, string Tesname)
+        public string CreateTesk(string jsonContent, int subId, int projectId, int userId, string tesId,
+            string outputBucket, string Tesname)
         {
             Log.Information("{Function} {jsonContent} running CreateTESK ", "CreateTesk", jsonContent);
 
@@ -164,16 +166,17 @@ namespace TRE_API
 
                 return id;
             }
+
             try
             {
                 string responseBody = response.Content.ReadAsStringAsync().Result;
-                Log.Error("{Function} Request failed with status code: {Code} {responseBody}", "CreateTESK", response.StatusCode, responseBody);
+                Log.Error("{Function} Request failed with status code: {Code} {responseBody}", "CreateTESK",
+                    response.StatusCode, responseBody);
             }
             catch (Exception ex)
             {
                 Log.Error("{Function} Request failed with status code: {Code}", "CreateTESK", response.StatusCode);
             }
-
 
 
             return "";
@@ -185,7 +188,8 @@ namespace TRE_API
             public string id { get; set; }
         }
 
-        public async Task CheckTES(string taskID, int subId, int projectId, int userId, string tesId, string outputBucket, string NameTes)
+        public async Task CheckTES(string taskID, int subId, int projectId, int userId, string tesId,
+            string outputBucket, string NameTes)
         {
             try
             {
@@ -195,11 +199,15 @@ namespace TRE_API
 
                 HttpClientHandler handler = new HttpClientHandler();
                 // Getting project name
-                var projectName = _dbContext.Projects.FirstOrDefault(p => p.SubmissionProjectId == projectId)?.SubmissionProjectName ?? "UnknownProject";
+                var projectName =
+                    _dbContext.Projects.FirstOrDefault(p => p.SubmissionProjectId == projectId)
+                        ?.SubmissionProjectName ?? "UnknownProject";
                 if (projectName == "UnknownProject")
                 {
-                    Log.Error("{Function} Could not find project name for projectId {ProjectId}", "CheckTES", projectId);
+                    Log.Error("{Function} Could not find project name for projectId {ProjectId}", "CheckTES",
+                        projectId);
                 }
+
                 if (_AgentSettings.Proxy)
                 {
                     handler = new HttpClientHandler
@@ -247,7 +255,8 @@ namespace TRE_API
                         if (shouldReport || (status.state == "COMPLETE" || status.state == "EXECUTOR_ERROR" ||
                                              status.state == "SYSTEM_ERROR"))
                         {
-                            Log.Information("{Function} *** status change *** {State} {name} {description}", "CheckTES", status.state, status.name, status.description);
+                            Log.Information("{Function} *** status change *** {State} {name} {description}", "CheckTES",
+                                status.state, status.name, status.description);
 
 
                             // send update
@@ -270,23 +279,22 @@ namespace TRE_API
                                         Log.Information("{Function} *** COMPLETE remove Token *** {Token} ",
                                             "CheckTES", Token);
 
-                                        
                                         try
                                         {
                                             await TriggerRevokeCredentialsAsync(subId, projectName, userId, 0);
-
                                         }
                                         catch (Exception ex)
                                         {
-                                            Log.Error(ex, "Failed to trigger revoke for submission {SubId}", subId);
-
+                                            Log.Error(ex, "Failed to trigger revoke credentials for submission {SubId}",
+                                                subId);
                                         }
+
                                         if (Token != null)
                                         {
                                             _dbContext.TokensToExpire.Remove(Token);
                                             _hasuraAuthenticationService.ExpirerToken(Token.Token);
                                         }
-                                        
+
                                         _dbContext.SaveChanges();
                                         break;
                                     case "EXECUTOR_ERROR":
@@ -294,6 +302,15 @@ namespace TRE_API
                                         Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
                                         Log.Information("{Function} *** EXECUTOR_ERROR remove Token *** {Token} ",
                                             "CheckTES", Token);
+                                        try
+                                        {
+                                            await TriggerRevokeCredentialsAsync(subId, projectName, userId, 0);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Log.Error(ex, "Failed to trigger revoke credentials for submission {SubId}",
+                                                subId);
+                                        }
 
                                         if (Token != null)
                                         {
@@ -309,6 +326,15 @@ namespace TRE_API
                                         Token = _dbContext.TokensToExpire.FirstOrDefault(x => x.SubId == subId);
                                         Log.Information("{Function} *** SYSTEM_ERROR remove Token *** {Token} ",
                                             "CheckTES", Token);
+                                        try
+                                        {
+                                            await TriggerRevokeCredentialsAsync(subId, projectName, userId, 0);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Log.Error(ex, "Failed to trigger revoke credentials for submission {SubId}",
+                                                subId);
+                                        }
 
                                         if (Token != null)
                                         {
@@ -427,7 +453,6 @@ namespace TRE_API
                 if (await _features.IsEnabledAsync(FeatureFlags.DemoAllInOne))
                 {
                     Log.Information("{Function} Demo Mode is on, simulating execution..", "Execute");
-
                 }
 
                 var cancelsubprojs = _subHelper.GetRequestCancelSubsForTre();
@@ -461,8 +486,6 @@ namespace TRE_API
                     listOfSubmissions?.Count);
                 foreach (var aSubmission in listOfSubmissions)
                 {
-
-
                     try
                     {
                         Log.Information("{Function}Submission: {submission}", "Execute", aSubmission.Id);
@@ -484,24 +507,27 @@ namespace TRE_API
 
                         else
                         {
-                            Dictionary<string, Dictionary<string, object>> credentials = new Dictionary<string, Dictionary<string, object>>();
+                            Dictionary<string, Dictionary<string, object>> credentials =
+                                new Dictionary<string, Dictionary<string, object>>();
 
                             if (await _features.IsEnabledAsync(FeatureFlags.EphemeralCredentials))
                             {
-                                var credsForSubmission = await _credsDbContext.EphemeralCredentials.Where(c => c.SubmissionId == aSubmission.Id).ToListAsync();
+                                var credsForSubmission = await _credsDbContext.EphemeralCredentials
+                                    .Where(c => c.SubmissionId == aSubmission.Id).ToListAsync();
 
                                 //This is the check to see if the start credentials were triggered for this submission
                                 bool alreadyTriggered = credsForSubmission.Any();
 
                                 // This is the check to see if the credentials were already fetched and processed for this submission
-                                bool alreadyProcessed = credsForSubmission.Any(c => c.IsProcessed == true); 
+                                bool alreadyProcessed = credsForSubmission.Any(c => c.IsProcessed == true);
 
                                 if (!alreadyTriggered)
                                 {
                                     try
                                     {
                                         var project = aSubmission.Project.Name;
-                                        await TriggerStartCredentialsAsync(aSubmission.Id, project, aSubmission.SubmittedBy.Id);
+                                        await TriggerStartCredentialsAsync(aSubmission.Id, project,
+                                            aSubmission.SubmittedBy.Id);
                                         Log.Information("Triggered credentials for submission {SubId}", aSubmission.Id);
                                     }
                                     catch (Exception ex)
@@ -511,16 +537,17 @@ namespace TRE_API
                                     }
                                 }
 
-                                if(!alreadyProcessed)
+                                if (!alreadyProcessed)
                                 {
-                                    Log.Information($"Fetching ephemeral credential data from Camunda");                                  
+                                    Log.Information($"Fetching ephemeral credential data from Camunda");
 
                                     var creds = await GetLatestCreds(aSubmission.Id);
 
                                     if (creds.Count == 0)
                                     {
-                                       
-                                        Log.Information("No credentials yet for submission {SubId}. Will retry inside same run.", aSubmission.Id);
+                                        Log.Information(
+                                            "No credentials yet for submission {SubId}. Will retry inside same run.",
+                                            aSubmission.Id);
 
                                         var retryStopwatch = Stopwatch.StartNew();
                                         while (retryStopwatch.Elapsed < TimeSpan.FromSeconds(60))
@@ -534,25 +561,33 @@ namespace TRE_API
 
                                         if (creds.Count == 0)
                                         {
-                                            Log.Information("Still no credentials after retry window. Skipping until next Hangfire cycle.");
+                                            Log.Information(
+                                                "Still no credentials after retry window. Skipping until next Hangfire cycle.");
                                             continue;
                                         }
-
                                     }
 
                                     //This check is to avoid duplicate runs for the same submission ID
-                                    var parentKey = creds.Select(c => c.ParentProcessInstanceKey).FirstOrDefault(k => k.HasValue && k.Value > 0);
+                                    var parentKey = creds.Select(c => c.ParentProcessInstanceKey)
+                                        .FirstOrDefault(k => k.HasValue && k.Value > 0);
 
                                     if (!parentKey.HasValue)
                                     {
-                                        Log.Information("No parent processInstanceKey for submission {SubId}. Skipping this cycle.", aSubmission.Id);
+                                        Log.Information(
+                                            "No parent processInstanceKey for submission {SubId}. Skipping this cycle.",
+                                            aSubmission.Id);
                                         continue;
                                     }
 
-                                    var credsRowforParentKey = await _credsDbContext.EphemeralCredentials.Where(e => e.SubmissionId == aSubmission.Id && e.ParentProcessInstanceKey == parentKey && e.IsProcessed != true).OrderByDescending(e => e.CreatedAt).ToListAsync();
+                                    var credsRowforParentKey = await _credsDbContext.EphemeralCredentials
+                                        .Where(e => e.SubmissionId == aSubmission.Id &&
+                                                    e.ParentProcessInstanceKey == parentKey && e.IsProcessed != true)
+                                        .OrderByDescending(e => e.CreatedAt).ToListAsync();
 
-                                    bool anyErrored = credsRowforParentKey.Any(c => c.SuccessStatus == SuccessStatus.Error);
-                                    bool allSucceeded = credsRowforParentKey.All(c => c.SuccessStatus == SuccessStatus.Success);
+                                    bool anyErrored =
+                                        credsRowforParentKey.Any(c => c.SuccessStatus == SuccessStatus.Error);
+                                    bool allSucceeded =
+                                        credsRowforParentKey.All(c => c.SuccessStatus == SuccessStatus.Success);
 
                                     if (anyErrored)
                                     {
@@ -562,18 +597,23 @@ namespace TRE_API
                                         latestRow.ErrorMessage = "Credential process failed";
                                         await _credsDbContext.SaveChangesAsync();
 
-                                        _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.RequestCancellation, "Credential process failed");
+                                        _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(),
+                                            StatusType.RequestCancellation, "Credential process failed");
                                         continue;
                                     }
 
                                     if (!allSucceeded)
                                     {
-                                        Log.Information("Credential process still running for submission , Will retry next run.");
+                                        Log.Information(
+                                            "Credential process still running for submission , Will retry next run.");
                                         continue;
                                     }
 
-                                    Log.Information("All credential handlers succeeded for submission {SubId}. Fetching credentials.", aSubmission.Id);
-                                    credentials = await WaitForAndFetchCredentialsAsync(aSubmission.Id, TimeSpan.FromMinutes(10));
+                                    Log.Information(
+                                        "All credential handlers succeeded for submission {SubId}. Fetching credentials.",
+                                        aSubmission.Id);
+                                    credentials =
+                                        await WaitForAndFetchCredentialsAsync(aSubmission.Id, TimeSpan.FromMinutes(10));
 
                                     if (credentials == null || credentials.Count == 0)
                                     {
@@ -584,37 +624,39 @@ namespace TRE_API
                                         latestRow.ErrorMessage = errorMsg;
                                         await _credsDbContext.SaveChangesAsync();
 
-                                        _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(), StatusType.RequestCancellation, errorMsg);
+                                        _subHelper.UpdateStatusForTre(aSubmission.Id.ToString(),
+                                            StatusType.RequestCancellation, errorMsg);
                                         continue;
                                     }
 
-                                    Log.Information($"Successfully obtained {credentials.Count} credentials for submission {aSubmission.Id}");
+                                    Log.Information(
+                                        $"Successfully obtained {credentials.Count} credentials for submission {aSubmission.Id}");
                                     await _credsDbContext.SaveChangesAsync();
 
                                     try
                                     {
-                                        await TriggerRevokeCredentialsAsync(aSubmission.Id, aSubmission.Project.Name, aSubmission.SubmittedBy.Id, 1);
-
+                                        await TriggerRevokeCredentialsAsync(aSubmission.Id, aSubmission.Project.Name,
+                                            aSubmission.SubmittedBy.Id, 1);
                                     }
                                     catch (Exception ex)
                                     {
-                                        Log.Error(ex, "Failed to trigger revoke credentials for submission {SubId}", aSubmission.Id);
-
+                                        Log.Error(ex, "Failed to trigger revoke credentials for submission {SubId}",
+                                            aSubmission.Id);
                                     }
-                    
                                 }
                                 else
                                 {
-                                    Log.Information("Submission {SubId} already fully processed. Skipping.", aSubmission.Id);
+                                    Log.Information("Submission {SubId} already fully processed. Skipping.",
+                                        aSubmission.Id);
                                     continue;
                                 }
-
                             }
 
                             else
                             {
                                 Log.Information("EphemeralCredentials feature is disabled.");
                             }
+
                             // The TES message
                             var tesMessage = JsonConvert.DeserializeObject<TesTask>(aSubmission.TesJson);
                             var processedOK = true;
@@ -693,20 +735,16 @@ namespace TRE_API
                                 }
 
 
-
-
-
                                 //S3://bucket-name/key-name
                                 foreach (var output in tesMessage.Outputs)
                                 {
                                     output.Url = OutputBucket + $"/{aSubmission.Id}";
-
                                 }
 
 
                                 var InputBucket = _dbContext.Projects
-                                  .First(x => x.SubmissionProjectId == projectId)
-                                  .SubmissionBucketTre;
+                                    .First(x => x.SubmissionProjectId == projectId)
+                                    .SubmissionBucketTre;
 
                                 var bucket = _subHelper.GetOutputBucketGutsSub(aSubmission.Id.ToString(), true);
 
@@ -716,9 +754,11 @@ namespace TRE_API
                                 {
                                     tesMessage.Inputs = new List<TesInput>();
                                 }
+
                                 if (string.IsNullOrEmpty(_AgentSettings.MandatoryInput) == false)
                                 {
-                                    MandatoryInput = JsonConvert.DeserializeObject<TesInput>(_AgentSettings.MandatoryInput);
+                                    MandatoryInput =
+                                        JsonConvert.DeserializeObject<TesInput>(_AgentSettings.MandatoryInput);
                                     tesMessage.Inputs.Add(MandatoryInput);
                                 }
 
@@ -727,7 +767,6 @@ namespace TRE_API
 
                                 foreach (var input in tesMessage.Inputs)
                                 {
-
                                     input.Path = input.Path.Replace("..", "");
 
 
@@ -771,9 +810,12 @@ namespace TRE_API
                                     }
 
 
-                                    Log.Information($"getting copy for {CleanedIntput} for SubmissionBucket {aSubmission.Project.SubmissionBucket} to {NewCleanedInput}");
+                                    Log.Information(
+                                        $"getting copy for {CleanedIntput} for SubmissionBucket {aSubmission.Project.SubmissionBucket} to {NewCleanedInput}");
 
-                                    var source = await _minioSubHelper.GetCopyObject(aSubmission.Project.SubmissionBucket, CleanedIntput);
+                                    var source =
+                                        await _minioSubHelper.GetCopyObject(aSubmission.Project.SubmissionBucket,
+                                            CleanedIntput);
                                     try
                                     {
                                         if (Files?.S3Objects != null && Files.S3Objects.Any(x => x.ETag == source.ETag))
@@ -781,15 +823,15 @@ namespace TRE_API
                                             continue;
                                         }
 
-                                        var resultcopy = await _minioTreHelper.CopyObjectToDestination(InputBucket, NewCleanedInput, source);
+                                        var resultcopy =
+                                            await _minioTreHelper.CopyObjectToDestination(InputBucket, NewCleanedInput,
+                                                source);
                                     }
                                     catch (Exception ex)
                                     {
                                         Log.Error(ex.ToString());
                                         throw ex;
                                     }
-
-
                                 }
 
 
@@ -818,7 +860,7 @@ namespace TRE_API
                                             Executor.Env["TRINO_SERVER_URL"] = _AgentSettings.URLTrinoToAdd;
                                             Executor.Env["ACCESS_TOKEN"] = Token;
                                             Executor.Env["USER_NAME"] = aSubmission.SubmittedBy.Name;
-                                 
+
 
                                             if (string.IsNullOrEmpty(Executor.Env["TRINO_SERVER_URL"]))
                                             {
@@ -826,15 +868,17 @@ namespace TRE_API
                                             }
                                         }
 
-                                        if(await _features.IsEnabledAsync(FeatureFlags.EphemeralCredentials))
+                                        if (await _features.IsEnabledAsync(FeatureFlags.EphemeralCredentials))
                                         {
-                                            Log.Information($"Injecteing credentials into environment variables for {aSubmission.Id} nub > {credentials.Count}");
+                                            Log.Information(
+                                                $"Injecteing credentials into environment variables for {aSubmission.Id} nub > {credentials.Count}");
 
                                             if (credentials != null && credentials.Count > 0)
                                             {
                                                 foreach (var outerKey in credentials)
                                                 {
-                                                    if (outerKey.Value is IDictionary<string, object> innerDict) //The format is dictionary within a dictionary
+                                                    if (outerKey.Value is IDictionary<string, object>
+                                                        innerDict) //The format is dictionary within a dictionary
                                                     {
                                                         foreach (var inner in innerDict)
                                                         {
@@ -847,7 +891,8 @@ namespace TRE_API
                                                     }
                                                 }
 
-                                                Log.Information($"Injected credentials into environment variables for {aSubmission.Id}");
+                                                Log.Information(
+                                                    $"Injected credentials into environment variables for {aSubmission.Id}");
                                             }
                                         }
 
@@ -880,7 +925,8 @@ namespace TRE_API
                                     Log.Information("{Function} tesMessage is not null runhing CreateTESK {tesMessage}",
                                         "Execute", stringdata);
 
-                                    CreateTesk(stringdata, aSubmission.Id,aSubmission.Project.Id, aSubmission.SubmittedBy.Id, aSubmission.TesId, OutputBucket,
+                                    CreateTesk(stringdata, aSubmission.Id, aSubmission.Project.Id,
+                                        aSubmission.SubmittedBy.Id, aSubmission.TesId, OutputBucket,
                                         aSubmission.TesName);
                                 }
                             }
@@ -938,7 +984,6 @@ namespace TRE_API
                         project = projectName,
                         user = userId.ToString(),
                         submissionId = submissionId.ToString()
-
                     }
                 }
             };
@@ -956,15 +1001,18 @@ namespace TRE_API
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
-                Log.Error("Camunda webhook call failed for submission {SubmissionId}. Error: {Error}", submissionId, error);
+                Log.Error("Camunda webhook call failed for submission {SubmissionId}. Error: {Error}", submissionId,
+                    error);
                 throw new Exception($"Camunda webhook call failed: {response.StatusCode}");
             }
 
-            Log.Information("Camunda StartCredentials triggered successfully for submission {SubmissionId}", submissionId);
+            Log.Information("Camunda StartCredentials triggered successfully for submission {SubmissionId}",
+                submissionId);
         }
 
 
-        private async Task<Dictionary<string, Dictionary<string, object>>> WaitForAndFetchCredentialsAsync(int submissionId, TimeSpan? timeout = null)
+        private async Task<Dictionary<string, Dictionary<string, object>>> WaitForAndFetchCredentialsAsync(
+            int submissionId, TimeSpan? timeout = null)
         {
             var maxWaitTime = timeout ?? TimeSpan.FromMinutes(5);
             var pollInterval = TimeSpan.FromSeconds(5); //Reduced polling interval for faster fetch
@@ -984,9 +1032,11 @@ namespace TRE_API
 
                     foreach (var record in credentialRecord)
                     {
-                        if (!fetchedCredentials.ContainsKey(record.CredentialType) && !string.IsNullOrEmpty(record.VaultPath))
+                        if (!fetchedCredentials.ContainsKey(record.CredentialType) &&
+                            !string.IsNullOrEmpty(record.VaultPath))
                         {
-                            Log.Information($"Found {record.CredentialType} credentials for submission {submissionId} at vault path: {record.VaultPath}");
+                            Log.Information(
+                                $"Found {record.CredentialType} credentials for submission {submissionId} at vault path: {record.VaultPath}");
 
                             var credentials = await _vaultService.GetCredentialAsync(record.VaultPath);
                             if (credentials != null && credentials.Count > 0)
@@ -994,7 +1044,8 @@ namespace TRE_API
                                 fetchedCredentials[record.CredentialType] = credentials;
                                 record.IsProcessed = true;
 
-                                Log.Information($"Successfully fetched {record.CredentialType} credentials for submission {submissionId}");
+                                Log.Information(
+                                    $"Successfully fetched {record.CredentialType} credentials for submission {submissionId}");
                             }
                         }
                     }
@@ -1003,7 +1054,7 @@ namespace TRE_API
                     {
                         await _credsDbContext.SaveChangesAsync();
                     }
-                    
+
                     if (fetchedCredentials.Count > 0)
                     {
                         Log.Information($"Successfully fetched all credentials for submission {submissionId}");
@@ -1023,7 +1074,7 @@ namespace TRE_API
             Log.Error(errorMsg);
             throw new TimeoutException(errorMsg);
         }
-        
+
         private async Task TriggerRevokeCredentialsAsync(int submissionId, string projectName, int user, int timer)
         {
             var payload = new
@@ -1048,7 +1099,8 @@ namespace TRE_API
 
             if (string.IsNullOrWhiteSpace(camundaWebhookUrl))
             {
-                throw new InvalidOperationException("Configuration 'CredentialAPISettings:RevokeWebhookUrl' is missing or empty.");
+                throw new InvalidOperationException(
+                    "Configuration 'CredentialAPISettings:RevokeWebhookUrl' is missing or empty.");
             }
 
             if (!Uri.TryCreate(camundaWebhookUrl, UriKind.Absolute, out var webhookUri))
@@ -1064,11 +1116,13 @@ namespace TRE_API
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
-                Log.Error("Camunda revoke webhook failed for submission {SubmissionId}. Error: {Error}", submissionId, error);
+                Log.Error("Camunda revoke webhook failed for submission {SubmissionId}. Error: {Error}", submissionId,
+                    error);
                 throw new Exception($"Camunda revoke webhook call failed: {response.StatusCode}");
             }
 
-            Log.Information("Camunda RevokeCredentials triggered successfully for submission {SubmissionId}", submissionId);
+            Log.Information("Camunda RevokeCredentials triggered successfully for submission {SubmissionId}",
+                submissionId);
         }
 
 
@@ -1080,6 +1134,5 @@ namespace TRE_API
                 .OrderByDescending(e => e.CreatedAt)
                 .ToListAsync();
         }
-
     }
 }
