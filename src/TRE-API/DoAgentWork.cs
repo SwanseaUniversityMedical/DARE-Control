@@ -201,8 +201,8 @@ namespace TRE_API
                 // Getting project name
                 var projectName =
                     _dbContext.Projects.FirstOrDefault(p => p.SubmissionProjectId == projectId)
-                        ?.SubmissionProjectName ?? "UnknownProject";
-                if (projectName == "UnknownProject")
+                        ?.SubmissionProjectName;
+                if (projectName is null)
                 {
                     Log.Error("{Function} Could not find project name for projectId {ProjectId}", "CheckTES",
                         projectId);
