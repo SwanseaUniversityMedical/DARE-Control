@@ -1,4 +1,3 @@
-// DMN Rule Manager JavaScript - Refactored to use TRE-UI Controller
 let dmnTable = null;
 let dataTable = null;
 
