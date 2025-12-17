@@ -168,7 +168,7 @@ try
             options.ClientId = treKeyCloakSettings.ClientId;
             //// Client secret shared with Keycloak
             options.ClientSecret = treKeyCloakSettings.ClientSecret;
-            options.MetadataAddress = treKeyCloakSettings.MetadataAddress;
+            // options.MetadataAddress = treKeyCloakSettings.MetadataAddress;
 
             options.SaveTokens = true;
 
