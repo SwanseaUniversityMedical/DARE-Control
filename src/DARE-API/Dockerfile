@@ -6,7 +6,7 @@ ENV ASPNETCORE_ENVIRONMENT=Development
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-EXPOSE 80
+EXPOSE 8080
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0.416 AS build
