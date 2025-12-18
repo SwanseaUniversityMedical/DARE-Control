@@ -168,11 +168,7 @@ try
             options.ClientId = treKeyCloakSettings.ClientId;
             //// Client secret shared with Keycloak
             options.ClientSecret = treKeyCloakSettings.ClientSecret;
-            // options.MetadataAddress = treKeyCloakSettings.MetadataAddress;
-            if (!string.IsNullOrEmpty(treKeyCloakSettings.MetadataAddress))
-            {
-                options.MetadataAddress = treKeyCloakSettings.MetadataAddress;
-            }
+            options.MetadataAddress = treKeyCloakSettings.MetadataAddress;
 
             options.SaveTokens = true;
 
@@ -185,20 +181,6 @@ try
             options.Scope.Add("openid");
             options.Scope.Add("profile");
             options.Scope.Add("email");
-
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                NameClaimType = "name",
-                RoleClaimType = ClaimTypes.Role,
-                ValidateIssuer = false  // Disable issuer validation due to Keycloak hostname mismatch
-            };
-
-            if (!string.IsNullOrWhiteSpace(treKeyCloakSettings.ValidAudience))
-            {
-                Log.Information("{Function} Setting valid audience {ValidAudience}",
-                    "AddOpenIdConnect", treKeyCloakSettings.ValidAudience);
-                options.TokenValidationParameters.ValidAudience = treKeyCloakSettings.ValidAudience;
-            }
 
             options.SaveTokens = true;
             options.ResponseType = OpenIdConnectResponseType.Code;
