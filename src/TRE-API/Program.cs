@@ -234,7 +234,6 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins(
                     configuration["TreAPISettings:Address"]
-                    //configuration["TreUISettings:Address"] ?? "https://localhost:7187"
                 )
                 .AllowAnyMethod()
                 .AllowAnyHeader()
