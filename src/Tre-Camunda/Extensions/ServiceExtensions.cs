@@ -30,6 +30,8 @@ namespace Tre_Camunda.Extensions
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             services.Configure<VaultSettings>(configuration.GetSection("VaultSettings"));
+            services.Configure<MinioSettings>(configuration.GetSection("MinioSettings"));
+            services.Configure<LdapSettings>(configuration.GetSection("LdapSettings"));
 
             services.AddHttpClient<IVaultCredentialsService, VaultCredentialsService>((sp, client) =>
             {
@@ -41,6 +43,12 @@ namespace Tre_Camunda.Extensions
                 client.DefaultRequestHeaders.Add("X-Vault-Token", settings.Token);
                 client.DefaultRequestHeaders.Accept.Add(
                     new MediaTypeWithQualityHeaderValue("application/json"));
+            });
+
+            services.AddSingleton(sp =>
+            {
+                var minioSettings = sp.GetRequiredService<IOptions<MinioSettings>>().Value;
+                return minioSettings;
             });
 
             services.AddDbContext<CredentialsDbContext>(options =>
@@ -64,6 +72,10 @@ namespace Tre_Camunda.Extensions
 
             services.AddScoped<ILdapUserManagementService, LdapUserManagementService>();
             services.AddScoped<CreateTrinoUserHandler>();
+
+            services.AddScoped<IMinioManagementService, MinioManagementService>();
+            services.AddScoped<CreateMinioSecretHandler>();
+            services.AddScoped<DeleteMinioSecretHandler>();
 
             services.AddScoped<IEphemeralCredentialsService, EphemeralCredentialsService>();
 
