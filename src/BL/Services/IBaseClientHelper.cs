@@ -21,6 +21,8 @@ namespace BL.Services
 
         Task<byte[]> CallAPIToGetFile(string endPoint, Dictionary<string, string>? paramList = null);
 
+        Task<TOutput?> CallAPIDelete<TOutput>(string endPoint, Dictionary<string, string>? paramList = null)
+            where TOutput : class?, new();
 
     }
 }

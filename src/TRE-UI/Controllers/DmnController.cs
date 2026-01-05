@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -7,6 +6,7 @@ using System;
 using System.Threading.Tasks;
 using TRE_UI.Services;
 using BL.Services;
+using BL.Models;
 
 namespace TRE_UI.Controllers
 {
@@ -35,26 +35,11 @@ namespace TRE_UI.Controllers
         /// </summary>
         /// <returns>View with DMN editor</returns>
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             try
             {
-                var accessToken = await GetAccessTokenAsync();
-
-                if (string.IsNullOrEmpty(accessToken))
-                {
-                    _logger.LogWarning("Access token not found for user: {User}", User?.Identity?.Name);
-                }
-                else
-                {
-                    _logger.LogInformation("Access token retrieved for user: {User}", User?.Identity?.Name);
-                }
-
-                ViewBag.AccessToken = accessToken;
-                ViewBag.ApiBaseUrl = _configuration["TreAPISettings:PublicApiBaseUrl"];
-
                 _logger.LogInformation("DMN management page loaded for user: {User}", User?.Identity?.Name);
-
                 return View();
             }
             catch (Exception ex)
@@ -64,54 +49,124 @@ namespace TRE_UI.Controllers
             }
         }
 
-        /// <summary>
-        /// Retrieves the Keycloak access token from the current user's authentication ticket
-        /// </summary>
-        /// <returns>Access token string, or empty string if not found</returns>
-        private async Task<string> GetAccessTokenAsync()
+
+        #region API Proxy Methods
+
+        
+        [HttpGet]
+        [Route("Dmn/GetTable")]
+        public async Task<IActionResult> GetTable()
         {
             try
             {
-                var result = await HttpContext.AuthenticateAsync();
-
-                if (result?.Principal == null)
-                {
-                    _logger.LogWarning("No authentication principal found");
-                    return string.Empty;
-                }
-
-                if (result.Properties?.GetTokenValue("access_token") is string token && !string.IsNullOrEmpty(token))
-                {
-                    _logger.LogDebug("Access token retrieved from authentication result");
-                    return token;
-                }
-
-                _logger.LogWarning("Access token not found in authentication result");
-                return string.Empty;
+                var result = await _clientHelper.CallAPIWithoutModel<DmnDecisionTable>("/api/Dmn/table");
+                return Json(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving access token");
-                return string.Empty;
+                _logger.LogError(ex, "Error retrieving DMN table");
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
+        
+        [HttpGet]
+        [Route("Dmn/GetRules")]
+        public async Task<IActionResult> GetRules()
+        {
+            try
+            {
+                var result = await _clientHelper.CallAPIWithoutModel<DmnDecisionTable>("/api/Dmn/rules");
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving DMN rules");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
 
-        /// <summary>
-        /// Test DMN evaluation page (currently commented out)
-        /// </summary>
-        //[HttpGet]
-        //public IActionResult Test()
-        //{
-        //    try
-        //    {
-        //        return View();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Error loading DMN test page");
-        //        return View("Error");
-        //    }
-        //}
+        
+        [HttpPost]
+        [Route("Dmn/AddRule")]
+        public async Task<IActionResult> AddRule([FromBody] CreateDmnRuleRequest request)
+        {
+            try
+            {
+                var result = await _clientHelper.CallAPI<CreateDmnRuleRequest, DmnOperationResult>("/api/Dmn/rules", request);
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding DMN rule");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPut]
+        [Route("Dmn/UpdateRule")]
+        public async Task<IActionResult> UpdateRule([FromBody] UpdateDmnRuleRequest request)
+        {
+            try
+            {
+                var result = await _clientHelper.CallAPI<UpdateDmnRuleRequest, DmnOperationResult>("/api/Dmn/rules", request, usePut: true);
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating DMN rule");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpDelete]
+        [Route("Dmn/DeleteRule/{ruleId}")]
+        public async Task<IActionResult> DeleteRule(string ruleId)
+        {
+            try
+            {
+                var result = await _clientHelper.CallAPIDelete<DmnOperationResult>($"/api/Dmn/rules/{ruleId}");
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting DMN rule");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        [Route("Dmn/ValidateDmn")]
+        public async Task<IActionResult> ValidateDmn()
+        {
+            try
+            {
+                var result = await _clientHelper.CallAPIWithoutModel<DmnOperationResult>("/api/Dmn/validate");
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validating DMN");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [Route("Dmn/DeployDmn")]
+        public async Task<IActionResult> DeployDmn()
+        {
+            try
+            {
+                var result = await _clientHelper.CallAPI<object, DmnOperationResult>("/api/Dmn/deploy", new { });
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deploying DMN to Zeebe");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        #endregion
     }
 }
