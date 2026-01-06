@@ -8,7 +8,7 @@ namespace BL.Models
 {
     public class DmnPath
     {
-        public string Path;
+        public string Path { get; set; }  
 
     }
 }
