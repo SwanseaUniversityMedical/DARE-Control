@@ -43,25 +43,6 @@ namespace TRE_API.Controllers
             // Get DMN file path from configuration or use default
             var configuredPath = _DmnPath.Path;
 
-            if (!string.IsNullOrEmpty(configuredPath))
-            {
-                // Use configured path - make it absolute if relative
-                if (Path.IsPathRooted(configuredPath))
-                {
-                    _DmnPath.Path = Path.Combine(configuredPath, "credentials.dmn");
-                }
-                else
-                {
-                    var projectDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", ".."));
-                    _DmnPath.Path = Path.GetFullPath(Path.Combine(projectDirectory, configuredPath, "credentials.dmn"));
-                }
-            }
-            else
-            {
-                var projectDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", ".."));
-                _DmnPath.Path = Path.GetFullPath(Path.Combine(projectDirectory, "..", "Tre-Camunda", "ProcessModels", "credentials.dmn"));
-            }
-
             _logger.LogInformation($"DMN file path resolved to: {_DmnPath.Path}");
         }
 
