@@ -10,15 +10,41 @@ namespace Tre_Camunda.Services
     {
         private IServicedZeebeClient _camunda;
         private readonly IConfiguration _configuration;
-     
+        private readonly string _dmnFilePath;
+
         public ProcessModelService(IServicedZeebeClient servicedZeebeClient, IConfiguration configuration)
         {
             _camunda = servicedZeebeClient;
-            _configuration = configuration;           
+            _configuration = configuration;
+            // Get DMN file path from configuration or use default
+            var configuredPath = configuration["DmnFilePath"];
+
+            if (!string.IsNullOrEmpty(configuredPath))
+            {
+                // Use configured path - make it absolute if relative
+                if (Path.IsPathRooted(configuredPath))
+                {
+                    _dmnFilePath = Path.Combine(configuredPath, "credentials.dmn");
+                }
+                else
+                {
+                    var projectDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", ".."));
+                    _dmnFilePath = Path.GetFullPath(Path.Combine(projectDirectory, configuredPath, "credentials.dmn"));
+                }
+            }
+            else
+            {
+                var projectDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", ".."));
+                _dmnFilePath = Path.GetFullPath(Path.Combine(projectDirectory, "..", "Tre-Camunda", "ProcessModels", "credentials.dmn"));
+            }
+
         }       
 
         public async Task DeployProcessDefinitionAndDecisionModels()
         {
+
+
+
             /* Testing connection */
             var gatewayAddress = _configuration["ZeebeBootstrap:Client:GatewayAddress"];
 
@@ -69,7 +95,7 @@ namespace Tre_Camunda.Services
                 foreach (var filePath in modelFiles)
                 {
                     var deploymentFileName = Path.GetFileName(filePath);
-                    
+               
                     try
                     {
                         using var fileStream = File.OpenRead(filePath);
@@ -88,6 +114,21 @@ namespace Tre_Camunda.Services
             {
                 Log.Information($"No process model files found in: {processModelsPath}");
             }
+
+            if (File.Exists(_dmnFilePath))
+            {
+                using (var stream = new FileStream(_dmnFilePath, FileMode.Open, FileAccess.Read))
+                {
+                    var fileName = Path.GetFileName(_dmnFilePath);
+                    await _camunda.DeployModel(stream, fileName);
+                }
+            }
+            else
+            {
+                Log.Error($"DMN file not found: {_dmnFilePath}");
+            }
+
+            
 
             return deployedCount;
         }
