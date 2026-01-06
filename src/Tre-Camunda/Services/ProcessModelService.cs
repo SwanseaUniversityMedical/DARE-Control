@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Zeebe.Client;
 using Tre_Credentials.Services;
+using BL.Models;
 
 namespace Tre_Camunda.Services
 {
@@ -10,14 +11,15 @@ namespace Tre_Camunda.Services
     {
         private IServicedZeebeClient _camunda;
         private readonly IConfiguration _configuration;
-        private readonly string _dmnFilePath;
+        private readonly DmnPath _DmnPath;
 
-        public ProcessModelService(IServicedZeebeClient servicedZeebeClient, IConfiguration configuration)
+
+        public ProcessModelService(IServicedZeebeClient servicedZeebeClient, IConfiguration configuration, DmnPath DmnPath)
         {
             _camunda = servicedZeebeClient;
             _configuration = configuration;
             // Get DMN file path from configuration or use default
-            _dmnFilePath = configuration["DmnFilePath"];
+            _DmnPath = DmnPath;
         }       
 
         public async Task DeployProcessDefinitionAndDecisionModels()
@@ -95,17 +97,17 @@ namespace Tre_Camunda.Services
                 Log.Information($"No process model files found in: {processModelsPath}");
             }
 
-            if (File.Exists(_dmnFilePath))
+            if (File.Exists(_DmnPath.Path))
             {
-                using (var stream = new FileStream(_dmnFilePath, FileMode.Open, FileAccess.Read))
+                using (var stream = new FileStream(_DmnPath.Path, FileMode.Open, FileAccess.Read))
                 {
-                    var fileName = Path.GetFileName(_dmnFilePath);
+                    var fileName = Path.GetFileName(_DmnPath.Path);
                     await _camunda.DeployModel(stream, fileName);
                 }
             }
             else
             {
-                Log.Error($"DMN file not found: {_dmnFilePath}");
+                Log.Error($"DMN file not found: {_DmnPath.Path}");
             }
 
             
