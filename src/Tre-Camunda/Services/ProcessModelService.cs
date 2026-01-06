@@ -1,9 +1,10 @@
-﻿using Serilog;
+﻿using BL.Models;
+using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Zeebe.Client;
 using Tre_Credentials.Services;
-using BL.Models;
+using Zeebe.Client;
 
 namespace Tre_Camunda.Services
 {
@@ -12,6 +13,7 @@ namespace Tre_Camunda.Services
         private IServicedZeebeClient _camunda;
         private readonly IConfiguration _configuration;
         private readonly DmnPath _DmnPath;
+        private readonly string path;
 
 
         public ProcessModelService(IServicedZeebeClient servicedZeebeClient, IConfiguration configuration, DmnPath DmnPath)
@@ -20,6 +22,25 @@ namespace Tre_Camunda.Services
             _configuration = configuration;
             // Get DMN file path from configuration or use default
             _DmnPath = DmnPath;
+
+            if (!string.IsNullOrEmpty(DmnPath.Path))
+            {
+                // Use configured path - make it absolute if relative
+                if (Path.IsPathRooted(DmnPath.Path))
+                {
+                    path = Path.Combine(DmnPath.Path, "credentials.dmn");
+                }
+                else
+                {
+                    var projectDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", ".."));
+                    path = Path.GetFullPath(Path.Combine(projectDirectory, DmnPath.Path, "credentials.dmn"));
+                }
+            }
+            else
+            {
+                var projectDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", ".."));
+                path = Path.GetFullPath(Path.Combine(projectDirectory, "..", "Tre-Camunda", "ProcessModels", "credentials.dmn"));
+            }
         }       
 
         public async Task DeployProcessDefinitionAndDecisionModels()
@@ -97,17 +118,17 @@ namespace Tre_Camunda.Services
                 Log.Information($"No process model files found in: {processModelsPath}");
             }
 
-            if (File.Exists(_DmnPath.Path))
+            if (File.Exists(path))
             {
-                using (var stream = new FileStream(_DmnPath.Path, FileMode.Open, FileAccess.Read))
+                using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
                 {
-                    var fileName = Path.GetFileName(_DmnPath.Path);
+                    var fileName = Path.GetFileName(path);
                     await _camunda.DeployModel(stream, fileName);
                 }
             }
             else
             {
-                Log.Error($"DMN file not found: {_DmnPath.Path}");
+                Log.Error($"DMN file not found: {path}");
             }
 
             
