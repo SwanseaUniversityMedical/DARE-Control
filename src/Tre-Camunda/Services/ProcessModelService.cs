@@ -97,8 +97,19 @@ namespace Tre_Camunda.Services
                 
                 foreach (var filePath in modelFiles)
                 {
-                    var deploymentFileName = Path.GetFileName(filePath);
+
                
+
+                    var deploymentFileName = Path.GetFileName(filePath);
+
+                    if (deploymentFileName == "credentials.dmn")
+                    {
+                        if (File.Exists(path))
+                        {
+                            continue;
+                        }
+                    }
+
                     try
                     {
                         using var fileStream = File.OpenRead(filePath);
@@ -120,11 +131,10 @@ namespace Tre_Camunda.Services
 
             if (File.Exists(path))
             {
-                using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
-                {
-                    var fileName = Path.GetFileName(path);
-                    await _camunda.DeployModel(stream, fileName);
-                }
+                using var fileStream = File.OpenRead(path);
+                var fileName = Path.GetFileName(path);
+                await _camunda.DeployModel(fileStream, fileName);
+   
             }
             else
             {
