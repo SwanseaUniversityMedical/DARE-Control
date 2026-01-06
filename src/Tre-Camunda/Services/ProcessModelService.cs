@@ -17,27 +17,7 @@ namespace Tre_Camunda.Services
             _camunda = servicedZeebeClient;
             _configuration = configuration;
             // Get DMN file path from configuration or use default
-            var configuredPath = configuration["DmnFilePath"];
-
-            if (!string.IsNullOrEmpty(configuredPath))
-            {
-                // Use configured path - make it absolute if relative
-                if (Path.IsPathRooted(configuredPath))
-                {
-                    _dmnFilePath = Path.Combine(configuredPath, "credentials.dmn");
-                }
-                else
-                {
-                    var projectDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", ".."));
-                    _dmnFilePath = Path.GetFullPath(Path.Combine(projectDirectory, configuredPath, "credentials.dmn"));
-                }
-            }
-            else
-            {
-                var projectDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", ".."));
-                _dmnFilePath = Path.GetFullPath(Path.Combine(projectDirectory, "..", "Tre-Camunda", "ProcessModels", "credentials.dmn"));
-            }
-
+            _dmnFilePath = configuration["DmnFilePath"];
         }       
 
         public async Task DeployProcessDefinitionAndDecisionModels()
