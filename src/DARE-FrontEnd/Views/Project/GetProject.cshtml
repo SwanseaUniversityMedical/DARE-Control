@@ -148,7 +148,10 @@
 
                     </div>
                 }
-                @await Html.PartialAsync("_SubmissionList", new SubmissionList() { SubmissionsGetProjectModel = Model.Submissions.Where(x => x.HasParent == false).ToList(), UseParent = false }) @*@await Html.PartialAsync("_SubmissionList", new SubmissionList(){Submissions  = Model.Submissions.Where(x => x.Parent == null).ToList(), UseParent = false})*@
+				<div class="hideProjectNameColumn">
+                    @await Html.PartialAsync("_SubmissionList", new SubmissionList() { SubmissionsGetProjectModel = Model.Submissions.Where(x => x.HasParent == false).ToList(), UseParent = false })
+                </div>
+                
             </div>
             <div class="tab-pane fade" id="userMembership" role="tabpanel" aria-labelledby="people">
                 @if (User.IsInRole("dare-control-admin"))
