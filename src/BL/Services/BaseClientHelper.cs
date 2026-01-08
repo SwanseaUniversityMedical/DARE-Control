@@ -282,9 +282,9 @@ namespace BL.Services
         }
 
 
-        public async Task<TOutput?> CallAPIWithoutModel<TOutput>(string endPoint, Dictionary<string, string>? paramList = null) where TOutput : class?, new()
+        public async Task<TOutput?> CallAPIWithoutModel<TOutput>(string endPoint, Dictionary<string, string>? paramList = null, HttpMethod httpMethod = null) where TOutput : class?, new()
         {
-            return await CallAPIWithReturnType<TOutput>(endPoint, null, paramList);
+            return await CallAPIWithReturnType<TOutput>(endPoint, null, paramList, httpMethod : httpMethod);
         }
 
         public async Task<TOutput?> CallAPIDelete<TOutput>(string endPoint, Dictionary<string, string>? paramList = null) where TOutput : class?, new()
