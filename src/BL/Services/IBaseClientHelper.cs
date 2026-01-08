@@ -16,7 +16,7 @@ namespace BL.Services
             bool usePut = false);
 
 
-        Task<TOutput?> CallAPIWithoutModel<TOutput>(string endPoint, Dictionary<string, string>? paramList = null)
+        Task<TOutput?> CallAPIWithoutModel<TOutput>(string endPoint, Dictionary<string, string>? paramList = null, HttpMethod httpMethod = null)
             where TOutput : class?, new();
 
         Task<byte[]> CallAPIToGetFile(string endPoint, Dictionary<string, string>? paramList = null);

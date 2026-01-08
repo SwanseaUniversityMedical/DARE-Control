@@ -1,8 +1,10 @@
-﻿using Serilog;
+﻿using BL.Models;
+using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Zeebe.Client;
 using Tre_Credentials.Services;
+using Zeebe.Client;
 
 namespace Tre_Camunda.Services
 {
@@ -10,15 +12,42 @@ namespace Tre_Camunda.Services
     {
         private IServicedZeebeClient _camunda;
         private readonly IConfiguration _configuration;
-     
-        public ProcessModelService(IServicedZeebeClient servicedZeebeClient, IConfiguration configuration)
+        private readonly DmnPath _DmnPath;
+        private readonly string path;
+
+
+        public ProcessModelService(IServicedZeebeClient servicedZeebeClient, IConfiguration configuration, DmnPath DmnPath)
         {
             _camunda = servicedZeebeClient;
-            _configuration = configuration;           
+            _configuration = configuration;
+            // Get DMN file path from configuration or use default
+            _DmnPath = DmnPath;
+
+            if (!string.IsNullOrEmpty(DmnPath.Path))
+            {
+                // Use configured path - make it absolute if relative
+                if (Path.IsPathRooted(DmnPath.Path))
+                {
+                    path = Path.Combine(DmnPath.Path, "credentials.dmn");
+                }
+                else
+                {
+                    var projectDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", ".."));
+                    path = Path.GetFullPath(Path.Combine(projectDirectory, DmnPath.Path, "credentials.dmn"));
+                }
+            }
+            else
+            {
+                var projectDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", ".."));
+                path = Path.GetFullPath(Path.Combine(projectDirectory, "..", "Tre-Camunda", "ProcessModels", "credentials.dmn"));
+            }
         }       
 
         public async Task DeployProcessDefinitionAndDecisionModels()
         {
+
+
+
             /* Testing connection */
             var gatewayAddress = _configuration["ZeebeBootstrap:Client:GatewayAddress"];
 
@@ -68,8 +97,19 @@ namespace Tre_Camunda.Services
                 
                 foreach (var filePath in modelFiles)
                 {
+
+               
+
                     var deploymentFileName = Path.GetFileName(filePath);
-                    
+
+                    if (deploymentFileName == "credentials.dmn")
+                    {
+                        if (File.Exists(path))
+                        {
+                            continue;
+                        }
+                    }
+
                     try
                     {
                         using var fileStream = File.OpenRead(filePath);
@@ -88,6 +128,20 @@ namespace Tre_Camunda.Services
             {
                 Log.Information($"No process model files found in: {processModelsPath}");
             }
+
+            if (File.Exists(path))
+            {
+                using var fileStream = File.OpenRead(path);
+                var fileName = Path.GetFileName(path);
+                await _camunda.DeployModel(fileStream, fileName);
+   
+            }
+            else
+            {
+                Log.Error($"DMN file not found: {path}");
+            }
+
+            
 
             return deployedCount;
         }

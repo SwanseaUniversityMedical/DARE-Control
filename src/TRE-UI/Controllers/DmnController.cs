@@ -157,7 +157,7 @@ namespace TRE_UI.Controllers
         {
             try
             {
-                var result = await _clientHelper.CallAPI<object, DmnOperationResult>("/api/Dmn/deploy", new { });
+                var result = await _clientHelper.CallAPIWithoutModel<DmnOperationResult>("/api/Dmn/deploy", httpMethod: HttpMethod.Post);
                 return Json(result);
             }
             catch (Exception ex)
