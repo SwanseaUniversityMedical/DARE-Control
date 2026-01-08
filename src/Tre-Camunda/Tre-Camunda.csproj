@@ -36,6 +36,7 @@
   </ItemGroup>	
 
 	<ItemGroup>
+	  <ProjectReference Include="..\BL\BL.csproj" />
 	  <ProjectReference Include="..\TRE.Credentials\Tre_Credentials.csproj" />
 	</ItemGroup>	
 

@@ -651,7 +651,6 @@ namespace BL.Services
         private AmazonS3Client GenerateAmazonS3Client()
         {
             var config = GenerateAmazonS3Config();
-            Log.Error("_minioSettings.AccessKey >" + _minioSettings.AccessKey + "_minioSettings.SecretKey > " + _minioSettings.SecretKey);
             return new AmazonS3Client(_minioSettings.AccessKey, _minioSettings.SecretKey, config);
         }
 

@@ -25,41 +25,45 @@ namespace TRE_API.Controllers
         private readonly IDmnService _dmnService;
         private readonly IServicedZeebeClient _zeebeClient;
         private readonly ILogger<DmnController> _logger;
-        private readonly string _dmnFilePath;
-
+        private readonly DmnPath _DmnPath;
+        private readonly string path;
         public DmnController(
             IDmnService dmnService,
             IServicedZeebeClient zeebeClient,
             ILogger<DmnController> logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            DmnPath DmnPath)
         {
             _dmnService = dmnService;
             _zeebeClient = zeebeClient;
             _logger = logger;
 
-            // Get DMN file path from configuration or use default
-            var configuredPath = configuration["DmnFilePath"];
+            _DmnPath = DmnPath;
 
-            if (!string.IsNullOrEmpty(configuredPath))
+            // Get DMN file path from configuration or use default
+            var configuredPath = _DmnPath.Path;
+
+
+            if (!string.IsNullOrEmpty(DmnPath.Path))
             {
                 // Use configured path - make it absolute if relative
-                if (Path.IsPathRooted(configuredPath))
+                if (Path.IsPathRooted(DmnPath.Path))
                 {
-                    _dmnFilePath = Path.Combine(configuredPath, "credentials.dmn");
+                    path = Path.Combine(DmnPath.Path, "credentials.dmn");
                 }
                 else
                 {
                     var projectDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", ".."));
-                    _dmnFilePath = Path.GetFullPath(Path.Combine(projectDirectory, configuredPath, "credentials.dmn"));
+                    path = Path.GetFullPath(Path.Combine(projectDirectory, DmnPath.Path, "credentials.dmn"));
                 }
             }
             else
             {
                 var projectDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", ".."));
-                _dmnFilePath = Path.GetFullPath(Path.Combine(projectDirectory, "..", "Tre-Camunda", "ProcessModels", "credentials.dmn"));
+                path = Path.GetFullPath(Path.Combine(projectDirectory, "..", "Tre-Camunda", "ProcessModels", "credentials.dmn"));
             }
 
-            _logger.LogInformation($"DMN file path resolved to: {_dmnFilePath}");
+            _logger.LogInformation($"DMN file path resolved to: {path}");
         }
 
         /// <summary>
@@ -74,7 +78,7 @@ namespace TRE_API.Controllers
         {
             try
             {
-                var table = await _dmnService.LoadDmnTableAsync(_dmnFilePath);
+                var table = await _dmnService.LoadDmnTableAsync(path);
                 return Ok(table);
             }
             catch (Exception ex)
@@ -96,7 +100,7 @@ namespace TRE_API.Controllers
         {
             try
             {
-                var table = await _dmnService.LoadDmnTableAsync(_dmnFilePath);
+                var table = await _dmnService.LoadDmnTableAsync(path);
                 return Ok(table.Rules);
             }
             catch (Exception ex)
@@ -124,13 +128,13 @@ namespace TRE_API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var newRule = await _dmnService.AddRuleAsync(_dmnFilePath, request);
+                var newRule = await _dmnService.AddRuleAsync(path, request);
 
                 // Validate the updated DMN
-                await _dmnService.ValidateDmnAsync(_dmnFilePath);
+                await _dmnService.ValidateDmnAsync(path);
 
                 // Deploy to Zeebe
-                await _dmnService.DeployDmnToZeebeAsync(_dmnFilePath);
+                await _dmnService.DeployDmnToZeebeAsync(path);
 
                 return Ok(new DmnOperationResult
                 {
@@ -168,13 +172,13 @@ namespace TRE_API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                await _dmnService.UpdateRuleAsync(_dmnFilePath, request);
+                await _dmnService.UpdateRuleAsync(path, request);
 
                 // Validate the updated DMN
-                await _dmnService.ValidateDmnAsync(_dmnFilePath);
+                await _dmnService.ValidateDmnAsync(path);
 
                 // Deploy to Zeebe
-                await _dmnService.DeployDmnToZeebeAsync(_dmnFilePath);
+                await _dmnService.DeployDmnToZeebeAsync(path);
 
                 return Ok(new DmnOperationResult
                 {
@@ -206,10 +210,10 @@ namespace TRE_API.Controllers
         {
             try
             {
-                await _dmnService.DeleteRuleAsync(_dmnFilePath, ruleId);
+                await _dmnService.DeleteRuleAsync(path, ruleId);
 
                 // Validate the updated DMN
-                await _dmnService.ValidateDmnAsync(_dmnFilePath);
+                await _dmnService.ValidateDmnAsync(path);
 
                 // Deploy to Zeebe
                 //await DeployDmnToZeebe();
@@ -243,7 +247,7 @@ namespace TRE_API.Controllers
         {
             try
             {
-                await _dmnService.ValidateDmnAsync(_dmnFilePath);
+                await _dmnService.ValidateDmnAsync(path);
                 return Ok(new DmnOperationResult
                 {
                     Success = true,
@@ -319,7 +323,7 @@ namespace TRE_API.Controllers
         {
             try
             {
-                await _dmnService.DeployDmnToZeebeAsync(_dmnFilePath);
+                await _dmnService.DeployDmnToZeebeAsync(path);
                 return Ok(new DmnOperationResult
                 {
                     Success = true,
