@@ -10,7 +10,6 @@ using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Http.ModelBinding;
 using Sentry.Protocol;
 using TRE_API.Repositories.DbContexts;
 
