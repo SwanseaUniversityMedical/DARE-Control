@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   main-ui-sonar:
-    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet-7.yaml@v2.3.2-sonar-dotnet-7
+    uses: SwanseaUniversityMedical/workflows/.github/workflows/sonar-dotnet-8.yaml@v1.0.0-sonar-dotnet-8
     with:
       project-name: "dare-control-ui"
       project-file: "DARE-FrontEnd.csproj"

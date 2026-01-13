@@ -54,6 +54,10 @@ namespace Tre_Camunda.Extensions
             configuration.Bind(nameof(camundaSettings), camundaSettings);
             services.AddSingleton(camundaSettings);
 
+            var DmnPath = new BL.Models.DmnPath();
+            configuration.Bind(nameof(DmnPath), DmnPath);
+            services.AddSingleton(DmnPath);
+
             services.AddHostedService<BpmnProcessDeployService>();
             services.AddScoped<IProcessModelService, ProcessModelService>();
 

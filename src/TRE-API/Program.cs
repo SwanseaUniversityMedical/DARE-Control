@@ -127,6 +127,12 @@ configuration.Bind(nameof(MinioTRESettings), minioTRESettings);
 builder.Services.AddSingleton(minioTRESettings);
 
 
+var DmnPath = new BL.Models.DmnPath();
+configuration.Bind(nameof(DmnPath), DmnPath);
+builder.Services.AddSingleton(DmnPath);
+
+
+
 var AuthenticationSetting = new AuthenticationSettings();
 configuration.Bind(nameof(AuthenticationSetting), AuthenticationSetting);
 builder.Services.AddSingleton(AuthenticationSetting);
