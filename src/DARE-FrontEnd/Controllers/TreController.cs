@@ -4,29 +4,26 @@ using BL.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using BL.Models.Settings;
-using Microsoft.CodeAnalysis;
-using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 
 namespace DARE_FrontEnd.Controllers
 {
-    [Authorize(Roles = "dare-control-admin")]
+    [Authorize]
     public class TreController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
-        
+
         private readonly FormIOSettings _formIOSettings;
-     
+
         public TreController(IDareClientHelper client, FormIOSettings formIo)
         {
             _clientHelper = client;
 
             _formIOSettings = formIo;
-
         }
 
         [HttpGet]
-        
+        [Authorize(Roles = "dare-control-admin")]
         public IActionResult SaveATre(int treId)
         {
             if (!ModelState.IsValid) // SonarQube security
@@ -36,7 +33,6 @@ namespace DARE_FrontEnd.Controllers
 
             var formData = new FormData()
             {
-                
                 FormIoUrl = _formIOSettings.TreForm,
                 FormIoString = @"{""id"":0}",
                 Id = treId
@@ -48,26 +44,23 @@ namespace DARE_FrontEnd.Controllers
                 paramList.Add("treId", treId.ToString());
                 var tre = _clientHelper.CallAPIWithoutModel<Tre>("/api/Tre/GetATre/", paramList).Result;
                 formData.FormIoString = tre?.FormData;
-                formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""Id"":" + treId.ToString(), StringComparison.CurrentCultureIgnoreCase);
+                formData.FormIoString = formData.FormIoString?.Replace(@"""id"":0", @"""Id"":" + treId.ToString(),
+                    StringComparison.CurrentCultureIgnoreCase);
             }
 
             return View(formData);
         }
 
-     
 
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult GetAllTres()
         {
-
             var tres = _clientHelper.CallAPIWithoutModel<List<Tre>>("/api/Tre/GetAllTres/").Result;
 
             return View(tres);
         }
 
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult GetATre(int id)
         {
             if (!ModelState.IsValid) // SonarQube security
@@ -83,8 +76,9 @@ namespace DARE_FrontEnd.Controllers
             return View(Tre);
         }
 
-     
+
         [HttpPost]
+        [Authorize(Roles = "dare-control-admin")]
         public async Task<IActionResult> TreFormSubmission([FromBody] object arg, int id)
         {
             if (!ModelState.IsValid) // SonarQube security
@@ -99,10 +93,10 @@ namespace DARE_FrontEnd.Controllers
                 var data = System.Text.Json.JsonSerializer.Deserialize<FormData>(str);
                 data.FormIoString = str;
 
-                
+
                 var json = System.Text.Json.JsonSerializer.Serialize(data);
                 var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-               
+
                 var response = await _clientHelper.CallAPI("/api/Tre/SaveTre", content);
 
                 if (response.IsSuccessStatusCode)
@@ -118,6 +112,7 @@ namespace DARE_FrontEnd.Controllers
                     return BadRequest(errorMessage);
                 }
             }
+
             return BadRequest("Invalid data");
         }
     }
