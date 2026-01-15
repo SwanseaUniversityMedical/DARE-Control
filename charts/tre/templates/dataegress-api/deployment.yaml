@@ -1,0 +1,207 @@
+# This is done except some of the keycloak extra setting stuff
+# TODO: make sure the TRE minio config is the right stuff to use here
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tre.fullname" . }}-data-egress-api
+  labels:
+    {{- include "tre.labels" . | nindent 4 }}
+    component: "data-egress-api"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "tre.selectorLabels" . | nindent 6 }}
+      component: "data-egress-api"
+  template:
+    metadata:
+      {{- with .Values.dataEgress.api.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "tre.labels" . | nindent 8 }}
+        component: "data-egress-api"
+        {{- with .Values.dataEgress.api.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "tre.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: tredataegressapi
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.dataEgress.api.image.repository }}:{{ .Values.dataEgress.api.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.dataEgress.api.image.pullPolicy }}
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.postgres.secretName }}
+                  key: {{ .Values.config.postgres.passwordSecretKey }}
+            - name: POSTGRES_USERNAME
+              valueFrom:
+                secretKeyRef: 
+                  name: {{ .Values.config.postgres.secretName }}
+                  key: {{ .Values.config.postgres.usernameSecretKey }}
+            - name: ConnectionStrings__DefaultConnection
+              value: "Server={{ .Values.config.postgres.host }};port={{ .Values.config.postgres.port }};Database={{ .Values.config.postgres.dataEgressDatabase }};Include Error Detail=true;User Id=$(POSTGRES_USERNAME);Password=$(POSTGRES_PASSWORD);"
+            - name: Serilog__SeqServerUrl
+              value: "{{ .Values.config.seqUrl }}"
+            - name: DemoMode
+              value: "{{ .Values.config.demoMode.enabled }}"
+            - name: KeycloakDemoMode
+              value: "{{ .Values.config.keycloakDemoMode }}"
+            - name: MinioSettings__Url
+              value: "{{ .Values.config.minio.tre.url }}"
+            - name: MinioSettings__BucketName
+              value: "{{ .Values.config.minio.tre.bucketName }}"
+            - name: MinioSettings__AWSRegion
+              value: "us-east-1"
+            - name: MinioSettings__AWSService
+              value: "{{ .Values.config.minio.tre.awsService }}"
+            - name: MinioSettings__AttributeName
+              value: "{{ .Values.config.minio.tre.attributeName }}"
+            - name: MinioSettings__AccessKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.minio.tre.secretName }}
+                  key: {{ .Values.config.minio.tre.accessSecretKey }}
+            - name: MinioSettings__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.minio.tre.secretName }}
+                  key: {{ .Values.config.minio.tre.secretSecretKey }}
+            - name: DataEgressAPISettings__Address
+              value: 'http://{{ include "tre.fullname" . }}-data-egress-api:{{ .Values.dataEgress.api.service.port }}'
+            - name: TreAPISettings__Address
+              value: 'http://{{ include "tre.fullname" . }}-api:{{ .Values.tre.api.service.port }}'
+            - name: TreKeyCloakSettings__Authority
+              value: "{{ default .Values.config.keycloak.tre.api.authority .Values.config.keycloak.global.authority }}"
+            - name: TreKeyCloakSettings__MetadataAddress
+              value: "{{ default .Values.config.keycloak.tre.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.tre.api.host .Values.config.keycloak.global.host }}/realms/{{ .Values.config.keycloak.tre.api.realm }}/.well-known/openid-configuration"
+            - name: TreKeyCloakSettings__BaseUrl
+              value: "{{ default .Values.config.keycloak.tre.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.tre.api.host .Values.config.keycloak.global.host }}/realms/{{ .Values.config.keycloak.tre.api.realm }}"
+            - name: TreKeyCloakSettings__RootUrl
+              value: "{{ default .Values.config.keycloak.tre.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.tre.api.host .Values.config.keycloak.global.host }}"
+            - name: TreKeyCloakSettings__Realm
+              value: "{{ .Values.config.keycloak.tre.api.realm }}"
+            - name: TreKeyCloakSettings__ClientId
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.keycloak.tre.api.secretName }}
+                  key: {{ .Values.config.keycloak.tre.api.clientIdKey }}
+            - name: TreKeyCloakSettings__ClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.keycloak.tre.api.secretName }}
+                  key: {{ .Values.config.keycloak.tre.api.clientSecretKey }}
+            - name: TreKeyCloakSettings__ValidAudiences
+              value: "{{ .Values.config.keycloak.tre.api.validAudiences }}"
+            - name: TreKeyCloakSettings__Proxy
+              value: "{{ .Values.config.keycloak.proxy.enabled }}"
+            - name: TreKeyCloakSettings__ProxyAddresURL
+              value: "{{ .Values.config.keycloak.proxy.url }}"
+            - name: TreKeyCloakSettings__BypassProxy
+              value: "{{ .Values.config.keycloak.proxy.bypassList }}"
+            - name: TreKeyCloakSettings__UseRedirectURL
+              value: "{{ .Values.config.keycloak.tre.api.useRedirect }}"
+            - name: TreKeyCloakSettings__RedirectURL
+              value: "{{ .Values.config.keycloak.tre.api.redirectUrl }}" 
+            - name: DataEgressKeyCloakSettings__Authority
+              value: "{{ default .Values.config.keycloak.dataEgress.api.authority .Values.config.keycloak.global.authority }}"
+            - name: DataEgressKeyCloakSettings__MetadataAddress
+              value: "{{ default .Values.config.keycloak.dataEgress.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.dataEgress.api.host .Values.config.keycloak.global.host }}/realms/{{ .Values.config.keycloak.dataEgress.api.realm }}/.well-known/openid-configuration"
+            - name: DataEgressKeyCloakSettings__BaseUrl
+              value: "{{ default .Values.config.keycloak.dataEgress.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.dataEgress.api.host .Values.config.keycloak.global.host }}/realms/{{ .Values.config.keycloak.dataEgress.api.realm }}"
+            - name: DataEgressKeyCloakSettings__RootUrl
+              value: "{{ default .Values.config.keycloak.dataEgress.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.dataEgress.api.host .Values.config.keycloak.global.host }}"
+            - name: DataEgressKeyCloakSettings__Realm
+              value: "{{ .Values.config.keycloak.dataEgress.api.realm }}"
+            - name: DataEgressKeyCloakSettings__ClientId
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.keycloak.dataEgress.api.secretName }}
+                  key: {{ .Values.config.keycloak.dataEgress.api.clientIdKey }}
+            - name: DataEgressKeyCloakSettings__ClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.keycloak.dataEgress.api.secretName }}
+                  key: {{ .Values.config.keycloak.dataEgress.api.clientSecretKey }}
+            - name: DataEgressKeyCloakSettings__ValidAudiences
+              value: "{{ .Values.config.keycloak.dataEgress.api.validAudiences }}"
+            - name: DataEgressKeyCloakSettings__Proxy
+              value: "{{ .Values.config.keycloak.proxy.enabled }}"
+            - name: DataEgressKeyCloakSettings__ProxyAddresURL
+              value: "{{ .Values.config.keycloak.proxy.url }}"
+            - name: DataEgressKeyCloakSettings__BypassProxy
+              value: "{{ .Values.config.keycloak.proxy.bypassList }}"
+            - name: DataEgressKeyCloakSettings__UseRedirectURL
+              value: "{{ .Values.config.keycloak.dataEgress.api.useRedirect }}"
+            - name: DataEgressKeyCloakSettings__RedirectURL
+              value: "{{ .Values.config.keycloak.dataEgress.api.redirectUrl }}" 
+            - name: EncryptionSettings__Key
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.encryption.secretName }}
+                  key: {{ .Values.config.encryption.encryptionKeySecretKey }}
+            - name: EncryptionSettings__Base
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.encryption.secretName }}
+                  key: {{ .Values.config.encryption.encryptionBaseSecretKey }}
+            - name: EmailSettings__Enabled
+              value: "{{ .Values.config.email.enabled }}"
+            - name: EmailSettings__Host
+              value: "{{ .Values.config.email.host }}"
+            - name: EmailSettings__Port
+              value: "{{ .Values.config.email.port }}"
+            - name: EmailSettings__EnableSSL
+              value: "{{ .Values.config.email.ssl }}"
+            - name: EmailSettings__FromAddress
+              value: "{{ .Values.config.email.from.address }}"
+            - name: EmailSettings__FromDisplayName
+              value: "{{ .Values.config.email.from.displayName }}"
+            - name: EmailSettings__EmailsToIgnor
+              value: "{{ .Values.config.email.ignoreList }}"
+            {{- with .Values.dataEgress.api.env }}
+            {{- . | toYaml | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.dataEgress.api.service.port }}
+              protocol: TCP
+          {{- with .Values.dataEgress.api.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.dataEgress.api.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.dataEgress.api.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,126 @@
+# TODO: figure out why the TreAPISettings__PublicApiBaseUrl setting exists and what its assumed it'll be set to...
+uiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tre.fullname" . }}-ui
+  labels:
+    {{- include "tre.labels" . | nindent 4 }}
+    component: "ui"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "tre.selectorLabels" . | nindent 6 }}
+      component: "ui"
+  template:
+    metadata:
+      {{- with .Values.tre.ui.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "tre.labels" . | nindent 8 }}
+        component: "ui"
+        {{- with .Values.tre.ui.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "tre.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: treui
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.tre.ui.image.repository }}:{{ .Values.tre.ui.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.tre.ui.image.pullPolicy }}
+          env:
+            - name: Serilog__SeqServerUrl
+              value: "{{ .Values.config.seqUrl }}"
+            - name: DemoMode
+              value: "{{ .Values.config.demoMode.enabled }}"
+            - name: KeycloakDemoMode
+              value: "{{ .Values.config.keycloakDemoMode }}"
+            - name: sslcookies
+              value: "{{ .Values.config.sslCookies }}"
+            - name: httpsRedirect
+              value: "{{ .Values.config.httpsRedirect }}"
+            - name: TreAPISettings__InternalApiBaseUrl
+              value: 'http://{{ include "tre.fullname" . }}-api'
+              # TODO: what and why does this exist?
+              # setting to the internal api svc name for now as orchestration will be hard...
+            - name: TreAPISettings__PublicApiBaseUrl
+              value: 'http://{{ include "tre.fullname" . }}-api'
+            - name: TreKeyCloakSettings__Authority
+              value: "{{ default .Values.config.keycloak.tre.api.authority .Values.config.keycloak.global.authority }}"
+            - name: TreKeyCloakSettings__MetadataAddress
+              value: "{{ default .Values.config.keycloak.tre.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.tre.api.host .Values.config.keycloak.global.host }}/realms/{{ .Values.config.keycloak.tre.api.realm }}/.well-known/openid-configuration"
+            - name: TreKeyCloakSettings__BaseUrl
+              value: "{{ default .Values.config.keycloak.tre.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.tre.api.host .Values.config.keycloak.global.host }}/realms/{{ .Values.config.keycloak.tre.api.realm }}"
+            - name: TreKeyCloakSettings__ClientId
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.keycloak.tre.api.secretName }}
+                  key: {{ .Values.config.keycloak.tre.api.clientIdKey }}
+            - name: TreKeyCloakSettings__ClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.keycloak.tre.api.secretName }}
+                  key: {{ .Values.config.keycloak.tre.api.clientSecretKey }}
+            - name: TreKeyCloakSettings__ValidAudience
+              value: "{{ .Values.config.keycloak.tre.api.validAudiences }}"
+            - name: TreKeyCloakSettings__Proxy
+              value: "{{ .Values.config.keycloak.proxy.enabled }}"
+            - name: TreKeyCloakSettings__ProxyAddresURL
+              value: "{{ .Values.config.keycloak.proxy.url }}"
+            - name: TreKeyCloakSettings__BypassProxy
+              value: "{{ .Values.config.keycloak.proxy.bypassList }}"
+            - name: TreKeyCloakSettings__UseRedirectURL
+              value: "{{ .Values.config.keycloak.tre.api.useRedirect }}"
+            - name: TreKeyCloakSettings__RedirectURL
+              value: "{{ .Values.config.keycloak.tre.api.redirectUrl }}" 
+            - name: TreKeyCloakSettings__AccountManagementURL
+              value: "{{ default .Values.config.keycloak.tre.api.protocol .Values.config.keycloak.global.protocol }}://{{ default .Values.config.keycloak.tre.api.host .Values.config.keycloak.global.host }}/realms/{{ .Values.config.keycloak.tre.api.realm }}/account"
+            - name: UIName__Name
+              value: "{{ .Values.config.uiName }}"
+            - name: Helpdesk__URL
+              value: "{{ .Values.config.helpdeskUrl }}"
+            {{- with .Values.tre.ui.env }}
+            {{- . | toYaml | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.tre.ui.service.port }}
+              protocol: TCP
+          {{- with .Values.tre.ui.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tre.ui.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.tre.ui.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
