@@ -38,8 +38,6 @@ namespace TRE_UI.Controllers
             {
                 return View(credentials);
             }
-
         }
-
     }
 }

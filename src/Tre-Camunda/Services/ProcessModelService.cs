@@ -97,9 +97,6 @@ namespace Tre_Camunda.Services
                 
                 foreach (var filePath in modelFiles)
                 {
-
-               
-
                     var deploymentFileName = Path.GetFileName(filePath);
 
                     if (deploymentFileName == "credentials.dmn")
