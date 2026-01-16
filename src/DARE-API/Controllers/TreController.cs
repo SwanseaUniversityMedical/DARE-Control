@@ -6,7 +6,6 @@ using Serilog;
 using BL.Models.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using BL.Models;
-using BL.Models.Tes;
 using DARE_API.Services;
 
 namespace DARE_API.Controllers
@@ -14,6 +13,7 @@ namespace DARE_API.Controllers
     
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class TreController : Controller
     {
         private readonly ApplicationDbContext _DbContext;
@@ -83,7 +83,6 @@ namespace DARE_API.Controllers
             }
         }
         [HttpGet("GetTresInProject/{projectId}")]
-        [AllowAnonymous]
         public List<Tre> GetTresInProject(int projectId)
         {
             try
@@ -99,7 +98,6 @@ namespace DARE_API.Controllers
         }
 
         [HttpGet("GetAllTresUI")]
-        [AllowAnonymous]
         public async Task<List<TreGetProjectModel>> GetAllTresUI()
         {
             try
@@ -125,7 +123,6 @@ namespace DARE_API.Controllers
 
 
         [HttpGet("GetAllTres")]
-        [AllowAnonymous]
         public async Task<List<Tre>> GetAllTres()
         {
             try
@@ -148,7 +145,6 @@ namespace DARE_API.Controllers
         }
         
         [HttpGet("GetATre")]
-        [AllowAnonymous]
         public Tre? GetATre(int treId)
         {
             try

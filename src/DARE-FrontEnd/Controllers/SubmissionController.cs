@@ -1,5 +1,4 @@
-﻿using Amazon.Runtime.Internal.Transform;
-using BL.Models;
+﻿using BL.Models;
 using BL.Models.Tes;
 using BL.Models.ViewModels;
 using BL.Services;
@@ -7,20 +6,14 @@ using DARE_FrontEnd.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.CodeAnalysis;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
-using NuGet.Common;
 using Serilog;
-using System;
-using static System.Net.Mime.MediaTypeNames;
 using DARE_FrontEnd.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace DARE_FrontEnd.Controllers
 {
-    [AllowAnonymous]
     public class SubmissionController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
@@ -46,8 +39,9 @@ namespace DARE_FrontEnd.Controllers
         }
 
 
-        [Authorize]
+        
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> SubmissionWizard(SubmissionWizard model)
         {
             if (!ModelState.IsValid) // SonarQube security
@@ -190,6 +184,7 @@ namespace DARE_FrontEnd.Controllers
 
 
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult> SubmitDemoTes(AddiSubmissionWizard model, string Executors, string SQL)
         {
             if (!ModelState.IsValid) // SonarQube security
@@ -252,6 +247,7 @@ namespace DARE_FrontEnd.Controllers
 
 
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult> AddiSubmissionWizard(AddiSubmissionWizard model, string Executors, string SQL)
         {
             if (!ModelState.IsValid) // SonarQube security

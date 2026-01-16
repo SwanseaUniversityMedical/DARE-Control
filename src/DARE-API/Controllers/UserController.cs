@@ -6,15 +6,12 @@ using Microsoft.AspNetCore.Authorization;
 using Serilog;
 using BL.Models.ViewModels;
 using DARE_API.Services.Contract;
-using Microsoft.AspNetCore.Authentication;
 using DARE_API.Services;
-using BL.Models.Tes;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace DARE_API.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly ApplicationDbContext _DbContext;
@@ -89,8 +86,7 @@ namespace DARE_API.Controllers
             
         }
 
-
-        [AllowAnonymous]
+        
         [HttpGet("GetUser")]
         public User? GetUser(int userId)
         {
@@ -119,8 +115,7 @@ namespace DARE_API.Controllers
             
         }
 
-
-        [AllowAnonymous]
+        
         [HttpGet("GetAllUsersUI")]
         public List<UserGetProjectModel> GetAllUsersUI()
         {
@@ -143,7 +138,7 @@ namespace DARE_API.Controllers
             }
         }
 
-        [AllowAnonymous]
+        
         [HttpGet("GetAllUsers")]
         public List<User> GetAllUsers()
         {
