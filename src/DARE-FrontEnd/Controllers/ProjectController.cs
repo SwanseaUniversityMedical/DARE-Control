@@ -397,7 +397,7 @@ namespace DARE_FrontEnd.Controllers
 
                 if (result.Id == 0)
                 {
-                    TempData["error"] = "";
+                    TempData["error"] = result.FormData;
                     return BadRequest();
                 }
                 TempData["success"] = "Project Save Successfully";
