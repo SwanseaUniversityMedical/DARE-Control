@@ -2,21 +2,15 @@
 using Users = BL.Models.User;
 using BL.Models.Settings;
 using BL.Services;
-using EasyNetQ.Management.Client.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Serilog;
-using System.Data;
 using BL.Models.ViewModels;
-using User = EasyNetQ.Management.Client.Model.User;
 using Microsoft.AspNetCore.Mvc.Rendering;
-//using Microsoft.CodeAnalysis;
+
 
 namespace DARE_FrontEnd.Controllers
 {
-    [Authorize(Roles = "dare-control-admin")]
+    [Authorize]
     public class UserController : Controller
     {
         private readonly IDareClientHelper _clientHelper;
@@ -32,6 +26,7 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "dare-control-admin")]
         public IActionResult SaveUserForm(int userId)
         {
             if (!ModelState.IsValid) // SonarQube security
@@ -59,7 +54,6 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult GetAllUsers()
         {
 
@@ -67,9 +61,9 @@ namespace DARE_FrontEnd.Controllers
 
             return View(result);
         }
-
-
-        [AllowAnonymous]
+        
+        
+        [HttpGet]
         public IActionResult GetUser(int id)
         {
             if (!ModelState.IsValid) // SonarQube security
@@ -96,6 +90,7 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "dare-control-admin")]
         public async Task<IActionResult> UserEditFormSubmission([FromBody] object arg, int id)
         {
             if (!ModelState.IsValid) // SonarQube security
@@ -124,6 +119,7 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "dare-control-admin")]
         public IActionResult AddProjectMembership()
         {
 
@@ -132,6 +128,7 @@ namespace DARE_FrontEnd.Controllers
         }
      
         [HttpPost]
+        [Authorize(Roles = "dare-control-admin")]
         public async Task<IActionResult> AddProjectMembership(ProjectUser model)
         {
             if (!ModelState.IsValid) // SonarQube security
@@ -148,6 +145,7 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "dare-control-admin")]
         public async Task<IActionResult> RemoveProjectFromUser(int userId, int projectId)
         {
             if (!ModelState.IsValid) // SonarQube security
@@ -188,6 +186,7 @@ namespace DARE_FrontEnd.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "dare-control-admin")]
         public async Task<IActionResult> AddProjectList(string Id, string ItemList)
         {
             string[] arr = ItemList.Split(',');
