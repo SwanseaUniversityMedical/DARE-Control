@@ -23,5 +23,9 @@ namespace BL.Models
 
         public virtual List<TreAuditLog>? AuditLogs { get; set; }
     }
-    
+    public class UpdateMembershipDecisionDto
+    {
+        public int Id { get; set; }
+        public Decision Decision { get; set; }
+    }
 }

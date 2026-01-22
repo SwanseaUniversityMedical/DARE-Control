@@ -273,7 +273,7 @@ namespace TRE_API.Controllers
         [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("UpdateMembershipDecisions")]
         public async Task<List<TreMembershipDecision>> UpdateMembershipDecisions(
-            List<TreMembershipDecision> membershipDecisions)
+            List<UpdateMembershipDecisionDto> membershipDecisions)
         {
             try
             {
