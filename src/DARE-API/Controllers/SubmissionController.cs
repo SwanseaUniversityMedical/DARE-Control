@@ -11,11 +11,6 @@ using EasyNetQ;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using BL.Rabbit;
-using Microsoft.AspNetCore.SignalR;
-using System.Reflection;
-using System.ComponentModel.DataAnnotations;
-using System.Numerics;
-using System.Xml.Linq;
 using BL.Services;
 using Microsoft.AspNetCore.StaticFiles;
 
@@ -371,25 +366,7 @@ namespace DARE_API.Controllers
             return result;
 
         }
-
-        //[AllowAnonymous]
-        //[HttpGet("DifferentStages")]
-        //public Dictionary<int, StageInfo> DifferentStages()
-        //{
-
-        //    var stage1List = new StageInfo();
-        //    stage1List.stageName = "Submission Layer Validation";
-        //    stage1List.stageNumber = 1;
-        //    stage1List.statusTypeList = new List<StatusType>
-        //    {
-        //        StatusType.InvalidUser,
-        //        StatusType.UserNotOnProject,
-        //        StatusType.InvalidSubmission,
-        //        StatusType.SubmissionWaitingForCrateFormatCheck
-        //    };
-        //    return null;
-
-        //}
+        
         public static string GetContentType(string fileName)
         {
             // Create a new FileExtensionContentTypeProvider

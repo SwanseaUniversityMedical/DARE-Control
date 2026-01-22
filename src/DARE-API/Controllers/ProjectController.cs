@@ -1,33 +1,24 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-
 using DARE_API.Repositories.DbContexts;
 using BL.Models;
 using BL.Models.ViewModels;
-
 using Newtonsoft.Json;
 using Serilog;
 using BL.Services;
 using DARE_API.Services.Contract;
 using Microsoft.AspNetCore.Authentication;
-using BL.Models.Tes;
-using EasyNetQ.Management.Client.Model;
-using System.Threading;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using BL.Models.APISimpleTypeReturns;
-using Amazon.Util.Internal;
 using DARE_API.Services;
-using User = BL.Models.User;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace DARE_API.Controllers
 {
 
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
 
 
     public class ProjectController : Controller
@@ -53,10 +44,10 @@ namespace DARE_API.Controllers
         [HttpPost("SaveProject")]
         public async Task<Project?> SaveProject([FromBody] FormData data)
         {
+            Project project = null;
             try
             {
-
-                Project project = JsonConvert.DeserializeObject<Project>(data.FormIoString);
+                project = JsonConvert.DeserializeObject<Project>(data.FormIoString);
                 //2023-06-01 14:30:00 use this as the datetime
            
 
@@ -78,37 +69,59 @@ namespace DARE_API.Controllers
 
                 if (project.Id == 0)
                 {
-                    _DbContext.Projects.Add(project);
-                    await _DbContext.SaveChangesAsync();
+                    try
+                    {
+                        _DbContext.Projects.Add(project);
+                        await _DbContext.SaveChangesAsync();
 
-                    project.SubmissionBucket = GenerateRandomName(project.Id.ToString()) + "submission".Replace("_", "");
-                    project.OutputBucket = GenerateRandomName(project.Id.ToString()) + "output".Replace("_", ""); ;
-                    var submissionBucket = await _minioHelper.CreateBucket(project.SubmissionBucket);
-                    if (!submissionBucket)
-                    {
-                        Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SaveProject", project.SubmissionBucket);
-                    }
-                    else
-                    {
-                        var submistionBucketPolicy = await _minioHelper.CreateBucketPolicy(project.SubmissionBucket);
-                        if (!submistionBucketPolicy)
+                        project.SubmissionBucket = GenerateRandomName(project.Id.ToString()) + "submission".Replace("_", "");
+                        project.OutputBucket = GenerateRandomName(project.Id.ToString()) + "output".Replace("_", ""); ;
+                        var submissionBucket = await _minioHelper.CreateBucket(project.SubmissionBucket);
+                        if (!submissionBucket)
                         {
-                            Log.Error("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.", "SaveProject", project.SubmissionBucket);
+                            Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SaveProject", project.SubmissionBucket);
+                            throw new Exception("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.");
+                        }
+                        else
+                        {
+                            var submistionBucketPolicy = await _minioHelper.CreateBucketPolicy(project.SubmissionBucket);
+                            if (!submistionBucketPolicy)
+                            {
+                                Log.Error("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.", "SaveProject", project.SubmissionBucket);
+                                throw new Exception("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.");
+                            }
+                        }
+                        var outputBucket = await _minioHelper.CreateBucket(project.OutputBucket);
+                        if (!outputBucket)
+                        {
+                            Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SaveProject", project.OutputBucket);
+                            throw new Exception("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.");
+
+                        }
+                        else
+                        {
+                            var outputBucketPolicy = await _minioHelper.CreateBucketPolicy(project.OutputBucket);
+                            if (!outputBucketPolicy)
+                            {
+                                Log.Error("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.", "SaveProject", project.OutputBucket);
+                                throw new Exception("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.");
+                            }
                         }
                     }
-                    var outputBucket = await _minioHelper.CreateBucket(project.OutputBucket);
-                    if (!outputBucket)
+                    catch (Exception ex)
                     {
-                        Log.Error("{Function} S3GetListObjects: Failed to create bucket {name}.", "SaveProject", project.OutputBucket);
-
-                    }
-                    else
-                    {
-                        var outputBucketPolicy = await _minioHelper.CreateBucketPolicy(project.OutputBucket);
-                        if (!outputBucketPolicy)
+                        if (project != null)
                         {
-                            Log.Error("{Function} CreateBucketPolicy: Failed to create policy for bucket {name}.", "SaveProject", project.OutputBucket);
+                            if (project.Id != 0)
+                            {
+                                _DbContext.Projects.Remove(project);
+                                await _DbContext.SaveChangesAsync();
+                            }
                         }
+                        Log.Error(ex, "{Function} Crash", "SaveProject");
+                        var errorModel = new Project();
+                        errorModel.FormData = ex.ToString();
+                        return errorModel;
                     }
                 }
 
@@ -343,8 +356,7 @@ namespace DARE_API.Controllers
 
         }
 
-
-        [AllowAnonymous]
+        
         [HttpGet("GetProjectUI")]
         public SubmissionGetProjectModel? GetProjectUI(int projectId)
         {
@@ -369,8 +381,7 @@ namespace DARE_API.Controllers
 
 
         }
-
-        [AllowAnonymous]
+        
         [HttpGet("GetProject")]
         public Project? GetProject(int projectId)
         {
@@ -395,7 +406,6 @@ namespace DARE_API.Controllers
         }
 
         [HttpGet("GetAllProjects")]
-        [AllowAnonymous]
         public List<Project> GetAllProjects()
         {
             try
@@ -543,7 +553,6 @@ namespace DARE_API.Controllers
         }
 
         [HttpGet("GetTresInProject")]
-        [AllowAnonymous]
         public List<Tre> GetTresInProject(int projectId)
         {
             try
@@ -590,8 +599,7 @@ namespace DARE_API.Controllers
                 throw;
             }
         }
-
-        [AllowAnonymous]
+        
         [HttpGet("IsUserOnProject")]
         public bool IsUserOnProject(int projectId, int userId)
         {
@@ -607,9 +615,8 @@ namespace DARE_API.Controllers
                 throw;
             }
         }
-
-        [HttpGet("GetMinioEndPoint")]
         [AllowAnonymous]
+        [HttpGet("GetMinioEndPoint")]
         public MinioEndpoint? GetMinioEndPoint()
         {
 
@@ -674,7 +681,7 @@ namespace DARE_API.Controllers
         [HttpGet("GetSearchData")]
         public List<Project> GetSearchData(string searchString)
         {
-              try
+            try
             {
 
                 //List<Project> searchResults = _DbContext.Projects
