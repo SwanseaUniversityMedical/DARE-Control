@@ -1,0 +1,305 @@
+# This is to override the chart name.
+nameOverride: ""
+fullnameOverride: ""
+
+# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+replicaCount: 1
+imagePullSecrets: []
+podSecurityContext: {}
+securityContext: {}
+nodeSelector: {}
+affinity: {}
+tolerations: []
+
+config:
+  postgres:
+    host: ""
+    port: 5432
+    secretName: ""
+    passwordSecretKey: "password"
+    usernameSecretKey: "username"
+    dataEgressDatabase: "DATA-Egress"
+    treDatabase: "DARE-Tre"
+    treCredsDatabase: "TRE_Credentials"
+
+  rabbitmq:
+    host: ""
+    port: 5672
+    vhost: "SubLayer"
+    secretName: ""
+    passwordSecretKey: "password"
+    usernameSecretKey: "username"
+
+  seqUrl: ""
+  helpdeskUrl: ""
+  uiName: ""
+  treName: ""
+  camundaUrl: ""
+  dmnFilePath: "../TRE.Credentials/ProcessModels"
+
+
+  demoMode:
+    enabled: false
+    secretName: ""
+    passwordSecretKey: "password"
+
+  keycloakDemoMode: true
+  sslCookies: false
+  httpsRedirect: false
+
+  minio:
+    tre:
+      url: ""
+      awsService: "s3"
+      attributeName: "policy"
+      bucketName: ""
+      consoleName: ""
+      consoleUrl: ""
+      secretName: ""
+      accessSecretKey: "accessKey"
+      secretSecretKey: "secretKey"
+
+    submission:
+      url: ""
+      awsService: "s3"
+      attributeName: "policy"
+      bucketName: ""
+      consoleUrl: ""
+      consoleName: ""
+      secretName: ""
+      accessSecretKey: "accessKey"
+      secretSecretKey: "secretKey"
+
+
+
+  keycloak:
+    global:
+      authority: ""
+      protocol: ""
+      host: ""
+
+    proxy:
+      enabled: false
+      url: ""
+      bypassList: ""
+
+    tre:
+      api:
+        authority: ""
+        protocol: ""
+        host: ""
+        realm: "Dare-TRE"
+        secretName: ""
+        clientIdKey: "clientId"
+        clientSecretKey: "clientSecret"
+        useRedirect: false
+        redirectUrl: ""
+        validAudiences: "Dare-TRE-API,Dare-TRE-UI"
+
+    dataEgress:
+      api:
+        authority: ""
+        protocol: ""
+        host: ""
+        realm: "Data-Egress"
+        secretName: ""
+        clientIdKey: "clientId"
+        clientSecretKey: "clientSecret"
+        useRedirect: false
+        redirectUrl: ""
+        validAudiences: "Data-Egress-API"
+
+      ui:
+        redirectUrl: ""
+
+    submission:
+      authority: ""
+      protocol: ""
+      host: ""
+      realm: ""
+      secretName: ""
+      clientIdKey: "clientId"
+      clientSecretKey: "clientSecret"
+      useRedirect: false
+      redirectUrl: ""
+      validAudiences: ""
+
+  encryption:
+    secretName: ""
+    encryptionBaseSecretKey: "base"
+    encryptionKeySecretKey: "key"
+
+  email:
+    enabled: false
+    host: ""
+    port: ""
+    ssl: false
+    from:
+      address: ""
+      displayName: ""
+    ignoreList: ""
+
+
+
+  externalHangfire:
+    enabled: false
+
+  jobSettings:
+    syncSchedule: 10
+    scanSchedule: 1
+
+
+  authSettings:
+    tokenExpireDays: ""
+
+  submission:
+    apiAddress: ""
+
+  features:
+    generateAccounts: "false"
+    sqlNotGraphQl: "true"
+    demoAllInOne: "false"
+    ephemeralCreds: "false"
+
+  hasura:
+    enabled: false
+    url: ""
+    adminSecretName: ""
+    adminSecretKey: ""
+    dbEnvVar: ""
+    dbName: ""
+
+  opa:
+    endpoint: ""
+    policyUploadEndpoint: ""
+    expiryDelayMins: ""
+    useRealExpiry: ""
+
+  vault:
+    url: ""
+    secretEngine: ""
+    retry: true
+    retryAttempts: 3
+    tokenSecretName: ""
+    tokenSecretKey: ""
+
+  agent:
+    rabbit:
+      enabled: false
+    tesk:
+      enabled: false
+      outputBucketPrefix: ""
+      url: ""
+    proxy:
+      enabled: false
+      url: ""
+      bypassList: ""
+
+    tokenImageName: ""
+    tokenGQLImageName: ""
+    hasuraUrl: ""
+    catalog: ""
+    mandatoryInput: ""
+
+  zeebe:
+    clientGatewayAddress: ""
+    worker:
+      maxJobsActive: "5"
+      pollIntervalMS: "500"
+      pollTimeoutMS: "50"
+      retryTimeoutMS: "1000"
+      timeoutMS: "1000"
+
+
+
+dataEgress:
+  api:
+    podAnnotations: {}
+    podLabels: {}
+    image:
+      repository: ""
+      tag: ""
+      pullPolicy: IfNotPresent
+    env: []
+    service:
+      port: 80
+      type: ClusterIP
+    resources: {}
+    volumeMounts: []
+    volumes: []
+
+  ui:
+    podAnnotations: {}
+    podLabels: {}
+    image:
+      repository: ""
+      tag: ""
+      pullPolicy: IfNotPresent
+    env: []
+    service:
+      port: 80
+      type: ClusterIP
+    resources: {}
+    volumeMounts: []
+    volumes: []
+
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      tls: []
+      hosts: []
+      host: ""
+
+tre:
+  ui:
+    podAnnotations: {}
+    podLabels: {}
+    image:
+      repository: ""
+      tag: ""
+      pullPolicy: IfNotPresent
+
+    service:
+      type: ClusterIP
+      port: 80
+    env: []
+    resources: {}
+    volumeMounts: []
+    volumes: []
+
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      tls: []
+      hosts: []
+      host: ""
+
+  api:
+    podAnnotations: {}
+    podLabels: {}
+    image:
+      repository: ""
+      tag: ""
+      pullPolicy: IfNotPresent
+
+    service:
+      type: ClusterIP
+      port: 80
+    env: []
+    resources: {}
+    volumeMounts: []
+    volumes: []
+
