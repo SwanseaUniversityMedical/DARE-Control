@@ -201,7 +201,7 @@ namespace TRE_API.Controllers
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("UpdateProjects")]
-        public async Task<List<TreProject>> UpdateProjects(List<UpdateProjectDetailsDto> projects)
+        public async Task<List<TreProject>> UpdateProjects(List<TreProject> projects)
         {
             try
             {
@@ -218,25 +218,14 @@ namespace TRE_API.Controllers
                     var dbproj = _DbContext.Projects.First(x => x.Id == treProject.Id);
                     dbproj.LocalProjectName = treProject.LocalProjectName;
                     
-                    // Suspect these are related to TREFX-370 which removed the DB crendentials storage in TRE side
-                    // if (treProject.Password != null)
-                    // {
-                    //     dbproj.Password = _encDecHelper.Encrypt(treProject.Password);
-                    // }
-                    //
-                    // if (treProject.UserName != null)
-                    // {
-                    //     dbproj.UserName = treProject.UserName;
-                    // }
-
                     if (treProject.Decision != dbproj.Decision)
                     {
                         dbproj.Decision = treProject.Decision;
                         dbproj.ApprovedBy = approvedBy;
                         dbproj.LastDecisionDate = approvedDate;
                     }
-                    // Remove due to there is no implementation to use/check ProjectExpiryDate from the TRE side yet
-                    // dbproj.ProjectExpiryDate = treProject.ProjectExpiryDate.ToUniversalTime();
+
+                    dbproj.ProjectExpiryDate = treProject.ProjectExpiryDate.ToUniversalTime();
 
 
                     resultList.Add(dbproj);
@@ -274,7 +263,7 @@ namespace TRE_API.Controllers
         [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("UpdateMembershipDecisions")]
         public async Task<List<TreMembershipDecision>> UpdateMembershipDecisions(
-            List<UpdateMembershipDecisionDto> membershipDecisions)
+            List<TreMembershipDecision> membershipDecisions)
         {
             try
             {
