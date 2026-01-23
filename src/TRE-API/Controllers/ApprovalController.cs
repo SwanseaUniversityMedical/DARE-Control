@@ -217,17 +217,7 @@ namespace TRE_API.Controllers
                 {
                     var dbproj = _DbContext.Projects.First(x => x.Id == treProject.Id);
                     dbproj.LocalProjectName = treProject.LocalProjectName;
-
-                    if (treProject.Password != null)
-                    {
-                        dbproj.Password = _encDecHelper.Encrypt(treProject.Password);
-                    }
-
-                    if (treProject.UserName != null)
-                    {
-                        dbproj.UserName = treProject.UserName;
-                    }
-
+                    
                     if (treProject.Decision != dbproj.Decision)
                     {
                         dbproj.Decision = treProject.Decision;
@@ -273,7 +263,7 @@ namespace TRE_API.Controllers
         [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("UpdateMembershipDecisions")]
         public async Task<List<TreMembershipDecision>> UpdateMembershipDecisions(
-            List<UpdateMembershipDecisionDto> membershipDecisions)
+            List<TreMembershipDecision> membershipDecisions)
         {
             try
             {

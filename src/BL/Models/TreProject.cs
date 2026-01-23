@@ -1,6 +1,5 @@
 ﻿using BL.Models.Enums;
 using System.ComponentModel.DataAnnotations;
-using System.Xml.Linq;
 
 namespace BL.Models
 {
@@ -44,5 +43,4 @@ namespace BL.Models
 
         public string? OutputBucketSub { get; set; }
     }
-    
 }
