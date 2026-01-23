@@ -43,10 +43,4 @@ namespace BL.Models
 
         public string? OutputBucketSub { get; set; }
     }
-    public class UpdateProjectDetailsDto
-    {
-        public string LocalProjectName { get; set; }
-        public Decision Decision { get; set; }
-        public int Id { get; set; }
-    }
 }
