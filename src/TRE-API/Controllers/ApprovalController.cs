@@ -201,7 +201,7 @@ namespace TRE_API.Controllers
 
         [Authorize(Roles = "dare-tre-admin")]
         [HttpPost("UpdateProjects")]
-        public async Task<List<TreProject>> UpdateProjects(List<TreProject> projects)
+        public async Task<List<TreProject>> UpdateProjects(List<UpdateProjectDetailsDto> projects)
         {
             try
             {
@@ -217,16 +217,17 @@ namespace TRE_API.Controllers
                 {
                     var dbproj = _DbContext.Projects.First(x => x.Id == treProject.Id);
                     dbproj.LocalProjectName = treProject.LocalProjectName;
-
-                    if (treProject.Password != null)
-                    {
-                        dbproj.Password = _encDecHelper.Encrypt(treProject.Password);
-                    }
-
-                    if (treProject.UserName != null)
-                    {
-                        dbproj.UserName = treProject.UserName;
-                    }
+                    
+                    // Suspect these are related to TREFX-370 which removed the DB crendentials storage in TRE side
+                    // if (treProject.Password != null)
+                    // {
+                    //     dbproj.Password = _encDecHelper.Encrypt(treProject.Password);
+                    // }
+                    //
+                    // if (treProject.UserName != null)
+                    // {
+                    //     dbproj.UserName = treProject.UserName;
+                    // }
 
                     if (treProject.Decision != dbproj.Decision)
                     {
@@ -234,8 +235,8 @@ namespace TRE_API.Controllers
                         dbproj.ApprovedBy = approvedBy;
                         dbproj.LastDecisionDate = approvedDate;
                     }
-
-                    dbproj.ProjectExpiryDate = treProject.ProjectExpiryDate.ToUniversalTime();
+                    // Remove due to there is no implementation to use/check ProjectExpiryDate from the TRE side yet
+                    // dbproj.ProjectExpiryDate = treProject.ProjectExpiryDate.ToUniversalTime();
 
 
                     resultList.Add(dbproj);
