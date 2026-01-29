@@ -60,19 +60,16 @@ namespace Tre_Camunda.Services
         {
             try
             {
-                Log.Information("Attempting to create LDAP connection to {Host}:{Port}", _config.Host, _config.Port);
                 using var connection = CreateConnection();
                 try
                 {
-                    Log.Information("Attempting to bind to LDAP server...");
                     connection.Bind();
-                    Log.Information("LDAP bind successful.");
-                }catch (System.DirectoryServices.Protocols.LdapException ex)
+                    _logger.LogInformation("LDAP bind successful.");
+                } catch (System.DirectoryServices.Protocols.LdapException ex)
                 {
                     Log.Error("LDAP connection failed: {Message} - ServerErrorMessage: {ServerError}", ex.Message, ex.ServerErrorMessage);
                     throw;
                 }
-                _logger.LogInformation("LDAP bind successful.");
 
                 //Null check
                 if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
