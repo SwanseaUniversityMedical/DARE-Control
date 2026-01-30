@@ -37,16 +37,8 @@ namespace Tre_Camunda.Services
                 identifier = new LdapDirectoryIdentifier(_config.Host, _config.Port);
             }
 
-            LdapConnection connection = null;
-
-            if (_config.Port == -1)
-            {
-                connection = new LdapConnection(identifier);
-            }
-            else
-            {
-                connection = new LdapConnection(_config.Host);
-            }
+            // Always use the identifier which contains both host and port information
+            var connection = new LdapConnection(identifier);
 
     
             connection.SessionOptions.ProtocolVersion = 3;
@@ -71,14 +63,13 @@ namespace Tre_Camunda.Services
                 using var connection = CreateConnection();
                 try
                 {
-
-                }catch (System.DirectoryServices.Protocols.LdapException ex)
+                    connection.Bind();
+                    _logger.LogInformation("LDAP bind successful.");
+                } catch (System.DirectoryServices.Protocols.LdapException ex)
                 {
-                    Log.Error(ex.ServerErrorMessage);
-                    throw ex;
+                    Log.Error("LDAP connection failed: {Message} - ServerErrorMessage: {ServerError}", ex.Message, ex.ServerErrorMessage);
+                    throw;
                 }
-                connection.Bind();
-                _logger.LogInformation("LDAP bind successful.");
 
                 //Null check
                 if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
