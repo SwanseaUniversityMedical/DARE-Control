@@ -61,6 +61,14 @@ services:
       - ZEEBE_BROKER_DATA_DISKUSAGECOMMANDWATERMARK=0.998
       - ZEEBE_BROKER_DATA_DISKUSAGEREPLICATIONWATERMARK=0.999
       - "JAVA_TOOL_OPTIONS=-Xms512m -Xmx512m"
+      
+      - CAMUNDA_IDENTITY_ISSUERBACKENDURL=https://auth2.ukserp.ac.uk/realms/AirlockFileRequest
+      - CAMUNDA_IDENTITY_BASEURL=http://identity:8084
+      - CAMUNDA_IDENTITY_AUDIENCE=zeebe-api
+      - ZEEBE_BROKER_GATEWAY_SECURITY_AUTHENTICATION_MODE=identity
+      - ZEEBE_BROKER_GATEWAY_SECURITY_AUTHENTICATION_IDENTITY_ISSUERBACKENDURL=https://auth2.ukserp.ac.uk/realms/AirlockFileRequest
+      - ZEEBE_BROKER_GATEWAY_SECURITY_AUTHENTICATION_IDENTITY_AUDIENCE=zeebe-api
+      - ZEEBE_BROKER_GATEWAY_SECURITY_AUTHENTICATION_IDENTITY_BASEURL=http://identity:8084
     restart: always
     healthcheck:
       test: [ "CMD-SHELL", "timeout 10s bash -c ':> /dev/tcp/127.0.0.1/9600' && timeout 10s bash -c ':> /dev/tcp/127.0.0.1/26500' || exit 1" ]
@@ -81,11 +89,30 @@ services:
     ports:
       - "8081:8080"
     environment: #http://localhost:8081/swagger-ui/index.html#/ProcessInstance/byKey_1
+    
       - CAMUNDA_OPERATE_ZEEBE_GATEWAYADDRESS=zeebe:26500
       - CAMUNDA_OPERATE_ELASTICSEARCH_URL=http://elasticsearch:9200
       - CAMUNDA_OPERATE_ZEEBEELASTICSEARCH_URL=http://elasticsearch:9200
       - management.endpoints.web.exposure.include=health
       - management.endpoint.health.probes.enabled=true     
+      
+      
+      - ZEEBE_CLIENT_ID=zeebe
+      - ZEEBE_CLIENT_SECRET=QtqKNLFFN1bY2N08kKe6pjCxAHjRgo4x
+      - ZEEBE_TOKEN_AUDIENCE=zeebe-api
+      
+      - ZEEBE_AUTHORIZATION_SERVER_URL=https://auth2.ukserp.ac.uk/realms/AirlockFileRequest/protocol/openid-connect/token
+      - SPRING_PROFILES_ACTIVE=none
+      - CAMUNDA_OPERATE_IDENTITY_BASEURL=http://identity:8084
+      - CAMUNDA_OPERATE_IDENTITY_ISSUER_URL=https://auth2.ukserp.ac.uk/realms/AirlockFileRequest
+      - CAMUNDA_OPERATE_IDENTITY_ISSUER_BACKEND_URL=https://auth2.ukserp.ac.uk/realms/AirlockFileRequest
+      - CAMUNDA_OPERATE_IDENTITY_CLIENTID=operate
+      - CAMUNDA_OPERATE_IDENTITY_CLIENTSECRET=Zyhvor8p8YdQ9kOXd0eVABUXIJeDmjNg
+      - CAMUNDA_OPERATE_IDENTITY_AUDIENCE=operate-api
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=https://auth2.ukserp.ac.uk/realms/AirlockFileRequest
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=https://auth2.ukserp.ac.uk/realms/AirlockFileRequest/protocol/openid-connect/certs
+      - CAMUNDA_OPERATE_IDENTITY_RESOURCEPERMISSIONSENABLED=true
+      
     healthcheck:
       test: [ "CMD-SHELL", "wget -O - -q 'http://localhost:8080/actuator/health/readiness'" ]
       interval: 30s
@@ -111,6 +138,9 @@ services:
       - CAMUNDA_OPERATE_CLIENT_PASSWORD=demo
       - management.endpoints.web.exposure.include=health
       - management.endpoint.health.probes.enabled=true
+      - CAMUNDA_CLIENT_AUTH_ISSUERURL=https://auth2.ukserp.ac.uk/realms/AirlockFileRequest
+      - CAMUNDA_CLIENT_AUTH_CLIENTID=connectors-api
+      - CAMUNDA_CLIENT_AUTH_CLIENTSECRET=NH1hMxx5kppDSeptmERvLSaP5YKVv6PM
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8080/actuator/health/readiness" ]
       interval: 30s
@@ -124,6 +154,31 @@ services:
       - zeebe
       - operate 
   
+  identity:
+    container_name: identity
+    image: camunda/identity:${CAMUNDA_IDENTITY_VERSION}
+    ports:
+      - "8084:8084"
+    environment:
+      SERVER_PORT: 8084
+      IDENTITY_RETRY_DELAY_SECONDS: 30
+      IDENTITY_URL: https://auth2.ukserp.ac.uk
+      #IDENTITY_LOG_LEVEL: DEBUG
+      #JAVA_TOOL_OPTIONS: >-
+      #  -Dlogging.level.root=DEBUG
+      #  -Ddebug=true
+      #  -Dlogging.level.org.apache.http.impl.execchain.MainClientExec=DEBUG
+      #  -Dlogging.level.org.apache.http.headers=DEBUG
+      #  -Dlogging.level.org.apache.http.wire=DEBUG
+    # Point to your external Keycloak
+      KEYCLOAK_URL: https://auth2.ukserp.ac.uk
+      IDENTITY_CLIENT_SECRET: PaV8izySyIEgV7OzYqNkAWi6dU9gDNtQ
+      SPRING_PROFILES_ACTIVE: keycloak
+      IDENTITY_CLIENT_ID: camunda-identity
+      IDENTITY_AUTH_PROVIDER_ISSUER_URL: https://auth2.ukserp.ac.uk/realms/AirlockFileRequest
+      IDENTITY_AUTH_PROVIDER_BACKEND_URL: https://auth2.ukserp.ac.uk/realms/AirlockFileRequest
+      KEYCLOAK_REALM: AirlockFileRequest
+
   elasticsearch: # https://hub.docker.com/_/elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}
     container_name: elasticsearch
