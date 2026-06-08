@@ -40,9 +40,11 @@ namespace Data_Egress_UI.Controllers
             paramlist.Add("id", id.ToString());
 
             var files = _dataClientHelper.CallAPIWithoutModel<EgressSubmission>("/api/DataEgress/GetEgress/", paramlist).Result;
-            // Get Minio URL from configuration
-            var minioUrl = _configuration["MinioSettings:Url"] ?? "http://localhost:9003";
-            ViewBag.MinioUrl = minioUrl;
+            // Get S3 settings from configuration
+            var s3Url = _configuration["S3Settings:Url"] ?? "http://localhost:9003";
+            var s3BucketPath = _configuration["S3Settings:BucketPath"] ?? "/rustfs/console/browser/?bucket=";
+            ViewBag.S3Url = s3Url;
+            ViewBag.S3BucketPath = s3BucketPath;
             
             return View(files);
         }
