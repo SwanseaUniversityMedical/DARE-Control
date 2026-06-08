@@ -26,11 +26,11 @@ namespace BL.Models
 
         public string? Name { get; set; } 
         
-        public string GetMinioBucketUrl(string minioBaseUrl = "http://localhost:9003")
+        public string GetS3BucketUrl(string minioBaseUrl = "http://localhost:9003", string bucketPath = "/rustfs/console/browser/?bucket=")
         {
             return string.IsNullOrEmpty(OutputBucket) 
                 ? "#" 
-                : $"{minioBaseUrl}/browser/{OutputBucket}";
+                : $"{minioBaseUrl}{bucketPath}{OutputBucket}";
         }
         
         public string EgressStatusDisplay

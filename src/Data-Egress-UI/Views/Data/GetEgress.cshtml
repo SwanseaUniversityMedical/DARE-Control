@@ -17,7 +17,7 @@
     <hr class="d-flex my-4">
     <div class="d-flex align-items-center justify-content-between">
         <div>
-            <a href="@Model.GetMinioBucketUrl(ViewBag.MinioUrl)" class="btn btn-sm btn-outline-secondary">Minio Bucket</a>
+            <a href="@Model.GetS3BucketUrl(ViewBag.S3Url, ViewBag.S3BucketPath)" class="btn btn-sm btn-outline-secondary">S3 Bucket</a>
             @if (Model.Status != EgressStatus.NotCompleted)
             {
                 <p class="text-muted fs-7 mt-4 mb-0">
