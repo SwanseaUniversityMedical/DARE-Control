@@ -1,30 +1,25 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-EXPOSE 8080
-EXPOSE 443
-
-FROM mcr.microsoft.com/dotnet/sdk:8.0.416 AS build
+FROM --platform=${BUILDPLATFORM} mcr.microsoft.com/dotnet/sdk:8.0.416 AS build
 WORKDIR /src
 COPY ["DARE-FrontEnd/DARE-FrontEnd.csproj", "DARE-FrontEnd/"]
 COPY ["BL/BL.csproj", "BL/"]
 RUN dotnet restore "DARE-FrontEnd/DARE-FrontEnd.csproj"
-RUN dotnet restore "BL/BL.csproj"
+COPY BL/ BL/
+COPY DARE-FrontEnd/ DARE-FrontEnd/
+RUN dotnet publish "DARE-FrontEnd/DARE-FrontEnd.csproj" \
+    -c Release \
+    -o /app/publish \
+    --no-restore \
+    --self-contained=false \
+    /p:UseAppHost=false
 
-COPY . .
-WORKDIR "/src/DARE-FrontEnd"
-RUN dotnet build "DARE-FrontEnd.csproj"   -c Release -o /app/build
-
-FROM build AS publish
-RUN dotnet publish "DARE-FrontEnd.csproj" -c Release -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "DARE-FrontEnd.dll"]
-
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+USER root
 COPY rootca.pem /usr/local/share/ca-certificates/chi-ansible.crt
-
-RUN chmod 644 /usr/local/share/ca-certificates/*.crt && \
-	update-ca-certificates
+RUN chmod 644 /usr/local/share/ca-certificates/chi-ansible.crt && \
+    update-ca-certificates
+USER app
+EXPOSE 8080
+EXPOSE 443
+WORKDIR /app
+COPY --chown=app:app --from=build /app/publish .
+ENTRYPOINT ["dotnet", "DARE-FrontEnd.dll"]
