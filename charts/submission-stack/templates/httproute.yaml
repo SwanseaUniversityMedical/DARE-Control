@@ -7,11 +7,11 @@ kind: HTTPRoute
 metadata:
   name: {{ $fullName }}
   labels:
-    {{ - include "submission.labels" . | nindent 4 }}
-  {{ - with .Values.global.gatewayIngress.route.annotations }}
+    {{- include "submission.labels" . | nindent 4 }}
+  {{- with .Values.global.gatewayIngress.route.annotations }}
   annotations:
-    {{ - toYaml . | nindent 4 }}
-  {{ - end }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   parentRefs:
     - name: {{ .Values.global.gatewayIngress.gateway.name }}
