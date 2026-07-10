@@ -11,8 +11,8 @@ metadata:
     {{- include "submission-stack.labels" . | nindent 4 }}
   {{- with .Values.global.gatewayIngress.gateway.annotations }}
   annotations:
-    {{ - toYaml . | nindent 4 }}
-  {{ - end }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   gatewayClassName: {{ .Values.global.gatewayIngress.gateway.className }}
   listeners:
