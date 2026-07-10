@@ -13,6 +13,34 @@ global:
     className: "nginx-msreg"
     adminClassName: "nginx-hiru"
     certClusterIssuer: "ca-issuer"
+  gatewayIngress:
+    enabled: false
+    hostnames: ["forms.msregister.pk.serp.ac.uk"]
+    route:
+      annotations: {}
+      portname: httproute
+      port: 8080
+    gateway:
+      # Setting this to false will bypass creation of gateway. Only do this if you are using a bespoke gateway.
+      create: true
+      name: DARE-submission-stack-gateway
+      namespace: ""
+      className: "traefik"
+      #CA Issuer goes under gateway.annotations, if using.
+      annotations:
+        - cert-manager.io/cluster-issuer: "ca-issuer"
+      # Traefik only listens on specific ports: HTTP 8000 and HTTPS 8843.
+      # Note, if using Minio S3 API is served over HTTPS only.
+      listeners:
+        - name: HTTPS
+          protocol: HTTPS
+          port: 8843
+          hostname: "forms.msregister.pk.serp.ac.uk"
+          tls:
+            enabled: true
+            certificateRefs:
+              - kind: Secret
+                name: "ca-issuer-submission-stack-gateway"
   storage:
     defaultClass: "default"
     rwxClass: "default"

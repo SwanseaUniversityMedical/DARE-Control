@@ -52,6 +52,32 @@ config:
     from: "email@email.com"
     fromName: "SERP Gov"
 
+  gatewayIngress:
+    enabled: false
+    hostnames: []
+    route:
+      annotations: {}
+    gateway:
+      # Setting this to false will bypass creation of gateway. Only do this if you are using a bespoke gateway.
+      create: true
+      name: DARE-submission-gateway
+      namespace: ""
+      className: "traefik"
+      #CA Issuer goes under gateway.annotations, if using.
+      annotations:
+        - cert-manager.io/cluster-issuer: "ca-issuer"
+      # Traefik only listens on specific ports: HTTP 8000 and HTTPS 8843.
+      # Note, if using Minio S3 API is served over HTTPS only.
+      listeners:
+        - name: HTTPS
+          protocol: HTTPS
+          port: 8843
+          hostname: ""
+          tls:
+            enabled: true
+            certificateRefs:
+              - kind: Secret
+                name: ""
 
   keycloak:
     proxy:

@@ -1,0 +1,35 @@
+{{- if and .Values.config.gatewayIngress.enabled .Values.config.gatewayIngress.gateway.create }}
+{{- $namespace := .Values.config.gatewayIngress.gateway.namespace | default .Release.Namespace }}
+{{- $fullName := include "submission.fullname" . -}}
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ .Values.config.gatewayIngress.gateway.name }}
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "submission.labels" . | nindent 4 }}
+  {{- with .Values.config.gatewayIngress.gateway.annotations }}
+  annotations:
+    {{ - toYaml . | nindent 4 }}
+  {{ - end }}
+spec:
+  gatewayClassName: {{ .Values.config.gatewayIngress.gateway.className }}
+  listeners:
+    {{- range .Values.config.gatewayIngress.gateway.listeners }}
+    - name: {{ .name }}
+      port: {{ .port }}
+      hostname: {{ .hostname }}
+      {{- if .tls.enabled }}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          {{- range .tls.certificateRefs }}
+          - kind: Secret
+            name: {{ .name }}
+            group: ""
+          {{- end }}
+      {{ end }}
+    {{ end }}
+{{ end }}
+
