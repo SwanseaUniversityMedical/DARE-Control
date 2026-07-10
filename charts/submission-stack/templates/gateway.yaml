@@ -1,4 +1,4 @@
-{{- if and .Values.config.gatewayIngress.enabled .Values.global.gatewayIngress.gateway.create }}
+{{- if and .Values.global.gatewayIngress.enabled .Values.global.gatewayIngress.gateway.create }}
 {{- $namespace := .Values.global.gatewayIngress.gateway.namespace | default .Release.Namespace }}
 {{- $fullName := include "submission-stack.fullname" . -}}
 
