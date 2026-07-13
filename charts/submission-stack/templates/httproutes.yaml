@@ -1,12 +1,8 @@
 {{- if .Values.global.gatewayIngress.enabled }}
 {{- $namespace := .Values.global.gatewayIngress.gateway.namespace | default .Release.Namespace }}
-{{- if .Values.global.gatewayIngress.enabled }}
-{{- $namespace := .Values.global.gatewayIngress.gateway.namespace | default .Release.Namespace }}
 {{- $gatewayName := .Values.global.gatewayIngress.gateway.name }}
 {{- range .Values.global.gatewayIngress.routes }}
-
 ---
-
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -45,7 +41,7 @@ spec:
           port: {{ .backendPort }}
         {{- else if eq .name "seq" }}
         - name: {{ include "submission-stack.fullname" $ }}-seq
-          port: 80
+          port: {{ .backendPort }}
         {{- end }}
 {{- end }}
 {{- end }}

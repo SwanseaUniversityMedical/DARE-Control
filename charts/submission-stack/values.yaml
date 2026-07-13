@@ -55,7 +55,7 @@ global:
         tls:
           enabled: true
           certificateRefName: "ca-issuer-submission-stack-seq"
-          annotations: {}
+        annotations: {}
     gateway:
       # Setting this to false will bypass creation of gateway. Only do this if you are using a bespoke gateway.
       create: true

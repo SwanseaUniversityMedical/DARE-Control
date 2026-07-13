@@ -70,7 +70,6 @@ config:
       # Note, if using Minio S3 API is served over HTTPS only.
       listeners:
         - name: https
-          protocol: HTTPS
           port: 8843
           hostname: ""
           tls:
