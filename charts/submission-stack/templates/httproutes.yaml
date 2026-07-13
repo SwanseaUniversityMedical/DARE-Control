@@ -1,0 +1,51 @@
+{{- if .Values.global.gatewayIngress.enabled }}
+{{- $namespace := .Values.global.gatewayIngress.gateway.namespace | default .Release.Namespace }}
+{{- if .Values.global.gatewayIngress.enabled }}
+{{- $namespace := .Values.global.gatewayIngress.gateway.namespace | default .Release.Namespace }}
+{{- $gatewayName := .Values.global.gatewayIngress.gateway.name }}
+{{- range .Values.global.gatewayIngress.routes }}
+
+---
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "submission-stack.fullname" $ }}-{{ .name }}
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "submission-stack.labels" $ | nindent 4 }}
+  {{- with .annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    - name: {{ $gatewayName }}
+      namespace: {{ $namespace }}
+      sectionName: {{ .name }}
+  hostnames:
+    - {{ .hostname | quote }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        {{- if eq .name "app" }}
+        - name: {{ include "submission-stack.fullname" $ }}-ui
+          port: {{ .backendPort }}
+        {{- else if eq .name "minio-api" }}
+        - name: minio
+          port: {{ .backendPort }}
+        {{- else if eq .name "minio-console" }}
+        - name: {{ $.Values.minio.tenantName }}-console
+          port: {{ .backendPort }}
+        {{- else if eq .name "keycloak" }}
+        - name: keycloak
+          port: {{ .backendPort }}
+        {{- else if eq .name "seq" }}
+        - name: {{ include "submission-stack.fullname" $ }}-seq
+          port: 80
+        {{- end }}
+{{- end }}
+{{- end }}

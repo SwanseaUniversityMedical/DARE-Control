@@ -1,7 +1,5 @@
 {{- if and .Values.global.gatewayIngress.enabled .Values.global.gatewayIngress.gateway.create }}
 {{- $namespace := .Values.global.gatewayIngress.gateway.namespace | default .Release.Namespace }}
-{{- $fullName := include "submission-stack.fullname" . -}}
-
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
@@ -16,20 +14,22 @@ metadata:
 spec:
   gatewayClassName: {{ .Values.global.gatewayIngress.gateway.className }}
   listeners:
-    {{- range .Values.global.gatewayIngress.gateway.listeners }}
+    {{- range .Values.global.gatewayIngress.routes }}
     - name: {{ .name }}
+      {{- if .tls.enabled }}
+      protocol: HTTPS
+      {{- else }}
+      protocol: HTTP
+      {{- end }}
       port: {{ .port }}
-      hostname: {{ .hostname }}
+      hostname: {{ .hostname | quote }}
       {{- if .tls.enabled }}
       tls:
         mode: Terminate
         certificateRefs:
-          {{- range .tls.certificateRefs }}
           - kind: Secret
-            name: {{ .name }}
+            name: {{ .tls.certificateRefName }}
             group: ""
-          {{- end }}
-      {{ end }}
-    {{ end }}
-{{ end }}
-
+      {{- end }}
+    {{- end }}
+{{- end }}

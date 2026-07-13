@@ -11,11 +11,43 @@ global:
     enabled: false
   gatewayIngress:
     enabled: false
-    hostnames: [ ]
-    route:
-      annotations: {}
-      portname: httproute
-      port: 8080
+    routes:
+      - name: app
+        hostname: "submission.localtest.me"
+        port: 8000
+        backendPort: 80
+        tls:
+          enabled: false
+        annotations: { }
+      - name: minio-api
+        hostname: "minio-api.localtest.me"
+        port: 8000
+        backendPort: 9000
+        tls:
+          enabled: false
+        annotations: {}
+      - name: minio-console
+        hostname: "minio.localtest.me"
+        port: 8000
+        backendPort: 9090
+        tls:
+          enabled: false
+        annotations: {}
+      - name: keycloak
+        hostname: "keycloak.localtest.me"
+        port: 8000
+        backendPort: 8085
+        tls:
+          enabled: false
+        annotations: {}
+#      - name: seq
+#        hostname: "seq.localtest.me"
+#        port: 8000
+#        backendPort: 80
+#        tls:
+#          enabled: true
+#          certificateRefName: "ca-issuer-submission-stack-seq"
+#          annotations: {}
     gateway:
       # Setting this to false will bypass creation of gateway. Only do this if you are using a bespoke gateway.
       create: true
@@ -24,19 +56,8 @@ global:
       className: "traefik"
       #CA Issuer goes under gateway.annotations, if using.
       annotations:
-        - cert-manager.io/cluster-issuer: "ca-issuer"
-      # Traefik only listens on specific ports: HTTP 8000 and HTTPS 8843.
-      # Note, if using Minio S3 API is served over HTTPS only.
-      listeners:
-        - name: HTTPS
-          protocol: HTTPS
-          port: 8843
-          hostname: ""
-          tls:
-            enabled: true
-            certificateRefs:
-              - kind: Secret
-                name: "ca-issuer-submission-stack-gateway-dev"
+        cert-manager.io/cluster-issuer: "ca-issuer"
+
   storage:
     defaultClass: "standard"
     rwxClass: "standard"
