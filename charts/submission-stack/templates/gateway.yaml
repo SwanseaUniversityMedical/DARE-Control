@@ -33,3 +33,52 @@ spec:
       {{- end }}
     {{- end }}
 {{- end }}
+
+{{/*
+There's no admin Traefik GatewayClass yet (this used to be
+global.ingress.adminClassName under nginx-ingress, keeping keycloak/seq off the
+public ingress controller). Once one exists:
+  1. Fill in and uncomment `global.gatewayIngress.adminGateway` in values.yaml.
+  2. Tag the routes that should move to it (currently keycloak, seq) with `gateway: admin`
+     (also commented out next to those two entries in values.yaml).
+  3. Delete the two Helm comment delimiter lines wrapping this block (immediately above and below it) to activate it.
+  4. Update httproutes.yaml's parentRefs to pick adminGateway vs gateway per-route.
+
+{{- if and .Values.global.gatewayIngress.enabled .Values.global.gatewayIngress.adminGateway.create }}
+{{- $adminNamespace := .Values.global.gatewayIngress.adminGateway.namespace | default .Release.Namespace }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ .Values.global.gatewayIngress.adminGateway.name }}
+  namespace: {{ $adminNamespace }}
+  labels:
+    {{- include "submission-stack.labels" . | nindent 4 }}
+  {{- with .Values.global.gatewayIngress.adminGateway.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  gatewayClassName: {{ .Values.global.gatewayIngress.adminGateway.className }}
+  listeners:
+    {{- range .Values.global.gatewayIngress.routes }}
+    {{- if eq .gateway "admin" }}
+    - name: {{ .name }}
+      {{- if .tls.enabled }}
+      protocol: HTTPS
+      {{- else }}
+      protocol: HTTP
+      {{- end }}
+      port: {{ .port }}
+      hostname: {{ .hostname | quote }}
+      {{- if .tls.enabled }}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: {{ .tls.certificateRefName }}
+            group: ""
+      {{- end }}
+    {{- end }}
+    {{- end }}
+{{- end }}
+*/}}

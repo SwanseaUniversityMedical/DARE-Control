@@ -48,6 +48,7 @@ global:
           enabled: true
           certificateRefName: "ca-issuer-submission-stack-keycloak"
         annotations: {}
+        # gateway: admin   # uncomment once adminGateway below is enabled, to move this route off the public Gateway
       - name: seq
         hostname: "seq.forms.msregister.pk.serp.ac.uk"
         port: 8843
@@ -56,6 +57,7 @@ global:
           enabled: true
           certificateRefName: "ca-issuer-submission-stack-seq"
         annotations: {}
+        # gateway: admin   # uncomment once adminGateway below is enabled, to move this route off the public Gateway
     gateway:
       # Setting this to false will bypass creation of gateway. Only do this if you are using a bespoke gateway.
       create: true
@@ -65,6 +67,24 @@ global:
       #CA Issuer goes under gateway.annotations, if using.
       annotations:
         cert-manager.io/cluster-issuer: "ca-issuer"
+
+    # There's no admin Traefik GatewayClass yet (this mirrors what
+    # global.ingress.adminClassName used to give us for keycloak/seq under nginx-ingress -
+    # see keycloak.yaml/seq.yaml, which still route through adminClassName).
+    # Once one exists:
+    #   1. Fill in className below (and namespace/annotations if it differs from the public one).
+    #   2. Uncomment this block.
+    #   3. Uncomment the `gateway: admin` lines on the keycloak/seq route entries above.
+    #   4. Uncomment the matching block in templates/gateway.yaml.
+    #   5. Update templates/httproutes.yaml's parentRefs to pick adminGateway vs gateway
+    #      per-route based on the `gateway` field (see the comment there).
+    # adminGateway:
+    #   create: true
+    #   name: DARE-submission-stack-admin-gateway
+    #   namespace: ""
+    #   className: ""
+    #   annotations:
+    #     cert-manager.io/cluster-issuer: "ca-issuer"
 
   storage:
     defaultClass: "default"

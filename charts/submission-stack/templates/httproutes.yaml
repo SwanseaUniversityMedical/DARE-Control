@@ -15,6 +15,12 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  {{/*
+  Once the admin Gateway (see gateway.yaml) exists, replace the parentRefs block below
+   so routes tagged `gateway: admin` in values.yaml (keycloak,
+  seq) attach to the admin Gateway instead of the public one:
+
+  */}}
   parentRefs:
     - name: {{ $gatewayName }}
       namespace: {{ $namespace }}
