@@ -66,12 +66,9 @@ config:
       #CA Issuer goes under gateway.annotations, if using.
       annotations:
         cert-manager.io/cluster-issuer: "ca-issuer"
-      # Traefik only listens on specific ports: HTTP 8000 and HTTPS 8843.
-      # Note, if using Minio S3 API is served over HTTPS only.
       listeners:
-        - name: https
-          port: 8843
-          hostname: ""
+        - hostname: ""
+          name: "submission-https"
           tls:
             enabled: true
             certificateRefs:

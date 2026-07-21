@@ -16,15 +16,11 @@ spec:
   gatewayClassName: {{ .Values.config.gatewayIngress.gateway.className }}
   listeners:
     {{- range .Values.config.gatewayIngress.gateway.listeners }}
-    - name: {{ .name }}
-      {{- if .tls.enabled }}
-      protocol: HTTPS
-      {{- else }}
-      protocol: HTTP
-      {{- end }}
-      port: {{ .port }}
+    - name: {{ .name | quote }}
       hostname: {{ .hostname | quote }}
       {{- if .tls.enabled }}
+      protocol: HTTPS
+      port: 8443
       tls:
         mode: Terminate
         certificateRefs:
@@ -33,6 +29,9 @@ spec:
             name: {{ .name }}
             group: ""
           {{- end }}
+      {{- else }}
+      protocol: HTTP
+      port: 8000
       {{- end }}
     {{- end }}
 {{- end }}

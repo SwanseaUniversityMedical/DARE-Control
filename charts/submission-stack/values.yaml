@@ -38,7 +38,7 @@ seq:
       certificateRefName: "ca-issuer-submission-stack-seq"
     gateway:
       create: true
-      className: ""   # empty = falls back to global.gateway.className
+      className: ""   # empty = falls back to global.gateway.adminClassName
       namespace: ""
       annotations:
         cert-manager.io/cluster-issuer: "ca-issuer"
@@ -113,9 +113,6 @@ submission:
     sql: "ukserp/runsql:1.0.0"
     graphql: "harbor.ukserp.ac.uk/dare-trefx/control-tre-hasura:2.12.0"
 
-  # Forwarded into the nested submission Application's own config.gatewayIngress (see
-  # templates/submission.yaml) - that chart already implements its own gateway.yaml/
-  # httproute.yaml, this chart just supplies the hostname/cert/GatewayClass.
   gatewayIngress:
     enabled: false
     hostAddr: "submission"
@@ -143,7 +140,7 @@ keycloak:
       certificateRefName: "ca-issuer-submission-stack-keycloak"
     gateway:
       create: true
-      className: ""   # empty = falls back to global.gateway.className
+      className: ""   # empty = falls back to global.gateway.adminClassName
       namespace: ""
       annotations:
         cert-manager.io/cluster-issuer: "ca-issuer"
