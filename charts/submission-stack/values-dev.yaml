@@ -9,55 +9,10 @@ global:
     authority: "http://keycloak.localtest.me/realms/Dare-Control"
   ingress:
     enabled: false
-  gatewayIngress:
-    enabled: false
-    routes:
-      - name: app
-        hostname: "submission.localtest.me"
-        port: 8000
-        backendPort: 80
-        tls:
-          enabled: false
-        annotations: { }
-      - name: minio-api
-        hostname: "minio-api.localtest.me"
-        port: 8000
-        backendPort: 9000
-        tls:
-          enabled: false
-        annotations: {}
-      - name: minio-console
-        hostname: "minio.localtest.me"
-        port: 8000
-        backendPort: 9090
-        tls:
-          enabled: false
-        annotations: {}
-      - name: keycloak
-        hostname: "keycloak.localtest.me"
-        port: 8000
-        backendPort: 8085
-        tls:
-          enabled: false
-        annotations: {}
-#      - name: seq
-#        hostname: "seq.localtest.me"
-#        port: 8000
-#        backendPort: 80
-#        tls:
-#          enabled: true
-#          certificateRefName: "ca-issuer-submission-stack-seq"
-#          annotations: {}
-    gateway:
-      # Setting this to false will bypass creation of gateway. Only do this if you are using a bespoke gateway.
-      create: true
-      name: DARE-submission-stack-gateway
-      namespace: ""
-      className: "traefik"
-      #CA Issuer goes under gateway.annotations, if using.
-      annotations:
-        cert-manager.io/cluster-issuer: "ca-issuer"
-
+    host: "localtest.me"
+  gateway:
+    className: "traefik"
+    adminClassName: "traefik"
   storage:
     defaultClass: "standard"
     rwxClass: "standard"
@@ -69,6 +24,15 @@ global:
 
 seq:
   storageSize: "1Gi"
+  gatewayIngress:
+    enabled: false
+    hostAddr: "seq"
+    tls:
+      enabled: false
+    gateway:
+      create: true
+      className: ""
+      namespace: ""
 
 rabbitmq:
   storageSize: "1Gi"
@@ -105,6 +69,15 @@ submission:
     sql: "ukserp/runsql:1.0.0"
     graphql: "harbor.ukserp.ac.uk/dare-trefx/control-tre-hasura:1.33.1"
 
+  gatewayIngress:
+    enabled: false
+    hostAddr: "submission"
+    tls:
+      enabled: false
+    gateway:
+      create: true
+      className: ""
+
 
 keycloak:
   enabled: true
@@ -112,6 +85,15 @@ keycloak:
     replicas: 1
     database: "keycloak"
     size: "2Gi"
+  gatewayIngress:
+    enabled: false
+    hostAddr: "keycloak"
+    tls:
+      enabled: false
+    gateway:
+      create: true
+      className: ""
+      namespace: ""
 
 minio:
   enabled: true
@@ -145,6 +127,26 @@ minio:
     #     limits:
     #       cpu: "16"
     #       memory: "10Gi"
+
+  gatewayIngress:
+    api:
+      enabled: false
+      hostAddr: "minio-api"
+      tls:
+        enabled: false
+      gateway:
+        create: true
+        className: ""
+        namespace: ""
+    console:
+      enabled: false
+      hostAddr: "minio"
+      tls:
+        enabled: false
+      gateway:
+        create: true
+        className: ""
+        namespace: ""
 
 
 operators:

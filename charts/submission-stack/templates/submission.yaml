@@ -107,6 +107,30 @@ spec:
             {{ . | toYaml | nindent 12 }}
           {{- end }}
 
+          gatewayIngress:
+            enabled: {{ .Values.submission.gatewayIngress.enabled }}
+            hostnames:
+              - {{ printf "%s.%s" .Values.submission.gatewayIngress.hostAddr .Values.global.ingress.host | quote }}
+            route:
+              annotations: {}
+            gateway:
+              create: {{ .Values.submission.gatewayIngress.gateway.create }}
+              name: {{ include "submission-stack.fullname" . }}-app-gateway
+              className: {{ .Values.submission.gatewayIngress.gateway.className | default .Values.global.gateway.className }}
+              {{- with .Values.submission.gatewayIngress.gateway.annotations }}
+              annotations:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              listeners:
+                - name: submission-stack-https
+                  port: 8843
+                  hostname: {{ printf "%s.%s" .Values.submission.gatewayIngress.hostAddr .Values.global.ingress.host | quote }}
+                  tls:
+                    enabled: {{ .Values.submission.gatewayIngress.tls.enabled }}
+                    certificateRefs:
+                      - kind: Secret
+                        name: {{ .Values.submission.gatewayIngress.tls.certificateRefName | quote }}
+
         api:
           image:
             {{- with .Values.submission.api.image }}

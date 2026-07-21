@@ -13,79 +13,9 @@ global:
     className: "nginx-msreg"
     adminClassName: "nginx-hiru"
     certClusterIssuer: "ca-issuer"
-  gatewayIngress:
-    enabled: false
-    routes:
-      - name: app
-        hostname: "submission.forms.msregister.pk.serp.ac.uk"
-        port: 8843
-        backendPort: 80
-        tls:
-          enabled: true
-          certificateRefName: "ca-issuer-submission-stack-gateway"
-        annotations: { }
-      - name: minio-api
-        hostname: "minio-api.forms.msregister.pk.serp.ac.uk"
-        port: 8843
-        backendPort: 9000
-        tls:
-          enabled: true
-          certificateRefName: "ca-issuer-submission-stack-minio-api"
-        annotations: {}
-      - name: minio-console
-        hostname: "minio.forms.msregister.pk.serp.ac.uk"
-        port: 8843
-        backendPort: 9090
-        tls:
-          enabled: true
-          certificateRefName: "ca-issuer-submission-stack-minio-console"
-        annotations: {}
-      - name: keycloak
-        hostname: "keycloak.forms.msregister.pk.serp.ac.uk"
-        port: 8843
-        backendPort: 8085
-        tls:
-          enabled: true
-          certificateRefName: "ca-issuer-submission-stack-keycloak"
-        annotations: {}
-        # gateway: admin   # uncomment once adminGateway below is enabled, to move this route off the public Gateway
-      - name: seq
-        hostname: "seq.forms.msregister.pk.serp.ac.uk"
-        port: 8843
-        backendPort: 80
-        tls:
-          enabled: true
-          certificateRefName: "ca-issuer-submission-stack-seq"
-        annotations: {}
-        # gateway: admin   # uncomment once adminGateway below is enabled, to move this route off the public Gateway
-    gateway:
-      # Setting this to false will bypass creation of gateway. Only do this if you are using a bespoke gateway.
-      create: true
-      name: DARE-submission-stack-gateway
-      namespace: ""
-      className: "traefik"
-      #CA Issuer goes under gateway.annotations, if using.
-      annotations:
-        cert-manager.io/cluster-issuer: "ca-issuer"
-
-    # There's no admin Traefik GatewayClass yet (this mirrors what
-    # global.ingress.adminClassName used to give us for keycloak/seq under nginx-ingress -
-    # see keycloak.yaml/seq.yaml, which still route through adminClassName).
-    # Once one exists:
-    #   1. Fill in className below (and namespace/annotations if it differs from the public one).
-    #   2. Uncomment this block.
-    #   3. Uncomment the `gateway: admin` lines on the keycloak/seq route entries above.
-    #   4. Uncomment the matching block in templates/gateway.yaml.
-    #   5. Update templates/httproutes.yaml's parentRefs to pick adminGateway vs gateway
-    #      per-route based on the `gateway` field (see the comment there).
-    # adminGateway:
-    #   create: true
-    #   name: DARE-submission-stack-admin-gateway
-    #   namespace: ""
-    #   className: ""
-    #   annotations:
-    #     cert-manager.io/cluster-issuer: "ca-issuer"
-
+  gateway:
+    className: "traefik"
+    adminClassName: "traefik"
   storage:
     defaultClass: "default"
     rwxClass: "default"
@@ -100,6 +30,18 @@ vault:
 
 seq:
   storageSize: "1Gi"
+  gatewayIngress:
+    enabled: false
+    hostAddr: "seq"
+    tls:
+      enabled: true
+      certificateRefName: "ca-issuer-submission-stack-seq"
+    gateway:
+      create: true
+      className: ""   # empty = falls back to global.gateway.className
+      namespace: ""
+      annotations:
+        cert-manager.io/cluster-issuer: "ca-issuer"
 
 rabbitmq:
   storageSize: "1Gi"
@@ -171,6 +113,21 @@ submission:
     sql: "ukserp/runsql:1.0.0"
     graphql: "harbor.ukserp.ac.uk/dare-trefx/control-tre-hasura:2.12.0"
 
+  # Forwarded into the nested submission Application's own config.gatewayIngress (see
+  # templates/submission.yaml) - that chart already implements its own gateway.yaml/
+  # httproute.yaml, this chart just supplies the hostname/cert/GatewayClass.
+  gatewayIngress:
+    enabled: false
+    hostAddr: "submission"
+    tls:
+      enabled: true
+      certificateRefName: "ca-issuer-submission-stack-gateway"
+    gateway:
+      create: true
+      className: ""   # empty = falls back to global.gateway.className
+      annotations:
+        cert-manager.io/cluster-issuer: "ca-issuer"
+
 
 keycloak:
   enabled: true
@@ -178,6 +135,18 @@ keycloak:
     replicas: 1
     database: "keycloak"
     size: "2Gi"
+  gatewayIngress:
+    enabled: false
+    hostAddr: "keycloak"
+    tls:
+      enabled: true
+      certificateRefName: "ca-issuer-submission-stack-keycloak"
+    gateway:
+      create: true
+      className: ""   # empty = falls back to global.gateway.className
+      namespace: ""
+      annotations:
+        cert-manager.io/cluster-issuer: "ca-issuer"
 
 minio:
   enabled: true
@@ -211,6 +180,32 @@ minio:
     #     limits:
     #       cpu: "16"
     #       memory: "10Gi"
+
+  gatewayIngress:
+    api:
+      enabled: false
+      hostAddr: "minio-api"
+      tls:
+        enabled: true
+        certificateRefName: "ca-issuer-submission-stack-minio-api"
+      gateway:
+        create: true
+        className: ""   # empty = falls back to global.gateway.className
+        namespace: ""
+        annotations:
+          cert-manager.io/cluster-issuer: "ca-issuer"
+    console:
+      enabled: false
+      hostAddr: "minio"
+      tls:
+        enabled: true
+        certificateRefName: "ca-issuer-submission-stack-minio-console"
+      gateway:
+        create: true
+        className: ""   # empty = falls back to global.gateway.className
+        namespace: ""
+        annotations:
+          cert-manager.io/cluster-issuer: "ca-issuer"
 
 
 operators:
