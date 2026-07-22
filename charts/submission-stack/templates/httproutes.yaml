@@ -1,0 +1,99 @@
+{{- if .Values.minio.gatewayIngress.api.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "submission-stack.fullname" . }}-minio-api
+  namespace: {{ .Values.minio.gatewayIngress.api.gateway.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "submission-stack.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+    - name: {{ include "submission-stack.fullname" . }}-minio-api-gateway
+      namespace: {{ .Values.minio.gatewayIngress.api.gateway.namespace | default .Release.Namespace }}
+      sectionName: minio-api
+  hostnames:
+    - {{ printf "%s.%s" .Values.minio.gatewayIngress.api.hostAddr .Values.global.ingress.host | quote }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: minio
+          port: 9000
+{{- end }}
+---
+{{- if .Values.minio.gatewayIngress.console.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "submission-stack.fullname" . }}-minio-console
+  namespace: {{ .Values.minio.gatewayIngress.console.gateway.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "submission-stack.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+    - name: {{ include "submission-stack.fullname" . }}-minio-console-gateway
+      namespace: {{ .Values.minio.gatewayIngress.console.gateway.namespace | default .Release.Namespace }}
+      sectionName: minio-console
+  hostnames:
+    - {{ printf "%s.%s" .Values.minio.gatewayIngress.console.hostAddr .Values.global.ingress.host | quote }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ .Values.minio.tenantName }}-console
+          port: 9090
+{{- end }}
+---
+{{- if .Values.keycloak.gatewayIngress.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "submission-stack.fullname" . }}-keycloak
+  namespace: {{ .Values.keycloak.gatewayIngress.gateway.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "submission-stack.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+    - name: {{ include "submission-stack.fullname" . }}-keycloak-gateway
+      namespace: {{ .Values.keycloak.gatewayIngress.gateway.namespace | default .Release.Namespace }}
+      sectionName: keycloak
+  hostnames:
+    - {{ printf "%s.%s" .Values.keycloak.gatewayIngress.hostAddr .Values.global.ingress.host | quote }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: keycloak
+          port: 8085
+{{- end }}
+---
+{{- if .Values.seq.gatewayIngress.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "submission-stack.fullname" . }}-seq
+  namespace: {{ .Values.seq.gatewayIngress.gateway.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "submission-stack.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+    - name: {{ include "submission-stack.fullname" . }}-seq-gateway
+      namespace: {{ .Values.seq.gatewayIngress.gateway.namespace | default .Release.Namespace }}
+      sectionName: seq
+  hostnames:
+    - {{ printf "%s.%s" .Values.seq.gatewayIngress.hostAddr .Values.global.ingress.host | quote }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ include "submission-stack.fullname" . }}-seq
+          port: 80
+{{- end }}

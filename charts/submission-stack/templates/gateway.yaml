@@ -1,0 +1,127 @@
+{{- if and .Values.minio.gatewayIngress.api.enabled .Values.minio.gatewayIngress.api.gateway.create }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ include "submission-stack.fullname" . }}-minio-api-gateway
+  namespace: {{ .Values.minio.gatewayIngress.api.gateway.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "submission-stack.labels" . | nindent 4 }}
+  {{- with .Values.minio.gatewayIngress.api.gateway.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  gatewayClassName: {{ .Values.minio.gatewayIngress.api.gateway.className | default .Values.global.gateway.className }}
+  listeners:
+    - name: minio-api
+      hostname: {{ printf "%s.%s" .Values.minio.gatewayIngress.api.hostAddr .Values.global.ingress.host | quote }}
+      {{- if .Values.minio.gatewayIngress.api.tls.enabled }}
+      protocol: HTTPS
+      port: 8443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: {{ .Values.minio.gatewayIngress.api.tls.certificateRefName }}
+            group: ""
+      {{- else }}
+      protocol: HTTP
+      port: 8000
+      {{- end }}
+{{- end }}
+---
+{{- if and .Values.minio.gatewayIngress.console.enabled .Values.minio.gatewayIngress.console.gateway.create }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ include "submission-stack.fullname" . }}-minio-console-gateway
+  namespace: {{ .Values.minio.gatewayIngress.console.gateway.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "submission-stack.labels" . | nindent 4 }}
+  {{- with .Values.minio.gatewayIngress.console.gateway.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  gatewayClassName: {{ .Values.minio.gatewayIngress.console.gateway.className | default .Values.global.gateway.className }}
+  listeners:
+    - name: minio-console
+      hostname: {{ printf "%s.%s" .Values.minio.gatewayIngress.console.hostAddr .Values.global.ingress.host | quote }}
+      {{- if .Values.minio.gatewayIngress.console.tls.enabled }}
+      protocol: HTTPS
+      port: 8443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: {{ .Values.minio.gatewayIngress.console.tls.certificateRefName }}
+            group: ""
+      {{- else }}
+      protocol: HTTP
+      port: 8000
+      {{- end }}
+{{- end }}
+---
+{{- if and .Values.keycloak.gatewayIngress.enabled .Values.keycloak.gatewayIngress.gateway.create }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ include "submission-stack.fullname" . }}-keycloak-gateway
+  namespace: {{ .Values.keycloak.gatewayIngress.gateway.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "submission-stack.labels" . | nindent 4 }}
+  {{- with .Values.keycloak.gatewayIngress.gateway.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  gatewayClassName: {{ .Values.keycloak.gatewayIngress.gateway.className | default .Values.global.gateway.adminClassName }}
+  listeners:
+    - name: keycloak
+      hostname: {{ printf "%s.%s" .Values.keycloak.gatewayIngress.hostAddr .Values.global.ingress.host | quote }}
+      {{- if .Values.keycloak.gatewayIngress.tls.enabled }}
+      protocol: HTTPS
+      port: 8443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: {{ .Values.keycloak.gatewayIngress.tls.certificateRefName }}
+            group: ""
+      {{- else }}
+      protocol: HTTP
+      port: 8000
+      {{- end }}
+{{- end }}
+---
+{{- if and .Values.seq.gatewayIngress.enabled .Values.seq.gatewayIngress.gateway.create }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ include "submission-stack.fullname" . }}-seq-gateway
+  namespace: {{ .Values.seq.gatewayIngress.gateway.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "submission-stack.labels" . | nindent 4 }}
+  {{- with .Values.seq.gatewayIngress.gateway.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  gatewayClassName: {{ .Values.seq.gatewayIngress.gateway.className | default .Values.global.gateway.adminClassName }}
+  listeners:
+    - name: seq
+      hostname: {{ printf "%s.%s" .Values.seq.gatewayIngress.hostAddr .Values.global.ingress.host | quote }}
+      {{- if .Values.seq.gatewayIngress.tls.enabled }}
+      protocol: HTTPS
+      port: 8443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: {{ .Values.seq.gatewayIngress.tls.certificateRefName }}
+            group: ""
+      {{- else }}
+      protocol: HTTP
+      port: 8000
+      {{- end }}
+{{- end }}
