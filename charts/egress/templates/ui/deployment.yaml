@@ -1,0 +1,159 @@
+{{- if .Values.ui.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "egress.fullname" . }}-ui
+  labels:
+    {{- include "egress.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ui
+spec:
+  # In-memory session store (MemoryCacheTicketStore); not designed for more
+  # than one pod.
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "egress.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: ui
+  template:
+    metadata:
+      labels:
+        {{- include "egress.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: ui
+    spec:
+      serviceAccountName: {{ include "egress.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        {{- if .Values.global.trustClusterCa.enabled }}
+        - name: certs-overlay
+          configMap:
+            name: {{ .Values.global.trustClusterCa.configMapName }}
+            defaultMode: 420
+        {{- end }}
+      containers:
+        - name: ui
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.ui.image.repository }}:{{ .Values.ui.image.tag | default .Values.global.tag }}"
+          imagePullPolicy: {{ .Values.ui.image.pullPolicy }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            {{- if .Values.global.trustClusterCa.enabled }}
+            - name: certs-overlay
+              mountPath: {{ .Values.global.trustClusterCa.mountPath }}
+              subPath: {{ .Values.global.trustClusterCa.key }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.ui.containerPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "{{ .Values.global.config.aspnetEnvironment }}"
+            - name: Logging__LogLevel__Default
+              value: "{{ .Values.global.config.logging.default }}"
+            - name: Logging__LogLevel__Microsoft.AspNetCore
+              value: "{{ .Values.global.config.logging.microsoftAspNetCore }}"
+            - name: AllowedHosts
+              value: "{{ .Values.global.config.allowedHosts }}"
+            # Unset resolves to a HANDLED fatal that still exits before the
+            # app binds a port — operationally a crash. Never gate behind an if.
+            - name: DemoMode
+              value: "{{ .Values.ui.demoMode }}"
+            - name: KeycloakDemoMode
+              value: "{{ .Values.ui.keycloakDemoMode }}"
+            - name: SuppressAntiforgery
+              value: "{{ .Values.ui.suppressAntiforgery }}"
+            - name: sslcookies
+              value: "{{ .Values.ui.sslCookies }}"
+            - name: httpsRedirect
+              value: "{{ .Values.ui.httpsRedirect }}"
+            # Bare realm URL: no .well-known suffix, no trailing slash. The
+            # refresh path concatenates /protocol/openid-connect/token onto it.
+            - name: DataEgressKeyCloakSettings__Authority
+              value: "{{ .Values.global.oidc.authority }}"
+            - name: DataEgressKeyCloakSettings__ClientId
+              value: "{{ .Values.ui.oidc.clientId }}"
+            - name: DataEgressKeyCloakSettings__MetadataAddress
+              value: "{{ .Values.global.oidc.authority }}/.well-known/openid-configuration"
+            - name: DataEgressKeyCloakSettings__AccountManagementURL
+              value: "{{ .Values.global.oidc.authority }}/account"
+            - name: DataEgressKeyCloakSettings__ClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ui.secretName }}
+                  key: keycloakClientSecret
+            - name: DataEgressKeyCloakSettings__RemoteSignOutPath
+              value: "{{ .Values.ui.oidc.remoteSignOutPath }}"
+            - name: DataEgressKeyCloakSettings__SignedOutRedirectUri
+              value: "{{ .Values.ui.oidc.signedOutRedirectUri }}"
+            - name: DataEgressKeyCloakSettings__TokenExpiredAddress
+              value: "{{ .Values.ui.oidc.tokenExpiredAddress }}"
+            - name: DataEgressKeyCloakSettings__AutoTrustKeycloakCert
+              value: "{{ .Values.ui.oidc.autoTrustKeycloakCert }}"
+            - name: DataEgressKeyCloakSettings__ValidIssuer
+              value: "{{ .Values.ui.oidc.validIssuer }}"
+            - name: DataEgressKeyCloakSettings__ValidAudience
+              value: "{{ .Values.ui.oidc.validAudience }}"
+            - name: DataEgressKeyCloakSettings__Proxy
+              value: "{{ .Values.ui.oidc.proxy }}"
+            - name: DataEgressKeyCloakSettings__ProxyAddresURL
+              value: "{{ .Values.ui.oidc.proxyAddresUrl }}"
+            - name: DataEgressKeyCloakSettings__BypassProxy
+              value: "{{ .Values.ui.oidc.bypassProxy }}"
+            - name: Serilog__SeqServerUrl
+              value: "{{ .Values.global.config.seqUrl }}"
+            - name: Serilog__MinimumLevel__Default
+              value: "{{ .Values.global.config.serilog.default }}"
+            - name: Serilog__MinimumLevel__Override__Microsoft
+              value: "{{ .Values.global.config.serilog.overrideMicrosoft }}"
+            - name: Serilog__MinimumLevel__Override__Microsoft.EntityFrameworkCore.Model.Validation
+              value: "{{ .Values.global.config.serilog.overrideEfCoreModelValidation }}"
+            - name: Serilog__MinimumLevel__Override__System
+              value: "{{ .Values.global.config.serilog.overrideSystem }}"
+            - name: Serilog__MinimumLevel__Override__Hangfire
+              value: "{{ .Values.global.config.serilog.overrideHangfire }}"
+            # api's static Service name; the ui and api are always co-installed.
+            - name: DataEgressAPISettings__Address
+              value: "http://egress-api"
+            - name: S3Settings__Url
+              value: "{{ .Values.ui.s3ConsoleUrl }}"
+            - name: S3Settings__BucketPath
+              value: "{{ .Values.ui.s3BucketPath }}"
+            - name: Helpdesk__URL
+              value: "{{ .Values.ui.helpdeskUrl }}"
+            - name: DataProtectionSettings__PersistKeys
+              value: "{{ .Values.dataProtection.persistKeys }}"
+            - name: DataProtectionSettings__KeysPath
+              value: "{{ .Values.dataProtection.keysPath }}"
+            {{- if .Values.global.monitoring.enabled }}
+            - name: PUSHGATEWAY_URL
+              value: "{{ .Values.global.monitoring.pushgatewayUrl }}"
+            - name: PUSHGATEWAY_JOB
+              value: {{ .Release.Namespace }}-egress-ui
+            {{- end }}
+            {{- with .Values.ui.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.ui.resources | nindent 12 }}
+{{- end }}
