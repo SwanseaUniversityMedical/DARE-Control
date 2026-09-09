@@ -34,9 +34,16 @@ namespace BL.Models.Services
                         var refreshToken = context.Properties.GetTokenValue("refresh_token");
 
                         //check if users refresh token is still valid?
-                        var tokenRefresh = handler.ReadToken(refreshToken) as JwtSecurityToken;
-                        var refreshTokenExpiryDate = tokenRefresh.ValidTo;
-                        if (refreshTokenExpiryDate < DateTime.UtcNow)
+                        JwtSecurityToken? tokenRefresh;
+                        try
+                        {
+                            tokenRefresh = handler.ReadToken(refreshToken) as JwtSecurityToken;
+                        }
+                        catch (Exception)
+                        {
+                            tokenRefresh = null;
+                        }
+                        if (tokenRefresh == null || tokenRefresh.ValidTo < DateTime.UtcNow)
                         {
                          
                             //probably need to log user out
