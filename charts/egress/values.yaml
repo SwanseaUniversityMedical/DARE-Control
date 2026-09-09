@@ -180,7 +180,8 @@ ui:
     clientId: "Data-Egress-UI"
     remoteSignOutPath: "/SignOut"
     signedOutRedirectUri: "/"
-    tokenExpiredAddress: "https://localhost:5001/Account/LoginAfterTokenExpired"
+    # Empty derives https://egress.<global.ingress.host>/Account/LoginAfterTokenExpired.
+    tokenExpiredAddress: ""
     autoTrustKeycloakCert: "false"
     validIssuer: ""
     validAudience: ""

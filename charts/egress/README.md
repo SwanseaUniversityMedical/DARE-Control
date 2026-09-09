@@ -89,7 +89,7 @@ Set by `ui.secretName`.
 | **Name** | **Description** | **Value** |
 |---|---|---|
 | `dataProtection.persistKeys` | Persist ASP.NET data-protection keys to disk. Kept `false`: audit-confirmed independent, ephemeral key rings, no shared volume. | `"false"` |
-| `dataProtection.keysPath` | Value of `DataProtectionSettings__KeysPath`. Only meaningful if `persistKeys` is ever turned on. | `/keys` |
+| `dataProtection.keysPath` | Value of `DataProtectionSettings__KeysPath`. This chart mounts no volume at this path: turning `persistKeys` on without adding one first fails the pod at startup under `readOnlyRootFilesystem: true`. | `/keys` |
 
 ### Global parameters
 
@@ -181,9 +181,9 @@ Settings shared by more than one component. Defined once.
 | `ui.sslCookies` | Mark cookies secure. Requires HTTPS end-to-end if `true`. | `"false"` |
 | `ui.httpsRedirect` | Redirect HTTP to HTTPS inside the app. Kept `false`; TLS terminates at the ingress. | `"false"` |
 | `ui.oidc.clientId` | Keycloak client ID for the UI's own `Data-Egress-UI` client. | `Data-Egress-UI` |
-| `ui.oidc.remoteSignOutPath` | Never varies between environments; kept as a value because the audit tables this row as a chart value. | `/SignOut` |
-| `ui.oidc.signedOutRedirectUri` | Never varies between environments; kept as a value for the same reason. | `/` |
-| `ui.oidc.tokenExpiredAddress` | Only used inside a log statement; the functional redirect on this code path is commented out. | `https://localhost:5001/Account/LoginAfterTokenExpired` |
+| `ui.oidc.remoteSignOutPath` | Path the OIDC middleware listens on for a Keycloak-initiated sign-out callback. | `/SignOut` |
+| `ui.oidc.signedOutRedirectUri` | Where the browser lands after that sign-out completes. | `/` |
+| `ui.oidc.tokenExpiredAddress` | Only used inside a log statement; the functional redirect on this code path is commented out. Empty computes `https://egress.<global.ingress.host>/Account/LoginAfterTokenExpired`. | `""` |
 | `ui.oidc.autoTrustKeycloakCert` | Trust Keycloak's certificate without validation. Keep `false`; use `global.trustClusterCa` instead. | `"false"` |
 | `ui.oidc.validIssuer` | Expected token issuer override. Empty uses the Authority. | `""` |
 | `ui.oidc.validAudience` | Expected token audience override. Empty skips the check. | `""` |

@@ -1,4 +1,5 @@
 {{- if .Values.ui.enabled -}}
+{{- $authority := trimSuffix "/" .Values.global.oidc.authority }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -90,13 +91,13 @@ spec:
             # Bare realm URL: no .well-known suffix, no trailing slash. The
             # refresh path concatenates /protocol/openid-connect/token onto it.
             - name: DataEgressKeyCloakSettings__Authority
-              value: "{{ .Values.global.oidc.authority }}"
+              value: "{{ $authority }}"
             - name: DataEgressKeyCloakSettings__ClientId
               value: "{{ .Values.ui.oidc.clientId }}"
             - name: DataEgressKeyCloakSettings__MetadataAddress
-              value: "{{ .Values.global.oidc.authority }}/.well-known/openid-configuration"
+              value: "{{ $authority }}/.well-known/openid-configuration"
             - name: DataEgressKeyCloakSettings__AccountManagementURL
-              value: "{{ .Values.global.oidc.authority }}/account"
+              value: "{{ $authority }}/account"
             - name: DataEgressKeyCloakSettings__ClientSecret
               valueFrom:
                 secretKeyRef:
@@ -107,7 +108,10 @@ spec:
             - name: DataEgressKeyCloakSettings__SignedOutRedirectUri
               value: "{{ .Values.ui.oidc.signedOutRedirectUri }}"
             - name: DataEgressKeyCloakSettings__TokenExpiredAddress
-              value: "{{ .Values.ui.oidc.tokenExpiredAddress }}"
+              # Only read inside a Log.Warning; the functional redirect on
+              # this path is commented out. Empty derives the chart's own
+              # UI ingress host rather than shipping a developer address.
+              value: "{{ .Values.ui.oidc.tokenExpiredAddress | default (printf "https://egress.%s/Account/LoginAfterTokenExpired" .Values.global.ingress.host) }}"
             - name: DataEgressKeyCloakSettings__AutoTrustKeycloakCert
               value: "{{ .Values.ui.oidc.autoTrustKeycloakCert }}"
             - name: DataEgressKeyCloakSettings__ValidIssuer
