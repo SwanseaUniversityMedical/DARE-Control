@@ -55,6 +55,7 @@ try
     var demomode = configuration["DemoMode"].ToLower() == "true";
     dataEgressKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
     builder.Services.AddSingleton(dataEgressKeyCloakSettings);
+    builder.Services.AddSingleton<BaseKeyCloakSettings>(dataEgressKeyCloakSettings);
     
 
     builder.Services.AddHttpContextAccessor();
