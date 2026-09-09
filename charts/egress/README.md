@@ -7,6 +7,11 @@ Standalone chart for the Data-Egress product.
 - **api** — the Data-Egress API (`control-egress-api` image), listening on `/health` at port 8080.
 - **ui** — the Data-Egress web UI (`control-egress-ui` image), listening on `/health` at port 8080.
 
+`global.tag` must be a `control-egress-api`/`control-egress-ui` release built at or after the
+commit that adds `/health`. The published `3.0.4` tag predates it: liveness/readiness probes on
+`/health` CrashLoop against that tag. `3.0.4` is not a working default; use a release built from
+this branch or later.
+
 Both stay at `replicas: 1`. Neither is a shared-volume decision: the API seeds demo data on
 startup, and the UI keeps its session store in memory (`MemoryCacheTicketStore`). Both also run
 with `DataProtectionSettings__PersistKeys=false` — the audit confirmed each pod keeps its own
@@ -27,8 +32,8 @@ ephemeral, independent data-protection key ring, so there is no shared PVC to mo
 ## What this chart does not do
 
 It does not install PostgreSQL, RustFS, Seq or Keycloak. It does not create any Secret. It
-contains no ArgoCD `Application` and no `dependencies:`. The `egress-stack` chart installs all of
-the above.
+contains no ArgoCD `Application` and no `dependencies:`. The `5s-Tes` repo's `charts/agent-stack`
+chart installs all of the above.
 
 ## Encryption key stability
 
@@ -39,7 +44,7 @@ re-encryption migration makes every existing stored credential permanently undec
 ## Secrets
 
 This chart does **not** create these. They must already exist in the namespace before the chart
-is installed. The `egress-stack` chart creates them from Vault.
+is installed. The `5s-Tes` repo's `charts/agent-stack` chart creates them from Vault.
 
 ### `egress-api-secret`
 

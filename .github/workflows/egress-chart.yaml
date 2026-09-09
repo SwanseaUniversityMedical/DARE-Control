@@ -40,7 +40,7 @@ jobs:
       registry-user: ${{ vars.HARBOR_USER }}
       registry-project: ${{ vars.HARBOR_PROJECT }}
       registry-repo: egress
-      release-tag-format: 'Helm-Chart-${version}'
+      release-tag-format: 'Egress-Helm-Chart-${version}'
       notation-cert: ${{ vars.NOTATION_CERT }}
       chart: charts/egress
       test-command: |

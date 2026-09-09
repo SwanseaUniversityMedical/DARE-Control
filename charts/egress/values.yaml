@@ -1,5 +1,6 @@
 # Defaults are the local-dev settings, so `helm template` renders with no
-# input. The egress-stack chart overrides environment-specific keys.
+# input. The 5s-Tes repo's charts/agent-stack chart overrides
+# environment-specific keys.
 
 nameOverride: ""
 fullnameOverride: "egress"
@@ -38,6 +39,8 @@ dataProtection:
 
 global:
   # renovate: datasource=docker depName=dare-trefx/control-egress-api registryUrl=https://harbor.ukserp.ac.uk
+  # 3.0.4 predates the /health endpoint this chart probes; a default install
+  # CrashLoops on it. Use a release built at or after that commit.
   tag: "3.0.4"
 
   config:
@@ -73,7 +76,7 @@ global:
     tls: true
 
   # Off by default so `helm template` renders with no cluster present. The
-  # egress-stack chart turns this on for real clusters.
+  # 5s-Tes repo's charts/agent-stack chart turns this on for real clusters.
   trustClusterCa:
     enabled: false
     configMapName: overlay-castore
