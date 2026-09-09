@@ -38,9 +38,9 @@ dataProtection:
   keysPath: /keys
 
 global:
-  # renovate: datasource=docker depName=dare-trefx/control-egress-api registryUrl=https://harbor.ukserp.ac.uk
   # 3.0.4 predates the /health endpoint this chart probes; a default install
   # CrashLoops on it. Use a release built at or after that commit.
+  # renovate: datasource=docker depName=dare-trefx/control-egress-api registryUrl=https://harbor.ukserp.ac.uk
   tag: "3.0.4"
 
   config:
