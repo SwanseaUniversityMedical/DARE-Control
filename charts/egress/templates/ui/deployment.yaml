@@ -153,7 +153,7 @@ spec:
             - name: PUSHGATEWAY_URL
               value: "{{ .Values.global.monitoring.pushgatewayUrl }}"
             - name: PUSHGATEWAY_JOB
-              value: {{ .Release.Namespace }}-egress-ui
+              value: "{{ .Release.Namespace }}-egress-ui"
             {{- end }}
             {{- with .Values.ui.extraEnv }}
             {{- toYaml . | nindent 12 }}

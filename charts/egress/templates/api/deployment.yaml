@@ -1,6 +1,7 @@
 {{- if .Values.api.enabled -}}
 {{- $authority := trimSuffix "/" .Values.global.oidc.authority }}
 {{- $keycloakUrl := urlParse $authority }}
+{{- $treAuthority := trimSuffix "/" .Values.tre.oidcAuthority }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -109,7 +110,7 @@ spec:
             - name: TreKeyCloakSettings__ClientId
               value: "{{ .Values.api.treOidc.clientId }}"
             - name: TreKeyCloakSettings__BaseUrl
-              value: "{{ .Values.tre.oidcAuthority }}"
+              value: "{{ $treAuthority }}"
             - name: TreKeyCloakSettings__ClientSecret
               valueFrom:
                 secretKeyRef:
@@ -208,7 +209,7 @@ spec:
             - name: PUSHGATEWAY_URL
               value: "{{ .Values.global.monitoring.pushgatewayUrl }}"
             - name: PUSHGATEWAY_JOB
-              value: {{ .Release.Namespace }}-egress-api
+              value: "{{ .Release.Namespace }}-egress-api"
             {{- end }}
             {{- with .Values.api.extraEnv }}
             {{- toYaml . | nindent 12 }}
