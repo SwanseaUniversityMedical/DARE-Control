@@ -1,0 +1,190 @@
+nameOverride: ""
+fullnameOverride: "egress"
+
+imagePullSecrets: []
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# fsGroup lets UID 1000 (securityContext.runAsUser) write the /tmp emptyDir
+# consistently regardless of the node's default group ownership.
+podSecurityContext:
+  fsGroup: 1000
+  fsGroupChangePolicy: OnRootMismatch
+
+# Org security baseline. Do not weaken without a reason in the pull request.
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  runAsNonRoot: true
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+
+# Neither component persists ASP.NET data-protection keys to disk.
+dataProtection:
+  persistKeys: "false"
+  keysPath: /keys
+
+global:
+  # this chart won't work with versions pre 3.0.5
+  # renovate: datasource=docker depName=dare-trefx/control-egress-api registryUrl=https://harbor.ukserp.ac.uk
+  tag: "3.0.5"
+
+  config:
+    aspnetEnvironment: "Development"
+    seqUrl: "http://seq:5341"
+    allowedHosts: "*"
+    logging:
+      default: "Information"
+      microsoftAspNetCore: "Warning"
+    serilog:
+      default: "Verbose"
+      overrideMicrosoft: "Warning"
+      overrideEfCoreModelValidation: "Error"
+      overrideSystem: "Warning"
+      overrideHangfire: "Warning"
+
+  # Bare realm URL, no trailing slash, no .well-known suffix
+  oidc:
+    authority: "http://keycloak/realms/Data-Egress"
+
+  monitoring:
+    enabled: false
+    pushgatewayUrl: ""
+
+  # Base domain; api and ui each get their own subdomain of it.
+  ingress:
+    enabled: true
+    className: "nginx"
+    host: "localtest.me"
+    certClusterIssuer: "ca-issuer"
+    tls: true
+
+  trustClusterCa:
+    enabled: false
+    configMapName: overlay-castore
+    key: ca-certificates.crt
+    mountPath: /etc/ssl/certs/ca-certificates.crt
+
+# Cross-realm link to the TRE product. The API obtains a service token from
+# this realm to call the TRE API. Distinct from global.oidc.authority (the
+# Data-Egress realm this chart's own components authenticate against).
+tre:
+  oidcAuthority: "http://keycloak/realms/Dare-TRE"
+
+# --------------------------------------------------------------------
+# One block per component. Only the settings unique to that component.
+# --------------------------------------------------------------------
+
+api:
+  enabled: true
+  image:
+    repository: harbor.ukserp.ac.uk/dare-trefx/control-egress-api
+    tag: ""
+    pullPolicy: IfNotPresent
+  containerPort: 8080
+  resources: {}
+  service:
+    type: ClusterIP
+  # Expected keys: connectionString, treKeycloakClientSecret,
+  # dataEgressKeycloakClientSecret, s3AccessKey, s3SecretKey, encryptionKey,
+  # encryptionBase, demoModeDefaultPassword. See README Secrets section.
+  secretName: egress-api-secret
+  ingress:
+    enabled: true
+    # Empty computes "egress-api.<global.ingress.host>".
+    host: ""
+
+  # Demo data seeding; also seeds the two service-account credentials that
+  # demoModeDefaultPassword (in api.secretName) becomes the Keycloak password
+  # for. Always rendered: an unset value crashes the app at startup.
+  demoMode: "false"
+  keycloakDemoMode: "false"
+  suppressAntiforgery: "false"
+
+  oidc:
+    clientId: "Data-Egress-API"
+    # Always rendered: an unset value crashes the app at startup.
+    validAudiences: "Data-Egress-UI,Data-Egress-API"
+    proxy: "false"
+    proxyAddresUrl: ""
+    bypassProxy: ""
+
+  treOidc:
+    clientId: "Dare-TRE-API"
+    proxy: "false"
+    proxyAddresUrl: ""
+
+  s3Url: "http://rustfs-svc:9000"
+  s3Proxy:
+    enabled: "false"
+    addressUrl: ""
+    bypassProxy: ""
+
+  # Static Service name of the agent chart's API (charts/agent/templates/api/service.yaml).
+  treApiAddress: "http://agent-api"
+
+  email:
+    host: "192.168.10.22"
+    port: 25
+    enableSsl: "false"
+    fromAddress: "helpdesk@chi.swan.ac.uk"
+    fromDisplayName: "SERP Gov"
+    override: ""
+    enabled: "false"
+
+  # Rare one-off settings only. If you find yourself adding a third entry
+  # here, it belongs above as a named key instead.
+  extraEnv: []
+
+ui:
+  enabled: true
+  image:
+    repository: harbor.ukserp.ac.uk/dare-trefx/control-egress-ui
+    tag: ""
+    pullPolicy: IfNotPresent
+  containerPort: 8080
+  resources: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  # Expected key: keycloakClientSecret. See README Secrets section.
+  secretName: egress-ui-secret
+  ingress:
+    enabled: true
+    # Empty computes "egress.<global.ingress.host>".
+    host: ""
+
+  # Always rendered: an unset value crashes the app at startup.
+  demoMode: "false"
+  keycloakDemoMode: "false"
+  suppressAntiforgery: "false"
+  sslCookies: "false"
+  # TLS terminates at the ingress, so the app itself does not redirect.
+  httpsRedirect: "false"
+
+  oidc:
+    clientId: "Data-Egress-UI"
+    remoteSignOutPath: "/SignOut"
+    signedOutRedirectUri: "/"
+    # Empty derives https://egress.<global.ingress.host>/Account/LoginAfterTokenExpired.
+    tokenExpiredAddress: ""
+    autoTrustKeycloakCert: "false"
+    validIssuer: ""
+    validAudience: ""
+    proxy: "false"
+    proxyAddresUrl: ""
+    bypassProxy: ""
+
+  s3ConsoleUrl: "http://localhost:9003"
+  s3BucketPath: "/rustfs/console/browser/?bucket="
+  helpdeskUrl: "https://ukserp.atlassian.net/servicedesk/customer/portal/3"
+
+  # Rare one-off settings only. If you find yourself adding a third entry
+  # here, it belongs above as a named key instead.
+  extraEnv: []

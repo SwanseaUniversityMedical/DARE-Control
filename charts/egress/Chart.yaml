@@ -1,0 +1,6 @@
+apiVersion: v2
+name: egress
+description: Standalone chart for the Data-Egress API and UI
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

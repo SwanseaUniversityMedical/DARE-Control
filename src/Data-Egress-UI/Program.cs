@@ -30,9 +30,14 @@ try
     {
         Log.Warning("{Function} Disabling Anti Forgery token. Only do if testing", "Main");
         builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
+    }
+
+    var dpSection = builder.Configuration.GetSection("DataProtectionSettings");
+    if (bool.TryParse(dpSection["PersistKeys"], out var persistKeys) && persistKeys)
+    {
         builder.Services.AddDataProtection()
-            .PersistKeysToFileSystem(new DirectoryInfo("/root/.aspnet/DataProtection-Keys"))
-            .DisableAutomaticKeyGeneration();
+            .PersistKeysToFileSystem(new DirectoryInfo(dpSection["KeysPath"] ?? "/keys"))
+            .SetApplicationName("egress");
     }
     IdentityModelEventSource.ShowPII = true;
 
@@ -50,10 +55,12 @@ try
     var demomode = configuration["DemoMode"].ToLower() == "true";
     dataEgressKeyCloakSettings.KeycloakDemoMode = keycloakDemomode;
     builder.Services.AddSingleton(dataEgressKeyCloakSettings);
+    builder.Services.AddSingleton<BaseKeyCloakSettings>(dataEgressKeyCloakSettings);
     
 
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddHttpClient();
+    builder.Services.AddHealthChecks();
 
 
 //add services here
@@ -316,6 +323,16 @@ try
 
     var app = builder.Build();
 
+    if (Environment.GetEnvironmentVariable("PUSHGATEWAY_URL") != null)
+    {
+        var pusher = new Prometheus.MetricPusher(new Prometheus.MetricPusherOptions
+        {
+            Endpoint = Environment.GetEnvironmentVariable("PUSHGATEWAY_URL"),
+            Job = Environment.GetEnvironmentVariable("PUSHGATEWAY_JOB")
+        });
+        pusher.Start();
+    }
+
     app.UseCors();
     app.UseForwardedHeaders();
 
@@ -370,6 +387,8 @@ try
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}");
 
+    // Anonymous: probed by Kubernetes, which cannot authenticate.
+    app.MapHealthChecks("/health").AllowAnonymous();
 
     app.Run();
 }

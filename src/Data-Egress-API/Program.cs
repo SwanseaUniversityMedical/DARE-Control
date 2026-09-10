@@ -32,9 +32,14 @@ if (configuration["SuppressAntiforgery"] != null && configuration["SuppressAntif
 {
     Log.Warning("{Function} Disabling Anti Forgery token. Only do if testing", "Main");
     builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
+}
+
+var dpSection = builder.Configuration.GetSection("DataProtectionSettings");
+if (bool.TryParse(dpSection["PersistKeys"], out var persistKeys) && persistKeys)
+{
     builder.Services.AddDataProtection()
-        .PersistKeysToFileSystem(new DirectoryInfo("/root/.aspnet/DataProtection-Keys"))
-        .DisableAutomaticKeyGeneration();
+        .PersistKeysToFileSystem(new DirectoryInfo(dpSection["KeysPath"] ?? "/keys"))
+        .SetApplicationName("egress");
 }
 // Add services to the container.
 
@@ -56,6 +61,8 @@ AddServices(builder);
 
 //Add Dependancies
 AddDependencies(builder, configuration);
+
+builder.Services.AddHealthChecks();
 
 var dataEgressKeyCloakSettings = new DataEgressKeyCloakSettings();
 configuration.Bind(nameof(dataEgressKeyCloakSettings), dataEgressKeyCloakSettings);
@@ -186,6 +193,16 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+if (Environment.GetEnvironmentVariable("PUSHGATEWAY_URL") != null)
+{
+    var pusher = new Prometheus.MetricPusher(new Prometheus.MetricPusherOptions
+    {
+        Endpoint = Environment.GetEnvironmentVariable("PUSHGATEWAY_URL"),
+        Job = Environment.GetEnvironmentVariable("PUSHGATEWAY_JOB")
+    });
+    pusher.Start();
+}
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -254,6 +271,9 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Anonymous: probed by Kubernetes, which cannot authenticate.
+app.MapHealthChecks("/health").AllowAnonymous();
 
 
 Serilog.ILogger CreateSerilogLogger(ConfigurationManager configuration, IWebHostEnvironment environment)
