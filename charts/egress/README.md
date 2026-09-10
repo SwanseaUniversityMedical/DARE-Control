@@ -10,10 +10,8 @@ Standalone chart for the Data-Egress product.
 `global.tag` must be a `control-egress-api`/`control-egress-ui` release built at or after the
 commit that adds `/health`. **This must be `3.0.5` or later or it won't work**.
 
-Both stay at `replicas: 1`. Neither is a shared-volume decision: the API seeds demo data on
-startup, and the UI keeps its session store in memory (`MemoryCacheTicketStore`). Both also run
-with `DataProtectionSettings__PersistKeys=false` — the audit confirmed each pod keeps its own
-ephemeral, independent data-protection key ring, so there is no shared PVC to mount.
+Both components are fixed at `replicas: 1` (the UI keeps sessions in memory). Neither needs a
+persistent volume.
 
 ## What must already exist
 
@@ -91,7 +89,7 @@ Set by `ui.secretName`.
 
 | **Name** | **Description** | **Value** |
 |---|---|---|
-| `dataProtection.persistKeys` | Persist ASP.NET data-protection keys to disk. Kept `false`: audit-confirmed independent, ephemeral key rings, no shared volume. | `"false"` |
+| `dataProtection.persistKeys` | Persist ASP.NET data-protection keys to disk. Leave `"false"`: the chart mounts no key volume. | `"false"` |
 | `dataProtection.keysPath` | Value of `DataProtectionSettings__KeysPath`. This chart mounts no volume at this path: turning `persistKeys` on without adding one first fails the pod at startup under `readOnlyRootFilesystem: true`. | `/keys` |
 
 ### Global parameters
@@ -111,7 +109,7 @@ Settings shared by more than one component. Defined once.
 | `global.config.serilog.overrideEfCoreModelValidation` | Read into `Serilog__MinimumLevel__Override__Microsoft.EntityFrameworkCore.Model.Validation`. | `"Error"` |
 | `global.config.serilog.overrideSystem` | Read into `Serilog__MinimumLevel__Override__System`. | `"Warning"` |
 | `global.config.serilog.overrideHangfire` | Read into `Serilog__MinimumLevel__Override__Hangfire`. | `"Warning"` |
-| `global.oidc.authority` | Full `Data-Egress` Keycloak realm URL both components authenticate against. Bare realm URL: no trailing slash, no `.well-known` suffix. Also the source of `DataEgressKeyCloakSettings__RootUrl`/`__Realm` (the API's admin-API calls), derived with `urlParse` rather than set separately. | `"http://keycloak/realms/Data-Egress"` |
+| `global.oidc.authority` | Full `Data-Egress` Keycloak realm URL both components authenticate against. Bare realm URL: no trailing slash, no `.well-known` suffix. | `"http://keycloak/realms/Data-Egress"` |
 | `global.monitoring.enabled` | Push metrics to a Prometheus Pushgateway. | `false` |
 | `global.monitoring.pushgatewayUrl` | Pushgateway address, used when `global.monitoring.enabled` is `true`. | `""` |
 | `global.ingress.enabled` | Create an Ingress for either component at all. | `true` |
@@ -141,7 +139,7 @@ Settings shared by more than one component. Defined once.
 | `api.ingress.host` | Hostname for the API Ingress. Empty computes `egress-api.<global.ingress.host>`. | `""` |
 | `api.demoMode` | Seed demo data on startup. Always rendered: an unset `DemoMode` crashes the app at startup. | `"false"` |
 | `api.keycloakDemoMode` | Run the API's Keycloak integration in demo mode. Always rendered: an unset `KeycloakDemoMode` crashes the app at startup. | `"false"` |
-| `api.suppressAntiforgery` | Disable antiforgery checks. Currently gates an inert DataProtection-persistence code path. | `"false"` |
+| `api.suppressAntiforgery` | Disable antiforgery checks. | `"false"` |
 | `api.oidc.clientId` | Keycloak client ID for the API's own `Data-Egress-API` client. | `Data-Egress-API` |
 | `api.oidc.validAudiences` | Accepted token audiences. Always rendered: an unset value crashes the app at startup. | `Data-Egress-UI,Data-Egress-API` |
 | `api.oidc.proxy` | The API sits behind an egress proxy when calling Keycloak. | `"false"` |
@@ -151,7 +149,7 @@ Settings shared by more than one component. Defined once.
 | `api.treOidc.proxy` | The API sits behind an egress proxy when calling the `Dare-TRE` realm. | `"false"` |
 | `api.treOidc.proxyAddresUrl` | Proxy address, used when `api.treOidc.proxy` is `"true"`. | `""` |
 | `api.s3Url` | In-cluster RustFS S3 endpoint. Read into `MinioSettings__Url`. | `http://rustfs-svc:9000` |
-| `api.s3Proxy.enabled` | Route RustFS S3 calls through a proxy. Property name is genuinely `UesProxy` (transposed letters) in the app's own settings class. | `"false"` |
+| `api.s3Proxy.enabled` | Route RustFS S3 calls through a proxy. | `"false"` |
 | `api.s3Proxy.addressUrl` | Proxy address, used when `api.s3Proxy.enabled` is `"true"`. | `""` |
 | `api.s3Proxy.bypassProxy` | Proxy bypass list for RustFS S3 calls. | `""` |
 | `api.treApiAddress` | Address of the TRE API. Static Service name of the agent chart's API component. | `http://agent-api` |
@@ -162,7 +160,7 @@ Settings shared by more than one component. Defined once.
 | `api.email.fromDisplayName` | From display name for admin-notification email. | `SERP Gov` |
 | `api.email.override` | When set, replaces every notification recipient with this single address. | `""` |
 | `api.email.enabled` | Enable outbound email. | `"false"` |
-| `api.extraEnv` | Rare one-off environment variables. Anything the app always needs is a named value above instead. | `[]` |
+| `api.extraEnv` | Extra environment variables. | `[]` |
 
 ### UI parameters
 
@@ -179,15 +177,15 @@ Settings shared by more than one component. Defined once.
 | `ui.secretName` | Name of the Kubernetes Secret holding this component's secrets. See **Secrets** above. | `egress-ui-secret` |
 | `ui.ingress.enabled` | Create an Ingress for the UI. | `true` |
 | `ui.ingress.host` | Hostname for the UI Ingress. Empty computes `egress.<global.ingress.host>`. | `""` |
-| `ui.demoMode` | Read but operationally inert (never branched on downstream). Always rendered: an unset `DemoMode` still ends in a startup fatal before the app binds a port. | `"false"` |
-| `ui.keycloakDemoMode` | Read and assigned but operationally inert. Always rendered: same startup-fatal shape as `ui.demoMode`. | `"false"` |
-| `ui.suppressAntiforgery` | Disable antiforgery checks. Currently gates an inert DataProtection-persistence code path. | `"false"` |
+| `ui.demoMode` | No effect in the UI. Always rendered: an unset `DemoMode` crashes the app at startup. | `"false"` |
+| `ui.keycloakDemoMode` | No effect in the UI. Always rendered: an unset `KeycloakDemoMode` crashes the app at startup. | `"false"` |
+| `ui.suppressAntiforgery` | Disable antiforgery checks. | `"false"` |
 | `ui.sslCookies` | Mark cookies secure. Requires HTTPS end-to-end if `true`. | `"false"` |
 | `ui.httpsRedirect` | Redirect HTTP to HTTPS inside the app. Kept `false`; TLS terminates at the ingress. | `"false"` |
 | `ui.oidc.clientId` | Keycloak client ID for the UI's own `Data-Egress-UI` client. | `Data-Egress-UI` |
 | `ui.oidc.remoteSignOutPath` | Path the OIDC middleware listens on for a Keycloak-initiated sign-out callback. | `/SignOut` |
 | `ui.oidc.signedOutRedirectUri` | Where the browser lands after that sign-out completes. | `/` |
-| `ui.oidc.tokenExpiredAddress` | Only used inside a log statement; the functional redirect on this code path is commented out. Empty computes `https://egress.<global.ingress.host>/Account/LoginAfterTokenExpired`. | `""` |
+| `ui.oidc.tokenExpiredAddress` | Empty computes `https://egress.<global.ingress.host>/Account/LoginAfterTokenExpired`. Only appears in a log message. | `""` |
 | `ui.oidc.autoTrustKeycloakCert` | Trust Keycloak's certificate without validation. Keep `false`; use `global.trustClusterCa` instead. | `"false"` |
 | `ui.oidc.validIssuer` | Expected token issuer override. Empty uses the Authority. | `""` |
 | `ui.oidc.validAudience` | Expected token audience override. Empty skips the check. | `""` |
@@ -197,4 +195,4 @@ Settings shared by more than one component. Defined once.
 | `ui.s3ConsoleUrl` | Public RustFS console URL shown to users, for a display-only link. Unrelated to `api.s3Url`. | `http://localhost:9003` |
 | `ui.s3BucketPath` | RustFS console path template appended to a bucket name. | `/rustfs/console/browser/?bucket=` |
 | `ui.helpdeskUrl` | Helpdesk link shown in the UI. | `https://ukserp.atlassian.net/servicedesk/customer/portal/3` |
-| `ui.extraEnv` | Rare one-off environment variables. Anything the app always needs is a named value above instead. | `[]` |
+| `ui.extraEnv` | Extra environment variables. | `[]` |
