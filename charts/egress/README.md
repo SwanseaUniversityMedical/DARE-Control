@@ -8,9 +8,7 @@ Standalone chart for the Data-Egress product.
 - **ui** — the Data-Egress web UI (`control-egress-ui` image), listening on `/health` at port 8080.
 
 `global.tag` must be a `control-egress-api`/`control-egress-ui` release built at or after the
-commit that adds `/health`. The published `3.0.4` tag predates it: liveness/readiness probes on
-`/health` CrashLoop against that tag. `3.0.4` is not a working default; use a release built from
-this branch or later.
+commit that adds `/health`. **This must be `3.0.5` or later or it won't work**.
 
 Both stay at `replicas: 1`. Neither is a shared-volume decision: the API seeds demo data on
 startup, and the UI keeps its session store in memory (`MemoryCacheTicketStore`). Both also run

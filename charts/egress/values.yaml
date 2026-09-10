@@ -1,7 +1,3 @@
-# Defaults are the local-dev settings, so `helm template` renders with no
-# input. The 5s-Tes repo's charts/agent-stack chart overrides
-# environment-specific keys.
-
 nameOverride: ""
 fullnameOverride: "egress"
 
@@ -29,17 +25,13 @@ securityContext:
     drop:
       - ALL
 
-# Neither component persists ASP.NET data-protection keys to disk (audit-
-# confirmed: independent, ephemeral key rings, no shared volume). Both stay
-# at replicas: 1 anyway because the UI keeps its session store in memory
-# (MemoryCacheTicketStore) and the API seeds demo data on startup.
+# Neither component persists ASP.NET data-protection keys to disk.
 dataProtection:
   persistKeys: "false"
   keysPath: /keys
 
 global:
-  # 3.0.4 predates the /health endpoint this chart probes; a default install
-  # CrashLoops on it. Use a release built at or after that commit.
+  # this chart won't work with versions pre 3.0.4
   # renovate: datasource=docker depName=dare-trefx/control-egress-api registryUrl=https://harbor.ukserp.ac.uk
   tag: "3.0.4"
 
@@ -57,9 +49,7 @@ global:
       overrideSystem: "Warning"
       overrideHangfire: "Warning"
 
-  # Full Data-Egress realm URL both components authenticate against. Bare
-  # realm URL, no trailing slash, no .well-known suffix: the refresh path
-  # concatenates /protocol/openid-connect/token onto this directly.
+  # Bare realm URL, no trailing slash, no .well-known suffix
   oidc:
     authority: "http://keycloak/realms/Data-Egress"
 
@@ -75,8 +65,6 @@ global:
     certClusterIssuer: "ca-issuer"
     tls: true
 
-  # Off by default so `helm template` renders with no cluster present. The
-  # 5s-Tes repo's charts/agent-stack chart turns this on for real clusters.
   trustClusterCa:
     enabled: false
     configMapName: overlay-castore

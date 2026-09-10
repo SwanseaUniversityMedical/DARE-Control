@@ -76,8 +76,7 @@ spec:
               value: "{{ .Values.global.config.logging.microsoftAspNetCore }}"
             - name: AllowedHosts
               value: "{{ .Values.global.config.allowedHosts }}"
-            # Unset resolves to a HANDLED fatal that still exits before the
-            # app binds a port — operationally a crash. Never gate behind an if.
+            # Pod will crash if this isn't set to true or false.
             - name: DemoMode
               value: "{{ .Values.ui.demoMode }}"
             - name: KeycloakDemoMode
@@ -88,8 +87,7 @@ spec:
               value: "{{ .Values.ui.sslCookies }}"
             - name: httpsRedirect
               value: "{{ .Values.ui.httpsRedirect }}"
-            # Bare realm URL: no .well-known suffix, no trailing slash. The
-            # refresh path concatenates /protocol/openid-connect/token onto it.
+            # Bare realm URL: no .well-known suffix, no trailing slash.
             - name: DataEgressKeyCloakSettings__Authority
               value: "{{ $authority }}"
             - name: DataEgressKeyCloakSettings__ClientId

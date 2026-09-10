@@ -120,29 +120,27 @@ spec:
               value: "{{ .Values.api.treOidc.proxy }}"
             - name: TreKeyCloakSettings__ProxyAddresURL
               value: "{{ .Values.api.treOidc.proxyAddresUrl }}"
-            # Bare realm URL: no .well-known suffix, no trailing slash. The
-            # refresh path concatenates /protocol/openid-connect/token onto it.
+            # Bare realm URL: no .well-known suffix, no trailing slash. 
             - name: DataEgressKeyCloakSettings__Authority
               value: "{{ $authority }}"
             - name: DataEgressKeyCloakSettings__MetadataAddress
               value: "{{ $authority }}/.well-known/openid-configuration"
             - name: DataEgressKeyCloakSettings__RootUrl
-              # Derived from global.oidc.authority: the chart already knows this.
+              # Derived from global.oidc.authority
               value: "{{ $keycloakUrl.scheme }}://{{ $keycloakUrl.host }}"
             - name: DataEgressKeyCloakSettings__BaseUrl
               value: "{{ $authority }}"
             - name: DataEgressKeyCloakSettings__ClientId
               value: "{{ .Values.api.oidc.clientId }}"
             - name: DataEgressKeyCloakSettings__Realm
-              # Derived from global.oidc.authority: the chart already knows this.
+              # Derived from global.oidc.authority
               value: "{{ last (splitList "/" (trimSuffix "/" $keycloakUrl.path)) }}"
             - name: DataEgressKeyCloakSettings__ClientSecret
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.api.secretName }}
                   key: dataEgressKeycloakClientSecret
-            # Unguarded .Trim() with no top-level try/catch in the API: unset
-            # crashes the pod. Never gate behind an if.
+            # this needs to be set or the pod crashes
             - name: DataEgressKeyCloakSettings__ValidAudiences
               value: "{{ .Values.api.oidc.validAudiences }}"
             - name: DataEgressKeyCloakSettings__Proxy
@@ -163,8 +161,7 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.api.secretName }}
                   key: s3SecretKey
-            # Property is genuinely spelled UesProxy (transposed letters) in
-            # the app's own settings class; the env var name must match it.
+            # Typo in c# appsettings, not a typo in the chart
             - name: MinioSettings__UesProxy
               value: "{{ .Values.api.s3Proxy.enabled }}"
             - name: MinioSettings__ProxyAddresURL
