@@ -164,6 +164,7 @@ ui:
   resources: {}
   service:
     type: ClusterIP
+    annotations: {}
   # Expected key: keycloakClientSecret. See README Secrets section.
   secretName: egress-ui-secret
   ingress:
