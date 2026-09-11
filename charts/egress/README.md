@@ -7,8 +7,7 @@ Standalone chart for the Data-Egress product.
 - **api** — the Data-Egress API (`control-egress-api` image), listening on `/health` at port 8080.
 - **ui** — the Data-Egress web UI (`control-egress-ui` image), listening on `/health` at port 8080.
 
-`global.tag` must be a `control-egress-api`/`control-egress-ui` release built at or after the
-commit that adds `/health`. **This must be `3.0.5` or later or it won't work**.
+`global.tag` must be a `control-egress-api`/`control-egress-ui` release. **This must be `3.1.0` or later or it won't work**.
 
 Both components are fixed at `replicas: 1` (the UI keeps sessions in memory). Neither needs a
 persistent volume.
