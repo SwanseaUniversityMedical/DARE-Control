@@ -9,6 +9,14 @@ on:
       - edited
       - synchronize
 
+# The shared pr-lint action posts its result as a PR comment and labels a failing PR. A token
+# without these write scopes fails that step - "Resource not accessible by integration" - and
+# turns the check red even when the title passed.
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   # This linting can be cancelled if there is a newer commit to lint
